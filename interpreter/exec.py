@@ -31,7 +31,11 @@ class RichOutStream:
 
         # Clean ANSI color codes
         self.data = re.sub(r'\x1b\[[0-9;]*m', '', self.data)
-
+      
+        # Clean ANSI escape sequences
+        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+        self.data = ansi_escape.sub('', self.data)
+      
         panel = Panel(self.data.strip(), box=MINIMAL, style="#FFFFFF on #3b3b37")
         self.live.update(panel, refresh=True)
 
