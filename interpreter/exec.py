@@ -22,8 +22,8 @@ def check_for_syntax_errors(code):
 
 
 def truncate_output(data):
-    max_length = 5000
-    message = f'Output truncated. Showing the last {max_length} characters:\n'
+    max_length = 7000
+    message = f'Output truncated. Showing the last {max_length} characters:\n\n'
 
     # Remove previous truncation message if it exists
     if data.startswith(message):
