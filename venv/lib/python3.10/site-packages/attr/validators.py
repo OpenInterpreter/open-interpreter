@@ -9,17 +9,12 @@ import operator
 import re
 
 from contextlib import contextmanager
+from re import Pattern
 
 from ._config import get_run_validators, set_run_validators
 from ._make import _AndValidator, and_, attrib, attrs
 from .converters import default_if_none
 from .exceptions import NotCallableError
-
-
-try:
-    Pattern = re.Pattern
-except AttributeError:  # Python <3.7 lacks a Pattern type.
-    Pattern = type(re.compile(""))
 
 
 __all__ = [
@@ -249,7 +244,17 @@ def provides(interface):
     :raises TypeError: With a human readable error message, the attribute
         (of type `attrs.Attribute`), the expected interface, and the
         value it got.
+
+    .. deprecated:: 23.1.0
     """
+    import warnings
+
+    warnings.warn(
+        "attrs's zope-interface support is deprecated and will be removed in, "
+        "or after, April 2024.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     return _ProvidesValidator(interface)
 
 
@@ -275,15 +280,16 @@ def optional(validator):
     which can be set to ``None`` in addition to satisfying the requirements of
     the sub-validator.
 
-    :param validator: A validator (or a list of validators) that is used for
-        non-``None`` values.
-    :type validator: callable or `list` of callables.
+    :param Callable | tuple[Callable] | list[Callable] validator: A validator
+        (or validators) that is used for non-``None`` values.
 
     .. versionadded:: 15.1.0
     .. versionchanged:: 17.1.0 *validator* can be a list of validators.
+    .. versionchanged:: 23.1.0 *validator* can also be a tuple of validators.
     """
-    if isinstance(validator, list):
+    if isinstance(validator, (list, tuple)):
         return _OptionalValidator(_AndValidator(validator))
+
     return _OptionalValidator(validator)
 
 
@@ -359,13 +365,13 @@ class _IsCallableValidator:
 
 def is_callable():
     """
-    A validator that raises a `attr.exceptions.NotCallableError` if the
+    A validator that raises a `attrs.exceptions.NotCallableError` if the
     initializer is called with a value for this particular attribute
     that is not callable.
 
     .. versionadded:: 19.1.0
 
-    :raises `attr.exceptions.NotCallableError`: With a human readable error
+    :raises attrs.exceptions.NotCallableError: With a human readable error
         message containing the attribute (`attrs.Attribute`) name,
         and the value it got.
     """

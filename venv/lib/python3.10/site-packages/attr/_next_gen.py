@@ -46,7 +46,7 @@ def define(
     match_args=True,
 ):
     r"""
-    Define an ``attrs`` class.
+    Define an *attrs* class.
 
     Differences to the classic `attr.s` that it uses underneath:
 
@@ -167,6 +167,7 @@ def field(
     hash=None,
     init=True,
     metadata=None,
+    type=None,
     converter=None,
     factory=None,
     kw_only=False,
@@ -179,6 +180,10 @@ def field(
     Identical to `attr.ib`, except keyword-only and with some arguments
     removed.
 
+    .. versionadded:: 23.1.0
+       The *type* parameter has been re-added; mostly for
+       {func}`attrs.make_class`. Please note that type checkers ignore this
+       metadata.
     .. versionadded:: 20.1.0
     """
     return attrib(
@@ -188,6 +193,7 @@ def field(
         hash=hash,
         init=init,
         metadata=metadata,
+        type=type,
         converter=converter,
         factory=factory,
         kw_only=kw_only,

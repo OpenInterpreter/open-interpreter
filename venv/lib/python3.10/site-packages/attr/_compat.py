@@ -9,9 +9,11 @@ import types
 import warnings
 
 from collections.abc import Mapping, Sequence  # noqa
+from typing import _GenericAlias
 
 
 PYPY = platform.python_implementation() == "PyPy"
+PY_3_9_PLUS = sys.version_info[:2] >= (3, 9)
 PY310 = sys.version_info[:2] >= (3, 10)
 PY_3_12_PLUS = sys.version_info[:2] >= (3, 12)
 
@@ -81,32 +83,32 @@ def make_set_closure_cell():
 
     # Otherwise gotta do it the hard way.
 
-    # Create a function that will set its first cellvar to `value`.
-    def set_first_cellvar_to(value):
-        x = value
-        return
-
-        # This function will be eliminated as dead code, but
-        # not before its reference to `x` forces `x` to be
-        # represented as a closure cell rather than a local.
-        def force_x_to_be_a_cell():  # pragma: no cover
-            return x
-
     try:
-        # Extract the code object and make sure our assumptions about
-        # the closure behavior are correct.
-        co = set_first_cellvar_to.__code__
-        if co.co_cellvars != ("x",) or co.co_freevars != ():
-            raise AssertionError  # pragma: no cover
-
-        # Convert this code object to a code object that sets the
-        # function's first _freevar_ (not cellvar) to the argument.
         if sys.version_info >= (3, 8):
 
             def set_closure_cell(cell, value):
                 cell.cell_contents = value
 
         else:
+            # Create a function that will set its first cellvar to `value`.
+            def set_first_cellvar_to(value):
+                x = value
+                return
+
+                # This function will be eliminated as dead code, but
+                # not before its reference to `x` forces `x` to be
+                # represented as a closure cell rather than a local.
+                def force_x_to_be_a_cell():  # pragma: no cover
+                    return x
+
+            # Extract the code object and make sure our assumptions about
+            # the closure behavior are correct.
+            co = set_first_cellvar_to.__code__
+            if co.co_cellvars != ("x",) or co.co_freevars != ():
+                raise AssertionError  # pragma: no cover
+
+            # Convert this code object to a code object that sets the
+            # function's first _freevar_ (not cellvar) to the argument.
             args = [co.co_argcount]
             args.append(co.co_kwonlyargcount)
             args.extend(
@@ -174,3 +176,10 @@ set_closure_cell = make_set_closure_cell()
 # don't have a direct reference to the thread-local in their globals dict.
 # If they have such a reference, it breaks cloudpickle.
 repr_context = threading.local()
+
+
+def get_generic_base(cl):
+    """If this is a generic class (A[str]), return the generic base for it."""
+    if cl.__class__ is _GenericAlias:
+        return cl.__origin__
+    return None

@@ -46,7 +46,7 @@ from attr import validators as validators
 
 # TODO: see definition of attr.asdict/astuple
 def asdict(
-    inst: Any,
+    inst: AttrsInstance,
     recurse: bool = ...,
     filter: Optional[_FilterType[Any]] = ...,
     dict_factory: Type[Mapping[Any, Any]] = ...,
@@ -59,7 +59,7 @@ def asdict(
 
 # TODO: add support for returning NamedTuple from the mypy plugin
 def astuple(
-    inst: Any,
+    inst: AttrsInstance,
     recurse: bool = ...,
     filter: Optional[_FilterType[Any]] = ...,
     tuple_factory: Type[Sequence[Any]] = ...,
