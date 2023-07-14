@@ -6,7 +6,7 @@ from .openai_utils import openai_streaming_response
 
 functions = [{
     "name": "run_code",
-    "description": "Executes given code in an IPython shell, capturing prints, return values, terminal outputs, and tracebacks.",
+    "description": "Executes code in a stateful IPython shell, capturing prints, return values, terminal outputs, and tracebacks.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -20,14 +20,8 @@ functions = [{
     "function": exec_and_capture_output
 }]
 
-system_message = """
-Only use the function you have been provided with, which has one keyword argument: code.
-Remember to write your messages to the user in Markdown.
-You can access the internet. Run whatever code you'd like to achieve the goal, and if at first you don't succeed, try again and again.
-If you run_code and it fails, write a normal message explaining what happened, theorizing why, and planning a new way forward.
-You can install new packages with !pip.
-While you can generate and display static plots (like those from Matplotlib), you will not be able to see the output-- only the user will see it. Interactive and dynamic visualizations (like those from Plotly) won't be displayed correctly, so if you need to do something like that, save it as an image and display it.
-""".strip()
+with open('system_message.txt', 'r') as file:
+    system_message = file.read().strip()
 
 class Interpreter:
     def __init__(self):
