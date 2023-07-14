@@ -34,7 +34,7 @@ class Interpreter:
         self.messages = []
         self._logs = []
         self.system_message = system_message
-        self.openai_api_key = None
+        self.api_key = None
 
     def reset(self):
         self.messages = []
@@ -92,7 +92,7 @@ class Interpreter:
                 gpt_functions,
                 self.system_message,
                 "gpt-4-0613",
-                self.openai_api_key
+                self.api_key
             )
 
             base_event = {
