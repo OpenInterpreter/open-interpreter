@@ -53,7 +53,7 @@ class RichOutStream:
         self.data = truncate_output(self.data)
 
         # None outputs should be empty, they happen with things like plt.show()
-        if self.data.strip() == "None":
+        if self.data.strip() == "None" or self.data.strip() == "":
             self.data = ""
             self.live.update("", refresh=True)
         else:
