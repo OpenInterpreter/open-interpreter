@@ -20,7 +20,6 @@ def check_for_syntax_errors(code):
     cleaned_code = '\n'.join(filtered_lines)
     compile(cleaned_code, '<string>', 'exec')
 
-
 def truncate_output(data):
     max_length = 7000
     message = f'Output truncated. Showing the last {max_length} characters:\n\n'
@@ -33,7 +32,6 @@ def truncate_output(data):
     if len(data) > max_length:
         data = message + data[-max_length:]
     return data
-  
 
 class RichOutStream:
 
