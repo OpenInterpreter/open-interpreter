@@ -52,12 +52,13 @@ class RichOutStream:
         # Truncate and prepend a message if truncated
         self.data = truncate_output(self.data)
 
-        # None outputs should be removed, they happen with things like plt.show()
+        # None outputs should be empty, they happen with things like plt.show()
         if self.data.strip() == "None":
             self.data = ""
-        
-        panel = Panel(self.data.strip(), box=MINIMAL, style="#FFFFFF on #3b3b37")
-        self.live.update(panel, refresh=True)
+            self.live.update("", refresh=True)
+        else:
+            panel = Panel(self.data.strip(), box=MINIMAL, style="#FFFFFF on #3b3b37")
+            self.live.update(panel, refresh=True)
 
     def flush(self):
         pass
