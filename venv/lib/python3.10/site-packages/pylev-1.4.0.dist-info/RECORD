@@ -1,0 +1,16 @@
+pylev-1.4.0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+pylev-1.4.0.dist-info/LICENSE,sha256=0iCEUn5N6d2GTFzgspzZz_iFZsQWHbwC9-jUVpmIxO4,1481
+pylev-1.4.0.dist-info/METADATA,sha256=KzP44pYEOI9zraOfVY3n7_fx39XWnbqqGVj_vaOZco4,2315
+pylev-1.4.0.dist-info/RECORD,,
+pylev-1.4.0.dist-info/WHEEL,sha256=Z-nyYpwrcSqxfdux5Mbn_DQ525iP7J2DG3JgGvOYyTQ,110
+pylev-1.4.0.dist-info/top_level.txt,sha256=hwP13Cseriu_xvKjI_10TDCuSIoB5oG2lG6m1tOxaFQ,6
+pylev/__init__.py,sha256=q9f3gIKa0-8N1PTusBzNBI5N6tO8c6ZG8PpahGHhJGM,895
+pylev/__pycache__/__init__.cpython-310.pyc,,
+pylev/__pycache__/classic.cpython-310.pyc,,
+pylev/__pycache__/damerau.cpython-310.pyc,,
+pylev/__pycache__/recursive.cpython-310.pyc,,
+pylev/__pycache__/wf.cpython-310.pyc,,
+pylev/classic.py,sha256=siBSUKKQ4s9_El4Se-woweoPenOHrTVZqEH-xAol0kg,933
+pylev/damerau.py,sha256=x-YTWJ3WRvlYf83MMwGmVrtJ22HqcZ3fs-hKcKztctk,1838
+pylev/recursive.py,sha256=dZ0tfMv0IF_wxulGKW2PjC6wp9tQOsOmZvNgZgh-kIg,1300
+pylev/wf.py,sha256=FgdzcE0M7kcV-t2stXs14lvSinK7vUcm4Roe678MrvE,2355

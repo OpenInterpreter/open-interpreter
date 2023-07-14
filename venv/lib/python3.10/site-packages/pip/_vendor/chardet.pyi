@@ -1,0 +1,1 @@
+from chardet import *
