@@ -1,0 +1,2 @@
+[console_scripts]
+doesitcache = cachecontrol._cmd:main

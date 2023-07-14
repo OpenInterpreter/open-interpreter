@@ -1,0 +1,15 @@
+pyproject_hooks-1.0.0.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+pyproject_hooks-1.0.0.dist-info/LICENSE,sha256=GyKwSbUmfW38I6Z79KhNjsBLn9-xpR02DkK0NCyLQVQ,1081
+pyproject_hooks-1.0.0.dist-info/METADATA,sha256=W-kbDJ885CyP_Lx_lSzn_1t6zejS3U4d5C2uUPvPbOk,1341
+pyproject_hooks-1.0.0.dist-info/RECORD,,
+pyproject_hooks-1.0.0.dist-info/WHEEL,sha256=rSgq_JpHF9fHR1lx53qwg_1-2LypZE_qmcuXbVUq948,81
+pyproject_hooks/__init__.py,sha256=kCehmy0UaBa9oVMD7ZIZrnswfnP3LXZ5lvnNJAL5JBM,491
+pyproject_hooks/__pycache__/__init__.cpython-310.pyc,,
+pyproject_hooks/__pycache__/_compat.cpython-310.pyc,,
+pyproject_hooks/__pycache__/_impl.cpython-310.pyc,,
+pyproject_hooks/_compat.py,sha256=qn8v6Suythkg002Jg4OxCTpRdT_5Xdazf_JDwEzMLj8,121
+pyproject_hooks/_impl.py,sha256=61GJxzQip0IInhuO69ZI5GbNQ82XEDUB_1Gg5_KtUoc,11920
+pyproject_hooks/_in_process/__init__.py,sha256=9gQATptbFkelkIy0OfWFEACzqxXJMQDWCH9rBOAZVwQ,546
+pyproject_hooks/_in_process/__pycache__/__init__.cpython-310.pyc,,
+pyproject_hooks/_in_process/__pycache__/_in_process.cpython-310.pyc,,
+pyproject_hooks/_in_process/_in_process.py,sha256=m2b34c917IW5o-Q_6TYIHlsK9lSUlNiyrITTUH_zwew,10927

@@ -1,8 +1,12 @@
 [tool.poetry]
-name = "repl_nix_open-interpreter"
+name = "open-interpreter"
+packages = [
+    {include = "interpreter"}
+]
 version = "0.0.1"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "Ask GPT-4 to run code locally"
+authors = ["Killian Lucas <killian@drinkwater.ai>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"

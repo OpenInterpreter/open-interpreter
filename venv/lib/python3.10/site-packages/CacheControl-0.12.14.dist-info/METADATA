@@ -1,0 +1,74 @@
+Metadata-Version: 2.1
+Name: CacheControl
+Version: 0.12.14
+Summary: httplib2 caching for requests
+Home-page: https://github.com/ionrock/cachecontrol
+Author: Eric Larson
+Author-email: eric@ionrock.org
+Keywords: requests http caching web
+Classifier: Development Status :: 4 - Beta
+Classifier: Environment :: Web Environment
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3.6
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Topic :: Internet :: WWW/HTTP
+Requires-Python: >=3.6
+License-File: LICENSE.txt
+Requires-Dist: requests
+Requires-Dist: msgpack (>=0.5.2)
+Provides-Extra: filecache
+Requires-Dist: lockfile (>=0.9) ; extra == 'filecache'
+Provides-Extra: redis
+Requires-Dist: redis (>=2.10.5) ; extra == 'redis'
+
+..
+  SPDX-FileCopyrightText: SPDX-FileCopyrightText: 2015 Eric Larson
+
+  SPDX-License-Identifier: Apache-2.0
+
+==============
+ CacheControl
+==============
+
+.. image:: https://img.shields.io/pypi/v/cachecontrol.svg
+    :target: https://pypi.python.org/pypi/cachecontrol
+    :alt: Latest Version
+
+.. image:: https://travis-ci.org/ionrock/cachecontrol.png?branch=master
+  :target: https://travis-ci.org/ionrock/cachecontrol
+
+CacheControl is a port of the caching algorithms in httplib2_ for use with
+requests_ session object.
+
+It was written because httplib2's better support for caching is often
+mitigated by its lack of thread safety. The same is true of requests in
+terms of caching.
+
+
+Quickstart
+==========
+
+.. code-block:: python
+
+  import requests
+
+  from cachecontrol import CacheControl
+
+
+  sess = requests.session()
+  cached_sess = CacheControl(sess)
+
+  response = cached_sess.get('http://google.com')
+
+If the URL contains any caching based headers, it will cache the
+result in a simple dictionary.
+
+For more info, check out the docs_
+
+.. _docs: http://cachecontrol.readthedocs.org/en/latest/
+.. _httplib2: https://github.com/httplib2/httplib2
+.. _requests: http://docs.python-requests.org/

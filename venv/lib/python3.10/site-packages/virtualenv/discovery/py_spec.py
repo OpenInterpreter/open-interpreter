@@ -1,5 +1,8 @@
-"""A Python specification is an abstract requirement definition of an interpreter"""
+"""A Python specification is an abstract requirement definition of an interpreter."""
 
+from __future__ import annotations
+
+import contextlib
 import os
 import re
 from collections import OrderedDict
@@ -10,9 +13,9 @@ PATTERN = re.compile(r"^(?P<impl>[a-zA-Z]+)?(?P<version>[0-9.]+)?(?:-(?P<arch>32
 
 
 class PythonSpec:
-    """Contains specification about a Python Interpreter"""
+    """Contains specification about a Python Interpreter."""
 
-    def __init__(self, str_spec, implementation, major, minor, micro, architecture, path):
+    def __init__(self, str_spec, implementation, major, minor, micro, architecture, path) -> None:  # noqa: PLR0913
         self.str_spec = str_spec
         self.implementation = implementation
         self.major = major
@@ -22,7 +25,7 @@ class PythonSpec:
         self.path = path
 
     @classmethod
-    def from_string_spec(cls, string_spec):
+    def from_string_spec(cls, string_spec):  # noqa: C901, PLR0912
         impl, major, minor, micro, arch, path = None, None, None, None, None, None
         if os.path.isabs(string_spec):
             path = string_spec
@@ -39,16 +42,16 @@ class PythonSpec:
                     version = groups["version"]
                     if version is not None:
                         versions = tuple(int(i) for i in version.split(".") if i)
-                        if len(versions) > 3:
-                            raise ValueError
-                        if len(versions) == 3:
+                        if len(versions) > 3:  # noqa: PLR2004
+                            raise ValueError  # noqa: TRY301
+                        if len(versions) == 3:  # noqa: PLR2004
                             major, minor, micro = versions
-                        elif len(versions) == 2:
+                        elif len(versions) == 2:  # noqa: PLR2004
                             major, minor = versions
                         elif len(versions) == 1:
                             version_data = versions[0]
                             major = int(str(version_data)[0])  # first digit major
-                            if version_data > 9:
+                            if version_data > 9:  # noqa: PLR2004
                                 minor = int(str(version_data)[1:])
                     ok = True
                 except ValueError:
@@ -76,10 +79,9 @@ class PythonSpec:
                 impls[self.implementation.upper()] = False
         impls["python"] = True  # finally consider python as alias, implementation must match now
         version = self.major, self.minor, self.micro
-        try:
+        with contextlib.suppress(ValueError):
             version = version[: version.index(None)]
-        except ValueError:
-            pass
+
         for impl, match in impls.items():
             for at in range(len(version), -1, -1):
                 cur_ver = version[0:at]
@@ -91,7 +93,7 @@ class PythonSpec:
         return self.path is not None and os.path.isabs(self.path)
 
     def satisfies(self, spec):
-        """called when there's a candidate metadata spec to see if compatible - e.g. PEP-514 on Windows"""
+        """Called when there's a candidate metadata spec to see if compatible - e.g. PEP-514 on Windows."""
         if spec.is_abs and self.is_abs and self.path != spec.path:
             return False
         if spec.implementation is not None and spec.implementation.lower() != self.implementation.lower():
@@ -104,7 +106,7 @@ class PythonSpec:
                 return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         name = type(self).__name__
         params = "implementation", "major", "minor", "micro", "architecture", "path"
         return f"{name}({', '.join(f'{k}={getattr(self, k)}' for k in params if getattr(self, k) is not None)})"

@@ -1,0 +1,70 @@
+Metadata-Version: 2.1
+Name: poetry-core
+Version: 1.6.1
+Summary: Poetry PEP 517 Build Backend
+Home-page: https://github.com/python-poetry/poetry-core
+License: MIT
+Keywords: packaging,dependency,poetry
+Author: Sébastien Eustace
+Author-email: sebastien@eustace.io
+Requires-Python: >=3.7,<4.0
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Requires-Dist: importlib-metadata (>=1.7.0) ; python_version < "3.8"
+Project-URL: Bug Tracker, https://github.com/python-poetry/poetry/issues
+Project-URL: Repository, https://github.com/python-poetry/poetry-core
+Description-Content-Type: text/markdown
+
+# Poetry Core
+[![PyPI version](https://img.shields.io/pypi/v/poetry-core)](https://pypi.org/project/poetry-core/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/poetry-core)](https://pypi.org/project/poetry-core/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![](https://github.com/python-poetry/poetry-core/workflows/Tests/badge.svg)](https://github.com/python-poetry/poetry-core/actions?query=workflow%3ATests)
+
+A [PEP 517](https://www.python.org/dev/peps/pep-0517/) build backend implementation developed for
+[Poetry](https://github.com/python-poetry/poetry). This project is intended to be a light weight, fully compliant,
+self-contained package allowing PEP 517 compatible build frontends to build Poetry managed projects.
+
+## Usage
+In most cases, the usage of this package is transparent to the end-user as it is either made use by Poetry itself
+or a PEP 517 frontend (eg: `pip`).
+
+In order to enable the use `poetry-core` as your build backend, the following snippet must be present in your
+project's `pyproject.toml` file.
+
+```toml
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+```
+
+Once this is present, a PEP 517 frontend like `pip` can build and install your project from source without the need
+for Poetry or any of its dependencies.
+
+```shell
+# install to current environment
+pip install /path/to/poetry/managed/project
+
+# build a wheel package
+pip wheel /path/to/poetry/managed/project
+```
+
+## Why is this required?
+Prior to the release of version `1.1.0`, Poetry was a project management tool that included a PEP 517
+build backend. This was inefficient and time consuming when a PEP 517 build was required. For example,
+both `pip` and `tox` (with isolated builds) would install Poetry and all dependencies it required. Most of these
+dependencies are not required when the objective is to simply build either a source or binary distribution of your
+project.
+
+In order to improve the above situation, `poetry-core` was created. Shared functionality pertaining to PEP 517 build
+backends, including reading `pyproject.toml` and building wheel/sdist, were implemented in this package. This
+makes PEP 517 builds extremely fast for Poetry managed packages.
+
