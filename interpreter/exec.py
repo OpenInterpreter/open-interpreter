@@ -20,6 +20,21 @@ def check_for_syntax_errors(code):
     cleaned_code = '\n'.join(filtered_lines)
     compile(cleaned_code, '<string>', 'exec')
 
+
+def truncate_output(data):
+    max_length = 5000
+    message = f'Output truncated. Showing the last {max_length} characters:\n'
+
+    # Remove previous truncation message if it exists
+    if data.startswith(message):
+        data = data[len(message):]
+
+    # If data exceeds max length, truncate it and add message
+    if len(data) > max_length:
+        data = message + data[-max_length:]
+    return data
+  
+
 class RichOutStream:
 
     def __init__(self, live):
@@ -35,7 +50,10 @@ class RichOutStream:
         # Clean ANSI escape sequences
         ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
         self.data = ansi_escape.sub('', self.data)
-      
+
+        # Truncate and prepend a message if truncated
+        self.data = truncate_output(self.data)
+        
         panel = Panel(self.data.strip(), box=MINIMAL, style="#FFFFFF on #3b3b37")
         self.live.update(panel, refresh=True)
 
