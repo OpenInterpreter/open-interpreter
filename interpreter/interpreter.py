@@ -25,7 +25,7 @@ functions = [{
 # for the directory where this file is located ("here"):
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'system_message.txt'), 'r') as f:
-    system_message = file.read().strip()
+    system_message = f.read().strip()
 
 class Interpreter:
     def __init__(self):
