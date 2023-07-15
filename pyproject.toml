@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"}
 ]
-version = "0.0.224"
+version = "0.0.225"
 description = "Ask GPT-4 to run code locally"
 authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
@@ -21,3 +21,6 @@ astor = "^0.8.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+interpreter = "interpreter:chat"
