@@ -3,6 +3,7 @@ from .exec import exec_and_capture_output
 from .view import View
 from .json_utils import JsonDeltaCalculator
 from .openai_utils import openai_streaming_response
+import os
 
 functions = [{
     "name": "run_code",
@@ -20,7 +21,10 @@ functions = [{
     "function": exec_and_capture_output
 }]
 
-with open('interpreter/system_message.txt', 'r') as file:
+# Locate system_message.txt using the absolute path
+# for the directory where this file is located ("here"):
+here = os.path.abspath(os.path.dirname(__file__))
+with open(os.path.join(here, 'system_message.txt'), 'r') as f:
     system_message = file.read().strip()
 
 class Interpreter:
