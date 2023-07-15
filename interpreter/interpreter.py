@@ -20,7 +20,7 @@ functions = [{
     "function": exec_and_capture_output
 }]
 
-with open('system_message.txt', 'r') as file:
+with open('interpreter/system_message.txt', 'r') as file:
     system_message = file.read().strip()
 
 class Interpreter:

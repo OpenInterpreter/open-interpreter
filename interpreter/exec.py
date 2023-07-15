@@ -1,5 +1,5 @@
 import ast
-import astunparse
+import astor
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.ultratb import AutoFormattedTB
 from contextlib import redirect_stdout, redirect_stderr
@@ -153,7 +153,7 @@ def jupyterify_code(code):
         tree.body[-1] = ast.Expr(ast.Call(func=ast.Name(id='print', ctx=ast.Load()), args=[last_statement.value], keywords=[]))
 
     # Convert modified AST back into source code
-    new_code_lines = astunparse.unparse(tree).split('\n')
+    new_code_lines = astor.to_source(tree).split('\n')
 
     # Reinsert magic commands in their original places
     for i, line in magic_commands.items():
