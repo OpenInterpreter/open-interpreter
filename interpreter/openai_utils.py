@@ -61,7 +61,7 @@ def num_tokens_from_messages(messages, model):
     num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
     return num_tokens
 
-def openai_streaming_response(messages, functions, system_message, model, api_key):
+def openai_streaming_response(messages, functions, system_message, model, temperature, api_key):
 
     if api_key == None:
         if 'OPENAI_API_KEY' in os.environ:
@@ -106,5 +106,6 @@ def openai_streaming_response(messages, functions, system_message, model, api_ke
         model=model,
         messages=final_messages,
         functions=functions,
-        stream=True
+        stream=True,
+        temperature=temperature,
     )
