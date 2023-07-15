@@ -32,6 +32,7 @@ class Interpreter:
         self.messages = []
         self._logs = []
         self.system_message = system_message
+        self.temperature = 0.2
         self.api_key = None
 
     def reset(self):
@@ -90,6 +91,7 @@ class Interpreter:
                 gpt_functions,
                 self.system_message,
                 "gpt-4-0613",
+                self.temperature,
                 self.api_key
             )
 
