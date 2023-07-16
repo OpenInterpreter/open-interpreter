@@ -1,6 +1,6 @@
 #!/home/runner/open-interpreter/venv/bin/python
 import sys
-from main import interpreter
+from main import main
 
 if __name__ == '__main__':
-    sys.exit(interpreter())
+    sys.exit(main())

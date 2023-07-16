@@ -1,4 +1,4 @@
-run = "python3 tests/chat.py"
+run = "python3 main.py"
 
 # The primary language of the repl. There can be others, though!
 language = "python3"

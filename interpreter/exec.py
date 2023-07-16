@@ -66,7 +66,7 @@ class RichOutStream:
     # Some things (like youtube-dl) will check if this is "isatty()"
     # then fail if it isn't present, so:
     def isatty(self):
-        return True
+        return False
 
 def exec_and_capture_output(code):
     # Store the original stdout and stderr
