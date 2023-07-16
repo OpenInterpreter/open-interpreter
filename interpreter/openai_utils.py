@@ -67,7 +67,7 @@ def openai_streaming_response(messages, functions, system_message, model, temper
         if 'OPENAI_API_KEY' in os.environ:
             api_key = os.environ['OPENAI_API_KEY']
         else:
-            raise Exception("Please provide an OpenAI API key via interpreter.openai_api_key or as an environment variable ('OPENAI_API_KEY').")
+            raise Exception("Please provide an OpenAI API key via interpreter.api_key or as an environment variable ('OPENAI_API_KEY').")
     else:
         openai.api_key = api_key
 
