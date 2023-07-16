@@ -86,22 +86,20 @@ interpreter.chat("Add subtitles to all videos in /videos.")
 
 # ... Streams output to your terminal, completes task ...
 
-interpreter.chat("These look great but can you make the subtitles bigger?") # Note: .chat() remembers conversation history by default
+interpreter.chat("These look great but can you make the subtitles bigger?")
 
 # ...
 ```
 
 #### Start a New Chat
 
-By default, Open Interpreter remembers conversation history. 
-
-If you want to start fresh, you can reset it:
+By default, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
 interpreter.reset()
 ```
 
-Then open a new **Terminal Chat** or **Python Chat** as described above.
+Then [start a chat as described above](https://github.com/KillianLucas/open-interpreter#terminal-chat).
 
 #### Save and Restore Chats
 
@@ -128,7 +126,7 @@ Open Interpreter equips a [function-calling](https://platform.openai.com/docs/gu
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
-Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but past events may be forgotten.
+Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
 
 ## Contributing
 
