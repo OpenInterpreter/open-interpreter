@@ -64,7 +64,7 @@ class RichOutStream:
         pass
 
     # Some things (like youtube-dl) will check if this is "isatty()"
-    # then fail if it isn't present, so:
+    # then fail if it isn't present, so. If this is True it breaks the CLI, so we set it to False (I don't know what it means).
     def isatty(self):
         return False
 
