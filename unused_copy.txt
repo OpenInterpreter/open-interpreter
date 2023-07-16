@@ -1,0 +1,35 @@
+Lightweight terminal interface for OpenAI's code interpreter that executes code locally.
+
+Lightweight, open-source Code Interpreter implementation that installs new packages and run locally.
+
+Open-source, GPT-4 powered Code Interpreter that installs new packages and runs locally.
+
+Use OpenAI's Code Interpreter from your terminal.
+
+OpenAI's Code Interpreter in Python. Lightweight, open-source.
+
+Open-source ChatGPT in your terminal that can execute code.
+
+Open-source Code Interpreter in your terminal that runs locally.
+
+Combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
+
+## Features
+
+- Provides GPT-4 access to an `exec(code)` function.
+- Installs packages and executes code in your environment.
+- Streams messages, code, and outputs directly to your terminal.
+
+
+The main advantage of Open Interpreter over ChatGPT's interpreter is its local operation. Executing generated code locally bypasses multiple limitations:
+- Internet access (runs `!pip` and `!apt-get` as needed)
+- No filesize or timeout limits
+
+It's Code Interpreter in your terminal.
+
+
+
+
+The hosted Code Interpreter offered by OpenAI via ChatGPT shares some features with Open Interpreter, such as executing code. However, there are notable differences. The online interpreter can only operate for a maximum of 120 seconds and has file size restrictions. It also has a limited selection of pip packages, does not have internet access, and operates on a cloud server.
+
+In contrast, Open Interpreter, being locally run, doesn't have these limitations. It can install any necessary packages, has access to the internet, can handle more extensive operations, and operates like a stateful Jupyter Notebook.
