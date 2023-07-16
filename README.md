@@ -11,7 +11,7 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 
 <br>
 
-![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner_4.png)
+![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner.png)
 
 <p align="right">
     <sub><i>Illustration created by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
