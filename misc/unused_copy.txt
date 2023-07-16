@@ -1,3 +1,5 @@
+Ask GPT-4 to run code locally.
+
 Lightweight terminal interface for OpenAI's code interpreter that executes code locally.
 
 Lightweight, open-source Code Interpreter implementation that installs new packages and run locally.
