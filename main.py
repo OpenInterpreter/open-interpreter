@@ -1,2 +1,4 @@
 import interpreter
-interpreter.chat()
+
+def main():
+  interpreter.chat()
