@@ -1,6 +1,6 @@
 # Open Interpreter
 
-![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner.png)
+![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner_2.png)
 
 Open Interpreter is a lightweight, open-source implementation of OpenAI's Code Interpreter that runs locally.
 
