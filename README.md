@@ -1,7 +1,5 @@
 # Open Interpreter
 
-![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner_3.png)
-
 Open Interpreter is a lightweight, open-source implementation of OpenAI's Code Interpreter that runs locally.
 
 ```python
@@ -10,6 +8,8 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 ```
 >>> On it. First, I'll check if any speech-to-text libraries are installed...
 ```
+
+![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner_3.png)
 
 ## Demo Notebook
 
