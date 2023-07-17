@@ -25,11 +25,11 @@ On it! First, I'll check if any speech-to-text libraries are installed...
 
 <br>
 
-**Open Interpreter** lets GPT-4 execute Python code locally. Given an OpenAI API key, we provide a ChatGPT-like interface with this model in your terminal.
+**Open Interpreter** lets GPT-4 execute Python code locally. Running `$ interpreter` opens a ChatGPT-like interface to this model in your terminal.
 
-Open Interpreter extends GPT-4 with Python's general-purpose capabilities:
+This extends GPT-4 with Python's general-purpose capabilities:
 
-- Create and edit photos, videos, PDFs, etc.
+- Create and edit videos, PDFs, folders, etc.
 - Run `selenium` to control a Chrome browser.
 - Convert DNA to proteins with `biopython`.
 - ...etc.
