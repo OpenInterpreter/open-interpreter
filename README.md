@@ -17,6 +17,14 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
     <sub><i>Illustration created by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
 </p>
 
+## What is this?
+
+Simply put, [code interpreters](https://openai.com/blog/chatgpt-plugins#code-interpreter) allow language models to run the code they write.
+
+Open Interpreter provides a minimal, [rich](https://github.com/Textualize/rich) text interface to GPT-4, which can run Python code and reflect on its output. This code is executed locally, which provides [several advantages](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) over OpenAI's hosted interpreter.
+
+> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
+
 ## Demo Notebook
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
@@ -39,15 +47,15 @@ pip install open-interpreter
 import interpreter
 
 interpreter.api_key = "<openai_api_key>"
-interpreter.chat() # Starts an interactive chat in your terminal
+interpreter.chat() # Starts an interactive chat
 ```
 
 ### Terminal
 
-After installation, set your `OPENAI_API_KEY` environment variable, then run `interpreter`:
+After installation, set your `OPENAI_API_KEY` environment variable, then simply run `interpreter`:
 
 ```shell
-$ interpreter
+interpreter
 ```
 
 ## Use Cases
@@ -80,12 +88,14 @@ Open Interpreter overcomes these limitations by running in a stateful Jupyter no
 
 #### Interactive Chat
 
-To start an interactive session in your terminal, either run `interpreter` from the command line:
+To start an interactive chat in your terminal, either run `interpreter` from the command line:
 
 ```shell
-$ interpreter
+interpreter
 ```
+
 Or `interpreter.chat()` from a .py file:
+
 ```python
 interpreter.chat()
 ```
@@ -136,7 +146,7 @@ print(interpreter.system_message)
 
 ## How Does it Work?
 
-Open Interpreter equips a [function-calling](https://platform.openai.com/docs/guides/gpt/function-calling) GPT-4 with the `exec()` function.
+Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/docs/guides/gpt/function-calling) with the `exec()` function.
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
