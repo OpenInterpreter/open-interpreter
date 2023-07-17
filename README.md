@@ -2,8 +2,8 @@
 
 A lightweight, open-source implementation of OpenAI's code interpreter.
 
-```python
-interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
+```
+> Add subtitles to video.mp4 on my Desktop.
 ```
 ```
 On it! First, I'll check if any speech-to-text libraries are installed...
@@ -19,7 +19,9 @@ On it! First, I'll check if any speech-to-text libraries are installed...
 
 > Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - [OpenAI](https://openai.com/blog/chatgpt-plugins#code-interpreter)
 
-**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal. The model can run Python code locally and reflect on its output.
+---
+
+**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal. The model can run Python code _locally_ and reflect on its output, providing [several advantages](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) over OpenAI's hosted interpreter.
 
 This extends GPT-4 with Python's general-purpose capabilities:
 
@@ -27,6 +29,8 @@ This extends GPT-4 with Python's general-purpose capabilities:
 - Run `selenium` to control a Chrome browser.
 - Sequence DNA with `biopython`.
 - ...etc.
+
+Running GPT-4's code locally has its [disadvantages](https://github.com/KillianLucas/open-interpreter#safety-notice), but generally results in [fewer restrictions and far more capabilies](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) than OpenAI's hosted interpreter.
 
 ## Demo Notebook
 
@@ -144,6 +148,14 @@ Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/d
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
 Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
+
+## Safety Notice
+
+Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
+
+- Be cautious when requesting commands that modify files or system settings.
+- Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
+- Regularly back up your data and work in a virtual environment.
 
 ## Contributing
 
