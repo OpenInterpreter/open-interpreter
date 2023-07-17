@@ -1,5 +1,20 @@
 Simply put, code interpreters allow language models to run the code they write. 
 
+A GPT-4 powered code interpreter in your terminal.
+
+# Open Interpreter
+
+GPT-4 powered code interpreter in your terminal
+
+Open Interpreter is a lightweight, open-source implementation of OpenAI's Code Interpreter.
+
+```python
+interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
+```
+```
+>>> On it. First, I'll check if any speech-to-text libraries are installed...
+```
+
 
 When GPT-4 writes code, it's executed on your local system
 

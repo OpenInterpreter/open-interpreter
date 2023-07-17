@@ -1,15 +1,8 @@
 # Open Interpreter
 
-Open Interpreter is a lightweight, open-source implementation of OpenAI's Code Interpreter.
+A lightweight, open-source implementation of OpenAI's Code Interpreter.
 
-```python
-interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
-```
-```
->>> On it. First, I'll check if any speech-to-text libraries are installed...
-```
-
-<br>
+> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
 
 ![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner.png)
 
@@ -19,21 +12,14 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 
 ## What is this?
 
----
-
-## **Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) text interface to GPT-4 in your terminal, which can run Python code and reflect on its output. 
-
----
+**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal, which can run Python code and reflect on its output.
 
 This extends GPT-4 with Python's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
 - Sequence DNA with `biopython`.
-
----
-
-> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
+- ...etc.
 
 ## Demo Notebook
 
