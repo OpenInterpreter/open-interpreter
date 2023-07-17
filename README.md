@@ -29,7 +29,7 @@ On it! First, I'll check if any speech-to-text libraries are installed...
 
 This extends GPT-4 with Python's general-purpose capabilities:
 
-- Create and edit videos, PDFs, folders, etc.
+- Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
 - Convert DNA to proteins with `biopython`.
 - ...etc.
