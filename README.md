@@ -19,11 +19,17 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 
 ## What is this?
 
-Simply put, [code interpreters](https://openai.com/blog/chatgpt-plugins#code-interpreter) allow language models to run the code they write.
-
-Open Interpreter provides a minimal, [rich](https://github.com/Textualize/rich) text interface to GPT-4, which can run Python code and reflect on its output. This code is executed locally, which provides [several advantages](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) over OpenAI's hosted interpreter.
-
 > Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
+
+Simply put, code interpreters allow language models to run the code they write. 
+
+**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) text interface to GPT-4 in your terminal, which can run Python code and reflect on its output.
+
+This equips GPT-4 with Python's general-purpose capabilities:
+
+- Create and edit photos, videos, PDFs, etc.
+- Run `selenium` to control a Chrome browser.
+- Sequence DNA with `biopython`.
 
 ## Demo Notebook
 
@@ -60,7 +66,7 @@ interpreter
 
 ## Use Cases
 
-Open Interpreter acts as a seasoned programmer that can execute code snippets to accomplish tasks.
+Open Interpreter acts as a junior programmer that can execute code snippets to accomplish tasks.
 
 1. Add subtitles to all videos in a folder.
 2. Blur all faces in a photo or video.

@@ -1,3 +1,18 @@
+When GPT-4 writes code, it's executed on your local system
+
+Simply run `pip install open-interpreter` then `interpreter` to talk to GPT-4 in your terminal.
+
+
+lets you chat with GPT-4 in your terminal, and equips GPT-4 with one function: `exec()`. This function executes code locally and returns it output to GPT-4, which provides [several advantages](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) over OpenAI's hosted interpreter.
+
+Open Interpreter provides a minimal, [rich](https://github.com/Textualize/rich) text interface to a GPT-4 powered code interpreter that executes code locally.
+
+
+
+Open Interpreter provides a minimal, [rich](https://github.com/Textualize/rich) text interface to GPT-4, and lets it run code locally. This provides [several advantages](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) over OpenAI's hosted interpreter.
+
+Open Interpreter provides a minimal, rich text interface to GPT-4, which can run Python code and reflect on its output. This code is executed locally, which provides several advantages over OpenAI's hosted interpreter.
+
 Open-source ChatGPT in your terminal that can execute code.
 
 Ask GPT-4 to run code locally.
@@ -37,3 +52,7 @@ It's Code Interpreter in your terminal.
 The hosted Code Interpreter offered by OpenAI via ChatGPT shares some features with Open Interpreter, such as executing code. However, there are notable differences. The online interpreter can only operate for a maximum of 120 seconds and has file size restrictions. It also has a limited selection of pip packages, does not have internet access, and operates on a cloud server.
 
 In contrast, Open Interpreter, being locally run, doesn't have these limitations. It can install any necessary packages, has access to the internet, can handle more extensive operations, and operates like a stateful Jupyter Notebook.
+
+Esentially, running `interpreter` lets you talk to GPT-4 in your terminal, and equips GPT-4 with Python's `exec()` function.
+
+Esentially, running `interpreter` lets you talk to a version of GPT-4 that has been equipped with Python's `exec()` function.
