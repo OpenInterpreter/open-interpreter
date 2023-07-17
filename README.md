@@ -1,6 +1,6 @@
 # Open Interpreter
 
-A minimal, open-source implementation of OpenAI's code interpreter.
+A lightweight, open-source implementation of OpenAI's code interpreter.
 
 ```python
 interpreter.chat('Hey, can you add subtitles to video.mp4 on my Desktop?')
