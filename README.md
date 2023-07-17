@@ -2,6 +2,8 @@
 
 A minimal, open-source implementation of OpenAI's code interpreter.
 
+https://github.com/KillianLucas/open-interpreter/assets/63927363/27de56b2-26a6-4414-9eac-60eb9f3170b1
+
 ```python
 interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 ```
