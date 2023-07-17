@@ -1,7 +1,5 @@
 # Open Interpreter
 
-<br>
-
 A lightweight, open-source implementation of OpenAI's code interpreter.
 
 ```python
@@ -23,11 +21,11 @@ On it! First, I'll check if any speech-to-text libraries are installed...
 
 <br>
 
-> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - [OpenAI](https://openai.com/blog/chatgpt-plugins#code-interpreter)
+> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - [OpenAI code interpreter release](https://openai.com/blog/chatgpt-plugins#code-interpreter)
 
 <br>
 
-**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal. The model can run Python code locally and reflect on its output.
+**Open Interpreter** lets GPT-4 execute Python code locally. After installing, running `$ interpreter` starts a ChatGPT-like session in your terminal.
 
 This extends GPT-4 with Python's general-purpose capabilities:
 

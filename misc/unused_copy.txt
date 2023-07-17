@@ -26,7 +26,9 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 ```
 >>> On it. First, I'll check if any speech-to-text libraries are installed...
 ```
+provides a ChatGPT-like chat interface in your terminal. The model can execute Python code or shell commands.
 
+Open Interpreter provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal. The model can run Python code locally and reflect on its output.
 
 When GPT-4 writes code, it's executed on your local system
 
