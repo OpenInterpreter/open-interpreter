@@ -21,7 +21,7 @@ Absolutely. First, let's check if any speech-to-text libraries are installed...
 
 <br>
 
-> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences. — [OpenAI's code interpreter release](https://openai.com/blog/chatgpt-plugins#code-interpreter)
+> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences. — _OpenAI_
 
 <br>
 
