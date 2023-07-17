@@ -1,6 +1,6 @@
 # Open Interpreter
 
-A lightweight, open-source implementation of OpenAI's code interpreter.
+A minimal, open-source implementation of OpenAI's code interpreter.
 
 ```python
 interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
@@ -21,20 +21,20 @@ On it! First, I'll check if any speech-to-text libraries are installed...
 
 <br>
 
-> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - [OpenAI code interpreter release](https://openai.com/blog/chatgpt-plugins#code-interpreter)
+> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - [OpenAI code interpreter release](https://openai.com/blog/chatgpt-plugins#code-interpreter)
 
 <br>
 
-**Open Interpreter** lets GPT-4 execute Python code locally. After installing, running `$ interpreter` starts a ChatGPT-like session in your terminal.
+**Open Interpreter** lets GPT-4 execute Python code locally. Given an OpenAI API key, we provide a ChatGPT-like interface with this model in your terminal.
 
-This extends GPT-4 with Python's general-purpose capabilities:
+Open Interpreter extends GPT-4 with Python's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
 - Convert DNA to proteins with `biopython`.
 - ...etc.
 
-[How does this compare to ChatGPT's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)
+[How does this compare to OpenAI's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)
 
 <br>
 

@@ -30,6 +30,8 @@ provides a ChatGPT-like chat interface in your terminal. The model can execute P
 
 Open Interpreter provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal. The model can run Python code locally and reflect on its output.
 
+**Open Interpreter** lets GPT-4 execute Python code locally. After installing, running `$ interpreter` starts a ChatGPT-like session in your terminal.
+
 When GPT-4 writes code, it's executed on your local system
 
 Running code locally-- as opposed to a hosted environment-- has its [disadvantages](https://github.com/KillianLucas/open-interpreter#safety-notice), but generally results in [fewer restrictions and more capabilies](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) than OpenAI's hosted interpreter.
