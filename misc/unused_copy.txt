@@ -1,5 +1,7 @@
 Simply put, code interpreters allow language models to run the code they write. 
 
+> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
+
 A GPT-4 powered code interpreter in your terminal.
 
 # Open Interpreter

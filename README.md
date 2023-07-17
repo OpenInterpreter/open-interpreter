@@ -2,8 +2,6 @@
 
 A lightweight, open-source implementation of OpenAI's Code Interpreter.
 
-> Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
-
 ![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner.png)
 
 <p align="right">
