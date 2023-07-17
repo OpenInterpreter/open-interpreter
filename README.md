@@ -35,15 +35,6 @@ This extends GPT-4 with Python's general-purpose capabilities:
 pip install open-interpreter
 ```
 
-### Python
-
-```python
-import interpreter
-
-interpreter.api_key = "<openai_api_key>"
-interpreter.chat() # Starts an interactive chat
-```
-
 ### Terminal
 
 After installation, set your `OPENAI_API_KEY` environment variable, then simply run `interpreter`:
@@ -52,15 +43,14 @@ After installation, set your `OPENAI_API_KEY` environment variable, then simply 
 interpreter
 ```
 
-## Use Cases
+### Python
 
-Open Interpreter acts as a junior programmer that can execute code snippets to accomplish tasks.
+```python
+import interpreter
 
-1. Add subtitles to all videos in a folder.
-2. Blur all faces in a photo or video.
-4. Edit a large batch of documents.
-
-...
+interpreter.api_key = "<openai_api_key>"
+interpreter.chat() # Starts an interactive chat
+```
 
 ## Comparison to ChatGPT's Code Interpreter
 
