@@ -33,12 +33,21 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 pip install open-interpreter
 ```
 
+### Python
+
 ```python
 import interpreter
-interpreter.api_key = "<your_openai_api_key>"
 
-# Start an interactive chat in your terminal
+interpreter.api_key = "<openai_api_key>"
 interpreter.chat()
+```
+
+### Terminal
+
+After installation, set your `OPENAI_API_KEY` environment variable, then run `interpreter`:
+
+```shell
+$ interpreter
 ```
 
 ## Use Cases
@@ -69,15 +78,19 @@ Open Interpreter overcomes these limitations by running in a stateful Jupyter no
 
 ## Commands
 
-#### Terminal Chat
+#### Interactive Chat
 
-Running `.chat()` will start an interactive session in your terminal:
+To start an interactive session in your terminal, either run `interpreter` from the command line:
 
+```shell
+$ interpreter
+```
+Or `interpreter.chat()` from a .py file:
 ```python
 interpreter.chat()
 ```
 
-#### Python Chat
+#### Programmatic Chat
 
 For more precise control, you can pass messages directly to `.chat(message)`:
 
@@ -93,7 +106,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 
 #### Start a New Chat
 
-By default, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
+In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
 interpreter.reset()
