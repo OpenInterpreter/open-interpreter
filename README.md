@@ -6,7 +6,7 @@ A minimal, open-source implementation of OpenAI's code interpreter.
 interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 ```
 ```
-On it! First, I'll check if any speech-to-text libraries are installed...
+Understood. First, let's check if any speech-to-text libraries are installed...
 ```
 
 <br>
