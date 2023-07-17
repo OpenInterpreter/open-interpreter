@@ -3,10 +3,10 @@
 A minimal, open-source implementation of OpenAI's code interpreter.
 
 ```python
-interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
+interpreter.chat('Hey, can you add subtitles to video.mp4 on my Desktop?')
 ```
 ```
-Understood. First, let's check if any speech-to-text libraries are installed...
+Absolutely. First, let's check if any speech-to-text libraries are installed...
 ```
 
 <br>
