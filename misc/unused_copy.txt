@@ -1,4 +1,9 @@
+Simply put, code interpreters allow language models to run the code they write. 
+
+
 When GPT-4 writes code, it's executed on your local system
+
+
 
 Simply run `pip install open-interpreter` then `interpreter` to talk to GPT-4 in your terminal.
 
