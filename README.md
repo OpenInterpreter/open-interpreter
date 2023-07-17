@@ -117,7 +117,10 @@ interpreter.reset()
 `interpreter.chat()` returns a List of messages, which can be restored with `interpreter.load(messages)`:
 
 ```python
-interpreter.load(chat)
+messages = interpreter.chat() # Save chat to 'messages'
+interpreter.reset() # Reset interpreter
+
+interpreter.load(messages) # Resume chat from 'messages'
 ```
 
 #### Customize System Message
