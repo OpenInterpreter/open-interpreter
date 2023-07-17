@@ -4,10 +4,11 @@ A lightweight, open-source implementation of OpenAI's code interpreter.
 
 ```
 > Add subtitles to video.mp4 on my Desktop.
-```
-```
+
 On it! First, I'll check if any speech-to-text libraries are installed...
 ```
+
+<br>
 
 ![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner.png)
 
