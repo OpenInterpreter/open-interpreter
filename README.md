@@ -36,6 +36,8 @@ This extends GPT-4 with Python's general-purpose capabilities:
 - Convert DNA to proteins with `biopython`.
 - ...etc.
 
+<br>
+
 [How does this compare to OpenAI's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)
 
 <br>
