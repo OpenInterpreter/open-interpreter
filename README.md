@@ -33,7 +33,7 @@ This extends GPT-4 with Python's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
-- Sequence DNA with `biopython`.
+- Convert DNA to proteins with `biopython`.
 - ...etc.
 
 [How does this compare to ChatGPT's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)
