@@ -1,5 +1,15 @@
 Simply put, code interpreters allow language models to run the code they write. 
 
+## Use Cases
+
+Open Interpreter acts as a junior programmer that can execute code snippets to accomplish tasks.
+
+1. Add subtitles to all videos in a folder.
+2. Blur all faces in a photo or video.
+4. Edit a large batch of documents.
+
+...
+
 > Having access to a very eager junior programmer working at the speed of your fingertips can make completely new workflows effortless and efficient, as well as open the benefits of programming to new audiences. - OpenAI
 
 A GPT-4 powered code interpreter in your terminal.
