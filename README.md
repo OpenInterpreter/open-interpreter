@@ -22,7 +22,7 @@ On it! First, I'll check if any speech-to-text libraries are installed...
 
 ---
 
-**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to GPT-4 in your terminal. The model can run Python code _locally_ and reflect on its output, providing [several advantages](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) over OpenAI's hosted interpreter.
+**Open Interpreter** provides a minimal, [rich](https://github.com/Textualize/rich) chat interface to a code-executing GPT-4 in your terminal. The model can run Python code locally and reflect on its output.
 
 This extends GPT-4 with Python's general-purpose capabilities:
 
@@ -31,7 +31,7 @@ This extends GPT-4 with Python's general-purpose capabilities:
 - Sequence DNA with `biopython`.
 - ...etc.
 
-Running GPT-4's code locally has its [disadvantages](https://github.com/KillianLucas/open-interpreter#safety-notice), but generally results in [fewer restrictions and far more capabilies](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) than OpenAI's hosted interpreter.
+[How does this compare to ChatGPT's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)
 
 ## Demo Notebook
 
