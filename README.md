@@ -39,7 +39,7 @@ pip install open-interpreter
 import interpreter
 
 interpreter.api_key = "<openai_api_key>"
-interpreter.chat()
+interpreter.chat() # Starts an interactive chat in your terminal
 ```
 
 ### Terminal
@@ -111,8 +111,6 @@ In Python, Open Interpreter remembers conversation history. If you want to start
 ```python
 interpreter.reset()
 ```
-
-Then [start a chat as described above](https://github.com/KillianLucas/open-interpreter#terminal-chat).
 
 #### Save and Restore Chats
 
