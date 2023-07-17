@@ -30,7 +30,7 @@ interpreter.chat("Add subtitles to video.mp4 on my Desktop.")
 
 When GPT-4 writes code, it's executed on your local system
 
-
+Running code locally-- as opposed to a hosted environment-- has its [disadvantages](https://github.com/KillianLucas/open-interpreter#safety-notice), but generally results in [fewer restrictions and more capabilies](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter) than OpenAI's hosted interpreter.
 
 Simply run `pip install open-interpreter` then `interpreter` to talk to GPT-4 in your terminal.
 
