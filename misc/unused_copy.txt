@@ -1,3 +1,20 @@
+# Example queries:
+
+# Can you describe what's happening in image.png?
+
+# I have a folder named 'Documents' with many PDF files.
+# Could you rename all the files in this folder to follow the format 'Document-<Number>.pdf',
+# where '<Number>' is a unique, sequential number for each file?
+
+# I have a DNA sequence in the file 'sequence.txt'.
+# Could you use the Biopython package to translate this sequence
+# into a protein sequence and save the result to a new file called 'protein_sequence.txt'?
+
+# What are the last 10 BBC news headlines?
+
+# Could you go through all the '.txt' files in my
+# 'Documents' folder and replace every occurrence of 'Machine Learning' with 'AI'
+
 # Open Interpreter Demo
 
 Welcome to the demo of Open Interpreter, an open-source implementation of OpenAI's code interpreter.
