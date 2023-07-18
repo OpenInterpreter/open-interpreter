@@ -27,14 +27,16 @@ Absolutely. First, let's check if any speech-to-text libraries are installed...
 
 <br>
 
-**Open Interpreter** lets GPT-4 execute Python code locally. This extends GPT-4 with Python's general-purpose capabilities:
+**Open Interpreter** lets GPT-4 run Python code locally. You can chat with Open Interpreter via a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
+
+By letting the model install new `pip` packages, this project extends GPT-4 towards Python's general-purpose capabilities:
+
+This project provides a natural language iterface to Python's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
 - Modify files/folders on your local system.
 - ...etc.
-
-You can converse with Open Interpreter through a ChatGPT-like interface in your terminal via the `$ interpreter` command, or `interpreter.chat('message')` in Python.
 
 <br>
 
