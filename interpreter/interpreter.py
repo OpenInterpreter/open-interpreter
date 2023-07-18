@@ -53,7 +53,7 @@ class Interpreter:
             while True:
                 user_input = input("> ")
 
-                if user_input == 'exit':
+                if user_input == 'exit' or user_input == 'exit()':
                     break
 
                 self.messages.append({"role": "user", "content": user_input})
