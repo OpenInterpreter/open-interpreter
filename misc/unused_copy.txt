@@ -1,3 +1,18 @@
+# Open Interpreter Demo
+
+Welcome to the demo of Open Interpreter, an open-source implementation of OpenAI's code interpreter.
+
+Open Interpreter essentially gives GPT-4 access to one function -- `exec(code)`.
+
+Open Interpreter can install packages and execute code in any environment. The output will be returned to GPT-4.
+
+Messages, code, and outputs will be streamed to your terminal and rendered as markdown.
+
+You can chat with Open Interpreter via the terminal with `interpreter.chat()`.
+
+To get started, simply `import interpreter` and set `interpreter.api_key` to your OpenAI API key.
+
+
 Simply put, code interpreters allow language models to run the code they write. 
 
 ## Use Cases
