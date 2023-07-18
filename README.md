@@ -27,14 +27,14 @@ Absolutely. First, let's check if any speech-to-text libraries are installed...
 
 <br>
 
-**Open Interpreter** lets GPT-4 execute Python code locally. Running `$ interpreter` opens a ChatGPT-like interface to this model in your terminal.
-
-This extends GPT-4 with Python's general-purpose capabilities:
+**Open Interpreter** lets GPT-4 execute Python code locally. This extends GPT-4 with Python's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
-- Convert DNA to proteins with `biopython`.
+- Modify files/folders on your local system.
 - ...etc.
+
+You can converse with Open Interpreter through a ChatGPT-like interface in your terminal via the `$ interpreter` command, or `interpreter.chat('message')` in Python.
 
 <br>
 
