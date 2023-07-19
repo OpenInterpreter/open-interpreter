@@ -1,4 +1,5 @@
 run = "interpreter"
+#run = "python test.py"
 
 # The primary language of the repl. There can be others, though!
 language = "python3"
