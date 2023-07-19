@@ -26,15 +26,12 @@ functions = [{
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'system_message.txt'), 'r') as f:
     system_message = f.read().strip()
-with open(os.path.join(here, 'experimental_system_message.txt'), 'r') as f:
-    experimental_system_message = f.read().strip()
 
 class Interpreter:
     def __init__(self):
         self.messages = []
         self._logs = []
         self.system_message = system_message
-        self.experimental_system_message = experimental_system_message
         self.temperature = 0.2
         self.api_key = None
         self.max_output_chars = 2000
