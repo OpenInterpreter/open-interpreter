@@ -43,7 +43,7 @@ class Interpreter:
     def load(self, messages):
         self.messages = messages
 
-    def chat(self, message=None, return_chat=False):
+    def chat(self, message=None, return_messages=False):
         self.verify_api_key()
       
         if message:
@@ -62,7 +62,7 @@ class Interpreter:
                 self.messages.append({"role": "user", "content": user_input})
                 self.respond()
 
-        if return_chat:
+        if return_messages:
             return self.messages
 
     def display(self, delta):
