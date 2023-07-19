@@ -38,19 +38,17 @@ This provides a natural language interface to Python's general-purpose capabilit
 
 <br>
 
-[How does this compare to OpenAI's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)
+[How does this compare to OpenAI's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)<br>
 
-<br>
+## Demo Notebook
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
 ## Features
 
 - Generated code runs locally.
 - Uses `pip` and `apt-get` to extend itself.
 - Interactive, streaming chat inside your terminal.
-
-## Demo Notebook
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
 ## Quick Start
 
