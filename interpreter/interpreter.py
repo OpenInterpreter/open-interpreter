@@ -54,7 +54,7 @@ class Interpreter:
             print("Type 'exit' to leave the chat.\n")
 
             while True:
-                user_input = input("> ")
+                user_input = input("> ").strip()
 
                 if user_input == 'exit' or user_input == 'exit()':
                     break
