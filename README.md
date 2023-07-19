@@ -27,7 +27,7 @@ Absolutely. First, let's check if any speech-to-text libraries are installed...
 
 <br>
 
-**Open Interpreter** lets GPT-4 run Python code locally. You can chat with Open Interpreter via a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
+**Open Interpreter** lets GPT-4 run Python code locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
 
 This provides a natural language interface to Python's general-purpose capabilities:
 
@@ -42,15 +42,15 @@ This provides a natural language interface to Python's general-purpose capabilit
 
 <br>
 
-## Demo Notebook
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
-
 ## Features
 
 - Generated code runs locally.
 - Uses `pip` and `apt-get` to extend itself.
 - Interactive, streaming chat inside your terminal.
+
+## Demo Notebook
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
 ## Quick Start
 

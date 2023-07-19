@@ -20,24 +20,24 @@ def check_for_syntax_errors(code):
     cleaned_code = '\n'.join(filtered_lines)
     compile(cleaned_code, '<string>', 'exec')
 
-def truncate_output(data):
-    max_length = 7000
-    message = f'Output truncated. Showing the last {max_length} characters:\n\n'
+def truncate_output(data, max_output_chars):
+    message = f'Output truncated. Showing the last {max_output_chars} characters:\n\n'
 
     # Remove previous truncation message if it exists
     if data.startswith(message):
         data = data[len(message):]
 
     # If data exceeds max length, truncate it and add message
-    if len(data) > max_length:
-        data = message + data[-max_length:]
+    if len(data) > max_output_chars:
+        data = message + data[-max_output_chars:]
     return data
 
 class RichOutStream:
 
-    def __init__(self, live):
+    def __init__(self, live, max_output_chars):
         self.live = live
         self.data = ""
+        self.max_output_chars = max_output_chars
 
     def write(self, data):
         self.data += data
@@ -50,7 +50,7 @@ class RichOutStream:
         self.data = ansi_escape.sub('', self.data)
 
         # Truncate and prepend a message if truncated
-        self.data = truncate_output(self.data)
+        self.data = truncate_output(self.data, max_output_chars=self.max_output_chars)
 
         # None outputs should be empty, they happen with things like plt.show()
         if self.data.strip() == "None" or self.data.strip() == "":
@@ -68,7 +68,7 @@ class RichOutStream:
     def isatty(self):
         return False
 
-def exec_and_capture_output(code):
+def exec_and_capture_output(code, max_output_chars):
     # Store the original stdout and stderr
     old_stdout = sys.stdout
     old_stderr = sys.stderr
@@ -95,7 +95,7 @@ def exec_and_capture_output(code):
     live = Live(console=Console(), auto_refresh=False)  # Set auto_refresh to False to update manually
     try:
         live.start()
-        rich_stdout = RichOutStream(live)
+        rich_stdout = RichOutStream(live, max_output_chars)
 
         # Check syntax before attempting to execute
         try:
