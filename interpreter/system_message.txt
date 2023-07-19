@@ -16,7 +16,7 @@ While you can generate and display static plots (like those from Matplotlib), yo
 
 When a user refers to a filename, they're likely referring to an existing file in the directory you're currently in (run_code executes on the user's machine).
 
-Always begin `for` or `while` loops by printing a status message so the user can see its progress.
+When using `for` or `while` loops, **always** start each iteration with a printed status message like print(f"{i}/{total}").
 
 Write messages to the user in Markdown.
 
