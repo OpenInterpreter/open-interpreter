@@ -1,0 +1,54 @@
+GitPython was originally written by Michael Trier.
+GitPython 0.2 was partially (re)written by Sebastian Thiel, based on 0.1.6 and git-dulwich.
+
+Contributors are:
+
+-Michael Trier <mtrier _at_ gmail.com>
+-Alan Briolat
+-Florian Apolloner <florian _at_ apolloner.eu>
+-David Aguilar <davvid _at_ gmail.com>
+-Jelmer Vernooij <jelmer _at_ samba.org>
+-Steve Frécinaux <code _at_ istique.net>
+-Kai Lautaportti <kai _at_ lautaportti.fi>
+-Paul Sowden <paul _at_ idontsmoke.co.uk>
+-Sebastian Thiel <byronimo _at_ gmail.com>
+-Jonathan Chu <jonathan.chu _at_ me.com>
+-Vincent Driessen <me _at_ nvie.com>
+-Phil Elson <pelson _dot_ pub _at_ gmail.com>
+-Bernard `Guyzmo` Pratz <guyzmo+gitpython+pub@m0g.net>
+-Timothy B. Hartman <tbhartman _at_ gmail.com>
+-Konstantin Popov <konstantin.popov.89 _at_ yandex.ru>
+-Peter Jones <pjones _at_ redhat.com>
+-Anson Mansfield <anson.mansfield _at_ gmail.com>
+-Ken Odegard <ken.odegard _at_ gmail.com>
+-Alexis Horgix Chotard
+-Piotr Babij <piotr.babij _at_ gmail.com>
+-Mikuláš Poul <mikulaspoul _at_ gmail.com>
+-Charles Bouchard-Légaré <cblegare.atl _at_ ntis.ca>
+-Yaroslav Halchenko <debian _at_ onerussian.com>
+-Tim Swast <swast _at_ google.com>
+-William Luc Ritchie
+-David Host <hostdm _at_ outlook.com>
+-A. Jesse Jiryu Davis <jesse _at_ emptysquare.net>
+-Steven Whitman <ninloot _at_ gmail.com>
+-Stefan Stancu <stefan.stancu _at_ gmail.com>
+-César Izurieta <cesar _at_ caih.org>
+-Arthur Milchior <arthur _at_ milchior.fr>
+-Anil Khatri <anil.soccer.khatri _at_ gmail.com>
+-JJ Graham <thetwoj _at_ gmail.com>
+-Ben Thayer <ben _at_ benthayer.com>
+-Dries Kennes <admin _at_ dries007.net>
+-Pratik Anurag <panurag247365 _at_ gmail.com>
+-Harmon <harmon.public _at_ gmail.com>
+-Liam Beguin <liambeguin _at_ gmail.com>
+-Ram Rachum <ram _at_ rachum.com>
+-Alba Mendez <me _at_ alba.sh>
+-Robert Westman <robert _at_ byteflux.io>
+-Hugo van Kemenade
+-Hiroki Tokunaga <tokusan441 _at_ gmail.com>
+-Julien Mauroy <pro.julien.mauroy _at_ gmail.com>
+-Patrick Gerard
+-Luke Twist <itsluketwist@gmail.com>
+-Joseph Hale <me _at_ jhale.dev>
+-Santos Gallegos <stsewd _at_ proton.me>
+Portions derived from other open source works and are clearly marked.

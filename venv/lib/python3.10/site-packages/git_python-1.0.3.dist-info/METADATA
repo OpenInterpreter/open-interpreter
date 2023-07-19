@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: git-python
+Version: 1.0.3
+Summary: combination and simplification of some useful git commands
+Home-page: https://github.com/pynickle/git-python
+Author: code-nick-python
+Author-email: 2330458484@qq.com
+License: UNKNOWN
+Platform: any
+Requires-Dist: gitpython
+
+
+1. add and commit
+
+  gp addc -m "message"
+
+

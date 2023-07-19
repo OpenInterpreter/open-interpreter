@@ -3,6 +3,8 @@
     pkgs.python310Full
     pkgs.replitPackages.prybar-python310
     pkgs.replitPackages.stderred
+    pkgs.coreutils
+    pkgs.git
   ];
   env = {
     PYTHON_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [
@@ -13,6 +15,7 @@
       pkgs.glib
       # Needed for matplotlib
       pkgs.xorg.libX11
+      pkgs.git
     ];
     PYTHONHOME = "${pkgs.python310Full}";
     PYTHONBIN = "${pkgs.python310Full}/bin/python3.10";
