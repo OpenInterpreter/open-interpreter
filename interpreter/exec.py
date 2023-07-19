@@ -21,7 +21,7 @@ def check_for_syntax_errors(code):
     compile(cleaned_code, '<string>', 'exec')
 
 def truncate_output(data, max_output_chars):
-    message = f'Output truncated. Showing the last {max_output_chars} characters:\n\n'
+    message = f'Output truncated. Showing the last {max_output_chars} characters (change this number by setting interpreter.max_output_chars):\n\n'
 
     # Remove previous truncation message if it exists
     if data.startswith(message):

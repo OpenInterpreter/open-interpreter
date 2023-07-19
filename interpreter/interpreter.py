@@ -34,7 +34,7 @@ class Interpreter:
         self.system_message = system_message
         self.temperature = 0.2
         self.api_key = None
-        self.max_code_output_chars = 4000
+        self.max_code_output_chars = 2000
 
     def reset(self):
         self.messages = []
