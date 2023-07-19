@@ -59,10 +59,10 @@ class RichOutStream:
         # None outputs should be empty, they happen with things like plt.show()
         if self.data.strip() == "None" or self.data.strip() == "":
             self.data = ""
-            self.live.update("", refresh=True)
+            self.live.update("")
         else:
             panel = Panel(self.data.strip(), box=MINIMAL, style="#FFFFFF on #3b3b37")
-            self.live.update(panel, refresh=True)
+            self.live.update(panel)
 
     def flush(self):
         pass
@@ -96,7 +96,7 @@ def exec_and_capture_output(code, max_output_chars):
 
     code = jupyterify_code(code)
 
-    live = Live(console=Console(), auto_refresh=False)  # Set auto_refresh to False to update manually
+    live = Live(console=Console(), refresh_per_second=1)  # Set auto_refresh to False to update manually
     try:
         live.start()
         rich_stdout = RichOutStream(live, max_output_chars)

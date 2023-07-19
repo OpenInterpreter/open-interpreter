@@ -131,13 +131,13 @@ interpreter.reset()
 
 #### Save and Restore Chats
 
-`interpreter.chat()` returns a List of messages, which can be restored with `interpreter.load(messages)`:
+`interpreter.chat()` returns a List of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
 
 ```python
-messages = interpreter.chat() # Save chat to 'messages'
-interpreter.reset() # Reset interpreter
+messages = interpreter.chat("My name is Killian.", return_messages=True) # Save messages to 'messages'
+interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 
-interpreter.load(messages) # Resume chat from 'messages'
+interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
 #### Customize System Message
