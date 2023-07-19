@@ -65,6 +65,8 @@ def num_tokens_from_messages(messages, model):
 def openai_streaming_response(messages, functions, system_message, model,
                               temperature, api_key):
 
+  openai.api_key = api_key
+
   system_message_event = {"role": "system", "content": system_message}
 
   max_tokens = model_max_tokens[model]
