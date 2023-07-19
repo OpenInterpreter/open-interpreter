@@ -1,3 +1,6 @@
+"""
+This file contains the View class, which acts as our "frontend". It renders Open Interpreter's messages and code (but not code output, the rendering of which is handled by exec.py).
+"""
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel

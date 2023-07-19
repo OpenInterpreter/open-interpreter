@@ -1,3 +1,7 @@
+"""
+exec_and_capture_output is a function that runs code in a stateful Jupyter notebook and captures its outputs (exceptions, print statements-- anything that would display in the terminal). It renders those outputs to the user's terminal as they're generated.
+"""
+
 import ast
 import astor
 from IPython.core.interactiveshell import InteractiveShell
