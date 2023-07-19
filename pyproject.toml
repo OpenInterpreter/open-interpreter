@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"}
 ]
-version = "0.0.231"
+version = "0.0.232"
 description = "Ask GPT-4 to run code locally."
 authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
