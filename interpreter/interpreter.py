@@ -34,6 +34,7 @@ class Interpreter:
         self.system_message = system_message
         self.temperature = 0.2
         self.api_key = None
+        self.max_code_output_chars = 4000
 
     def reset(self):
         self.messages = []
@@ -156,6 +157,11 @@ class Interpreter:
 
                     # The output might use a rich Live display so we need to finalize ours.
                     self.view.finalize()
+
+                    # For interpreter. This should always be true:
+                    if func_call["name"] == "run_code":
+                      # Pass in max_output_chars to truncate the output
+                      function_args["max_output_chars"] = self.max_output_chars
 
                     output = function(**function_args)
 
