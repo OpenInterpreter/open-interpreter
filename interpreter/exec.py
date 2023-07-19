@@ -96,7 +96,7 @@ def exec_and_capture_output(code, max_output_chars):
 
     code = jupyterify_code(code)
 
-    live = Live(console=Console(), refresh_per_second=1)  # Set auto_refresh to False to update manually
+    live = Live(console=Console())
     try:
         live.start()
         rich_stdout = RichOutStream(live, max_output_chars)
