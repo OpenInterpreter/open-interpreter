@@ -1,5 +1,4 @@
 import tiktoken
-import os
 import openai
 import json
 
@@ -62,14 +61,6 @@ def num_tokens_from_messages(messages, model):
     return num_tokens
 
 def openai_streaming_response(messages, functions, system_message, model, temperature, api_key):
-
-    if api_key == None:
-        if 'OPENAI_API_KEY' in os.environ:
-            api_key = os.environ['OPENAI_API_KEY']
-        else:
-            raise Exception("Please provide an OpenAI API key via interpreter.api_key or as an environment variable ('OPENAI_API_KEY').")
-    else:
-        openai.api_key = api_key
 
     system_message_event = {"role": "system", "content": system_message}
 
