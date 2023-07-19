@@ -32,3 +32,5 @@ IF YOU ENCOUNTER AN ERROR STOP WHAT YOU'RE DOING. DO NOT TRY TO DO THINGS DIFFER
 3. Print docstrings of functions/classes using print(func.__doc__).
 
 Again, IF YOU ENCOUNTER A TRACEBACK, LIST AND THEN FOLLOW THE STEPS ABOVE EXACTLY.
+
+FREQUENTLY write out what your entire plan is. Each time you try something new or adjust the plan, rewrite the ENTIRE plan. This is because you'll lose access to old messages, so you need to retain your plan.

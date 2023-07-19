@@ -34,7 +34,7 @@ class Interpreter:
         self.system_message = system_message
         self.temperature = 0.2
         self.api_key = None
-        self.max_code_output_chars = 2000
+        self.max_output_chars = 2000
 
     def reset(self):
         self.messages = []
@@ -44,6 +44,8 @@ class Interpreter:
         self.messages = messages
 
     def chat(self, message=None, return_chat=False):
+        self.verify_api_key()
+      
         if message:
             self.messages.append({"role": "user", "content": message})
             self.respond()
@@ -78,6 +80,19 @@ class Interpreter:
         self._logs.append(["old delta:", old_delta, "new delta:", delta])
         self.view.process_delta(delta)
 
+    def verify_api_key(self):
+        if self.api_key == None:
+            if 'OPENAI_API_KEY' in os.environ:
+                self.api_key = os.environ['OPENAI_API_KEY']
+            else:
+                print("""OpenAI API key not found.
+                
+To use Open Interpreter in your terminal, set the environment variable using 'export OPENAI_API_KEY=your_api_key' in Unix-based systems, or 'setx OPENAI_API_KEY your_api_key' in Windows.
+
+To get an API key, visit https://platform.openai.com/account/api-keys.
+""")
+                self.api_key = input("""Please enter an OpenAI API key for this session:\n""").strip()
+
     def respond(self):
 
         # You always need a new view.
@@ -87,6 +102,7 @@ class Interpreter:
 
             # make openai call
             gpt_functions = [{k: v for k, v in d.items() if k != 'function'} for d in functions]
+
             response = openai_streaming_response(
                 self.messages,
                 gpt_functions,
