@@ -81,7 +81,9 @@ def exec_and_capture_output(code, max_output_chars):
     shell = InteractiveShell.instance()
 
     # Disable automatic stdout/stderr flushing
-    shell.ast_node_interactivity = "last_expr_or_assign"
+    #shell.ast_node_interactivity = "last_expr_or_assign"
+    # No wait, this should be none so we can handle printing the last node on our own. Why did we have it set to last_expr_or_assign?
+    shell.ast_node_interactivity = "none"
     
     # Store the original traceback handler
     old_showtraceback = shell.showtraceback
