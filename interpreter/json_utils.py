@@ -1,48 +1,64 @@
 import json
-import re
 
 def close_and_parse_json(s):
-    # First, check if the string is valid JSON as-is.
+    """
+    Tries to parse a string as JSON and if it fails, attempts to 'close' any open JSON structures.
+
+    Parameters:
+    s (str): The string to parse as JSON.
+
+    Returns:
+    json: The parsed JSON if successful, or None if it fails even after attempting to close open structures.
+    """
+
+    # First, try to parse the string as-is. If it's valid JSON, we'll return it directly.
     try:
         return json.loads(s)
     except json.JSONDecodeError:
-        pass  # We will handle this case below.
+        pass  # The string is not valid JSON. We'll try to handle this case below.
 
-    # If the string is not valid JSON, we will try to close any open structures.
+    # Initialize a stack to keep track of open braces and brackets.
+    stack = []
 
-    # count the number of escaped and unescaped quotes
-    num_escaped_quotes = len(re.findall(r'\\\"', s))
-    num_unescaped_quotes = len(re.findall(r'(?<!\\)\"', s))
+    # Initialize a flag to keep track of whether we're currently inside a string.
+    is_inside_string = False
 
-    # The number of open quotes is the total number of unescaped quotes
-    # minus twice the number of escaped quotes (since each pair of quotes forms a complete string).
-    num_open_quotes = num_unescaped_quotes - 2 * num_escaped_quotes
+    # Process each character in the string one at a time.
+    for char in s:
 
-    # append closing characters to the string
-    if num_open_quotes % 2 != 0:
+        # Handle quotes, which denote the start or end of a string in JSON.
+        if char == '"':
+            if stack and stack[-1] == '\\':
+                # This quote is escaped, so it doesn't affect whether we're inside a string.
+                stack.pop()
+            else:
+                # This quote is not escaped, so it toggles whether we're inside a string.
+                is_inside_string = not is_inside_string
+
+        # If we're not inside a string, we need to handle braces and brackets.
+        elif not is_inside_string:
+            if char == '{' or char == '[':
+                # This character opens a new structure, so add it to the stack.
+                stack.append(char)
+            elif char == '}' or char == ']':
+                # This character closes a structure, so remove the most recently opened structure from the stack.
+                if stack:
+                    stack.pop()
+
+    # If we're still inside a string at the end of processing, we need to close the string.
+    if is_inside_string:
         s += '"'
 
-    # Keep a stack of the open braces and brackets, and add closing characters
-    # in the reverse order of the opening characters.
-    stack = []
-    for char in s:
-        if char == '{' or char == '[':
-            stack.append(char)
-        elif char == '}' or char == ']':
-            if stack:
-                stack.pop()
-
+    # Close any remaining open structures in the reverse order that they were opened.
     while stack:
         open_char = stack.pop()
-        if open_char == '{':
-            s += '}'
-        elif open_char == '[':
-            s += ']'
+        s += '}' if open_char == '{' else ']'
 
-    # attempt to parse the string as JSON again
+    # Attempt to parse the string as JSON again now that we've closed all open structures.
     try:
         return json.loads(s)
     except json.JSONDecodeError:
+        # If we still can't parse the string as JSON, return None to indicate failure.
         return None
 
 class JsonDeltaCalculator:
