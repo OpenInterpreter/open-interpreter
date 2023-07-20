@@ -1,0 +1,23 @@
+# .gitignore
+
+# Ignore the .replit configuration file
+.replit
+
+# Ignore the .env file if you're using one to store sensitive information
+.env
+
+# Ignore Python virtual environment directories if you're using them
+venv
+__pycache__
+
+# Ignore Nix directories
+/nix
+
+# Ignore any logs
+*.log
+
+# Ignore all .DS_Store files
+.DS_Store
+
+# Ignore dist directory
+/dist
