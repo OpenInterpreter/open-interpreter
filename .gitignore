@@ -13,6 +13,9 @@ __pycache__/
 # Ignore Nix directories
 nix/
 
+# Ignore the replit.nix configuration file
+replit.nix
+
 # Ignore any logs
 *.log
 
