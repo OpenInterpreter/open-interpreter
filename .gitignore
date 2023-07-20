@@ -24,3 +24,6 @@ replit.nix
 
 # Ignore dist directory
 dist/
+
+# Ignore misc directory
+misc/
