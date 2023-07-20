@@ -73,7 +73,6 @@ class RichOutStream:
         return False
 
 def exec_and_capture_output(code, max_output_chars):
-    print("test")
     # Store the original stdout and stderr
     old_stdout = sys.stdout
     old_stderr = sys.stderr
@@ -112,11 +111,16 @@ def exec_and_capture_output(code, max_output_chars):
             etype, value, tb = sys.exc_info()
             traceback_str = ''.join(itb.structured_traceback(etype, value, tb))
             rich_stdout.write(traceback_str)
+
+            live.refresh() # Sometimes this can happen so quickly, it doesn't auto refresh in time
+
             return rich_stdout.data.strip()
 
         # If syntax is correct, execute the code
         with redirect_stdout(rich_stdout), redirect_stderr(rich_stdout), live:
             shell.run_cell(code)
+
+        live.refresh() # Sometimes this can happen so quickly, it doesn't auto refresh in time
 
         return rich_stdout.data.strip()
     finally:
