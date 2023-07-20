@@ -7,11 +7,11 @@
 .env
 
 # Ignore Python virtual environment directories if you're using them
-venv
-__pycache__
+venv/
+__pycache__/
 
 # Ignore Nix directories
-/nix
+nix/
 
 # Ignore any logs
 *.log
@@ -20,4 +20,4 @@ __pycache__
 .DS_Store
 
 # Ignore dist directory
-/dist
+dist/
