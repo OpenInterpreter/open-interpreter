@@ -1,1 +1,0 @@
-from idna import *

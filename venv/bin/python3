@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-LD_LIBRARY_PATH="${PYTHON_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}" exec -a "$0" "${PYTHONBIN}" "$@"
