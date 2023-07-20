@@ -11,7 +11,7 @@ Absolutely. First, let's check if any speech-to-text libraries are installed...
 
 <br>
 
-![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/misc/banner.png)
+![Banner Image](https://github.com/KillianLucas/open-interpreter/blob/main/images/banner.png)
 
 <p align="right">
     <sub><i>Illustration by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
