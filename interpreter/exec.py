@@ -113,7 +113,8 @@ def exec_and_capture_output(code, max_output_chars):
             rich_stdout.write(traceback_str)
 
             live.refresh() # Sometimes this can happen so quickly, it doesn't auto refresh in time
-
+            shell.ast_node_interactivity = "last_expr_or_assign" # Restore last node interactivity
+            
             return rich_stdout.data.strip()
 
         # If syntax is correct, execute the code
@@ -121,6 +122,7 @@ def exec_and_capture_output(code, max_output_chars):
             shell.run_cell(code)
 
         live.refresh() # Sometimes this can happen so quickly, it doesn't auto refresh in time
+        shell.ast_node_interactivity = "last_expr_or_assign" # Restore last node interactivity
 
         return rich_stdout.data.strip()
     finally:
