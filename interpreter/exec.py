@@ -73,6 +73,7 @@ class RichOutStream:
         return False
 
 def exec_and_capture_output(code, max_output_chars):
+    print("test")
     # Store the original stdout and stderr
     old_stdout = sys.stdout
     old_stderr = sys.stderr
