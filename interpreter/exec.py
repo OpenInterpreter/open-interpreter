@@ -81,9 +81,9 @@ def exec_and_capture_output(code, max_output_chars):
     shell = InteractiveShell.instance()
 
     # Disable automatic stdout/stderr flushing
-    shell.ast_node_interactivity = "last_expr_or_assign"
+    #shell.ast_node_interactivity = "last_expr_or_assign"
     # No wait, this should be none so we can handle printing the last node on our own. Why did we have it set to last_expr_or_assign?
-    #shell.ast_node_interactivity = "none"
+    shell.ast_node_interactivity = "none"
     
     # Store the original traceback handler
     old_showtraceback = shell.showtraceback
@@ -115,7 +115,7 @@ def exec_and_capture_output(code, max_output_chars):
 
         # If syntax is correct, execute the code
         with redirect_stdout(rich_stdout), redirect_stderr(rich_stdout), live:
-            exec_result = shell.run_cell(code)
+            shell.run_cell(code)
 
         return rich_stdout.data.strip()
     finally:
@@ -151,7 +151,7 @@ def jupyterify_code(code):
     # Try to parse the code without magic commands as an AST
     try:
         tree = ast.parse(code_without_magic)
-    except SyntaxError as e:
+    except SyntaxError:
         return code
 
     # A single pip command would do this
