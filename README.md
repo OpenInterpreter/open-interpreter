@@ -1,16 +1,8 @@
 # Open Interpreter
 
-A lightweight, open-source implementation of OpenAI's code interpreter.
+A minimal, open-source implementation of OpenAI's code interpreter.
 
 ![Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/c6db73a8-231a-4d41-a7d3-b4ebdf04239c)
-
-<br>
-
-![Banner Image](https://i.ibb.co/ZHfB9sm/open-interpreter-banner.png)
-
-<p align="right">
-    <sub><i>Illustration by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
-</p>
 
 ## What is this?
 
@@ -169,3 +161,9 @@ As an open-source project, we are extremely open to contributions, whether it be
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
+
+![Banner Image](https://i.ibb.co/ZHfB9sm/open-interpreter-banner.png)
+
+<p align="right">
+    <sub><i>Illustration by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
+</p>
