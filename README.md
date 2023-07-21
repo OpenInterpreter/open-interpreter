@@ -2,7 +2,7 @@
 
 A minimal, open-source implementation of OpenAI's code interpreter.
 
-![Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/c6db73a8-231a-4d41-a7d3-b4ebdf04239c)
+![Interpreter Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/a1597f66-d298-4172-bc0b-35b36e1479eb)
 
 ## What is this?
 
