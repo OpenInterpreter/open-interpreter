@@ -4,6 +4,8 @@ from .view import View
 from .json_utils import JsonDeltaCalculator
 from .openai_utils import openai_streaming_response
 import os
+import readline
+
 
 functions = [{
   "name": "run_code",
@@ -111,11 +113,15 @@ class Interpreter:
       print("Type 'exit' to leave the chat.\n")
 
       while True:
-        user_input = input("> ").strip()
+        try:
+          user_input = input("> ").strip()
+        except EOFError:
+          break
 
         if user_input == 'exit' or user_input == 'exit()':
           break
 
+        readline.add_history(user_input)  # add input to the readline history
         self.messages.append({"role": "user", "content": user_input})
         self.respond()
 
