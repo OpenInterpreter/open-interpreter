@@ -1,21 +1,8 @@
 # Open Interpreter
 
-A lightweight, open-source implementation of OpenAI's code interpreter.
+A minimal, open-source implementation of OpenAI's code interpreter.
 
-```python
-interpreter.chat('Hey, can you add subtitles to video.mp4 on my Desktop?')
-```
-```
-Absolutely. First, let's check if any speech-to-text libraries are installed...
-```
-
-<br>
-
-![Banner Image](https://i.ibb.co/ZHfB9sm/open-interpreter-banner.png)
-
-<p align="right">
-    <sub><i>Illustration by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
-</p>
+![Interpreter Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/a1597f66-d298-4172-bc0b-35b36e1479eb)
 
 ## What is this?
 
@@ -157,6 +144,8 @@ We then stream the model's messages, code, and your system's outputs to the term
 
 Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
 
+Sure, here's an updated version:
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
@@ -164,6 +153,8 @@ Since generated code is executed in your local environment, it can interact with
 - Be cautious when requesting commands that modify files or system settings.
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Regularly back up your data and work in a virtual environment.
+- Open Interpreter utilizes `interpreter.forbidden_commands`, a list of commands identified as potentially harmful and disallowed by default. You can modify this list, but do so with caution.
+- Consider running the Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
 ## Contributing
 
@@ -174,3 +165,9 @@ As an open-source project, we are extremely open to contributions, whether it be
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
+
+![Banner Image](https://i.ibb.co/ZHfB9sm/open-interpreter-banner.png)
+
+<p align="right">
+    <sub><i>Illustration by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
+</p>
