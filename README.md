@@ -153,7 +153,7 @@ Since generated code is executed in your local environment, it can interact with
 - Be cautious when requesting commands that modify files or system settings.
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Regularly back up your data and work in a virtual environment.
-- Open Interpreter utilizes `interpreter.forbidden_commands`, a list of commands identified as potentially harmful and disallowed by default. You can modify this list, but do so with caution.
+- Open Interpreter utilizes `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default. You can modify this list, but do so with caution.
 - Consider running the Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
 ## Contributing
