@@ -72,7 +72,7 @@ class RichOutStream:
     def isatty(self):
         return False
 
-def exec_and_capture_output(code, max_output_chars):
+def exec_and_capture_output(code, max_output_chars, forbidden_commands):
     # Store the original stdout and stderr
     old_stdout = sys.stdout
     old_stderr = sys.stderr
@@ -115,6 +115,18 @@ def exec_and_capture_output(code, max_output_chars):
             live.refresh() # Sometimes this can happen so quickly, it doesn't auto refresh in time
             shell.ast_node_interactivity = "last_expr_or_assign" # Restore last node interactivity
             
+            return rich_stdout.data.strip()
+
+        # Check for forbidden_commands
+        lines = code.split('\n')
+        for line in lines:
+          if line.strip() in forbidden_commands:
+            message = f"Command '{line}' is not permitted. Modify `interpreter.forbidden_commands` to override."
+            rich_stdout.write(message)
+            
+            live.refresh() # Sometimes this can happen so quickly, it doesn't auto refresh in time
+            shell.ast_node_interactivity = "last_expr_or_assign" # Restore last
+
             return rich_stdout.data.strip()
 
         # If syntax is correct, execute the code
