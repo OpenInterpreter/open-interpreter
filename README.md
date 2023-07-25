@@ -48,7 +48,7 @@ pip install open-interpreter
 After installation, set your `OPENAI_API_KEY` environment variable, then simply run `interpreter`:
 
 ```shell
-interpreter // Add --safe_mode to ask for confirmation before running generated code
+interpreter
 ```
 
 ### Python
@@ -83,7 +83,7 @@ Open Interpreter overcomes these limitations by running in a stateful Jupyter no
 To start an interactive chat in your terminal, either run `interpreter` from the command line:
 
 ```shell
-interpreter --safe_mode
+interpreter
 ```
 
 Or `interpreter.chat()` from a .py file:
