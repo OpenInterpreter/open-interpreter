@@ -48,7 +48,7 @@ pip install open-interpreter
 After installation, set your `OPENAI_API_KEY` environment variable, then simply run `interpreter`:
 
 ```shell
-interpreter
+interpreter // Add --safe_mode to ask for confirmation before running generated code
 ```
 
 ### Python
@@ -83,7 +83,7 @@ Open Interpreter overcomes these limitations by running in a stateful Jupyter no
 To start an interactive chat in your terminal, either run `interpreter` from the command line:
 
 ```shell
-interpreter
+interpreter --safe_mode
 ```
 
 Or `interpreter.chat()` from a .py file:
@@ -144,8 +144,6 @@ We then stream the model's messages, code, and your system's outputs to the term
 
 Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
 
-Sure, here's an updated version:
-
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
@@ -155,6 +153,7 @@ Since generated code is executed in your local environment, it can interact with
 - Regularly back up your data and work in a virtual environment.
 - Open Interpreter utilizes `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default. You can modify this list, but do so with caution.
 - Consider running the Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
+- Utilize Safe Mode by running `interpreter --safe_mode` from the terminal or setting `interpreter.safe_mode = True` in Python. This asks for user confirmation before running any code.
 
 ## Contributing
 

@@ -37,11 +37,11 @@ class Interpreter:
 
   def __init__(self):
     self.messages = []
-    self._logs = []
     self.system_message = system_message
     self.temperature = 0.2
     self.api_key = None
     self.max_output_chars = 2000
+    self.safe_mode = False
 
     # Commands Open Interpreter cannot run
     self.forbidden_commands = [
@@ -91,13 +91,11 @@ class Interpreter:
       "os.system('init 0')",  # Python command
       "os.system('dd if=/dev/zero of=/dev/sda')",  # Python command
       "os.system('mkfs.ext3 /dev/sda1')",  # Python command
-      "os.system('mv directory_to_destroy /dev/null')",  # Python command
       "os.system('openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt')",  # Python command
     ]
 
   def reset(self):
     self.messages = []
-    self._logs = []
 
   def load(self, messages):
     self.messages = messages
@@ -130,8 +128,6 @@ class Interpreter:
 
   def display(self, delta):
 
-    old_delta = delta
-
     if delta == None:
       return
 
@@ -140,7 +136,6 @@ class Interpreter:
     elif "function_call" in delta:
       delta = {"type": "function", "content": delta["function_call"]}
 
-    self._logs.append(["old delta:", old_delta, "new delta:", delta])
     self.view.process_delta(delta)
 
   def verify_api_key(self):
@@ -220,7 +215,6 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
 
           function = [f for f in functions
                       if f["name"] == func_call["name"]][0]["function"]
-          self._logs.append(func_call["arguments"])
 
           # For interpreter. Sometimes it just sends the code??
           try:
@@ -238,7 +232,21 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
             # Pass in forbidden_commands
             function_args["forbidden_commands"] = self.forbidden_commands
 
-          output = function(**function_args)
+          user_declined = False
+          if self.safe_mode:
+            # Ask the user for confirmation
+            print()
+            response = input("Would you like to run the above code? (y/n) ")
+            print()
+            if response.lower().strip() != "y":
+              user_declined = True
+            else:
+              user_declined = False
+
+          if user_declined:
+            output = "The user you're chatting with declined to run this code on their machine. It may be best to ask them why, or to try another method."
+          else:
+            output = function(**function_args)
 
           event = {
             "role": "function",
@@ -248,7 +256,8 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           self.messages.append(event)
 
           # Go around again
-          self.respond()
+          if not user_declined:
+            self.respond()
 
         if "content" in delta and delta.content != None:
           event["content"] += delta.content
