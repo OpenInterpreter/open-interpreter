@@ -23,6 +23,7 @@ Write messages to the user in Markdown.
 [Preferred Packages]
 Audio effects: `pedalboard`
 YouTube downloading: `yt-dlp`
+Video: `ffmpeg`
 
 [Traceback Protocol]
 If you encounter an error, do not try to use an alternative method yet. Instead:
