@@ -76,7 +76,7 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 
 Open Interpreter overcomes these limitations by running in a stateful Jupyter notebook on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
-**Open Interpreter combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.**
+This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
 
 ## Commands
 
