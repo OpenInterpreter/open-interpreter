@@ -1,7 +1,7 @@
 import argparse
 import interpreter
 
-def main():
+def cli():
     parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
     parser.add_argument('--no_confirm', action='store_true', help='Execute code without user confirmation')
     args = parser.parse_args()
@@ -14,6 +14,3 @@ def main():
     
     # Now run the chat method
     interpreter.chat()
-
-if __name__ == "__main__":
-    main()
