@@ -142,7 +142,7 @@ print(interpreter.system_message)
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
 
-**⚠️ Open Interpreter will ask for confirmation before executing code.**
+**⚠️ Open Interpreter will ask for user confirmation before executing code.**
 
 You can run `interpreter --no_confirm` or set `interpreter.no_confirm = True` to bypass this confirmation, in which case:
 
