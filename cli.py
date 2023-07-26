@@ -2,14 +2,14 @@ import argparse
 import interpreter
 
 def main():
-    parser = argparse.ArgumentParser(description='Run the OpenAI Interpreter.')
-    parser.add_argument('--safe_mode', action='store_true', help='Enable safe mode')
+    parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
+    parser.add_argument('--auto_exec', action='store_true', help='Enable auto execution')
     args = parser.parse_args()
 
     # Set safe_mode on the imported interpreter instance
-    if args.safe_mode:
-      print("\nYou are in safe mode. Generated code will require confirmation before running.\n")
-      interpreter.safe_mode = True
+    if args.auto_exec:
+      print("\nYou are in auto execution mode. Generated code will execute without confirmation.\n")
+      interpreter.auto_exec = True
     
     # Now run the chat method
     interpreter.chat()
