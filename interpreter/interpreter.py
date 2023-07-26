@@ -41,7 +41,7 @@ class Interpreter:
     self.temperature = 0.2
     self.api_key = None
     self.max_output_chars = 2000
-    self.auto_exec = False
+    self.no_confirm = False
 
     # Commands Open Interpreter cannot run
     self.forbidden_commands = [
@@ -234,7 +234,7 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
 
           user_declined = False
           
-          if self.auto_exec == False:
+          if self.no_confirm == False:
             # Ask the user for confirmation
             print()
             response = input("Would you like to run the above code? (y/n) ")
