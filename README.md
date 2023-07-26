@@ -14,7 +14,7 @@ A minimal, open-source implementation of OpenAI's code interpreter.
 
 <br>
 
-**Open Interpreter** lets GPT-4 run Python code locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
+**Open Interpreter** lets GPT-4 run Python code locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing. **You'll be asked to approve any code before it's run.**
 
 This provides a natural language interface to Python's general-purpose capabilities:
 
@@ -33,7 +33,7 @@ This provides a natural language interface to Python's general-purpose capabilit
 
 ## Features
 
-- Generated code runs locally.
+- **User confirmation required to run code.**
 - Uses `pip` and `apt-get` to extend itself.
 - Interactive, streaming chat inside your terminal.
 
@@ -75,6 +75,20 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 Open Interpreter overcomes these limitations by running in a stateful Jupyter notebook on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
 **Open Interpreter combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.**
+
+## Safety Notice
+
+Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
+
+**Open Interpreter will ask for confirmation before executing any code.**
+
+You can run `interpreter --no_confirm` or set `interpreter.no_confirm = True` to bypass this confirmation, in which case:
+
+- Be cautious when requesting commands that modify files or system settings.
+- Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
+- Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
+
+For added security, Open Interpreter also respects `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default. You can modify this list, but do so with caution.
 
 ## Commands
 
@@ -143,17 +157,6 @@ Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/d
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
 Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
-
-## Safety Notice
-
-Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
-
-- Be cautious when requesting commands that modify files or system settings.
-- Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
-- Regularly back up your data and work in a virtual environment.
-- Open Interpreter utilizes `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default. You can modify this list, but do so with caution.
-- Consider running the Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
-- Utilize Safe Mode by running `interpreter --safe_mode` from the terminal or setting `interpreter.safe_mode = True` in Python. This asks for user confirmation before running any code.
 
 ## Contributing
 
