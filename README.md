@@ -138,19 +138,11 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
-## How Does it Work?
-
-Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/docs/guides/gpt/function-calling) with the `exec()` function.
-
-We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
-
-Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
-
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
 
-**Open Interpreter will ask for confirmation before executing any code.**
+**⚠️ Open Interpreter will ask for confirmation before executing any code.**
 
 You can run `interpreter --no_confirm` or set `interpreter.no_confirm = True` to bypass this confirmation, in which case:
 
@@ -158,7 +150,15 @@ You can run `interpreter --no_confirm` or set `interpreter.no_confirm = True` to
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
-For added security, Open Interpreter also respects `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default. You can modify this list, but do so with caution.
+Open Interpreter also respects `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default.
+
+## How Does it Work?
+
+Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/docs/guides/gpt/function-calling) with the `exec()` function.
+
+We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
+
+Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
 
 ## Contributing
 
