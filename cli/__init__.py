@@ -1,16 +1,21 @@
 import argparse
 import interpreter
+from rich import print
+from rich.markdown import Markdown
+
+confirm_mode_message = "**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this (recommended)."
 
 def cli():
     parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
-    parser.add_argument('--no_confirm', action='store_true', help='Execute code without user confirmation')
+    parser.add_argument('-y', '--yes', action='store_true', help='execute code without user confirmation')
     args = parser.parse_args()
 
-    # Set safe_mode on the imported interpreter instance
-    if args.no_confirm:
+    if args.yes:
       interpreter.no_confirm = True
     else:
-      print("\nGenerated code will require confirmation before executing. Run `interpreter --no_confirm` for instant code execution.\n")
-    
+      print() # Print newline
+      print(Markdown(confirm_mode_message))
+      print() # Print newline
+          
     # Now run the chat method
     interpreter.chat()
