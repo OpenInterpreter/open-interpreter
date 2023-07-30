@@ -58,7 +58,7 @@ interpreter
 ```python
 import interpreter
 
-interpreter.api_key = "<openai_api_key>"
+interpreter.api_key = "your_openai_api_key"
 interpreter.chat() # Starts an interactive chat
 ```
 
