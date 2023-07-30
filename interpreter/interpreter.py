@@ -237,7 +237,7 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           if self.no_confirm == False:
             # Ask the user for confirmation
             print()
-            response = input("Would you like to run the above code? (y/n) ")
+            response = input("  Would you like to run this code? (y/n) ")
             print()
             if response.lower().strip() != "y":
               user_declined = True
