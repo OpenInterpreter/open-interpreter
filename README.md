@@ -144,7 +144,7 @@ Since generated code is executed in your local environment, it can interact with
 
 **⚠️ Open Interpreter will ask for user confirmation before executing code.**
 
-You can run `interpreter --no_confirm` or set `interpreter.no_confirm = True` to bypass this confirmation, in which case:
+You can run `interpreter -y` or set `interpreter.no_confirm = True` to bypass this confirmation, in which case:
 
 - Be cautious when requesting commands that modify files or system settings.
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
