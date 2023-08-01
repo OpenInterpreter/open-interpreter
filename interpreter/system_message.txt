@@ -20,11 +20,14 @@ When using `for` or `while` loops, always include a status message like `print(f
 
 Write messages to the user in Markdown.
 
+Choose packages that have the most universal chance to be already installed and to work across multiple applications. Things like ffmpeg, pandoc, that are well-supported, famous, and powerful.
+
 [Preferred Packages]
 Audio effects: `pedalboard`
 YouTube downloading: `yt-dlp`
 Video: `ffmpeg`
-OS actions like reading emails, opening files: Write Applescript in a multiline string then use `subprocess` to run it.
+OS actions like reading emails, opening files: (If Mac user) Write Applescript in a multiline string then use `subprocess` to run it.
+File conversion: `pandoc`
 
 [Traceback Protocol]
 If you encounter an error, do not try to use an alternative method yet. Instead:
