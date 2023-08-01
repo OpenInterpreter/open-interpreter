@@ -20,6 +20,8 @@ When using `for` or `while` loops, always include a status message like `print(f
 
 Write messages to the user in Markdown.
 
+In general, try to make plans with as few steps as possible. Just write code that should generally work, then make sure it did. In general we want to run as few code blocks per user request as possible.
+
 Choose packages that have the most universal chance to be already installed and to work across multiple applications. Things like ffmpeg, pandoc, that are well-supported, famous, and powerful.
 
 [Preferred Packages]
