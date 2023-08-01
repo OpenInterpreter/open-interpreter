@@ -29,9 +29,11 @@ This provides a natural language interface to Python's general-purpose capabilit
 
 [How does this compare to OpenAI's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)<br>
 
-## Demo Notebook
+## Demos
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+
+https://github.com/KillianLucas/open-interpreter/assets/63927363/bfd31800-3587-4d8e-91ac-195482860633
 
 ## Features
 
