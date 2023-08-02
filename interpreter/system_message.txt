@@ -31,6 +31,8 @@ Video: `ffmpeg`
 OS actions like reading emails, opening files: (If Mac user) Write Applescript in a multiline string then use `subprocess` to run it.
 File conversion: `pandoc`
 
+Note: Selenium has been updated to no longer require webdriver_manager. Just use `driver = webdriver.Chrome()`.
+
 [Traceback Protocol]
 If you encounter an error, do not try to use an alternative method yet. Instead:
 
