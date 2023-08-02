@@ -4,6 +4,13 @@ A minimal, open-source implementation of OpenAI's code interpreter.
 
 ![Interpreter Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/a1597f66-d298-4172-bc0b-35b36e1479eb)
 
+```shell
+pip install open-interpreter
+```
+```shell
+interpreter
+```
+
 ## What is this?
 
 <br>
