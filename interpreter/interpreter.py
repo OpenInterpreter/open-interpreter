@@ -2,7 +2,8 @@ import json
 from .exec import exec_and_capture_output
 from .view import View
 from .json_utils import JsonDeltaCalculator
-from .openai_utils import openai_streaming_response
+import openai
+import tokentrim as tt
 import os
 import readline
 
@@ -164,9 +165,14 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
                         for k, v in d.items() if k != 'function'}
                        for d in functions]
 
-      response = openai_streaming_response(self.messages, gpt_functions,
-                                           self.system_message, "gpt-4-0613",
-                                           self.temperature, self.api_key)
+      model = "gpt-4-0613"
+      response = openai.ChatCompletion.create(
+          model=model,
+          messages=tt.trim(self.messages, model, system_message=self.system_message),
+          functions=gpt_functions,
+          stream=True,
+          temperature=self.temperature,
+      )
 
       base_event = {"role": "assistant", "content": ""}
       event = base_event

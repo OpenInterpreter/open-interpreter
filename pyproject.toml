@@ -17,6 +17,7 @@ tiktoken = "^0.4.0"
 ipython = "^8.14.0"
 astor = "^0.8.1"
 git-python = "^1.0.3"
+tokentrim = "^0.1.2"
 
 [tool.poetry.dev-dependencies]
 
