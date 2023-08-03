@@ -982,6 +982,20 @@ requests = ">=2.26.0"
 blobfile = ["blobfile (>=2)"]
 
 [[package]]
+name = "tokentrim"
+version = "0.1.3"
+description = "Easily trim 'messages' arrays for use with GPTs."
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "tokentrim-0.1.3-py3-none-any.whl", hash = "sha256:b66fc5091cb15e53e42591b69f327cf646a9d92b71e319bb750dc2f3c95f032c"},
+    {file = "tokentrim-0.1.3.tar.gz", hash = "sha256:6294f4877447ad4c9513faef5846f3aa05359af57ad75d1841e5461330e40f28"},
+]
+
+[package.dependencies]
+tiktoken = ">=0.4.0,<0.5.0"
+
+[[package]]
 name = "tqdm"
 version = "4.65.0"
 description = "Fast, Extensible Progress Meter"
@@ -1134,4 +1148,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "6110cb8772ce5e85b01debf02ef5cb4cb8ee382966aa8b756b9614c92a0f3f0e"
+content-hash = "7e203edbf1c07594d03821515e9c274682ec49af09e718acb7e79a5e5677cf13"
