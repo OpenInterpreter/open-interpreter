@@ -38,10 +38,11 @@ def truncate_output(data, max_output_chars):
 
 class RichOutStream:
 
-    def __init__(self, live, max_output_chars):
+    def __init__(self, live, max_output_chars, sysout):
         self.live = live
         self.data = ""
         self.max_output_chars = max_output_chars
+        self.sysout = sysout
 
     def write(self, data):
         self.data += data
@@ -65,7 +66,7 @@ class RichOutStream:
             self.live.update(panel)
 
     def flush(self):
-        pass
+        self.sysout.flush()
 
     # Some things (like youtube-dl) will check if this is "isatty()"
     # then fail if it isn't present, so. If this is True it breaks the CLI, so we set it to False (I don't know what it means).
@@ -101,7 +102,7 @@ def exec_and_capture_output(code, max_output_chars, forbidden_commands):
     live = Live(console=Console())
     try:
         live.start()
-        rich_stdout = RichOutStream(live, max_output_chars)
+        rich_stdout = RichOutStream(live, max_output_chars, old_stdout)
 
         # Check syntax before attempting to execute
         try:
