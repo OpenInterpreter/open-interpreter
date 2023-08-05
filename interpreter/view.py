@@ -34,6 +34,7 @@ class View:
     self.live = None
     self.current_type = None
     self.current_content = ""
+    self.programming_language = ""
 
   def process_delta(self, event):
 
@@ -48,6 +49,9 @@ class View:
         if 'code' in data:
           content = data['code']
           display_type = 'code'
+        elif 'language' in data:
+          self.programming_language += data["language"]
+          return
         else:
           return
         # elif 'name' in data:
@@ -77,7 +81,7 @@ class View:
         markdown = Markdown(textify_markdown_code_blocks(self.current_content))
         current_display = Panel(markdown, box=MINIMAL)
       elif display_type == 'code':
-        syntax = Syntax(self.current_content, "python", theme="monokai")
+        syntax = Syntax(self.current_content, self.programming_language, theme="monokai")
         current_display = Panel(syntax, box=MINIMAL, style="on #272722")
       # elif display_type == 'name':
       #     markdown = Markdown("# " + self.current_content)

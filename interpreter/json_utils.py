@@ -62,40 +62,91 @@ def close_and_parse_json(s):
         return None
 
 class JsonDeltaCalculator:
+    """
+    This class calculates the 'delta', or difference, between two JSON objects.
+
+    The delta is represented as a new JSON object that contains only the elements that
+    were added or changed in the second JSON object compared to the first one.
+
+    Attributes:
+    previous_json (dict): The previous JSON object received.
+    accumulated_str (str): The accumulated JSON string.
+    """
+
     def __init__(self):
+        """
+        The constructor for JsonDeltaCalculator class. Initializes previous_json as an empty dict
+        and accumulated_str as an empty string.
+        """
         self.previous_json = {}
         self.accumulated_str = ""
 
     def receive_chunk(self, char):
+        """
+        Receives a chunk of string, tries to parse it as JSON, and calculates the delta
+        between the parsed JSON and the previous JSON.
+
+        Parameters:
+        char (str): The string chunk received.
+
+        Returns:
+        dict: The delta between the parsed JSON and the previous JSON, or None if the string cannot be parsed as JSON.
+        """
+        # Accumulate the chunks
         self.accumulated_str += char
 
+        # Try to parse the accumulated string as JSON
         parsed_json = close_and_parse_json(self.accumulated_str)
+
+        # If the string cannot be parsed as JSON, return None
         if parsed_json is None:
             return None
 
+        # Calculate the delta between the parsed JSON and the previous JSON
         delta = self.calculate_delta(self.previous_json, parsed_json)
+
+        # Store the parsed JSON as the previous JSON for the next call
         self.previous_json = parsed_json
 
+        # Return the delta if it is not None or an empty dictionary
         if delta != None and delta != {}:
-          return delta
+            return delta
 
     def calculate_delta(self, previous, current):
+        """
+        Calculates the delta between two JSON objects.
+
+        Parameters:
+        previous (dict): The first JSON object.
+        current (dict): The second JSON object.
+
+        Returns:
+        dict: The delta between the two JSON objects.
+
+        Raises:
+        ValueError: If the JSON objects contain lists, since lists are not supported.
+        """
         delta = {}
 
         for key, value in current.items():
             if isinstance(value, dict):
+                # If the key does not exist in the previous JSON, the entire value is new
                 if key not in previous:
                     delta[key] = value
                 else:
+                    # If the key does exist, calculate the delta recursively
                     sub_delta = self.calculate_delta(previous[key], value)
                     if sub_delta:
                         delta[key] = sub_delta
             elif isinstance(value, list):
+                # If the value is a list, raise an error since lists are not supported
                 raise ValueError("Lists are not supported")
             else:
+                # If the key does not exist in the previous JSON, the entire value is new
                 if key not in previous:
                     delta[key] = value
                 else:
+                    # If the key does exist, add the new part of the value to the delta
                     prev_value = previous[key]
                     if value[len(prev_value):]:
                         delta[key] = value[len(prev_value):]
