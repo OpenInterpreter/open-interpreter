@@ -1,5 +1,5 @@
 import json
-from .exec import exec_and_capture_output
+from .code_interpreter import run_code
 from .view import View
 from .json_utils import JsonDeltaCalculator
 import openai
@@ -7,24 +7,28 @@ import tokentrim as tt
 import os
 import readline
 
-
 functions = [{
   "name": "run_code",
-  "description":
-  "Executes code in a stateful IPython shell, capturing prints, return values, terminal outputs, and tracebacks.",
+  "description": "Executes code in various programming languages and returns the output.",
   "parameters": {
     "type": "object",
     "properties": {
+      "language": {
+        "type": "string",
+        # Temporarily disabled javascript
+        # "description": "The programming language. Supported languages: python, bash, javascript",
+        # "enum": ["python", "bash", "javascript"]
+        "description": "The programming language. Supported languages: python, bash",
+        "enum": ["python", "bash"]
+      },
       "code": {
-        "type":
-        "string",
-        "description":
-        "The code to execute as a JSON decodable string. Can include standard Python and IPython commands."
+        "type": "string",
+        "description": "The code to execute."
       }
     },
-    "required": ["code"],
+    "required": ["language", "code"]
   },
-  "function": exec_and_capture_output
+  "function": run_code
 }]
 
 # Locate system_message.txt using the absolute path
@@ -43,57 +47,11 @@ class Interpreter:
     self.api_key = None
     self.max_output_chars = 2000
     self.no_confirm = False
+    self.code_interpreters = {}
 
     # Commands Open Interpreter cannot run
-    self.forbidden_commands = [
-      "!rm -rf /",
-      "!rm -rf *",
-      "!find / -delete",
-      "!> /dev/sda",
-      "!dd if=/dev/random of=/dev/sda",
-      "!mkfs.ext4 /dev/sda",
-      "!mv ~ /dev/null",
-      "!shutdown -h now",
-      "!reboot",
-      "!halt",
-      "!poweroff",
-      "!passwd root",
-      "!init 0",
-      "!dd if=/dev/zero of=/dev/sda",
-      "!mkfs.ext3 /dev/sda1",
-      "!mv directory_to_destroy /dev/null",
-      "!openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt",
-      "!del /F /S /Q C:\\*.*",  # Windows command
-      "!rd /S /Q C:\\",  # Windows command
-      "!format C: /y",  # Windows command
-      "!format /FS:NTFS /Q /Y C:",  # Windows command
-      "!schtasks /create /sc minute /mo 1 /tn \"My task\" /tr \"C:\\Windows\\System32\\shutdown.exe /s\"",  # Windows command
-      "!reg delete HKCR\\*",  # Windows command
-      "!reg delete HKCU\\*",  # Windows command
-      "!reg delete HKLM\\*",  # Windows command
-      "!reg delete HKU\\*",  # Windows command
-      "!reg delete HKCC\\*",  # Windows command
-      "os.system('rm -rf /')",  # Python command
-      "os.system('rm -rf *')",  # Python command
-      "os.system('shutdown -h now')",  # Python command
-      "shutil.rmtree('/')",  # Python command
-      "os.rmdir('/')",  # Python command
-      "os.unlink('/')",  # Python command
-      "os.system('find / -delete')",  # Python command
-      "os.system('> /dev/sda')",  # Python command
-      "os.system('dd if=/dev/random of=/dev/sda')",  # Python command
-      "os.system('mkfs.ext4 /dev/sda')",  # Python command
-      "os.system('mv ~ /dev/null')",  # Python command
-      "os.system('shutdown -h now')",  # Python command
-      "os.system('reboot')",  # Python command
-      "os.system('halt')",  # Python command
-      "os.system('poweroff')",  # Python command
-      "os.system('passwd root')",  # Python command
-      "os.system('init 0')",  # Python command
-      "os.system('dd if=/dev/zero of=/dev/sda')",  # Python command
-      "os.system('mkfs.ext3 /dev/sda1')",  # Python command
-      "os.system('openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/apache-selfsigned.key -out /etc/ssl/certs/apache-selfsigned.crt')",  # Python command
-    ]
+    with open('forbidden_commands.json', 'r') as f:
+        self.forbidden_commands = json.load(f)
 
   def reset(self):
     self.messages = []
@@ -228,23 +186,22 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           except:
             function_args = {"code": func_call["arguments"]}
 
-          # The output might use a rich Live display so we need to finalize ours.
-          self.view.finalize()
-
           # For interpreter. This should always be true:
-          if func_call["name"] == "run_code":
+          if func_call["name"] == "run_code" and False:
             # Pass in max_output_chars to truncate the output
             function_args["max_output_chars"] = self.max_output_chars
             # Pass in forbidden_commands
             function_args["forbidden_commands"] = self.forbidden_commands
 
+          function_args["code_interpreters"] = self.code_interpreters
+
           user_declined = False
           
           if self.no_confirm == False:
             # Ask the user for confirmation
-            print()
+            print("\n")
             response = input("  Would you like to run this code? (y/n) ")
-            print()
+            print("\n")
             if response.lower().strip() != "y":
               user_declined = True
             else:
@@ -253,6 +210,13 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           if user_declined:
             output = "The user you're chatting with declined to run this code on their machine. It may be best to ask them why, or to try another method."
           else:
+            
+            # Clear live
+            self.view.live.update("")
+  
+            # The output might use a rich Live display so we need to finalize ours.
+            self.view.finalize()
+            
             output = function(**function_args)
 
           event = {

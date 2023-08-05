@@ -65,6 +65,12 @@ class RichOutStream:
             panel = Panel(self.data.strip(), box=MINIMAL, style="#FFFFFF on #3b3b37")
             self.live.update(panel)
 
+        self.sysout.write("Refreshing\n")
+        self.flush()
+        #print("refreshing")
+        self.live.refresh()
+        #self.sysout.write(self.live)
+
     def flush(self):
         self.sysout.flush()
 
@@ -99,7 +105,7 @@ def exec_and_capture_output(code, max_output_chars, forbidden_commands):
 
     code = jupyterify_code(code)
 
-    live = Live(console=Console())
+    live = Live(console=Console(), auto_refresh=True, refresh_per_second=4)
     try:
         live.start()
         rich_stdout = RichOutStream(live, max_output_chars, old_stdout)
