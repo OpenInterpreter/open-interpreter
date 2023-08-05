@@ -70,8 +70,9 @@ class Interpreter:
     Adds relevent information to system_message.txt.
     """
 
-    # First get the baseline system message from .system_message.txt
-    with open('interpreter/system_message.txt', 'r') as f:
+    # First get the baseline system message from system_message.txt
+    here = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(here, 'system_message.txt'), 'r') as f:
       system_message = f.read().strip()
 
     return system_message
