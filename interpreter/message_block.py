@@ -13,18 +13,19 @@ class MessageBlock:
     self.live.start()
     self.content = ""
 
-  #def export_message(self):
-  #  return {"role": "assistant", "content": self.content}
+  def update_from_message(self, message):
+    self.content = message.get("content")
+    self.refresh()
 
-  def end_block(self):
+  def end(self):
     self.live.stop()
 
-  def update_display(self):
+  def refresh(self):
     markdown = Markdown(textify_markdown_code_blocks(self.content))
     panel = Panel(markdown, box=MINIMAL)
     self.live.update(panel)
     self.live.refresh()
-
+    
 
 def textify_markdown_code_blocks(text):
   replacement = "```text"

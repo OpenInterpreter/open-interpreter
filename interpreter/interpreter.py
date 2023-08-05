@@ -1,7 +1,7 @@
-import json
 from .code_interpreter import CodeInterpreter
+from .code_block import CodeBlock
 from .message_block import MessageBlock
-from .json_utils import JsonDeltaCalculator
+from .json_utils import JsonDeltaCalculator, JsonAccumulator, close_and_parse_json
 import openai
 import tokentrim as tt
 import os
@@ -16,8 +16,6 @@ functions = [{
       "language": {
         "type": "string",
         # Temporarily disabled javascript
-        # "description": "The programming language. Supported languages: python, bash, javascript",
-        # "enum": ["python", "bash", "javascript"]
         "description": "The programming language. Supported languages: python, bash",
         "enum": ["python", "bash"]
       },
@@ -51,10 +49,6 @@ class Interpreter:
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
 
-    # These are commands Open Interpreter can't run
-    with open('interpreter/forbidden_commands.json', 'r') as f:
-        self.forbidden_commands = json.load(f)
-
   def reset(self):
     self.messages = []
     self.code_interpreters = {}
@@ -68,31 +62,30 @@ class Interpreter:
     if message:
       self.messages.append({"role": "user", "content": message})
       self.respond()
+      return
 
-    else:
-      print("Type 'exit' to leave the chat.\n")
+    while True:
+      try:
+        user_input = input("> ").strip()
+      except EOFError:
+        break
+      except KeyboardInterrupt:
+        print()
+        break
 
-      while True:
-        try:
-          user_input = input("> ").strip()
-        except EOFError:
-          break
-        except KeyboardInterrupt:
-          print()
-          break
+      if user_input == 'exit' or user_input == 'exit()':
+        break
 
-        if user_input == 'exit' or user_input == 'exit()':
-          break
+      readline.add_history(user_input)  # add input to the readline history
+      self.messages.append({"role": "user", "content": user_input})
 
-        readline.add_history(user_input)  # add input to the readline history
-        self.messages.append({"role": "user", "content": user_input})
-
-        try:
-          self.respond()
-        except KeyboardInterrupt:
-          if self.active_block:
-            self.active_block.end_block()
-            self.active_block = None
+      try:
+        self.respond()
+      except KeyboardInterrupt:
+        pass
+      finally:
+        # Always end the active block. Multiple Live displays = issues
+        self.end_active_block()
 
     if return_messages:
       return self.messages
@@ -111,140 +104,119 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
         self.api_key = input(
           """Please enter an OpenAI API key for this session:\n""").strip()
 
+
+  def end_active_block(self):
+    if self.active_block:
+        self.active_block.end()
+        self.active_block = None
+
   def respond(self):
   
-    # make openai call
-    gpt_functions = [{k: v
-                      for k, v in d.items() if k != 'function'}
-                     for d in functions]
-  
+    # Make OpenAI call
     model = "gpt-4-0613"
     response = openai.ChatCompletion.create(
         model=model,
         messages=tt.trim(self.messages, model, system_message=self.system_message),
-        functions=gpt_functions,
+        functions=functions,
         stream=True,
         temperature=self.temperature,
     )
-  
-    base_event = {"role": "assistant", "content": ""}
-    event = base_event
-  
-    func_call = {
-      "name": None,
-      "arguments": "",
-    }
+
+    # Initialize
+    self.messages.append({})
+    json_accumulator = JsonAccumulator()
+    in_function_call = False
+    self.active_block = None
   
     for chunk in response:
   
       delta = chunk.choices[0].delta
-  
-      if "function_call" in delta:
-        if "name" in delta.function_call:
-  
-          # New event!
-          if event != base_event:
-            # oh this is us appending the old event
-            self.messages.append(event)
-          event = {"role": "assistant", "content": None}
-  
-          # End the last block
-          if self.active_block:
-            self.active_block.end_block()
-            self.active_block = None
-  
-          func_call["name"] = delta.function_call["name"]
-  
-          delta_calculator = JsonDeltaCalculator()
-  
-        if "arguments" in delta.function_call:
-          func_call["arguments"] += delta.function_call["arguments"]
-  
-          argument_delta = delta_calculator.receive_chunk(
-            delta.function_call["arguments"])
-  
-          # Reassemble it as though OpenAI did this properly
-  
-          if argument_delta != None:
-            #self.display({"content": None, "function_call": argument_delta})
-  
-            if self.active_block == None:
-  
-              if "language" in delta_calculator.previous_json:
-                if delta_calculator.previous_json["language"] != "":
-                  language = delta_calculator.previous_json["language"]
-                  if language not in self.code_interpreters:
-  
-                      self.code_interpreters[language] = CodeInterpreter()
-                      self.code_interpreters[language].language = language
-              
-                  # Create the block
-                  
-                  # Print whitespace if it was just a code block or user message
-                  if len(self.messages) > 0:
-                    last_role = self.messages[-1]["role"]
-                    if last_role == "user" or last_role == "function":
-                      print()
-                      
-                  self.active_block = self.code_interpreters[language]
-                  self.active_block.create_block()
-  
-            if self.active_block != None:
-              
-              # this will update the code and the language
-              for key, value in delta_calculator.previous_json.items():
-                setattr(self.active_block, key, value)
-  
-              self.active_block.update_display()
-  
-      if chunk.choices[0].finish_reason == "function_call":
-  
-        event["function_call"] = func_call
-        self.messages.append(event)
-  
-        user_declined = False
-        
-        if self.auto_run == False:
-          # Ask the user for confirmation
-          print("\n")
-          response = input("  Would you like to run this code? (y/n) ")
-          print("\n")
-          if response.lower().strip() != "y":
-            user_declined = True
-          else:
-            user_declined = False
-  
-        if user_declined:
-          output = "The user you're chatting with declined to run this code on their machine. It may be best to ask them why, or to try another method."
-        else:
-          output = self.active_block.exec()
-  
-        # End the block
-        self.active_block.end_block()
-        self.active_block = None
-  
-        event = {
-          "role": "function",
-          "name": func_call["name"],
-          "content": output
-        }
-        self.messages.append(event)
-  
-        # Go around again
-        if not user_declined:
-          self.respond()
-  
-      if "content" in delta and delta.content != None:
-        event["content"] += delta.content
-  
+
+      # Accumulate deltas into the last message in messages
+      json_accumulator.receive_delta(delta)
+      self.messages[-1] = json_accumulator.accumulated_json
+
+      # Check if we're in a function call
+      if "function_call" in self.messages[-1]:
+
+        # Check if we just entered a function call
+        if in_function_call == False:
+
+          # If so, end the last block,
+          self.end_active_block()
+
+          # then create a new code block
+          self.active_block = CodeBlock()
+
+        # Remember we're in a function_call
+        in_function_call = True
+
+        # Parse arguments and save to parsed_args, under function_call
+        if "arguments" in self.messages[-1]["function_call"]:
+          args = self.messages[-1]["function_call"]["arguments"]
+          self.messages[-1]["function_call"]["parsed_args"] = close_and_parse_json(args)
+
+      else:
+
+        # If we're not in a function call and there's no active block,
         if self.active_block == None:
+
+          # Create a message block
           self.active_block = MessageBlock()
-          
-        self.active_block.content = event["content"]
-        self.active_block.update_display()
-  
-      if chunk.choices[0].finish_reason and chunk.choices[
-          0].finish_reason != "function_call":
-        self.messages.append(event)
-        self.active_block.end_block()
-        self.active_block = None
+
+      # Update active_block
+      self.active_block.update_from_message(self.messages[-1])
+
+      # Check if we're finished
+      if chunk.choices[0].finish_reason:
+        if chunk.choices[0].finish_reason == "function_call":
+          # Time to call the function!
+          # (Because this is Open Interpreter, we only have one function.)
+
+          # Ask for user confirmation to run code
+          if self.auto_run == False:
+            print("\n")
+            response = input("  Would you like to run this code? (y/n) ")
+            print("\n")
+            if response.lower() != "y":
+              self.active_block.end()
+              self.messages.append({
+                "role": "function",
+                "name": "run_code",
+                "content": "User decided not to run this code."
+              })
+              return
+
+          # Create or retrieve a Code Interpreter for this language
+          language = self.messages[-1]["function_call"]["parsed_args"]["language"]
+          if language not in self.code_interpreters:
+              self.code_interpreters[language] = CodeInterpreter(language)
+          code_interpreter = self.code_interpreters[language]
+      
+          # Print newline if it was just a code block or user message
+          # (this just looks nice)
+          last_role = self.messages[-1]["role"]
+          if last_role == "user" or last_role == "function":
+            print()
+
+          # Let Code Interpreter control the active_block
+          code_interpreter.active_block = self.active_block
+          code_interpreter.run()
+
+          # End the active_block
+          self.active_block.end()
+
+          # Append the output to messages
+          self.messages.append({
+            "role": "function",
+            "name": "run_code",
+            "content": self.active_block.output
+          })
+    
+          # Go around again
+          self.respond()
+
+        if chunk.choices[0].finish_reason != "function_call":
+          # Done!
+          self.active_block.end()
+          return
