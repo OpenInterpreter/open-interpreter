@@ -1,6 +1,6 @@
 import json
-from .code_interpreter import run_code
-from .view import View
+from .code_interpreter import CodeInterpreter
+from .message_block import MessageBlock
 from .json_utils import JsonDeltaCalculator
 import openai
 import tokentrim as tt
@@ -28,7 +28,6 @@ functions = [{
     },
     "required": ["language", "code"]
   },
-  "function": run_code
 }]
 
 # Locate system_message.txt using the absolute path
@@ -43,18 +42,22 @@ class Interpreter:
   def __init__(self):
     self.messages = []
     self.system_message = system_message
-    self.temperature = 0.2
+    self.temperature = 0.01
     self.api_key = None
     self.max_output_chars = 2000
-    self.no_confirm = False
+    self.auto_run = False
+    self.active_block = None
+
+    # Store Code Interpreter instances for each language
     self.code_interpreters = {}
 
-    # Commands Open Interpreter cannot run
-    with open('forbidden_commands.json', 'r') as f:
+    # These are commands Open Interpreter can't run
+    with open('interpreter/forbidden_commands.json', 'r') as f:
         self.forbidden_commands = json.load(f)
 
   def reset(self):
     self.messages = []
+    self.code_interpreters = {}
 
   def load(self, messages):
     self.messages = messages
@@ -74,28 +77,25 @@ class Interpreter:
           user_input = input("> ").strip()
         except EOFError:
           break
+        except KeyboardInterrupt:
+          print()
+          break
 
         if user_input == 'exit' or user_input == 'exit()':
           break
 
         readline.add_history(user_input)  # add input to the readline history
         self.messages.append({"role": "user", "content": user_input})
-        self.respond()
+
+        try:
+          self.respond()
+        except KeyboardInterrupt:
+          if self.active_block:
+            self.active_block.end_block()
+            self.active_block = None
 
     if return_messages:
       return self.messages
-
-  def display(self, delta):
-
-    if delta == None:
-      return
-
-    if "content" in delta and delta["content"] != None:
-      delta = {"type": "message", "content": delta["content"]}
-    elif "function_call" in delta:
-      delta = {"type": "function", "content": delta["function_call"]}
-
-    self.view.process_delta(delta)
 
   def verify_api_key(self):
     if self.api_key == None:
@@ -112,131 +112,139 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           """Please enter an OpenAI API key for this session:\n""").strip()
 
   def respond(self):
-
-    # You always need a new view.
-    self.view = View()
-
-    try:
-
-      # make openai call
-      gpt_functions = [{k: v
-                        for k, v in d.items() if k != 'function'}
-                       for d in functions]
-
-      model = "gpt-4-0613"
-      response = openai.ChatCompletion.create(
-          model=model,
-          messages=tt.trim(self.messages, model, system_message=self.system_message),
-          functions=gpt_functions,
-          stream=True,
-          temperature=self.temperature,
-      )
-
-      base_event = {"role": "assistant", "content": ""}
-      event = base_event
-
-      func_call = {
-        "name": None,
-        "arguments": "",
-      }
-
-      for chunk in response:
-
-        delta = chunk.choices[0].delta
-
-        if "function_call" in delta:
-          if "name" in delta.function_call:
-
-            # New event!
-            if event != base_event:
-              self.messages.append(event)
-            event = {"role": "assistant", "content": None}
-
-            func_call["name"] = delta.function_call["name"]
-            self.display(delta)
-
-            delta_calculator = JsonDeltaCalculator()
-
-          if "arguments" in delta.function_call:
-            func_call["arguments"] += delta.function_call["arguments"]
-
-            argument_delta = delta_calculator.receive_chunk(
-              delta.function_call["arguments"])
-
-            # Reassemble it as though OpenAI did this properly
-
-            if argument_delta != None:
-              self.display({"content": None, "function_call": argument_delta})
-
-        if chunk.choices[0].finish_reason == "function_call":
-
-          event["function_call"] = func_call
-          self.messages.append(event)
-
-          # For interpreter
-          if func_call["name"] != "run_code":
-            func_call["name"] = "run_code"
-
-          function = [f for f in functions
-                      if f["name"] == func_call["name"]][0]["function"]
-
-          # For interpreter. Sometimes it just sends the code??
-          try:
-            function_args = json.loads(func_call["arguments"])
-          except:
-            function_args = {"code": func_call["arguments"]}
-
-          # For interpreter. This should always be true:
-          if func_call["name"] == "run_code" and False:
-            # Pass in max_output_chars to truncate the output
-            function_args["max_output_chars"] = self.max_output_chars
-            # Pass in forbidden_commands
-            function_args["forbidden_commands"] = self.forbidden_commands
-
-          function_args["code_interpreters"] = self.code_interpreters
-
-          user_declined = False
-          
-          if self.no_confirm == False:
-            # Ask the user for confirmation
-            print("\n")
-            response = input("  Would you like to run this code? (y/n) ")
-            print("\n")
-            if response.lower().strip() != "y":
-              user_declined = True
-            else:
-              user_declined = False
-
-          if user_declined:
-            output = "The user you're chatting with declined to run this code on their machine. It may be best to ask them why, or to try another method."
-          else:
-            
-            # Clear live
-            self.view.live.update("")
   
-            # The output might use a rich Live display so we need to finalize ours.
-            self.view.finalize()
-            
-            output = function(**function_args)
-
-          event = {
-            "role": "function",
-            "name": func_call["name"],
-            "content": output
-          }
-          self.messages.append(event)
-
-          # Go around again
-          if not user_declined:
-            self.respond()
-
-        if "content" in delta and delta.content != None:
-          event["content"] += delta.content
-          self.display(delta)
-
-        if chunk.choices[0].finish_reason and chunk.choices[
-            0].finish_reason != "function_call":
-          self.messages.append(event)
-
-    finally:
-      self.view.finalize()
+    # make openai call
+    gpt_functions = [{k: v
+                      for k, v in d.items() if k != 'function'}
+                     for d in functions]
+  
+    model = "gpt-4-0613"
+    response = openai.ChatCompletion.create(
+        model=model,
+        messages=tt.trim(self.messages, model, system_message=self.system_message),
+        functions=gpt_functions,
+        stream=True,
+        temperature=self.temperature,
+    )
+  
+    base_event = {"role": "assistant", "content": ""}
+    event = base_event
+  
+    func_call = {
+      "name": None,
+      "arguments": "",
+    }
+  
+    for chunk in response:
+  
+      delta = chunk.choices[0].delta
+  
+      if "function_call" in delta:
+        if "name" in delta.function_call:
+  
+          # New event!
+          if event != base_event:
+            # oh this is us appending the old event
+            self.messages.append(event)
+          event = {"role": "assistant", "content": None}
+  
+          # End the last block
+          if self.active_block:
+            self.active_block.end_block()
+            self.active_block = None
+  
+          func_call["name"] = delta.function_call["name"]
+  
+          delta_calculator = JsonDeltaCalculator()
+  
+        if "arguments" in delta.function_call:
+          func_call["arguments"] += delta.function_call["arguments"]
+  
+          argument_delta = delta_calculator.receive_chunk(
+            delta.function_call["arguments"])
+  
+          # Reassemble it as though OpenAI did this properly
+  
+          if argument_delta != None:
+            #self.display({"content": None, "function_call": argument_delta})
+  
+            if self.active_block == None:
+  
+              if "language" in delta_calculator.previous_json:
+                if delta_calculator.previous_json["language"] != "":
+                  language = delta_calculator.previous_json["language"]
+                  if language not in self.code_interpreters:
+  
+                      self.code_interpreters[language] = CodeInterpreter()
+                      self.code_interpreters[language].language = language
+              
+                  # Create the block
+                  
+                  # Print whitespace if it was just a code block or user message
+                  if len(self.messages) > 0:
+                    last_role = self.messages[-1]["role"]
+                    if last_role == "user" or last_role == "function":
+                      print()
+                      
+                  self.active_block = self.code_interpreters[language]
+                  self.active_block.create_block()
+  
+            if self.active_block != None:
+              
+              # this will update the code and the language
+              for key, value in delta_calculator.previous_json.items():
+                setattr(self.active_block, key, value)
+  
+              self.active_block.update_display()
+  
+      if chunk.choices[0].finish_reason == "function_call":
+  
+        event["function_call"] = func_call
+        self.messages.append(event)
+  
+        user_declined = False
+        
+        if self.auto_run == False:
+          # Ask the user for confirmation
+          print("\n")
+          response = input("  Would you like to run this code? (y/n) ")
+          print("\n")
+          if response.lower().strip() != "y":
+            user_declined = True
+          else:
+            user_declined = False
+  
+        if user_declined:
+          output = "The user you're chatting with declined to run this code on their machine. It may be best to ask them why, or to try another method."
+        else:
+          output = self.active_block.exec()
+  
+        # End the block
+        self.active_block.end_block()
+        self.active_block = None
+  
+        event = {
+          "role": "function",
+          "name": func_call["name"],
+          "content": output
+        }
+        self.messages.append(event)
+  
+        # Go around again
+        if not user_declined:
+          self.respond()
+  
+      if "content" in delta and delta.content != None:
+        event["content"] += delta.content
+  
+        if self.active_block == None:
+          self.active_block = MessageBlock()
+          
+        self.active_block.content = event["content"]
+        self.active_block.update_display()
+  
+      if chunk.choices[0].finish_reason and chunk.choices[
+          0].finish_reason != "function_call":
+        self.messages.append(event)
+        self.active_block.end_block()
+        self.active_block = None
