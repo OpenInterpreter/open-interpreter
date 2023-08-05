@@ -1,0 +1,43 @@
+from rich.console import Console
+from rich.live import Live
+from rich.panel import Panel
+from rich.markdown import Markdown
+from rich.box import MINIMAL
+import re
+
+
+class MessageBlock:
+
+  def __init__(self):
+    self.live = Live(auto_refresh=False, console=Console())
+    self.live.start()
+    self.content = ""
+
+  #def export_message(self):
+  #  return {"role": "assistant", "content": self.content}
+
+  def end_block(self):
+    self.live.stop()
+
+  def update_display(self):
+    markdown = Markdown(textify_markdown_code_blocks(self.content))
+    panel = Panel(markdown, box=MINIMAL)
+    self.live.update(panel)
+    self.live.refresh()
+
+
+def textify_markdown_code_blocks(text):
+  replacement = "```text"
+  lines = text.split('\n')
+  inside_code_block = False
+
+  for i in range(len(lines)):
+    # If the line matches ``` followed by optional language specifier
+    if re.match(r'^```(\w*)$', lines[i].strip()):
+      inside_code_block = not inside_code_block
+
+      # If we just entered a code block, replace the marker
+      if inside_code_block:
+        lines[i] = replacement
+
+  return '\n'.join(lines)

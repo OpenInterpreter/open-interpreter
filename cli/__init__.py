@@ -11,7 +11,7 @@ def cli():
     args = parser.parse_args()
 
     if args.yes:
-      interpreter.no_confirm = True
+      interpreter.auto_run = True
     else:
       print() # Print newline
       print(Markdown(confirm_mode_message))
