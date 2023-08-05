@@ -7,17 +7,21 @@ import tokentrim as tt
 import os
 import readline
 from .cli import cli
+from rich import print
+from rich.markdown import Markdown
 
-functions = [{
+# Function schema for function-calling GPTs
+function_schema = {
   "name": "run_code",
-  "description": "Executes code in various programming languages and returns the output.",
+  "description":
+  "Executes code in various programming languages and returns the output.",
   "parameters": {
     "type": "object",
     "properties": {
       "language": {
         "type": "string",
-        # Temporarily disabled javascript
-        "description": "The programming language. Supported languages: python, bash",
+        "description":
+        "The programming language. Supported languages: python, bash",
         "enum": ["python", "bash"]
       },
       "code": {
@@ -27,33 +31,50 @@ functions = [{
     },
     "required": ["language", "code"]
   },
-}]
+}
 
-# Locate system_message.txt using the absolute path
-# for the directory where this file is located ("here"):
-here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'system_message.txt'), 'r') as f:
-  system_message = f.read().strip()
+# Message for when users don't have an OpenAI API key.
+# `---` is at the bottom for aesthetic reasons.
+missing_api_key_message = """
+**OpenAI API key not found.** You can [get one here](https://platform.openai.com/account/api-keys).
+
+To use Open Interpreter in your terminal, set the environment variable using `export OPENAI_API_KEY=your_api_key` on Unix-based systems, or `setx OPENAI_API_KEY your_api_key` on Windows.
+
+---
+"""
 
 
 class Interpreter:
 
   def __init__(self):
     self.messages = []
-    self.system_message = system_message
+    self.system_message = self.generate_system_message()
     self.temperature = 0.01
     self.api_key = None
-    self.max_output_chars = 2000
     self.auto_run = False
-    self.active_block = None
 
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
+
+    # No active block to start
+    # (blocks are visual representation of messages on the terminal)
+    self.active_block = None
 
   def cli(self):
     # The cli takes the current instance of Interpreter,
     # modifies it according to command line flags, then runs chat.
     cli(self)
+
+  def generate_system_message(self):
+    """
+    Adds relevent information to system_message.txt.
+    """
+
+    # First get the baseline system message from .system_message.txt
+    with open('interpreter/system_message.txt', 'r') as f:
+      system_message = f.read().strip()
+
+    return system_message
 
   def reset(self):
     self.messages = []
@@ -65,26 +86,31 @@ class Interpreter:
   def chat(self, message=None, return_messages=False):
     self.verify_api_key()
 
+    # Message won't be None if we're passing one in via interpreter.chat(message)
+    # In that case, we respond non-interactivley and return:
     if message:
       self.messages.append({"role": "user", "content": message})
       self.respond()
       return
 
+    # Start interactive chat
     while True:
       try:
         user_input = input("> ").strip()
       except EOFError:
         break
       except KeyboardInterrupt:
-        print()
+        print()  # Aesthetic choice
         break
 
-      if user_input == 'exit' or user_input == 'exit()':
-        break
+      # Use `readline` to let users up-arrow to previous user messages,
+      # which is a common behavior in terminals.
+      readline.add_history(user_input)
 
-      readline.add_history(user_input)  # add input to the readline history
+      # Add the user message to self.messages
       self.messages.append({"role": "user", "content": user_input})
 
+      # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
       try:
         self.respond()
       except KeyboardInterrupt:
@@ -97,35 +123,36 @@ class Interpreter:
       return self.messages
 
   def verify_api_key(self):
+    """
+    Makes sure we have an OPENAI_API_KEY.
+    """
+
     if self.api_key == None:
+
       if 'OPENAI_API_KEY' in os.environ:
         self.api_key = os.environ['OPENAI_API_KEY']
       else:
-        print("""OpenAI API key not found.
-                
-To use Open Interpreter in your terminal, set the environment variable using 'export OPENAI_API_KEY=your_api_key' in Unix-based systems, or 'setx OPENAI_API_KEY your_api_key' in Windows.
-
-To get an API key, visit https://platform.openai.com/account/api-keys.
-""")
-        self.api_key = input(
-          """Please enter an OpenAI API key for this session:\n""").strip()
-
+        # Print message with newlines on either side (aesthetic choice)
+        print('', Markdown(missing_api_key_message), '')
+        self.api_key = input("Enter an OpenAI API key for this session:\n")
 
   def end_active_block(self):
     if self.active_block:
-        self.active_block.end()
-        self.active_block = None
+      self.active_block.end()
+      self.active_block = None
 
   def respond(self):
-  
+
     # Make OpenAI call
     model = "gpt-4-0613"
     response = openai.ChatCompletion.create(
-        model=model,
-        messages=tt.trim(self.messages, model, system_message=self.system_message),
-        functions=functions,
-        stream=True,
-        temperature=self.temperature,
+      model=model,
+      messages=tt.trim(self.messages,
+                       model,
+                       system_message=self.system_message),
+      functions=[function_schema],
+      stream=True,
+      temperature=self.temperature,
     )
 
     # Initialize
@@ -133,9 +160,9 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
     json_accumulator = JsonAccumulator()
     in_function_call = False
     self.active_block = None
-  
+
     for chunk in response:
-  
+
       delta = chunk.choices[0].delta
 
       # Accumulate deltas into the last message in messages
@@ -169,7 +196,7 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
 
           # There are some common errors made in GPT function calls.
           new_parsed_args = close_and_parse_json(args)
-          
+
           if new_parsed_args:
             # Only overwrite what we have if it's not None (which means it failed to parse)
             self.messages[-1]["function_call"]["parsed_args"] = new_parsed_args
@@ -199,16 +226,20 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
             if response.lower() != "y":
               self.active_block.end()
               self.messages.append({
-                "role": "function",
-                "name": "run_code",
-                "content": "User decided not to run this code."
+                "role":
+                "function",
+                "name":
+                "run_code",
+                "content":
+                "User decided not to run this code."
               })
               return
 
           # Create or retrieve a Code Interpreter for this language
-          language = self.messages[-1]["function_call"]["parsed_args"]["language"]
+          language = self.messages[-1]["function_call"]["parsed_args"][
+            "language"]
           if language not in self.code_interpreters:
-              self.code_interpreters[language] = CodeInterpreter(language)
+            self.code_interpreters[language] = CodeInterpreter(language)
           code_interpreter = self.code_interpreters[language]
 
           # Let Code Interpreter control the active_block
@@ -224,7 +255,7 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
             "name": "run_code",
             "content": self.active_block.output
           })
-    
+
           # Go around again
           self.respond()
 
