@@ -20,6 +20,10 @@ language_map = {
   }
 }
 
+# Get forbidden_commands
+with open("interpreter/forbidden_commands.json", "r") as f:
+  forbidden_commands = json.load(f)
+
 
 class CodeInterpreter:
   """
@@ -53,9 +57,24 @@ class CodeInterpreter:
                      daemon=True).start()
 
   def run(self):
+    """
+    Executes code.
+    """
 
+    # Get code to execute
     self.code = self.active_block.code
 
+    # Check for forbidden commands (disabled)
+    """
+    for line in self.code.split("\n"):
+      if line in forbidden_commands:
+        message = f"This code contains a forbidden command: {line}"
+        message += "\n\nPlease contact the Open Interpreter team if this is an error."
+        self.active_block.output = message
+        return message
+    """
+
+    # Start the subprocess if it hasn't been started
     if not self.proc:
       self.start_process()
 
@@ -66,22 +85,22 @@ class CodeInterpreter:
     self.print_cmd = language_map[self.language]["print_cmd"]
     code = self.code
 
-    # If it's Python, insert print commands to say what line is running and fix indentation
+    # If it's Python, insert print commands to say what line is running
+    # then normalize and fix indentation (so it works with `python -i`)
     if self.language == "python":
-      print("CODE:\n", code)
       code = self.add_active_line_prints(code)
-      print("ACODE:\n", code)
       code = normalize(code)
-      print("NCODE:\n", code)
       code = fix_code_indentation(code)
-      print("FCODE:\n", code)
 
-    # Add end command
-    code += "\n\n" + self.print_cmd.format('END') + "\n"
+    # Add end command (we'll be listening for this so we know when it ends)
+    code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION') + "\n"
 
+    """
+    # Debug
     print("Running code:")
     print(code)
     print("---")
+    """
 
     # Reset self.done so we can .wait() for it
     self.done = threading.Event()
@@ -146,7 +165,7 @@ class CodeInterpreter:
       # Or if we should save it to self.output
       if line.startswith("ACTIVE_LINE:"):
         self.active_line = int(line.split(":")[1])
-      elif line == "END":
+      elif line == "END_OF_EXECUTION":
         self.done.set()
         self.active_line = None
       else:

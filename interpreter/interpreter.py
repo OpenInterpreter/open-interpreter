@@ -1,11 +1,12 @@
 from .code_interpreter import CodeInterpreter
 from .code_block import CodeBlock
 from .message_block import MessageBlock
-from .json_utils import JsonDeltaCalculator, JsonAccumulator, close_and_parse_json
+from .json_utils import JsonAccumulator, close_and_parse_json
 import openai
 import tokentrim as tt
 import os
 import readline
+from .cli import cli
 
 functions = [{
   "name": "run_code",
@@ -48,6 +49,11 @@ class Interpreter:
 
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
+
+  def cli(self):
+    # The cli takes the current instance of Interpreter,
+    # modifies it according to command line flags, then runs chat.
+    cli(self)
 
   def reset(self):
     self.messages = []
@@ -145,6 +151,12 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           # If so, end the last block,
           self.end_active_block()
 
+          # Print newline if it was just a code block or user message
+          # (this just looks nice)
+          last_role = self.messages[-2]["role"]
+          if last_role == "user" or last_role == "function":
+            print()
+
           # then create a new code block
           self.active_block = CodeBlock()
 
@@ -198,12 +210,6 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
           if language not in self.code_interpreters:
               self.code_interpreters[language] = CodeInterpreter(language)
           code_interpreter = self.code_interpreters[language]
-      
-          # Print newline if it was just a code block or user message
-          # (this just looks nice)
-          last_role = self.messages[-2]["role"]
-          if last_role == "user" or last_role == "function":
-            print()
 
           # Let Code Interpreter control the active_block
           code_interpreter.active_block = self.active_block

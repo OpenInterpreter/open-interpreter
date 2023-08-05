@@ -2,7 +2,6 @@
 name = "open-interpreter"
 packages = [
     {include = "interpreter"},
-    {include = "cli"}
 ]
 version = "0.0.246"
 description = "Ask GPT-4 to run code locally."
@@ -26,4 +25,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-interpreter = "cli:cli"
+interpreter = "interpreter:cli"
