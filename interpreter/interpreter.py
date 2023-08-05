@@ -154,7 +154,13 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
         # Parse arguments and save to parsed_args, under function_call
         if "arguments" in self.messages[-1]["function_call"]:
           args = self.messages[-1]["function_call"]["arguments"]
-          self.messages[-1]["function_call"]["parsed_args"] = close_and_parse_json(args)
+
+          # There are some common errors made in GPT function calls.
+          new_parsed_args = close_and_parse_json(args)
+          
+          if new_parsed_args:
+            # Only overwrite what we have if it's not None (which means it failed to parse)
+            self.messages[-1]["function_call"]["parsed_args"] = new_parsed_args
 
       else:
 
@@ -195,7 +201,7 @@ To get an API key, visit https://platform.openai.com/account/api-keys.
       
           # Print newline if it was just a code block or user message
           # (this just looks nice)
-          last_role = self.messages[-1]["role"]
+          last_role = self.messages[-2]["role"]
           if last_role == "user" or last_role == "function":
             print()
 

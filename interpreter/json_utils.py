@@ -1,5 +1,17 @@
 import json
 
+def escape_newlines_in_json_string_values(s):
+    result = []
+    in_string = False
+    for ch in s:
+        if ch == '"' and (len(result) == 0 or result[-1] != '\\'):
+            in_string = not in_string
+        if in_string and ch == '\n':
+            result.append('\\n')
+        else:
+            result.append(ch)
+    return ''.join(result)
+
 def close_and_parse_json(s):
     """
     Tries to parse a string as JSON and if it fails, attempts to 'close' any open JSON structures.
@@ -17,6 +29,9 @@ def close_and_parse_json(s):
     except json.JSONDecodeError:
         pass  # The string is not valid JSON. We'll try to handle this case below.
 
+    # First, make sure newlines inside double quotes are escaped properly (a common error in GPT function calls)
+    s = escape_newlines_in_json_string_values(s)
+
     # Initialize a stack to keep track of open braces and brackets.
     stack = []
 
@@ -28,7 +43,9 @@ def close_and_parse_json(s):
 
         # Handle quotes, which denote the start or end of a string in JSON.
         if char == '"':
-            if stack and stack[-1] == '\\':
+          
+            if stack and stack[-1] == '\\': # <- This is a single backslash, even though it looks like two!
+              
                 # This quote is escaped, so it doesn't affect whether we're inside a string.
                 stack.pop()
             else:
