@@ -1,13 +1,6 @@
 import subprocess
 import threading
 import time
-from rich.live import Live
-from rich.panel import Panel
-from rich.box import MINIMAL
-from rich.syntax import Syntax
-from rich.table import Table
-from rich.console import Group
-from rich.console import Console
 
 # Mapping of languages to their start and print commands
 language_map = {
@@ -24,40 +17,9 @@ class CodeInterpreter:
   They can create code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
   """
 
-  def __init__(self):
-    # Define these for IDE auto-completion
-    self.language = ""
-    self.output = ""
-    self.code = ""
-    
+  def __init__(self, language):
+    self.language = language
     self.proc = None
-    self.active_line = None
-
-  def create_block(self):
-    # Start a new live display
-    self.live = Live(auto_refresh=False, console=Console())
-    self.live.start()
-    self.output = ""
-    self.code = ""
-
-  """def export_messages(self):
-    return [
-      {
-        "role": "function_call"
-        "function_call": {
-          "name": "run_code",
-          "args": {
-            "language": self.language,
-            "code": self.code,
-          }
-        }
-      },
-      {"role": "function", "content": self.output}
-    ]"""
-
-  def end_block(self):
-    # Destroys live display
-    self.live.stop()
 
   def start_process(self):
     # Get the start_cmd for the selected language
@@ -78,20 +40,19 @@ class CodeInterpreter:
                      args=(self.proc.stderr, ),
                      daemon=True).start()
 
-  def exec(self):
+  def run(self):
+
+    self.code = self.active_block.code
+    
     if not self.proc:
       self.start_process()
 
-    # Reset output_lines and active_line
+    # Reset output
     self.output = ""
-    self.active_line = None
 
     # Split the code into lines and add print statements to track the active line
     code_lines = self.code.strip().split('\n')
     self.active_line = 0
-
-    # Display just the code
-    self.update_display()
 
     # Use the print_cmd for the selected language
     print_cmd = language_map[self.language]["print_cmd"]
@@ -117,12 +78,17 @@ class CodeInterpreter:
     # Join the modified lines with newlines
     code = "\n".join(modified_code_lines)
 
+    # Add end command
+    code += "\n\n" + print_cmd.format('END') + "\n"
+    
+    print("Running:\n---\n", code, "\n---")
+
     # Reset self.done so we can .wait() for it
     self.done = threading.Event()
     self.done.clear()
 
     # Write code to stdin of the process
-    self.proc.stdin.write(code + "\n" + print_cmd.format('END') + "\n")
+    self.proc.stdin.write(code)
     self.proc.stdin.flush()
 
     # Wait until execution completes
@@ -145,7 +111,7 @@ class CodeInterpreter:
         self.active_line = int(line.split(":")[1])
       elif line == "END":
         self.done.set()
-        self.active_line = -1
+        self.active_line = None
       else:
         self.output += "\n" + line
         self.output = self.output.strip()
@@ -153,54 +119,10 @@ class CodeInterpreter:
       # Strip then truncate the output if necessary
       self.output = truncate_output(self.output)
 
-      # Update the display, which renders code + self.output
-      self.update_display()
-
-  def update_display(self):
-    # Create a table for the code
-    code_table = Table(show_header=False,
-                       show_footer=False,
-                       box=None,
-                       padding=0,
-                       expand=True)
-    code_table.add_column()
-
-    # Add each line of code to the table
-    code_lines = self.code.strip().split('\n')
-    for i, line in enumerate(code_lines, start=1):
-      if i == self.active_line:
-        # This is the active line, print it with a white background
-        syntax = Syntax(line, self.language, line_numbers=False, theme="bw")
-        code_table.add_row(syntax, style="black on white")
-      else:
-        # This is not the active line, print it normally
-        syntax = Syntax(line,
-                        self.language,
-                        line_numbers=False,
-                        theme="monokai")
-        code_table.add_row(syntax)
-
-    # Create a panel for the code
-    code_panel = Panel(code_table, box=MINIMAL, style="on #272722")
-
-    # Create a panel for the output (if there is any)
-    if self.output == "" or self.output == "None":
-      output_panel = ""
-    else:
-      output_panel = Panel(self.output,
-                           box=MINIMAL,
-                           style="#FFFFFF on #3b3b37")
-
-    # Create a group with the code table and output panel
-    group = Group(
-      code_panel,
-      output_panel,
-    )
-
-    # Update the live display
-    self.live.update(group)
-    self.live.refresh()
-
+      # Update the active block
+      self.active_block.active_line = self.active_line
+      self.active_block.output = self.output
+      self.active_block.refresh()
 
 def truncate_output(data):
 
@@ -217,22 +139,3 @@ def truncate_output(data):
   if len(data) > max_output_chars:
     data = message + data[-max_output_chars:]
   return data
-
-
-"""
-def run_code(language: str, code: str, code_interpreters: dict) -> Union[str, None]:
-    # Check if the provided language is supported
-    if language not in language_map:
-        raise ValueError(f"Unsupported language: {language}")
-
-    # Get or create a code interpreter for the language
-    if language not in code_interpreters:
-        code_interpreters[language] = CodeInterpreter()
-        code_interpreters[language].language = language
-
-    # Create the block
-    block = code_interpreters[language]
-    output = block.exec(code)
-
-    return output
-"""

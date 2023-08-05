@@ -152,3 +152,24 @@ class JsonDeltaCalculator:
                         delta[key] = value[len(prev_value):]
 
         return delta
+
+
+class JsonAccumulator:
+    def __init__(self):
+        self.accumulated_json = {}
+
+    def receive_delta(self, delta):
+        self.merge_dictionaries(self.accumulated_json, delta)
+
+    def merge_dictionaries(self, original, delta):
+        for key, value in delta.items():
+            if isinstance(value, dict):
+                if key not in original:
+                    original[key] = value
+                else:
+                    self.merge_dictionaries(original[key], value)
+            else:
+                if key in original:
+                    original[key] += value
+                else:
+                    original[key] = value

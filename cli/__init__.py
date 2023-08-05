@@ -3,7 +3,11 @@ import interpreter
 from rich import print
 from rich.markdown import Markdown
 
-confirm_mode_message = "**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this."
+confirm_mode_message = """
+**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this.
+
+Press `CTRL-C` to exit.
+"""
 
 def cli():
     parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
