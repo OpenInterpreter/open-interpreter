@@ -25,9 +25,8 @@ def cli(interpreter):
   if args.yes:
     interpreter.auto_run = True
   else:
-    print()  # Print newline
-    print(Markdown(confirm_mode_message))
-    print()  # Print newline
+    # Print message with newlines on either side (aesthetic choice)
+    print('', Markdown(confirm_mode_message), '')
 
   # Now run the chat method
   interpreter.chat()

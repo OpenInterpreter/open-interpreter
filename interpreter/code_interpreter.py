@@ -3,7 +3,6 @@ import threading
 import time
 import ast
 import astor
-import json
 
 
 # Mapping of languages to their start and print commands
@@ -22,9 +21,11 @@ language_map = {
   }
 }
 
-# Get forbidden_commands
+# Get forbidden_commands (disabled)
+"""
 with open("interpreter/forbidden_commands.json", "r") as f:
   forbidden_commands = json.load(f)
+"""
 
 
 class CodeInterpreter:
