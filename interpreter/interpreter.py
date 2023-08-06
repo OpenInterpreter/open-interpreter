@@ -198,6 +198,8 @@ class Interpreter:
         print('', Markdown(missing_api_key_message), '')
         self.api_key = input("Enter an OpenAI API key for this session:\n")
 
+    openai.api_key = self.api_key
+
   def end_active_block(self):
     if self.active_block:
       self.active_block.end()
@@ -300,6 +302,11 @@ class Interpreter:
           if "content" in self.messages[-1]:
             current_code_block = self.messages[-1]["content"].split("```")[-1]
             arguments = {"language": "python", "code": current_code_block}
+            
+            # Llama-2 won't make a "function_call" property for us to store this under, so:
+            if "function_call" not in self.messages[-1]:
+              self.messages[-1]["function_call"] = {}
+              
             self.messages[-1]["function_call"]["parsed_arguments"] = arguments
 
       else:
