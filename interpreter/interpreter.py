@@ -21,8 +21,8 @@ function_schema = {
       "language": {
         "type": "string",
         "description":
-        "The programming language. Supported languages: python, bash",
-        "enum": ["python", "bash"]
+        "The programming language. Supported languages: python, shell",
+        "enum": ["python", "shell"]
       },
       "code": {
         "type": "string",
@@ -221,10 +221,25 @@ class Interpreter:
 
           # Ask for user confirmation to run code
           if self.auto_run == False:
-            print("\n")
-            response = input("  Would you like to run this code? (y/n) ")
-            print("\n")
-            if response.lower() != "y":
+
+            # End the active block so you can run input() below it
+            # Save language and code so we can create a new block in a moment
+            self.active_block.end()
+            language = self.active_block.language
+            code = self.active_block.code
+
+            # Prompt user
+            response = input("  Would you like to run this code? (y/n) \n\n  ")
+            print("") # <- Aesthetic choice
+
+            if response.lower() == "y":
+              # Create a new, identical block where the code will actually be run
+              self.active_block = CodeBlock()
+              self.active_block.language = language
+              self.active_block.code = code
+              
+            else:
+              # User declined to run code.
               self.active_block.end()
               self.messages.append({
                 "role":
