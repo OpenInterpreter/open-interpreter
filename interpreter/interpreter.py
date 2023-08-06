@@ -57,9 +57,8 @@ class Interpreter:
     self.local = False
 
     # Get default system message
-    # here = os.path.abspath(os.path.dirname(__file__))
-    # with open(os.path.join(here, 'system_message.txt'), 'r') as f:
-    with open('./interpreter/system_message.txt', 'r') as f:
+    here = os.path.abspath(os.path.dirname(__file__))
+    with open(os.path.join(here, 'system_message.txt'), 'r') as f:
       self.system_message = f.read().strip()
 
     # Store Code Interpreter instances for each language
