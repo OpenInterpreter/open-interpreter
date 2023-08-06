@@ -20,6 +20,10 @@ def cli(interpreter):
                       '--yes',
                       action='store_true',
                       help='execute code without user confirmation')
+  parser.add_argument('-l',
+                      '--local',
+                      action='store_true',
+                      help='run fully local with llama-2')
   args = parser.parse_args()
 
   if args.yes:
@@ -27,6 +31,9 @@ def cli(interpreter):
   else:
     # Print message with newlines on either side (aesthetic choice)
     print('', Markdown(confirm_mode_message), '')
+
+  if args.local:
+    interpreter.local = True
 
   # Now run the chat method
   interpreter.chat()

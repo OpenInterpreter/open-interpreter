@@ -13,7 +13,7 @@ import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
 
-# Function schema for function-calling GPTs
+# Function schema for GPT-4
 function_schema = {
   "name": "run_code",
   "description":
@@ -54,6 +54,7 @@ class Interpreter:
     self.temperature = 0.01
     self.api_key = None
     self.auto_run = False
+    self.local = False
 
     # Get default system message
     # here = os.path.abspath(os.path.dirname(__file__))
@@ -67,6 +68,11 @@ class Interpreter:
     # No active block to start
     # (blocks are visual representation of messages on the terminal)
     self.active_block = None
+
+    # Note: While Open Interpreter can use Llama, we will prioritize GPT-4.
+    # GPT-4 is faster, smarter, can call functions, and is all-around easier to use.
+    # This makes GPT-4 better aligned with Open Interpreters priority to be easy to use.
+    self.llama_instance = None
 
   def cli(self):
     # The cli takes the current instance of Interpreter,
@@ -86,14 +92,21 @@ class Interpreter:
     operating_system = os.name if os.name != 'nt' else os.uname().sysname
     info += f"\n\n[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
-    # Open Procedures is an open-source database of tiny, structured coding tutorials.
-    # We can query it semantically and append relevant tutorials to our system message:
-    
-    # Get a procedure that's relevant to the last message
-    query = str(self.messages[-1])
-    url = f"https://open-procedures.replit.app/search/?query={query}"
-    relevant_procedure = requests.get(url).json()["procedure"]
-    info += "\n\n[Related Recommended Procedure] (might be irrelevant)\n" + relevant_procedure
+    if not self.local:
+      
+      # Open Procedures is an open-source database of tiny, structured coding tutorials.
+      # We can query it semantically and append relevant tutorials to our system message:
+      
+      # Get a procedure that's relevant to the last message
+      query = str(self.messages[-1])
+      url = f"https://open-procedures.replit.app/search/?query={query}"
+      relevant_procedure = requests.get(url).json()["procedure"]
+      info += "\n\n[Related Recommended Procedure]\n" + relevant_procedure
+
+    elif self.local:
+
+      # Tell Llama-2 how to run code.
+      info += "\n\nTo run Python code, simply write a Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
 
     return info
 
@@ -105,7 +118,17 @@ class Interpreter:
     self.messages = messages
 
   def chat(self, message=None, return_messages=False):
-    self.verify_api_key()
+
+    # Connect to an LLM
+    if not self.local:
+      # GPT-4
+      self.verify_api_key()
+    elif self.local:
+      # Llama-2
+      if self.llama_instance == None:
+        # Find or install LLama-2
+        from .llama_2 import llama_2
+        self.llama_instance = llama_2
 
     # Message won't be None if we're passing one in via interpreter.chat(message)
     # In that case, we respond non-interactivley and return:
@@ -163,29 +186,38 @@ class Interpreter:
       self.active_block = None
 
   def respond(self):
-
     # Add relevant info to system_message
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
     system_message = self.system_message + "\n\n" + info
 
-    print("system_message:\n\n", system_message)
+    # Make LLM call
+    if not self.local:
+      # GPT-4
+      model = "gpt-4-0613"
+      response = openai.ChatCompletion.create(
+        model=model,
+        messages=tt.trim(self.messages,
+                         model,
+                         system_message=system_message),
+        functions=[function_schema],
+        stream=True,
+        temperature=self.temperature,
+      )
+    elif self.local:
+      # Llama-2
+      response = self.llama_instance.create_chat_completion(
+        messages=tt.trim(self.messages,
+                         "gpt-3.5-turbo",
+                         system_message=system_message),
+        stream=True,
+        temperature=self.temperature,
+      )
 
-    # Make OpenAI call
-    model = "gpt-4-0613"
-    response = openai.ChatCompletion.create(
-      model=model,
-      messages=tt.trim(self.messages,
-                       model,
-                       system_message=system_message),
-      functions=[function_schema],
-      stream=True,
-      temperature=self.temperature,
-    )
-
-    # Initialize
+    # Initialize message, function call trackers, and active block
     self.messages.append({})
     in_function_call = False
+    llama_function_call_finished = False
     self.active_block = None
 
     for chunk in response:
@@ -196,7 +228,15 @@ class Interpreter:
       self.messages[-1] = merge_deltas(self.messages[-1], delta)
 
       # Check if we're in a function call
-      if "function_call" in self.messages[-1]:
+      if not self.local:
+        condition = "function_call" in self.messages[-1]
+      elif self.local:
+        # Since Llama-2 can't call functions, we just check if we're in a code block.
+        # This simply returns true if the number of "```" in the message is odd.
+        condition = self.messages[-1]["content"].count("```") % 2 == 1
+      
+      if condition:
+        # We are in a function call.
 
         # Check if we just entered a function call
         if in_function_call == False:
@@ -216,18 +256,40 @@ class Interpreter:
         # Remember we're in a function_call
         in_function_call = True
 
-        # Parse arguments and save to parsed_arguments, under function_call
-        if "arguments" in self.messages[-1]["function_call"]:
-          arguments = self.messages[-1]["function_call"]["arguments"]
-          new_parsed_arguments = parse_partial_json(arguments)
+        # Now let's parse the function's arguments:
 
-          if new_parsed_arguments:
-            # Only overwrite what we have if it's not None (which means it failed to parse)
-            self.messages[-1]["function_call"]["parsed_arguments"] = new_parsed_arguments
+        if not self.local:
+          # GPT-4
+          # Parse arguments and save to parsed_arguments, under function_call
+          if "arguments" in self.messages[-1]["function_call"]:
+            arguments = self.messages[-1]["function_call"]["arguments"]
+            new_parsed_arguments = parse_partial_json(arguments)
+            if new_parsed_arguments:
+              # Only overwrite what we have if it's not None (which means it failed to parse)
+              self.messages[-1]["function_call"]["parsed_arguments"] = new_parsed_arguments
+        
+        elif self.local:
+          # Llama-2
+          # Get contents of current code block and save to parsed_arguments, under function_call
+          current_code_block = self.messages[-1]["content"].split("```")[-1]
+          arguments = {"language": "python", "code": current_code_block}
+          self.messages[-1]["function_call"]["parsed_arguments"] = arguments
 
       else:
+        # We are not in a function call.
 
-        # If we're not in a function call and there's no active block,
+        # Check if we just left a function call
+        if in_function_call == True:
+
+          if self.local:
+            # This is the same as when GPT-4 gives finish_reason as function_call.
+            # We have just finished a code block, so now we should run it.
+            llama_function_call_finished = True
+
+        # Remember we're not in a function_call
+        in_function_call = False
+
+        # If there's no active block,
         if self.active_block == None:
 
           # Create a message block
@@ -237,8 +299,8 @@ class Interpreter:
       self.active_block.update_from_message(self.messages[-1])
 
       # Check if we're finished
-      if chunk.choices[0].finish_reason:
-        if chunk.choices[0].finish_reason == "function_call":
+      if chunk.choices[0].finish_reason or llama_function_call_finished:
+        if chunk.choices[0].finish_reason == "function_call" or llama_function_call_finished:
           # Time to call the function!
           # (Because this is Open Interpreter, we only have one function.)
 
