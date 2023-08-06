@@ -229,8 +229,15 @@ class Interpreter:
       )
     elif self.local:
       # Llama-2
+      
+      # Turn function messages -> system messages for llama compatability
+      messages = self.messages
+      for message in messages:
+        if message['role'] == 'function':
+            message['role'] = 'system'
+          
       response = self.llama_instance.create_chat_completion(
-        messages=tt.trim(self.messages,
+        messages=tt.trim(messages,
                          "gpt-3.5-turbo",
                          system_message=system_message),
         stream=True,
@@ -300,7 +307,7 @@ class Interpreter:
           # Llama-2
           # Get contents of current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
-            current_code_block = self.messages[-1]["content"].split("```")[-1]
+            current_code_block = self.messages[-1]["content"].split("```python")[-1]
             arguments = {"language": "python", "code": current_code_block}
             
             # Llama-2 won't make a "function_call" property for us to store this under, so:
@@ -378,7 +385,7 @@ class Interpreter:
             self.code_interpreters[language] = CodeInterpreter(language)
           code_interpreter = self.code_interpreters[language]
 
-          # Let Code Interpreter control the active_block
+          # Let this Code Interpreter control the active_block
           code_interpreter.active_block = self.active_block
           code_interpreter.run()
 

@@ -1,6 +1,11 @@
 import json
 
 def merge_deltas(original, delta):
+    """
+    Pushes the delta into the original and returns that.
+
+    Great for reconstructing OpenAI streaming responses -> complete message objects.
+    """
     for key, value in delta.items():
         if isinstance(value, dict):
             if key not in original:
