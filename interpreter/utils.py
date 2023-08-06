@@ -12,6 +12,7 @@ def merge_deltas(original, delta):
                 original[key] += value
             else:
                 original[key] = value
+    return original
 
 def escape_newlines_in_json_string_values(s):
     result = []

@@ -6,6 +6,8 @@ from .code_interpreter import CodeInterpreter
 
 import os
 import openai
+import getpass
+import requests
 import readline
 import tokentrim as tt
 from rich import print
@@ -76,7 +78,23 @@ class Interpreter:
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
       system_message = f.read().strip()
 
-    return system_message
+    # Add user info
+    username = getpass.getuser()
+    current_working_directory = os.getcwd()
+    operating_system = os.name if os.name != 'nt' else os.uname().sysname
+    info_string = f"[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
+    system_message += "\n\n" + info_string
+
+    # Open Procedures is an open-source database of tiny, structured coding tutorials.
+    # We can query it semantically and append relevant tutorials to our system message:
+    
+    # Get a procedure that's relevant to the last two messages
+    query = str(self.messages[-2:])
+    url = f"https://open-procedures.replit.app/search/?query={query}"
+    relevant_procedure = requests.get(url).json()["procedure"]
+    system_message += "\n\n" + relevant_procedure
+
+    return system_message.strip()
 
   def reset(self):
     self.messages = []
