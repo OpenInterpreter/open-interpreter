@@ -189,6 +189,8 @@ class CodeInterpreter:
       elif line == "END_OF_EXECUTION":
         self.done.set()
         self.active_line = None
+      elif "KeyboardInterrupt" in line:
+        raise KeyboardInterrupt
       else:
         self.output += "\n" + line
         self.output = self.output.strip()
