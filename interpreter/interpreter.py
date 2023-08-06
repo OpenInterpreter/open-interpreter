@@ -1,7 +1,7 @@
 from .code_interpreter import CodeInterpreter
 from .code_block import CodeBlock
 from .message_block import MessageBlock
-from .json_utils import JsonAccumulator, close_and_parse_json
+from .utils import merge_deltas, parse_partial_json
 import openai
 import tokentrim as tt
 import os
@@ -158,7 +158,6 @@ class Interpreter:
 
     # Initialize
     self.messages.append({})
-    json_accumulator = JsonAccumulator()
     in_function_call = False
     self.active_block = None
 
@@ -167,8 +166,7 @@ class Interpreter:
       delta = chunk.choices[0].delta
 
       # Accumulate deltas into the last message in messages
-      json_accumulator.receive_delta(delta)
-      self.messages[-1] = json_accumulator.accumulated_json
+      self.messages[-1] = merge_deltas(self.messages[-1], delta)
 
       # Check if we're in a function call
       if "function_call" in self.messages[-1]:
@@ -191,16 +189,14 @@ class Interpreter:
         # Remember we're in a function_call
         in_function_call = True
 
-        # Parse arguments and save to parsed_args, under function_call
+        # Parse arguments and save to parsed_arguments, under function_call
         if "arguments" in self.messages[-1]["function_call"]:
-          args = self.messages[-1]["function_call"]["arguments"]
+          arguments = self.messages[-1]["function_call"]["arguments"]
+          new_parsed_arguments = parse_partial_json(arguments)
 
-          # There are some common errors made in GPT function calls.
-          new_parsed_args = close_and_parse_json(args)
-
-          if new_parsed_args:
+          if new_parsed_arguments:
             # Only overwrite what we have if it's not None (which means it failed to parse)
-            self.messages[-1]["function_call"]["parsed_args"] = new_parsed_args
+            self.messages[-1]["function_call"]["parsed_arguments"] = new_parsed_arguments
 
       else:
 
@@ -252,8 +248,7 @@ class Interpreter:
               return
 
           # Create or retrieve a Code Interpreter for this language
-          language = self.messages[-1]["function_call"]["parsed_args"][
-            "language"]
+          language = self.messages[-1]["function_call"]["parsed_arguments"]["language"]
           if language not in self.code_interpreters:
             self.code_interpreters[language] = CodeInterpreter(language)
           code_interpreter = self.code_interpreters[language]
