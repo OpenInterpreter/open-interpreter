@@ -3,6 +3,7 @@ from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
+from .llama_2 import get_llama_2_instance
 
 import os
 import openai
@@ -44,6 +45,12 @@ missing_api_key_message = """
 To use Open Interpreter in your terminal, set the environment variable using `export OPENAI_API_KEY=your_api_key` on Unix-based systems, or `setx OPENAI_API_KEY your_api_key` on Windows.
 
 ---
+"""
+
+confirm_mode_message = """
+**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this.
+
+Press `CTRL-C` to exit.
 """
 
 
@@ -92,10 +99,10 @@ class Interpreter:
     info += f"\n\n[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
     if not self.local:
-      
+
       # Open Procedures is an open-source database of tiny, structured coding tutorials.
       # We can query it semantically and append relevant tutorials to our system message:
-      
+
       # Get a procedure that's relevant to the last message
       query = str(self.messages[-1])
       url = f"https://open-procedures.replit.app/search/?query={query}"
@@ -105,6 +112,8 @@ class Interpreter:
     elif self.local:
 
       # Tell Llama-2 how to run code.
+      # (We actually don't use this because we overwrite the system message with a tiny, performant one.)
+      # (But someday, when Llama is fast enough, this should be how we handle it.)
       info += "\n\nTo run Python code, simply write a Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
 
     return info
@@ -118,18 +127,28 @@ class Interpreter:
 
   def chat(self, message=None, return_messages=False):
 
-    # Connect to an LLM
+    # Connect to an LLM (an large language model)
     if not self.local:
       # GPT-4
       self.verify_api_key()
     elif self.local:
       # Llama-2
       if self.llama_instance == None:
+        
         # Find or install LLama-2
-        from .llama_2 import llama_2
-        self.llama_instance = llama_2
+        self.llama_instance = get_llama_2_instance()
 
-    # Message won't be None if we're passing one in via interpreter.chat(message)
+        # If the user decided not to download it, exit gracefully
+        if self.llama_instance == None:
+          raise KeyboardInterrupt
+
+    # If not auto_run, tell the user we'll ask permission to run code
+    # We also tell them here how to exit Open Interpreter
+    if not self.auto_run:
+      # Print message with newlines on either side (aesthetic choice)
+      print('', Markdown(confirm_mode_message), '')
+
+    # `message` won't be None if we're passing one in via interpreter.chat(message)
     # In that case, we respond non-interactivley and return:
     if message:
       self.messages.append({"role": "user", "content": message})
@@ -190,15 +209,18 @@ class Interpreter:
     info = self.get_info_for_system_message()
     system_message = self.system_message + "\n\n" + info
 
+    # While Llama-2 is still so slow, we need to
+    # overwrite the system message with a tiny, performant one.
+    if self.local:
+      system_message = "You are an AI that executes Python code. Use ```python to run it."
+
     # Make LLM call
     if not self.local:
       # GPT-4
       model = "gpt-4-0613"
       response = openai.ChatCompletion.create(
         model=model,
-        messages=tt.trim(self.messages,
-                         model,
-                         system_message=system_message),
+        messages=tt.trim(self.messages, model, system_message=system_message),
         functions=[function_schema],
         stream=True,
         temperature=self.temperature,
@@ -221,7 +243,7 @@ class Interpreter:
 
     for chunk in response:
 
-      delta = chunk.choices[0].delta
+      delta = chunk["choices"][0]["delta"]
 
       # Accumulate deltas into the last message in messages
       self.messages[-1] = merge_deltas(self.messages[-1], delta)
@@ -232,8 +254,12 @@ class Interpreter:
       elif self.local:
         # Since Llama-2 can't call functions, we just check if we're in a code block.
         # This simply returns true if the number of "```" in the message is odd.
-        condition = self.messages[-1]["content"].count("```") % 2 == 1
-      
+        if "content" in self.messages[-1]:
+          condition = self.messages[-1]["content"].count("```") % 2 == 1
+        else:
+          # If it hasn't made "content" yet, we're certainly not in a function call.
+          condition = False
+
       if condition:
         # We are in a function call.
 
@@ -265,14 +291,16 @@ class Interpreter:
             new_parsed_arguments = parse_partial_json(arguments)
             if new_parsed_arguments:
               # Only overwrite what we have if it's not None (which means it failed to parse)
-              self.messages[-1]["function_call"]["parsed_arguments"] = new_parsed_arguments
-        
+              self.messages[-1]["function_call"][
+                "parsed_arguments"] = new_parsed_arguments
+
         elif self.local:
           # Llama-2
           # Get contents of current code block and save to parsed_arguments, under function_call
-          current_code_block = self.messages[-1]["content"].split("```")[-1]
-          arguments = {"language": "python", "code": current_code_block}
-          self.messages[-1]["function_call"]["parsed_arguments"] = arguments
+          if "content" in self.messages[-1]:
+            current_code_block = self.messages[-1]["content"].split("```")[-1]
+            arguments = {"language": "python", "code": current_code_block}
+            self.messages[-1]["function_call"]["parsed_arguments"] = arguments
 
       else:
         # We are not in a function call.
@@ -298,8 +326,9 @@ class Interpreter:
       self.active_block.update_from_message(self.messages[-1])
 
       # Check if we're finished
-      if chunk.choices[0].finish_reason or llama_function_call_finished:
-        if chunk.choices[0].finish_reason == "function_call" or llama_function_call_finished:
+      if chunk["choices"][0]["finish_reason"] or llama_function_call_finished:
+        if chunk["choices"][
+            0]["finish_reason"] == "function_call" or llama_function_call_finished:
           # Time to call the function!
           # (Because this is Open Interpreter, we only have one function.)
 
@@ -313,15 +342,15 @@ class Interpreter:
             code = self.active_block.code
 
             # Prompt user
-            response = input("  Would you like to run this code? (y/n) \n\n  ")
-            print("") # <- Aesthetic choice
+            response = input("  Would you like to run this code? (y/n)\n\n  ")
+            print("")  # <- Aesthetic choice
 
-            if response.lower() == "y":
+            if response.strip().lower() == "y":
               # Create a new, identical block where the code will actually be run
               self.active_block = CodeBlock()
               self.active_block.language = language
               self.active_block.code = code
-              
+
             else:
               # User declined to run code.
               self.active_block.end()
@@ -336,7 +365,8 @@ class Interpreter:
               return
 
           # Create or retrieve a Code Interpreter for this language
-          language = self.messages[-1]["function_call"]["parsed_arguments"]["language"]
+          language = self.messages[-1]["function_call"]["parsed_arguments"][
+            "language"]
           if language not in self.code_interpreters:
             self.code_interpreters[language] = CodeInterpreter(language)
           code_interpreter = self.code_interpreters[language]
@@ -358,7 +388,7 @@ class Interpreter:
           # Go around again
           self.respond()
 
-        if chunk.choices[0].finish_reason != "function_call":
+        if chunk["choices"][0]["finish_reason"] != "function_call":
           # Done!
           self.active_block.end()
           return

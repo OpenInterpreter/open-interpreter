@@ -14,8 +14,9 @@ class MessageBlock:
     self.content = ""
 
   def update_from_message(self, message):
-    self.content = message.get("content")
-    self.refresh()
+    self.content = message.get("content", "")
+    if self.content:
+      self.refresh()
 
   def end(self):
     self.live.stop()
