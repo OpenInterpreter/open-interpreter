@@ -51,10 +51,15 @@ class Interpreter:
 
   def __init__(self):
     self.messages = []
-    self.system_message = self.generate_system_message()
     self.temperature = 0.01
     self.api_key = None
     self.auto_run = False
+
+    # Get default system message
+    # here = os.path.abspath(os.path.dirname(__file__))
+    # with open(os.path.join(here, 'system_message.txt'), 'r') as f:
+    with open('./interpreter/system_message.txt', 'r') as f:
+      self.system_message = f.read().strip()
 
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
@@ -68,33 +73,29 @@ class Interpreter:
     # modifies it according to command line flags, then runs chat.
     cli(self)
 
-  def generate_system_message(self):
+  def get_info_for_system_message(self):
     """
-    Adds relevent information to system_message.txt.
+    Gets relevent information for the system message.
     """
 
-    # First get the baseline system message from system_message.txt
-    here = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(here, 'system_message.txt'), 'r') as f:
-      system_message = f.read().strip()
+    info = ""
 
     # Add user info
     username = getpass.getuser()
     current_working_directory = os.getcwd()
     operating_system = os.name if os.name != 'nt' else os.uname().sysname
-    info_string = f"[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
-    system_message += "\n\n" + info_string
+    info += f"\n\n[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
     # Open Procedures is an open-source database of tiny, structured coding tutorials.
     # We can query it semantically and append relevant tutorials to our system message:
     
-    # Get a procedure that's relevant to the last two messages
-    query = str(self.messages[-2:])
+    # Get a procedure that's relevant to the last message
+    query = str(self.messages[-1])
     url = f"https://open-procedures.replit.app/search/?query={query}"
     relevant_procedure = requests.get(url).json()["procedure"]
-    system_message += "\n\n" + relevant_procedure
+    info += "\n\n[Related Recommended Procedure] (might be irrelevant)\n" + relevant_procedure
 
-    return system_message.strip()
+    return info
 
   def reset(self):
     self.messages = []
@@ -163,13 +164,20 @@ class Interpreter:
 
   def respond(self):
 
+    # Add relevant info to system_message
+    # (e.g. current working directory, username, os, etc.)
+    info = self.get_info_for_system_message()
+    system_message = self.system_message + "\n\n" + info
+
+    print("system_message:\n\n", system_message)
+
     # Make OpenAI call
     model = "gpt-4-0613"
     response = openai.ChatCompletion.create(
       model=model,
       messages=tt.trim(self.messages,
                        model,
-                       system_message=self.system_message),
+                       system_message=system_message),
       functions=[function_schema],
       stream=True,
       temperature=self.temperature,
