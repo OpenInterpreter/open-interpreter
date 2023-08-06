@@ -1,13 +1,4 @@
 import argparse
-from rich import print
-from rich.markdown import Markdown
-
-confirm_mode_message = """
-**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this.
-
-Press `CTRL-C` to exit.
-"""
-
 
 def cli(interpreter):
   """
@@ -28,9 +19,6 @@ def cli(interpreter):
 
   if args.yes:
     interpreter.auto_run = True
-  else:
-    # Print message with newlines on either side (aesthetic choice)
-    print('', Markdown(confirm_mode_message), '')
 
   if args.local:
     interpreter.local = True
