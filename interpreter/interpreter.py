@@ -1,12 +1,13 @@
-from .code_interpreter import CodeInterpreter
-from .code_block import CodeBlock
-from .message_block import MessageBlock
-from .utils import merge_deltas, parse_partial_json
-import openai
-import tokentrim as tt
-import os
-import readline
 from .cli import cli
+from .utils import merge_deltas, parse_partial_json
+from .message_block import MessageBlock
+from .code_block import CodeBlock
+from .code_interpreter import CodeInterpreter
+
+import os
+import openai
+import readline
+import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
 
