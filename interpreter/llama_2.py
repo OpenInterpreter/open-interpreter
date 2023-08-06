@@ -61,7 +61,7 @@ def get_llama_2_instance():
 
     # Initialize and return Llama-2
     llama_2 = Llama(model_path=model_path)
-    print("\n✅ Llama-2 loaded.\n")
+    print("\n✅ Llama-2 loaded.", '')
   
     return llama_2
 
