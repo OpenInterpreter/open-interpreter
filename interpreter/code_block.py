@@ -23,10 +23,14 @@ class CodeBlock:
     self.live.start()
 
   def update_from_message(self, message):
-    if "function_call" in message and "parsed_args" in message["function_call"]:
-      if message["function_call"]["parsed_args"] != None:
-        self.language = message["function_call"]["parsed_args"].get("language")
-        self.code = message["function_call"]["parsed_args"].get("code")
+    if "function_call" in message and "parsed_arguments" in message[
+        "function_call"]:
+
+      parsed_arguments = message["function_call"]["parsed_arguments"]
+
+      if parsed_arguments != None:
+        self.language = parsed_arguments.get("language")
+        self.code = parsed_arguments.get("code")
 
         if self.code and self.language:
           self.refresh()
