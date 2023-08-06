@@ -25,9 +25,13 @@ class MessageBlock:
     panel = Panel(markdown, box=MINIMAL)
     self.live.update(panel)
     self.live.refresh()
-    
+
 
 def textify_markdown_code_blocks(text):
+  """
+  To distinguish CodeBlocks from markdown code, we simply turn all markdown code
+  (like '```python...') into text code blocks ('```text') which makes the code black and white.
+  """
   replacement = "```text"
   lines = text.split('\n')
   inside_code_block = False
