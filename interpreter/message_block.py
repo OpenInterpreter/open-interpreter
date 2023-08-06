@@ -19,10 +19,18 @@ class MessageBlock:
       self.refresh()
 
   def end(self):
+    self.refresh(cursor=False)
     self.live.stop()
 
-  def refresh(self):
-    markdown = Markdown(textify_markdown_code_blocks(self.content))
+  def refresh(self, cursor=True):
+    # De-stylize any code blocks in markdown,
+    # to differentiate from our Code Blocks
+    content = textify_markdown_code_blocks(self.content)
+    
+    if cursor:
+      content += "█"
+      
+    markdown = Markdown(content)
     panel = Panel(markdown, box=MINIMAL)
     self.live.update(panel)
     self.live.refresh()
