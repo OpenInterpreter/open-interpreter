@@ -36,10 +36,11 @@ class CodeBlock:
           self.refresh()
 
   def end(self):
+    self.refresh(cursor=False)
     # Destroys live display
     self.live.stop()
 
-  def refresh(self):
+  def refresh(self, cursor=True):
     # Create a table for the code
     code_table = Table(show_header=False,
                        show_footer=False,
@@ -48,8 +49,13 @@ class CodeBlock:
                        expand=True)
     code_table.add_column()
 
+    # Get code and add cursor
+    code = self.code
+    if cursor:
+      code += "█"
+
     # Add each line of code to the table
-    code_lines = self.code.strip().split('\n')
+    code_lines = code.strip().split('\n')
     for i, line in enumerate(code_lines, start=1):
       if i == self.active_line:
         # This is the active line, print it with a white background

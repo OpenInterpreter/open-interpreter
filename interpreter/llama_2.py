@@ -39,7 +39,7 @@ def get_llama_2_instance():
         message = f"Llama-2 not found. Would you like to download the `6.9GB` file to `{download_path}`?"
         if confirm_action(message):
             url = "https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/resolve/main/llama-2-13b-chat.ggmlv3.q4_0.bin"
-            subprocess.run(f"curl -L '{url}' -o {download_path}", shell=True)
+            subprocess.run(f"curl -L '{url}' -o '{download_path}'", shell=True)
             model_path = download_path
             print('\n', "Finished downloading Llama-2.", '\n')
         else:
