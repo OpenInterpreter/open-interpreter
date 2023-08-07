@@ -106,8 +106,8 @@ class Interpreter:
       # Get a procedure that's relevant to the last message
       query = str(self.messages[-1])
       url = f"https://open-procedures.replit.app/search/?query={query}"
-      relevant_procedure = requests.get(url).json()["procedure"]
-      info += "\n\n[Related Recommended Procedure]\n" + relevant_procedure
+      relevant_procedures = requests.get(url).json()["procedures"]
+      info += "\n\n# Potentially Helpful Procedures (may or may not be related)\n" + "\n---\n".join(relevant_procedures)
 
     elif self.local:
 
