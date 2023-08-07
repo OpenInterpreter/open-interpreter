@@ -1,5 +1,6 @@
 import subprocess
 import threading
+import traceback
 import time
 import ast
 import astor
@@ -98,7 +99,27 @@ class CodeInterpreter:
     # If it's Python, we also need to normalize
     # and fix indentation (so it works with `python -i`)
     if self.language == "python":
-      code = normalize(code)
+
+      # Normalize code by parsing then unparsing it
+      try:
+        parsed_ast = ast.parse(code)
+        code = astor.to_source(parsed_ast)
+      except:
+        # If this failed, it means the code didn't compile
+        # This traceback will be our output.
+        
+        traceback_string = traceback.format_exc()
+        self.output = traceback_string
+
+        # Strip then truncate the output if necessary
+        self.output = truncate_output(self.output)
+
+        # Display it
+        self.active_block.output = self.output
+        self.active_block.refresh()
+
+        return self.output
+        
       code = fix_code_indentation(code)
 
     # Add end command (we'll be listening for this so we know when it ends)
@@ -202,15 +223,6 @@ class CodeInterpreter:
       self.active_block.active_line = self.active_line
       self.active_block.output = self.output
       self.active_block.refresh()
-
-
-def normalize(code):
-  # Parse the code into an AST
-  parsed_ast = ast.parse(code)
-
-  # Convert the AST back to source code
-  return astor.to_source(parsed_ast)
-
 
 def fix_code_indentation(code):
   lines = code.split("\n")
