@@ -11,6 +11,10 @@ def cli(interpreter):
                       '--yes',
                       action='store_true',
                       help='execute code without user confirmation')
+  parser.add_argument('-f',
+                      '--fast',
+                      action='store_true',
+                      help='use gpt-3.5-turbo instead of gpt-4')
   parser.add_argument('-l',
                       '--local',
                       action='store_true',
@@ -19,9 +23,10 @@ def cli(interpreter):
 
   if args.yes:
     interpreter.auto_run = True
-
   if args.local:
     interpreter.local = True
+  if args.fast:
+    interpreter.model = "gpt-3.5-turbo-0613"
 
   # Now run the chat method
   interpreter.chat()

@@ -165,6 +165,10 @@ class CodeInterpreter:
     1) Any line starts with whitespace and
     2) Sometimes, doesn't even work for regular loops with newlines between lines
     We return in those cases.
+
+    In python it doesn't work if:
+    1) Try/Except clause
+    2) Triple quote multiline strings
     """
 
     # Split the original code into lines
@@ -177,6 +181,11 @@ class CodeInterpreter:
       for line in code_lines:
         if line.startswith(" "):
           return code
+
+    # If it's Python, check for breaking cases
+    if self.language == "python":
+      if "try" in code or "except" in code or "'''" in code or "'''" in code:
+        return code
 
     # Initialize an empty list to hold the modified lines of code
     modified_code_lines = []
