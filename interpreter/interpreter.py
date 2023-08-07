@@ -62,6 +62,7 @@ class Interpreter:
     self.api_key = None
     self.auto_run = False
     self.local = False
+    self.model = "gpt-4-0613"
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -219,10 +220,9 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # GPT-4
-      model = "gpt-4-0613"
       response = openai.ChatCompletion.create(
-        model=model,
-        messages=tt.trim(self.messages, model, system_message=system_message),
+        model=self.model,
+        messages=tt.trim(self.messages, self.model, system_message=system_message),
         functions=[function_schema],
         stream=True,
         temperature=self.temperature,
