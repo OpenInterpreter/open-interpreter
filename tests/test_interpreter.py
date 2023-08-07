@@ -4,7 +4,7 @@ interpreter.temperature = 0
 
 def test_delayed_exec():
     interpreter.reset()
-    interpreter.chat("""Can you write a single block of code and run_code it that prints something, then delays 5 seconds, then prints something else? No talk just code. Thanks!""", return_messages=True)
+    interpreter.chat("""Can you write a single block of code and run_code it that prints something, then delays 1 second, then prints something else? No talk just code. Thanks!""", return_messages=True)
 
 def test_nested_loops_and_multiple_newlines():
     interpreter.reset()
