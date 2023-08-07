@@ -136,8 +136,15 @@ class CodeInterpreter:
     self.done.clear()
 
     # Write code to stdin of the process
-    self.proc.stdin.write(code)
-    self.proc.stdin.flush()
+    try:
+      self.proc.stdin.write(code)
+      self.proc.stdin.flush()
+    except BrokenPipeError:
+      # It can just.. break sometimes? Let's fix this better in the future
+      # For now, just try again
+      self.start_process()
+      self.run()
+      return
 
     # Wait until execution completes
     self.done.wait()
