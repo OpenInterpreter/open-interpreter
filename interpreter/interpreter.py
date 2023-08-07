@@ -101,9 +101,9 @@ class Interpreter:
     if not self.local:
 
       # Open Procedures is an open-source database of tiny, structured coding tutorials.
-      # We can query it semantically and append relevant tutorials to our system message:
+      # We can query it semantically and append relevant tutorials/procedures to our system message:
 
-      # Get a procedure that's relevant to the last message
+      # Get procedures that are relevant to the last message
       query = str(self.messages[-1])
       url = f"https://open-procedures.replit.app/search/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
