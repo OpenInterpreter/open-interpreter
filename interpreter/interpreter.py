@@ -6,6 +6,7 @@ from .code_interpreter import CodeInterpreter
 from .llama_2 import get_llama_2_instance
 
 import os
+import platform #new, see OS request line 99
 import openai
 import getpass
 import requests
@@ -96,7 +97,9 @@ class Interpreter:
     # Add user info
     username = getpass.getuser()
     current_working_directory = os.getcwd()
-    operating_system = os.name if os.name != 'nt' else os.uname().sysname
+
+    #Retrieve OS in a way that fine on both Win and Linux etc OS 
+    operating_system = os.name if os.name != 'nt' else platform.system()
     info += f"\n\n[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
     if not self.local:
