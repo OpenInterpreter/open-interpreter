@@ -1,6 +1,7 @@
 import subprocess
 import threading
 import traceback
+import platform
 import time
 import ast
 import astor
@@ -16,8 +17,9 @@ language_map = {
     "print_cmd": 'print("{}")'
   },
   "shell": {
-    # Start command is different on Unix vs. non-Unix systems
-    "start_cmd": "cmd.exe" if os.name == 'nt' else "bash",
+    # On Windows, the shell start command is `cmd.exe`
+    # On Unix, it should be the SHELL environment variable (defaults to 'bash' if not set)
+    "start_cmd": 'cmd.exe' if platform.system() == 'Windows' else os.environ.get('SHELL', 'bash')
     "print_cmd": 'echo "{}"'
   },
   "javascript": {
