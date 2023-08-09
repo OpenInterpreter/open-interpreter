@@ -6,11 +6,15 @@ def cli(interpreter):
   Modifies it according to command line flags, then runs chat.
   """
 
+  # Setup CLI
   parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
+  
   parser.add_argument('-y',
                       '--yes',
                       action='store_true',
                       help='execute code without user confirmation')
+
+  
   parser.add_argument('-f',
                       '--fast',
                       action='store_true',
@@ -21,12 +25,13 @@ def cli(interpreter):
                       help='run fully local with llama-2')
   args = parser.parse_args()
 
+  # Modify interpreter according to command line flags
   if args.yes:
     interpreter.auto_run = True
-  if args.local:
-    interpreter.local = True
   if args.fast:
     interpreter.model = "gpt-3.5-turbo-0613"
+  if args.local:
+    interpreter.local = True
 
-  # Now run the chat method
+  # Run the chat method
   interpreter.chat()
