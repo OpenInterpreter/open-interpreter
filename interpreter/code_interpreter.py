@@ -19,7 +19,7 @@ language_map = {
   "shell": {
     # On Windows, the shell start command is `cmd.exe`
     # On Unix, it should be the SHELL environment variable (defaults to 'bash' if not set)
-    "start_cmd": 'cmd.exe' if platform.system() == 'Windows' else os.environ.get('SHELL', 'bash')
+    "start_cmd": 'cmd.exe' if platform.system() == 'Windows' else os.environ.get('SHELL', 'bash'),
     "print_cmd": 'echo "{}"'
   },
   "javascript": {
