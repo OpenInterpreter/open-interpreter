@@ -118,12 +118,16 @@ class CodeInterpreter:
         self.active_block.output = self.output
         self.active_block.refresh()
 
+        # Wait for the display to catch up? (I'm not sure why this works)
+        time.sleep(0.01)
+
         return self.output
         
       code = fix_code_indentation(code)
 
     # Add end command (we'll be listening for this so we know when it ends)
     code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION') + "\n"
+
     """
     # Debug
     print("Running code:")
@@ -165,6 +169,7 @@ class CodeInterpreter:
     1) Any line starts with whitespace and
     2) Sometimes, doesn't even work for regular loops with newlines between lines
     We return in those cases.
+    3) It really struggles with multiline stuff, so I've disabled that (but we really should fix and restore).
 
     In python it doesn't work if:
     1) Try/Except clause
@@ -176,6 +181,8 @@ class CodeInterpreter:
 
     # If it's shell, check for breaking cases
     if self.language == "shell":
+      if len(code_lines) > 1:
+        return code
       if "for" in code or "do" in code or "done" in code:
         return code
       for line in code_lines:
@@ -184,7 +191,7 @@ class CodeInterpreter:
 
     # If it's Python, check for breaking cases
     if self.language == "python":
-      if "try" in code or "except" in code or "'''" in code or "'''" in code:
+      if "try" in code or "except" in code or "'''" in code or "'''" in code or "[\n" in code or "{\n" in code:
         return code
 
     # Initialize an empty list to hold the modified lines of code
