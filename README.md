@@ -161,8 +161,6 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
-Open Interpreter also respects `interpreter.forbidden_commands`, a list of potentially harmful commands that are disallowed by default.
-
 ## How Does it Work?
 
 Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/docs/guides/gpt/function-calling) with the `exec()` function.
