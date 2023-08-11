@@ -151,29 +151,31 @@ class Interpreter:
         if self.llama_instance == None:
           raise KeyboardInterrupt
 
-    # Display messages regarding settings
+    # Display welcome message
+    welcome_message = ""
     
     if self.debug_mode:
-      print('', Markdown("`You are in debug mode.`"), '')
+      welcome_message += "> Entered debug mode."
 
     if "gpt-3.5" in self.model:
-      print('', Markdown(f"Model set to `{self.model}`."), '')
+      welcome_message += f"\n> Model set to `{self.model}`."
     
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
-      # Print message with newlines on either side (aesthetic choice)
-      print('', Markdown(confirm_mode_message), '')
+      welcome_message += confirm_mode_message
       
+    # Print welcome message with newlines on either side (aesthetic choice)
+    print('', welcome_message.strip(), '')
+
+    # Check if `message` was passed in by user
     if message:
-      # `message` won't be None if we're passing one in via interpreter.chat(message)
-      # In that case, we respond non-interactivley
+      # If it was, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
       self.respond()
       
     else:
-      # `message` is None, so we're in interpreter.chat() 
-      # Start interactive chat
+      # If it wasn't, we start an interactive chat
       while True:
         try:
           user_input = input("> ").strip()
