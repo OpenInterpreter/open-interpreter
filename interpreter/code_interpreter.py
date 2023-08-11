@@ -25,6 +25,7 @@ language_map = {
   "javascript": {
     "start_cmd": "node -i",
     "print_cmd": 'console.log("{}")'
+    
   },
   "applescript": {
     # Starts from shell, whatever the user's preference (defaults to '/bin/zsh')
@@ -162,7 +163,7 @@ class CodeInterpreter:
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION') + "\n"
+    code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
 
     # Applescript-specific processing
     if self.language == "applescript":
@@ -170,8 +171,8 @@ class CodeInterpreter:
       code = code.replace('"', r'\"')
       # Wrap in double quotes
       code = '"' + code + '"'
-      # Prepend start command + newline (to send it in)
-      code = "osascript -e " + code + "\n"
+      # Prepend start command
+      code = "osascript -e " + code
 
     # Debug
     if self.debug_mode:
@@ -185,7 +186,7 @@ class CodeInterpreter:
 
     # Write code to stdin of the process
     try:
-      self.proc.stdin.write(code)
+      self.proc.stdin.write(code + "\n")
       self.proc.stdin.flush()
     except BrokenPipeError:
       # It can just.. break sometimes? Let's fix this better in the future
