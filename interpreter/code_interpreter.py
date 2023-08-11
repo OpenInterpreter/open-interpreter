@@ -133,14 +133,12 @@ class CodeInterpreter:
     # Add print commands that tell us what the active line is
     code = self.add_active_line_prints(code)
 
-    # If it's Python, we also need to normalize
-    # and fix indentation (so it works with `python -i`)
+    # If it's Python, we also need to prepare it for `python -i`
     if self.language == "python":
 
       # Normalize code by parsing then unparsing it
       try:
-        parsed_ast = ast.parse(code)
-        code = astor.to_source(parsed_ast)
+        code = prepare_for_python_interactive(code)
       except:
         # If this failed, it means the code didn't compile
         # This traceback will be our output.
@@ -216,11 +214,10 @@ class CodeInterpreter:
     2) Sometimes, doesn't even work for regular loops with newlines between lines
     We return in those cases.
     3) It really struggles with multiline stuff, so I've disabled that (but we really should fix and restore).
-
-    In python it doesn't work if:
-    1) Try/Except clause
-    2) Triple quote multiline strings
     """
+
+    if self.language == "python":
+      return add_active_line_prints_to_python(code)
 
     # Split the original code into lines
     code_lines = code.strip().split('\n')
@@ -234,11 +231,6 @@ class CodeInterpreter:
       for line in code_lines:
         if line.startswith(" "):
           return code
-
-    # If it's Python, check for breaking cases
-    if self.language == "python":
-      if "try" in code or "except" in code or "'''" in code or "'''" in code or "[\n" in code or "{\n" in code:
-        return code
 
     # Initialize an empty list to hold the modified lines of code
     modified_code_lines = []
@@ -333,3 +325,88 @@ def truncate_output(data):
     data = message + data[-max_output_chars:]
 
   return data
+
+# Perhaps we should split the "add active line prints" processing to a new file?
+# Add active prints to python:
+
+class AddLinePrints(ast.NodeTransformer):
+    """
+    Transformer to insert print statements indicating the line number
+    before every executable line in the AST.
+    """
+
+    def insert_print_statement(self, line_number):
+        """Inserts a print statement for a given line number."""
+        return ast.Expr(
+            value=ast.Call(
+                func=ast.Name(id='print', ctx=ast.Load()),
+                args=[ast.Constant(value=f"ACTIVE_LINE:{line_number}")],
+                keywords=[]
+            )
+        )
+
+    def process_body(self, body):
+        """Processes a block of statements, adding print calls."""
+        new_body = []
+        for sub_node in body:
+            if hasattr(sub_node, 'lineno'):
+                new_body.append(self.insert_print_statement(sub_node.lineno))
+            new_body.append(sub_node)
+        return new_body
+
+    def visit(self, node):
+        """Overridden visit to transform nodes."""
+        new_node = super().visit(node)
+        
+        # If node has a body, process it
+        if hasattr(new_node, 'body'):
+            new_node.body = self.process_body(new_node.body)
+        
+        # If node has an orelse block (like in for, while, if), process it
+        if hasattr(new_node, 'orelse') and new_node.orelse:
+            new_node.orelse = self.process_body(new_node.orelse)
+        
+        # Special case for Try nodes as they have multiple blocks
+        if isinstance(new_node, ast.Try):
+            for handler in new_node.handlers:
+                handler.body = self.process_body(handler.body)
+            if new_node.finalbody:
+                new_node.finalbody = self.process_body(new_node.finalbody)
+        
+        return new_node
+
+def add_active_line_prints_to_python(code):
+    """
+    Add print statements indicating line numbers to a python string.
+    """
+    tree = ast.parse(code)
+    transformer = AddLinePrints()
+    new_tree = transformer.visit(tree)
+    return ast.unparse(new_tree)
+
+def prepare_for_python_interactive(code):
+    """
+    Adjusts code formatting for the python -i flag. It adds newlines based 
+    on whitespace to make code work in interactive mode.
+    """
+
+    def get_indentation(line):
+        """Returns the number of leading spaces in a line, treating 4 spaces as one level of indentation."""
+        return len(line) - len(line.lstrip())
+
+    lines = code.split('\n')
+    adjusted_code = []
+
+    previous_indentation = 0
+
+    for line in lines:
+        current_indentation = get_indentation(line)
+
+        if current_indentation < previous_indentation:
+            if not (line.strip().startswith("except:") or line.strip().startswith("else:") or line.strip().startswith("elif:") or line.strip().startswith("finally:")):
+              adjusted_code.append('')  # end of block
+
+        adjusted_code.append(line)
+        previous_indentation = current_indentation
+
+    return '\n'.join(adjusted_code)
