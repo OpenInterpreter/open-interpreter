@@ -7,6 +7,7 @@ import ast
 import astor
 import sys
 import os
+import re
 
 # Mapping of languages to their start and print commands
 language_map = {
@@ -25,7 +26,6 @@ language_map = {
   "javascript": {
     "start_cmd": "node -i",
     "print_cmd": 'console.log("{}")'
-    
   },
   "applescript": {
     # Starts from shell, whatever the user's preference (defaults to '/bin/zsh')
@@ -278,11 +278,21 @@ class CodeInterpreter:
       
       line = line.strip()
 
+      # Node's interactive REPL outputs a billion things
+      # So we clean it up:
+      if self.language == "javascript":
+        if "Welcome to Node.js" in line:
+          continue
+        if line in ["undefined", 'Type ".help" for more information.']:
+          continue
+        # Remove trailing ">"s
+        line = re.sub(r'^\s*(>\s*)+', '', line)
+
       # Check if it's a message we added (like ACTIVE_LINE)
       # Or if we should save it to self.output
       if line.startswith("ACTIVE_LINE:"):
         self.active_line = int(line.split(":")[1])
-      elif line == "END_OF_EXECUTION":
+      elif "END_OF_EXECUTION" in line:
         self.done.set()
         self.active_line = None
       elif "KeyboardInterrupt" in line:
