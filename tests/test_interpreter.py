@@ -2,16 +2,16 @@ import interpreter
 interpreter.auto_run = True
 interpreter.temperature = 0
 
+def test_hello_world():
+    interpreter.reset()
+    messages = interpreter.chat("""Please reply with just the words "Hello, World!" and nothing else.""", return_messages=True)
+    assert messages == [{'role': 'user', 'content': 'Please reply with just the words "Hello, World!" and nothing else.'}, {'role': 'assistant', 'content': 'Hello, World!'}]
+
 def test_math():
     interpreter.reset()
     messages = interpreter.chat("""Please perform the calculation 27073*7397 then reply with just the integer answer with no commas or anything, nothing else.""", return_messages=True)
     print(messages)
     assert messages[-1] == {'role': 'assistant', 'content': '200258981'}
-
-def test_hello_world():
-    interpreter.reset()
-    messages = interpreter.chat("""Please reply with just the words "Hello, World!" and nothing else.""", return_messages=True)
-    assert messages == [{'role': 'user', 'content': 'Please reply with just the words "Hello, World!" and nothing else.'}, {'role': 'assistant', 'content': 'Hello, World!'}]
 
 def test_delayed_exec():
     interpreter.reset()
