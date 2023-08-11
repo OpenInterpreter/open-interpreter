@@ -25,6 +25,10 @@ language_map = {
   "javascript": {
     "start_cmd": "node -i",
     "print_cmd": 'console.log("{}")'
+  },
+  "applescript": {
+    "start_cmd": "osascript",
+    "print_cmd": 'log "{}"'
   }
 }
 
@@ -42,10 +46,11 @@ class CodeInterpreter:
   They can create code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
   """
 
-  def __init__(self, language):
+  def __init__(self, language, debug_mode):
     self.language = language
     self.proc = None
     self.active_line = None
+    self.debug_mode = debug_mode
 
   def start_process(self):
     # Get the start_cmd for the selected language
@@ -66,6 +71,19 @@ class CodeInterpreter:
                      args=(self.proc.stderr, ),
                      daemon=True).start()
 
+  def update_active_block(self):
+      """
+      This will also truncate the output,
+      which we need to do every time we update the active block.
+      """
+      # Strip then truncate the output if necessary
+      self.output = truncate_output(self.output)
+  
+      # Display it
+      self.active_block.active_line = self.active_line
+      self.active_block.output = self.output
+      self.active_block.refresh()
+
   def run(self):
     """
     Executes code.
@@ -85,8 +103,22 @@ class CodeInterpreter:
     """
 
     # Start the subprocess if it hasn't been started
-    if not self.proc:
-      self.start_process()
+    try:
+      if not self.proc:
+        self.start_process()
+    except:
+      # Sometimes start_process will fail!
+      # Like if they don't have `node` installed or something.
+      
+      traceback_string = traceback.format_exc()
+      self.output = traceback_string
+      self.update_active_block()
+
+      # Before you return, wait for the display to catch up?
+      # (I'm not sure why this works)
+      time.sleep(0.1)
+
+      return self.output
 
     # Reset output
     self.output = ""
@@ -112,30 +144,29 @@ class CodeInterpreter:
         
         traceback_string = traceback.format_exc()
         self.output = traceback_string
+        self.update_active_block()
 
-        # Strip then truncate the output if necessary
-        self.output = truncate_output(self.output)
-
-        # Display it
-        self.active_block.output = self.output
-        self.active_block.refresh()
-
-        # Wait for the display to catch up? (I'm not sure why this works)
-        time.sleep(0.01)
+        # Before you return, wait for the display to catch up?
+        # (I'm not sure why this works)
+        time.sleep(0.1)
 
         return self.output
         
       code = fix_code_indentation(code)
 
+    # Remove any whitespace lines, as this will break indented blocks
+    code_lines = code.split("\n")
+    code_lines = [c for c in code_lines if c.strip() != ""]
+    code = "\n".join(code_lines)
+
     # Add end command (we'll be listening for this so we know when it ends)
     code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION') + "\n"
 
-    """
     # Debug
-    print("Running code:")
-    print(code)
-    print("---")
-    """
+    if self.debug_mode:
+      print("Running code:")
+      print(code)
+      print("---")
 
     # Reset self.done so we can .wait() for it
     self.done = threading.Event()
@@ -155,8 +186,9 @@ class CodeInterpreter:
     # Wait until execution completes
     self.done.wait()
 
-    # Wait for the display to catch up? (I'm not sure why this works)
-    time.sleep(0.01)
+    # Before you return, wait for the display to catch up?
+    # (I'm not sure why this works)
+    time.sleep(0.1)
 
     # Return code output
     return self.output
@@ -226,6 +258,12 @@ class CodeInterpreter:
   def save_and_display_stream(self, stream):
     # Handle each line of output
     for line in iter(stream.readline, ''):
+
+      if self.debug_mode:
+        print("Recieved output line:")
+        print(line)
+        print("---")
+      
       line = line.strip()
 
       # Check if it's a message we added (like ACTIVE_LINE)
@@ -241,13 +279,7 @@ class CodeInterpreter:
         self.output += "\n" + line
         self.output = self.output.strip()
 
-      # Strip then truncate the output if necessary
-      self.output = truncate_output(self.output)
-
-      # Update the active block
-      self.active_block.active_line = self.active_line
-      self.active_block.output = self.output
-      self.active_block.refresh()
+      self.update_active_block()
 
 def fix_code_indentation(code):
   lines = code.split("\n")
