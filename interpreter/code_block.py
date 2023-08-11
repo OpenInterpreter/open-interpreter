@@ -19,7 +19,7 @@ class CodeBlock:
     self.code = ""
     self.active_line = None
 
-    self.live = Live(auto_refresh=False, console=Console())
+    self.live = Live(auto_refresh=False, console=Console(), vertical_overflow="visible")
     self.live.start()
 
   def update_from_message(self, message):
@@ -59,14 +59,11 @@ class CodeBlock:
     for i, line in enumerate(code_lines, start=1):
       if i == self.active_line:
         # This is the active line, print it with a white background
-        syntax = Syntax(line, self.language, line_numbers=False, theme="bw")
+        syntax = Syntax(line, self.language, theme="bw", line_numbers=False, word_wrap=True)
         code_table.add_row(syntax, style="black on white")
       else:
         # This is not the active line, print it normally
-        syntax = Syntax(line,
-                        self.language,
-                        line_numbers=False,
-                        theme="monokai")
+        syntax = Syntax(line, self.language, theme="monokai", line_numbers=False, word_wrap=True)
         code_table.add_row(syntax)
 
     # Create a panel for the code
