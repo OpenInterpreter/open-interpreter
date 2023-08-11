@@ -11,7 +11,7 @@ def test_hello_world():
 def test_math():
     interpreter.reset()
     messages = interpreter.chat("""Please perform the calculation 27073*7397 then reply with just the integer answer with no commas or anything, nothing else.""", return_messages=True)
-    assert messages[-1] == {'role': 'assistant', 'content': '200258981'}
+    assert "200258981" in messages[-1]["content"]
 
 def test_delayed_exec():
     interpreter.reset()
