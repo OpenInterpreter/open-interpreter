@@ -11,6 +11,7 @@ import openai
 import getpass
 import requests
 import readline
+import urllib.parse
 import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
@@ -107,8 +108,12 @@ class Interpreter:
       # Open Procedures is an open-source database of tiny, structured coding tutorials.
       # We can query it semantically and append relevant tutorials/procedures to our system message:
 
-      # Get procedures that are relevant to the last messages
+      # Embed and truncate the last two messages
       query = str(self.messages[-2:])
+      query = urllib.parse.quote(query)
+      query = query[-2000:]
+      
+      # Use them to query Open Procedures
       url = f"https://open-procedures.replit.app/search/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
       info += "\n\n# Potentially Helpful Procedures (may or may not be related)\n" + "\n---\n".join(relevant_procedures)
