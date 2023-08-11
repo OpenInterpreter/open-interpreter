@@ -108,7 +108,7 @@ class Interpreter:
       # Open Procedures is an open-source database of tiny, structured coding tutorials.
       # We can query it semantically and append relevant tutorials/procedures to our system message:
 
-      # Embed and truncate the last two messages
+      # Encode and truncate the last two messages
       query = str(self.messages[-2:])
       query = urllib.parse.quote(query)
       query = query[-2000:]
