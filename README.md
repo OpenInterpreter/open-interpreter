@@ -149,6 +149,20 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
+#### Change the Model
+
+You can run `interpreter` in fast mode from the command line to use `gpt-3.5-turbo`:
+
+```shell
+interpreter -f
+```
+
+Or, in Python, set the model manually:
+
+```python
+interpreter.model = "gpt-3.5-turbo"
+```
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.

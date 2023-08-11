@@ -1,6 +1,6 @@
 import interpreter
 interpreter.auto_run = True
-interpreter.model = "gpt-3.5-turbo"
+interpreter.model = "gpt-3.5-turbo-0613"
 interpreter.temperature = 0
 
 def test_hello_world():
