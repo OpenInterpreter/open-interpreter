@@ -151,6 +151,14 @@ class Interpreter:
         if self.llama_instance == None:
           raise KeyboardInterrupt
 
+    # Display messages regarding settings
+    
+    if self.debug_mode:
+      print('', Markdown("`You are in debug mode.`"), '')
+
+    if "gpt-3.5" in self.model:
+      print('', Markdown(f"Model set to `{self.model}`."), '')
+    
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
