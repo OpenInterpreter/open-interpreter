@@ -26,8 +26,8 @@ function_schema = {
       "language": {
         "type": "string",
         "description":
-        "The programming language. Supported languages: python, shell",
-        "enum": ["python", "shell"]
+        "The programming language.",
+        "enum": ["python", "shell", "applescript", "javascript"]
       },
       "code": {
         "type": "string",
@@ -64,6 +64,7 @@ class Interpreter:
     self.auto_run = False
     self.local = False
     self.model = "gpt-4-0613"
+    self.debug_mode = False
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -214,17 +215,28 @@ class Interpreter:
     info = self.get_info_for_system_message()
     system_message = self.system_message + "\n\n" + info
 
-    # While Llama-2 is still so slow, we need to
-    # overwrite the system message with a tiny, performant one.
     if self.local:
+      # While Llama-2 is still so slow, we need to
+      # overwrite the system message with a tiny, performant one.
       system_message = "You are an AI that executes Python code. Use ```python to run it."
+      
+      # Model determines how much we'll trim the messages list to get it under the context limit
+      # So for Llama-2, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as Llama-2
+      self.model = "gpt-3.5-turbo"
+
+    messages = tt.trim(self.messages, self.model, system_message=system_message)
+    
+    if self.debug_mode:
+      print("\n", "Sending `messages` to LLM:", "\n")
+      print(messages)
+      print()
 
     # Make LLM call
     if not self.local:
       # GPT-4
       response = openai.ChatCompletion.create(
         model=self.model,
-        messages=tt.trim(self.messages, self.model, system_message=system_message),
+        messages=messages,
         functions=[function_schema],
         stream=True,
         temperature=self.temperature,
@@ -239,9 +251,7 @@ class Interpreter:
             message['role'] = 'system'
           
       response = self.llama_instance.create_chat_completion(
-        messages=tt.trim(messages,
-                         "gpt-3.5-turbo",
-                         system_message=system_message),
+        messages=messages,
         stream=True,
         temperature=self.temperature,
       )
@@ -384,7 +394,7 @@ class Interpreter:
           language = self.messages[-1]["function_call"]["parsed_arguments"][
             "language"]
           if language not in self.code_interpreters:
-            self.code_interpreters[language] = CodeInterpreter(language)
+            self.code_interpreters[language] = CodeInterpreter(language, self.debug_mode)
           code_interpreter = self.code_interpreters[language]
 
           # Let this Code Interpreter control the active_block

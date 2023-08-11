@@ -13,8 +13,6 @@ def cli(interpreter):
                       '--yes',
                       action='store_true',
                       help='execute code without user confirmation')
-
-  
   parser.add_argument('-f',
                       '--fast',
                       action='store_true',
@@ -23,6 +21,9 @@ def cli(interpreter):
                       '--local',
                       action='store_true',
                       help='run fully local with llama-2')
+  parser.add_argument('--debug',
+                      action='store_true',
+                      help='debug mode. prints extra information')
   args = parser.parse_args()
 
   # Modify interpreter according to command line flags
@@ -32,6 +33,8 @@ def cli(interpreter):
     interpreter.model = "gpt-3.5-turbo-0613"
   if args.local:
     interpreter.local = True
+  if args.debug:
+    interpreter.debug_mode = True
 
   # Run the chat method
   interpreter.chat()
