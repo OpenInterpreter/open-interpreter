@@ -170,7 +170,8 @@ class CodeInterpreter:
       code = code.replace('"', r'\"')
       # Wrap in double quotes
       code = '"' + code + '"'
-      code = "osascript -e " + code
+      # Prepend start command + newline (to send it in)
+      code = "osascript -e " + code + "\n"
 
     # Debug
     if self.debug_mode:
