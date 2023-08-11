@@ -157,8 +157,12 @@ class Interpreter:
     if self.debug_mode:
       welcome_message += "> Entered debug mode."
 
-    if "gpt-3.5" in self.model:
+    # If self.local, we actually don't use self.model
+    if not self.local and "gpt-3.5" in self.model:
       welcome_message += f"\n> Model set to `{self.model}`."
+
+    if self.local:
+      welcome_message += f"\n> Model set to `llama-2`."
     
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
@@ -166,7 +170,7 @@ class Interpreter:
       welcome_message += confirm_mode_message
       
     # Print welcome message with newlines on either side (aesthetic choice)
-    print('', welcome_message.strip(), '')
+    print('', Markdown(welcome_message.strip()), '')
 
     # Check if `message` was passed in by user
     if message:
