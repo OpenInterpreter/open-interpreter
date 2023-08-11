@@ -27,7 +27,7 @@ language_map = {
     "print_cmd": 'console.log("{}")'
   },
   "applescript": {
-    "start_cmd": "osascript",
+    "start_cmd": "osascript -e",
     "print_cmd": 'log "{}"'
   }
 }
@@ -43,7 +43,7 @@ class CodeInterpreter:
   """
   Code Interpreters display and run code in different languages.
   
-  They can create code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
+  They can control code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
   """
 
   def __init__(self, language, debug_mode):
@@ -103,22 +103,23 @@ class CodeInterpreter:
     """
 
     # Start the subprocess if it hasn't been started
-    try:
-      if not self.proc:
+    # Some languages, like Applescript, need to be run with their start command every time
+    if not self.proc or self.language in ["applescript"]:
+      try:
         self.start_process()
-    except:
-      # Sometimes start_process will fail!
-      # Like if they don't have `node` installed or something.
-      
-      traceback_string = traceback.format_exc()
-      self.output = traceback_string
-      self.update_active_block()
-
-      # Before you return, wait for the display to catch up?
-      # (I'm not sure why this works)
-      time.sleep(0.1)
-
-      return self.output
+      except:
+        # Sometimes start_process will fail!
+        # Like if they don't have `node` installed or something.
+        
+        traceback_string = traceback.format_exc()
+        self.output = traceback_string
+        self.update_active_block()
+  
+        # Before you return, wait for the display to catch up?
+        # (I'm not sure why this works)
+        time.sleep(0.1)
+  
+        return self.output
 
     # Reset output
     self.output = ""
@@ -161,6 +162,13 @@ class CodeInterpreter:
 
     # Add end command (we'll be listening for this so we know when it ends)
     code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION') + "\n"
+
+    # Applescript needs to be wrapped in quotes
+    if self.language == "applescript":
+      # Escape double quotes
+      code = code.replace('"', r'\"')
+      # Wrap in double quotes
+      code = '"' + code + '"'
 
     # Debug
     if self.debug_mode:
