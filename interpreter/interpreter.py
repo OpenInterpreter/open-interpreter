@@ -167,7 +167,7 @@ class Interpreter:
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
-      welcome_message += confirm_mode_message
+      welcome_message += "\n\n" + confirm_mode_message
       
     # Print welcome message with newlines on either side (aesthetic choice)
     print('', Markdown(welcome_message.strip()), '')
