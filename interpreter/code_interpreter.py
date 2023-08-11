@@ -103,8 +103,7 @@ class CodeInterpreter:
     """
 
     # Start the subprocess if it hasn't been started
-    # Some languages, like Applescript, need to be run with their start command every time
-    if not self.proc or self.language in ["applescript"]:
+    if not self.proc:
       try:
         self.start_process()
       except:
@@ -163,12 +162,13 @@ class CodeInterpreter:
     # Add end command (we'll be listening for this so we know when it ends)
     code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION') + "\n"
 
-    # Applescript needs to be wrapped in quotes
+    # Applescript-specific processing
     if self.language == "applescript":
       # Escape double quotes
       code = code.replace('"', r'\"')
       # Wrap in double quotes
       code = '"' + code + '"'
+      code = "osascript -e " + code
 
     # Debug
     if self.debug_mode:
