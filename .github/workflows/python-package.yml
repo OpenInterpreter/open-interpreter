@@ -29,4 +29,6 @@ jobs:
         poetry install
     - name: Test with pytest
       run: |
-        poetry run pytest
+        poetry run pytest -s
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
