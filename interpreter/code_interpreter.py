@@ -27,7 +27,9 @@ language_map = {
     "print_cmd": 'console.log("{}")'
   },
   "applescript": {
-    "start_cmd": "osascript -e",
+    # Starts from shell, whatever the user's preference (defaults to '/bin/zsh')
+    # (We'll prepend "osascript -e" every time, not once at the start, so we want an empty shell)
+    "start_cmd": os.environ.get('SHELL', '/bin/zsh'),
     "print_cmd": 'log "{}"'
   }
 }
