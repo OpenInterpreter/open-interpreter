@@ -151,42 +151,43 @@ class Interpreter:
     if not self.auto_run:
       # Print message with newlines on either side (aesthetic choice)
       print('', Markdown(confirm_mode_message), '')
-
-    # `message` won't be None if we're passing one in via interpreter.chat(message)
-    # In that case, we respond non-interactivley and return:
+      
     if message:
+      # `message` won't be None if we're passing one in via interpreter.chat(message)
+      # In that case, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
       self.respond()
-      return
-
-    # Start interactive chat
-    while True:
-      try:
-        user_input = input("> ").strip()
-      except EOFError:
-        break
-      except KeyboardInterrupt:
-        print()  # Aesthetic choice
-        break
-
-      # Use `readline` to let users up-arrow to previous user messages,
-      # which is a common behavior in terminals.
-      readline.add_history(user_input)
-
-      # Add the user message to self.messages
-      self.messages.append({"role": "user", "content": user_input})
-
-      # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
-      try:
-        self.respond()
-      except KeyboardInterrupt:
-        pass
-      finally:
-        # Always end the active block. Multiple Live displays = issues
-        self.end_active_block()
+      
+    else:
+      # `message` is None, so we're in interpreter.chat() 
+      # Start interactive chat
+      while True:
+        try:
+          user_input = input("> ").strip()
+        except EOFError:
+          break
+        except KeyboardInterrupt:
+          print()  # Aesthetic choice
+          break
+  
+        # Use `readline` to let users up-arrow to previous user messages,
+        # which is a common behavior in terminals.
+        readline.add_history(user_input)
+  
+        # Add the user message to self.messages
+        self.messages.append({"role": "user", "content": user_input})
+  
+        # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
+        try:
+          self.respond()
+        except KeyboardInterrupt:
+          pass
+        finally:
+          # Always end the active block. Multiple Live displays = issues
+          self.end_active_block()
 
     if return_messages:
-      return self.messages
+        return self.messages
 
   def verify_api_key(self):
     """
