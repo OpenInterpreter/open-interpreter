@@ -1,4 +1,6 @@
 import subprocess
+import webbrowser
+import tempfile
 import threading
 import traceback
 import platform
@@ -9,7 +11,17 @@ import sys
 import os
 import re
 
-# Mapping of languages to their start and print commands
+
+def run_html(html_content):
+    # Create a temporary HTML file with the content
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+        f.write(html_content.encode())
+        
+    # Open the HTML file with the default web browser
+    webbrowser.open('file://' + os.path.realpath(f.name))
+
+
+# Mapping of languages to their start, run, and print commands
 language_map = {
   "python": {
     # Python is run from this interpreter with sys.executable
@@ -32,6 +44,10 @@ language_map = {
     # (We'll prepend "osascript -e" every time, not once at the start, so we want an empty shell)
     "start_cmd": os.environ.get('SHELL', '/bin/zsh'),
     "print_cmd": 'log "{}"'
+  },
+  "html": {
+    "open_subrocess" = False,
+    "run_function": run_html,
   }
 }
 
@@ -105,8 +121,11 @@ class CodeInterpreter:
         return message
     """
 
+    # Should we keep a subprocess open? True by default
+    open_subrocess = language_map[self.language].get("open_subrocess", True)
+
     # Start the subprocess if it hasn't been started
-    if not self.proc:
+    if not self.proc and open_subrocess:
       try:
         self.start_process()
       except:
@@ -127,11 +146,12 @@ class CodeInterpreter:
     self.output = ""
 
     # Use the print_cmd for the selected language
-    self.print_cmd = language_map[self.language]["print_cmd"]
+    self.print_cmd = language_map[self.language].get("print_cmd")
     code = self.code
 
     # Add print commands that tell us what the active line is
-    code = self.add_active_line_prints(code)
+    if self.print_cmd:
+      code = self.add_active_line_prints(code)
 
     # If it's Python, we also need to prepare it for `python -i`
     if self.language == "python":
@@ -161,7 +181,8 @@ class CodeInterpreter:
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
+    if self.print_cmd:
+      code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
 
     # Applescript-specific processing
     if self.language == "applescript":
@@ -171,12 +192,17 @@ class CodeInterpreter:
       code = '"' + code + '"'
       # Prepend start command
       code = "osascript -e " + code
-
+      
     # Debug
     if self.debug_mode:
       print("Running code:")
       print(code)
       print("---")
+
+    # HTML-specific processing
+    if self.language == "html":
+      language_map["html"]["run_function"](code)
+      return "Opened successfully."
 
     # Reset self.done so we can .wait() for it
     self.done = threading.Event()
