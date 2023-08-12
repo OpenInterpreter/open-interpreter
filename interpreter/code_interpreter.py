@@ -46,7 +46,7 @@ language_map = {
     "print_cmd": 'log "{}"'
   },
   "html": {
-    "open_subrocess" = False,
+    "open_subrocess": False,
     "run_function": run_html,
   }
 }
