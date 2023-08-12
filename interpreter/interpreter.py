@@ -114,7 +114,8 @@ class Interpreter:
       query = query[-2000:]
       
       # Use them to query Open Procedures
-      url = f"https://open-procedures.replit.app/search/?query={query}"
+      #url = f"https://open-procedures.replit.app/search/?query={query}"
+      url = f"https://open-procedures.killianlucas1.repl.co/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
       info += "\n\n# Potentially Helpful Procedures (may or may not be related)\n" + "\n---\n".join(relevant_procedures)
 
