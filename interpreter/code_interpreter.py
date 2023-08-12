@@ -20,6 +20,8 @@ def run_html(html_content):
     # Open the HTML file with the default web browser
     webbrowser.open('file://' + os.path.realpath(f.name))
 
+    return f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
+
 
 # Mapping of languages to their start, run, and print commands
 language_map = {
@@ -201,8 +203,8 @@ class CodeInterpreter:
 
     # HTML-specific processing
     if self.language == "html":
-      language_map["html"]["run_function"](code)
-      return "Opened successfully."
+      output = language_map["html"]["run_function"](code)
+      return output
 
     # Reset self.done so we can .wait() for it
     self.done = threading.Event()
