@@ -154,14 +154,8 @@ class CodeInterpreter:
 
     # Add print commands that tell us what the active line is
     if self.print_cmd:
-      code = self.add_active_line_prints(code)
-
-    # If it's Python, we also need to prepare it for `python -i`
-    if self.language == "python":
-
-      # Normalize code by parsing then unparsing it
       try:
-        code = prepare_for_python_interactive(code)
+        code = self.add_active_line_prints(code)
       except:
         # If this failed, it means the code didn't compile
         # This traceback will be our output.
@@ -169,16 +163,20 @@ class CodeInterpreter:
         traceback_string = traceback.format_exc()
         self.output = traceback_string
         self.update_active_block()
-
+  
         # Before you return, wait for the display to catch up?
         # (I'm not sure why this works)
         time.sleep(0.1)
-
+  
         return self.output
-        
-      code = fix_code_indentation(code)
+
+    if self.language == "python":
+      # This lets us stop execution when error happens (which is not default -i behavior)
+      # And solves a bunch of indentation problems-- if everything's indented, -i treats it as one block
+      code = wrap_in_try_except(code)
 
     # Remove any whitespace lines, as this will break indented blocks
+    # (are we sure about this? test this)
     code_lines = code.split("\n")
     code_lines = [c for c in code_lines if c.strip() != ""]
     code = "\n".join(code_lines)
@@ -202,7 +200,7 @@ class CodeInterpreter:
       print(code)
       print("---")
 
-    # HTML-specific processing
+    # HTML-specific processing (and running)
     if self.language == "html":
       output = language_map["html"]["run_function"](code)
       return output
@@ -330,20 +328,6 @@ class CodeInterpreter:
 
       self.update_active_block()
 
-def fix_code_indentation(code):
-  lines = code.split("\n")
-  fixed_lines = []
-  was_indented = False
-  for line in lines:
-    current_indent = len(line) - len(line.lstrip())
-    if current_indent == 0 and was_indented:
-      fixed_lines.append('')  # Add an empty line after an indented block
-    fixed_lines.append(line)
-    was_indented = current_indent > 0
-
-  return "\n".join(fixed_lines)
-
-
 def truncate_output(data):
 
   # In the future, this will come from a config file
@@ -424,12 +408,6 @@ def add_active_line_prints_to_python(code):
     transformer = AddLinePrints()
     new_tree = transformer.visit(tree)
     return ast.unparse(new_tree)
-
-def prepare_for_python_interactive(code):
-    """
-    Adjusts code formatting for the python -i flag.
-    """
-    return wrap_in_try_except(code)
 
 def wrap_in_try_except(code):
     # Add import traceback
