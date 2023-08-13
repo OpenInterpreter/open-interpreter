@@ -379,6 +379,11 @@ class Interpreter:
           # Time to call the function!
           # (Because this is Open Interpreter, we only have one function.)
 
+          if self.debug_mode:
+            print("Running function:")
+            print(self.messages[-1])
+            print("---")
+
           # Ask for user confirmation to run code
           if self.auto_run == False:
 
