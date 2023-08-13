@@ -82,7 +82,8 @@ class CodeInterpreter:
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
-                                 text=True)
+                                 text=True,
+                                 bufsize=0)
 
     # Start watching ^ its `stdout` and `stderr` streams
     threading.Thread(target=self.save_and_display_stream,
@@ -308,6 +309,12 @@ class CodeInterpreter:
         # Remove trailing ">"s
         line = re.sub(r'^\s*(>\s*)+', '', line)
 
+      # Python's interactive REPL outputs a million things
+      # So we clean it up:
+      if self.language == "python":
+        if re.match(r'^(\s*>>>\s*|\s*\.\.\.\s*)', line):
+          continue
+
       # Check if it's a message we added (like ACTIVE_LINE)
       # Or if we should save it to self.output
       if line.startswith("ACTIVE_LINE:"):
@@ -376,10 +383,16 @@ class AddLinePrints(ast.NodeTransformer):
     def process_body(self, body):
         """Processes a block of statements, adding print calls."""
         new_body = []
+
+        # In case it's not iterable:
+        if not isinstance(body, list):
+            body = [body]
+    
         for sub_node in body:
             if hasattr(sub_node, 'lineno'):
                 new_body.append(self.insert_print_statement(sub_node.lineno))
             new_body.append(sub_node)
+
         return new_body
 
     def visit(self, node):
@@ -414,27 +427,41 @@ def add_active_line_prints_to_python(code):
 
 def prepare_for_python_interactive(code):
     """
-    Adjusts code formatting for the python -i flag. It adds newlines based 
-    on whitespace to make code work in interactive mode.
+    Adjusts code formatting for the python -i flag.
     """
+    return wrap_in_try_except(code)
 
-    def get_indentation(line):
-        """Returns the number of leading spaces in a line, treating 4 spaces as one level of indentation."""
-        return len(line) - len(line.lstrip())
+def wrap_in_try_except(code):
+    # Add import traceback
+    code = "import traceback\n" + code
 
-    lines = code.split('\n')
-    adjusted_code = []
+    # Parse the input code into an AST
+    parsed_code = ast.parse(code)
 
-    previous_indentation = 0
+    # Wrap the entire code's AST in a single try-except block
+    try_except = ast.Try(
+        body=parsed_code.body,
+        handlers=[
+            ast.ExceptHandler(
+                type=ast.Name(id="Exception", ctx=ast.Load()),
+                name=None,
+                body=[
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(value=ast.Name(id="traceback", ctx=ast.Load()), attr="print_exc", ctx=ast.Load()),
+                            args=[],
+                            keywords=[]
+                        )
+                    ),
+                ]
+            )
+        ],
+        orelse=[],
+        finalbody=[]
+    )
 
-    for line in lines:
-        current_indentation = get_indentation(line)
+    # Assign the try-except block as the new body
+    parsed_code.body = [try_except]
 
-        if current_indentation < previous_indentation:
-            if not (line.strip().startswith("except:") or line.strip().startswith("else:") or line.strip().startswith("elif:") or line.strip().startswith("finally:")):
-              adjusted_code.append('')  # end of block
-
-        adjusted_code.append(line)
-        previous_indentation = current_indentation
-
-    return '\n'.join(adjusted_code)
+    # Convert the modified AST back to source code
+    return ast.unparse(parsed_code)

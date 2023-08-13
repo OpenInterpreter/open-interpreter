@@ -21,7 +21,8 @@ def cli(interpreter):
                       '--local',
                       action='store_true',
                       help='run fully local with llama-2')
-  parser.add_argument('--debug',
+  parser.add_argument('-d',
+                      '--debug',
                       action='store_true',
                       help='debug mode. prints extra information')
   args = parser.parse_args()
