@@ -10,13 +10,7 @@ import platform
 import openai
 import getpass
 import requests
-try:
-    if platform.system() == 'Windows':
-        import pyreadline3 as readline
-    else:
-        import readline
-except ImportError:
-    print("Windows file system detected, please pip install pyreadline3.")
+import readline
 import urllib.parse
 import tokentrim as tt
 from rich import print
