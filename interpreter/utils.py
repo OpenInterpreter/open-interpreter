@@ -19,19 +19,12 @@ def merge_deltas(original, delta):
                 original[key] = value
     return original
 
-def escape_newlines_in_json_string_values(s):
-    result = []
-    in_string = False
-    for ch in s:
-        if ch == '"' and (len(result) == 0 or result[-1] != '\\'):
-            in_string = not in_string
-        if in_string and ch == '\n':
-            result.append('\\n')
-        else:
-            result.append(ch)
-    return ''.join(result)
-
 def parse_partial_json(s):
+
+    # Escape newlines. GPT likes to do this in function calls sometimes, which makes it invalid JSON.
+    # This will make the JSON into a single line, but that's not destructive to the content (only removes pretty formatting).
+    s = s.replace('\n', '\\n')
+  
     # Initialize a stack to keep track of open braces, brackets, and strings.
     stack = []
     is_inside_string = False
