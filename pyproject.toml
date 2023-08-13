@@ -19,6 +19,14 @@ tokentrim = "^0.1.2"
 appdirs = "^1.4.4"
 six = "^1.16.0"
 
+[tool.poetry.dependencies.pyreadline3]
+version = "*"
+markers = "sys_platform == 'win32'"
+
+[tool.poetry.dependencies.readline]
+version = "*"
+markers = "sys_platform != 'win32'"
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
 
