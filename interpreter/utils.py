@@ -32,65 +32,44 @@ def escape_newlines_in_json_string_values(s):
     return ''.join(result)
 
 def parse_partial_json(s):
-    """
-    Tries to parse a string as JSON and if it fails, attempts to 'close' any open JSON structures.
-
-    Parameters:
-    s (str): The string to parse as JSON.
-
-    Returns:
-    json: The parsed JSON if successful, or None if it fails even after attempting to close open structures.
-    """
-
-    # First, try to parse the string as-is. If it's valid JSON, we'll return it directly.
-    try:
-        return json.loads(s)
-    except json.JSONDecodeError:
-        pass  # The string is not valid JSON. We'll try to handle this case below.
-
-    # First, make sure newlines inside double quotes are escaped properly (a common error in GPT function calls)
-    s = escape_newlines_in_json_string_values(s)
-
-    # Initialize a stack to keep track of open braces and brackets.
+    # Initialize a stack to keep track of open braces, brackets, and strings.
     stack = []
-
-    # Initialize a flag to keep track of whether we're currently inside a string.
     is_inside_string = False
+    escaped = False
 
     # Process each character in the string one at a time.
     for char in s:
-
-        # Handle quotes, which denote the start or end of a string in JSON.
-        if char == '"':
-          
-            if stack and stack[-1] == '\\': # <- This is a single backslash, even though it looks like two!
-              
-                # This quote is escaped, so it doesn't affect whether we're inside a string.
-                stack.pop()
+        if is_inside_string:
+            if char == '"' and not escaped:
+                is_inside_string = False
+            elif char == '\\':
+                escaped = not escaped
             else:
-                # This quote is not escaped, so it toggles whether we're inside a string.
-                is_inside_string = not is_inside_string
-
-        # If we're not inside a string, we need to handle braces and brackets.
-        elif not is_inside_string:
-            if char == '{' or char == '[':
-                # This character opens a new structure, so add it to the stack.
-                stack.append(char)
+                escaped = False
+        else:
+            if char == '"':
+                is_inside_string = True
+                escaped = False
+            elif char == '{':
+                stack.append('}')
+            elif char == '[':
+                stack.append(']')
             elif char == '}' or char == ']':
-                # This character closes a structure, so remove the most recently opened structure from the stack.
-                if stack:
+                if stack and stack[-1] == char:
                     stack.pop()
+                else:
+                    # Mismatched closing character; the input is malformed.
+                    return None
 
     # If we're still inside a string at the end of processing, we need to close the string.
     if is_inside_string:
         s += '"'
 
     # Close any remaining open structures in the reverse order that they were opened.
-    while stack:
-        open_char = stack.pop()
-        s += '}' if open_char == '{' else ']'
+    for closing_char in reversed(stack):
+        s += closing_char
 
-    # Attempt to parse the string as JSON again now that we've closed all open structures.
+    # Attempt to parse the modified string as JSON.
     try:
         return json.loads(s)
     except json.JSONDecodeError:

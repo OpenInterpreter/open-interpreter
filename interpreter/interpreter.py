@@ -28,7 +28,7 @@ function_schema = {
         "type": "string",
         "description":
         "The programming language.",
-        "enum": ["python", "shell", "applescript", "javascript"]
+        "enum": ["python", "shell", "applescript", "javascript", "html"]
       },
       "code": {
         "type": "string",
