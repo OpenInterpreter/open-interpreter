@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.0.292"
+version = "0.0.293"
 description = "Ask GPT-4 to run code locally."
 authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
@@ -19,13 +19,11 @@ tokentrim = "^0.1.2"
 appdirs = "^1.4.4"
 six = "^1.16.0"
 
+# On non-windows systems, you can just `import readline`.
+# On windows, `pyreadline3` replaces that, so you can also just `import readline`.
 [tool.poetry.dependencies.pyreadline3]
-version = "*"
+version = "^3.4.1"
 markers = "sys_platform == 'win32'"
-
-[tool.poetry.dependencies.readline]
-version = "*"
-markers = "sys_platform != 'win32'"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
