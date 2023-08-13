@@ -1,4 +1,6 @@
 import subprocess
+import webbrowser
+import tempfile
 import threading
 import traceback
 import platform
@@ -9,7 +11,19 @@ import sys
 import os
 import re
 
-# Mapping of languages to their start and print commands
+
+def run_html(html_content):
+    # Create a temporary HTML file with the content
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+        f.write(html_content.encode())
+        
+    # Open the HTML file with the default web browser
+    webbrowser.open('file://' + os.path.realpath(f.name))
+
+    return f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
+
+
+# Mapping of languages to their start, run, and print commands
 language_map = {
   "python": {
     # Python is run from this interpreter with sys.executable
@@ -32,6 +46,10 @@ language_map = {
     # (We'll prepend "osascript -e" every time, not once at the start, so we want an empty shell)
     "start_cmd": os.environ.get('SHELL', '/bin/zsh'),
     "print_cmd": 'log "{}"'
+  },
+  "html": {
+    "open_subrocess": False,
+    "run_function": run_html,
   }
 }
 
@@ -64,7 +82,8 @@ class CodeInterpreter:
                                  stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
-                                 text=True)
+                                 text=True,
+                                 bufsize=0)
 
     # Start watching ^ its `stdout` and `stderr` streams
     threading.Thread(target=self.save_and_display_stream,
@@ -105,8 +124,11 @@ class CodeInterpreter:
         return message
     """
 
+    # Should we keep a subprocess open? True by default
+    open_subrocess = language_map[self.language].get("open_subrocess", True)
+
     # Start the subprocess if it hasn't been started
-    if not self.proc:
+    if not self.proc and open_subrocess:
       try:
         self.start_process()
       except:
@@ -127,18 +149,13 @@ class CodeInterpreter:
     self.output = ""
 
     # Use the print_cmd for the selected language
-    self.print_cmd = language_map[self.language]["print_cmd"]
+    self.print_cmd = language_map[self.language].get("print_cmd")
     code = self.code
 
     # Add print commands that tell us what the active line is
-    code = self.add_active_line_prints(code)
-
-    # If it's Python, we also need to prepare it for `python -i`
-    if self.language == "python":
-
-      # Normalize code by parsing then unparsing it
+    if self.print_cmd:
       try:
-        code = prepare_for_python_interactive(code)
+        code = self.add_active_line_prints(code)
       except:
         # If this failed, it means the code didn't compile
         # This traceback will be our output.
@@ -146,22 +163,27 @@ class CodeInterpreter:
         traceback_string = traceback.format_exc()
         self.output = traceback_string
         self.update_active_block()
-
+  
         # Before you return, wait for the display to catch up?
         # (I'm not sure why this works)
         time.sleep(0.1)
-
+  
         return self.output
-        
-      code = fix_code_indentation(code)
+
+    if self.language == "python":
+      # This lets us stop execution when error happens (which is not default -i behavior)
+      # And solves a bunch of indentation problems-- if everything's indented, -i treats it as one block
+      code = wrap_in_try_except(code)
 
     # Remove any whitespace lines, as this will break indented blocks
+    # (are we sure about this? test this)
     code_lines = code.split("\n")
     code_lines = [c for c in code_lines if c.strip() != ""]
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
+    if self.print_cmd:
+      code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
 
     # Applescript-specific processing
     if self.language == "applescript":
@@ -171,12 +193,17 @@ class CodeInterpreter:
       code = '"' + code + '"'
       # Prepend start command
       code = "osascript -e " + code
-
+      
     # Debug
     if self.debug_mode:
       print("Running code:")
       print(code)
       print("---")
+
+    # HTML-specific processing (and running)
+    if self.language == "html":
+      output = language_map["html"]["run_function"](code)
+      return output
 
     # Reset self.done so we can .wait() for it
     self.done = threading.Event()
@@ -280,6 +307,12 @@ class CodeInterpreter:
         # Remove trailing ">"s
         line = re.sub(r'^\s*(>\s*)+', '', line)
 
+      # Python's interactive REPL outputs a million things
+      # So we clean it up:
+      if self.language == "python":
+        if re.match(r'^(\s*>>>\s*|\s*\.\.\.\s*)', line):
+          continue
+
       # Check if it's a message we added (like ACTIVE_LINE)
       # Or if we should save it to self.output
       if line.startswith("ACTIVE_LINE:"):
@@ -294,20 +327,6 @@ class CodeInterpreter:
         self.output = self.output.strip()
 
       self.update_active_block()
-
-def fix_code_indentation(code):
-  lines = code.split("\n")
-  fixed_lines = []
-  was_indented = False
-  for line in lines:
-    current_indent = len(line) - len(line.lstrip())
-    if current_indent == 0 and was_indented:
-      fixed_lines.append('')  # Add an empty line after an indented block
-    fixed_lines.append(line)
-    was_indented = current_indent > 0
-
-  return "\n".join(fixed_lines)
-
 
 def truncate_output(data):
 
@@ -348,10 +367,16 @@ class AddLinePrints(ast.NodeTransformer):
     def process_body(self, body):
         """Processes a block of statements, adding print calls."""
         new_body = []
+
+        # In case it's not iterable:
+        if not isinstance(body, list):
+            body = [body]
+    
         for sub_node in body:
             if hasattr(sub_node, 'lineno'):
                 new_body.append(self.insert_print_statement(sub_node.lineno))
             new_body.append(sub_node)
+
         return new_body
 
     def visit(self, node):
@@ -384,29 +409,37 @@ def add_active_line_prints_to_python(code):
     new_tree = transformer.visit(tree)
     return ast.unparse(new_tree)
 
-def prepare_for_python_interactive(code):
-    """
-    Adjusts code formatting for the python -i flag. It adds newlines based 
-    on whitespace to make code work in interactive mode.
-    """
+def wrap_in_try_except(code):
+    # Add import traceback
+    code = "import traceback\n" + code
 
-    def get_indentation(line):
-        """Returns the number of leading spaces in a line, treating 4 spaces as one level of indentation."""
-        return len(line) - len(line.lstrip())
+    # Parse the input code into an AST
+    parsed_code = ast.parse(code)
 
-    lines = code.split('\n')
-    adjusted_code = []
+    # Wrap the entire code's AST in a single try-except block
+    try_except = ast.Try(
+        body=parsed_code.body,
+        handlers=[
+            ast.ExceptHandler(
+                type=ast.Name(id="Exception", ctx=ast.Load()),
+                name=None,
+                body=[
+                    ast.Expr(
+                        value=ast.Call(
+                            func=ast.Attribute(value=ast.Name(id="traceback", ctx=ast.Load()), attr="print_exc", ctx=ast.Load()),
+                            args=[],
+                            keywords=[]
+                        )
+                    ),
+                ]
+            )
+        ],
+        orelse=[],
+        finalbody=[]
+    )
 
-    previous_indentation = 0
+    # Assign the try-except block as the new body
+    parsed_code.body = [try_except]
 
-    for line in lines:
-        current_indentation = get_indentation(line)
-
-        if current_indentation < previous_indentation:
-            if not (line.strip().startswith("except:") or line.strip().startswith("else:") or line.strip().startswith("elif:") or line.strip().startswith("finally:")):
-              adjusted_code.append('')  # end of block
-
-        adjusted_code.append(line)
-        previous_indentation = current_indentation
-
-    return '\n'.join(adjusted_code)
+    # Convert the modified AST back to source code
+    return ast.unparse(parsed_code)
