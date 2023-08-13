@@ -41,6 +41,11 @@ class CodeBlock:
     self.live.stop()
 
   def refresh(self, cursor=True):
+    # Get code, return if there is none
+    code = self.code
+    if not code:
+      return
+    
     # Create a table for the code
     code_table = Table(show_header=False,
                        show_footer=False,
@@ -49,8 +54,7 @@ class CodeBlock:
                        expand=True)
     code_table.add_column()
 
-    # Get code and add cursor
-    code = self.code
+    # Add cursor    
     if cursor:
       code += "█"
 
