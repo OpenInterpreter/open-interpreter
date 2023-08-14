@@ -331,6 +331,7 @@ class CodeInterpreter:
       self.update_active_block()
 
 def truncate_output(data):
+  needs_truncation = False
 
   # In the future, this will come from a config file
   max_output_chars = 2000
@@ -340,9 +341,10 @@ def truncate_output(data):
   # Remove previous truncation message if it exists
   if data.startswith(message):
     data = data[len(message):]
+    needs_truncation = True
 
   # If data exceeds max length, truncate it and add message
-  if len(data) > max_output_chars:
+  if len(data) > max_output_chars or needs_truncation:
     data = message + data[-max_output_chars:]
 
   return data
