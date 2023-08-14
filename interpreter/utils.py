@@ -1,4 +1,5 @@
 import json
+import re
 
 def merge_deltas(original, delta):
     """
@@ -21,9 +22,14 @@ def merge_deltas(original, delta):
 
 def parse_partial_json(s):
 
-    # Escape newlines. GPT likes to do this in function calls sometimes, which makes it invalid JSON.
-    # This will make the JSON into a single line, but that's not destructive to the content (only removes pretty formatting).
-    s = s.replace('\n', '\\n')
+    # Escape newlines within unescaped quotes. GPT likes to do this in function calls sometimes, which makes it invalid JSON.
+    s = re.sub(r'("(?:[^"\\]|\\.)*")', lambda m: m.group(1).replace('\n', '\\n'), s)
+
+    # Attempt to parse the string as-is.
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        pass
   
     # Initialize a stack to keep track of open braces, brackets, and strings.
     stack = []

@@ -170,8 +170,12 @@ class Interpreter:
       welcome_message += "\n\n" + confirm_mode_message
       
     # Print welcome message with newlines on either side (aesthetic choice)
+    # unless we're starting with a blockquote (aesthetic choice)
     if welcome_message != "":
-      print('', Markdown(welcome_message.strip()), '')
+      if welcome_message.startswith(">"):
+        print(Markdown(welcome_message.strip()), '')
+      else:
+        print('', Markdown(welcome_message.strip()), '')
 
     # Check if `message` was passed in by user
     if message:
