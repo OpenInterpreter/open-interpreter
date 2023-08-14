@@ -71,8 +71,6 @@ def parse_partial_json(s):
     for closing_char in reversed(stack):
         new_s += closing_char
 
-    print(new_s)
-
     # Attempt to parse the modified string as JSON.
     try:
         return json.loads(new_s)
