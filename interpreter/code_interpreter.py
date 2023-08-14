@@ -182,7 +182,7 @@ class CodeInterpreter:
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    if self.print_cmd:
+    if self.print_cmd and self.language != "applescript": # Applescript is special. Needs it to be a shell command because 'return' (very common) will actually return, halt script
       code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
 
     # Applescript-specific processing
@@ -193,6 +193,8 @@ class CodeInterpreter:
       code = '"' + code + '"'
       # Prepend start command
       code = "osascript -e " + code
+      # Append end command
+      code += '\necho "END_OF_EXECUTION"'
       
     # Debug
     if self.debug_mode:

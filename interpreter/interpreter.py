@@ -437,10 +437,11 @@ class Interpreter:
           self.active_block.end()
 
           # Append the output to messages
+          # Explicitly tell it if there was no output (sometimes "" = hallucinates output)
           self.messages.append({
             "role": "function",
             "name": "run_code",
-            "content": self.active_block.output
+            "content": self.active_block.output if self.active_block.output else "No output"
           })
 
           # Go around again
