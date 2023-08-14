@@ -116,7 +116,7 @@ class Interpreter:
       # Use them to query Open Procedures
       url = f"https://open-procedures.replit.app/search/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
-      info += "\n\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (this is **critical** as they will disappear momentarily) from these procedures if they are relevant to the task:\n\n# Potentially Helpful Procedures\n" + "\n---\n".join(relevant_procedures)
+      info += "\n\n# Potentially Helpful Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (this is **critical** as they will disappear in a moment) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
 
     elif self.local:
 
