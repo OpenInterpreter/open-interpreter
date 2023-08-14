@@ -60,7 +60,7 @@ class Interpreter:
 
   def __init__(self):
     self.messages = []
-    self.temperature = 0.01
+    self.temperature = 0.001
     self.api_key = None
     self.auto_run = False
     self.local = False
@@ -116,7 +116,7 @@ class Interpreter:
       # Use them to query Open Procedures
       url = f"https://open-procedures.replit.app/search/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
-      info += "\n\n# Potentially Helpful Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (this is **critical** as they will disappear in a moment) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
+      info += "\n\n# Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (this is **CRITICAL CRITICAL CRITICAL** that you **WRITE THEM INTO YOUR PLAN** as they will disappear once you finish writing your message) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
 
     elif self.local:
 
@@ -168,14 +168,16 @@ class Interpreter:
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
       welcome_message += "\n\n" + confirm_mode_message
+
+    welcome_message = welcome_message.strip()
       
     # Print welcome message with newlines on either side (aesthetic choice)
     # unless we're starting with a blockquote (aesthetic choice)
     if welcome_message != "":
       if welcome_message.startswith(">"):
-        print(Markdown(welcome_message.strip()), '')
+        print(Markdown(welcome_message), '')
       else:
-        print('', Markdown(welcome_message.strip()), '')
+        print('', Markdown(welcome_message), '')
 
     # Check if `message` was passed in by user
     if message:
