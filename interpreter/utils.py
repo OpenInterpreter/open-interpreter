@@ -22,16 +22,14 @@ def merge_deltas(original, delta):
 
 def parse_partial_json(s):
 
-    # Escape newlines within unescaped quotes. GPT likes to do this in function calls sometimes, which makes it invalid JSON.
-    s = re.sub(r'("(?:[^"\\]|\\.)*")', lambda m: m.group(1).replace('\n', '\\n'), s)
-
     # Attempt to parse the string as-is.
     try:
         return json.loads(s)
     except json.JSONDecodeError:
         pass
   
-    # Initialize a stack to keep track of open braces, brackets, and strings.
+    # Initialize variables.
+    new_s = ""
     stack = []
     is_inside_string = False
     escaped = False
@@ -41,6 +39,8 @@ def parse_partial_json(s):
         if is_inside_string:
             if char == '"' and not escaped:
                 is_inside_string = False
+            elif char == '\n' and not escaped:
+                char = '\\n' # Replace the newline character with the escape sequence.
             elif char == '\\':
                 escaped = not escaped
             else:
@@ -59,18 +59,23 @@ def parse_partial_json(s):
                 else:
                     # Mismatched closing character; the input is malformed.
                     return None
+        
+        # Append the processed character to the new string.
+        new_s += char
 
     # If we're still inside a string at the end of processing, we need to close the string.
     if is_inside_string:
-        s += '"'
+        new_s += '"'
 
     # Close any remaining open structures in the reverse order that they were opened.
     for closing_char in reversed(stack):
-        s += closing_char
+        new_s += closing_char
+
+    print(new_s)
 
     # Attempt to parse the modified string as JSON.
     try:
-        return json.loads(s)
+        return json.loads(new_s)
     except json.JSONDecodeError:
         # If we still can't parse the string as JSON, return None to indicate failure.
         return None
