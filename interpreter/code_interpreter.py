@@ -87,11 +87,11 @@ class CodeInterpreter:
 
     # Start watching ^ its `stdout` and `stderr` streams
     threading.Thread(target=self.save_and_display_stream,
-                     args=(self.proc.stdout, ),
-                     daemon=True).start()
+                     args=(self.proc.stdout, False), # Passes False to is_error_stream
+                     daemon=False).start()
     threading.Thread(target=self.save_and_display_stream,
-                     args=(self.proc.stderr, ),
-                     daemon=True).start()
+                     args=(self.proc.stderr, True), # Passes True to is_error_stream
+                     daemon=False).start()
 
   def update_active_block(self):
       """
@@ -286,7 +286,7 @@ class CodeInterpreter:
     code = "\n".join(modified_code_lines)
     return code
 
-  def save_and_display_stream(self, stream):
+  def save_and_display_stream(self, stream, is_error_stream):
     # Handle each line of output
     for line in iter(stream.readline, ''):
 
@@ -320,7 +320,7 @@ class CodeInterpreter:
       elif "END_OF_EXECUTION" in line:
         self.done.set()
         self.active_line = None
-      elif "KeyboardInterrupt" in line:
+      elif is_error_stream and "KeyboardInterrupt" in line:
         raise KeyboardInterrupt
       else:
         self.output += "\n" + line
