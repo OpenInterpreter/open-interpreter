@@ -42,9 +42,9 @@ This provides a natural language interface to Python's general-purpose capabilit
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/bfd31800-3587-4d8e-91ac-195482860633
 
-https://github.com/KillianLucas/open-interpreter/assets/63927363/2c11d125-dfdd-49fa-b261-0a0c0673d307
-
 https://github.com/KillianLucas/open-interpreter/assets/63927363/a6cf811d-630f-4960-b15d-f43a5f1812e2
+
+https://github.com/KillianLucas/open-interpreter/assets/63927363/2c11d125-dfdd-49fa-b261-0a0c0673d307
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/650f22f1-b37d-45dc-89fa-80a911446cb5
 
