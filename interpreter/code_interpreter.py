@@ -87,11 +87,11 @@ class CodeInterpreter:
 
     # Start watching ^ its `stdout` and `stderr` streams
     threading.Thread(target=self.save_and_display_stream,
-                     args=(self.proc.stdout, ),
-                     daemon=True).start()
+                     args=(self.proc.stdout, False), # Passes False to is_error_stream
+                     daemon=False).start()
     threading.Thread(target=self.save_and_display_stream,
-                     args=(self.proc.stderr, ),
-                     daemon=True).start()
+                     args=(self.proc.stderr, True), # Passes True to is_error_stream
+                     daemon=False).start()
 
   def update_active_block(self):
       """
@@ -182,7 +182,7 @@ class CodeInterpreter:
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    if self.print_cmd:
+    if self.print_cmd and self.language != "applescript": # Applescript is special. Needs it to be a shell command because 'return' (very common) will actually return, halt script
       code += "\n\n" + self.print_cmd.format('END_OF_EXECUTION')
 
     # Applescript-specific processing
@@ -193,6 +193,8 @@ class CodeInterpreter:
       code = '"' + code + '"'
       # Prepend start command
       code = "osascript -e " + code
+      # Append end command
+      code += '\necho "END_OF_EXECUTION"'
       
     # Debug
     if self.debug_mode:
@@ -286,7 +288,7 @@ class CodeInterpreter:
     code = "\n".join(modified_code_lines)
     return code
 
-  def save_and_display_stream(self, stream):
+  def save_and_display_stream(self, stream, is_error_stream):
     # Handle each line of output
     for line in iter(stream.readline, ''):
 
@@ -320,7 +322,7 @@ class CodeInterpreter:
       elif "END_OF_EXECUTION" in line:
         self.done.set()
         self.active_line = None
-      elif "KeyboardInterrupt" in line:
+      elif is_error_stream and "KeyboardInterrupt" in line:
         raise KeyboardInterrupt
       else:
         self.output += "\n" + line
@@ -329,6 +331,7 @@ class CodeInterpreter:
       self.update_active_block()
 
 def truncate_output(data):
+  needs_truncation = False
 
   # In the future, this will come from a config file
   max_output_chars = 2000
@@ -338,9 +341,10 @@ def truncate_output(data):
   # Remove previous truncation message if it exists
   if data.startswith(message):
     data = data[len(message):]
+    needs_truncation = True
 
   # If data exceeds max length, truncate it and add message
-  if len(data) > max_output_chars:
+  if len(data) > max_output_chars or needs_truncation:
     data = message + data[-max_output_chars:]
 
   return data
