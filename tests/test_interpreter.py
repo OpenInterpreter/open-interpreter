@@ -3,7 +3,7 @@ interpreter.auto_run = True
 interpreter.model = "gpt-3.5-turbo-0613"
 interpreter.temperature = 0
 
-'''
+
 def test_hello_world():
     interpreter.reset()
     messages = interpreter.chat("""Please reply with just the words "Hello, World!" and nothing else. Do not run code.""", return_messages=True)
@@ -25,4 +25,3 @@ def test_nested_loops_and_multiple_newlines():
 def test_markdown():
     interpreter.reset()
     interpreter.chat("""Hi, can you test out a bunch of markdown features? Try writing a fenced code block, a table, headers, everything. DO NOT write the markdown inside a markdown code block, just write it raw.""")
-'''
