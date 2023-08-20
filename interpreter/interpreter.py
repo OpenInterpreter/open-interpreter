@@ -60,7 +60,7 @@ class Interpreter:
 
   def __init__(self):
     self.messages = []
-    self.temperature = 0.01
+    self.temperature = 0.001
     self.api_key = None
     self.auto_run = False
     self.local = False
@@ -116,7 +116,7 @@ class Interpreter:
       # Use them to query Open Procedures
       url = f"https://open-procedures.replit.app/search/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
-      info += "\n\n# Potentially Helpful Procedures (may or may not be related)\n" + "\n---\n".join(relevant_procedures)
+      info += "\n\n# Recommended Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for depracation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
 
     elif self.local:
 
@@ -168,10 +168,16 @@ class Interpreter:
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
       welcome_message += "\n\n" + confirm_mode_message
+
+    welcome_message = welcome_message.strip()
       
     # Print welcome message with newlines on either side (aesthetic choice)
+    # unless we're starting with a blockquote (aesthetic choice)
     if welcome_message != "":
-      print('', Markdown(welcome_message.strip()), '')
+      if welcome_message.startswith(">"):
+        print(Markdown(welcome_message), '')
+      else:
+        print('', Markdown(welcome_message), '')
 
     # Check if `message` was passed in by user
     if message:
@@ -379,6 +385,11 @@ class Interpreter:
           # Time to call the function!
           # (Because this is Open Interpreter, we only have one function.)
 
+          if self.debug_mode:
+            print("Running function:")
+            print(self.messages[-1])
+            print("---")
+
           # Ask for user confirmation to run code
           if self.auto_run == False:
 
@@ -426,10 +437,11 @@ class Interpreter:
           self.active_block.end()
 
           # Append the output to messages
+          # Explicitly tell it if there was no output (sometimes "" = hallucinates output)
           self.messages.append({
             "role": "function",
             "name": "run_code",
-            "content": self.active_block.output
+            "content": self.active_block.output if self.active_block.output else "No output"
           })
 
           # Go around again

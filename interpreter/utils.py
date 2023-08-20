@@ -1,4 +1,5 @@
 import json
+import re
 
 def merge_deltas(original, delta):
     """
@@ -19,20 +20,16 @@ def merge_deltas(original, delta):
                 original[key] = value
     return original
 
-def escape_newlines_in_json_string_values(s):
-    result = []
-    in_string = False
-    for ch in s:
-        if ch == '"' and (len(result) == 0 or result[-1] != '\\'):
-            in_string = not in_string
-        if in_string and ch == '\n':
-            result.append('\\n')
-        else:
-            result.append(ch)
-    return ''.join(result)
-
 def parse_partial_json(s):
-    # Initialize a stack to keep track of open braces, brackets, and strings.
+
+    # Attempt to parse the string as-is.
+    try:
+        return json.loads(s)
+    except json.JSONDecodeError:
+        pass
+  
+    # Initialize variables.
+    new_s = ""
     stack = []
     is_inside_string = False
     escaped = False
@@ -42,6 +39,8 @@ def parse_partial_json(s):
         if is_inside_string:
             if char == '"' and not escaped:
                 is_inside_string = False
+            elif char == '\n' and not escaped:
+                char = '\\n' # Replace the newline character with the escape sequence.
             elif char == '\\':
                 escaped = not escaped
             else:
@@ -60,18 +59,21 @@ def parse_partial_json(s):
                 else:
                     # Mismatched closing character; the input is malformed.
                     return None
+        
+        # Append the processed character to the new string.
+        new_s += char
 
     # If we're still inside a string at the end of processing, we need to close the string.
     if is_inside_string:
-        s += '"'
+        new_s += '"'
 
     # Close any remaining open structures in the reverse order that they were opened.
     for closing_char in reversed(stack):
-        s += closing_char
+        new_s += closing_char
 
     # Attempt to parse the modified string as JSON.
     try:
-        return json.loads(s)
+        return json.loads(new_s)
     except json.JSONDecodeError:
         # If we still can't parse the string as JSON, return None to indicate failure.
         return None
