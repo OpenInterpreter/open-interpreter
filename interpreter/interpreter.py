@@ -114,7 +114,7 @@ class Interpreter:
       query = query[-2000:]
       
       # Use them to query Open Procedures
-      url = f"https://open-procedures.killianlucas1.repl.co/search/?query={query}"
+      url = f"https://open-procedures.replit.app/search/?query={query}"
       relevant_procedures = requests.get(url).json()["procedures"]
       info += "\n\n# Recommended Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for depracation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
 
