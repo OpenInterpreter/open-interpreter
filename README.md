@@ -174,15 +174,13 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 
 ## How Does it Work?
 
-Open Interpreter equips a [function-calling GPT-4](https://platform.openai.com/docs/guides/gpt/function-calling) with the `exec()` function.
+Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "python" or "javascript") and `code` to run.
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
-Only the last `model_max_tokens` of the conversation are shown to the model, so conversations can be any length, but older messages may be forgotten.
-
 ## Contributing
 
-As an open-source project, we are extremely open to contributions, whether it be in the form of a new feature, improved infrastructure, or better documentation.
+This is a community-made project. If it looks exciting to you, please don't hesitate to contribute!
 
 ## License
 
