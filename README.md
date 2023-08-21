@@ -14,7 +14,7 @@
 
 **Open Interpreter** lets GPT-4 run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing. 
 
-This provides a natural language interface to Python's general-purpose capabilities:
+This provides a natural language interface to your computer's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
