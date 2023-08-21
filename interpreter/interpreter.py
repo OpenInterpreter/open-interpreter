@@ -46,6 +46,8 @@ missing_api_key_message = """
 
 To use Open Interpreter in your terminal, set the environment variable using `export OPENAI_API_KEY=your_api_key` on Unix-based systems, or `setx OPENAI_API_KEY your_api_key` on Windows.
 
+To use `Llama-2`, which is slower (~1 word/minute on average systems) but free, run `interpreter --local`.
+
 ---
 """
 

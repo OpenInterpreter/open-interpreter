@@ -88,10 +88,10 @@ class CodeInterpreter:
     # Start watching ^ its `stdout` and `stderr` streams
     threading.Thread(target=self.save_and_display_stream,
                      args=(self.proc.stdout, False), # Passes False to is_error_stream
-                     daemon=False).start()
+                     daemon=True).start()
     threading.Thread(target=self.save_and_display_stream,
                      args=(self.proc.stderr, True), # Passes True to is_error_stream
-                     daemon=False).start()
+                     daemon=True).start()
 
   def update_active_block(self):
       """
