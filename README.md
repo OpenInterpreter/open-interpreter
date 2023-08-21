@@ -1,6 +1,6 @@
 # Open Interpreter
 
-Ask GPT-4 to run code locally.
+Let GPT-4 run code locally. Chat with it from your terminal.
 
 ![Interpreter Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/a1597f66-d298-4172-bc0b-35b36e1479eb)
 
