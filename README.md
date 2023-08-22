@@ -2,19 +2,21 @@
 
 ![Interpreter Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/a1597f66-d298-4172-bc0b-35b36e1479eb)
 
-## What is this?
+<br>
+
+```shell
+pip install open-interpreter
+```
+
+```shell
+interpreter
+```
 
 <br>
 
-> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
->
-> — _OpenAI's Code Interpreter Release_
+**Open Interpreter** lets LLMs run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
 
-<br>
-
-**Open Interpreter** lets GPT-4 run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing. 
-
-This provides a natural language interface to your computer's general-purpose capabilities:
+This provides a natural-language interface to your computer's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
 - Run `selenium` to control a Chrome browser.
@@ -25,7 +27,11 @@ This provides a natural language interface to your computer's general-purpose ca
 
 <br>
 
-[How does this compare to OpenAI's code interpreter?](https://github.com/KillianLucas/open-interpreter#comparison-to-chatgpts-code-interpreter)<br>
+> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
+>
+> — _OpenAI's Code Interpreter Release_
+
+<br>
 
 ## Demos
 
