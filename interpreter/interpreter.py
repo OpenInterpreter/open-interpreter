@@ -245,16 +245,16 @@ class Interpreter:
             # User pressed `enter`, requesting Llama-2
             self.local = True
             
-            print('', Markdown("Tip: Run `interpreter --local` to automatically use `Llama-2`."), '')
-            time.sleep(1)
-            assert False
+            print(Markdown("> Switching to `llama-2`...\n\n**Tip:** Run `interpreter --local` to automatically use `Llama-2`."), '')
+            time.sleep(3)
+            print(Markdown("---"))
             return
           
         else:
             self.api_key = response
             print(Markdown("> Model set to `gpt-4`"))
             # time.sleep(1)
-            print('', Markdown("To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
+            print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
             time.sleep(3)
             print(Markdown("---"))
             
