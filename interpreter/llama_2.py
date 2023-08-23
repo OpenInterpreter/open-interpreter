@@ -97,7 +97,7 @@ def get_llama_2_instance():
             return None
 
     # Initialize and return Llama-2
-    llama_2 = Llama(model_path=model_path)
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=-1)
       
     return llama_2
 
