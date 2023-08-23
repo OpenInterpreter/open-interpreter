@@ -43,8 +43,6 @@ function_schema = {
 # Message for when users don't have an OpenAI API key.
 # `---` is at the bottom for aesthetic reasons.
 missing_api_key_message = """
----
-
 🔑 OpenAI API key not found.
 
 To use `GPT-4` (recommended) please provide an OpenAI API key. You can [get one here](https://platform.openai.com/account/api-keys).
@@ -243,7 +241,7 @@ class Interpreter:
         print('', Markdown("# **Welcome to Open Interpreter.**"), '')
         time.sleep(1)
         
-        print(Markdown(missing_api_key_message), '')
+        print(Markdown("---"), '', Markdown(missing_api_key_message), '')
         response = input("OpenAI API key: ")
     
         if response == "":
@@ -252,7 +250,7 @@ class Interpreter:
             
             print(Markdown("> Switching to `Llama-2`...\n\n**Tip:** Run `interpreter --local` to automatically use `Llama-2`."), '')
             time.sleep(2)
-            print(Markdown("---"), '')
+            print(Markdown("---"))
             return
           
         else:
