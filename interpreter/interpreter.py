@@ -66,7 +66,7 @@ class Interpreter:
     self.api_key = None
     self.auto_run = False
     self.local = False
-    self.model = "gpt-4-0613"
+    self.model = "gpt-4"
     self.debug_mode = False
 
     # Get default system message
@@ -162,7 +162,8 @@ class Interpreter:
       welcome_message += "> Entered debug mode"
 
     # If self.local, we actually don't use self.model
-    if not self.local and "gpt-3.5" in self.model:
+    # (self.auto_run is like advanced usage, we display no messages)
+    if not self.local and not self.auto_run:
       welcome_message += f"\n> Model set to `{self.model.upper()}`."
 
     if self.local:
@@ -239,8 +240,8 @@ class Interpreter:
         # This is probably their first time here!
         print('', Markdown("**Welcome to Open Interpreter.**"), '')
         time.sleep(1)
-        
-        print(Markdown("---"), '', Markdown(missing_api_key_message), '')
+
+        print(Markdown("---"), Markdown(missing_api_key_message), '')
         response = input("OpenAI API key: ")
     
         if response == "":

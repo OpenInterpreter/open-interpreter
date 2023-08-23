@@ -32,7 +32,7 @@ def cli(interpreter):
   if args.yes:
     interpreter.auto_run = True
   if args.fast:
-    interpreter.model = "gpt-3.5-turbo-0613"
+    interpreter.model = "gpt-3.5-turbo"
   if args.local:
     interpreter.local = True
   if args.debug:
