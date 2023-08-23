@@ -10,7 +10,7 @@ from rich.markdown import Markdown
 def get_llama_2_instance():
 
     # Define the file name
-    file_name = "llama-2-7b-chat.ggmlv3.q4_0.bin"
+    file_name = "llama-2-7b-chat.ggmlv3.q2_K.bin"
 
     # Get user data directory for your application
     user_data_dir = appdirs.user_data_dir("open-interpreter")
@@ -38,7 +38,7 @@ def get_llama_2_instance():
         download_path = os.path.join(default_path, file_name)
         message = f"Llama-2 not found. Would you like to download the `6.9GB` file to `{download_path}`?"
         if confirm_action(message):
-            url = "https://huggingface.co/TheBloke/Llama-2-7B-chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q4_0.bin"
+            url = "https://huggingface.co/TheBloke/Llama-2-7B-chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q2_K.bin"
             subprocess.run(f"curl -L '{url}' -o '{download_path}'", shell=True)
             model_path = download_path
             print('\n', "Finished downloading Llama-2.", '\n')
