@@ -6,6 +6,7 @@ from .code_interpreter import CodeInterpreter
 from .llama_2 import get_llama_2_instance
 
 import os
+import time
 import platform
 import openai
 import getpass
@@ -16,7 +17,7 @@ import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
 
-# Function schema for GPT-4
+# Function schema for gpt-4
 function_schema = {
   "name": "run_code",
   "description":
@@ -42,7 +43,9 @@ function_schema = {
 # Message for when users don't have an OpenAI API key.
 # `---` is at the bottom for aesthetic reasons.
 missing_api_key_message = """
-🔑 **OpenAI API key not found.** 
+---
+
+🔑 OpenAI API key not found.
 
 To use `GPT-4` (recommended) please provide an OpenAI API key. You can [get one here](https://platform.openai.com/account/api-keys).
 
@@ -81,9 +84,9 @@ class Interpreter:
     # (blocks are visual representation of messages on the terminal)
     self.active_block = None
 
-    # Note: While Open Interpreter can use Llama, we will prioritize GPT-4.
-    # GPT-4 is faster, smarter, can call functions, and is all-around easier to use.
-    # This makes GPT-4 better aligned with Open Interpreters priority to be easy to use.
+    # Note: While Open Interpreter can use Llama, we will prioritize gpt-4.
+    # gpt-4 is faster, smarter, can call functions, and is all-around easier to use.
+    # This makes gpt-4 better aligned with Open Interpreters priority to be easy to use.
     self.llama_instance = None
 
   def cli(self):
@@ -122,7 +125,7 @@ class Interpreter:
 
     elif self.local:
 
-      # Tell Llama-2 how to run code.
+      # Tell llama-2 how to run code.
       # (We actually don't use this because we overwrite the system message with a tiny, performant one.)
       # (But someday, when Llama is fast enough, this should be how we handle it.)
       info += "\n\nTo run Python code, simply write a Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
@@ -140,15 +143,15 @@ class Interpreter:
 
     # Connect to an LLM (an large language model)
     if not self.local:
-      # GPT-4
+      # gpt-4
       self.verify_api_key()
 
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
-      # Llama-2
+      # llama-2
       if self.llama_instance == None:
         
-        # Find or install LLama-2
+        # Find or install llama-2
         self.llama_instance = get_llama_2_instance()
 
         # If the user decided not to download it, exit gracefully
@@ -163,10 +166,10 @@ class Interpreter:
 
     # If self.local, we actually don't use self.model
     if not self.local and "gpt-3.5" in self.model:
-      welcome_message += f"\n> Model set to `{self.model}`."
+      welcome_message += f"\n> Model set to `{self.model.upper()}`."
 
     if self.local:
-      welcome_message += f"\n> Model set to `llama-2`."
+      welcome_message += f"\n> Model set to `Llama-2`."
     
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
@@ -236,26 +239,28 @@ class Interpreter:
       if 'OPENAI_API_KEY' in os.environ:
         self.api_key = os.environ['OPENAI_API_KEY']
       else:
-        # Print message with newlines on either side (aesthetic choice)
-        print('', Markdown(missing_api_key_message), '')
+        # This is probably their first time here!
+        print('', Markdown("# **Welcome to Open Interpreter.**"), '')
+        time.sleep(1)
+        
+        print(Markdown(missing_api_key_message), '')
         response = input("OpenAI API key: ")
-        import time
     
         if response == "":
-            # User pressed `enter`, requesting Llama-2
+            # User pressed `enter`, requesting llama-2
             self.local = True
             
-            print(Markdown("> Switching to `llama-2`...\n\n**Tip:** Run `interpreter --local` to automatically use `Llama-2`."), '')
-            time.sleep(3)
-            print(Markdown("---"))
+            print(Markdown("> Switching to `Llama-2`...\n\n**Tip:** Run `interpreter --local` to automatically use `Llama-2`."), '')
+            time.sleep(2)
+            print(Markdown("---"), '')
             return
           
         else:
             self.api_key = response
-            print(Markdown("> Model set to `gpt-4`"))
+            print(Markdown("> Model set to `GPT-4`"))
             # time.sleep(1)
             print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
-            time.sleep(3)
+            time.sleep(2)
             print(Markdown("---"))
             
     openai.api_key = self.api_key
@@ -272,12 +277,12 @@ class Interpreter:
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
-      # While Llama-2 is still so slow, we need to
+      # While llama-2 is still so slow, we need to
       # overwrite the system message with a tiny, performant one.
       system_message = "You are an AI that executes Python code. Use ```python to run it."
       
       # Model determines how much we'll trim the messages list to get it under the context limit
-      # So for Llama-2, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as Llama-2
+      # So for llama-2, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as llama-2
       self.model = "gpt-3.5-turbo"
 
     messages = tt.trim(self.messages, self.model, system_message=system_message)
@@ -289,7 +294,7 @@ class Interpreter:
 
     # Make LLM call
     if not self.local:
-      # GPT-4
+      # gpt-4
       response = openai.ChatCompletion.create(
         model=self.model,
         messages=messages,
@@ -298,7 +303,7 @@ class Interpreter:
         temperature=self.temperature,
       )
     elif self.local:
-      # Llama-2
+      # llama-2
       
       # Turn function messages -> system messages for llama compatability
       messages = self.messages
@@ -329,7 +334,7 @@ class Interpreter:
       if not self.local:
         condition = "function_call" in self.messages[-1]
       elif self.local:
-        # Since Llama-2 can't call functions, we just check if we're in a code block.
+        # Since llama-2 can't call functions, we just check if we're in a code block.
         # This simply returns true if the number of "```" in the message is odd.
         if "content" in self.messages[-1]:
           condition = self.messages[-1]["content"].count("```") % 2 == 1
@@ -361,7 +366,7 @@ class Interpreter:
         # Now let's parse the function's arguments:
 
         if not self.local:
-          # GPT-4
+          # gpt-4
           # Parse arguments and save to parsed_arguments, under function_call
           if "arguments" in self.messages[-1]["function_call"]:
             arguments = self.messages[-1]["function_call"]["arguments"]
@@ -372,13 +377,13 @@ class Interpreter:
                 "parsed_arguments"] = new_parsed_arguments
 
         elif self.local:
-          # Llama-2
+          # llama-2
           # Get contents of current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
             current_code_block = self.messages[-1]["content"].split("```python")[-1]
             arguments = {"language": "python", "code": current_code_block}
             
-            # Llama-2 won't make a "function_call" property for us to store this under, so:
+            # llama-2 won't make a "function_call" property for us to store this under, so:
             if "function_call" not in self.messages[-1]:
               self.messages[-1]["function_call"] = {}
               
@@ -391,7 +396,7 @@ class Interpreter:
         if in_function_call == True:
 
           if self.local:
-            # This is the same as when GPT-4 gives finish_reason as function_call.
+            # This is the same as when gpt-4 gives finish_reason as function_call.
             # We have just finished a code block, so now we should run it.
             llama_function_call_finished = True
 
