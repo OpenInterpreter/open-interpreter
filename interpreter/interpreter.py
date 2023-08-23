@@ -42,8 +42,7 @@ function_schema = {
 
 # Message for when users don't have an OpenAI API key.
 # `---` is at the bottom for aesthetic reasons.
-missing_api_key_message = """
-🔑 OpenAI API key not found.
+missing_api_key_message = """> OpenAI API key not found
 
 To use `GPT-4` (recommended) please provide an OpenAI API key. You can [get one here](https://platform.openai.com/account/api-keys).
 
@@ -160,14 +159,14 @@ class Interpreter:
     welcome_message = ""
     
     if self.debug_mode:
-      welcome_message += "> Entered debug mode."
+      welcome_message += "> Entered debug mode"
 
     # If self.local, we actually don't use self.model
     if not self.local and "gpt-3.5" in self.model:
       welcome_message += f"\n> Model set to `{self.model.upper()}`."
 
     if self.local:
-      welcome_message += f"\n> Model set to `Llama-2`."
+      welcome_message += f"\n> Model set to `Llama-2`"
     
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
@@ -238,7 +237,7 @@ class Interpreter:
         self.api_key = os.environ['OPENAI_API_KEY']
       else:
         # This is probably their first time here!
-        print('', Markdown("# **Welcome to Open Interpreter.**"), '')
+        print('', Markdown("**Welcome to Open Interpreter.**"), '')
         time.sleep(1)
         
         print(Markdown("---"), '', Markdown(missing_api_key_message), '')
