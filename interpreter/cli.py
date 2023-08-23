@@ -38,6 +38,8 @@ def cli(interpreter):
   if args.debug:
     interpreter.debug_mode = True
 
+  """
+  # TODO - config
   questions = [
       inquirer.List('option',
                     message="Select an option",
@@ -51,6 +53,7 @@ def cli(interpreter):
           break
       else:
           print(f"You selected: {answers['option']}")
+  """
 
   # Run the chat method
   interpreter.chat()
