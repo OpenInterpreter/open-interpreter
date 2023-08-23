@@ -42,11 +42,11 @@ function_schema = {
 # Message for when users don't have an OpenAI API key.
 # `---` is at the bottom for aesthetic reasons.
 missing_api_key_message = """
-**OpenAI API key not found.** You can [get one here](https://platform.openai.com/account/api-keys).
+🔑 **OpenAI API key not found.** 
 
-To use Open Interpreter in your terminal, set the environment variable using `export OPENAI_API_KEY=your_api_key` on Unix-based systems, or `setx OPENAI_API_KEY your_api_key` on Windows.
+To use `GPT-4` (recommended) please provide an OpenAI API key. You can [get one here](https://platform.openai.com/account/api-keys).
 
-To use `Llama-2`, which is slower (~1 word/minute on average systems) but free, run `interpreter --local`.
+To use `Llama-2` (free but less capable) press `enter`.
 
 ---
 """
@@ -142,7 +142,9 @@ class Interpreter:
     if not self.local:
       # GPT-4
       self.verify_api_key()
-    elif self.local:
+
+    # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
+    if self.local:
       # Llama-2
       if self.llama_instance == None:
         
@@ -204,6 +206,13 @@ class Interpreter:
   
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
+
+        # Let the user turn on debug mode mid-chat
+        if user_input == "%debug":
+            print('', Markdown("> Entered debug mode"), '')
+            print(self.messages)
+            self.debug_mode = True
+            continue
   
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
         try:
@@ -229,8 +238,26 @@ class Interpreter:
       else:
         # Print message with newlines on either side (aesthetic choice)
         print('', Markdown(missing_api_key_message), '')
-        self.api_key = input("Enter an OpenAI API key for this session:\n")
-
+        response = input("OpenAI API key: ")
+        import time
+    
+        if response == "":
+            # User pressed `enter`, requesting Llama-2
+            self.local = True
+            
+            print('', Markdown("Tip: Run `interpreter --local` to automatically use `Llama-2`."), '')
+            time.sleep(1)
+            assert False
+            return
+          
+        else:
+            self.api_key = response
+            print(Markdown("> Model set to `gpt-4`"))
+            # time.sleep(1)
+            print('', Markdown("To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
+            time.sleep(3)
+            print(Markdown("---"))
+            
     openai.api_key = self.api_key
 
   def end_active_block(self):
