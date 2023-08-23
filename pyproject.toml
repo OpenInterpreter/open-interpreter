@@ -21,6 +21,7 @@ six = "^1.16.0"
 
 # On non-windows systems, you can just `import readline`.
 # On windows, `pyreadline3` replaces that, so you can also just `import readline`.
+inquirer = "^3.1.3"
 [tool.poetry.dependencies.pyreadline3]
 version = "^3.4.1"
 markers = "sys_platform == 'win32'"
