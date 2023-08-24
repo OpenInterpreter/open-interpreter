@@ -277,7 +277,7 @@ class Interpreter:
     if self.local:
       # While llama-2 is still so slow, we need to
       # overwrite the system message with a tiny, performant one.
-      system_message = "You are an AI that executes Python code. Use ```python to run it."
+      # system_message = "You are an AI that executes Python code. Use ```python to run it."
       
       # Model determines how much we'll trim the messages list to get it under the context limit
       # So for llama-2, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as llama-2
