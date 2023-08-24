@@ -19,7 +19,7 @@ def get_llama_2_instance():
         # Middle Ground
         {'Name': 'llama-2-7b-chat.ggmlv3.q4_1.bin', 'Param': '7B', 'Bits': 4, 'Size': '4.21 GB', 'RAM': '6.71 GB', 'Description': 'Original quant method, 4-bit. Higher accuracy than q4_0 but not as high as q5_0. However has quicker inference than q5 models.'},
         # Middle Ground
-        {'Name': 'llama-2-7b-chat.ggmlv3.q5_0.bin', 'Param': '7B', 'Bits': 5, 'Size': '4.63 GB', 'RAM': '7.13 GB', 'Description': 'Original quant method, 5-bit. Higher accuracy, higher resource usage and slower inference.'},
+        # {'Name': 'llama-2-7b-chat.ggmlv3.q5_0.bin', 'Param': '7B', 'Bits': 5, 'Size': '4.63 GB', 'RAM': '7.13 GB', 'Description': 'Original quant method, 5-bit. Higher accuracy, higher resource usage and slower inference.'},
         # Best/Slowest
         {'Name': 'llama-2-7b-chat.ggmlv3.q8_0.bin', 'Param': '7B', 'Bits': 8, 'Size': '7.16 GB', 'RAM': '9.66 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
     ]
@@ -29,7 +29,7 @@ def get_llama_2_instance():
         # Middle Ground
         {'Name': 'llama-2-13b-chat.ggmlv3.q3_K_L.bin', 'Param': '13B', 'Bits': 3, 'Size': '6.93 GB', 'RAM': '9.43 GB', 'Description': 'New k-quant method. Uses GGML_TYPE_Q5_K for the attention.wv, attention.wo, and feed_forward.w2 tensors, else GGML_TYPE_Q3_K'},
         # Middle Ground
-        {'Name': 'llama-2-13b-chat.ggmlv3.q4_1.bin', 'Param': '13B', 'Bits': 4, 'Size': '8.14 GB', 'RAM': '10.64 GB', 'Description': 'Original quant method, 4-bit. Higher accuracy than q4_0 but not as high as q5_0. However has quicker inference than q5 models.'},
+        # {'Name': 'llama-2-13b-chat.ggmlv3.q4_1.bin', 'Param': '13B', 'Bits': 4, 'Size': '8.14 GB', 'RAM': '10.64 GB', 'Description': 'Original quant method, 4-bit. Higher accuracy than q4_0 but not as high as q5_0. However has quicker inference than q5 models.'},
         # Best/Slowest
         {'Name': 'llama-2-13b-chat.ggmlv3.q8_0.bin', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
     ]
@@ -97,7 +97,8 @@ def get_llama_2_instance():
             return None
 
     # Initialize and return Llama-2
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=1)
+    # n_gpu_layers=-1 should use GPU, but frankly I can't tell if it does (Mac OSX)
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=-1)
       
     return llama_2
 
