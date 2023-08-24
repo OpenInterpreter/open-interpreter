@@ -16,6 +16,7 @@ import urllib.parse
 import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
+from rich.rule import Rule
 
 # Function schema for gpt-4
 function_schema = {
@@ -41,14 +42,11 @@ function_schema = {
 }
 
 # Message for when users don't have an OpenAI API key.
-# `---` is at the bottom for aesthetic reasons.
 missing_api_key_message = """> OpenAI API key not found
 
-To use `GPT-4` (recommended) please provide an OpenAI API key. You can [get one here](https://platform.openai.com/account/api-keys).
+To use `GPT-4` (recommended) please provide an OpenAI API key.
 
 To use `Llama-2` (free but less capable) press `enter`.
-
----
 """
 
 confirm_mode_message = """
@@ -241,7 +239,9 @@ class Interpreter:
         print('', Markdown("**Welcome to Open Interpreter.**"), '')
         time.sleep(1)
 
-        print(Markdown("---"), Markdown(missing_api_key_message), '')
+        print(Rule(style="white"))
+
+        print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
         response = input("OpenAI API key: ")
     
         if response == "":
@@ -250,7 +250,7 @@ class Interpreter:
             
             print(Markdown("> Switching to `Llama-2`...\n\n**Tip:** Run `interpreter --local` to automatically use `Llama-2`."), '')
             time.sleep(2)
-            print(Markdown("---"))
+            print(Rule(style="white"))
             return
           
         else:
@@ -259,7 +259,7 @@ class Interpreter:
             # time.sleep(1)
             print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
             time.sleep(2)
-            print(Markdown("---"))
+            print(Rule(style="white"))
             
     openai.api_key = self.api_key
 
@@ -275,13 +275,10 @@ class Interpreter:
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
-      # While llama-2 is still so slow, we need to
-      # overwrite the system message with a tiny, performant one.
-      # system_message = "You are an AI that executes Python code. Use ```python to run it."
-      
       # Model determines how much we'll trim the messages list to get it under the context limit
       # So for llama-2, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as llama-2
       self.model = "gpt-3.5-turbo"
+      # In the future lets make --model {model} just work / include llama
 
     messages = tt.trim(self.messages, self.model, system_message=system_message)
     
