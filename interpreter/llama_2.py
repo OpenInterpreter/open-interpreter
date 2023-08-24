@@ -11,7 +11,7 @@ from rich.markdown import Markdown
 def get_llama_2_instance():
 
     # First, we ask them which model they want to use.
-    print('', Markdown("Please select a `Llama-2` model."), '')
+    print('', Markdown("Please select a `Llama-2` model (use arrow keys)."), '')
     
     models_7b = [
         # Smallest/Fastest
