@@ -51,7 +51,7 @@ def get_llama_2_instance():
     answers = inquirer.prompt(questions)
     
     url = answers['URL']
-    file_name = URL.split("/")[-1]
+    file_name = url.split("/")[-1]
 
     # Get user data directory for your application
     user_data_dir = appdirs.user_data_dir("open-interpreter")
