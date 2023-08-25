@@ -155,6 +155,7 @@ class Interpreter:
 
     # Display welcome message
     welcome_message = ""
+
     
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
