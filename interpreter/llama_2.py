@@ -38,6 +38,7 @@ def get_llama_2_instance():
     ]
     
     all_models = llama_2_7b + llama_2_13b + code_llama_13b
+  
     
     # Function to format the model choice for display
     def format_choice(model):
