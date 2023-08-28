@@ -121,9 +121,7 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      # (We actually don't use this because we overwrite the system message with a tiny, performant one.)
-      # (But someday, when Llama is fast enough, this should be how we handle it.)
-      info += "\n\nTo run Python code, simply write a Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      info += "\n\nTo run Python code, simply write a fenced Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
 
     return info
 
@@ -413,11 +411,6 @@ class Interpreter:
             0]["finish_reason"] == "function_call" or llama_function_call_finished:
           # Time to call the function!
           # (Because this is Open Interpreter, we only have one function.)
-
-          # Code Llama likes to output "###" at the end of every message for some reason
-          if self.local and "content" in self.messages[-1]:
-            self.messages[-1]["content"] = self.messages[-1]["content"].rstrip("# ")
-            self.active_block.refresh()
 
           if self.debug_mode:
             print("Running function:")
