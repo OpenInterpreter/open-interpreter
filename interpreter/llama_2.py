@@ -80,7 +80,7 @@ def get_llama_2_instance():
     else:
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, file_name)
-        message = f"This instance of `Code-Llama` was not found. Would you like to download it to `{download_path}`?"
+        message = f"This instance of `Code-Llama` was not found. Would you like to download it?"
         if confirm_action(message):
             subprocess.run(f"curl -L '{url}' -o '{download_path}'", shell=True)
             model_path = download_path
@@ -93,7 +93,7 @@ def get_llama_2_instance():
         from llama_cpp import Llama
     except:
         # Ask for confirmation to install the required pip package
-        message = "`Code-Llama` interface package not found. Install `llama-cpp-python` package?"
+        message = "`Code-Llama` interface package not found. Install `llama-cpp-python`?"
         if confirm_action(message):
             
             # We're going to build llama-cpp-python correctly for the system we're on
