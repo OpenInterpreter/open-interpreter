@@ -44,9 +44,9 @@ def get_llama_2_instance():
   
     questions = [inquirer.List('quality', message="Quality (lower is faster, higher is more capable)", choices=quality_choices)]
     answers = inquirer.prompt(questions)
-    chosen_quality = answers['quality'].split(' ')[0].lower()  # Extracting the 'small', 'medium', or 'large' from the selected choice
-    
-    # Get the URL based on choices
+    chosen_quality = answers['quality'].split(' ')[0]  # Extracting the 'small', 'medium', or 'large' from the selected choice
+
+    # Get the URL based on choices 
     url = models[chosen_param][chosen_quality]['URL']
     file_name = url.split("/")[-1]
 
