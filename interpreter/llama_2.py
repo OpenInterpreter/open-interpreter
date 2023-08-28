@@ -98,7 +98,6 @@ def get_llama_2_instance():
             
             # We're going to build llama-cpp-python correctly for the system we're on
 
-            import subprocess
             import platform
             
             def check_command(command):
