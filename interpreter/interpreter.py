@@ -46,7 +46,7 @@ missing_api_key_message = """> OpenAI API key not found
 
 To use `GPT-4` (recommended) please provide an OpenAI API key.
 
-To use `Llama-2` (free but less capable) press `enter`.
+To use `Code-Llama` (free but less capable) press `enter`.
 """
 
 confirm_mode_message = """
@@ -120,7 +120,7 @@ class Interpreter:
 
     elif self.local:
 
-      # Tell llama-2 how to run code.
+      # Tell Code-Llama how to run code.
       # (We actually don't use this because we overwrite the system message with a tiny, performant one.)
       # (But someday, when Llama is fast enough, this should be how we handle it.)
       info += "\n\nTo run Python code, simply write a Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
@@ -143,10 +143,10 @@ class Interpreter:
 
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
-      # llama-2
+      # Code-Llama
       if self.llama_instance == None:
         
-        # Find or install llama-2
+        # Find or install Code-Llama
         self.llama_instance = get_llama_2_instance()
 
         # If the user decided not to download it, exit gracefully
@@ -166,7 +166,7 @@ class Interpreter:
       welcome_message += f"\n> Model set to `{self.model.upper()}`\n> **Tip:** To run locally, use `interpreter --local`"
 
     if self.local:
-      welcome_message += f"\n> Model set to `Llama-2`"
+      welcome_message += f"\n> Model set to `Code-Llama`"
     
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
@@ -246,10 +246,10 @@ class Interpreter:
         response = input("OpenAI API key: ")
     
         if response == "":
-            # User pressed `enter`, requesting llama-2
+            # User pressed `enter`, requesting Code-Llama
             self.local = True
             
-            print(Markdown("> Switching to `Llama-2`...\n\n**Tip:** Run `interpreter --local` to automatically use `Llama-2`."), '')
+            print(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
             time.sleep(2)
             print(Rule(style="white"))
             return
@@ -277,7 +277,7 @@ class Interpreter:
 
     if self.local:
       # Model determines how much we'll trim the messages list to get it under the context limit
-      # So for llama-2, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as llama-2
+      # So for Code-Llama, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as Code-Llama
       self.model = "gpt-3.5-turbo"
       # In the future lets make --model {model} just work / include llama
 
@@ -299,7 +299,7 @@ class Interpreter:
         temperature=self.temperature,
       )
     elif self.local:
-      # llama-2
+      # Code-Llama
       
       # Turn function messages -> system messages for llama compatability
       messages = self.messages
@@ -330,7 +330,7 @@ class Interpreter:
       if not self.local:
         condition = "function_call" in self.messages[-1]
       elif self.local:
-        # Since llama-2 can't call functions, we just check if we're in a code block.
+        # Since Code-Llama can't call functions, we just check if we're in a code block.
         # This simply returns true if the number of "```" in the message is odd.
         if "content" in self.messages[-1]:
           condition = self.messages[-1]["content"].count("```") % 2 == 1
@@ -373,13 +373,13 @@ class Interpreter:
                 "parsed_arguments"] = new_parsed_arguments
 
         elif self.local:
-          # llama-2
+          # Code-Llama
           # Get contents of current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
             current_code_block = self.messages[-1]["content"].split("```python")[-1]
             arguments = {"language": "python", "code": current_code_block}
             
-            # llama-2 won't make a "function_call" property for us to store this under, so:
+            # Code-Llama won't make a "function_call" property for us to store this under, so:
             if "function_call" not in self.messages[-1]:
               self.messages[-1]["function_call"] = {}
               

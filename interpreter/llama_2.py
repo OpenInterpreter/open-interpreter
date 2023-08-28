@@ -11,7 +11,7 @@ from rich.markdown import Markdown
 def get_llama_2_instance():
 
     # First, we ask them which model they want to use.
-    print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution.\n\nUse your arrow keys then press `enter` to set up the model."), '')
+    print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
         
     models = {
         '7B': {
@@ -74,11 +74,11 @@ def get_llama_2_instance():
     else:
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, file_name)
-        message = f"This instance of `Llama-2` was not found. Would you like to download it to `{download_path}`?"
+        message = f"This instance of `Code-Llama` was not found. Would you like to download it to `{download_path}`?"
         if confirm_action(message):
             subprocess.run(f"curl -L '{url}' -o '{download_path}'", shell=True)
             model_path = download_path
-            print('\n', "Finished downloading `Llama-2`.", '\n')
+            print('\n', "Finished downloading `Code-Llama`.", '\n')
         else:
             print('\n', "Download cancelled. Exiting.", '\n')
             return None
@@ -87,7 +87,7 @@ def get_llama_2_instance():
         from llama_cpp import Llama
     except:
         # Ask for confirmation to install the required pip package
-        message = "`Llama-2` interface package not found. Install `llama-cpp-python` package?"
+        message = "`Code-Llama` interface package not found. Install `llama-cpp-python` package?"
         if confirm_action(message):
             
             # We're going to build llama-cpp-python correctly for the system we're on
@@ -142,7 +142,7 @@ def get_llama_2_instance():
                 install_llama("OpenBLAS")
           
             from llama_cpp import Llama
-            print('', "Finished downloading `Llama-2` interface.", '')
+            print('', "Finished downloading `Code-Llama` interface.", '')
 
             # Tell them if their architecture is bad
 
@@ -170,9 +170,8 @@ def get_llama_2_instance():
     else:
       n_gpu_layers = 0
 
-    # Initialize and return Llama-2
+    # Initialize and return Code-Llama
     llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers)
-    print(llama_2.__dict__)
       
     return llama_2
 
