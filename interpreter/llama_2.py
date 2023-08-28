@@ -149,13 +149,34 @@ def get_llama_2_instance():
           
             from llama_cpp import Llama
             print('', "Finished downloading `Llama-2` interface.", '')
+
+            # Tell them if their architecture is bad
+
+            # Check if on macOS
+            if platform.system() == "Darwin":
+                # Check if it's Apple Silicon
+                if platform.machine() == "arm64":
+                    # Check if Python is running under 'arm64' architecture
+                    if platform.architecture()[0] != "arm64":
+                        print("Warning: You are using Apple Silicon (M1) Mac but your Python is not of 'arm64' architecture.")
+                        print("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1) Mac.")
+                        print("\nTo install the correct version of Python that supports 'arm64' architecture:")
+                        print("1. Download Miniforge for M1:")
+                        print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
+                        print("2. Install it:")
+                        print("bash Miniforge3-MacOSX-arm64.sh")
+                        # You might want to exit the script or add further instructions based on your requirements            
+      
         else:
             print('', "Installation cancelled. Exiting.", '')
             return None
 
     # Initialize and return Llama-2
     # n_gpu_layers=1 should use GPU, but frankly I can't tell if it does (Mac OSX)
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=1000)
+    if confirm_action("1 or -1"):
+      llama_2 = Llama(model_path=model_path, n_gpu_layers=-1)
+    else:
+      llama_2 = Llama(model_path=model_path, n_gpu_layers=1)
       
     return llama_2
 
