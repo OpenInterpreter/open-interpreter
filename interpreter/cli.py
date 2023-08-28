@@ -21,11 +21,11 @@ def cli(interpreter):
   parser.add_argument('-l',
                       '--local',
                       action='store_true',
-                      help='run fully local with llama-2')
+                      help='run fully local with code-llama')
   parser.add_argument('-d',
                       '--debug',
                       action='store_true',
-                      help='debug mode. prints extra information')
+                      help='prints extra information')
   args = parser.parse_args()
 
   # Modify interpreter according to command line flags
