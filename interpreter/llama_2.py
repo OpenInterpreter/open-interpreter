@@ -150,7 +150,7 @@ def get_llama_2_instance():
             from llama_cpp import Llama
             print('', "Finished downloading `Code-Llama` interface.", '')
 
-            # Tell them if their architecture is bad
+            # Tell them if their architecture won't work well
 
             # Check if on macOS
             if platform.system() == "Darwin":
@@ -165,7 +165,7 @@ def get_llama_2_instance():
                         print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
                         print("2. Install it:")
                         print("bash Miniforge3-MacOSX-arm64.sh")
-                        # You might want to exit the script or add further instructions based on your requirements            
+                        print("")
       
         else:
             print('', "Installation cancelled. Exiting.", '')
