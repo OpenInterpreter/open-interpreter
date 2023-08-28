@@ -36,6 +36,8 @@ def get_llama_2_instance():
     code_llama_13b = [
         {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q4_K_M.gguf', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
     ]
+
+    print("Testing")
     
     #all_models = llama_2_7b + llama_2_13b + code_llama_13b
     all_models = code_llama_13b
