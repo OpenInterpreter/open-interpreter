@@ -11,53 +11,51 @@ from rich.markdown import Markdown
 def get_llama_2_instance():
 
     # First, we ask them which model they want to use.
-    print('', Markdown("Please select a `Llama-2` model (use arrow keys)."), '')
+    print('', Markdown("Open Interpreter currently supports CodeLlama for local execution. Please follow the prompts below to install CodeLlama."), '')
+        
+    models = {
+        '7B': {
+            'small': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q2_K.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
+            'medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/blob/main/codellama-7b.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
+            'large': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
+        },
+        '16B': {
+            'small': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q2_K.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
+            'medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
+            'large': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
+        },
+        '34B': {
+            'small': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q2_K.gguf', 'Size': '14.21 GB', 'RAM': '16.71 GB'},
+            'medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q4_K_M.gguf', 'Size': '20.22 GB', 'RAM': '22.72 GB'},
+            'large': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q8_0.gguf', 'Size': '35.79 GB', 'RAM': '38.29 GB'}
+        }
+    }
     
-    llama_2_7b = [
-        # Smallest/Fastest
-        {'URL': 'https://huggingface.co/TheBloke/Llama-2-7B-chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q2_K.bin', 'Param': '7B', 'Bits': 2, 'Size': '2.87 GB', 'RAM': '5.37 GB', 'Description': 'New k-quant method. Uses GGML_TYPE_Q4_K for the attention.vw and feed_forward.w2 tensors, GGML_TYPE_Q2_K for the other tensors.'},
-        # Middle Ground
-        {'URL': 'https://huggingface.co/TheBloke/Llama-2-7B-chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q4_1.bin', 'Param': '7B', 'Bits': 4, 'Size': '4.21 GB', 'RAM': '6.71 GB', 'Description': 'Original quant method, 4-bit. Higher accuracy than q4_0 but not as high as q5_0. However has quicker inference than q5 models.'},
-        # Middle Ground
-        # {'URL': 'https://huggingface.co/TheBloke/Llama-2-7B-chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q5_0.bin', 'Param': '7B', 'Bits': 5, 'Size': '4.63 GB', 'RAM': '7.13 GB', 'Description': 'Original quant method, 5-bit. Higher accuracy, higher resource usage and slower inference.'},
-        # Best/Slowest
-        {'URL': 'https://huggingface.co/TheBloke/Llama-2-7B-chat-GGML/resolve/main/llama-2-7b-chat.ggmlv3.q8_0.bin', 'Param': '7B', 'Bits': 8, 'Size': '7.16 GB', 'RAM': '9.66 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
-    ]
-    llama_2_13b = [
-        # Smallest/Fastest
-        {'URL': 'https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/resolve/main/llama-2-13b-chat.ggmlv3.q2_K.bin', 'Param': '13B', 'Bits': 2, 'Size': '5.51 GB', 'RAM': '8.01 GB', 'Description': 'New k-quant method. Uses GGML_TYPE_Q4_K for the attention.vw and feed_forward.w2 tensors, GGML_TYPE_Q2_K for the other tensors.'},
-        # Middle Ground
-        {'URL': 'https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/resolve/main/llama-2-13b-chat.ggmlv3.q3_K_L.bin', 'Param': '13B', 'Bits': 3, 'Size': '6.93 GB', 'RAM': '9.43 GB', 'Description': 'New k-quant method. Uses GGML_TYPE_Q5_K for the attention.wv, attention.wo, and feed_forward.w2 tensors, else GGML_TYPE_Q3_K'},
-        # Middle Ground
-        # {'URL': 'https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/resolve/main/llama-2-13b-chat.ggmlv3.q4_1.bin', 'Param': '13B', 'Bits': 4, 'Size': '8.14 GB', 'RAM': '10.64 GB', 'Description': 'Original quant method, 4-bit. Higher accuracy than q4_0 but not as high as q5_0. However has quicker inference than q5 models.'},
-        # Best/Slowest
-        {'URL': 'https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/resolve/main/llama-2-13b-chat.ggmlv3.q8_0.bin', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
-    ]
-    code_llama_13b = [
-        {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q2_K.gguf', 'Param': '13B', 'Bits': 1, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'},
-        {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q4_K_M.gguf', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'},
-        {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q2_K.gguf', 'Param': '13B', 'Bits': 3, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'},
-    ]
-    
-    #all_models = llama_2_7b + llama_2_13b + code_llama_13b
-    all_models = code_llama_13b
-  
-    
-    # Function to format the model choice for display
-    def format_choice(model):
-        return f"{model['Param']} Parameter, {model['Bits']}-Bit | Size: {model['Size']}, RAM usage: {model['RAM']}"
-    
-    questions = [
-        inquirer.List('URL',
-                      choices=[(format_choice(m), m['URL']) for m in all_models])
-    ]
-    
+    # First stage: Select parameter size
+    print('', Markdown("Model size: (use arrow keys)"), '')
+    parameter_choices = list(models.keys())
+    questions = [inquirer.List('param', message="Lower is faster, higher is more capable", choices=parameter_choices)]
     answers = inquirer.prompt(questions)
+    chosen_param = answers['param']
     
-    url = answers['URL']
+    # Second stage: Select quality level
+  
+    print('', Markdown("Model quality: (quantization level)"), '')
+    def format_quality_choice(quality, model):
+        return f"{quality} | Size: {model['Size']}, RAM usage: {model['RAM']}"
+
+    # Format the size choices to show file size and RAM usage
+    size_choices = [format_size_choice(size, models[chosen_param][size]) for size in models[chosen_param]]
+    
+    questions = [inquirer.List('size', message="Lower is faster, higher is more capable", choices=size_choices)]
+    answers = inquirer.prompt(questions)
+    chosen_size = answers['size'].split(' ')[0].lower()  # Extracting the 'small', 'medium', or 'large' from the selected choice
+    
+    # Get the URL based on choices
+    url = models[chosen_param][chosen_size]['URL']
     file_name = url.split("/")[-1]
 
-    # Get user data directory for your application
+    # Get user data directory
     user_data_dir = appdirs.user_data_dir("open-interpreter")
     default_path = os.path.join(user_data_dir, "models")
 
@@ -172,12 +170,14 @@ def get_llama_2_instance():
             print('', "Installation cancelled. Exiting.", '')
             return None
 
-    # Initialize and return Llama-2
-    # n_gpu_layers=1 should use GPU, but frankly I can't tell if it does (Mac OSX)
-    n_gpu_layers = int(input("n_gpu_layers"))
-    n_ctx = int(input("n_ctx"))
+    if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
+      n_gpu_layers = -1
+    else:
+      n_gpu_layers = 0
 
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, n_ctx=n_ctx)
+    # Initialize and return Llama-2
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers)
+    print(llama_2.__dict__)
       
     return llama_2
 
