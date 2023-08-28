@@ -163,7 +163,7 @@ class Interpreter:
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
-      welcome_message += f"\n> Model set to `{self.model.upper()}`"
+      welcome_message += f"\n> Model set to `{self.model.upper()}`\n> **Tip:** To run locally, use `interpreter --local`"
 
     if self.local:
       welcome_message += f"\n> Model set to `Llama-2`"
