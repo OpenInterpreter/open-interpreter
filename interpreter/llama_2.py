@@ -46,6 +46,12 @@ def get_llama_2_instance():
     answers = inquirer.prompt(questions)
     chosen_quality = answers['quality'].split(' ')[0]  # Extracting the 'small', 'medium', or 'large' from the selected choice
 
+    # Third stage: GPU confirm
+    if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
+      n_gpu_layers = -1
+    else:
+      n_gpu_layers = 0
+
     # Get the URL based on choices 
     url = models[chosen_param][chosen_quality]['URL']
     file_name = url.split("/")[-1]
@@ -165,13 +171,8 @@ def get_llama_2_instance():
             print('', "Installation cancelled. Exiting.", '')
             return None
 
-    if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
-      n_gpu_layers = -1
-    else:
-      n_gpu_layers = 0
-
     # Initialize and return Code-Llama
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers)
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False)
       
     return llama_2
 
