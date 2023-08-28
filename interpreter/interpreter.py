@@ -480,7 +480,8 @@ class Interpreter:
           # Code Llama likes to output "###" at the end of every message for some reason
           if self.local and "content" in self.messages[-1]:
             self.messages[-1]["content"] = self.messages[-1]["content"].strip().rstrip("#")
-            self.active_block.refresh()
+            self.active_block.update_from_message(self.messages[-1])
+            time.sleep(0.1)
             
           self.active_block.end()
           return
