@@ -34,6 +34,7 @@ def get_llama_2_instance():
         {'URL': 'https://huggingface.co/TheBloke/Llama-2-13B-chat-GGML/resolve/main/llama-2-13b-chat.ggmlv3.q8_0.bin', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
     ]
     code_llama_13b = [
+        {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q2_K.gguf', 'Param': '13B', 'Bits': 1, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'},
         {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q4_K_M.gguf', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'},
         {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q2_K.gguf', 'Param': '13B', 'Bits': 3, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'},
     ]
