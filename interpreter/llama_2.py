@@ -174,9 +174,9 @@ def get_llama_2_instance():
     # Initialize and return Llama-2
     # n_gpu_layers=1 should use GPU, but frankly I can't tell if it does (Mac OSX)
     if confirm_action("1 or -1"):
-      llama_2 = Llama(model_path=model_path, n_gpu_layers=-1)
+      llama_2 = Llama(model_path=model_path, n_gpu_layers=-1, n_ctx=2000)
     else:
-      llama_2 = Llama(model_path=model_path, n_gpu_layers=1)
+      llama_2 = Llama(model_path=model_path, n_gpu_layers=1, n_ctx=2000)
       
     return llama_2
 
