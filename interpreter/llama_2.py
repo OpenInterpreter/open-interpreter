@@ -35,6 +35,7 @@ def get_llama_2_instance():
     ]
     code_llama_13b = [
         {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q4_K_M.gguf', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
+        {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q2_K.gguf', 'Param': '13B', 'Bits': 3, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
     ]
     
     #all_models = llama_2_7b + llama_2_13b + code_llama_13b
@@ -173,10 +174,13 @@ def get_llama_2_instance():
 
     # Initialize and return Llama-2
     # n_gpu_layers=1 should use GPU, but frankly I can't tell if it does (Mac OSX)
-    if confirm_action("1 or -1"):
-      llama_2 = Llama(model_path=model_path, n_gpu_layers=-1, n_ctx=2000)
+    if confirm_action("-1 is yes 1 is no"):
+      if confirm_action("nothing is yes -1 is no"):
+        llama_2 = Llama(model_path=model_path)
+      else:
+        llama_2 = Llama(model_path=model_path, n_gpu_layers=-1)
     else:
-      llama_2 = Llama(model_path=model_path, n_gpu_layers=1, n_ctx=2000)
+      llama_2 = Llama(model_path=model_path, n_gpu_layers=1)
       
     return llama_2
 
