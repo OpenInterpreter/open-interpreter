@@ -40,19 +40,19 @@ def get_llama_2_instance():
     
     # Second stage: Select quality level
   
-    print('', Markdown("Model quality: (quantization level)"), '')
+    print('', Markdown("Model quality:"), '')
     def format_quality_choice(quality, model):
         return f"{quality} | Size: {model['Size']}, RAM usage: {model['RAM']}"
 
-    # Format the size choices to show file size and RAM usage
-    size_choices = [format_size_choice(size, models[chosen_param][size]) for size in models[chosen_param]]
+    # Format the quality choices to show file size and RAM usage
+    quality_choices = [format_quality_choice(quality, models[chosen_param][quality]) for quality in models[chosen_param]]
     
-    questions = [inquirer.List('size', message="Lower is faster, higher is more capable", choices=size_choices)]
+    questions = [inquirer.List('quality', message="Lower is faster, higher is more capable", choices=quality_choices)]
     answers = inquirer.prompt(questions)
-    chosen_size = answers['size'].split(' ')[0].lower()  # Extracting the 'small', 'medium', or 'large' from the selected choice
+    chosen_quality = answers['quality'].split(' ')[0].lower()  # Extracting the 'small', 'medium', or 'large' from the selected choice
     
     # Get the URL based on choices
-    url = models[chosen_param][chosen_size]['URL']
+    url = models[chosen_param][chosen_quality]['URL']
     file_name = url.split("/")[-1]
 
     # Get user data directory
