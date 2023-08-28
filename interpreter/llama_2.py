@@ -176,8 +176,11 @@ def get_llama_2_instance():
     return llama_2
 
 def confirm_action(message):
-    # Print message with newlines on either side (aesthetic choice)
-    print('', Markdown(f"{message} (y/n)"), '')
-    response = input().strip().lower()
-    print('') # <- Aesthetic choice
-    return response == 'y'
+    question = [
+        inquirer.Confirm('confirm',
+                         message=message,
+                         default=True),
+    ]
+
+    answers = inquirer.prompt(question)
+    return answers['confirm']
