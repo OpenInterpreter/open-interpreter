@@ -11,43 +11,38 @@ from rich.markdown import Markdown
 def get_llama_2_instance():
 
     # First, we ask them which model they want to use.
-    print('', Markdown("Open Interpreter currently supports CodeLlama for local execution. Please follow the prompts below to install CodeLlama."), '')
+    print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution.\n\nUse your arrow keys then press `enter` to set up the model."), '')
         
     models = {
         '7B': {
-            'small': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q2_K.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
-            'medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/blob/main/codellama-7b.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
-            'large': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
+            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q2_K.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
+            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/blob/main/codellama-7b.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
+            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
         },
         '16B': {
-            'small': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q2_K.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
-            'medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
-            'large': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
+            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q2_K.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
+            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
+            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
         },
         '34B': {
-            'small': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q2_K.gguf', 'Size': '14.21 GB', 'RAM': '16.71 GB'},
-            'medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q4_K_M.gguf', 'Size': '20.22 GB', 'RAM': '22.72 GB'},
-            'large': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q8_0.gguf', 'Size': '35.79 GB', 'RAM': '38.29 GB'}
+            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q2_K.gguf', 'Size': '14.21 GB', 'RAM': '16.71 GB'},
+            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q4_K_M.gguf', 'Size': '20.22 GB', 'RAM': '22.72 GB'},
+            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-GGUF/resolve/main/codellama-34b.Q8_0.gguf', 'Size': '35.79 GB', 'RAM': '38.29 GB'}
         }
     }
     
     # First stage: Select parameter size
-    print('', Markdown("Model size: (use arrow keys)"), '')
     parameter_choices = list(models.keys())
-    questions = [inquirer.List('param', message="Lower is faster, higher is more capable", choices=parameter_choices)]
+    questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
     answers = inquirer.prompt(questions)
     chosen_param = answers['param']
     
     # Second stage: Select quality level
-  
-    print('', Markdown("Model quality:"), '')
     def format_quality_choice(quality, model):
         return f"{quality} | Size: {model['Size']}, RAM usage: {model['RAM']}"
-
-    # Format the quality choices to show file size and RAM usage
     quality_choices = [format_quality_choice(quality, models[chosen_param][quality]) for quality in models[chosen_param]]
-    
-    questions = [inquirer.List('quality', message="Lower is faster, higher is more capable", choices=quality_choices)]
+  
+    questions = [inquirer.List('quality', message="Quality (lower is faster, higher is more capable)", choices=quality_choices)]
     answers = inquirer.prompt(questions)
     chosen_quality = answers['quality'].split(' ')[0].lower()  # Extracting the 'small', 'medium', or 'large' from the selected choice
     
