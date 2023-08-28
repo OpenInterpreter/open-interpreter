@@ -36,8 +36,6 @@ def get_llama_2_instance():
     code_llama_13b = [
         {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-oasst-sft-v10-GGUF/resolve/main/codellama-13b-oasst-sft-v10.Q4_K_M.gguf', 'Param': '13B', 'Bits': 8, 'Size': '13.83 GB', 'RAM': '16.33 GB', 'Description': 'Original quant method, 8-bit. Almost indistinguishable from float16. High resource use and slow. Not recommended for most users.'}
     ]
-
-    print("Testing")
     
     #all_models = llama_2_7b + llama_2_13b + code_llama_13b
     all_models = code_llama_13b
@@ -96,7 +94,59 @@ def get_llama_2_instance():
         # Ask for confirmation to install the required pip package
         message = "`Llama-2` interface package not found. Install `llama-cpp-python` package?"
         if confirm_action(message):
-            subprocess.run(["pip", "install", "llama-cpp-python"])
+            
+            # We're going to build llama-cpp-python correctly for the system we're on
+
+            import subprocess
+            import platform
+            
+            def check_command(command):
+                try:
+                    subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    return True
+                except subprocess.CalledProcessError:
+                    return False
+                except FileNotFoundError:
+                    return False
+            
+            def install_llama(backend):
+                env_vars = {
+                    "FORCE_CMAKE": "1"
+                }
+                
+                if backend == "cuBLAS":
+                    env_vars["CMAKE_ARGS"] = "-DLLAMA_CUBLAS=on"
+                elif backend == "hipBLAS":
+                    env_vars["CMAKE_ARGS"] = "-DLLAMA_HIPBLAS=on"
+                elif backend == "Metal":
+                    env_vars["CMAKE_ARGS"] = "-DLLAMA_METAL=on"
+                else:  # Default to OpenBLAS
+                    env_vars["CMAKE_ARGS"] = "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
+                
+                try:
+                    subprocess.run(["pip", "install", "llama-cpp-python"], env=env_vars, check=True)
+                except subprocess.CalledProcessError as e:
+                    print(f"Error during installation with {backend}: {e}")
+            
+            def supports_metal():
+                # Check for macOS version
+                if platform.system() == "Darwin":
+                    mac_version = tuple(map(int, platform.mac_ver()[0].split('.')))
+                    # Metal requires macOS 10.11 or later
+                    if mac_version >= (10, 11):
+                        return True
+                return False
+            
+            # Check system capabilities
+            if check_command(["nvidia-smi"]):
+                install_llama("cuBLAS")
+            elif check_command(["rocminfo"]):
+                install_llama("hipBLAS")
+            elif supports_metal():
+                install_llama("Metal")
+            else:
+                install_llama("OpenBLAS")
+          
             from llama_cpp import Llama
             print('', "Finished downloading `Llama-2` interface.", '')
         else:
@@ -106,8 +156,6 @@ def get_llama_2_instance():
     # Initialize and return Llama-2
     # n_gpu_layers=1 should use GPU, but frankly I can't tell if it does (Mac OSX)
     llama_2 = Llama(model_path=model_path, n_gpu_layers=1000)
-
-    print("Installed llama:", llama_2)
       
     return llama_2
 
