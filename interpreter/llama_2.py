@@ -175,7 +175,9 @@ def get_llama_2_instance():
     # Initialize and return Llama-2
     # n_gpu_layers=1 should use GPU, but frankly I can't tell if it does (Mac OSX)
     n_gpu_layers = int(input("n_gpu_layers"))
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers)
+    n_ctx = int(input("n_ctx"))
+
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, n_ctx=n_ctx)
       
     return llama_2
 
