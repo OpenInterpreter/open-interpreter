@@ -155,7 +155,6 @@ class Interpreter:
 
     # Display welcome message
     welcome_message = ""
-
     
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
@@ -415,6 +414,11 @@ class Interpreter:
           # Time to call the function!
           # (Because this is Open Interpreter, we only have one function.)
 
+          # Code Llama likes to output "###" at the end of every message for some reason
+          if self.local and "content" in self.messages[-1]:
+            self.messages[-1]["content"] = self.messages[-1]["content"].rstrip("# ")
+            self.active_block.refresh()
+
           if self.debug_mode:
             print("Running function:")
             print(self.messages[-1])
@@ -479,5 +483,11 @@ class Interpreter:
 
         if chunk["choices"][0]["finish_reason"] != "function_call":
           # Done!
+
+          # Code Llama likes to output "###" at the end of every message for some reason
+          if self.local and "content" in self.messages[-1]:
+            self.messages[-1]["content"] = self.messages[-1]["content"].rstrip("# ")
+            self.active_block.refresh()
+            
           self.active_block.end()
           return
