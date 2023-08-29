@@ -30,21 +30,17 @@ This provides a natural-language interface to your computer's general-purpose ca
 - Modify files/folders on your local system.
 - ...etc.
 
-**⚠️ Note: You'll be asked to approve any code before it's run.**
+**⚠️ Note: You'll be asked to approve code before it's run.**
 
 <br>
 
-> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
->
-> — _OpenAI's Code Interpreter Release_
-
-<br>
-
-## Demos
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+## Demo
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
+
+#### An interactive demo is also avaliable on Google Colab:
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
 ## Quick Start
 
@@ -186,3 +182,9 @@ This is a community-made project. If it looks exciting to you, please don't hesi
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
+
+<br>
+
+> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
+>
+> — _OpenAI's Code Interpreter Release_
