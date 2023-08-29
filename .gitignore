@@ -4,7 +4,7 @@
 # Ignore the .env file if you're using one to store sensitive information
 .env
 
-# Ignore Python virtual environment directories if you're using them
+# Ignore Python virtual environment directories
 venv/
 __pycache__/
 
