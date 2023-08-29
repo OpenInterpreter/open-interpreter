@@ -2,7 +2,7 @@
 
 <p align="center">
     <b>Let language models run code on your computer.</b><br />
-    An open-source, locally running implementation of OpenAI's Code Interpreter.
+    An open-source, local implementation of OpenAI's Code Interpreter.
 </p>
 
 <br>
