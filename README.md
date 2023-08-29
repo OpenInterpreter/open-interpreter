@@ -26,8 +26,8 @@ interpreter
 This provides a natural-language interface to your computer's general-purpose capabilities:
 
 - Create and edit photos, videos, PDFs, etc.
-- Run `selenium` to control a Chrome browser.
-- Modify files/folders on your local system.
+- Control a Chrome browser to perform research
+- Plot, clean, and analyze large datasets
 - ...etc.
 
 **⚠️ Note: You'll be asked to approve code before it's run.**
