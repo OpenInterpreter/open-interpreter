@@ -1,6 +1,13 @@
-# Open Interpreter
+<h1 align="center">Open Interpreter</h1>
 
-![Interpreter Demo](https://github.com/KillianLucas/open-interpreter/assets/63927363/a1597f66-d298-4172-bc0b-35b36e1479eb)
+<p align="center">
+    <b>Let language models run code on your computer.</b><br />
+    An open-source, locally running implementation of <a href="https://openai.com/blog/chatgpt-plugins#code-interpreter">OpenAI's Code Interpreter</a>.
+</p>
+
+<br>
+
+![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 
@@ -39,12 +46,6 @@ This provides a natural-language interface to your computer's general-purpose ca
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
-## Features
-
-- Generated code runs locally (with confirmation).
-- Interactive, streaming chat inside your terminal.
-- Uses `pip` and `apt-get` to extend itself.
-
 ## Quick Start
 
 ```shell
@@ -70,7 +71,7 @@ interpreter.chat() # Starts an interactive chat
 
 ## Comparison to ChatGPT's Code Interpreter
 
-OpenAI's recent release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
+OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
 
 However, OpenAI's service is hosted, closed-source, and heavily restricted:
 - No internet access.
@@ -80,7 +81,7 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 
 ---
 
-Open Interpreter overcomes these limitations by running in a stateful Jupyter notebook on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
+Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
 This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
 
@@ -185,9 +186,3 @@ This is a community-made project. If it looks exciting to you, please don't hesi
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
-
-![Banner Image](https://i.ibb.co/ZHfB9sm/open-interpreter-banner.png)
-
-<p align="right">
-    <sub><i>Illustration by Open Interpreter. Inspired by <a href="https://rubywjchen.com/">Ruby Chen's</a> GPT-4 artwork.</i></sub>
-</p>
