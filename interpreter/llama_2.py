@@ -57,7 +57,7 @@ def get_llama_2_instance():
     file_name = url.split("/")[-1]
 
     # Get user data directory
-    user_data_dir = appdirs.user_data_dir("open-interpreter")
+    user_data_dir = appdirs.user_data_dir("Open Interpreter")
     default_path = os.path.join(user_data_dir, "models")
 
     # Ensure the directory exists
@@ -82,6 +82,7 @@ def get_llama_2_instance():
         download_path = os.path.join(default_path, file_name)
         message = f"This instance of `Code-Llama` was not found. Would you like to download it?"
         if confirm_action(message):
+            print("")
             subprocess.run(f"curl -L '{url}' -o '{download_path}'", shell=True)
             model_path = download_path
             print('\n', "Finished downloading `Code-Llama`.", '\n')
