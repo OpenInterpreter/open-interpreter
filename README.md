@@ -50,7 +50,7 @@ pip install open-interpreter
 
 ### Terminal
 
-After installation, set your `OPENAI_API_KEY` environment variable, then simply run `interpreter`:
+After installation, simply run `interpreter`:
 
 ```shell
 interpreter
@@ -61,7 +61,7 @@ interpreter
 ```python
 import interpreter
 
-interpreter.api_key = "your_openai_api_key"
+interpreter.chat("Plot APPL and META's normalized stock prices") # Executes a single command
 interpreter.chat() # Starts an interactive chat
 ```
 
@@ -143,10 +143,16 @@ print(interpreter.system_message)
 
 #### Change the Model
 
-You can run `interpreter` in fast mode from the command line to use `gpt-3.5-turbo`:
+You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
 ```shell
-interpreter -f
+interpreter --local
+```
+
+For `gpt-3.5-turbo`, use fast mode:
+
+```shell
+interpreter --fast
 ```
 
 Or, in Python, set the model manually:
