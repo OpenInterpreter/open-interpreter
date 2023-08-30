@@ -1,4 +1,4 @@
-<br><h1 align="center">● Open Interpreter</h1>
+<h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
     <b>Let language models run code on your computer.</b><br />
