@@ -263,6 +263,20 @@ Since generated code is executed in your local environment, it can interact with
 
 **⚠️ Open Interpreter will ask for user confirmation before executing code.**
 
+### Code Scanning
+
+Open Intepreter provides some flags to enable code scanning for various issues:
+
+- `--scan` allows you to control the behavior Open Interpreter uses to scan code using [semgrep](https://semgrep.dev/)
+  - `auto` scans all code automatically before executing it
+  - `ask` asks you if you want to scan a code block before asking if you want to execute it
+  - `off` does not scan code before asking if you want to execute it
+- `--guarddog` uses [guarddog](https://github.com/datadog/guarddog) to analyze [PyPI](https://github.com/DataDog/guarddog#pypi) and [npm](https://github.com/DataDog/guarddog#npm) packages before installing them
+
+**⚠️ Open Interpreter will check to see if [guarddog](https://github.com/datadog/guarddog) is available on your system and ask to install it if you use the `--guarddog` flag without it installed.**
+
+### Bypassing Confirmation
+
 You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this confirmation, in which case:
 
 - Be cautious when requesting commands that modify files or system settings.

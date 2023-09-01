@@ -63,7 +63,7 @@ def cli(interpreter):
 
   # Setup CLI
   parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
-  
+
   parser.add_argument('-y',
                       '--yes',
                       action='store_true',
@@ -89,34 +89,43 @@ def cli(interpreter):
                       action='store_true',
                       default=DEBUG,
                       help='prints extra information')
-  
+
   parser.add_argument('--model',
                       type=str,
                       help='model name (for OpenAI compatible APIs) or HuggingFace repo',
                       default="",
                       required=False)
-  
+
   parser.add_argument('--max_tokens',
                       type=int,
                       help='max tokens generated (for locally run models)')
   parser.add_argument('--context_window',
                       type=int,
                       help='context window in tokens (for locally run models)')
-  
+
   parser.add_argument('--api_base',
                       type=str,
                       help='change your api_base to any OpenAI compatible api',
                       default="",
                       required=False)
-  
+
   parser.add_argument('--use-azure',
                       action='store_true',
                       default=USE_AZURE,
                       help='use Azure OpenAI Services')
-  
+
   parser.add_argument('--version',
                       action='store_true',
                       help='display current Open Interpreter version')
+
+  parser.add_argument('--scan',
+                      action='store',
+                      choices=['auto', 'ask', 'off'],
+                      default='off',
+                      help='scan code for vulnerabiltiies: auto = always scan, ask = confirm before scan, off = no scanning')
+  parser.add_argument('--guarddog',
+                      action='store_true',
+                      help='run guarddog before installing packages')
 
   args = parser.parse_args()
 
@@ -141,15 +150,15 @@ def cli(interpreter):
 
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --local, they get the same experience as before.
-    
+
     rprint('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-        
+
     models = {
         '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
         '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
         '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
     }
-    
+
     parameter_choices = list(models.keys())
     questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
     answers = inquirer.prompt(questions)
@@ -159,7 +168,7 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
-  
+
   if args.debug:
     interpreter.debug_mode = True
   if args.use_azure:
@@ -181,15 +190,15 @@ def cli(interpreter):
 
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --falcon, they get the same experience as --local.
-    
+
     rprint('', Markdown("**Open Interpreter** will use `Falcon` for local execution. Use your arrow keys to set up the model."), '')
-        
+
     models = {
         '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
         '40B': 'YokaiKoibito/falcon-40b-GGUF',
         '180B': 'TheBloke/Falcon-180B-Chat-GGUF'
     }
-    
+
     parameter_choices = list(models.keys())
     questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
     answers = inquirer.prompt(questions)
@@ -202,6 +211,11 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
+  if args.guarddog:
+    interpreter.guarddog = True
+
+  # Set code scanning choice
+  interpreter.scan = args.scan
 
   # Run the chat method
   interpreter.chat()

@@ -24,6 +24,7 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from .code_scan import code_scan
 
 import os
 import time
@@ -92,7 +93,6 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
-
 class Interpreter:
 
   def __init__(self):
@@ -112,6 +112,9 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    # Code Scanning
+    self.scan = 'off'
+    self.guarddog = False
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -134,6 +137,27 @@ class Interpreter:
     # The cli takes the current instance of Interpreter,
     # modifies it according to command line flags, then runs chat.
     cli(self)
+
+  def should_scan_code(self):
+    if (self.debug_mode):
+      print(f"code scanning: {self.scan}")
+      print("---")
+
+    if self.scan == 'off':
+      return False
+
+    if self.scan == 'auto':
+      return True
+
+    # Prompt user
+    response = input("  Would you like to scan this code? (y/n)\n\n  ")
+    print("")  # <- Aesthetic choice
+
+    if response.strip().lower() == "y":
+      # Create a new, identical block where the code will actually be run
+      return True
+
+    return False
 
   def get_info_for_system_message(self):
     """
@@ -181,6 +205,25 @@ class Interpreter:
       info += "\n\nTo run code, write a fenced code block (i.e ```python, R or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
       # We make references in system_message.txt to the "function" it can call, "run_code".
 
+    if self.guarddog:
+      info += "\n\nBefore installing any packages via pip run `guarddog pypi scan $package` for each package name. Before installing any packages with npm run `guarddog npm scan $package` with each package name. Display the guarddog results to the user and ask if they still want to install the package before proceeding with installation. `guarddog` only accepts one package name at a time. If guarddog isn't available, ask the user if you can install it."
+
+      # guarddog currently requires installation via Docker on Windows
+      # https://github.com/datadog/guarddog#installation
+      if operating_system == 'Windows':
+        info += """\n\nThe user will need Docker to run guarddog. Once Docker is running, you can install guarddog via
+          ```shell
+          docker pull ghcr.io/datadog/guarddog
+          docker run --rm ghcr.io/datadog/guarddog
+          ```
+        """
+      else:
+        info += "\n\nYou can install guarddog via pip without needing to run guarddog against it first."
+
+      if self.debug_mode:
+        print("guarddog enabled")
+        print("---")
+
     return info
 
   def reset(self):
@@ -222,7 +265,7 @@ class Interpreter:
         print(Markdown(f"**Removed message:** `\"{message['content'][:30]}...\"`"))
       elif 'function_call' in message:
         print(Markdown(f"**Removed codeblock**")) # TODO: Could add preview of code removed here.
-    
+
     print("") # Aesthetics.
 
   def handle_help(self, arguments):
@@ -353,7 +396,7 @@ class Interpreter:
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
 
-      
+
 
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
@@ -364,7 +407,7 @@ class Interpreter:
       else:
         notice_model = f"{self.model.upper()}"
       welcome_message += f"\n> Model set to `{notice_model}`\n\n**Tip:** To run locally, use `interpreter --local`"
-      
+
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
 
@@ -600,9 +643,9 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # GPT
-      
+
       error = ""
-      
+
       for _ in range(3):  # 3 retries
         try:
 
@@ -643,7 +686,7 @@ class Interpreter:
             time.sleep(3)
       else:
         raise Exception(error)
-            
+
     elif self.local:
       # Code-Llama
 
@@ -874,6 +917,9 @@ class Interpreter:
             self.active_block.end()
             language = self.active_block.language
             code = self.active_block.code
+
+            if self.should_scan_code():
+              code_scan(code, language, self)
 
             # Prompt user
             response = input("  Would you like to run this code? (y/n)\n\n  ")

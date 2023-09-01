@@ -48,33 +48,39 @@ language_map = {
     # Python is run from this interpreter with sys.executable
     # in interactive, quiet, and unbuffered mode
     "start_cmd": sys.executable + " -i -q -u",
-    "print_cmd": 'print("{}")'
+    "print_cmd": 'print("{}")',
+    "extension": "py"
   },
   "R": {
     # R is run from this interpreter with R executable
     # in interactive, quiet, and unbuffered mode
     "start_cmd": "R -q --vanilla",
-    "print_cmd": 'print("{}")'
+    "print_cmd": 'print("{}")',
+    "extension": "r"
   },
   "shell": {
     # On Windows, the shell start command is `cmd.exe`
     # On Unix, it should be the SHELL environment variable (defaults to 'bash' if not set)
     "start_cmd": 'cmd.exe' if platform.system() == 'Windows' else os.environ.get('SHELL', 'bash'),
-    "print_cmd": 'echo "{}"'
+    "print_cmd": 'echo "{}"',
+    "extension": "sh"
   },
   "javascript": {
     "start_cmd": "node -i",
-    "print_cmd": 'console.log("{}")'
+    "print_cmd": 'console.log("{}")',
+    "extension": "js"
   },
   "applescript": {
     # Starts from shell, whatever the user's preference (defaults to '/bin/zsh')
     # (We'll prepend "osascript -e" every time, not once at the start, so we want an empty shell)
     "start_cmd": os.environ.get('SHELL', '/bin/zsh'),
-    "print_cmd": 'log "{}"'
+    "print_cmd": 'log "{}"',
+    "extension": "applescript"
   },
   "html": {
     "open_subprocess": False,
     "run_function": run_html,
+    "extension": "html"
   }
 }
 
@@ -273,7 +279,7 @@ class CodeInterpreter:
     # Doesn't work on Windows
     if platform.system() == 'Windows':
        return code
-    
+
     # Doesn't work with R
     if self.language == 'R':
        return code
