@@ -253,8 +253,6 @@ class Interpreter:
           
         else:
             self.api_key = response
-            print(Markdown("> Model set to `GPT-4`"))
-            # time.sleep(1)
             print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
             time.sleep(2)
             print(Rule(style="white"))
