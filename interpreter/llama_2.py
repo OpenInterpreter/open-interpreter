@@ -1,5 +1,6 @@
 import os
 import sys
+import wget
 import appdirs
 import inquirer
 import subprocess
@@ -83,7 +84,7 @@ def get_llama_2_instance():
         message = f"This instance of `Code-Llama` was not found. Would you like to download it?"
         if confirm_action(message):
             print("")
-            subprocess.run(f"curl -L '{url}' -o '{download_path}'", shell=True)
+            wget.download(url, download_path)
             model_path = download_path
             print('\n', "Finished downloading `Code-Llama`.", '\n')
         else:

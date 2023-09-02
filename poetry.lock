@@ -1016,6 +1016,16 @@ files = [
 ]
 
 [[package]]
+name = "wget"
+version = "3.2"
+description = "pure python download utility"
+optional = false
+python-versions = "*"
+files = [
+    {file = "wget-3.2.zip", hash = "sha256:35e630eca2aa50ce998b9b1a127bb26b30dfee573702782aa982f875e3f16061"},
+]
+
+[[package]]
 name = "yarl"
 version = "1.9.2"
 description = "Yet another URL library"
@@ -1105,4 +1115,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "efaf298c891239eab25da4f8eeb6a9ab67767adcbed5326eabb76e964adedc78"
+content-hash = "f0a8a50b646c0dddab99452f455b56b4b04b678c7d48bd25c1f43d32372744a8"
