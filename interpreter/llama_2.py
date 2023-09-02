@@ -83,7 +83,6 @@ def get_llama_2_instance():
         download_path = os.path.join(default_path, file_name)
         message = f"This instance of `Code-Llama` was not found. Would you like to download it?"
         if confirm_action(message):
-            print("")
             wget.download(url, download_path)
             model_path = download_path
             print('\n', "Finished downloading `Code-Llama`.", '\n')
