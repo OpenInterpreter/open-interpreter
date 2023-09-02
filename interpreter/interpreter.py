@@ -150,11 +150,20 @@ class Interpreter:
       if self.llama_instance == None:
         
         # Find or install Code-Llama
-        self.llama_instance = get_llama_2_instance()
+        try:
+          self.llama_instance = get_llama_2_instance()
+        except:
+          # If it didn't work, apologize and switch to GPT-4
+          
+          print(">Failed to install Code-LLama.")
+          print("\n**We have likely not built the proper `Code-Llama` support for your system.**")
+          print("\n(Running language models locally is a difficult task! If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development.)")
+          print("\nPlease press enter to switch to `GPT-4` (recommended).")
+          input()
 
-        # If the user decided not to download it, exit gracefully
-        if self.llama_instance == None:
-          raise KeyboardInterrupt
+          # Switch to GPT-4
+          self.local = False
+          self.verify_api_key()
 
     # Display welcome message
     welcome_message = ""
