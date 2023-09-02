@@ -461,6 +461,24 @@ class Interpreter:
               })
               return
 
+          # If we couldn't parse its arguments, we need to try again.
+          if "parsed_arguments" not in self.messages[-1]["function_call"]:
+            print("> Function call could not be parsed.\n\nPlease open an issue on Github (openinterpreter.com, click Github) and paste the following:")
+            print("\n", self.messages[-1]["function_call"], "\n")
+            time.sleep(2)
+            print("Informing the language model and continuing...")
+            
+            # Reiterate what we need to the language model:
+            self.messages.append({
+              "role": "function",
+              "name": "run_code",
+              "content": """Your function call could not be parsed. Please use ONLY the `run_code` function, which takes two parameters: `code` and `language`. Your response should be formatted as a JSON."""
+            })
+  
+            # Go around again
+            self.respond()
+            return
+
           # Create or retrieve a Code Interpreter for this language
           language = self.messages[-1]["function_call"]["parsed_arguments"][
             "language"]
