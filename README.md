@@ -40,7 +40,7 @@ This provides a natural-language interface to your computer's general-purpose ca
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
-#### An interactive demo is also avaliable on Google Colab:
+#### An interactive demo is also available on Google Colab:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
