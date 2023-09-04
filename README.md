@@ -196,3 +196,7 @@ Open Interpreter is licensed under the MIT License. You are permitted to use, co
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >
 > — _OpenAI's Code Interpreter Release_
+
+<br>
+
+_Looking for the desktop application? [Sign up for early access.](https://openinterpreter.com)_
