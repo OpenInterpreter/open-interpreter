@@ -126,7 +126,10 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      info += "\n\nTo run Python code, simply write a fenced Python code block (i.e ```python) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      info += "\n\nTo run code, simply write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      # We make references in system_message.txt to the "function" it can call, "run_code".
+      # But functions are not supported by Code-Llama, so:
+      info = info.replace("run_code", "a markdown code block")
 
     return info
 
@@ -383,16 +386,24 @@ class Interpreter:
 
         elif self.local:
           # Code-Llama
-          # Get contents of current code block and save to parsed_arguments, under function_call
+          # Parse current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
-            current_code_block = self.messages[-1]["content"].split("```python")[-1]
-            arguments = {"language": "python", "code": current_code_block}
+            current_code_block = self.messages[-1]["content"].split("```")[-1]
+            
+            language = current_code_block.split("\n")[0]
+            # Default to python if it just did a "```" then continued writing code
+            if language == "" and "\n" in current_code_block:
+              language = "python"
+
+            code = current_code_block.split("\n")[1:]
+            
+            arguments = {"language": language, "code": code}
             
             # Code-Llama won't make a "function_call" property for us to store this under, so:
             if "function_call" not in self.messages[-1]:
               self.messages[-1]["function_call"] = {}
               
-            self.messages[-1]["function_call"]["parsed_arguments"] = arguments
+            self.messages[-1]["function_call"]["parsed_arguments"] = arguments            
 
       else:
         # We are not in a function call.
