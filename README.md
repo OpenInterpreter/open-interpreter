@@ -4,7 +4,7 @@
     <a href="https://discord.gg/YG7APUyJ5"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
 <br>
     <b>Let language models run code on your computer.</b><br>
-    An open-source, locally running implementation of OpenAI's Code Interpreter.
+    An open-source, locally running implementation of OpenAI's Advanced Data Analytics, previously known as Code Interpreter.
 </p>
 
 <br>
@@ -67,9 +67,9 @@ interpreter.chat("Plot APPL and META's normalized stock prices") # Executes a si
 interpreter.chat() # Starts an interactive chat
 ```
 
-## Comparison to ChatGPT's Code Interpreter
+## Comparison to ChatGPT's Advance Data Analytics, previously known as Code Interpreter
 
-OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
+OpenAI's release of [Advance Data Analytics, previously known as Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
 
 However, OpenAI's service is hosted, closed-source, and heavily restricted:
 - No internet access.
@@ -81,7 +81,7 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 
 Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
-This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
+This combines the power of GPT-4's Advance Data Analytics, previously know as Code Interpreter, with the flexibility of your local development environment.
 
 ## Commands
 
@@ -195,7 +195,7 @@ Open Interpreter is licensed under the MIT License. You are permitted to use, co
 
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >
-> — _OpenAI's Code Interpreter Release_
+> — _OpenAI's Advance Data Analytics (previously known as Code Interpreter) Release_
 
 <br>
 
