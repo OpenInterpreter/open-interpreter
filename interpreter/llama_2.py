@@ -20,7 +20,7 @@ def get_llama_2_instance():
             'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
             'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
         },
-        '16B': {
+        '13B': {
             'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q2_K.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
             'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
             'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-GGUF/resolve/main/codellama-13b.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
