@@ -944,13 +944,13 @@ blobfile = ["blobfile (>=2)"]
 
 [[package]]
 name = "tokentrim"
-version = "0.1.4"
+version = "0.1.6"
 description = "Easily trim 'messages' arrays for use with GPTs."
 optional = false
 python-versions = ">=3.6,<4.0"
 files = [
-    {file = "tokentrim-0.1.4-py3-none-any.whl", hash = "sha256:3a21f4ae1c87ea9cfc9b4b18b921bb66de74c87d45caf07486e5b2f6212ec2f6"},
-    {file = "tokentrim-0.1.4.tar.gz", hash = "sha256:ed215e78c3afc2ef9b3905baeac2327d5c11efb125ee3b7f98be8668829a9c01"},
+    {file = "tokentrim-0.1.6-py3-none-any.whl", hash = "sha256:fb15d98ec2bef9abb1d7cec75b91de510eb5615176fa4305022da2db755b9157"},
+    {file = "tokentrim-0.1.6.tar.gz", hash = "sha256:86c66f1f728f50b05188475f30188b7a6f241c343bdced4d93c1a3d9f94b1639"},
 ]
 
 [package.dependencies]

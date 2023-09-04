@@ -149,6 +149,8 @@ class Interpreter:
 
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
+      self.model = "code-llama"
+      
       # Code-Llama
       if self.llama_instance == None:
         
@@ -166,6 +168,7 @@ class Interpreter:
 
           # Switch to GPT-4
           self.local = False
+          self.model = "gpt-4"
           self.verify_api_key()
 
     # Display welcome message
@@ -286,12 +289,6 @@ class Interpreter:
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
     system_message = self.system_message + "\n\n" + info
-
-    if self.local:
-      # Model determines how much we'll trim the messages list to get it under the context limit
-      # So for Code-Llama, we'll use "gpt-3.5-turbo" which (i think?) has the same context window as Code-Llama
-      self.model = "gpt-3.5-turbo"
-      # In the future lets make --model {model} just work / include llama
 
     messages = tt.trim(self.messages, self.model, system_message=system_message)
     
