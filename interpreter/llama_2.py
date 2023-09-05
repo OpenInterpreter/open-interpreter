@@ -149,7 +149,7 @@ def get_llama_2_instance():
                 install_llama("OpenBLAS")
           
             from llama_cpp import Llama
-            print('', "Finished downloading `Code-Llama` interface.", '')
+            print('', Markdown("Finished downloading `Code-Llama` interface."), '')
 
             # Tell them if their architecture won't work well
 
