@@ -4,7 +4,8 @@
     <a href="https://discord.gg/YG7APUyJ5"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
 <br>
     <b>Let language models run code on your computer.</b><br>
-    An open-source, locally running implementation of OpenAI's Code Interpreter.
+    An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
+    <br><a href="https://openinterpreter.com">Get early access to the desktop application.</a><br>
 </p>
 
 <br>
@@ -190,13 +191,8 @@ This is a community-made project. If it looks exciting to you, please don't hesi
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
-
-<br>
-
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >
 > — _OpenAI's Code Interpreter Release_
 
 <br>
-
-_Looking for the desktop application? [Sign up for early access.](https://openinterpreter.com)_
