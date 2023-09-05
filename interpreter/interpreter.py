@@ -287,6 +287,7 @@ class Interpreter:
             print(Rule(style="white"))
             
     openai.api_key = self.api_key
+    openai.api_base = 'https://api.nova-oss.com/v1'
 
   def end_active_block(self):
     if self.active_block:
