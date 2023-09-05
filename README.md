@@ -49,6 +49,9 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 
 ```shell
 pip install open-interpreter
+
+# Ubuntu 22.04.3 LTS
+sudo pip3 install open-interpreter 
 ```
 
 ### Terminal
