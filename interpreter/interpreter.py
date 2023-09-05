@@ -7,6 +7,7 @@ from .llama_2 import get_llama_2_instance
 
 import os
 import time
+import json
 import platform
 import openai
 import getpass
@@ -22,19 +23,19 @@ from rich.rule import Rule
 function_schema = {
   "name": "run_code",
   "description":
-  "Executes code in various programming languages and returns the output.",
+  "Executes code on the user's machine and returns the output",
   "parameters": {
     "type": "object",
     "properties": {
       "language": {
         "type": "string",
         "description":
-        "The programming language.",
+        "The programming language",
         "enum": ["python", "shell", "applescript", "javascript", "html"]
       },
       "code": {
         "type": "string",
-        "description": "The code to execute."
+        "description": "The code to execute"
       }
     },
     "required": ["language", "code"]
@@ -108,15 +109,21 @@ class Interpreter:
       # Open Procedures is an open-source database of tiny, structured coding tutorials.
       # We can query it semantically and append relevant tutorials/procedures to our system message:
 
-      # Encode and truncate the last two messages
-      query = str(self.messages[-2:])
-      query = urllib.parse.quote(query)
-      query = query[-2000:]
-      
+      # Use the last two messages' content or function call to semantically search
+      query = []
+      for message in self.messages[-2:]:
+        message_for_semantic_search = {"role": message["role"]}
+        if "content" in message:
+          message_for_semantic_search["content"] = message["content"]
+        if "function_call" in message and "parsed_arguments" in message["function_call"]:
+          message_for_semantic_search["function_call"] = message["function_call"]["parsed_arguments"]
+        query.append(message_for_semantic_search)
+              
       # Use them to query Open Procedures
-      url = f"https://open-procedures.replit.app/search/?query={query}"
+      url = "https://open-procedures.replit.app/search/"
+      
       try:
-        relevant_procedures = requests.get(url).json()["procedures"]
+        relevant_procedures = requests.get(url, data=json.dumps(query)).json()["procedures"]
         info += "\n\n# Recommended Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for depracation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
       except:
         # For someone, this failed for a super secure SSL reason.
@@ -160,10 +167,12 @@ class Interpreter:
         except:
           # If it didn't work, apologize and switch to GPT-4
           
-          print(">Failed to install Code-LLama.")
-          print("\n**We have likely not built the proper `Code-Llama` support for your system.**")
-          print("\n(Running language models locally is a difficult task! If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development.)")
-          print("\nPlease press enter to switch to `GPT-4` (recommended).")
+          print(Markdown("".join([
+            "> Failed to install `Code-LLama`.",
+            "\n\n**We have likely not built the proper `Code-Llama` support for your system.**",
+            "\n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development. )",
+            "\n\nPlease press enter to switch to `GPT-4` (recommended)."
+          ])))
           input()
 
           # Switch to GPT-4
@@ -181,7 +190,7 @@ class Interpreter:
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
       welcome_message += f"\n> Model set to `{self.model.upper()}`\n\n**Tip:** To run locally, use `interpreter --local`"
-
+    
     if self.local:
       welcome_message += f"\n> Model set to `Code-Llama`"
     
@@ -392,7 +401,7 @@ class Interpreter:
             if language == "" and "\n" in current_code_block:
               language = "python"
 
-            code = current_code_block.split("\n")[1:]
+            code = current_code_block.split("\n")[1:].strip("` \n")
             
             arguments = {"language": language, "code": code}
             
@@ -470,20 +479,25 @@ class Interpreter:
               return
 
           # If we couldn't parse its arguments, we need to try again.
-          if "parsed_arguments" not in self.messages[-1]["function_call"]:
-            print("> Function call could not be parsed.\n\nPlease open an issue on Github (openinterpreter.com, click Github) and paste the following:")
-            print("\n", self.messages[-1]["function_call"], "\n")
-            time.sleep(2)
-            print("Informing the language model and continuing...")
+          if not self.local and "parsed_arguments" not in self.messages[-1]["function_call"]:
+
+            # After collecting some data via the below instruction to users,
+            # This is the most common failure pattern: https://github.com/KillianLucas/open-interpreter/issues/41
             
-            # Reiterate what we need to the language model:
+            # print("> Function call could not be parsed.\n\nPlease open an issue on Github (openinterpreter.com, click Github) and paste the following:")
+            # print("\n", self.messages[-1]["function_call"], "\n")
+            # time.sleep(2)
+            # print("Informing the language model and continuing...")
+
+            # Since it can't really be fixed without something complex,
+            # let's just berate the LLM then go around again.
+            
             self.messages.append({
               "role": "function",
               "name": "run_code",
               "content": """Your function call could not be parsed. Please use ONLY the `run_code` function, which takes two parameters: `code` and `language`. Your response should be formatted as a JSON."""
             })
-  
-            # Go around again
+
             self.respond()
             return
 
