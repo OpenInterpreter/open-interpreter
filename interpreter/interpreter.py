@@ -308,28 +308,62 @@ class Interpreter:
 
     # Make LLM call
     if not self.local:
-      # gpt-4
-      response = openai.ChatCompletion.create(
-        model=self.model,
-        messages=messages,
-        functions=[function_schema],
-        stream=True,
-        temperature=self.temperature,
-      )
+      # GPT
+      
+      for _ in range(3):  # 3 retries
+        try:
+            response = openai.ChatCompletion.create(
+              model=self.model,
+              messages=messages,
+              functions=[function_schema],
+              stream=True,
+              temperature=self.temperature,
+            )
+            break
+        except openai.error.RateLimitError:
+            # Rate limit hit. Retrying in 3 seconds
+            time.sleep(3)
+      else:
+        raise openai.error.RateLimitError("RateLimitError: Max retries reached")
+      
     elif self.local:
       # Code-Llama
       
-      # Turn function messages -> system messages for llama compatability
+      # Turn function messages -> user messages for llama compatability
       messages = self.messages
       for message in messages:
         if message['role'] == 'function':
-            message['role'] = 'system'
+            message['role'] = 'user'
           
-      response = self.llama_instance.create_chat_completion(
-        messages=messages,
+      # Convert to Chat Completion
+
+      def messages_to_prompt(messages):
+        # Extracting the system prompt and initializing the formatted string with it.
+        system_prompt = messages[0]['content']
+        formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
+        
+        # Loop starting from the first user message
+        for index, item in enumerate(messages[1:]):
+            role = item['role']
+            content = item['content']
+            
+            if role == 'user':
+                formatted_messages += f"{content} [/INST] "
+            elif role == 'assistant':
+                formatted_messages += f"{content} </s><s>[INST] "
+    
+        # Remove the trailing '<s>[INST] ' from the final output
+        if formatted_messages.endswith("<s>[INST] "):
+            formatted_messages = formatted_messages[:-10]
+        
+        return formatted_messages
+            
+      response = self.llama_instance(
+        messages_to_prompt(messages),
         stream=True,
         temperature=self.temperature,
       )
+    
 
     # Initialize message, function call trackers, and active block
     self.messages.append({})
