@@ -335,7 +335,8 @@ class Interpreter:
         if message['role'] == 'function':
             message['role'] = 'user'
           
-      # Convert to Chat Completion
+      # Convert messages to prompt
+      # (This only works if the first message is the only system message)
 
       def messages_to_prompt(messages):
         # Extracting the system prompt and initializing the formatted string with it.
@@ -357,13 +358,14 @@ class Interpreter:
             formatted_messages = formatted_messages[:-10]
         
         return formatted_messages
+
+      # Run Code-Llama
             
       response = self.llama_instance(
         messages_to_prompt(messages),
         stream=True,
         temperature=self.temperature,
       )
-    
 
     # Initialize message, function call trackers, and active block
     self.messages.append({})
