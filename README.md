@@ -166,24 +166,6 @@ In Python, you will need to set the model manually:
 interpreter.model = "gpt-3.5-turbo"
 ```
 
-#### Azure Support
-
-To connect to an Azure deployment, the `--use-azure` flag will walk you through setting this up:
-
-```
-interpreter --use-azure
-```
-
-In Python, set the following variables:
-
-```
-interpreter.use_azure = True
-interpreter.api_key = "your_openai_api_key"
-interpreter.azure_api_base = "your_azure_api_base"
-interpreter.azure_api_version = "your_azure_api_version"
-interpreter.azure_deployment_name = "your_azure_deployment_name"
-```
-
 #### Debug mode
 
 To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
