@@ -257,6 +257,10 @@ class Interpreter:
     Makes sure we have an OPENAI_API_KEY.
     """
 
+    if 'OPENAI_API_BASE' in os.environ:
+      print('using openai api base from environ', os.environ['OPENAI_API_BASE'])
+      openai.api_base = os.environ['OPENAI_API_BASE']
+
     if self.api_key == None:
 
       if 'OPENAI_API_KEY' in os.environ:
