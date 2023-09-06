@@ -26,6 +26,7 @@ def cli(interpreter):
                       '--debug',
                       action='store_true',
                       help='prints extra information')
+  parser.add_argument('--use-azure', action='store_true', help='use Azure OpenAI Services')
   args = parser.parse_args()
 
   # Modify interpreter according to command line flags
@@ -37,6 +38,9 @@ def cli(interpreter):
     interpreter.local = True
   if args.debug:
     interpreter.debug_mode = True
+  if args.use_azure:
+    interpreter.use_azure = True
+    interpreter.local = False
 
   # Run the chat method
   interpreter.chat()
