@@ -14,16 +14,6 @@
 
 <br>
 
-```shell
-pip install open-interpreter
-```
-
-```shell
-interpreter
-```
-
-<br>
-
 **Open Interpreter** lets LLMs run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
 
 This provides a natural-language interface to your computer's general-purpose capabilities:
@@ -50,7 +40,8 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 ```shell
 pip install open-interpreter
 
-# Ubuntu 22.04.3 LTS
+# ubuntu 22.04.3 LTS
+# it is recommended to create a virtual environment 
 sudo pip3 install open-interpreter 
 ```
 
