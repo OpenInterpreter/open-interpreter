@@ -359,13 +359,20 @@ class Interpreter:
         
         return formatted_messages
 
+      prompt = messages_to_prompt(messages)
+
+      # temporary debug
+      print(prompt)
+
       # Run Code-Llama
             
       response = self.llama_instance(
-        messages_to_prompt(messages),
+        prompt,
         stream=True,
         temperature=self.temperature,
       )
+
+      self.messages[-1] = {"role": "assistant"}
 
     # Initialize message, function call trackers, and active block
     self.messages.append({})
@@ -378,7 +385,10 @@ class Interpreter:
       # temporary debugging
       print(chunk)
 
-      delta = chunk["choices"][0]["delta"]
+      if self.local:
+        delta = {"content": chunk["choices"][0]["text"]}
+      else:
+        delta = chunk["choices"][0]["delta"]
 
       # Accumulate deltas into the last message in messages
       self.messages[-1] = merge_deltas(self.messages[-1], delta)
