@@ -299,7 +299,10 @@ class Interpreter:
     info = self.get_info_for_system_message()
     system_message = self.system_message + "\n\n" + info
 
-    messages = tt.trim(self.messages, self.model, system_message=system_message)
+    if self.local:
+      messages = tt.trim(self.messages, max_tokens=1048, system_message=system_message)
+    else:
+      messages = tt.trim(self.messages, self.model, system_message=system_message)
     
     if self.debug_mode:
       print("\n", "Sending `messages` to LLM:", "\n")
