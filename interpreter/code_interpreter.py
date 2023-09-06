@@ -214,7 +214,7 @@ class CodeInterpreter:
     # Write code to stdin of the process
     try:
       self.proc.stdin.write(code + "\n")
-      self.proc.stdin.flush()
+      self.proc.stdin.close()
     except BrokenPipeError:
       # It can just.. break sometimes? Let's fix this better in the future
       # For now, just try again
