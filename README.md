@@ -1,43 +1,43 @@
-<h1 align="center">● Open Interpreter</h1>
+<div align="center">
+    <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
+</div>
 
-<p align="center">
-    <a href="https://discord.gg/YG7APUyJ5"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
-<br>
-    <b>Let language models run code on your computer.</b><br>
-    An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop application.</a><br>
-</p>
+<h1 align="center">Open Interpreter</h1>
+
+<div align="center">
+    <div>
+        <a href="https://discord.gg/YG7APUyJ5">
+            <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white">
+        </a>
+        <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License" />
+    </div>
+    <div>
+        <strong>Let language models run code on your computer.</strong>
+    </div>
+    <div>
+        An open-source, locally running implementation of OpenAI's Code Interpreter.
+    </div>
+    <a href="https://openinterpreter.com">Get early access to the desktop application.</a>
+</div>
 
 <br>
 
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
-<br>
+## Introduction
 
-```shell
-pip install open-interpreter
-```
-
-```shell
-interpreter
-```
-
-<br>
-
-**Open Interpreter** lets LLMs run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
+**Open Interpreter** lets LLMs run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `interpreter` after installing.
 
 This provides a natural-language interface to your computer's general-purpose capabilities:
 
-- Create and edit photos, videos, PDFs, etc.
-- Control a Chrome browser to perform research
-- Plot, clean, and analyze large datasets
-- ...etc.
+- Generate or modify files such as PDFs, CSVs, etc.
+- Manage a Chrome browser for conducting research
+- Compute, clean, and study large datasets
+- ...and much more!
 
-**⚠️ Note: You'll be asked to approve code before it's run.**
+**⚠️ NOTE: You'll be asked to approve code before it's run.**
 
-<br>
-
-## Demo
+## Visual Demo
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
@@ -59,7 +59,39 @@ After installation, simply run `interpreter`:
 interpreter
 ```
 
-### Python
+## Commands
+
+To start an interactive chat in your terminal, run `interpreter` from the command line:
+
+```shell
+interpreter
+```
+
+#### Changing Models (GPT-4, GPT-3.5-Turbo, Code LLama)
+
+**⚠️ NOTE: We're working on consolidating these into a unified command.**
+
+You can run `interpreter` in local mode from the command line to use `Code Llama`:
+
+```shell
+interpreter --local
+```
+
+If you do not have access to GPT-4 or want to use fast mode (`gpt-3.5-turbo`):
+
+```shell
+interpreter --fast
+```
+
+## Programmatic (Python)
+
+Run `interpreter.chat()` from a .py file:
+
+```python
+interpreter.chat()
+```
+
+For more precise control, you can pass messages directly to `.chat(message)`:
 
 ```python
 import interpreter
@@ -67,42 +99,6 @@ import interpreter
 interpreter.chat("Plot APPL and META's normalized stock prices") # Executes a single command
 interpreter.chat() # Starts an interactive chat
 ```
-
-## Comparison to ChatGPT's Code Interpreter
-
-OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
-
-However, OpenAI's service is hosted, closed-source, and heavily restricted:
-- No internet access.
-- [Limited set  of pre-installed packages](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/).
-- 100 MB maximum upload, 120.0 second runtime limit.
-- State is cleared (along with any generated files or links) when the environment dies.
-
----
-
-Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
-
-This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
-
-## Commands
-
-#### Interactive Chat
-
-To start an interactive chat in your terminal, either run `interpreter` from the command line:
-
-```shell
-interpreter
-```
-
-Or `interpreter.chat()` from a .py file:
-
-```python
-interpreter.chat()
-```
-
-#### Programmatic Chat
-
-For more precise control, you can pass messages directly to `.chat(message)`:
 
 ```python
 interpreter.chat("Add subtitles to all videos in /videos.")
@@ -112,6 +108,12 @@ interpreter.chat("Add subtitles to all videos in /videos.")
 interpreter.chat("These look great but can you make the subtitles bigger?")
 
 # ...
+```
+
+#### You would have to set the model manually in Python:
+
+```python
+interpreter.model = "gpt-3.5-turbo"
 ```
 
 #### Start a New Chat
@@ -144,45 +146,17 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
-#### Change the Model
+## How Does it Work?
 
-> Note: We're working on consolidating these into a unified command.
+Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "python" or "javascript") and `code` to run.
 
-You can run `interpreter` in local mode from the command line to use `Code Llama`:
-
-```shell
-interpreter --local
-```
-
-For `gpt-3.5-turbo`, use fast mode:
-
-```shell
-interpreter --fast
-```
-
-In Python, you will need to set the model manually:
-
-```python
-interpreter.model = "gpt-3.5-turbo"
-```
-
-#### Debug mode
-
-To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
-
-You can activate debug mode by using it's flag (`interpreter --debug`), or mid-chat:
-
-```
-$ interpreter
-...
-> %debug # <- Turns on debug mode
-```
+We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
 
-**⚠️ Open Interpreter will ask for user confirmation before executing code.**
+**⚠️ NOTE: Open Interpreter will ask for user confirmation before executing code.**
 
 You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this confirmation, in which case:
 
@@ -190,11 +164,21 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
-## How Does it Work?
+## Comparison to ChatGPT's Code Interpreter
 
-Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "python" or "javascript") and `code` to run.
+OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
 
-We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
+However, OpenAI's service is hosted, closed-source, and heavily restricted:
+- No internet access.
+- [Limited set  of pre-installed packages](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/).
+- 100 MB maximum upload, 120.0 second runtime limit.
+- State is cleared (along with any generated files or links) when the environment dies.
+
+---
+
+Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
+
+This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
 
 ## Contributing
 
@@ -204,9 +188,8 @@ This is a community-made project. If it looks exciting to you, please don't hesi
 
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
-**Note**: This software is not affiliated with OpenAI.
+**⚠️ NOTE: This software is not affiliated with OpenAI.**
+
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >
 > — _OpenAI's Code Interpreter Release_
-
-<br>
