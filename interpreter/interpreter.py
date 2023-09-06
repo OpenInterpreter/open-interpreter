@@ -330,7 +330,6 @@ class Interpreter:
       # Code-Llama
       
       # Turn function messages -> user messages for llama compatability
-      messages = self.messages
       for message in messages:
         if message['role'] == 'function':
             message['role'] = 'user'
@@ -370,6 +369,7 @@ class Interpreter:
         prompt,
         stream=True,
         temperature=self.temperature,
+        stop=["</s>"]
       )
 
       self.messages[-1] = {"role": "assistant"}
