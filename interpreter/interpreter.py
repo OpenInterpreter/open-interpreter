@@ -461,16 +461,20 @@ class Interpreter:
           # Code-Llama
           # Parse current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
-            current_code_block = self.messages[-1]["content"].split("```")[-1]
             
-            language = current_code_block.split("\n")[0]
-            # Default to python if it just did a "```" then continued writing code
-            if language == "" and "\n" in current_code_block:
-              language = "python"
-
-            code = current_code_block.split("\n")[1:].strip("` \n")
+            # Split by "```" and get the last block
+            blocks = content.split("```")
+            if len(blocks) > 1:
+                current_code_block = blocks[-1]
             
-            arguments = {"language": language, "code": code}
+                lines = current_code_block.strip().split("\n")
+                language = lines[0].strip() if lines[0] else "python"
+            
+                # Join all lines except for the language line
+                code = '\n'.join(lines[1:]).strip("` \n")
+            
+                arguments = {"language": language, "code": code}
+                print(arguments)
             
             # Code-Llama won't make a "function_call" property for us to store this under, so:
             if "function_call" not in self.messages[-1]:
