@@ -361,7 +361,9 @@ class Interpreter:
       prompt = messages_to_prompt(messages)
 
       # temporary debug
-      print(prompt)
+      # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
+      import builtins
+      builtins.print(prompt)
 
       # Run Code-Llama
             
