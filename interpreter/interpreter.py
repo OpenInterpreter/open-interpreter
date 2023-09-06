@@ -50,6 +50,14 @@ To use `GPT-4` (recommended) please provide an OpenAI API key.
 To use `Code-Llama` (free but less capable) press `enter`.
 """
 
+# Message for when users don't have an OpenAI API key.
+missing_azure_info_message = """> Azure OpenAI Service API info not found
+
+To use `GPT-4` (recommended) please provide an Azure OpenAI API key, a API base, a deployment name and a API version.
+
+To use `Code-Llama` (free but less capable) press `enter`.
+"""
+
 confirm_mode_message = """
 **Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this.
 
@@ -67,6 +75,11 @@ class Interpreter:
     self.local = False
     self.model = "gpt-4"
     self.debug_mode = False
+    # Azure OpenAI
+    self.use_azure = False
+    self.azure_api_base = None
+    self.azure_api_version = None
+    self.azure_deployment_name = None
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -256,11 +269,14 @@ class Interpreter:
     """
     Makes sure we have an OPENAI_API_KEY.
     """
-
-    if self.api_key == None:
-
-      if 'OPENAI_API_KEY' in os.environ:
+    if self.use_azure:
+      all_env_available = ('OPENAI_API_KEY' in os.environ and 'AZURE_API_BASE' in os.environ
+                           and 'AZURE_API_VERSION' in os.environ and 'AZURE_DEPLOYMENT_NAME' in os.environ)
+      if all_env_available:
         self.api_key = os.environ['OPENAI_API_KEY']
+        self.azure_api_base = os.environ['AZURE_API_BASE']
+        self.azure_api_version = os.environ['AZURE_API_VERSION']
+        self.azure_deployment_name = os.environ['AZURE_DEPLOYMENT_NAME']
       else:
         # This is probably their first time here!
         print('', Markdown("**Welcome to Open Interpreter.**"), '')
@@ -268,25 +284,64 @@ class Interpreter:
 
         print(Rule(style="white"))
 
-        print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
-        response = input("OpenAI API key: ")
-    
+        print(Markdown(missing_azure_info_message), '', Rule(style="white"), '')
+        response = input("Azure OpenAI API key: ")
+
         if response == "":
-            # User pressed `enter`, requesting Code-Llama
-            self.local = True
-            
-            print(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
-            time.sleep(2)
-            print(Rule(style="white"))
-            return
-          
+          # User pressed `enter`, requesting Code-Llama
+          self.local = True
+
+          print(Markdown(
+            "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                '')
+          time.sleep(2)
+          print(Rule(style="white"))
+          return
+
         else:
-            self.api_key = response
-            print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
-            time.sleep(2)
-            print(Rule(style="white"))
-            
-    openai.api_key = self.api_key
+          self.api_key = response
+          self.azure_api_base = input("Azure OpenAI API base: ")
+          self.azure_deployment_name = input("Azure OpenAI deployment name of GPT: ")
+          self.azure_api_version = input("Azure OpenAI API version: ")
+          print('', Markdown(
+            "**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key AZURE_API_BASE=your_api_base AZURE_API_VERSION=your_api_version AZURE_DEPLOYMENT_NAME=your_gpt_deployment_name` on Mac/Linux or `setx OPENAI_API_KEY your_api_key AZURE_API_BASE your_api_base AZURE_API_VERSION your_api_version AZURE_DEPLOYMENT_NAME your_gpt_deployment_name` on Windows."),
+                '')
+          time.sleep(2)
+          print(Rule(style="white"))
+
+      openai.api_type = "azure"
+      openai.api_base = self.azure_api_base
+      openai.api_version = self.azure_api_version
+      openai.api_key = self.api_key
+    else:
+      if self.api_key == None:
+        if 'OPENAI_API_KEY' in os.environ:
+          self.api_key = os.environ['OPENAI_API_KEY']
+        else:
+          # This is probably their first time here!
+          print('', Markdown("**Welcome to Open Interpreter.**"), '')
+          time.sleep(1)
+
+          print(Rule(style="white"))
+
+          print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
+          response = input("OpenAI API key: ")
+
+          if response == "":
+              # User pressed `enter`, requesting Code-Llama
+              self.local = True
+              print(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
+              time.sleep(2)
+              print(Rule(style="white"))
+              return
+
+          else:
+              self.api_key = response
+              print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
+              time.sleep(2)
+              print(Rule(style="white"))
+
+      openai.api_key = self.api_key
 
   def end_active_block(self):
     if self.active_block:
@@ -309,13 +364,22 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # gpt-4
-      response = openai.ChatCompletion.create(
-        model=self.model,
-        messages=messages,
-        functions=[function_schema],
-        stream=True,
-        temperature=self.temperature,
-      )
+      if self.use_azure:
+        response = openai.ChatCompletion.create(
+            engine=self.azure_deployment_name,
+            messages=messages,
+            functions=[function_schema],
+            temperature=self.temperature,
+            stream=True,
+            )
+      else:
+        response = openai.ChatCompletion.create(
+          model=self.model,
+          messages=messages,
+          functions=[function_schema],
+          stream=True,
+          temperature=self.temperature,
+        )
     elif self.local:
       # Code-Llama
       
@@ -338,6 +402,9 @@ class Interpreter:
     self.active_block = None
 
     for chunk in response:
+      if self.use_azure and ('choices' not in chunk or len(chunk['choices']) == 0):
+        # Azure OpenAI Service may return empty chunk
+        continue
 
       delta = chunk["choices"][0]["delta"]
 
