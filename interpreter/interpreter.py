@@ -375,6 +375,9 @@ class Interpreter:
 
     for chunk in response:
 
+      # temporary debugging
+      print(chunk)
+
       delta = chunk["choices"][0]["delta"]
 
       # Accumulate deltas into the last message in messages
