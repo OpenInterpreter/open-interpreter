@@ -59,7 +59,7 @@ After installation, simply run `interpreter`:
 interpreter
 ```
 
-## Commands
+## Command Line
 
 To start an interactive chat in your terminal, run `interpreter` from the command line:
 
