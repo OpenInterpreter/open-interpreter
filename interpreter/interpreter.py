@@ -368,7 +368,12 @@ class Interpreter:
       prompt = messages_to_prompt(messages)
       # Lmao i can't believe this works (it does need this btw)
       if messages[-1]["role"] != "function":
-        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. I'm going to try to do this for your task. Anyway, to address your query: "
+        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. I'm going to try to do this for your task. Anyway, "
+      elif messages[-1]["role"] == "function" and messages[-1]["role"]["content"] != "No output":
+        prompt += "Given the output of the code I just ran, "
+      elif messages[-1]["role"] == "function" and messages[-1]["role"]["content"] == "No output":
+        prompt += "Given the fact that the code I just ran produced no output, "
+        
 
       if self.debug_mode:
         # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
@@ -392,10 +397,10 @@ class Interpreter:
 
     for chunk in response:
 
-      # temporary debugging
-      print(chunk)
-
       if self.local:
+        if "content" not in messages[-1]:
+          # This is the first chunk. We'll need to capitalize it, because our prompt ends in a ", "
+          chunk["choices"][0]["text"] = chunk["choices"][0]["text"].capitalize()
         delta = {"content": chunk["choices"][0]["text"]}
       else:
         delta = chunk["choices"][0]["delta"]
