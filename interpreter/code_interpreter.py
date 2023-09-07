@@ -10,9 +10,10 @@ import astor
 import sys
 import os
 import re
+import requests
 
 
-def run_html(html_content):
+def run_html(html_content, _active_block):
     # Create a temporary HTML file with the content
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
         f.write(html_content.encode())
@@ -22,6 +23,30 @@ def run_html(html_content):
 
     return f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
 
+
+def run_bing_search(search_term, active_block):
+  bing_search_url = "https://api.bing.microsoft.com/v7.0/search"
+  headers = {"Ocp-Apim-Subscription-Key": os.environ['BING_SUBSCRIPTION_KEY']}
+  params = {
+      "q": search_term,
+      "count": 5,
+      "textDecorations": True,
+      "textFormat": "HTML",
+  }
+  response = requests.get(
+      bing_search_url, headers=headers, params=params  # type: ignore
+  )
+  response.raise_for_status()
+  search_results = response.json()
+  snippets = []
+  for result in search_results["webPages"]["value"]:
+    snippets.append(result["snippet"])
+  output = " ".join(snippets)
+
+  active_block.output = output
+  active_block.refresh()
+
+  return output
 
 # Mapping of languages to their start, run, and print commands
 language_map = {
@@ -50,6 +75,10 @@ language_map = {
   "html": {
     "open_subrocess": False,
     "run_function": run_html,
+  },
+  "web_search": {
+    "run_function": run_bing_search,
+    "open_subrocess": False,
   }
 }
 
@@ -203,8 +232,9 @@ class CodeInterpreter:
       print("---")
 
     # HTML-specific processing (and running)
-    if self.language == "html":
-      output = language_map["html"]["run_function"](code)
+    if self.language in ("html", "web_search"):
+      output = language_map[self.language]["run_function"](code, self.active_block)
+      self.output = output
       return output
 
     # Reset self.done so we can .wait() for it

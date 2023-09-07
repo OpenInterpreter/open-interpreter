@@ -31,7 +31,7 @@ function_schema = {
         "type": "string",
         "description":
         "The programming language",
-        "enum": ["python", "shell", "applescript", "javascript", "html"]
+        "enum": ["python", "shell", "applescript", "javascript", "html", "web_search"]
       },
       "code": {
         "type": "string",
@@ -664,9 +664,6 @@ class Interpreter:
           code_interpreter.active_block = self.active_block
           code_interpreter.run()
 
-          # End the active_block
-          self.active_block.end()
-
           # Append the output to messages
           # Explicitly tell it if there was no output (sometimes "" = hallucinates output)
           self.messages.append({
@@ -674,6 +671,14 @@ class Interpreter:
             "name": "run_code",
             "content": self.active_block.output if self.active_block.output else "No output"
           })
+
+          if language == "web_search":
+            # The search result is just a blob of JSON, not very interesting
+            self.active_block.output = ""
+            self.active_block.refresh()
+          
+          # End the active_block
+          self.active_block.end()
 
           # Go around again
           self.respond()
