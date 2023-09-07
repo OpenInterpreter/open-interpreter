@@ -214,9 +214,11 @@ Open Interpreter equips a [function-calling language model](https://platform.ope
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
-## Contributing
+# Contributing
 
-This is a community-made project. If it looks exciting to you, please don't hesitate to contribute!
+Thank you for your interest in contributing! We welcome involvement from the community. 
+
+Please see our [Contributing Guidelines](https://github.com/KillianLucas/open-interpreter/blob/main/contributing.md) for more details on how to get involved.
 
 ## License
 
