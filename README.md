@@ -1,8 +1,9 @@
 <div align="center">
-    <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
+    <a href="https://openinterpreter.com">
+        <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
+    </a>
+    <h1>Open Interpreter</h1>
 </div>
-
-<h1 align="center">Open Interpreter</h1>
 
 <div align="center">
     <div>
@@ -51,37 +52,40 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 pip install open-interpreter
 ```
 
-### Terminal
+## Command Line (Terminal)
 
-After installation, simply run `interpreter`:
-
-```shell
-interpreter
-```
-
-## Command Line
-
-To start an interactive chat in your terminal, run `interpreter` from the command line:
+To start an interactive chat in your terminal after installation, simply run `interpreter` from the command line:
 
 ```shell
 interpreter
 ```
 
-#### Changing Models (GPT-4, GPT-3.5-Turbo, Code LLama)
+### Changing Models (GPT-4, GPT-3.5-Turbo, Code Llama)
 
 **⚠️ NOTE: We're working on consolidating these into a unified command.**
 
-You can run `interpreter` in local mode from the command line to use `Code Llama`:
+If you do not have access to GPT-4 or want to use "fast mode" (`gpt-3.5-turbo`):
+
+```shell
+interpreter --fast
+```
+
+**⚠️ NOTE: This requires you to install Code Llama on your machine.**
+
+You can run `interpreter` in "local mode" from the command line to use `Code Llama`:
 
 ```shell
 interpreter --local
 ```
 
-If you do not have access to GPT-4 or want to use fast mode (`gpt-3.5-turbo`):
+### Don't have an OpenAI key?
 
-```shell
-interpreter --fast
-```
+You can get your own OpenAI API key by following the following instructions:
+
+1. Go to https://platform.openai.com/account/api-keys
+2. Click on the `+ Create New Secret Key` button
+3. Enter an identifier name (optional) and click on the `Create Secret Key` button
+4. Copy & Paste!
 
 ## Programmatic (Python)
 
