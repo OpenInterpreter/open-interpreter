@@ -146,6 +146,8 @@ print(interpreter.system_message)
 
 #### Change the Model
 
+> Note: We're working on consolidating these into a unified command.
+
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
 ```shell
@@ -158,10 +160,22 @@ For `gpt-3.5-turbo`, use fast mode:
 interpreter --fast
 ```
 
-Or, in Python, set the model manually:
+In Python, you will need to set the model manually:
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
+```
+
+#### Debug mode
+
+To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
+
+You can activate debug mode by using it's flag (`interpreter --debug`), or mid-chat:
+
+```
+$ interpreter
+...
+> %debug # <- Turns on debug mode
 ```
 
 ## Safety Notice
