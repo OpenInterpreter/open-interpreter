@@ -415,6 +415,9 @@ class Interpreter:
         
         # Loop starting from the first user message
         for index, item in enumerate(messages[1:]):
+            # Happens if it immediatly writes code
+            if "role" not in item:
+              item["role"] == "assistant"
             role = item['role']
             content = item['content']
             
