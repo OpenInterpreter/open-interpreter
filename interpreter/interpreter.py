@@ -133,7 +133,7 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      info += "\n\nTo run code, write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output. DO NOT TELL THE USER YOU CAN'T RUN CODE. YOU CAN RUN CODE."
+      info += "\n\nTo run code, write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
       # We make references in system_message.txt to the "function" it can call, "run_code".
 
     return info
@@ -335,10 +335,7 @@ class Interpreter:
     elif self.local:
       # Code-Llama
       
-      # Turn function messages -> user messages for llama compatability
-      for message in messages:
-        if message['role'] == 'function':
-            message['role'] = 'user'
+      
           
       # Convert messages to prompt
       # (This only works if the first message is the only system message)
@@ -355,6 +352,8 @@ class Interpreter:
             
             if role == 'user':
                 formatted_messages += f"{content} [/INST] "
+            elif role == 'function':
+                formatted_messages += f"Output: {content} [/INST] "
             elif role == 'assistant':
                 formatted_messages += f"{content} </s><s>[INST] "
     
@@ -366,7 +365,8 @@ class Interpreter:
 
       prompt = messages_to_prompt(messages)
       # Lmao i can't believe this works (it does need this btw)
-      prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for ```shell, ```javascript, ```python, and ```applescript. Anyway, to address your query: "
+      if messages[-1]["role"] != "function":
+        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for ```shell, ```javascript, ```python, and ```applescript. Anyway, to address your query: "
 
       if self.debug_mode:
         # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
