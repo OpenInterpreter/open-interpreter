@@ -70,7 +70,7 @@ interpreter
 
 ### Changing Models (GPT-4, GPT-3.5-Turbo, Code Llama)
 
-**⚠️ NOTE: We're working on consolidating these into a unified command.**
+ⓘ **Issues running locally?** Read our new [local setup guide](/GPU.md).
 
 If you do not have access to GPT-4 or want to use "fast mode" (`gpt-3.5-turbo`):
 
@@ -168,7 +168,7 @@ interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
-### Customize System Message
+### Modify System Message
 
 You can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
 
