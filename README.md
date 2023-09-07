@@ -86,7 +86,7 @@ This combines the power of GPT-4's Code Interpreter with the flexibility of your
 
 ## Commands
 
-#### Interactive Chat
+### Interactive Chat
 
 To start an interactive chat in your terminal, either run `interpreter` from the command line:
 
@@ -100,7 +100,7 @@ Or `interpreter.chat()` from a .py file:
 interpreter.chat()
 ```
 
-#### Programmatic Chat
+### Programmatic Chat
 
 For more precise control, you can pass messages directly to `.chat(message)`:
 
@@ -114,7 +114,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 # ...
 ```
 
-#### Start a New Chat
+### Start a New Chat
 
 In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
@@ -122,7 +122,7 @@ In Python, Open Interpreter remembers conversation history. If you want to start
 interpreter.reset()
 ```
 
-#### Save and Restore Chats
+### Save and Restore Chats
 
 `interpreter.chat()` returns a List of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
 
@@ -133,7 +133,7 @@ interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
-#### Customize System Message
+### Customize System Message
 
 You can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
 
@@ -144,9 +144,9 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
-#### Change the Model
+### Change the Model
 
-> Note: We're working on consolidating these into a unified command.
+ⓘ  **Issues running Open Interpreter locally?** Read our new [local setup guide](/GPU.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
@@ -166,7 +166,7 @@ In Python, you will need to set the model manually:
 interpreter.model = "gpt-3.5-turbo"
 ```
 
-#### Azure Support
+### Azure Support
 
 To connect to an Azure deployment, the `--use-azure` flag will walk you through setting this up:
 
@@ -184,7 +184,7 @@ interpreter.azure_api_version = "your_azure_api_version"
 interpreter.azure_deployment_name = "your_azure_deployment_name"
 ```
 
-#### Debug mode
+### Debug mode
 
 To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
 
