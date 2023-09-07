@@ -115,7 +115,7 @@ class Interpreter:
     current_working_directory = os.getcwd()
     operating_system = platform.system()
     
-    info += f"\n\n[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
+    info += f"[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
     if not self.local:
 
@@ -146,10 +146,8 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      info += "\n\nTo run code, simply write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      info += "\n\nTo run code, write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
       # We make references in system_message.txt to the "function" it can call, "run_code".
-      # But functions are not supported by Code-Llama, so:
-      info = info.replace("run_code", "a markdown code block")
 
     return info
 
@@ -352,9 +350,19 @@ class Interpreter:
     # Add relevant info to system_message
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
+
+    # This is hacky, as we should have a different (minified) prompt for CodeLLama,
+    # but for now, to make the prompt shorter and remove "run_code" references, just get the first 2 lines:
+    if self.local:
+      self.system_message = "\n".join(self.system_message.split("\n")[:3])
+      self.system_message += "\nOnly do what the user asks you to do, then ask what they'd like to do next."
+    
     system_message = self.system_message + "\n\n" + info
 
-    messages = tt.trim(self.messages, self.model, system_message=system_message)
+    if self.local:
+      messages = tt.trim(self.messages, max_tokens=1048, system_message=system_message)
+    else:
+      messages = tt.trim(self.messages, self.model, system_message=system_message)
     
     if self.debug_mode:
       print("\n", "Sending `messages` to LLM:", "\n")
@@ -363,40 +371,92 @@ class Interpreter:
 
     # Make LLM call
     if not self.local:
-      # gpt-4
-      if self.use_azure:
-        response = openai.ChatCompletion.create(
-            engine=self.azure_deployment_name,
-            messages=messages,
-            functions=[function_schema],
-            temperature=self.temperature,
-            stream=True,
-            )
+      # GPT
+      
+      for _ in range(3):  # 3 retries
+        try:
+          
+            if self.use_azure:
+              response = openai.ChatCompletion.create(
+                  engine=self.azure_deployment_name,
+                  messages=messages,
+                  functions=[function_schema],
+                  temperature=self.temperature,
+                  stream=True,
+                  )
+            else:
+              response = openai.ChatCompletion.create(
+                model=self.model,
+                messages=messages,
+                functions=[function_schema],
+                stream=True,
+                temperature=self.temperature,
+              )
+              
+            break
+        except openai.error.RateLimitError:
+            # Rate limit hit. Retrying in 3 seconds
+            time.sleep(3)
       else:
-        response = openai.ChatCompletion.create(
-          model=self.model,
-          messages=messages,
-          functions=[function_schema],
-          stream=True,
-          temperature=self.temperature,
-        )
+        raise openai.error.RateLimitError("RateLimitError: Max retries reached")
+            
     elif self.local:
       # Code-Llama
       
-      # Turn function messages -> system messages for llama compatability
-      messages = self.messages
-      for message in messages:
-        if message['role'] == 'function':
-            message['role'] = 'system'
+      
           
-      response = self.llama_instance.create_chat_completion(
-        messages=messages,
+      # Convert messages to prompt
+      # (This only works if the first message is the only system message)
+
+      def messages_to_prompt(messages):
+        # Extracting the system prompt and initializing the formatted string with it.
+        system_prompt = messages[0]['content']
+        formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
+        
+        # Loop starting from the first user message
+        for index, item in enumerate(messages[1:]):
+            role = item['role']
+            content = item['content']
+            
+            if role == 'user':
+                formatted_messages += f"{content} [/INST] "
+            elif role == 'function':
+                formatted_messages += f"Output: {content} [/INST] "
+            elif role == 'assistant':
+                formatted_messages += f"{content} </s><s>[INST] "
+    
+        # Remove the trailing '<s>[INST] ' from the final output
+        if formatted_messages.endswith("<s>[INST] "):
+            formatted_messages = formatted_messages[:-10]
+        
+        return formatted_messages
+
+      prompt = messages_to_prompt(messages)
+      # Lmao i can't believe this works (it does need this btw)
+      if messages[-1]["role"] != "function":
+        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. I'm going to try to do this for your task. Anyway, "
+      elif messages[-1]["role"] == "function" and messages[-1]["content"] != "No output":
+        prompt += "Given the output of the code I just ran, "
+      elif messages[-1]["role"] == "function" and messages[-1]["content"] == "No output":
+        prompt += "Given the fact that the code I just ran produced no output, "
+        
+
+      if self.debug_mode:
+        # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
+        import builtins
+        builtins.print("TEXT PROMPT SEND TO LLM:\n", prompt)
+
+      # Run Code-Llama
+            
+      response = self.llama_instance(
+        prompt,
         stream=True,
         temperature=self.temperature,
+        stop=["</s>"]
       )
 
     # Initialize message, function call trackers, and active block
-    self.messages.append({})
+    self.messages.append({"role": "assistant"})
     in_function_call = False
     llama_function_call_finished = False
     self.active_block = None
@@ -406,7 +466,13 @@ class Interpreter:
         # Azure OpenAI Service may return empty chunk
         continue
 
-      delta = chunk["choices"][0]["delta"]
+      if self.local:
+        if "content" not in messages[-1]:
+          # This is the first chunk. We'll need to capitalize it, because our prompt ends in a ", "
+          chunk["choices"][0]["text"] = chunk["choices"][0]["text"].capitalize()
+        delta = {"content": chunk["choices"][0]["text"]}
+      else:
+        delta = chunk["choices"][0]["delta"]
 
       # Accumulate deltas into the last message in messages
       self.messages[-1] = merge_deltas(self.messages[-1], delta)
@@ -461,21 +527,29 @@ class Interpreter:
           # Code-Llama
           # Parse current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
-            
-            # Split by "```" and get the last block
-            blocks = content.split("```")
-            if len(blocks) > 1:
-                current_code_block = blocks[-1]
-            
-                lines = current_code_block.strip().split("\n")
-                language = lines[0].strip() if lines[0] else "python"
-            
-                # Join all lines except for the language line
-                code = '\n'.join(lines[1:]).strip("` \n")
-            
-                arguments = {"language": language, "code": code}
-                print(arguments)
-            
+
+            content = self.messages[-1]["content"]
+
+            if "```" in content:
+              # Split by "```" to get the last open code block
+              blocks = content.split("```")
+  
+              current_code_block = blocks[-1]
+          
+              lines = current_code_block.split("\n")
+  
+              if content.strip() == "```": # Hasn't outputted a language yet
+                language = None
+              else:
+                language = lines[0].strip() if lines[0] != "" else "python"
+          
+              # Join all lines except for the language line
+              code = '\n'.join(lines[1:]).strip("` \n")
+          
+              arguments = {"code": code}
+              if language: # We only add this if we have it-- the second we have it, an interpreter gets fired up (I think? maybe I'm wrong)
+                arguments["language"] = language
+
             # Code-Llama won't make a "function_call" property for us to store this under, so:
             if "function_call" not in self.messages[-1]:
               self.messages[-1]["function_call"] = {}
