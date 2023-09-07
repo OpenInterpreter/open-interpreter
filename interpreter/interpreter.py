@@ -366,7 +366,7 @@ class Interpreter:
 
       prompt = messages_to_prompt(messages)
       # Lmao i can't believe this works (it does need this btw)
-      prompt += "Let's explore this. (By the way, I can run code on your machine by writing the code in a markdown code block. This works for ```shell, ```javascript, ```python, and ```applescript. Anyway, to address your query: "
+      prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for ```shell, ```javascript, ```python, and ```applescript. Anyway, to address your query: "
 
       if self.debug_mode:
         # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
@@ -382,10 +382,8 @@ class Interpreter:
         stop=["</s>"]
       )
 
-      self.messages[-1] = {"role": "assistant"}
-
     # Initialize message, function call trackers, and active block
-    self.messages.append({})
+    self.messages.append({"role": "assistant"})
     in_function_call = False
     llama_function_call_finished = False
     self.active_block = None
