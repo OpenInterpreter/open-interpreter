@@ -30,7 +30,7 @@ class MessageBlock:
     if cursor:
       content += "█"
       
-    markdown = Markdown(content)
+    markdown = Markdown(content.strip())
     panel = Panel(markdown, box=MINIMAL)
     self.live.update(panel)
     self.live.refresh()
