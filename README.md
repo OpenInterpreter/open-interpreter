@@ -52,6 +52,14 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 pip install open-interpreter
 ```
 
+### Don't have an OpenAI key?
+You can get your own OpenAI API key by following the following instructions:
+
+1. Go to https://platform.openai.com/account/api-keys
+2. Click on the `+ Create New Secret Key` button
+3. Enter an identifier name (optional) and click on the `Create Secret Key` button
+4. Copy & Paste!
+
 ## Command Line (Terminal)
 
 To start an interactive chat in your terminal after installation, simply run `interpreter` from the command line:
@@ -78,14 +86,35 @@ You can run `interpreter` in "local mode" from the command line to use `Code Lla
 interpreter --local
 ```
 
-### Don't have an OpenAI key?
+### Azure Support
 
-You can get your own OpenAI API key by following the following instructions:
+To connect to an Azure deployment, the `--use-azure` flag will walk you through setting this up:
 
-1. Go to https://platform.openai.com/account/api-keys
-2. Click on the `+ Create New Secret Key` button
-3. Enter an identifier name (optional) and click on the `Create Secret Key` button
-4. Copy & Paste!
+```
+interpreter --use-azure
+```
+
+In Python, set the following variables:
+
+```
+interpreter.use_azure = True
+interpreter.api_key = "your_openai_api_key"
+interpreter.azure_api_base = "your_azure_api_base"
+interpreter.azure_api_version = "your_azure_api_version"
+interpreter.azure_deployment_name = "your_azure_deployment_name"
+```
+
+### Debug Mode
+
+To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
+
+You can activate debug mode by using it's flag (`interpreter --debug`), or mid-chat:
+
+```
+$ interpreter
+...
+> %debug # <- Turns on debug mode
+```
 
 ## Programmatic (Python)
 
@@ -114,13 +143,13 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 # ...
 ```
 
-#### You would have to set the model manually in Python:
+### Manually set the model in Python
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
 ```
 
-#### Start a New Chat
+### Start a New Chat
 
 In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
@@ -128,7 +157,7 @@ In Python, Open Interpreter remembers conversation history. If you want to start
 interpreter.reset()
 ```
 
-#### Save and Restore Chats
+### Save and Restore Chats
 
 `interpreter.chat()` returns a List of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
 
@@ -139,7 +168,7 @@ interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
-#### Customize System Message
+### Customize System Message
 
 You can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
 
