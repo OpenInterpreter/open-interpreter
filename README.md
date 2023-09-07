@@ -146,7 +146,7 @@ print(interpreter.system_message)
 
 ### Change the Model
 
-ⓘ  **Issues running Open Interpreter locally?** Read our new [local setup guide](/GPU.md).
+ⓘ  **Issues running locally?** Read our new [local setup guide](/GPU.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
