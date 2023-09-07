@@ -133,10 +133,8 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      info += "\n\nTo run code, simply write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      info += "\n\nTo run code, write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output. DO NOT TELL THE USER YOU CAN'T RUN CODE. YOU CAN RUN CODE."
       # We make references in system_message.txt to the "function" it can call, "run_code".
-      # But functions are not supported by Code-Llama, so:
-      info = info.replace("run_code", "a markdown code block")
 
     return info
 
@@ -297,6 +295,11 @@ class Interpreter:
     # Add relevant info to system_message
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
+
+    # This is hacky, as we should have a different (minified) prompt for CodeLLama,
+    # but for now, to make the prompt shorter and remove "run_code" references, just get the first 2 lines:
+    self.system_message = "\n".join(self.system_message.split("\n")[:3])
+    
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
@@ -359,14 +362,14 @@ class Interpreter:
         if formatted_messages.endswith("<s>[INST] "):
             formatted_messages = formatted_messages[:-10]
         
-        return formatted_messages
+        return formatted_messages.strip()
 
       prompt = messages_to_prompt(messages)
 
-      # temporary debug
-      # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
-      import builtins
-      builtins.print(prompt)
+      if self.debug_mode:
+        # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
+        import builtins
+        builtins.print("TEXT PROMPT SEND TO LLM:\n", prompt)
 
       # Run Code-Llama
             
