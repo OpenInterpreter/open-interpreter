@@ -25,3 +25,6 @@ dist/
 
 # Ignore misc directory
 misc/
+
+# Ignore .vscode directory
+.vscode/
