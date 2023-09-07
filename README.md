@@ -158,7 +158,7 @@ interpreter.reset()
 
 ### Save and Restore Chats
 
-`interpreter.chat()` returns a List of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
+`interpreter.chat()` returns a list of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
 
 ```python
 messages = interpreter.chat("My name is Killian.", return_messages=True) # Save messages to 'messages'
@@ -205,6 +205,12 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
 This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
+
+## How Does it Work?
+
+Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "python" or "javascript") and `code` to run.
+
+We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
 ## Contributing
 
