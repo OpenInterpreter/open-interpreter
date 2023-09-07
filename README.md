@@ -1,5 +1,5 @@
 <div align="center">
-    <a href="https://openinterpreter.com">
+    <a href="https://openinterpreter.com" target="_blank">
         <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
     </a>
     <h1>Open Interpreter</h1>
