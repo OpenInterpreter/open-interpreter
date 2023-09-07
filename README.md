@@ -1,11 +1,10 @@
 <div align="center">
-    <h1>Open Interpreter</h1>
-    <a href="https://openinterpreter.com" target="_blank">
-      <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
-    </a>
-</div>
-
-<div align="center">
+    <div>
+        <a href="https://openinterpreter.com" target="_blank">
+            <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
+        </a>
+        <h1>Open Interpreter</h1>
+    </div>
     <div>
         <a href="https://discord.gg/YG7APUyJ5">
             <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white">
