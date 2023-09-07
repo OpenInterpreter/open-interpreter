@@ -102,7 +102,7 @@ class Interpreter:
     current_working_directory = os.getcwd()
     operating_system = platform.system()
     
-    info += f"\n\n[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
+    info += f"[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
     if not self.local:
 
@@ -362,9 +362,11 @@ class Interpreter:
         if formatted_messages.endswith("<s>[INST] "):
             formatted_messages = formatted_messages[:-10]
         
-        return formatted_messages.strip()
+        return formatted_messages
 
       prompt = messages_to_prompt(messages)
+      # Lmao i can't believe this works (it does need this btw)
+      prompt += "Let's explore this. (By the way, I can run code on your machine by writing the code in a markdown code block. This works for ```shell, ```javascript, ```python, and ```applescript. Anyway, to address your query: "
 
       if self.debug_mode:
         # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
