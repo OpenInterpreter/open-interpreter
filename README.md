@@ -1,8 +1,8 @@
 <div align="center">
-    <a href="https://openinterpreter.com" target="_blank">
-        <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
-    </a>
     <h1>Open Interpreter</h1>
+    <a href="https://openinterpreter.com" target="_blank">
+      <img src="https://openinterpreter.com/assets/favicon/favicon-32x32.png" alt="Open Interpreter Icon" />
+    </a>
 </div>
 
 <div align="center">
@@ -143,7 +143,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 # ...
 ```
 
-### Manually set the model in Python
+### Manually Set The Model in Python
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
@@ -178,12 +178,6 @@ Run shell commands with -y so the user doesn't have to confirm them.
 """
 print(interpreter.system_message)
 ```
-
-## How Does it Work?
-
-Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "python" or "javascript") and `code` to run.
-
-We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
 ## Safety Notice
 
