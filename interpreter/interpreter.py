@@ -369,9 +369,9 @@ class Interpreter:
       # Lmao i can't believe this works (it does need this btw)
       if messages[-1]["role"] != "function":
         prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. I'm going to try to do this for your task. Anyway, "
-      elif messages[-1]["role"] == "function" and messages[-1]["role"]["content"] != "No output":
+      elif messages[-1]["role"] == "function" and messages[-1]["content"] != "No output":
         prompt += "Given the output of the code I just ran, "
-      elif messages[-1]["role"] == "function" and messages[-1]["role"]["content"] == "No output":
+      elif messages[-1]["role"] == "function" and messages[-1]["content"] == "No output":
         prompt += "Given the fact that the code I just ran produced no output, "
         
 
