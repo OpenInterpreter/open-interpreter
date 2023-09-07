@@ -456,7 +456,7 @@ class Interpreter:
       )
 
     # Initialize message, function call trackers, and active block
-    self.messages.append({"role": "assistant"})
+    self.messages.append({})
     in_function_call = False
     llama_function_call_finished = False
     self.active_block = None
@@ -470,6 +470,8 @@ class Interpreter:
         if "content" not in messages[-1]:
           # This is the first chunk. We'll need to capitalize it, because our prompt ends in a ", "
           chunk["choices"][0]["text"] = chunk["choices"][0]["text"].capitalize()
+          # We'll also need to add "role: assistant", CodeLlama will not generate this
+          messages[-1]["role"] = "assistant"
         delta = {"content": chunk["choices"][0]["text"]}
       else:
         delta = chunk["choices"][0]["delta"]
