@@ -368,7 +368,7 @@ class Interpreter:
       prompt = messages_to_prompt(messages)
       # Lmao i can't believe this works (it does need this btw)
       if messages[-1]["role"] != "function":
-        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. Anyway, to address your query: "
+        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. I'm going to try to do this for your task. Anyway, to address your query: "
 
       if self.debug_mode:
         # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
