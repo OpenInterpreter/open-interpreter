@@ -59,6 +59,14 @@ After installation, simply run `interpreter`:
 interpreter
 ```
 
+#### Fish Shell
+
+Fish shell users please ensure SHELL environmental variable is set to bash for **interpreter** to work. 
+
+The following code creates an alias to `i` command to run **interpreter** with SHELL pointing to bash and with the `-y` parameter enabled to execute code without user confirmation:
+
+`alias -s i="SHELL=(which bash) interpreter -y"`
+
 ### Python
 
 ```python
