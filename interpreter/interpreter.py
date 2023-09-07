@@ -412,12 +412,14 @@ class Interpreter:
         # Extracting the system prompt and initializing the formatted string with it.
         system_prompt = messages[0]['content']
         formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
+
+        for message in messages:
+          # Happens if it immediatly writes code
+          if "role" not in message:
+            message["role"] = "assistant"
         
         # Loop starting from the first user message
         for index, item in enumerate(messages[1:]):
-            # Happens if it immediatly writes code
-            if "role" not in item:
-              item["role"] == "assistant"
             role = item['role']
             content = item['content']
             
