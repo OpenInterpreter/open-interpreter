@@ -16,8 +16,8 @@ def get_llama_2_instance():
         
     models = {
         '7B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q2_K.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
+            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q3_K_S.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
+            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
             'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-GGUF/resolve/main/codellama-7b.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
         },
         '13B': {
