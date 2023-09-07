@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.1.0"
+version = "0.1.1"
 description = "Let language models run code locally."
 authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
@@ -15,7 +15,7 @@ rich = "^13.4.2"
 tiktoken = "^0.4.0"
 astor = "^0.8.1"
 git-python = "^1.0.3"
-tokentrim = "^0.1.2"
+tokentrim = "^0.1.9"
 appdirs = "^1.4.4"
 six = "^1.16.0"
 
