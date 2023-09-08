@@ -23,7 +23,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
 
 ENV PATH="/opt/conda/bin:${PATH}"
 
-RUN conda create -y --name interpreter-default python="3.11.4"
+RUN conda create -y --name interpreter-default python="$PYTHON_VERSION"
 RUN echo "source activate interpreter-default" > ~/.bashrc
 WORKDIR /app
 

@@ -58,7 +58,7 @@ def get_llama_2_instance():
     file_name = url.split("/")[-1]
 
     # Get user data directory
-    user_data_dir = appdirs.user_data_dir("Open Interpreter")
+    user_data_dir = appdirs.user_data_dir("Open_Interpreter")
     default_path = os.path.join(user_data_dir, "models")
 
     # Ensure the directory exists
