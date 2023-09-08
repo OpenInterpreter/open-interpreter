@@ -18,6 +18,8 @@
 pip install open-interpreter
 ```
 
+**⚠️ Note: Python version should be >= 3.10
+
 ```shell
 interpreter
 ```
