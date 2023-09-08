@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Install llama-cpp-python with GPU acceleration, overwriting the version installed by text-generation-webui
 # We do this on boot, so as to ensure the binaries are built with the right CPU instructions for the machine being used
@@ -16,4 +16,4 @@ fi
 
 export PATH=/usr/local/cuda/bin:"$PATH"
 export FORCE_CMAKE=1
-
+pip install --no-cache-dir llama-cpp-python
