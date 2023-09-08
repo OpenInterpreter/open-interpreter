@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/bash
 
 # Install llama-cpp-python with GPU acceleration, overwriting the version installed by text-generation-webui
 # We do this on boot, so as to ensure the binaries are built with the right CPU instructions for the machine being used
