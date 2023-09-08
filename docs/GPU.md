@@ -61,7 +61,7 @@ benefit from offloading some of the work to your GPU.
     ```
 
     The command should complete with no errors. If you receive an error, ask for
-    help on [the Discord server](https://discord.gg/YG7APUyJ5).
+    help on [the Discord server](https://discord.gg/6p3fD6rBVm).
 
 4.  Once `llama-cpp-python` has been reinstalled, you can quickly check whether
     GPU support has been installed and set up correctly by running the following
@@ -80,7 +80,7 @@ benefit from offloading some of the work to your GPU.
     True
     ```
 
-    If you instead see this, then ask for help on [the Discord server](https://discord.gg/YG7APUyJ5).
+    If you instead see this, then ask for help on [the Discord server](https://discord.gg/6p3fD6rBVm).
 
     ```
     False
@@ -124,7 +124,7 @@ benefit from offloading some of the work to your GPU.
     ls /usr/local/cuda/bin/nvcc
     ```
 
-    If it returns the following error, ask for help on [the Discord server](https://discord.gg/YG7APUyJ5).
+    If it returns the following error, ask for help on [the Discord server](https://discord.gg/6p3fD6rBVm).
 
     ```
     ls: cannot access '/usr/local/cuda/bin/nvcc': No such file or directory
@@ -147,7 +147,7 @@ benefit from offloading some of the work to your GPU.
     ```
 
     The command should complete with no errors. If you receive an error, ask for
-    help on [the Discord server](https://discord.gg/YG7APUyJ5).
+    help on [the Discord server](https://discord.gg/6p3fD6rBVm).
 
 7.  Once `llama-cpp-python` has been reinstalled, you can quickly check whether
     GPU support has been installed and set up correctly by running the following
@@ -166,7 +166,7 @@ benefit from offloading some of the work to your GPU.
     True
     ```
 
-    If you instead see this, then ask for help on [the Discord server](https://discord.gg/YG7APUyJ5).
+    If you instead see this, then ask for help on [the Discord server](https://discord.gg/6p3fD6rBVm).
 
     ```
     False
