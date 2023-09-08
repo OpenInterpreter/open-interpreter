@@ -28,9 +28,11 @@ RUN echo "source activate interpreter-default" > ~/.bashrc
 WORKDIR /app
 
 COPY  . /app
+RUN chmod +x /app/scripts/startup.sh
 RUN chmod +x /app/scripts/build_llama-cpp-python.sh
-
-RUN mkdir -p  /root/llama.cpp/models
+RUN mkdir -p /app/logs
+RUN mkdir -p  /root/.local/share/Open_Interpreter/models
+RUN ln -s /root/.local/share/Open_Interpreter/models /app/models
 
 RUN pip install -U pip setuptools
 RUN pip install poetry
