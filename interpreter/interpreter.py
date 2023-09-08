@@ -80,6 +80,7 @@ class Interpreter:
     self.azure_api_base = None
     self.azure_api_version = None
     self.azure_deployment_name = None
+    self.context_window = 1048
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -174,7 +175,7 @@ class Interpreter:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_llama_2_instance()
+          self.llama_instance = get_llama_2_instance(self.context_window)
         except:
           # If it didn't work, apologize and switch to GPT-4
           
@@ -363,7 +364,7 @@ class Interpreter:
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
-      messages = tt.trim(self.messages, max_tokens=1048, system_message=system_message)
+      messages = tt.trim(self.messages, max_tokens=self.context_window, system_message=system_message)
     else:
       messages = tt.trim(self.messages, self.model, system_message=system_message)
     

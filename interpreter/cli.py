@@ -27,6 +27,8 @@ def cli(interpreter):
                       action='store_true',
                       help='prints extra information')
   parser.add_argument('--use-azure', action='store_true', help='use Azure OpenAI Services')
+  parser.add_argument('-ctx', '--context-window', action='store_true', help='set the context window')
+
   args = parser.parse_args()
 
   # Modify interpreter according to command line flags
@@ -41,6 +43,12 @@ def cli(interpreter):
   if args.use_azure:
     interpreter.use_azure = True
     interpreter.local = False
+  if args.context_window:
+    try:
+      ctx = int(args.context_window)
+      interpreter.context_window = ctx if ctx >= 0 else 1048
+    except:
+      interpreter.context_window = 1048
 
   # Run the chat method
   interpreter.chat()

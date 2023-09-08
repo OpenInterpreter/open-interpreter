@@ -9,7 +9,7 @@ from rich import print
 from rich.markdown import Markdown
 
 
-def get_llama_2_instance():
+def get_llama_2_instance(ctx=1048):
 
     # First, we ask them which model they want to use.
     print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
@@ -173,7 +173,7 @@ def get_llama_2_instance():
             return None
 
     # Initialize and return Code-Llama
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=1048) # n_ctx = context window. smaller is faster
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=ctx) # n_ctx = context window. smaller is faster
       
     return llama_2
 
