@@ -196,6 +196,27 @@ $ interpreter
 > %debug # <- Turns on debug mode
 ```
 
+### Configuration with .env
+Open Interpreter allows you to set default behaviors using a .env file. This provides a flexible way to configure the interpreter without changing command-line arguments every time.
+
+Here's a sample .env configuration:
+
+```
+INTERPRETER_CLI_AUTO_RUN=False
+INTERPRETER_CLI_FAST_MODE=False
+INTERPRETER_CLI_LOCAL_RUN=False
+INTERPRETER_CLI_DEBUG=False
+INTERPRETER_CLI_USE_AZURE=False
+```
+
+- INTERPRETER_CLI_AUTO_RUN: If set to True, the interpreter will execute code without user confirmation.
+- INTERPRETER_CLI_FAST_MODE: If set to True, the interpreter will use gpt-3.5-turbo instead of gpt-4.
+- INTERPRETER_CLI_LOCAL_RUN: If set to True, the interpreter will run fully locally with Code Llama.
+- INTERPRETER_CLI_DEBUG: If set to True, the interpreter will print extra debugging information.
+- INTERPRETER_CLI_USE_AZURE: If set to True, the interpreter will use Azure OpenAI Services.
+
+You can modify these values in the .env file to change the default behavior of the Open Interpreter.
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
