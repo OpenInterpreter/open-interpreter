@@ -1,7 +1,7 @@
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
-    <a href="https://discord.gg/YG7APUyJ5"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
+    <a href="https://discord.gg/6SVEG4hunX"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
 <br>
     <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
@@ -146,7 +146,7 @@ print(interpreter.system_message)
 
 ### Change the Model
 
-ⓘ  **Issues running locally?** Read our new [local setup guide](/GPU.md).
+ⓘ  **Issues running locally?** Read our new [GPU setup guide](/GPU.md) and [Windows setup guide](/WINDOWS.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
