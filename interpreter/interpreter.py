@@ -15,7 +15,7 @@ import requests
 import readline
 import urllib.parse
 import tokentrim as tt
-from rich import print
+from rich import print as rprint
 from rich.markdown import Markdown
 from rich.rule import Rule
 
@@ -178,7 +178,7 @@ class Interpreter:
         except:
           # If it didn't work, apologize and switch to GPT-4
           
-          print(Markdown("".join([
+          rprint(Markdown("".join([
             "> Failed to install `Code-LLama`.",
             "\n\n**We have likely not built the proper `Code-Llama` support for your system.**",
             "\n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development. )",
@@ -212,13 +212,13 @@ class Interpreter:
 
     welcome_message = welcome_message.strip()
       
-    # Print welcome message with newlines on either side (aesthetic choice)
+    # rprint welcome message with newlines on either side (aesthetic choice)
     # unless we're starting with a blockquote (aesthetic choice)
     if welcome_message != "":
       if welcome_message.startswith(">"):
-        print(Markdown(welcome_message), '')
+        rprint(Markdown(welcome_message), '')
       else:
-        print('', Markdown(welcome_message), '')
+        rprint('', Markdown(welcome_message), '')
 
     # Check if `message` was passed in by user
     if message:
@@ -234,7 +234,7 @@ class Interpreter:
         except EOFError:
           break
         except KeyboardInterrupt:
-          print()  # Aesthetic choice
+          rprint()  # Aesthetic choice
           break
   
         # Use `readline` to let users up-arrow to previous user messages,
@@ -246,8 +246,8 @@ class Interpreter:
 
         # Let the user turn on debug mode mid-chat
         if user_input == "%debug":
-            print('', Markdown("> Entered debug mode"), '')
-            print(self.messages)
+            rprint('', Markdown("> Entered debug mode"), '')
+            rprint(self.messages)
             self.debug_mode = True
             continue
   
@@ -280,23 +280,23 @@ class Interpreter:
         self.azure_deployment_name = os.environ['AZURE_DEPLOYMENT_NAME']
       else:
         # This is probably their first time here!
-        print('', Markdown("**Welcome to Open Interpreter.**"), '')
+        rprint('', Markdown("**Welcome to Open Interpreter.**"), '')
         time.sleep(1)
 
-        print(Rule(style="white"))
+        rprint(Rule(style="white"))
 
-        print(Markdown(missing_azure_info_message), '', Rule(style="white"), '')
+        rprint(Markdown(missing_azure_info_message), '', Rule(style="white"), '')
         response = input("Azure OpenAI API key: ")
 
         if response == "":
           # User pressed `enter`, requesting Code-Llama
           self.local = True
 
-          print(Markdown(
+          rprint(Markdown(
             "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
                 '')
           time.sleep(2)
-          print(Rule(style="white"))
+          rprint(Rule(style="white"))
           return
 
         else:
@@ -304,11 +304,11 @@ class Interpreter:
           self.azure_api_base = input("Azure OpenAI API base: ")
           self.azure_deployment_name = input("Azure OpenAI deployment name of GPT: ")
           self.azure_api_version = input("Azure OpenAI API version: ")
-          print('', Markdown(
+          rprint('', Markdown(
             "**Tip:** To save this key for later, run `export AZURE_API_KEY=your_api_key AZURE_API_BASE=your_api_base AZURE_API_VERSION=your_api_version AZURE_DEPLOYMENT_NAME=your_gpt_deployment_name` on Mac/Linux or `setx AZURE_API_KEY your_api_key AZURE_API_BASE your_api_base AZURE_API_VERSION your_api_version AZURE_DEPLOYMENT_NAME your_gpt_deployment_name` on Windows."),
                 '')
           time.sleep(2)
-          print(Rule(style="white"))
+          rprint(Rule(style="white"))
 
       openai.api_type = "azure"
       openai.api_base = self.azure_api_base
@@ -320,27 +320,27 @@ class Interpreter:
           self.api_key = os.environ['OPENAI_API_KEY']
         else:
           # This is probably their first time here!
-          print('', Markdown("**Welcome to Open Interpreter.**"), '')
+          rprint('', Markdown("**Welcome to Open Interpreter.**"), '')
           time.sleep(1)
 
-          print(Rule(style="white"))
+          rprint(Rule(style="white"))
 
-          print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
+          rprint(Markdown(missing_api_key_message), '', Rule(style="white"), '')
           response = input("OpenAI API key: ")
 
           if response == "":
               # User pressed `enter`, requesting Code-Llama
               self.local = True
-              print(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
+              rprint(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
               time.sleep(2)
-              print(Rule(style="white"))
+              rprint(Rule(style="white"))
               return
 
           else:
               self.api_key = response
-              print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
+              rprint('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
               time.sleep(2)
-              print(Rule(style="white"))
+              rprint(Rule(style="white"))
 
       openai.api_key = self.api_key
 
@@ -368,9 +368,9 @@ class Interpreter:
       messages = tt.trim(self.messages, self.model, system_message=system_message)
     
     if self.debug_mode:
-      print("\n", "Sending `messages` to LLM:", "\n")
-      print(messages)
-      print()
+      rprint("\n", "Sending `messages` to LLM:", "\n")
+      rprint(messages)
+      rprint()
 
     # Make LLM call
     if not self.local:
@@ -450,9 +450,9 @@ class Interpreter:
         
 
       if self.debug_mode:
-        # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
+        # we have to use builtins bizarrely! because rich.rprint interprets "[INST]" as something meaningful
         import builtins
-        builtins.print("TEXT PROMPT SEND TO LLM:\n", prompt)
+        builtins.rprint("TEXT PROMPT SEND TO LLM:\n", prompt)
 
       # Run Code-Llama
             
@@ -508,11 +508,11 @@ class Interpreter:
           # If so, end the last block,
           self.end_active_block()
 
-          # Print newline if it was just a code block or user message
+          # rprint newline if it was just a code block or user message
           # (this just looks nice)
           last_role = self.messages[-2]["role"]
           if last_role == "user" or last_role == "function":
-            print()
+            rprint()
 
           # then create a new code block
           self.active_block = CodeBlock()
@@ -597,9 +597,9 @@ class Interpreter:
           # (Because this is Open Interpreter, we only have one function.)
 
           if self.debug_mode:
-            print("Running function:")
-            print(self.messages[-1])
-            print("---")
+            rprint("Running function:")
+            rprint(self.messages[-1])
+            rprint("---")
 
           # Ask for user confirmation to run code
           if self.auto_run == False:
@@ -612,7 +612,7 @@ class Interpreter:
 
             # Prompt user
             response = input("  Would you like to run this code? (y/n)\n\n  ")
-            print("")  # <- Aesthetic choice
+            rprint("")  # <- Aesthetic choice
 
             if response.strip().lower() == "y":
               # Create a new, identical block where the code will actually be run
@@ -639,10 +639,10 @@ class Interpreter:
             # After collecting some data via the below instruction to users,
             # This is the most common failure pattern: https://github.com/KillianLucas/open-interpreter/issues/41
             
-            # print("> Function call could not be parsed.\n\nPlease open an issue on Github (openinterpreter.com, click Github) and paste the following:")
-            # print("\n", self.messages[-1]["function_call"], "\n")
+            # rprint("> Function call could not be parsed.\n\nPlease open an issue on Github (openinterpreter.com, click Github) and paste the following:")
+            # rprint("\n", self.messages[-1]["function_call"], "\n")
             # time.sleep(2)
-            # print("Informing the language model and continuing...")
+            # rprint("Informing the language model and continuing...")
 
             # Since it can't really be fixed without something complex,
             # let's just berate the LLM then go around again.

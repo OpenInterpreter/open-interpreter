@@ -5,14 +5,14 @@ import appdirs
 import inquirer
 import subprocess
 import contextlib
-from rich import print
+from rich import print as rprint
 from rich.markdown import Markdown
 
 
 def get_llama_2_instance():
 
     # First, we ask them which model they want to use.
-    print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+    rprint('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
         
     models = {
         '7B': {
@@ -85,9 +85,9 @@ def get_llama_2_instance():
         if confirm_action(message):
             wget.download(url, download_path)
             model_path = download_path
-            print('\n', "Finished downloading `Code-Llama`.", '\n')
+            rprint('\n', "Finished downloading `Code-Llama`.", '\n')
         else:
-            print('\n', "Download cancelled. Exiting.", '\n')
+            rprint('\n', "Download cancelled. Exiting.", '\n')
             return None
 
     try:
@@ -127,7 +127,7 @@ def get_llama_2_instance():
                 try:
                     subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env=env_vars, check=True)
                 except subprocess.CalledProcessError as e:
-                    print(f"Error during installation with {backend}: {e}")
+                    rprint(f"Error during installation with {backend}: {e}")
             
             def supports_metal():
                 # Check for macOS version
@@ -149,7 +149,7 @@ def get_llama_2_instance():
                 install_llama("OpenBLAS")
           
             from llama_cpp import Llama
-            print('', Markdown("Finished downloading `Code-Llama` interface."), '')
+            rprint('', Markdown("Finished downloading `Code-Llama` interface."), '')
 
             # Tell them if their architecture won't work well
 
@@ -159,17 +159,17 @@ def get_llama_2_instance():
                 if platform.machine() == "arm64":
                     # Check if Python is running under 'arm64' architecture
                     if platform.architecture()[0] != "arm64":
-                        print("Warning: You are using Apple Silicon (M1) Mac but your Python is not of 'arm64' architecture.")
-                        print("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1) Mac.")
-                        print("\nTo install the correct version of Python that supports 'arm64' architecture:")
-                        print("1. Download Miniforge for M1:")
-                        print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
-                        print("2. Install it:")
-                        print("bash Miniforge3-MacOSX-arm64.sh")
-                        print("")
+                        rprint("Warning: You are using Apple Silicon (M1) Mac but your Python is not of 'arm64' architecture.")
+                        rprint("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1) Mac.")
+                        rprint("\nTo install the correct version of Python that supports 'arm64' architecture:")
+                        rprint("1. Download Miniforge for M1:")
+                        rprint("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
+                        rprint("2. Install it:")
+                        rprint("bash Miniforge3-MacOSX-arm64.sh")
+                        rprint("")
       
         else:
-            print('', "Installation cancelled. Exiting.", '')
+            rprint('', "Installation cancelled. Exiting.", '')
             return None
 
     # Initialize and return Code-Llama
