@@ -1,8 +1,8 @@
 # Code-Llama on MacOS (Apple Silicon)
 
-When running Open Interpreter on Windows with Code-Llama (either because you did
-not enter an OpenAI API key or you ran `interpreter --local`) you may want to make
-sure it works correctly by following the instructions below.
+When running Open Interpreter on macOS with Code-Llama (either because you did
+not enter an OpenAI API key or you ran `interpreter --local`) you may want to
+make sure it works correctly by following the instructions below.
 
 Tested on **MacOS Ventura 13.5** with **M2 Pro Chip**.
 
