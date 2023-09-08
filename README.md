@@ -14,11 +14,11 @@
 
 <br>
 
+⚠️ Required: Python Version >= 3.10
+
 ```shell
 pip install open-interpreter
 ```
-
-⚠️ Required: Python Version >= 3.10
 
 ```shell
 interpreter
