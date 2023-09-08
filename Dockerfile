@@ -4,6 +4,8 @@ ARG UBUNTU_VERSION="22.04"
 ARG PYTHON_VERSION="3.11.4"
 ARG DOCKER_FROM=nvidia/cuda:$CUDA_VERSION-cudnn$CUDNN_VERSION-devel-ubuntu$UBUNTU_VERSION
 
+
+
 FROM $DOCKER_FROM AS base
 
 RUN apt-get update && apt-get install -y \
@@ -22,6 +24,8 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh &
     rm Miniconda3-latest-Linux-x86_64.sh
 
 ENV PATH="/opt/conda/bin:${PATH}"
+
+ENV MAX_LOCAL_CTX="4096"
 
 RUN conda create -y --name interpreter-default python="$PYTHON_VERSION"
 RUN echo "source activate interpreter-default" > ~/.bashrc
