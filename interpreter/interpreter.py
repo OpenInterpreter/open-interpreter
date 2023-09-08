@@ -6,18 +6,19 @@ from .code_interpreter import CodeInterpreter
 from .llama_2 import get_llama_2_instance
 
 import os
+import re
 import time
 import json
-import platform
 import openai
 import getpass
+import platform
 import requests
 import readline
 import urllib.parse
 import tokentrim as tt
 from rich import print
-from rich.markdown import Markdown
 from rich.rule import Rule
+from rich.markdown import Markdown
 
 # Function schema for gpt-4
 function_schema = {
@@ -553,6 +554,10 @@ class Interpreter:
               else:
                 language = lines[0].strip() if lines[0] != "" else "python"
           
+              shebangLang = detect_shebang(content)
+              if language:
+                language = shebangLang
+
               # Join all lines except for the language line
               code = '\n'.join(lines[1:]).strip("` \n")
           
@@ -692,3 +697,21 @@ class Interpreter:
             
           self.active_block.end()
           return
+        
+
+def detect_shebang(content):
+    shebangs = {
+        'python': r'#!/usr/bin/env python[3]?|#!/usr/bin/python[3]?',
+        'shell': r'#!/bin/bash|#!/bin/sh',
+        'applescript': r'#!/usr/bin/osascript',
+        'javascript': r'#!/usr/bin/env node',
+        'html': r'<!DOCTYPE html>'
+    }
+
+    for language, pattern_str in shebangs.items():
+        pattern = re.compile(pattern_str, re.IGNORECASE)
+        if pattern.search(content):
+            return language  # Return the first detected language
+
+    return None  # Return None if no shebang is detected
+
