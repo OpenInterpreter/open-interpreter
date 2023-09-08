@@ -27,7 +27,7 @@ def cli(interpreter):
                       action='store_true',
                       help='prints extra information')
   parser.add_argument('--use-azure', action='store_true', help='use Azure OpenAI Services')
-  parser.add_argument('-ctx', '--context-window', action='store_true', help='set the context window')
+  parser.add_argument('-ctx', '--context-window', nargs=1, help='set the context window')
 
   args = parser.parse_args()
 
@@ -45,7 +45,7 @@ def cli(interpreter):
     interpreter.local = False
   if args.context_window:
     try:
-      ctx = int(args.context_window)
+      ctx = int(args.context_window[0])
       interpreter.context_window = ctx if ctx >= 0 else 1048
     except:
       interpreter.context_window = 1048
