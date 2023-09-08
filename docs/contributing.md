@@ -14,7 +14,7 @@ As such, we aim to keep the codebase simplified rather than overly complex. Our 
 
 ## Reporting Issues
 
-If you encounter a bug or have a brilliant feature in mind, don't hesitate to [open a new issue](https://github.com/KillianLucas/open-interpreter/issues/new). To ensure a swift and effective response, please provide the following:
+If you encounter a bug or have a brilliant feature in mind, don't hesitate to [open a new issue](https://github.com/KillianLucas/open-interpreter/issues/new/choose). To ensure a swift and effective response, please provide the following:
 
 - **Bug Reports:** Include detailed steps to reproduce the issue, along with specifics about your operating system and Python version, with screenshots and code/error snippets if required.
 - **Feature Requests:** Provide a comprehensive explanation of how your idea benefits Open Interpreter and its community.
