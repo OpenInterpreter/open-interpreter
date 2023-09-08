@@ -182,6 +182,7 @@ interpreter.api_key = "your_openai_api_key"
 interpreter.azure_api_base = "your_azure_api_base"
 interpreter.azure_api_version = "your_azure_api_version"
 interpreter.azure_deployment_name = "your_azure_deployment_name"
+interpreter.azure_api_type = "azure"
 ```
 
 ### Debug mode
