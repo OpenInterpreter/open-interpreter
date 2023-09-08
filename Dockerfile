@@ -35,11 +35,11 @@ COPY  . /app
 RUN chmod +x /app/scripts/startup.sh
 RUN chmod +x /app/scripts/build_llama-cpp-python.sh
 RUN mkdir -p /app/logs
-RUN mkdir -p  /root/.local/share/Open_Interpreter
+RUN mkdir -p /root/.local/share/Open_Interpreter
 RUN mkdir -p /app/models
 
 #RUN ln -s /root/.local/share/Open_Interpreter/models /app/models
-RUN ln -s /app/models /root/.local/share/Open_Interpreter/models
+#RUN ln -s /app/models /root/.local/share/Open_Interpreter/models
 RUN pip install -U pip setuptools
 RUN pip install poetry
 
