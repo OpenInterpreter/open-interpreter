@@ -4,6 +4,11 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .llama_2 import get_llama_2_instance
+from .settings import (
+  MISSING_API_KEY_MESSAGE,
+  MISSING_AZURE_INFO_MESSAGE,
+  CONFIRM_MODE_MESSAGE
+)
 
 import os
 import time
@@ -41,28 +46,6 @@ function_schema = {
     "required": ["language", "code"]
   },
 }
-
-# Message for when users don't have an OpenAI API key.
-missing_api_key_message = """> OpenAI API key not found
-
-To use `GPT-4` (recommended) please provide an OpenAI API key.
-
-To use `Code-Llama` (free but less capable) press `enter`.
-"""
-
-# Message for when users don't have an OpenAI API key.
-missing_azure_info_message = """> Azure OpenAI Service API info not found
-
-To use `GPT-4` (recommended) please provide an Azure OpenAI API key, a API base, a deployment name and a API version.
-
-To use `Code-Llama` (free but less capable) press `enter`.
-"""
-
-confirm_mode_message = """
-**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this.
-
-Press `CTRL-C` to exit.
-"""
 
 
 class Interpreter:
@@ -208,7 +191,7 @@ class Interpreter:
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
-      welcome_message += "\n\n" + confirm_mode_message
+      welcome_message += "\n\n" + CONFIRM_MODE_MESSAGE
 
     welcome_message = welcome_message.strip()
       
@@ -285,7 +268,7 @@ class Interpreter:
 
         print(Rule(style="white"))
 
-        print(Markdown(missing_azure_info_message), '', Rule(style="white"), '')
+        print(Markdown(MISSING_AZURE_INFO_MESSAGE), '', Rule(style="white"), '')
         response = input("Azure OpenAI API key: ")
 
         if response == "":
@@ -325,7 +308,7 @@ class Interpreter:
 
           print(Rule(style="white"))
 
-          print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
+          print(Markdown(MISSING_API_KEY_MESSAGE), '', Rule(style="white"), '')
           response = input("OpenAI API key: ")
 
           if response == "":
@@ -370,7 +353,6 @@ class Interpreter:
     if self.debug_mode:
       print("\n", "Sending `messages` to LLM:", "\n")
       print(messages)
-      print()
 
     # Make LLM call
     if not self.local:
