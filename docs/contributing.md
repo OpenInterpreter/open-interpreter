@@ -23,7 +23,7 @@ If you encounter a bug or have a brilliant feature in mind, don't hesitate to [o
 
 We welcome code contributions through pull requests. Here are some guidelines:
 
-- Before taking on significant code changes, please discuss your ideas on [Discord](https://discord.gg/qUxNuW4B) to ensure they align with our project vision. We want to keep the codebase simple and unintimidating for new users.
+- Before taking on significant code changes, please discuss your ideas on [Discord](https://discord.gg/6p3fD6rBVm) to ensure they align with our project vision. We want to keep the codebase simple and unintimidating for new users.
 
 - Fork the repository and create a new branch for your work.
 
@@ -37,7 +37,7 @@ We welcome code contributions through pull requests. Here are some guidelines:
 
 ## Questions?
 
-Join our [Discord community](https://discord.gg/qUxNuW4B) to connect with contributors. We're happy to guide you through your first open source contribution!
+Join our [Discord community](https://discord.gg/6p3fD6rBVm) to connect with contributors. We're happy to guide you through your first open source contribution!
 
 ## Licensing
 
