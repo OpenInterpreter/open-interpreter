@@ -173,8 +173,7 @@ def get_llama_2_instance():
             return None
 
     # Initialize and return Code-Llama
-
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=os.environ.get('MAX_LOCAL_CTX')) # n_ctx = context window. smaller is faster
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=1048) # n_ctx = context window. smaller is faster
       
     return llama_2
 
