@@ -7,55 +7,39 @@ import subprocess
 import contextlib
 from rich import print
 from rich.markdown import Markdown
+import os
+import inquirer
+from huggingface_hub import list_files_info, hf_hub_download
 
 
-def get_llama_2_instance():
+def get_hf_llm(repo_id):
 
-    # First, we ask them which model they want to use.
-    print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-        
-    models = {
-        '7B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q3_K_S.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
-            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-Instruct-7B-GGUF/resolve/main/codellama-7b-instruct.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
-        },
-        '13B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q3_K_S.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
-            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
-        },
-        '34B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q3_K_S.gguf', 'Size': '14.21 GB', 'RAM': '16.71 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q4_K_M.gguf', 'Size': '20.22 GB', 'RAM': '22.72 GB'},
-            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q8_0.gguf', 'Size': '35.79 GB', 'RAM': '38.29 GB'}
-        }
-    }
+    if "TheBloke/CodeLlama-" not in repo_id:
+      # ^ This means it was prob through the old --local, so we have already displayed this message.
+      print('', Markdown(f"**Open Interpreter** will use `{repo_id}` for local execution. Use your arrow keys to set up the model."), '')
+
+    raw_models = list_gguf_files(repo_id)
     
-    # First stage: Select parameter size
-    parameter_choices = list(models.keys())
-    questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+    if not raw_models:
+        print(f"Failed. Are you sure there are GGUF files in `{repo_id}`?")
+        return None
+
+    combined_models = group_and_combine_splits(raw_models)
+
+    # Display to user
+    choices = [format_quality_choice(model) for model in combined_models]
+    questions = [inquirer.List('selected_model', message="Quality (lower is faster, higher is more capable)", choices=choices)]
     answers = inquirer.prompt(questions)
-    chosen_param = answers['param']
-    
-    # Second stage: Select quality level
-    def format_quality_choice(quality, model):
-        return f"{quality} | Size: {model['Size']}, RAM usage: {model['RAM']}"
-    quality_choices = [format_quality_choice(quality, models[chosen_param][quality]) for quality in models[chosen_param]]
-  
-    questions = [inquirer.List('quality', message="Quality (lower is faster, higher is more capable)", choices=quality_choices)]
-    answers = inquirer.prompt(questions)
-    chosen_quality = answers['quality'].split(' ')[0]  # Extracting the 'small', 'medium', or 'large' from the selected choice
+    for model in combined_models:
+        if format_quality_choice(model) == answers["selected_model"]:
+            filename = model["filename"]
+            break
 
     # Third stage: GPU confirm
     if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
       n_gpu_layers = -1
     else:
       n_gpu_layers = 0
-
-    # Get the URL based on choices 
-    url = models[chosen_param][chosen_quality]['URL']
-    file_name = url.split("/")[-1]
 
     # Get user data directory
     user_data_dir = appdirs.user_data_dir("Open Interpreter")
@@ -74,27 +58,44 @@ def get_llama_2_instance():
 
     # Check for the file in each directory
     for directory in directories_to_check:
-        path = os.path.join(directory, file_name)
+        path = os.path.join(directory, filename)
         if os.path.exists(path):
             model_path = path
             break
     else:
         # If the file was not found, ask for confirmation to download it
-        download_path = os.path.join(default_path, file_name)
-        message = f"This instance of `Code-Llama` was not found. Would you like to download it?"
+        download_path = os.path.join(default_path, filename)
+      
+        print("This language model was not found on your system.")
+        message = f"Would you like to download it to {default_path}?"
+        
         if confirm_action(message):
-            wget.download(url, download_path)
-            model_path = download_path
-            print('\n', "Finished downloading `Code-Llama`.", '\n')
+          
+            # Check if model was originally split
+            split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
+            
+            if len(split_files) > 1:
+                # Download splits
+                for split_file in split_files:
+                    hf_hub_download(repo_id=repo_id, filename=split_file)
+                
+                # Combine and delete splits
+                actually_combine_files(selected_model, split_files)
+            else:
+                hf_hub_download(repo_id=repo_id, filename=selected_model)
+        
         else:
             print('\n', "Download cancelled. Exiting.", '\n')
             return None
 
+    # This is helpful for folks looking to delete corrupted ones and such
+    print(f"Model found at {download_path}")
+  
     try:
         from llama_cpp import Llama
     except:
         # Ask for confirmation to install the required pip package
-        message = "`Code-Llama` interface package not found. Install `llama-cpp-python`?"
+        message = "Local LLM interface package not found. Install `llama-cpp-python`?"
         if confirm_action(message):
             
             # We're going to build llama-cpp-python correctly for the system we're on
@@ -173,7 +174,7 @@ def get_llama_2_instance():
             return None
 
     # Initialize and return Code-Llama
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=1048) # n_ctx = context window. smaller is faster
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=1800) # n_ctx = context window. smaller is faster
       
     return llama_2
 
@@ -186,3 +187,75 @@ def confirm_action(message):
 
     answers = inquirer.prompt(question)
     return answers['confirm']
+
+
+
+
+
+
+import os
+import inquirer
+from huggingface_hub import list_files_info, hf_hub_download
+from typing import Dict, List, Union
+
+def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
+    """
+    Fetch all files from a given repository on Hugging Face Model Hub that contain 'gguf'.
+
+    :param repo_id: Repository ID on Hugging Face Model Hub.
+    :return: A list of dictionaries, each dictionary containing filename, size, and RAM usage of a model.
+    """
+    files_info = list_files_info(repo_id=repo_id)
+    gguf_files = [file for file in files_info if "gguf" in file.rfilename]
+
+    # Prepare the result
+    result = []
+    for file in gguf_files:
+        size_in_gb = file.size / (1024**3)
+        filename = file.rfilename
+        result.append({
+            "filename": filename,
+            "Size": size_in_gb,
+            "RAM": size_in_gb + 2.5,
+        })
+
+    return result
+
+def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List[Dict[str, Union[str, float]]]:
+    """
+    Groups filenames based on their base names and combines the sizes and RAM requirements.
+
+    :param models: List of model details.
+    :return: A list of combined model details.
+    """
+    grouped_files = {}
+    for model in models:
+        base_name = model["filename"].split('-split-')[0]
+        if base_name in grouped_files:
+            grouped_files[base_name]["Size"] += model["Size"]
+            grouped_files[base_name]["RAM"] += model["Size"]
+        else:
+            grouped_files[base_name] = model
+
+    return list(grouped_files.values())
+
+def actually_combine_files(base_name: str, files: List[str]) -> None:
+    """
+    Combines files together and deletes the original split files.
+
+    :param base_name: The base name for the combined file.
+    :param files: List of files to be combined.
+    """
+    files.sort()    
+    with open(base_name, 'wb') as outfile:
+        for file in files:
+            with open(file, 'rb') as infile:
+                outfile.write(infile.read())
+            os.remove(file)
+
+def format_quality_choice(model: Dict[str, Union[str, float]]) -> str:
+    """
+    Formats the model choice for display in the inquirer prompt.
+    """
+    return f"{model['filename']} | Size: {model['Size']:.1f} GB, RAM usage: {model['RAM']:.1f} GB"
+

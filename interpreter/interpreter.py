@@ -3,7 +3,7 @@ from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
-from .llama_2 import get_llama_2_instance
+from .get_hf_llm import get_hf_llm
 
 import os
 import time
@@ -167,14 +167,13 @@ class Interpreter:
 
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
-      self.model = "code-llama"
       
       # Code-Llama
       if self.llama_instance == None:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_llama_2_instance()
+          self.llama_instance = get_hf_llm(self.model)
         except:
           # If it didn't work, apologize and switch to GPT-4
           
