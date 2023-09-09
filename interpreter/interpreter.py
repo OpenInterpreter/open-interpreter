@@ -423,7 +423,7 @@ class Interpreter:
           
           formatted_messages = ""
           for message in messages:
-            formatted_messages += f"{message['role'].capitalize()}: {message['content']}"\n)
+            formatted_messages += f"{message['role'].capitalize()}: {message['content']}\n")
           formatted_messages = formatted_messages.strip()
 
         else:
