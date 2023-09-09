@@ -89,7 +89,7 @@ def get_hf_llm(repo_id):
             return None
 
     # This is helpful for folks looking to delete corrupted ones and such
-    print(f"Model found at {download_path}")
+    print(f"Model found at {model_path}")
   
     try:
         from llama_cpp import Llama
