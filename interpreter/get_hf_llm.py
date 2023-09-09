@@ -28,7 +28,7 @@ def get_hf_llm(repo_id, debug_mode):
 
     # Display to user
     choices = [format_quality_choice(model) for model in combined_models]
-    questions = [inquirer.List('selected_model', message="Quality (lower is faster, higher is more capable)", choices=choices)]
+    questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
     answers = inquirer.prompt(questions)
     for model in combined_models:
         if format_quality_choice(model) == answers["selected_model"]:
@@ -195,7 +195,7 @@ def confirm_action(message):
 
 import os
 import inquirer
-from huggingface_hub import list_files_info, hf_hub_download
+from huggingface_hub import list_files_info, hf_hub_download, login
 from typing import Dict, List, Union
 
 def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
@@ -205,7 +205,17 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
     :param repo_id: Repository ID on Hugging Face Model Hub.
     :return: A list of dictionaries, each dictionary containing filename, size, and RAM usage of a model.
     """
-    files_info = list_files_info(repo_id=repo_id)
+
+    try:
+      files_info = list_files_info(repo_id=repo_id)
+    except Exception as e:
+      if "authentication" in str(e).lower():
+        print("You likely need to be logged in to HuggingFace to access this language model.")
+        print(f"Visit this URL to log in and apply for access to this language model: https://huggingface.co/{repo_id}")
+        print("Then, log in here:")
+        login()
+        files_info = list_files_info(repo_id=repo_id)
+  
     gguf_files = [file for file in files_info if "gguf" in file.rfilename]
 
     # Prepare the result
@@ -257,5 +267,5 @@ def format_quality_choice(model: Dict[str, Union[str, float]]) -> str:
     """
     Formats the model choice for display in the inquirer prompt.
     """
-    return f"{model['filename']} | Size: {model['Size']:.1f} GB, RAM usage: {model['RAM']:.1f} GB"
+    return f"{model['filename']} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
 
