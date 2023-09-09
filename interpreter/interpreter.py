@@ -82,6 +82,7 @@ class Interpreter:
     self.azure_api_base = None
     self.azure_api_version = None
     self.azure_deployment_name = None
+    self.azure_api_type = "azure"
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -267,16 +268,20 @@ class Interpreter:
 
   def verify_api_key(self):
     """
-    Makes sure we have an OPENAI_API_KEY.
+    Makes sure we have an AZURE_API_KEY or OPENAI_API_KEY.
     """
     if self.use_azure:
-      all_env_available = ('OPENAI_API_KEY' in os.environ and 'AZURE_API_BASE' in os.environ
-                           and 'AZURE_API_VERSION' in os.environ and 'AZURE_DEPLOYMENT_NAME' in os.environ)
+      all_env_available = (
+        ('AZURE_API_KEY' in os.environ or 'OPENAI_API_KEY' in os.environ) and
+        'AZURE_API_BASE' in os.environ and
+        'AZURE_API_VERSION' in os.environ and
+        'AZURE_DEPLOYMENT_NAME' in os.environ)
       if all_env_available:
-        self.api_key = os.environ['OPENAI_API_KEY']
+        self.api_key = os.environ.get('AZURE_API_KEY') or os.environ['OPENAI_API_KEY']
         self.azure_api_base = os.environ['AZURE_API_BASE']
         self.azure_api_version = os.environ['AZURE_API_VERSION']
         self.azure_deployment_name = os.environ['AZURE_DEPLOYMENT_NAME']
+        self.azure_api_type = os.environ.get('AZURE_API_TYPE', 'azure')
       else:
         # This is probably their first time here!
         print('', Markdown("**Welcome to Open Interpreter.**"), '')
@@ -304,7 +309,7 @@ class Interpreter:
           self.azure_deployment_name = input("Azure OpenAI deployment name of GPT: ")
           self.azure_api_version = input("Azure OpenAI API version: ")
           print('', Markdown(
-            "**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key AZURE_API_BASE=your_api_base AZURE_API_VERSION=your_api_version AZURE_DEPLOYMENT_NAME=your_gpt_deployment_name` on Mac/Linux or `setx OPENAI_API_KEY your_api_key AZURE_API_BASE your_api_base AZURE_API_VERSION your_api_version AZURE_DEPLOYMENT_NAME your_gpt_deployment_name` on Windows."),
+            "**Tip:** To save this key for later, run `export AZURE_API_KEY=your_api_key AZURE_API_BASE=your_api_base AZURE_API_VERSION=your_api_version AZURE_DEPLOYMENT_NAME=your_gpt_deployment_name` on Mac/Linux or `setx AZURE_API_KEY your_api_key AZURE_API_BASE your_api_base AZURE_API_VERSION your_api_version AZURE_DEPLOYMENT_NAME your_gpt_deployment_name` on Windows."),
                 '')
           time.sleep(2)
           print(Rule(style="white"))
@@ -313,6 +318,7 @@ class Interpreter:
       litellm.api_base = self.azure_api_base
       litellm.api_version = self.azure_api_version
       litellm.api_key = self.api_key
+      
     else:
       if self.api_key == None:
         if 'OPENAI_API_KEY' in os.environ:
