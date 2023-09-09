@@ -186,7 +186,7 @@ interpreter.azure_deployment_name = "your_azure_deployment_name"
 
 ### Debug mode
 
-To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
+To help contributors inspect Open Interpreter, `--debug` mode is highly verbose.
 
 You can activate debug mode by using it's flag (`interpreter --debug`), or mid-chat:
 
@@ -194,6 +194,25 @@ You can activate debug mode by using it's flag (`interpreter --debug`), or mid-c
 $ interpreter
 ...
 > %debug # <- Turns on debug mode
+```
+
+## Docker
+
+You can run Open Interpreter in a container image.
+
+- Example [docker-compose](docker-compose.yaml).
+- Example environment file [.env.example](.env.example).
+
+Build:
+
+```shell
+docker build -t interpreter .
+```
+
+Run:
+
+```shell
+docker run --gpus all --runtime nvidia -v /path/to/your/models:/root/.local/share/Open Interpreter/models:cached -v /path/to/your/docs:/data -it interpreter
 ```
 
 ## Safety Notice
@@ -216,7 +235,7 @@ We then stream the model's messages, code, and your system's outputs to the term
 
 # Contributing
 
-Thank you for your interest in contributing! We welcome involvement from the community. 
+Thank you for your interest in contributing! We welcome involvement from the community.
 
 Please see our [Contributing Guidelines](/docs/contributing.md) for more details on how to get involved.
 

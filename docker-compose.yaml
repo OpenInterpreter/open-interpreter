@@ -1,0 +1,32 @@
+---
+services:
+  interpreter:
+    build:
+      context: https://github.com/KillianLucas/open-interpreter.git#main
+      dockerfile: Dockerfile
+      shm_size: "2gb"
+      args:
+      - TAG=killianlucas/open-interpreter:latest
+    image: killianlucas/open-interpreter:latest
+    container_name: interpreter
+    hostname: interpreter
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    shm_size: "8gb"
+    entrypoint: /bin/bash
+    tty: true
+    env_file:
+      - .env.example
+    volumes:
+      - /your/host/models:/root/.local/share/Open Interpreter/models:cached
+      - /your/host/source_documents:/data:ro
+      - /your/host/interpreter/messages:/app/messages:rw
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["compute", "utility", "graphics"]
