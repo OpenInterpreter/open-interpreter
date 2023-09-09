@@ -12,7 +12,7 @@ import inquirer
 from huggingface_hub import list_files_info, hf_hub_download
 
 
-def get_hf_llm(repo_id):
+def get_hf_llm(repo_id, debug_mode):
 
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
@@ -174,7 +174,7 @@ def get_hf_llm(repo_id):
             return None
 
     # Initialize and return Code-Llama
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=False, n_ctx=1800) # n_ctx = context window. smaller is faster
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=1800) # n_ctx = context window. smaller is faster
       
     return llama_2
 

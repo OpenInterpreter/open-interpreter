@@ -174,7 +174,7 @@ class Interpreter:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_hf_llm(self.model)
+          self.llama_instance = get_hf_llm(self.model, self.debug_mode)
         except:
           traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
