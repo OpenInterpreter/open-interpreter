@@ -6,7 +6,7 @@ make sure it works correctly by following the instructions below.
 
 Tested on **MacOS Ventura 13.5** with **M2 Pro Chip**.
 
-I use conda as a virtual environment but you can choose whatever you want
+I use conda as a virtual environment but you can choose whatever you want. If you go with conda you will find the Apple M1 version of miniconda here: [Link](https://docs.conda.io/projects/miniconda/en/latest/)
 
 ```
 conda create -n openinterpreter python=3.11.4
@@ -15,7 +15,7 @@ conda create -n openinterpreter python=3.11.4
 **Activate your environment:**
 
 ```
-conda activate
+conda activate openinterpreter
 ```
 
 **Install open-interpreter:**
