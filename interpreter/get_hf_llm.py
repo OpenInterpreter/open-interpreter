@@ -32,7 +32,7 @@ def get_hf_llm(repo_id):
     answers = inquirer.prompt(questions)
     for model in combined_models:
         if format_quality_choice(model) == answers["selected_model"]:
-            filename = model["filename"]
+            selected_model = model["filename"]
             break
 
     # Third stage: GPU confirm
@@ -58,18 +58,16 @@ def get_hf_llm(repo_id):
 
     # Check for the file in each directory
     for directory in directories_to_check:
-        path = os.path.join(directory, filename)
+        path = os.path.join(directory, selected_model)
         if os.path.exists(path):
             model_path = path
             break
     else:
         # If the file was not found, ask for confirmation to download it
-        download_path = os.path.join(default_path, filename)
+        download_path = os.path.join(default_path, selected_model)
       
-        print("This language model was not found on your system.")
-        message = f"Would you like to download it to {default_path}?"
-        
-        if confirm_action(message):
+        print("This language model was not found on your system.\n\nDownload to {default_path}?\n\n", "")
+        if confirm_action(""):
           
             # Check if model was originally split
             split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
