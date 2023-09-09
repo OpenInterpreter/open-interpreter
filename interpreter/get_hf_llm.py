@@ -16,6 +16,7 @@ def get_hf_llm(repo_id, debug_mode):
 
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
+      # Hacky. Not happy with this
       print('', Markdown(f"**Open Interpreter** will use `{repo_id}` for local execution. Use your arrow keys to set up the model."), '')
 
     raw_models = list_gguf_files(repo_id)
