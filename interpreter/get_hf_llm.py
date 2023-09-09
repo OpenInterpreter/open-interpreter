@@ -66,7 +66,7 @@ def get_hf_llm(repo_id):
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, selected_model)
       
-        print("This language model was not found on your system.\n\nDownload to {default_path}?\n\n", "")
+        print(f"This language model was not found on your system.\n\nDownload to {default_path}?", "")
         if confirm_action(""):
           
             # Check if model was originally split
@@ -81,6 +81,8 @@ def get_hf_llm(repo_id):
                 actually_combine_files(selected_model, split_files)
             else:
                 hf_hub_download(repo_id=repo_id, filename=selected_model)
+
+            model_path = download_path
         
         else:
             print('\n', "Download cancelled. Exiting.", '\n')
