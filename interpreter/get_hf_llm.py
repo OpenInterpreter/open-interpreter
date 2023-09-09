@@ -75,12 +75,12 @@ def get_hf_llm(repo_id, debug_mode):
             if len(split_files) > 1:
                 # Download splits
                 for split_file in split_files:
-                    hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path)
+                    hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
                 
                 # Combine and delete splits
                 actually_combine_files(selected_model, split_files)
             else:
-                hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path)
+                hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
 
             model_path = download_path
         
