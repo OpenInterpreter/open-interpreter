@@ -44,7 +44,10 @@ def cli(interpreter):
     
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --local, they get the same experience as before.
-
+    from rich import print
+    from rich.markdown import Markdown
+    import inquirer
+    
     print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
         
     models = {
