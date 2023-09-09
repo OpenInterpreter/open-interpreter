@@ -19,13 +19,10 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /tmp
 
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-    bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/conda && \
-    rm Miniconda3-latest-Linux-x86_64.sh
+COPY --from=continuumio/miniconda3:23.5.2-0 /opt/conda /opt/conda
 
 ENV PATH="/opt/conda/bin:${PATH}"
 
-ENV MAX_LOCAL_CTX="4096"
 
 RUN conda create -y --name interpreter-default python="$PYTHON_VERSION"
 RUN echo "source activate interpreter-default" > ~/.bashrc
