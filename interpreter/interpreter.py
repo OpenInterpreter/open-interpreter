@@ -410,30 +410,44 @@ class Interpreter:
       # (This only works if the first message is the only system message)
 
       def messages_to_prompt(messages):
-        # Extracting the system prompt and initializing the formatted string with it.
-        system_prompt = messages[0]['content']
-        formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
 
+        
         for message in messages:
           # Happens if it immediatly writes code
           if "role" not in message:
             message["role"] = "assistant"
-        
-        # Loop starting from the first user message
-        for index, item in enumerate(messages[1:]):
-            role = item['role']
-            content = item['content']
-            
-            if role == 'user':
-                formatted_messages += f"{content} [/INST] "
-            elif role == 'function':
-                formatted_messages += f"Output: {content} [/INST] "
-            elif role == 'assistant':
-                formatted_messages += f"{content} </s><s>[INST] "
-    
-        # Remove the trailing '<s>[INST] ' from the final output
-        if formatted_messages.endswith("<s>[INST] "):
-            formatted_messages = formatted_messages[:-10]
+
+
+        # Falcon prompt template
+        if "falcon" in self.model.lower():
+          
+          formatted_messages = ""
+          for message in messages:
+            formatted_messages += f"{message['role'].capitalize()}: {message['content']}"\n)
+          formatted_messages = formatted_messages.strip()
+
+        else:
+          # Llama prompt template
+          
+          # Extracting the system prompt and initializing the formatted string with it.
+          system_prompt = messages[0]['content']
+          formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
+          
+          # Loop starting from the first user message
+          for index, item in enumerate(messages[1:]):
+              role = item['role']
+              content = item['content']
+              
+              if role == 'user':
+                  formatted_messages += f"{content} [/INST] "
+              elif role == 'function':
+                  formatted_messages += f"Output: {content} [/INST] "
+              elif role == 'assistant':
+                  formatted_messages += f"{content} </s><s>[INST] "
+      
+          # Remove the trailing '<s>[INST] ' from the final output
+          if formatted_messages.endswith("<s>[INST] "):
+              formatted_messages = formatted_messages[:-10]
         
         return formatted_messages
 
