@@ -62,7 +62,7 @@ def cli(interpreter):
     chosen_param = answers['param']
 
     # THIS is more in line with the future. You just say the model you want by name:
-    self.model = models[chosen_param]
+    interpreter.model = models[chosen_param]
     interpreter.local = True
 
   
