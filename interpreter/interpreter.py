@@ -7,6 +7,7 @@ from .get_hf_llm import get_hf_llm
 
 import os
 import time
+import traceback
 import json
 import platform
 import openai
@@ -175,6 +176,7 @@ class Interpreter:
         try:
           self.llama_instance = get_hf_llm(self.model)
         except:
+          traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
           
           print(Markdown("".join([
