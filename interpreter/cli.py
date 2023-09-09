@@ -72,7 +72,7 @@ def cli(interpreter):
     interpreter.use_azure = True
     interpreter.local = False
   if args.model != "":
-    self.model = args.model
+    interpreter.model = args.model
     interpreter.local = True
 
   # Run the chat method

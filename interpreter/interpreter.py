@@ -355,7 +355,7 @@ class Interpreter:
     # This is hacky, as we should have a different (minified) prompt for CodeLLama,
     # but for now, to make the prompt shorter and remove "run_code" references, just get the first 2 lines:
     if self.local:
-      self.system_message = "\n".join(self.system_message.split("\n")[:3])
+      self.system_message = "\n".join(self.system_message.split("\n")[:2])
       self.system_message += "\nOnly do what the user asks you to do, then ask what they'd like to do next."
     
     system_message = self.system_message + "\n\n" + info
