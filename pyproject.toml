@@ -11,6 +11,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 openai = "^0.27.8"
+litellm = "^0.1.574"
 rich = "^13.4.2"
 tiktoken = "^0.4.0"
 astor = "^0.8.1"
