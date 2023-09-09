@@ -80,6 +80,7 @@ class Interpreter:
     self.azure_api_base = None
     self.azure_api_version = None
     self.azure_deployment_name = None
+    self.azure_api_type = "azure"
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -278,6 +279,7 @@ class Interpreter:
         self.azure_api_base = os.environ['AZURE_API_BASE']
         self.azure_api_version = os.environ['AZURE_API_VERSION']
         self.azure_deployment_name = os.environ['AZURE_DEPLOYMENT_NAME']
+        self.azure_api_type = os.environ.get('AZURE_API_TYPE', 'azure')
       else:
         # This is probably their first time here!
         print('', Markdown("**Welcome to Open Interpreter.**"), '')
@@ -310,7 +312,7 @@ class Interpreter:
           time.sleep(2)
           print(Rule(style="white"))
 
-      openai.api_type = "azure"
+      openai.api_type = self.azure_api_type
       openai.api_base = self.azure_api_base
       openai.api_version = self.azure_api_version
       openai.api_key = self.api_key
