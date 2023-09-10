@@ -1,3 +1,23 @@
+"""
+Right off the bat, to any contributors (a message from Killian):
+
+First of all, THANK YOU. Open Interpreter is ALIVE, ALL OVER THE WORLD because of YOU.
+
+While this project is rapidly growing, I've decided it's best for us to allow some technical debt.
+
+The code here has duplication. It has imports in weird places. It has been spaghettified to add features more quickly.
+
+In my opinion **this is critical** to keep up with the pace of demand for this project.
+
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+
+After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
+
+Especially if you have ideas and **EXCITEMENT** about the future of this project, chat with me on discord: https://discord.gg/6p3fD6rBVm
+
+- killian
+"""
+
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
@@ -78,6 +98,7 @@ class Interpreter:
     self.local = False
     self.model = "gpt-4"
     self.debug_mode = False
+    self.api_base = None # Will set it to whatever OpenAI wants
     # Azure OpenAI
     self.use_azure = False
     self.azure_api_base = None
@@ -178,15 +199,19 @@ class Interpreter:
         # Find or install Code-Llama
         try:
           self.llama_instance = get_hf_llm(self.model, self.debug_mode)
+          if self.llama_instance == None:
+            # They cancelled.
+            return
         except:
           traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
           
           print(Markdown("".join([
             f"> Failed to install `{self.model}`.",
-            f"\n\n**We have likely not built the proper `{self.model}` support for your system.**",
+            f"\n\n**Common Fix:** Press CTRL-C to exit Open Interpreter, then run the following code:\n\n```shell\npip install --upgrade llama-cpp-python\n```",
+            f"\n\n**If you've tried that and you're still getting this error, we have likely not built the proper `{self.model}` support for your system.**",
             "\n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development. )",
-            "\n\nPlease press enter to switch to `GPT-4` (recommended)."
+            "\n\nPress enter to switch to `GPT-4` (recommended)."
           ])))
           input()
 
@@ -206,12 +231,12 @@ class Interpreter:
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
+
       if self.use_azure:
         notice_model = f"Azure({self.azure_deployment_name})"
       else:
         notice_model = f"{self.model.upper()}"
       welcome_message += f"\n> Model set to `{notice_model}`\n\n**Tip:** To run locally, use `interpreter --local`"
-      
       
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
@@ -312,6 +337,7 @@ class Interpreter:
 
 
           # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+          # AND BELOW.
           # This way, when folks hit interpreter --local, they get the same experience as before.
           import inquirer
           
@@ -368,10 +394,40 @@ class Interpreter:
 
           if response == "":
               # User pressed `enter`, requesting Code-Llama
-              self.local = True
-              print(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
+
+              print(Markdown(
+                "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                    '')
               time.sleep(2)
               print(Rule(style="white"))
+
+
+
+              # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+              # AND ABOVE.
+              # This way, when folks hit interpreter --local, they get the same experience as before.
+              import inquirer
+              
+              print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+                  
+              models = {
+                  '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+                  '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+                  '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+              }
+              
+              parameter_choices = list(models.keys())
+              questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+              answers = inquirer.prompt(questions)
+              chosen_param = answers['param']
+
+              # THIS is more in line with the future. You just say the model you want by name:
+              self.model = models[chosen_param]
+              self.local = True
+
+
+
+
               return
 
           else:
@@ -381,6 +437,8 @@ class Interpreter:
               print(Rule(style="white"))
 
       litellm.api_key = self.api_key
+      if self.api_base:
+        litellm.api_base = self.api_base
 
   def end_active_block(self):
     if self.active_block:
@@ -426,20 +484,34 @@ class Interpreter:
                   stream=True,
                   )
             else:
-              response = litellm.completion(
-                model=self.model,
-                messages=messages,
-                functions=[function_schema],
-                stream=True,
-                temperature=self.temperature,
-              )
+              if self.api_base:
+                # The user set the api_base. litellm needs this to be "custom/{model}"
+                response = litellm.completion(
+                  api_base=self.api_base,
+                  model = "custom/" + self.model,
+                  messages=messages,
+                  functions=[function_schema],
+                  stream=True,
+                  temperature=self.temperature,
+                )
+              else:
+                # Normal OpenAI call
+                response = litellm.completion(
+                  model=self.model,
+                  messages=messages,
+                  functions=[function_schema],
+                  stream=True,
+                  temperature=self.temperature,
+                )
               
             break
         except:
-            # Probably rate limit hit. Retrying in 3 seconds
+            if self.debug_mode:
+              traceback.print_exc()
             time.sleep(3)
       else:
-        raise openai.error.RateLimitError("RateLimitError: Max retries reached")
+        traceback.print_exc()
+        raise Exception("")
             
     elif self.local:
       # Code-Llama
@@ -604,13 +676,22 @@ class Interpreter:
               if content.strip() == "```": # Hasn't outputted a language yet
                 language = None
               else:
-                language = lines[0].strip() if lines[0] != "" else "python"
+                if lines[0] != "":
+                  language = lines[0].strip()
+                else:
+                  language = "python"
+                  # In anticipation of its dumbassery let's check if "pip" is in there
+                  if len(lines) > 1:
+                    if lines[1].startswith("pip"):
+                      language = "shell"
           
               # Join all lines except for the language line
               code = '\n'.join(lines[1:]).strip("` \n")
           
               arguments = {"code": code}
               if language: # We only add this if we have it-- the second we have it, an interpreter gets fired up (I think? maybe I'm wrong)
+                if language == "bash":
+                  language = "shell"
                 arguments["language"] = language
 
             # Code-Llama won't make a "function_call" property for us to store this under, so:
