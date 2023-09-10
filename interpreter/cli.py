@@ -13,7 +13,7 @@ At the same time, I plan on pushing a significant re-factor of `interpreter.py` 
 
 After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
 
-Especially if you have ideas and **EXCITEMENT** about the future of this project, chat with me on Discord: https://discord.gg/6p3fD6rBVm
+Especially if you have ideas and **EXCITEMENT** about the future of this project, chat with me on discord: https://discord.gg/6p3fD6rBVm
 
 - killian
 """
