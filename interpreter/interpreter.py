@@ -11,7 +11,6 @@ import traceback
 import json
 import platform
 import openai
-import litellm
 import getpass
 import requests
 import readline
@@ -313,10 +312,10 @@ class Interpreter:
           time.sleep(2)
           print(Rule(style="white"))
 
-      litellm.api_type = self.azure_api_type
-      litellm.api_base = self.azure_api_base
-      litellm.api_version = self.azure_api_version
-      litellm.api_key = self.api_key
+      openai.api_type = self.azure_api_type
+      openai.api_base = self.azure_api_base
+      openai.api_version = self.azure_api_version
+      openai.api_key = self.api_key
     else:
       if self.api_key == None:
         if 'OPENAI_API_KEY' in os.environ:
@@ -345,7 +344,7 @@ class Interpreter:
               time.sleep(2)
               print(Rule(style="white"))
 
-      litellm.api_key = self.api_key
+      openai.api_key = self.api_key
 
   def end_active_block(self):
     if self.active_block:
@@ -383,7 +382,7 @@ class Interpreter:
         try:
           
             if self.use_azure:
-              response = litellm.completion(
+              response = openai.ChatCompletion.create(
                   engine=self.azure_deployment_name,
                   messages=messages,
                   functions=[function_schema],
@@ -391,7 +390,7 @@ class Interpreter:
                   stream=True,
                   )
             else:
-              response = litellm.completion(
+              response = openai.ChatCompletion.create(
                 model=self.model,
                 messages=messages,
                 functions=[function_schema],
