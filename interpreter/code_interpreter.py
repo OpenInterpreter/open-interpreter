@@ -6,7 +6,6 @@ import traceback
 import platform
 import time
 import ast
-import astor
 import sys
 import os
 import re

@@ -406,6 +406,8 @@ class Interpreter:
               print(Rule(style="white"))
 
       litellm.api_key = self.api_key
+      if self.api_base:
+        litellm.api_base = self.api_base
 
   def end_active_block(self):
     if self.active_block:
