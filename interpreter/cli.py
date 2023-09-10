@@ -4,17 +4,20 @@ from dotenv import load_dotenv
 import requests
 from packaging import version
 import pkg_resources
+from rich import print as rprint
+from rich.markdown import Markdown
+import inquirer
 
 # Load .env file
 load_dotenv()
 
-def check_for_update(package_name: str) -> bool:
+def check_for_update():
     # Fetch the latest version from the PyPI API
-    response = requests.get(f'https://pypi.org/pypi/{package_name}/json')
+    response = requests.get(f'https://pypi.org/pypi/open-interpreter/json')
     latest_version = response.json()['info']['version']
 
     # Get the current version using pkg_resources
-    current_version = pkg_resources.get_distribution(package_name).version
+    current_version = pkg_resources.get_distribution("open-interpreter").version
 
     return version.parse(latest_version) > version.parse(current_version)
 
@@ -73,12 +76,27 @@ def cli(interpreter):
                       default="",
                       required=False)
   
+  parser.add_argument('--api_base',
+                      type=str,
+                      help='change your api_base to any OpenAI compatible api',
+                      default="",
+                      required=False)
+  
   parser.add_argument('--use-azure',
                       action='store_true',
                       default=USE_AZURE,
                       help='use Azure OpenAI Services')
   
+  parser.add_argument('--version',
+                      action='store_true',
+                      help='display current Open Interpreter version')
+
   args = parser.parse_args()
+
+
+  if args.version:
+    print("Open Interpreter", pkg_resources.get_distribution("open-interpreter").version)
+    return
 
 
   # Modify interpreter according to command line flags
@@ -92,11 +110,8 @@ def cli(interpreter):
 
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --local, they get the same experience as before.
-    from rich import print
-    from rich.markdown import Markdown
-    import inquirer
     
-    print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+    rprint('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
         
     models = {
         '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
@@ -121,19 +136,20 @@ def cli(interpreter):
     interpreter.local = False
   if args.model != "":
     interpreter.model = args.model
-    interpreter.local = True
+
+    # "/" in there means it's a HF repo we're going to run locally:
+    if "/" in interpreter.model:
+      interpreter.local = True
+
+  if args.api_base:
+    interpreter.api_base = args.api_base
 
   if args.falcon:
 
-
-
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --falcon, they get the same experience as --local.
-    from rich import print
-    from rich.markdown import Markdown
-    import inquirer
     
-    print('', Markdown("**Open Interpreter** will use `Falcon` for local execution. Use your arrow keys to set up the model."), '')
+    rprint('', Markdown("**Open Interpreter** will use `Falcon` for local execution. Use your arrow keys to set up the model."), '')
         
     models = {
         '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
@@ -147,13 +163,13 @@ def cli(interpreter):
     chosen_param = answers['param']
 
     if chosen_param == "180B":
-      print(Markdown("> **WARNING:** To run `Falcon-180B` we recommend at least `100GB` of RAM."))
+      rprint(Markdown("> **WARNING:** To run `Falcon-180B` we recommend at least `100GB` of RAM."))
 
     # THIS is more in line with the future. You just say the model you want by name:
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
-
+  
 
 
   # Run the chat method
