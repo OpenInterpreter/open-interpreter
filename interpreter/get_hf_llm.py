@@ -1,3 +1,23 @@
+"""
+Right off the bat, to any contributors (a message from Killian):
+
+First of all, THANK YOU. Open Interpreter is ALIVE, ALL OVER THE WORLD because of YOU.
+
+While this project is rapidly growing, I've decided it's best for us to allow some technical debt.
+
+The code here has duplication. It has imports in weird places. It has been spaghettified to add features more quickly.
+
+In my opinion **this is critical** to keep up with the pace of demand for this project.
+
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+
+After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
+
+Especially if you have ideas and **EXCITEMENT** about the future of this project, chat with me on discord: https://discord.gg/6p3fD6rBVm
+
+- killian
+"""
+
 import os
 import sys
 import appdirs
@@ -25,14 +45,40 @@ def get_hf_llm(repo_id, debug_mode):
 
     combined_models = group_and_combine_splits(raw_models)
 
-    # Display to user
-    choices = [format_quality_choice(model) for model in combined_models]
-    questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
-    answers = inquirer.prompt(questions)
-    for model in combined_models:
-        if format_quality_choice(model) == answers["selected_model"]:
-            selected_model = model["filename"]
-            break
+    selected_model = None
+
+    # First we give them a simple small medium large option. If they want to see more, they can.
+
+    if len(combined_models) > 3:
+
+        # Display Small Medium Large options to user
+        choices = [
+            format_quality_choice(combined_models[0], "Small"),
+            format_quality_choice(combined_models[len(combined_models) // 2], "Medium"),
+            format_quality_choice(combined_models[-1], "Large"),
+            "See More"
+        ]
+        questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
+        answers = inquirer.prompt(questions)
+        if answers["selected_model"].startswith("Small"):
+            selected_model = combined_models[0]["filename"]
+        elif answers["selected_model"].startswith("Medium"):
+            selected_model = combined_models[len(combined_models) // 2]["filename"]
+        elif answers["selected_model"].startswith("Large"):
+            selected_model = combined_models[-1]["filename"]
+    
+    if selected_model == None:
+        # This means they either selected See More,
+        # Or the model only had 1 or 2 options
+
+        # Display to user
+        choices = [format_quality_choice(model) for model in combined_models]
+        questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
+        answers = inquirer.prompt(questions)
+        for model in combined_models:
+            if format_quality_choice(model) == answers["selected_model"]:
+                selected_model = model["filename"]
+                break
 
     # Third stage: GPU confirm
     if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
@@ -65,7 +111,7 @@ def get_hf_llm(repo_id, debug_mode):
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, selected_model)
       
-        print(f"This language model was not found on your system.\n\nDownload to {default_path}?", "")
+        print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
         if confirm_action(""):
           
             # Check if model was originally split
@@ -88,7 +134,7 @@ def get_hf_llm(repo_id, debug_mode):
             return None
 
     # This is helpful for folks looking to delete corrupted ones and such
-    print(f"Model found at {model_path}")
+    print(f"Model found at `{model_path}`")
   
     try:
         from llama_cpp import Llama
@@ -156,17 +202,15 @@ def get_hf_llm(repo_id, debug_mode):
             # Check if on macOS
             if platform.system() == "Darwin":
                 # Check if it's Apple Silicon
-                if platform.machine() == "arm64":
-                    # Check if Python is running under 'arm64' architecture
-                    if platform.architecture()[0] != "arm64":
-                        print("Warning: You are using Apple Silicon (M1) Mac but your Python is not of 'arm64' architecture.")
-                        print("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1) Mac.")
-                        print("\nTo install the correct version of Python that supports 'arm64' architecture:")
-                        print("1. Download Miniforge for M1:")
-                        print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
-                        print("2. Install it:")
-                        print("bash Miniforge3-MacOSX-arm64.sh")
-                        print("")
+                if platform.machine() != "arm64":
+                    print("Warning: You are using Apple Silicon (M1/M2) Mac but your Python is not of 'arm64' architecture.")
+                    print("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1/M2) Mac.")
+                    print("\nTo install the correct version of Python that supports 'arm64' architecture:")
+                    print("1. Download Miniforge for M1/M2:")
+                    print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
+                    print("2. Install it:")
+                    print("bash Miniforge3-MacOSX-arm64.sh")
+                    print("")
       
         else:
             print('', "Installation cancelled. Exiting.", '')
@@ -217,6 +261,8 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
   
     gguf_files = [file for file in files_info if "gguf" in file.rfilename]
 
+    gguf_files = sorted(gguf_files, key=lambda x: x.size)
+
     # Prepare the result
     result = []
     for file in gguf_files:
@@ -230,6 +276,8 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
 
     return result
 
+from typing import List, Dict, Union
+
 def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List[Dict[str, Union[str, float]]]:
     """
     Groups filenames based on their base names and combines the sizes and RAM requirements.
@@ -238,15 +286,24 @@ def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List
     :return: A list of combined model details.
     """
     grouped_files = {}
+
     for model in models:
         base_name = model["filename"].split('-split-')[0]
+        
         if base_name in grouped_files:
             grouped_files[base_name]["Size"] += model["Size"]
-            grouped_files[base_name]["RAM"] += model["Size"]
+            grouped_files[base_name]["RAM"] += model["RAM"]
+            grouped_files[base_name]["SPLITS"].append(model["filename"])
         else:
-            grouped_files[base_name] = model
+            grouped_files[base_name] = {
+                "filename": base_name,
+                "Size": model["Size"],
+                "RAM": model["RAM"],
+                "SPLITS": [model["filename"]]
+            }
 
     return list(grouped_files.values())
+
 
 def actually_combine_files(base_name: str, files: List[str]) -> None:
     """
@@ -262,9 +319,13 @@ def actually_combine_files(base_name: str, files: List[str]) -> None:
                 outfile.write(infile.read())
             os.remove(file)
 
-def format_quality_choice(model: Dict[str, Union[str, float]]) -> str:
+def format_quality_choice(model, name_override = None) -> str:
     """
     Formats the model choice for display in the inquirer prompt.
     """
-    return f"{model['filename']} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
+    if name_override:
+        name = name_override
+    else:
+        name = model['filename']
+    return f"{name} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
 
