@@ -82,6 +82,11 @@ class Interpreter:
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
 
+    # Local Model Parameters
+    self.local_model_parameter_count = os.getenv('INTERPRETER_LOCAL_MODEL_COUNT', None)
+    self.local_model_quality = os.getenv('INTERPRETER_LOCAL_MODEL_QUALITY', None)
+    self.local_model_use_gpu = os.getenv('INTERPRETER_LOCAL_USE_GPU', None)
+    
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
@@ -175,7 +180,7 @@ class Interpreter:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_llama_2_instance()
+          self.llama_instance = get_llama_2_instance(self.local_model_parameter_count, self.local_model_quality, self.local_model_use_gpu)
         except:
           # If it didn't work, apologize and switch to GPT-4
           

@@ -8,29 +8,41 @@ import contextlib
 from rich import print
 from rich.markdown import Markdown
 
+models = {
+    '7B': {
+        'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q3_K_S.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
+        'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
+        'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
+    },
+    '13B': {
+        'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q3_K_S.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
+        'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
+        'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
+    },
+    '34B': {
+        'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q3_K_S.gguf', 'Size': '14.21 GB', 'RAM': '16.71 GB'},
+        'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q4_K_M.gguf', 'Size': '20.22 GB', 'RAM': '22.72 GB'},
+        'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q8_0.gguf', 'Size': '35.79 GB', 'RAM': '38.29 GB'}
+    }
+}
 
-def get_llama_2_instance():
+def select_model():
+    """
+    Interactively prompts the user to select a model based on parameter count and quality level.
+    
+    The function first presents a list of available parameter counts for the user to choose from.
+    After the user selects a parameter count, they are then presented with a list of quality levels
+    associated with the chosen parameter count.
+    
+    Returns:
+    - tuple (str, str): A tuple containing the selected parameter count and quality level.
+    
+    Example:
+    ('7B', 'Medium')
+    """
 
     # First, we ask them which model they want to use.
     print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-        
-    models = {
-        '7B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q3_K_S.gguf', 'Size': '3.01 GB', 'RAM': '5.51 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q4_K_M.gguf', 'Size': '4.24 GB', 'RAM': '6.74 GB'},
-            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-7B-Instruct-GGUF/resolve/main/codellama-7b-instruct.Q8_0.gguf', 'Size': '7.16 GB', 'RAM': '9.66 GB'}
-        },
-        '13B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q3_K_S.gguf', 'Size': '5.66 GB', 'RAM': '8.16 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q4_K_M.gguf', 'Size': '8.06 GB', 'RAM': '10.56 GB'},
-            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-13B-Instruct-GGUF/resolve/main/codellama-13b-instruct.Q8_0.gguf', 'Size': '13.83 GB', 'RAM': '16.33 GB'}
-        },
-        '34B': {
-            'Low': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q3_K_S.gguf', 'Size': '14.21 GB', 'RAM': '16.71 GB'},
-            'Medium': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q4_K_M.gguf', 'Size': '20.22 GB', 'RAM': '22.72 GB'},
-            'High': {'URL': 'https://huggingface.co/TheBloke/CodeLlama-34B-Instruct-GGUF/resolve/main/codellama-34b-instruct.Q8_0.gguf', 'Size': '35.79 GB', 'RAM': '38.29 GB'}
-        }
-    }
     
     # First stage: Select parameter size
     parameter_choices = list(models.keys())
@@ -47,13 +59,48 @@ def get_llama_2_instance():
     answers = inquirer.prompt(questions)
     chosen_quality = answers['quality'].split(' ')[0]  # Extracting the 'small', 'medium', or 'large' from the selected choice
 
-    # Third stage: GPU confirm
-    if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
-      n_gpu_layers = -1
-    else:
-      n_gpu_layers = 0
+    return chosen_param, chosen_quality
 
-    # Get the URL based on choices 
+    
+def get_llama_2_instance(model_count=None, model_quality=None, use_gpu=None):
+    """
+    Returns an instance of Code-Llama.
+
+    Parameters:
+    - model_count (str, optional): The number of parameters in the model. 
+      Options: '7B', '13B', '34B'. 
+      Default: None (will prompt the user).
+
+    - model_quality (str, optional): The quality level of the model. 
+      Options: 'Low', 'Medium', 'High'. 
+      Default: None (will prompt the user).
+
+    - use_gpu (bool, optional): Whether to utilize GPU for the model. 
+      Options: True, False. 
+      Default: None (will prompt the user).
+
+    Returns:
+    - An instance of Code-Llama.
+    """
+
+    if model_count is None or model_quality is None:
+        # Ask the user to select a model
+        chosen_param, chosen_quality = select_model()
+    else:
+        chosen_param = model_count
+        chosen_quality = model_quality
+
+    if use_gpu is None:
+        if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
+            n_gpu_layers = -1
+        else:
+            n_gpu_layers = 0
+    else:
+        if use_gpu:
+            n_gpu_layers = -1
+        else:
+            n_gpu_layers = 0
+
     url = models[chosen_param][chosen_quality]['URL']
     file_name = url.split("/")[-1]
 
