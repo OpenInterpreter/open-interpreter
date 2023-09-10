@@ -3,10 +3,11 @@ from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
-from .llama_2 import get_llama_2_instance
+from .get_hf_llm import get_hf_llm
 
 import os
 import time
+import traceback
 import json
 import platform
 import openai
@@ -168,15 +169,15 @@ class Interpreter:
 
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
-      self.model = "code-llama"
       
       # Code-Llama
       if self.llama_instance == None:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_llama_2_instance()
+          self.llama_instance = get_hf_llm(self.model, self.debug_mode)
         except:
+          traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
           
           print(Markdown("".join([
@@ -359,7 +360,7 @@ class Interpreter:
     # This is hacky, as we should have a different (minified) prompt for CodeLLama,
     # but for now, to make the prompt shorter and remove "run_code" references, just get the first 2 lines:
     if self.local:
-      self.system_message = "\n".join(self.system_message.split("\n")[:3])
+      self.system_message = "\n".join(self.system_message.split("\n")[:2])
       self.system_message += "\nOnly do what the user asks you to do, then ask what they'd like to do next."
     
     system_message = self.system_message + "\n\n" + info
@@ -414,30 +415,44 @@ class Interpreter:
       # (This only works if the first message is the only system message)
 
       def messages_to_prompt(messages):
-        # Extracting the system prompt and initializing the formatted string with it.
-        system_prompt = messages[0]['content']
-        formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
 
+        
         for message in messages:
           # Happens if it immediatly writes code
           if "role" not in message:
             message["role"] = "assistant"
-        
-        # Loop starting from the first user message
-        for index, item in enumerate(messages[1:]):
-            role = item['role']
-            content = item['content']
-            
-            if role == 'user':
-                formatted_messages += f"{content} [/INST] "
-            elif role == 'function':
-                formatted_messages += f"Output: {content} [/INST] "
-            elif role == 'assistant':
-                formatted_messages += f"{content} </s><s>[INST] "
-    
-        # Remove the trailing '<s>[INST] ' from the final output
-        if formatted_messages.endswith("<s>[INST] "):
-            formatted_messages = formatted_messages[:-10]
+
+
+        # Falcon prompt template
+        if "falcon" in self.model.lower():
+          
+          formatted_messages = ""
+          for message in messages:
+            formatted_messages += f"{message['role'].capitalize()}: {message['content']}\n"
+          formatted_messages = formatted_messages.strip()
+
+        else:
+          # Llama prompt template
+          
+          # Extracting the system prompt and initializing the formatted string with it.
+          system_prompt = messages[0]['content']
+          formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
+          
+          # Loop starting from the first user message
+          for index, item in enumerate(messages[1:]):
+              role = item['role']
+              content = item['content']
+              
+              if role == 'user':
+                  formatted_messages += f"{content} [/INST] "
+              elif role == 'function':
+                  formatted_messages += f"Output: {content} [/INST] "
+              elif role == 'assistant':
+                  formatted_messages += f"{content} </s><s>[INST] "
+      
+          # Remove the trailing '<s>[INST] ' from the final output
+          if formatted_messages.endswith("<s>[INST] "):
+              formatted_messages = formatted_messages[:-10]
         
         return formatted_messages
 
