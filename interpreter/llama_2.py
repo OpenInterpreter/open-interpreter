@@ -102,7 +102,7 @@ def get_llama_2_instance(model_count=None, model_quality=None, use_gpu=None):
         else:
             n_gpu_layers = 0
 
-    # Get the URL based on choices
+    # Get the URL based on choices 
     url = models[chosen_param][chosen_quality]['URL']
     file_name = url.split("/")[-1]
 
