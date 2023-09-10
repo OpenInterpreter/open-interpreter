@@ -1,3 +1,23 @@
+"""
+Right off the bat, to any contributors (a message from Killian):
+
+First of all, THANK YOU. Open Interpreter is ALIVE, ALL OVER THE WORLD because of YOU.
+
+While this project is rapidly growing, I've decided it's best for us to allow some technical debt.
+
+The code here has duplication. It has imports in weird places. It has been spaghettified to add features more quickly.
+
+In my opinion **this is critical** to keep up with the pace of demand for this project.
+
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+
+After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
+
+Especially if you have ideas and **EXCITEMENT** about the future of this project, chat with me on Discord: https://discord.gg/6p3fD6rBVm
+
+- killian
+"""
+
 import os
 import sys
 import appdirs
@@ -91,7 +111,7 @@ def get_hf_llm(repo_id, debug_mode):
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, selected_model)
       
-        print(f"This language model was not found on your system.\n\nDownload to {default_path}?", "")
+        print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
         if confirm_action(""):
           
             # Check if model was originally split
@@ -114,7 +134,7 @@ def get_hf_llm(repo_id, debug_mode):
             return None
 
     # This is helpful for folks looking to delete corrupted ones and such
-    print(f"Model found at {model_path}")
+    print(f"Model found at `{model_path}`")
   
     try:
         from llama_cpp import Llama
