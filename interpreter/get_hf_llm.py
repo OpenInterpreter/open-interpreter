@@ -1,10 +1,8 @@
 import os
 import sys
-import wget
 import appdirs
 import inquirer
 import subprocess
-import contextlib
 from rich import print
 from rich.markdown import Markdown
 import os
