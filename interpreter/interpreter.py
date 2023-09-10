@@ -99,6 +99,8 @@ class Interpreter:
     self.model = "gpt-4"
     self.debug_mode = False
     self.api_base = None # Will set it to whatever OpenAI wants
+    self.context_window = 3500 # For local models only
+    self.max_tokens = 1000 # For local models only
     # Azure OpenAI
     self.use_azure = False
     self.azure_api_base = None
@@ -198,7 +200,7 @@ class Interpreter:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_hf_llm(self.model, self.debug_mode)
+          self.llama_instance = get_hf_llm(self.model, self.debug_mode, self.context_window)
           if self.llama_instance == None:
             # They cancelled.
             return
@@ -208,8 +210,8 @@ class Interpreter:
           
           print(Markdown("".join([
             f"> Failed to install `{self.model}`.",
-            f"\n\n**Common Fix:** Press CTRL-C to exit Open Interpreter, then run the following code:\n\n```shell\npip install --upgrade llama-cpp-python\n```",
-            f"\n\n**If you've tried that and you're still getting this error, we have likely not built the proper `{self.model}` support for your system.**",
+            f"\n\n**Common Fixes:** You can follow our simple setup docs at the link below to resolve common errors.\n\n```\nhttps://github.com/KillianLucas/open-interpreter/tree/main/docs\n```",
+            f"\n\n**If you've tried that and you're still getting an error, we have likely not built the proper `{self.model}` support for your system.**",
             "\n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development. )",
             "\n\nPress enter to switch to `GPT-4` (recommended)."
           ])))
@@ -452,7 +454,7 @@ class Interpreter:
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
-      messages = tt.trim(self.messages, max_tokens=1000, system_message=system_message)
+      messages = tt.trim(self.messages, max_tokens=(self.context_window-self.max_tokens-25), system_message=system_message)
     else:
       messages = tt.trim(self.messages, self.model, system_message=system_message)
     

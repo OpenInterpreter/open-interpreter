@@ -96,6 +96,13 @@ def cli(interpreter):
                       default="",
                       required=False)
   
+  parser.add_argument('--max_tokens',
+                      type=int,
+                      help='max tokens generated (for locally run models)')
+  parser.add_argument('--context_window',
+                      type=int,
+                      help='context window in tokens (for locally run models)')
+  
   parser.add_argument('--api_base',
                       type=str,
                       help='change your api_base to any OpenAI compatible api',
@@ -118,6 +125,10 @@ def cli(interpreter):
     print("Open Interpreter", pkg_resources.get_distribution("open-interpreter").version)
     return
 
+  if args.max_tokens:
+    interpreter.max_tokens = args.max_tokens
+  if args.context_window:
+    interpreter.context_window = args.context_window
 
   # Modify interpreter according to command line flags
   if args.yes:
@@ -191,7 +202,6 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
-  
 
   # Run the chat method
   interpreter.chat()
