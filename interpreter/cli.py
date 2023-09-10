@@ -1,16 +1,35 @@
 import argparse
-import inquirer
 import os
 from dotenv import load_dotenv
+import requests
+from packaging import version
+import pkg_resources
 
 # Load .env file
 load_dotenv()
+
+def check_for_update(package_name: str) -> bool:
+    # Fetch the latest version from the PyPI API
+    response = requests.get(f'https://pypi.org/pypi/{package_name}/json')
+    latest_version = response.json()['info']['version']
+
+    # Get the current version using pkg_resources
+    current_version = pkg_resources.get_distribution(package_name).version
+
+    return version.parse(latest_version) > version.parse(current_version)
 
 def cli(interpreter):
   """
   Takes an instance of interpreter.
   Modifies it according to command line flags, then runs chat.
   """
+
+  try:
+    if check_for_update():
+      print("A new version is available. Please run 'pip install --upgrade open-interpreter'.")
+  except:
+    # Fine if this fails
+    pass
 
   # Load values from .env file with the new names
   AUTO_RUN = os.getenv('INTERPRETER_CLI_AUTO_RUN', 'False') == 'True'
