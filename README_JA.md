@@ -120,10 +120,6 @@ Pythonでは、Open Interpreterは会話の履歴を覚えています。新鮮�
 interpreter.reset()
 ```
 
-Of course! Here's the translated text:
-
----
-
 ### チャットの保存と復元
 
 `interpreter.chat()` は、return_messages=True のときにメッセージのリストを返します。これを使用して、`interpreter.load(messages)` で会話を再開することができます。
