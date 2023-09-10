@@ -134,6 +134,8 @@ def cli(interpreter):
   if args.use_azure:
     interpreter.use_azure = True
     interpreter.local = False
+
+
   if args.model != "":
     interpreter.model = args.model
 
@@ -170,7 +172,6 @@ def cli(interpreter):
     interpreter.local = True
 
   
-
 
   # Run the chat method
   interpreter.chat()
