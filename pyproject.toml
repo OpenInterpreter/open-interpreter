@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.1.1"
+version = "0.1.2"
 description = "Let language models run code locally."
 authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
@@ -18,6 +18,7 @@ git-python = "^1.0.3"
 tokentrim = "^0.1.9"
 appdirs = "^1.4.4"
 six = "^1.16.0"
+python-dotenv = "^1.0.0"
 
 # On non-windows systems, you can just `import readline`.
 # On windows, `pyreadline3` replaces that, so you can also just `import readline`.
