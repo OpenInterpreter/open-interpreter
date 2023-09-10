@@ -462,7 +462,8 @@ class Interpreter:
               )
               
             break
-        except:
+        except Exception as e:
+            traceback.print_exc()
             # Probably rate limit hit. Retrying in 3 seconds
             time.sleep(3)
       else:
