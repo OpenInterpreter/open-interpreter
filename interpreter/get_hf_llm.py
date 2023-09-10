@@ -156,17 +156,15 @@ def get_hf_llm(repo_id, debug_mode):
             # Check if on macOS
             if platform.system() == "Darwin":
                 # Check if it's Apple Silicon
-                if platform.machine() == "arm64":
-                    # Check if Python is running under 'arm64' architecture
-                    if platform.architecture()[0] != "arm64":
-                        print("Warning: You are using Apple Silicon (M1) Mac but your Python is not of 'arm64' architecture.")
-                        print("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1) Mac.")
-                        print("\nTo install the correct version of Python that supports 'arm64' architecture:")
-                        print("1. Download Miniforge for M1:")
-                        print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
-                        print("2. Install it:")
-                        print("bash Miniforge3-MacOSX-arm64.sh")
-                        print("")
+                if platform.machine() != "arm64":
+                    print("Warning: You are using Apple Silicon (M1/M2) Mac but your Python is not of 'arm64' architecture.")
+                    print("The llama.ccp x86 version will be 10x slower on Apple Silicon (M1/M2) Mac.")
+                    print("\nTo install the correct version of Python that supports 'arm64' architecture:")
+                    print("1. Download Miniforge for M1/M2:")
+                    print("wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh")
+                    print("2. Install it:")
+                    print("bash Miniforge3-MacOSX-arm64.sh")
+                    print("")
       
         else:
             print('', "Installation cancelled. Exiting.", '')
