@@ -54,7 +54,7 @@ function_schema = {
         "type": "string",
         "description":
         "The programming language",
-        "enum": ["python", "shell", "applescript", "javascript", "html"]
+        "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
       },
       "code": {
         "type": "string",
@@ -141,7 +141,7 @@ class Interpreter:
     username = getpass.getuser()
     current_working_directory = os.getcwd()
     operating_system = platform.system()
-    
+
     info += f"[User Info]\nName: {username}\nCWD: {current_working_directory}\nOS: {operating_system}"
 
     if not self.local:
@@ -158,10 +158,10 @@ class Interpreter:
         if "function_call" in message and "parsed_arguments" in message["function_call"]:
           message_for_semantic_search["function_call"] = message["function_call"]["parsed_arguments"]
         query.append(message_for_semantic_search)
-              
+
       # Use them to query Open Procedures
       url = "https://open-procedures.replit.app/search/"
-      
+
       try:
         relevant_procedures = requests.get(url, data=json.dumps(query)).json()["procedures"]
         info += "\n\n# Recommended Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for depracation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
@@ -173,7 +173,7 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      info += "\n\nTo run code, write a fenced code block (i.e ```python or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      info += "\n\nTo run code, write a fenced code block (i.e ```python, R or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
       # We make references in system_message.txt to the "function" it can call, "run_code".
 
     return info
@@ -194,10 +194,10 @@ class Interpreter:
 
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
-      
+
       # Code-Llama
       if self.llama_instance == None:
-        
+
         # Find or install Code-Llama
         try:
           self.llama_instance = get_hf_llm(self.model, self.debug_mode, self.context_window)
@@ -207,7 +207,7 @@ class Interpreter:
         except:
           traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
-          
+
           print(Markdown("".join([
             f"> Failed to install `{self.model}`.",
             f"\n\n**Common Fixes:** You can follow our simple setup docs at the link below to resolve common errors.\n\n```\nhttps://github.com/KillianLucas/open-interpreter/tree/main/docs\n```",
@@ -224,7 +224,7 @@ class Interpreter:
 
     # Display welcome message
     welcome_message = ""
-    
+
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
 
@@ -232,17 +232,17 @@ class Interpreter:
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
       welcome_message += f"\n> Model set to `{self.model.upper()}`"
-    
+
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
-    
+
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
     if not self.auto_run:
       welcome_message += "\n\n" + confirm_mode_message
 
     welcome_message = welcome_message.strip()
-      
+
     # Print welcome message with newlines on either side (aesthetic choice)
     # unless we're starting with a blockquote (aesthetic choice)
     if welcome_message != "":
@@ -256,7 +256,7 @@ class Interpreter:
       # If it was, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
       self.respond()
-      
+
     else:
       # If it wasn't, we start an interactive chat
       while True:
@@ -267,11 +267,11 @@ class Interpreter:
         except KeyboardInterrupt:
           print()  # Aesthetic choice
           break
-  
+
         # Use `readline` to let users up-arrow to previous user messages,
         # which is a common behavior in terminals.
         readline.add_history(user_input)
-  
+
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
 
@@ -281,7 +281,7 @@ class Interpreter:
             print(self.messages)
             self.debug_mode = True
             continue
-  
+
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
         try:
           self.respond()
@@ -335,15 +335,15 @@ class Interpreter:
           # AND BELOW.
           # This way, when folks hit interpreter --local, they get the same experience as before.
           import inquirer
-          
+
           print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-              
+
           models = {
               '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
               '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
               '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
           }
-          
+
           parameter_choices = list(models.keys())
           questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
           answers = inquirer.prompt(questions)
@@ -402,15 +402,15 @@ class Interpreter:
               # AND ABOVE.
               # This way, when folks hit interpreter --local, they get the same experience as before.
               import inquirer
-              
+
               print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-                  
+
               models = {
                   '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
                   '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
                   '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
               }
-              
+
               parameter_choices = list(models.keys())
               questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
               answers = inquirer.prompt(questions)
@@ -450,14 +450,14 @@ class Interpreter:
     if self.local:
       self.system_message = "\n".join(self.system_message.split("\n")[:2])
       self.system_message += "\nOnly do what the user asks you to do, then ask what they'd like to do next."
-    
+
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
       messages = tt.trim(self.messages, max_tokens=(self.context_window-self.max_tokens-25), system_message=system_message)
     else:
       messages = tt.trim(self.messages, self.model, system_message=system_message)
-    
+
     if self.debug_mode:
       print("\n", "Sending `messages` to LLM:", "\n")
       print(messages)
@@ -466,10 +466,10 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # GPT
-      
+
       for _ in range(3):  # 3 retries
         try:
-          
+
             if self.use_azure:
               response = litellm.completion(
                   f"azure/{self.azure_deployment_name}",
@@ -498,7 +498,7 @@ class Interpreter:
                   stream=True,
                   temperature=self.temperature,
                 )
-              
+
             break
         except:
             if self.debug_mode:
@@ -507,18 +507,18 @@ class Interpreter:
       else:
         traceback.print_exc()
         raise Exception("")
-            
+
     elif self.local:
       # Code-Llama
-      
-      
-          
+
+
+
       # Convert messages to prompt
       # (This only works if the first message is the only system message)
 
       def messages_to_prompt(messages):
 
-        
+
         for message in messages:
           # Happens if it immediatly writes code
           if "role" not in message:
@@ -527,7 +527,7 @@ class Interpreter:
 
         # Falcon prompt template
         if "falcon" in self.model.lower():
-          
+
           formatted_messages = ""
           for message in messages:
             formatted_messages += f"{message['role'].capitalize()}: {message['content']}\n"
@@ -535,38 +535,38 @@ class Interpreter:
 
         else:
           # Llama prompt template
-          
+
           # Extracting the system prompt and initializing the formatted string with it.
           system_prompt = messages[0]['content']
           formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
-          
+
           # Loop starting from the first user message
           for index, item in enumerate(messages[1:]):
               role = item['role']
               content = item['content']
-              
+
               if role == 'user':
                   formatted_messages += f"{content} [/INST] "
               elif role == 'function':
                   formatted_messages += f"Output: {content} [/INST] "
               elif role == 'assistant':
                   formatted_messages += f"{content} </s><s>[INST] "
-      
+
           # Remove the trailing '<s>[INST] ' from the final output
           if formatted_messages.endswith("<s>[INST] "):
               formatted_messages = formatted_messages[:-10]
-        
+
         return formatted_messages
 
       prompt = messages_to_prompt(messages)
       # Lmao i can't believe this works (it does need this btw)
       if messages[-1]["role"] != "function":
-        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, and applescript. I'm going to try to do this for your task. Anyway, "
+        prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, R, and applescript. I'm going to try to do this for your task. Anyway, "
       elif messages[-1]["role"] == "function" and messages[-1]["content"] != "No output":
         prompt += "Given the output of the code I just ran, "
       elif messages[-1]["role"] == "function" and messages[-1]["content"] == "No output":
         prompt += "Given the fact that the code I just ran produced no output, "
-        
+
 
       if self.debug_mode:
         # we have to use builtins bizarrely! because rich.print interprets "[INST]" as something meaningful
@@ -574,7 +574,7 @@ class Interpreter:
         builtins.print("TEXT PROMPT SEND TO LLM:\n", prompt)
 
       # Run Code-Llama
-            
+
       response = self.llama_instance(
         prompt,
         stream=True,
@@ -663,11 +663,11 @@ class Interpreter:
             if "```" in content:
               # Split by "```" to get the last open code block
               blocks = content.split("```")
-  
+
               current_code_block = blocks[-1]
-          
+
               lines = current_code_block.split("\n")
-  
+
               if content.strip() == "```": # Hasn't outputted a language yet
                 language = None
               else:
@@ -679,10 +679,10 @@ class Interpreter:
                   if len(lines) > 1:
                     if lines[1].startswith("pip"):
                       language = "shell"
-          
+
               # Join all lines except for the language line
               code = '\n'.join(lines[1:]).strip("` \n")
-          
+
               arguments = {"code": code}
               if language: # We only add this if we have it-- the second we have it, an interpreter gets fired up (I think? maybe I'm wrong)
                 if language == "bash":
@@ -692,8 +692,8 @@ class Interpreter:
             # Code-Llama won't make a "function_call" property for us to store this under, so:
             if "function_call" not in self.messages[-1]:
               self.messages[-1]["function_call"] = {}
-              
-            self.messages[-1]["function_call"]["parsed_arguments"] = arguments            
+
+            self.messages[-1]["function_call"]["parsed_arguments"] = arguments
 
       else:
         # We are not in a function call.
@@ -767,7 +767,7 @@ class Interpreter:
 
             # After collecting some data via the below instruction to users,
             # This is the most common failure pattern: https://github.com/KillianLucas/open-interpreter/issues/41
-            
+
             # print("> Function call could not be parsed.\n\nPlease open an issue on Github (openinterpreter.com, click Github) and paste the following:")
             # print("\n", self.messages[-1]["function_call"], "\n")
             # time.sleep(2)
@@ -775,7 +775,7 @@ class Interpreter:
 
             # Since it can't really be fixed without something complex,
             # let's just berate the LLM then go around again.
-            
+
             self.messages.append({
               "role": "function",
               "name": "run_code",
@@ -818,6 +818,6 @@ class Interpreter:
             self.messages[-1]["content"] = self.messages[-1]["content"].strip().rstrip("#")
             self.active_block.update_from_message(self.messages[-1])
             time.sleep(0.1)
-            
+
           self.active_block.end()
           return
