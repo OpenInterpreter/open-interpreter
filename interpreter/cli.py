@@ -56,6 +56,11 @@ def cli(interpreter):
                       action='store_true',
                       default=LOCAL_RUN,
                       help='run fully local with code-llama')
+  parser.add_argument(
+                      '--falcon',
+                      action='store_true',
+                      default=False,
+                      help='run fully local with falcon-40b')
   parser.add_argument('-d',
                       '--debug',
                       action='store_true',
@@ -64,7 +69,7 @@ def cli(interpreter):
   
   parser.add_argument('--model',
                       type=str,
-                      help='HuggingFace repo id',
+                      help='run fully local with any HuggingFace repo ID',
                       default="",
                       required=False)
   
@@ -81,12 +86,10 @@ def cli(interpreter):
     interpreter.auto_run = True
   if args.fast:
     interpreter.model = "gpt-3.5-turbo"
-  if args.local:
+  if args.local and not args.falcon:
 
 
 
-
-    
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --local, they get the same experience as before.
     from rich import print
@@ -110,9 +113,6 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
-
-
-
   
   if args.debug:
     interpreter.debug_mode = True
@@ -122,6 +122,39 @@ def cli(interpreter):
   if args.model != "":
     interpreter.model = args.model
     interpreter.local = True
+
+  if args.falcon:
+
+
+
+    # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+    # This way, when folks hit interpreter --falcon, they get the same experience as --local.
+    from rich import print
+    from rich.markdown import Markdown
+    import inquirer
+    
+    print('', Markdown("**Open Interpreter** will use `Falcon` for local execution. Use your arrow keys to set up the model."), '')
+        
+    models = {
+        '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+        '40B': 'YokaiKoibito/falcon-40b-GGUF',
+        '180B': 'TheBloke/Falcon-180B-Chat-GGUF'
+    }
+    
+    parameter_choices = list(models.keys())
+    questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+    answers = inquirer.prompt(questions)
+    chosen_param = answers['param']
+
+    if chosen_param == "180B":
+      print(Markdown("> **WARNING:** To run `Falcon-180B` we recommend at least `100GB` of RAM."))
+
+    # THIS is more in line with the future. You just say the model you want by name:
+    interpreter.model = models[chosen_param]
+    interpreter.local = True
+
+
+
 
   # Run the chat method
   interpreter.chat()
