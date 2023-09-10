@@ -473,13 +473,13 @@ smmap = ">=3.0.1,<6"
 
 [[package]]
 name = "gitpython"
-version = "3.1.34"
+version = "3.1.35"
 description = "GitPython is a Python library used to interact with Git repositories"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "GitPython-3.1.34-py3-none-any.whl", hash = "sha256:5d3802b98a3bae1c2b8ae0e1ff2e4aa16bcdf02c145da34d092324f599f01395"},
-    {file = "GitPython-3.1.34.tar.gz", hash = "sha256:85f7d365d1f6bf677ae51039c1ef67ca59091c7ebd5a3509aa399d4eda02d6dd"},
+    {file = "GitPython-3.1.35-py3-none-any.whl", hash = "sha256:c19b4292d7a1d3c0f653858db273ff8a6614100d1eb1528b014ec97286193c09"},
+    {file = "GitPython-3.1.35.tar.gz", hash = "sha256:9cbefbd1789a5fe9bcf621bb34d3f441f3a90c8461d377f84eda73e721d9b06b"},
 ]
 
 [package.dependencies]
@@ -590,13 +590,13 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
-version = "0.1.578"
+version = "0.1.583"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.1.578-py3-none-any.whl", hash = "sha256:549bc53d175462582d400df22fa4b4ea2aaeb60ce93acec418d5dc596cb3f184"},
-    {file = "litellm-0.1.578.tar.gz", hash = "sha256:f6ac96d638ac1a4b7180a2e3bb7e828203d16f30f556b8f365e9a92fb4d0a97b"},
+    {file = "litellm-0.1.583-py3-none-any.whl", hash = "sha256:7ec36b8eac32a8338dac879114a17108585b31bc9cd1793c2ee345d5eeac8b61"},
+    {file = "litellm-0.1.583.tar.gz", hash = "sha256:91536f08dd5d210cee339afd26750a193fd9d0a6f6ef131a6fb2c8bfd1495e39"},
 ]
 
 [package.dependencies]
@@ -798,13 +798,13 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "7.4.1"
+version = "7.4.2"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-7.4.1-py3-none-any.whl", hash = "sha256:460c9a59b14e27c602eb5ece2e47bec99dc5fc5f6513cf924a7d03a578991b1f"},
-    {file = "pytest-7.4.1.tar.gz", hash = "sha256:2f2301e797521b23e4d2585a0a3d7b5e50fdddaaf7e7d6773ea26ddb17c213ab"},
+    {file = "pytest-7.4.2-py3-none-any.whl", hash = "sha256:1d881c6124e08ff0a1bb75ba3ec0bfd8b5354a01c194ddd5a0a870a48d99b002"},
+    {file = "pytest-7.4.2.tar.gz", hash = "sha256:a766259cfab564a2ad52cb1aae1b881a75c3eb7e34ca3779697c23ed47c47069"},
 ]
 
 [package.dependencies]
@@ -1138,13 +1138,13 @@ blobfile = ["blobfile (>=2)"]
 
 [[package]]
 name = "tokentrim"
-version = "0.1.9"
+version = "0.1.10"
 description = "Easily trim 'messages' arrays for use with GPTs."
 optional = false
 python-versions = ">=3.6,<4.0"
 files = [
-    {file = "tokentrim-0.1.9-py3-none-any.whl", hash = "sha256:732e4893c55de1ca25067f73b3092ae6fec160c4ba8400ecfb76e1f1d9df59c5"},
-    {file = "tokentrim-0.1.9.tar.gz", hash = "sha256:78fe076e27a15cea313f1155014d96037af382e0927f10baa6c299f80232c965"},
+    {file = "tokentrim-0.1.10-py3-none-any.whl", hash = "sha256:56ac50248a922a59733b17bd2f30d7beed90e66379e925c50e2075098e8ff385"},
+    {file = "tokentrim-0.1.10.tar.gz", hash = "sha256:460174c540fe8da40f6f3c892aeb1544b0a924ed544cddc693f06195b7cc2bf1"},
 ]
 
 [package.dependencies]
