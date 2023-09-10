@@ -35,6 +35,28 @@ We welcome code contributions through pull requests. Here are some guidelines:
 
 - Once approved, your code will be merged - thank you for improving Open Interpreter!
 
+## Running Your Local Fork
+
+Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
+
+1. CD into the project folder `/open-interpreter`
+2. Install dependencies `poetry install`
+3. Run the program `poetry run interpreter`
+
+After modifying the source code, you will need to do `poetry run interpreter` again.
+
+### Installing New Packages
+
+If you wish to install new dependencies into the project, please use `poetry add package-name`.
+
+### Known Issues
+
+For some, `poetry install` might hang on some dependencies. As a first step, try to run the following command in your terminal:  
+  
+`export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring`  
+  
+Then run `poetry install` again. If this doesn't work, please join our [Discord community](https://discord.gg/6p3fD6rBVm) for help.
+
 ## Questions?
 
 Join our [Discord community](https://discord.gg/6p3fD6rBVm) to connect with contributors. We're happy to guide you through your first open source contribution!
