@@ -25,14 +25,40 @@ def get_hf_llm(repo_id, debug_mode):
 
     combined_models = group_and_combine_splits(raw_models)
 
-    # Display to user
-    choices = [format_quality_choice(model) for model in combined_models]
-    questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
-    answers = inquirer.prompt(questions)
-    for model in combined_models:
-        if format_quality_choice(model) == answers["selected_model"]:
-            selected_model = model["filename"]
-            break
+    selected_model = None
+
+    # First we give them a simple small medium large option. If they want to see more, they can.
+
+    if len(combined_models) > 3:
+
+        # Display Small Medium Large options to user
+        choices = [
+            format_quality_choice(combined_models[0], "Small"),
+            format_quality_choice(combined_models[len(combined_models) // 2], "Medium"),
+            format_quality_choice(combined_models[-1], "Large"),
+            "See More"
+        ]
+        questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
+        answers = inquirer.prompt(questions)
+        if answers["selected_model"].startswith("Small"):
+            selected_model = combined_models[0]["filename"]
+        elif answers["selected_model"].startswith("Medium"):
+            selected_model = combined_models[len(combined_models) // 2]["filename"]
+        elif answers["selected_model"].startswith("Large"):
+            selected_model = combined_models[-1]["filename"]
+    
+    if selected_model == None:
+        # This means they either selected See More,
+        # Or the model only had 1 or 2 options
+
+        # Display to user
+        choices = [format_quality_choice(model) for model in combined_models]
+        questions = [inquirer.List('selected_model', message="Quality (smaller is faster, larger is more capable)", choices=choices)]
+        answers = inquirer.prompt(questions)
+        for model in combined_models:
+            if format_quality_choice(model) == answers["selected_model"]:
+                selected_model = model["filename"]
+                break
 
     # Third stage: GPU confirm
     if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
@@ -217,6 +243,8 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
   
     gguf_files = [file for file in files_info if "gguf" in file.rfilename]
 
+    gguf_files = sorted(gguf_files, key=lambda x: x.size)
+
     # Prepare the result
     result = []
     for file in gguf_files:
@@ -230,6 +258,8 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
 
     return result
 
+from typing import List, Dict, Union
+
 def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List[Dict[str, Union[str, float]]]:
     """
     Groups filenames based on their base names and combines the sizes and RAM requirements.
@@ -238,15 +268,24 @@ def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List
     :return: A list of combined model details.
     """
     grouped_files = {}
+
     for model in models:
         base_name = model["filename"].split('-split-')[0]
+        
         if base_name in grouped_files:
             grouped_files[base_name]["Size"] += model["Size"]
-            grouped_files[base_name]["RAM"] += model["Size"]
+            grouped_files[base_name]["RAM"] += model["RAM"]
+            grouped_files[base_name]["SPLITS"].append(model["filename"])
         else:
-            grouped_files[base_name] = model
+            grouped_files[base_name] = {
+                "filename": base_name,
+                "Size": model["Size"],
+                "RAM": model["RAM"],
+                "SPLITS": [model["filename"]]
+            }
 
     return list(grouped_files.values())
+
 
 def actually_combine_files(base_name: str, files: List[str]) -> None:
     """
@@ -262,9 +301,13 @@ def actually_combine_files(base_name: str, files: List[str]) -> None:
                 outfile.write(infile.read())
             os.remove(file)
 
-def format_quality_choice(model: Dict[str, Union[str, float]]) -> str:
+def format_quality_choice(model, name_override = None) -> str:
     """
     Formats the model choice for display in the inquirer prompt.
     """
-    return f"{model['filename']} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
+    if name_override:
+        name = name_override
+    else:
+        name = model['filename']
+    return f"{name} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
 
