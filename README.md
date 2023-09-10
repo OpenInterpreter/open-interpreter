@@ -1,7 +1,7 @@
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
-    <a href="https://discord.gg/YG7APUyJ5"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
+    <a href="https://discord.gg/6p3fD6rBVm"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a> <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
 <br>
     <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
@@ -64,7 +64,7 @@ interpreter
 ```python
 import interpreter
 
-interpreter.chat("Plot APPL and META's normalized stock prices") # Executes a single command
+interpreter.chat("Plot AAPL and META's normalized stock prices") # Executes a single command
 interpreter.chat() # Starts an interactive chat
 ```
 
@@ -86,7 +86,7 @@ This combines the power of GPT-4's Code Interpreter with the flexibility of your
 
 ## Commands
 
-#### Interactive Chat
+### Interactive Chat
 
 To start an interactive chat in your terminal, either run `interpreter` from the command line:
 
@@ -100,7 +100,7 @@ Or `interpreter.chat()` from a .py file:
 interpreter.chat()
 ```
 
-#### Programmatic Chat
+### Programmatic Chat
 
 For more precise control, you can pass messages directly to `.chat(message)`:
 
@@ -114,7 +114,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 # ...
 ```
 
-#### Start a New Chat
+### Start a New Chat
 
 In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
@@ -122,7 +122,7 @@ In Python, Open Interpreter remembers conversation history. If you want to start
 interpreter.reset()
 ```
 
-#### Save and Restore Chats
+### Save and Restore Chats
 
 `interpreter.chat()` returns a List of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
 
@@ -133,7 +133,7 @@ interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
-#### Customize System Message
+### Customize System Message
 
 You can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
 
@@ -144,9 +144,9 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
-#### Change the Model
+### Change the Model
 
-> Note: We're working on consolidating these into a unified command.
+ⓘ  **Issues running locally?** Read our new [GPU setup guide](/docs/GPU.md) and [Windows setup guide](/docs/WINDOWS.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
@@ -166,7 +166,26 @@ In Python, you will need to set the model manually:
 interpreter.model = "gpt-3.5-turbo"
 ```
 
-#### Debug mode
+### Azure Support
+
+To connect to an Azure deployment, the `--use-azure` flag will walk you through setting this up:
+
+```
+interpreter --use-azure
+```
+
+In Python, set the following variables:
+
+```
+interpreter.use_azure = True
+interpreter.api_key = "your_openai_api_key"
+interpreter.azure_api_base = "your_azure_api_base"
+interpreter.azure_api_version = "your_azure_api_version"
+interpreter.azure_deployment_name = "your_azure_deployment_name"
+interpreter.azure_api_type = "azure"
+```
+
+### Debug mode
 
 To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
 
@@ -177,6 +196,27 @@ $ interpreter
 ...
 > %debug # <- Turns on debug mode
 ```
+
+### Configuration with .env
+Open Interpreter allows you to set default behaviors using a .env file. This provides a flexible way to configure the interpreter without changing command-line arguments every time.
+
+Here's a sample .env configuration:
+
+```
+INTERPRETER_CLI_AUTO_RUN=False
+INTERPRETER_CLI_FAST_MODE=False
+INTERPRETER_CLI_LOCAL_RUN=False
+INTERPRETER_CLI_DEBUG=False
+INTERPRETER_CLI_USE_AZURE=False
+```
+
+- INTERPRETER_CLI_AUTO_RUN: If set to True, the interpreter will execute code without user confirmation.
+- INTERPRETER_CLI_FAST_MODE: If set to True, the interpreter will use gpt-3.5-turbo instead of gpt-4.
+- INTERPRETER_CLI_LOCAL_RUN: If set to True, the interpreter will run fully locally with Code Llama.
+- INTERPRETER_CLI_DEBUG: If set to True, the interpreter will print extra debugging information.
+- INTERPRETER_CLI_USE_AZURE: If set to True, the interpreter will use Azure OpenAI Services.
+
+You can modify these values in the .env file to change the default behavior of the Open Interpreter.
 
 ## Safety Notice
 
@@ -196,9 +236,11 @@ Open Interpreter equips a [function-calling language model](https://platform.ope
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
-## Contributing
+# Contributing
 
-This is a community-made project. If it looks exciting to you, please don't hesitate to contribute!
+Thank you for your interest in contributing! We welcome involvement from the community. 
+
+Please see our [Contributing Guidelines](/docs/contributing.md) for more details on how to get involved.
 
 ## License
 
