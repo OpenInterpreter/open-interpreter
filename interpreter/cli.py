@@ -177,7 +177,7 @@ def cli(interpreter):
   if args.api_base:
     interpreter.api_base = args.api_base
 
-  if args.falcon:
+  if args.falcon or args.model == "tiiuae/falcon-180B": # because i tweeted <-this by accident lol, we actually need TheBloke's quantized version of Falcon:
 
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --falcon, they get the same experience as --local.
