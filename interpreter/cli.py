@@ -84,6 +84,8 @@ def cli(interpreter):
   if args.local:
 
 
+
+
     
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --local, they get the same experience as before.
@@ -107,6 +109,9 @@ def cli(interpreter):
     # THIS is more in line with the future. You just say the model you want by name:
     interpreter.model = models[chosen_param]
     interpreter.local = True
+
+
+
 
   
   if args.debug:

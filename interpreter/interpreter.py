@@ -183,8 +183,8 @@ class Interpreter:
           # If it didn't work, apologize and switch to GPT-4
           
           print(Markdown("".join([
-            "> Failed to install `Code-LLama`.",
-            "\n\n**We have likely not built the proper `Code-Llama` support for your system.**",
+            f"> Failed to install `{self.model}`.",
+            f"\n\n**We have likely not built the proper `{self.model}` support for your system.**",
             "\n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development. )",
             "\n\nPlease press enter to switch to `GPT-4` (recommended)."
           ])))
@@ -207,7 +207,7 @@ class Interpreter:
       welcome_message += f"\n> Model set to `{self.model.upper()}`\n\n**Tip:** To run locally, use `interpreter --local`"
     
     if self.local:
-      welcome_message += f"\n> Model set to `Code-Llama`"
+      welcome_message += f"\n> Model set to `{self.model}`"
     
     # If not auto_run, tell the user we'll ask permission to run code
     # We also tell them here how to exit Open Interpreter
@@ -295,13 +295,39 @@ class Interpreter:
 
         if response == "":
           # User pressed `enter`, requesting Code-Llama
-          self.local = True
 
           print(Markdown(
             "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
                 '')
           time.sleep(2)
           print(Rule(style="white"))
+
+
+
+          # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+          # This way, when folks hit interpreter --local, they get the same experience as before.
+          import inquirer
+          
+          print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+              
+          models = {
+              '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+              '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+              '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+          }
+          
+          parameter_choices = list(models.keys())
+          questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+          answers = inquirer.prompt(questions)
+          chosen_param = answers['param']
+
+          # THIS is more in line with the future. You just say the model you want by name:
+          self.model = models[chosen_param]
+          self.local = True
+
+
+
+
           return
 
         else:
@@ -368,7 +394,7 @@ class Interpreter:
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
-      messages = tt.trim(self.messages, max_tokens=1048, system_message=system_message)
+      messages = tt.trim(self.messages, max_tokens=1000, system_message=system_message)
     else:
       messages = tt.trim(self.messages, self.model, system_message=system_message)
     
@@ -386,7 +412,7 @@ class Interpreter:
           
             if self.use_azure:
               response = litellm.completion(
-                  engine=self.azure_deployment_name,
+                  f"azure/{self.azure_deployment_name}",
                   messages=messages,
                   functions=[function_schema],
                   temperature=self.temperature,
@@ -402,8 +428,8 @@ class Interpreter:
               )
               
             break
-        except openai.error.RateLimitError:
-            # Rate limit hit. Retrying in 3 seconds
+        except:
+            # Probably rate limit hit. Retrying in 3 seconds
             time.sleep(3)
       else:
         raise openai.error.RateLimitError("RateLimitError: Max retries reached")
@@ -479,7 +505,8 @@ class Interpreter:
         prompt,
         stream=True,
         temperature=self.temperature,
-        stop=["</s>"]
+        stop=["</s>"],
+        max_tokens=750 # context window is set to 1800, messages are trimmed to 1000... 700 seems nice
       )
 
     # Initialize message, function call trackers, and active block
