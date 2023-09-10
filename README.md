@@ -151,14 +151,6 @@ print(interpreter.system_message)
 
 ### Change the Model
 
-ⓘ  **Issues running locally?** Read our new [GPU setup guide](/docs/GPU.md) and [Windows setup guide](/docs/WINDOWS.md).
-
-You can run `interpreter` in local mode from the command line to use `Code Llama`:
-
-```shell
-interpreter --local
-```
-
 For `gpt-3.5-turbo`, use fast mode:
 
 ```shell
@@ -169,6 +161,32 @@ In Python, you will need to set the model manually:
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
+```
+
+### Running Open Interpreter locally
+
+ⓘ  **Issues running locally?** Read our new [GPU setup guide](/docs/GPU.md) and [Windows setup guide](/docs/WINDOWS.md).
+
+You can run `interpreter` in local mode from the command line to use `Code Llama`:
+
+```shell
+interpreter --local
+```
+
+Or run any HugginFace model **locally** by using its repo ID (e.g. "tiiuae/falcon-180B"):
+
+```shell
+interpreter --model tiiuae/falcon-180B
+```
+
+#### Local model params
+
+You can easily modify the `max_tokens` and `context_window` (in tokens) of locally running models.
+
+Smaller context windows will use less RAM, so we recommend trying a shorter window if GPU is failing.
+
+```shell
+interpreter --max_tokens 2000 --context_window 16000
 ```
 
 ### Azure Support
