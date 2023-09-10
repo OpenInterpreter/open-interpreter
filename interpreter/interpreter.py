@@ -1,3 +1,23 @@
+"""
+Right off the bat, to any contributors (a message from Killian):
+
+First of all, THANK YOU. Open Interpreter is ALIVE, ALL OVER THE WORLD because of YOU.
+
+While this project is rapidly growing, I've decided it's best for us to allow some technical debt.
+
+The code here has duplication. It has imports in weird places. It has been spaghettified to add features more quickly.
+
+In my opinion **this is critical** to keep up with the pace of demand for this project.
+
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+
+After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
+
+Especially if you have ideas and **EXCITEMENT** about the future of this project, chat with me on Discord: https://discord.gg/6p3fD6rBVm
+
+- killian
+"""
+
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
@@ -179,15 +199,19 @@ class Interpreter:
         # Find or install Code-Llama
         try:
           self.llama_instance = get_hf_llm(self.model, self.debug_mode)
+          if self.llama_instance == None:
+            # They cancelled.
+            return
         except:
           traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
           
           print(Markdown("".join([
             f"> Failed to install `{self.model}`.",
-            f"\n\n**We have likely not built the proper `{self.model}` support for your system.**",
+            f"\n\n**Common Fix:** Press CTRL-C to exit Open Interpreter, then run the following code:\n\n```shell\npip install --upgrade llama-cpp-python\n```",
+            f"\n\n**If you've tried that and you're still getting this error, we have likely not built the proper `{self.model}` support for your system.**",
             "\n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development. )",
-            "\n\nPlease press enter to switch to `GPT-4` (recommended)."
+            "\n\nPress enter to switch to `GPT-4` (recommended)."
           ])))
           input()
 
@@ -205,7 +229,7 @@ class Interpreter:
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
-      welcome_message += f"\n> Model set to `{self.model.upper()}`\n\n**Tip:** To run locally, use `interpreter --local`"
+      welcome_message += f"\n> Model set to `{self.model.upper()}`"
     
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
@@ -453,21 +477,34 @@ class Interpreter:
                   stream=True,
                   )
             else:
-              response = litellm.completion(
-                model=self.model,
-                messages=messages,
-                functions=[function_schema],
-                stream=True,
-                temperature=self.temperature,
-              )
+              if self.api_base:
+                # The user set the api_base. litellm needs this to be "custom/{model}"
+                response = litellm.completion(
+                  api_base=self.api_base,
+                  model = "custom/" + self.model,
+                  messages=messages,
+                  functions=[function_schema],
+                  stream=True,
+                  temperature=self.temperature,
+                )
+              else:
+                # Normal OpenAI call
+                response = litellm.completion(
+                  model=self.model,
+                  messages=messages,
+                  functions=[function_schema],
+                  stream=True,
+                  temperature=self.temperature,
+                )
               
             break
-        except Exception as e:
-            traceback.print_exc()
-            # Probably rate limit hit. Retrying in 3 seconds
+        except:
+            if self.debug_mode:
+              traceback.print_exc()
             time.sleep(3)
       else:
-        raise openai.error.RateLimitError("RateLimitError: Max retries reached")
+        traceback.print_exc()
+        raise Exception("")
             
     elif self.local:
       # Code-Llama
