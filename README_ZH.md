@@ -5,7 +5,8 @@
   <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"></a>
     <a href="README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
   <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
-<br>
+    <br>
+    <br>
     <b>让语言模型在您的计算机上运行代码。</b><br>
     OpenAI的代码解释器的开源、本地运行实现。<br>
     <br><a href="https://openinterpreter.com">获取桌面应用程序的早期访问权限。</a><br>
