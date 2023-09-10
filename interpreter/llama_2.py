@@ -91,6 +91,7 @@ def get_llama_2_instance(model_count=None, model_quality=None, use_gpu=None):
         chosen_quality = model_quality
 
     if use_gpu is None:
+        # Third stage: GPU confirm
         if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
             n_gpu_layers = -1
         else:
