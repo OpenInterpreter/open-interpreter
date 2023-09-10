@@ -75,12 +75,13 @@ class Interpreter:
     self.local = False
     self.model = "gpt-4"
     self.debug_mode = False
+    self.api_base = 'https://api.openai.com/v1'
     # Azure OpenAI
     self.use_azure = False
     self.azure_api_base = None
     self.azure_api_version = None
     self.azure_deployment_name = None
-    self.azure_api_type = "azure"
+    self.particular_key = None
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -203,6 +204,14 @@ class Interpreter:
     if not self.local and not self.auto_run:
       welcome_message += f"\n> Model set to `{self.model.upper()}`\n\n**Tip:** To run locally, use `interpreter --local`"
     
+    # set api base
+    openai.api_base = self.api_base
+    welcome_message += '\n> API base set to `' + self.api_base + '`\n\n'
+
+    if self.particular_key:
+      openai.api_key = self.particular_key
+      welcome_message += '\n> A `particular key` was set\n\n'
+
     if self.local:
       welcome_message += f"\n> Model set to `Code-Llama`"
     
@@ -279,7 +288,6 @@ class Interpreter:
         self.azure_api_base = os.environ['AZURE_API_BASE']
         self.azure_api_version = os.environ['AZURE_API_VERSION']
         self.azure_deployment_name = os.environ['AZURE_DEPLOYMENT_NAME']
-        self.azure_api_type = os.environ.get('AZURE_API_TYPE', 'azure')
       else:
         # This is probably their first time here!
         print('', Markdown("**Welcome to Open Interpreter.**"), '')
@@ -312,7 +320,7 @@ class Interpreter:
           time.sleep(2)
           print(Rule(style="white"))
 
-      openai.api_type = self.azure_api_type
+      openai.api_type = "azure"
       openai.api_base = self.azure_api_base
       openai.api_version = self.azure_api_version
       openai.api_key = self.api_key
