@@ -92,7 +92,7 @@ def cli(interpreter):
   
   parser.add_argument('--model',
                       type=str,
-                      help='run fully local with any HuggingFace repo ID',
+                      help='model name (for OpenAI compatible APIs) or HuggingFace repo',
                       default="",
                       required=False)
   

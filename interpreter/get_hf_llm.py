@@ -217,7 +217,7 @@ def get_hf_llm(repo_id, debug_mode):
             return None
 
     # Initialize and return Code-Llama
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=1800) # n_ctx = context window. smaller is faster
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=1048) # n_ctx = context window. smaller is faster
       
     return llama_2
 
