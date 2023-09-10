@@ -5,7 +5,8 @@
     <a href="README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
-<br>
+    <br>
+    <br>
     <b>コンピュータ上でコードを実行する言語モデル。</b><br>
     OpenAIのコードインタープリタのオープンソースで、ローカルに実行される実装。<br>
     <br><a href="https://openinterpreter.com">デスクトップアプリケーションの早期アクセスを取得する。</a><br>
