@@ -201,11 +201,18 @@ class Interpreter:
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
 
+      
+
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
-      welcome_message += f"\n> Model set to `{self.model.upper()}`\n\n**Tip:** To run locally, use `interpreter --local`"
-    
+      if self.use_azure:
+        notice_model = f"Azure({self.azure_deployment_name})"
+      else:
+        notice_model = f"{self.model.upper()}"
+      welcome_message += f"\n> Model set to `{notice_model}`\n\n**Tip:** To run locally, use `interpreter --local`"
+      
+      
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
     
