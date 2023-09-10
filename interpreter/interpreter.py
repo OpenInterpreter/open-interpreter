@@ -78,6 +78,7 @@ class Interpreter:
     self.local = False
     self.model = "gpt-4"
     self.debug_mode = False
+    self.api_base = None # Will set it to whatever OpenAI wants
     # Azure OpenAI
     self.use_azure = False
     self.azure_api_base = None
@@ -305,6 +306,7 @@ class Interpreter:
 
 
           # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+          # AND BELOW.
           # This way, when folks hit interpreter --local, they get the same experience as before.
           import inquirer
           
@@ -361,10 +363,40 @@ class Interpreter:
 
           if response == "":
               # User pressed `enter`, requesting Code-Llama
-              self.local = True
-              print(Markdown("> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."), '')
+
+              print(Markdown(
+                "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                    '')
               time.sleep(2)
               print(Rule(style="white"))
+
+
+
+              # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+              # AND ABOVE.
+              # This way, when folks hit interpreter --local, they get the same experience as before.
+              import inquirer
+              
+              print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+                  
+              models = {
+                  '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+                  '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+                  '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+              }
+              
+              parameter_choices = list(models.keys())
+              questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+              answers = inquirer.prompt(questions)
+              chosen_param = answers['param']
+
+              # THIS is more in line with the future. You just say the model you want by name:
+              self.model = models[chosen_param]
+              self.local = True
+
+
+
+
               return
 
           else:
@@ -597,13 +629,22 @@ class Interpreter:
               if content.strip() == "```": # Hasn't outputted a language yet
                 language = None
               else:
-                language = lines[0].strip() if lines[0] != "" else "python"
+                if lines[0] != "":
+                  language = lines[0].strip()
+                else:
+                  language = "python"
+                  # In anticipation of its dumbassery let's check if "pip" is in there
+                  if len(lines) > 1:
+                    if lines[1].startswith("pip"):
+                      language = "shell"
           
               # Join all lines except for the language line
               code = '\n'.join(lines[1:]).strip("` \n")
           
               arguments = {"code": code}
               if language: # We only add this if we have it-- the second we have it, an interpreter gets fired up (I think? maybe I'm wrong)
+                if language == "bash":
+                  language = "shell"
                 arguments["language"] = language
 
             # Code-Llama won't make a "function_call" property for us to store this under, so:
