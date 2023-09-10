@@ -11,10 +11,10 @@ import traceback
 import json
 import platform
 import openai
+import litellm
 import getpass
 import requests
 import readline
-import urllib.parse
 import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
@@ -313,10 +313,10 @@ class Interpreter:
           time.sleep(2)
           print(Rule(style="white"))
 
-      openai.api_type = self.azure_api_type
-      openai.api_base = self.azure_api_base
-      openai.api_version = self.azure_api_version
-      openai.api_key = self.api_key
+      litellm.api_type = self.azure_api_type
+      litellm.api_base = self.azure_api_base
+      litellm.api_version = self.azure_api_version
+      litellm.api_key = self.api_key
     else:
       if self.api_key == None:
         if 'OPENAI_API_KEY' in os.environ:
@@ -345,7 +345,7 @@ class Interpreter:
               time.sleep(2)
               print(Rule(style="white"))
 
-      openai.api_key = self.api_key
+      litellm.api_key = self.api_key
 
   def end_active_block(self):
     if self.active_block:
@@ -383,7 +383,7 @@ class Interpreter:
         try:
           
             if self.use_azure:
-              response = openai.ChatCompletion.create(
+              response = litellm.completion(
                   engine=self.azure_deployment_name,
                   messages=messages,
                   functions=[function_schema],
@@ -391,7 +391,7 @@ class Interpreter:
                   stream=True,
                   )
             else:
-              response = openai.ChatCompletion.create(
+              response = litellm.completion(
                 model=self.model,
                 messages=messages,
                 functions=[function_schema],
