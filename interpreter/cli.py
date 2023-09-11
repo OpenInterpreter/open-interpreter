@@ -92,9 +92,16 @@ def cli(interpreter):
   
   parser.add_argument('--model',
                       type=str,
-                      help='run fully local with any HuggingFace repo ID',
+                      help='model name (for OpenAI compatible APIs) or HuggingFace repo',
                       default="",
                       required=False)
+  
+  parser.add_argument('--max_tokens',
+                      type=int,
+                      help='max tokens generated (for locally run models)')
+  parser.add_argument('--context_window',
+                      type=int,
+                      help='context window in tokens (for locally run models)')
   
   parser.add_argument('--api_base',
                       type=str,
@@ -118,6 +125,10 @@ def cli(interpreter):
     print("Open Interpreter", pkg_resources.get_distribution("open-interpreter").version)
     return
 
+  if args.max_tokens:
+    interpreter.max_tokens = args.max_tokens
+  if args.context_window:
+    interpreter.context_window = args.context_window
 
   # Modify interpreter according to command line flags
   if args.yes:
@@ -166,7 +177,7 @@ def cli(interpreter):
   if args.api_base:
     interpreter.api_base = args.api_base
 
-  if args.falcon:
+  if args.falcon or args.model == "tiiuae/falcon-180B": # because i tweeted <-this by accident lol, we actually need TheBloke's quantized version of Falcon:
 
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --falcon, they get the same experience as --local.
@@ -191,7 +202,6 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
-  
 
   # Run the chat method
   interpreter.chat()

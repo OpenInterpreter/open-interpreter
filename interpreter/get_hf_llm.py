@@ -21,6 +21,7 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 import os
 import sys
 import appdirs
+import traceback
 import inquirer
 import subprocess
 from rich import print
@@ -30,7 +31,7 @@ import inquirer
 from huggingface_hub import list_files_info, hf_hub_download
 
 
-def get_hf_llm(repo_id, debug_mode):
+def get_hf_llm(repo_id, debug_mode, context_window):
 
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
@@ -134,11 +135,13 @@ def get_hf_llm(repo_id, debug_mode):
             return None
 
     # This is helpful for folks looking to delete corrupted ones and such
-    print(f"Model found at `{model_path}`")
+    print(Markdown(f"Model found at `{model_path}`"))
   
     try:
         from llama_cpp import Llama
     except:
+        if debug_mode:
+            traceback.print_exc()
         # Ask for confirmation to install the required pip package
         message = "Local LLM interface package not found. Install `llama-cpp-python`?"
         if confirm_action(message):
@@ -217,7 +220,8 @@ def get_hf_llm(repo_id, debug_mode):
             return None
 
     # Initialize and return Code-Llama
-    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=1800) # n_ctx = context window. smaller is faster
+    assert os.path.isfile(model_path)
+    llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=context_window)
       
     return llama_2
 
