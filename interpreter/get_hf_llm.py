@@ -121,6 +121,11 @@ def get_hf_llm(repo_id, debug_mode, context_window):
             if len(split_files) > 1:
                 # Download splits
                 for split_file in split_files:
+                    # Do we already have a file split downloaded?
+                    split_path = os.path.join(default_path, split_file)
+                    if os.path.exists(split_path):
+                        if not confirm_action(f"Split file {split_path} already exists. Download again?"):
+                            continue
                     hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
                 
                 # Combine and delete splits
