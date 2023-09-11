@@ -40,14 +40,28 @@ body:
     attributes:
       label: Screenshots
       description: If applicable, add screenshots to help explain your problem.
-  - type: textarea
-    id: system
+  - type: input
+    id: oiversion
     attributes:
-      label: System (please complete the following information).
-      placeholder: |
-        - OS: [e.g. iOS]
-        - Python version [e.g. 3.10]
-        - Open Interpreter version (`pip show open-interpreter`): [e.g. 0.1.1] 
+      label: Open Interpreter version
+      description: Run `pip show open-interpreter`
+      placeholder: e.g. 0.1.1
+    validations:
+      required: true
+  - type: input
+    id: pythonversion
+    attributes:
+      label: Python version
+      description: Run `python -V`
+      placeholder: e.g. 3.11.5
+    validations:
+      required: true
+  - type: input
+    id: osversion
+    attributes:
+      label: Operating System name and version
+      description: The name and version of your OS.
+      placeholder: e.g. Windows 11 / macOS 13 / Ubuntu 22.10
     validations:
       required: true
   - type: textarea
