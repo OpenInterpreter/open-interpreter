@@ -33,6 +33,7 @@ import json
 import platform
 import openai
 import litellm
+import pkg_resources
 
 import getpass
 import requests
@@ -319,7 +320,7 @@ class Interpreter:
         self.azure_api_type = os.environ.get('AZURE_API_TYPE', 'azure')
       else:
         # This is probably their first time here!
-        print('', Markdown("**Welcome to Open Interpreter.**"), '')
+        self._print_welcome_message()
         time.sleep(1)
 
         print(Rule(style="white"))
@@ -386,7 +387,7 @@ class Interpreter:
           self.api_key = os.environ['OPENAI_API_KEY']
         else:
           # This is probably their first time here!
-          print('', Markdown("**Welcome to Open Interpreter.**"), '')
+          self._print_welcome_message()
           time.sleep(1)
 
           print(Rule(style="white"))
@@ -830,3 +831,7 @@ class Interpreter:
 
           self.active_block.end()
           return
+
+  def _print_welcome_message(self):
+    current_version = pkg_resources.get_distribution("open-interpreter").version
+    print(f"\n Hello, Welcome to [bold white]⬤ Open Interpreter[/bold white]. (v{current_version})\n")
