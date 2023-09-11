@@ -7,9 +7,9 @@
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
     <br>
     <br>
-    <b>コンピュータ上でコードを実行する言語モデル。</b><br>
-    OpenAIのコードインタープリタのオープンソースで、ローカルに実行される実装。<br>
-    <br><a href="https://openinterpreter.com">デスクトップアプリケーションの早期アクセスを取得する。</a><br>
+    <b>自然言語で指示するだけでコードを書いて実行までやってくれる。</b><br>
+    ローカルに実装したOpenAI Code Interpreterのオープンソース版。<br>
+    <br><a href="https://openinterpreter.com">デスクトップアプリケーションへの早期アクセス。</a><br>
 </p>
 
 <br>
@@ -28,16 +28,16 @@ interpreter
 
 <br>
 
-**Open Interpreter**は、LLMを使用してコード（Python、Javascript、Shellなど）をローカルで実行できます。インストール後に`$ interpreter`を実行することで、ターミナルでChatGPTのようなインターフェースを介してOpen Interpreterとチャットできます。
+**Open Interpreter**は、言語モデルに指示し、コード（Python、Javascript、Shellなど）をローカル環境で実行するようにします。インストール後、`$ interpreter`を実行するとターミナル経由でChatGPTのようなインターフェースを介し、Open Interpreterとチャットができます。
 
-これにより、コンピュータの一般的な目的の機能に自然言語のインターフェースを提供できます。
+これにより、自然言語のインターフェースを通して、パソコンの一般的な機能が操作できます。
 
 - 写真、動画、PDFなどの作成や編集。
-- Chromeブラウザの制御とリサーチ実行。
+- Chromeブラウザの制御とリサーチ作業。
 - 大規模なデータセットのプロット、クリーニング、分析。
-- ...等。
+- 等々
 
-**⚠️ 注意：実行する前にコードを承認するように求められます。**
+**⚠️ 注意：実行する前にコードを承認するよう求められます。**
 
 <br>
 
@@ -57,7 +57,7 @@ pip install open-interpreter
 
 ### ターミナル
 
-インストール後、`interpreter`を実行するだけ：
+インストール後、`interpreter`を実行するだけです：
 
 ```shell
 interpreter
@@ -68,23 +68,23 @@ interpreter
 ```python
 import interpreter
 
-interpreter.chat("AAPLとMETAの正規化された株価をプロットする") # 一つのコマンドを実行
+interpreter.chat("AAPLとMETAの株価グラフを描いてください") # 一つのコマンドを実行
 interpreter.chat() # インタラクティブなチャットを開始
 ```
 
-## ChatGPTのコードインタープリタとの比較
+## ChatGPTのコードインタープリタとの違い
 
-OpenAIがGPT-4で[Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter)をリリースすることで、ChatGPTで実際のタスクを達成する素晴らしい機会が提供されました。
+GPT-4で実装されたOpenAIの[Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) は、実世界のタスクをChatGPTで操作できる素晴らしい機会を提供しています。
 
-しかし、OpenAIのサービスはホスティングされ、クローズドソースで、かつ大きな制限があります：
-- インターネットアクセス不可。
-- [インストールされているパッケージのセットが限定されている](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
-- 100 MBの最大アップロード、120.0秒のランタイム制限。
-- 環境が終了すると状態がクリアされます。
+しかし、OpenAIのサービスはホスティングされていて、クローズドソースで、かなり制限されています：
+- インターネットに接続できない。
+- [プリインストールされているパッケージが限られている](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
+- 最大アップロードは100MBで、120秒という実行時間の制限も。
+- 生成されたファイルやリンクとともに状態がリセットされる。
 
-Open Interpreterは、ローカル環境で実行することでこれらの制約を克服します。インターネットに完全にアクセスでき、時間やファイルサイズに制限されず、任意のパッケージやライブラリを使用することができます。
+Open Interpreterは、ローカル環境で操作することで、これらの制限を克服しています。インターネットにフルアクセスでき、時間やファイルサイズの制限を受けず、どんなパッケージやライブラリも利用できます。
 
-GPT-4のCode Interpreterの力と、ローカルの開発環境の柔軟性を組み合わせることができます。
+Open Interpterは、GPT-4のコードインタープリタのパワーとローカル開発環境の柔軟性を組み合わせたものです。
 
 ## コマンド
 
@@ -96,29 +96,29 @@ GPT-4のCode Interpreterの力と、ローカルの開発環境の柔軟性を�
 interpreter
 ```
 
-または、.pyファイルから`interpreter.chat()`を使用します。
+または、.pyファイルから`interpreter.chat()`も利用できます。
 
 ```python
 interpreter.chat()
 ```
 
-### プログラムチャット
+### プログラム的なチャット
 
 より精確な制御のために、メッセージを直接`.chat(message)`に渡すことができます。
 
 ```python
-interpreter.chat("/videos内のすべての動画に字幕を追加する。")
+interpreter.chat("/videosフォルダにあるすべての動画に字幕を追加する。")
 
 # ... ターミナルに出力をストリームし、タスクを完了 ...
 
-interpreter.chat("これは素晴らしいですが、字幕を大きくできますか？")
+interpreter.chat("ついでに、字幕を大きくできますか？")
 
 # ...
 ```
 
 ### 新しいチャットを開始
 
-Pythonでは、Open Interpreterは会話の履歴を覚えています。新鮮な気持ちで始めたい場合は、リセットできます：
+プログラム的チャットでOpen Interpreterは、会話の履歴を記憶しています。新しくやり直したい場合は、リセットすることができます：
 
 ```python
 interpreter.reset()
@@ -126,29 +126,43 @@ interpreter.reset()
 
 ### チャットの保存と復元
 
-`interpreter.chat()` は、return_messages=True のときにメッセージのリストを返します。これを使用して、`interpreter.load(messages)` で会話を再開することができます。
+`interpreter.chat()` は、return_messages=True のときにメッセージのリストを返し、`interpreter.load(messages)` で会話を再開することができます。
 
 ```python
-messages = interpreter.chat("私の名前はKillianです。", return_messages=True) # 'messages'にメッセージを保存
-interpreter.reset() # インタープリタをリセット（"Killian"は忘れられる）
+messages = interpreter.chat("私の名前は田中です。", return_messages=True) # 'messages'にメッセージを保存
+interpreter.reset() # インタープリタをリセット（"田中"は忘れられる）
 
-interpreter.load(messages) # 'messages'からチャットを再開（"Killian"は覚えられる）
+interpreter.load(messages) # 'messages'からチャットを再開（"田中"は記憶される）
 ```
 
 ### システムメッセージのカスタマイズ
 
-Open Interpreterのシステムメッセージを調査し、機能を拡張、権限を変更、またはより多くのコンテキストを提供するために設定できます。
+Open Interpreterのシステムメッセージを確認し、設定することで、機能を拡張したり、権限を変更したり、またはより多くのコンテキストを与えたりすることができます。
 
 ```python
 interpreter.system_message += """
-ユーザーがそれらを確認する必要がないように、-yでシェルコマンドを実行します。
+シェルコマンドを「-y」フラグ付きで実行し、ユーザーが確認する必要がないようにする。
 """
 print(interpreter.system_message)
 ```
 
 ### モデルの変更
 
-ⓘ **ローカルでの実行に問題がありますか？** 新しい[GPUセットアップガイド](/docs/GPU.md)と[Windowsセットアップガイド](/docs/WINDOWS.md)を読んでください。
+gpt-3.5-turboの場合は、fastモードを使用する：
+
+```python
+interpreter --fast
+```
+
+プログラム的チャットでは、モデルを手動で設定する必要がある：
+
+```python
+interpreter.model = "gpt-3.5-turbo"
+```
+
+### ローカルのモデルを実行する
+
+ⓘ **ローカルでの実行に問題ですか？** 新しい[GPUセットアップガイド](/docs/GPU.md)と[Windowsセットアップガイド](/docs/WINDOWS.md)を参考にしてください。
 
 `Code Llama` を使用するには、コマンドラインからローカルモードで `interpreter` を実行します。
 
@@ -156,23 +170,27 @@ print(interpreter.system_message)
 interpreter --local
 ```
 
-`gpt-3.5-turbo`の場合は、fastモードを使用します。
+または、Hugging FaceモデルをそのレポID（例えば "tiiuae/falcon-180B"）を使ってローカルで実行することもできます：
 
 ```shell
-interpreter --fast
+interpreter --model tiiuae/falcon-180B
 ```
 
-Pythonでは、手動でモデルを設定する必要があります。
+### ローカルモデルのパラメータ
 
-```python
-interpreter.model = "gpt-3.5-turbo"
+ローカルで実行するモデルの max_tokens と context_window (トークン単位) を簡単に変更できます。
+
+context_windowを小さくするとRAMの使用量が減るので、GPUが失敗している場合はサイズを短くしてみることをお勧めします。
+
+```shell
+interpreter --max_tokens 2000 --context_window 16000
 ```
 
-### Azureサポート
+### Azureのサポート
 
-Azureデプロイメントに接続するには、`--use-azure`フラグでこれを設定します。
+AzureのOpenAI Serviceに接続するには、`--use-azure`フラグを渡します。
 
-```
+```shell
 interpreter --use-azure
 ```
 
@@ -180,31 +198,31 @@ Pythonでは、次の変数を設定します：
 
 ```
 interpreter.use_azure = True
-interpreter.api_key = "あなたの_openai_api_key"
-interpreter.azure_api_base = "あなたの_azure_api_base"
-interpreter.azure_api_version = "あなたの_azure_api_version"
-interpreter.azure_deployment_name = "あなたの_azure_deployment_name"
+interpreter.api_key = "your_openai_api_key"
+interpreter.azure_api_base = "your_azure_api_base"
+interpreter.azure_api_version = "your_azure_api_version"
+interpreter.azure_deployment_name = "your_azure_deployment_name"
 interpreter.azure_api_type = "azure"
 ```
 
 ### デバッグモード
 
-寄稿者がOpen Interpreterを調査するのを助けるために、`--debug`モードは非常に詳細です。
+コントリビューターがOpen Interpreterを調査するのを助けるために、`--debug`モードは非常に便利です。
 
-フラグ（`interpreter --debug`）を使用してデバッグモードを有効にするか、チャット中に有効にできます：
+デバッグモードは、フラグ（`interpreter --debug`）を使用するか、またはチャットの中から有効にできます：
 
-```
+```shell
 $ interpreter
 ...
-> %debug # <- デバッグモードをオンにする
+> %debug # <- デバッグモードを有効にする
 ```
 
-### .envでの設定
-Open Interpreterは、.envファイルを使用してデフォルトの動作を設定することを許可しています。これにより、毎回コマンドライン引数を変更することなく、インタープリタを設定する柔軟な方法が提供されます。
+### .envによる設定
+Open Interpreterでは、.envファイルを使ってデフォルトの動作を設定することができます。これにより、コマンドライン引数を毎回変更することなく、Open Interpreterを柔軟に設定できるようになります。
 
 サンプルの.env設定は次のとおりです：
 
-```
+```shell
 INTERPRETER_CLI_AUTO_RUN=False
 INTERPRETER_CLI_FAST_MODE=False
 INTERPRETER_CLI_LOCAL_RUN=False
@@ -212,42 +230,40 @@ INTERPRETER_CLI_DEBUG=False
 INTERPRETER_CLI_USE_AZURE=False
 ```
 
-これらの値を.envファイルで変更して、Open Interpreterのデフォルトの動作を変更できます。
+これらの値を.envファイルで変更することで、Open Interpreterのデフォルトの動作を変更できます。
 
 ## 安全に関する注意
 
-生成されたコードはローカル環境で実行されるため、ファイルやシステム設定と対話することができ、データロスやセキュリティリスクなどの予期しない結果が生じる可能性があります。
+生成されたコードはローカル環境で実行されるため、ファイルやシステム設定と相互作用する可能性があり、データ損失やセキュリティリスクなど予期せぬ結果につながる可能性があります。
 
 **⚠️ Open Interpreterはコードを実行する前にユーザーの確認を求めます。**
 
-確認を回避する
-
-ために `interpreter -y` を実行するか、`interpreter.auto_run = True` を設定できます。その場合：
+この確認を回避するには、`interpreter -y` を実行するか、`interpreter.auto_run = True` を設定します。その場合：
 
 - ファイルやシステム設定を変更するコマンドを要求するときは注意してください。
-- Open Interpreterを自動運転車のように注意深く見て、ターミナルを閉じることでプロセスを終了する準備をしてください。
-- Google ColabやReplitのような制限された環境でOpen Interpreterを実行することを検討してください。これらの環境はより孤立しており、任意のコードを実行することに関連するリスクを減少させます。
+- Open Interpreter を自動運転車のように監視し、ターミナルを閉じてプロセスを終了できるように準備しておいてください。
+- Google ColabやReplitのような制限された環境でOpen Interpreterを実行することを検討してください。これらの環境はより隔離されており、任意のコードの実行に関連するリスクを軽減します。
 
-## それはどのように動作するのか？
+## Open Interpreterはどのように機能するのか？
 
-Open Interpreterは、`exec()`関数を備えた[関数呼び出し言語モデル](https://platform.openai.com/docs/guides/gpt/function-calling)を装備しており、実行する`language`（"python"や"javascript"など）と`code`を受け入れます。
+Open Interpreterは、[関数が呼び出せる言語モデル](https://platform.openai.com/docs/guides/gpt/function-calling)に`exec()`関数を装備し、実行する言語（"python"や"javascript"など）とコードが渡せるようになっています。
 
-その後、モデルのメッセージ、コード、およびシステムの出力をMarkdownとしてターミナルにストリームします。
+そして、モデルからのメッセージ、コード、システムの出力をMarkdownとしてターミナルにストリーミングします。
 
 # 貢献
 
-貢献に興味を持っていただき、ありがとうございます！コミュニティからの関与を歓迎しています。
+貢献に興味を持っていただき、ありがとうございます！コミュニティからの参加を歓迎しています。
 
 詳しくは、[貢献ガイドライン](/docs/contributing.md)を参照してください。
 
 ## ライセンス
 
-Open InterpreterはMITライセンスの下でライセンスされています。ソフトウェアの使用、コピー、変更、配布、サブライセンス、および販売のコピーが許可されています。
+Open InterpreterのライセンスはMITライセンスです。本ソフトウェアの使用、複製、変更、配布、サブライセンス、およびコピーの販売を許可します。
 
-**注意**: このソフトウェアはOpenAIとは関連していません。
-> あなたの指先の速さで動く初級プログラマーにアクセスできることは... 新しいワークフローを努力なく効率的にすることができ、プログラミングの恩恵を新しい観客に開くことができます。
+**注意**: このソフトウェアはOpenAIとは関係ありません。
+> あなたの指先のスピードで作業するジュニアプログラマーにアクセスすることで、… 新しいワークフローを楽で効率的なものにし、プログラミングの利点を新しいオーディエンスに開放することができます。
 >
-> — _OpenAIのコードインタープリタリリース_
+> — _OpenAIのコードインタープリタリリースから_
 
 <br>
 <br>
