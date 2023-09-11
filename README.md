@@ -173,7 +173,7 @@ You can run `interpreter` in local mode from the command line to use `Code Llama
 interpreter --local
 ```
 
-Or run any HugginFace model **locally** by using its repo ID (e.g. "tiiuae/falcon-180B"):
+Or run any Hugging Face model **locally** by using its repo ID (e.g. "tiiuae/falcon-180B"):
 
 ```shell
 interpreter --model tiiuae/falcon-180B
