@@ -151,7 +151,7 @@ print(interpreter.system_message)
 
 ### 更改模型
 
-在 `gpt-3.5-turbo` 下，使用更快的模式：
+在 `gpt-3.5-turbo` 下，使用快速模式：
 
 ```shell
 interpreter --fast
@@ -235,7 +235,7 @@ INTERPRETER_CLI_USE_AZURE=False
 您可以运行 `interpreter -y` 或设置 `interpreter.auto_run = True` 来绕过此确认，此时：
 
 -   在运行请求修改本地文件或系统设置的命令时要谨慎。
--   请做好随时关闭终端以结束 Open Interpreter 进程的准备。
+-   请像驾驶自动驾驶汽车一样留意 Open Interpreter，并随时做好通过关闭终端来结束进程的准备。
 -   考虑在 Google Colab 或 Replit 等受限环境中运行 Open Interpreter。主要是这些环境更加独立，从而降低执行任意代码导致出现问题的风险。
 
 ## 它是如何工作的？
