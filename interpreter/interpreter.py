@@ -99,8 +99,8 @@ class Interpreter:
     self.model = "gpt-4"
     self.debug_mode = False
     self.api_base = None # Will set it to whatever OpenAI wants
-    self.context_window = 3500 # For local models only
-    self.max_tokens = 1000 # For local models only
+    self.context_window = 2000 # For local models only
+    self.max_tokens = 750 # For local models only
     # Azure OpenAI
     self.use_azure = False
     self.azure_api_base = None
@@ -466,7 +466,9 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # GPT
-
+      
+      error = ""
+      
       for _ in range(3):  # 3 retries
         try:
 
@@ -503,11 +505,11 @@ class Interpreter:
         except:
             if self.debug_mode:
               traceback.print_exc()
+            error = traceback.format_exc()
             time.sleep(3)
       else:
-        traceback.print_exc()
-        raise Exception("")
-
+        raise Exception(error)
+            
     elif self.local:
       # Code-Llama
 
