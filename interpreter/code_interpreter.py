@@ -35,7 +35,7 @@ def run_html(html_content):
     # Create a temporary HTML file with the content
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
         f.write(html_content.encode())
-        
+
     # Open the HTML file with the default web browser
     webbrowser.open('file://' + os.path.realpath(f.name))
 
@@ -48,6 +48,12 @@ language_map = {
     # Python is run from this interpreter with sys.executable
     # in interactive, quiet, and unbuffered mode
     "start_cmd": sys.executable + " -i -q -u",
+    "print_cmd": 'print("{}")'
+  },
+  "R": {
+    # R is run from this interpreter with R executable
+    # in interactive, quiet, and unbuffered mode
+    "start_cmd": "R -q --vanilla",
     "print_cmd": 'print("{}")'
   },
   "shell": {
@@ -82,7 +88,7 @@ with open("interpreter/forbidden_commands.json", "r") as f:
 class CodeInterpreter:
   """
   Code Interpreters display and run code in different languages.
-  
+
   They can control code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
   """
 
@@ -119,7 +125,7 @@ class CodeInterpreter:
       """
       # Strip then truncate the output if necessary
       self.output = truncate_output(self.output)
-  
+
       # Display it
       self.active_block.active_line = self.active_line
       self.active_block.output = self.output
@@ -153,15 +159,15 @@ class CodeInterpreter:
       except:
         # Sometimes start_process will fail!
         # Like if they don't have `node` installed or something.
-        
+
         traceback_string = traceback.format_exc()
         self.output = traceback_string
         self.update_active_block()
-  
+
         # Before you return, wait for the display to catch up?
         # (I'm not sure why this works)
         time.sleep(0.1)
-  
+
         return self.output
 
     # Reset output
@@ -178,15 +184,15 @@ class CodeInterpreter:
       except:
         # If this failed, it means the code didn't compile
         # This traceback will be our output.
-        
+
         traceback_string = traceback.format_exc()
         self.output = traceback_string
         self.update_active_block()
-  
+
         # Before you return, wait for the display to catch up?
         # (I'm not sure why this works)
         time.sleep(0.1)
-  
+
         return self.output
 
     if self.language == "python":
@@ -214,7 +220,7 @@ class CodeInterpreter:
       code = "osascript -e " + code
       # Append end command
       code += '\necho "END_OF_EXECUTION"'
-      
+
     # Debug
     if self.debug_mode:
       print("Running code:")
@@ -315,7 +321,7 @@ class CodeInterpreter:
         print("Recieved output line:")
         print(line)
         print("---")
-      
+
       line = line.strip()
 
       # Node's interactive REPL outputs a billion things
@@ -331,6 +337,12 @@ class CodeInterpreter:
       # Python's interactive REPL outputs a million things
       # So we clean it up:
       if self.language == "python":
+        if re.match(r'^(\s*>>>\s*|\s*\.\.\.\s*)', line):
+          continue
+
+      # R's interactive REPL outputs a million things
+      # So we clean it up:
+      if self.language == "R":
         if re.match(r'^(\s*>>>\s*|\s*\.\.\.\s*)', line):
           continue
 
@@ -394,7 +406,7 @@ class AddLinePrints(ast.NodeTransformer):
         # In case it's not iterable:
         if not isinstance(body, list):
             body = [body]
-    
+
         for sub_node in body:
             if hasattr(sub_node, 'lineno'):
                 new_body.append(self.insert_print_statement(sub_node.lineno))
@@ -405,22 +417,22 @@ class AddLinePrints(ast.NodeTransformer):
     def visit(self, node):
         """Overridden visit to transform nodes."""
         new_node = super().visit(node)
-        
+
         # If node has a body, process it
         if hasattr(new_node, 'body'):
             new_node.body = self.process_body(new_node.body)
-        
+
         # If node has an orelse block (like in for, while, if), process it
         if hasattr(new_node, 'orelse') and new_node.orelse:
             new_node.orelse = self.process_body(new_node.orelse)
-        
+
         # Special case for Try nodes as they have multiple blocks
         if isinstance(new_node, ast.Try):
             for handler in new_node.handlers:
                 handler.body = self.process_body(handler.body)
             if new_node.finalbody:
                 new_node.finalbody = self.process_body(new_node.finalbody)
-        
+
         return new_node
 
 def add_active_line_prints_to_python(code):
