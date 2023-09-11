@@ -67,9 +67,11 @@ function_schema = {
 }
 
 # Message for when users don't have an OpenAI API key.
-missing_api_key_message = """> OpenAI API key not found
+missing_api_key_message = """> LLM API key not found
 
 To use `GPT-4` (recommended) please provide an OpenAI API key.
+
+To use `Claude-2` please provide an Anthropic API key.
 
 To use `Code-Llama` (free but less capable) press `enter`.
 """
@@ -385,6 +387,8 @@ class Interpreter:
       if self.api_key == None:
         if 'OPENAI_API_KEY' in os.environ:
           self.api_key = os.environ['OPENAI_API_KEY']
+        if 'ANTHROPIC_API_KEY' in os.environ:
+          self.api_key = os.environ['ANTHROPIC_API_KEY']
         else:
           # This is probably their first time here!
           self._print_welcome_message()
@@ -393,7 +397,8 @@ class Interpreter:
           print(Rule(style="white"))
 
           print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
-          response = input("OpenAI API key: ")
+
+          response = input("LLM API [OpenAI/Anthropic] key: ")
 
           if response == "":
               # User pressed `enter`, requesting Code-Llama
@@ -460,11 +465,16 @@ class Interpreter:
       self.system_message += "\nOnly do what the user asks you to do, then ask what they'd like to do next."
 
     system_message = self.system_message + "\n\n" + info
-
+    messages = self.messages
     if self.local:
       messages = tt.trim(self.messages, max_tokens=(self.context_window-self.max_tokens-25), system_message=system_message)
     else:
-      messages = tt.trim(self.messages, self.model, system_message=system_message)
+      try:
+        # tt. does not support claude-2
+        # TODO: use litellm to trim messages or integrate litellm and tt
+        messages = tt.trim(self.messages, self.model, system_message=system_message)
+      except:
+        pass
 
     if self.debug_mode:
       print("\n", "Sending `messages` to LLM:", "\n")
