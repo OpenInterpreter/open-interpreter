@@ -26,16 +26,12 @@ benefit from offloading some of the work to your GPU.
 
     You may choose to install additional components if you like.
 
-2.  Once the CUDA Toolkit has finished installing, open a Command Prompt or
-    PowerShell window, and run the corresponding command. This ensures that the
+2.  Once the CUDA Toolkit has finished installing, open **x64 Native Tools Command
+    Prompt for VS 2022**, and run the following command. This ensures that the
     `CUDA_PATH` environment varilable is set.
 
     ```
-    # Command Prompt
     echo %CUDA_PATH%
-
-    # PowerShell
-    $env:CUDA_PATH
     ```
 
     If you don't get back something like this:
@@ -46,24 +42,19 @@ benefit from offloading some of the work to your GPU.
 
     Restart your computer, then repeat this step.
 
-3.  Once you have verified that the `CUDA_PATH` environment variable is set, run
-    the corresponding commands for your shell. This will reinstall the
-    `llama-cpp-python` package with NVIDIA GPU support.
+4.  Once you have verified that the `CUDA_PATH` environment variable is set, run
+    the following commands. This will reinstall the `llama-cpp-python` package
+    with NVIDIA GPU support.
 
     ```
-    # Command Prompt
     set FORCE_CMAKE=1 && set CMAKE_ARGS=-DLLAMA_CUBLAS=on
-    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir -vv
-
-    # PowerShell
-    $env:FORCE_CMAKE=1; $env:CMAKE_ARGS='-DLLAMA_CUBLAS=on'
     pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir -vv
     ```
 
     The command should complete with no errors. If you receive an error, ask for
     help on [the Discord server](https://discord.gg/6p3fD6rBVm).
 
-4.  Once `llama-cpp-python` has been reinstalled, you can quickly check whether
+6.  Once `llama-cpp-python` has been reinstalled, you can quickly check whether
     GPU support has been installed and set up correctly by running the following
     command.
 
@@ -86,7 +77,7 @@ benefit from offloading some of the work to your GPU.
     False
     ```
 
-5.  Finally, run the following command to use Open Interpreter with a local
+7.  Finally, run the following command to use Open Interpreter with a local
     language model with GPU support.
 
     ```
