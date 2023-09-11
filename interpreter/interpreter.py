@@ -27,6 +27,7 @@ from .get_hf_llm import get_hf_llm
 
 
 import os
+import sys
 import time
 import traceback
 import json
@@ -263,8 +264,12 @@ class Interpreter:
     if message:
       # If it was, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
-      self.respond()
-
+      
+      try:
+        self.respond()
+      except Exception as e:
+        self._print_error_message_and_exit(e)
+      
     else:
       # If it wasn't, we start an interactive chat
       while True:
@@ -479,7 +484,6 @@ class Interpreter:
       
       for _ in range(3):  # 3 retries
         try:
-
             if self.use_azure:
               response = litellm.completion(
                   f"azure/{self.azure_deployment_name}",
@@ -508,13 +512,13 @@ class Interpreter:
                   stream=True,
                   temperature=self.temperature,
                 )
-
             break
-        except:
+        except Exception as e:
             if self.debug_mode:
               traceback.print_exc()
             error = traceback.format_exc()
             time.sleep(3)
+            raise self._handle_response_error(e)
       else:
         raise Exception(error)
             
@@ -835,3 +839,14 @@ class Interpreter:
   def _print_welcome_message(self):
     current_version = pkg_resources.get_distribution("open-interpreter").version
     print(f"\n Hello, Welcome to [bold white]⬤ Open Interpreter[/bold white]. (v{current_version})\n")
+    
+  def _handle_response_error(self, e: Exception):
+    # If it is an Openai authentication, timeout error 
+    if type(e) is openai.error.AuthenticationError or type(e) is openai.error.Timeout:
+      self._print_error_message_and_exit(e)
+    else: raise e
+  
+  # Print error message and if not in debug_model, exit the system directly.
+  def _print_error_message_and_exit(self, e: Exception):
+    print("\n[bold red]Error:[/bold red]", str(e), "\n")
+    not self.debug_mode and sys.exit(1)
