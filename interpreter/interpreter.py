@@ -834,4 +834,4 @@ class Interpreter:
 
   def _print_welcome_message(self):
     current_version = pkg_resources.get_distribution("open-interpreter").version
-    print(f"\n Hello, Welcome to [bold white]⬤ Open Interpreter[/bold white]. (v{current_version})\n")
+    print(f"\n Hello, Welcome to [bold]● Open Interpreter[/bold]. (v{current_version})\n")
