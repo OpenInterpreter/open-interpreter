@@ -37,7 +37,7 @@ interpreter
 - 绘制、清理和分析大型数据集
 - ...等等。
 
-**⚠️ 注意：在代码运行之前，您会被要求批准。**
+**⚠️ 注意：在运行之前，您会被要求批准代码。**
 
 <br>
 
@@ -57,7 +57,7 @@ pip install open-interpreter
 
 ### 终端
 
-安装后，简单地运行 `interpreter`：
+安装后，只需运行 `interpreter`：
 
 ```shell
 interpreter
@@ -150,14 +150,6 @@ print(interpreter.system_message)
 
 ### 更改模型
 
-ⓘ **在本地运行时遇到问题？** 阅读我们的新 [GPU设置指南](/docs/GPU.md) 和 [Windows设置指南](/docs/WINDOWS.md)。
-
-您可以从命令行在本地模式下运行 `interpreter` 以使用 `Code Llama`：
-
-```shell
-interpreter --local
-```
-
 对于 `gpt-3.5-turbo`，使用快速模式：
 
 ```shell
@@ -169,6 +161,28 @@ interpreter --fast
 ```python
 interpreter.model = "gpt-3.5-turbo"
 ```
+
+### 在本地运行开放解释器
+
+ⓘ **在本地运行时遇到问题？** 阅读我们的新[GPU 设置指南](/docs/GPU.md)和[Windows 设置指南](/docs/WINDOWS.md)。
+
+您可以从命令行在本地模式下运行`interpreter`以使用`Code Llama`：
+
+```shell
+interpreter --local
+```
+
+或者通过repo ID在本地运行任何Huggin Face的模型（如"tiiuae/falcon-180B"）
+
+```shell
+interpreter --model tiiuae/falcon-180B
+```
+
+#### 本地模型参数
+
+您可以很容易地修改本地运行模拟行的`max_tokens`以及`context_window`。
+
+小的上下文窗口将会使用更少的内存, 所以在GPU无法正常工作的情况下我们建议尝试小的上下文窗口。
 
 ### Azure 支持
 
