@@ -150,12 +150,17 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
-### Change the Model
-
+### Change the Model - We support 100+ LLMs
+open-interpreter uses [LiteLLM](https://github.com/BerriAI/litellm) for LLM Input/Ouput
 For `gpt-3.5-turbo`, use fast mode:
 
 ```shell
 interpreter --fast
+```
+
+For `claude-2`, use
+```shell
+interpreter --model claude-2
 ```
 
 In Python, you will need to set the model manually:
