@@ -172,7 +172,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 Azureデプロイメントに接続するには、`--use-azure`フラグでこれを設定します。
 
-```
+```shell
 interpreter --use-azure
 ```
 
@@ -193,7 +193,7 @@ interpreter.azure_api_type = "azure"
 
 フラグ（`interpreter --debug`）を使用してデバッグモードを有効にするか、チャット中に有効にできます：
 
-```
+```shell
 $ interpreter
 ...
 > %debug # <- デバッグモードをオンにする

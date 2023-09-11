@@ -35,7 +35,7 @@ The resolve this issue, perform the following steps.
 
 4.  Run the following command.
 
-    ```
+    ```shell
     pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
     ```
 

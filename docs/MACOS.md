@@ -8,25 +8,25 @@ Tested on **MacOS Ventura 13.5** with **M2 Pro Chip**.
 
 I use conda as a virtual environment but you can choose whatever you want. If you go with conda you will find the Apple M1 version of miniconda here: [Link](https://docs.conda.io/projects/miniconda/en/latest/)
 
-```
+```shell
 conda create -n openinterpreter python=3.11.4
 ```
 
 **Activate your environment:**
 
-```
+```shell
 conda activate openinterpreter
 ```
 
 **Install open-interpreter:**
 
-```
+```shell
 pip install open-interpreter
 ```
 
 **Uninstall any previously installed llama-cpp-python packages:**
 
-```
+```shell
 pip uninstall llama-cpp-python -y
 ```
 
@@ -34,12 +34,12 @@ pip uninstall llama-cpp-python -y
 
 Part 1
 
-```
+```shell
 CMAKE_ARGS="-DLLAMA_METAL=on" FORCE_CMAKE=1 pip install -U llama-cpp-python --no-cache-dir
 ```
 
 Part 2
 
-```
+```shell
 pip install 'llama-cpp-python[server]'
 ```

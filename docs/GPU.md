@@ -67,7 +67,7 @@ benefit from offloading some of the work to your GPU.
     GPU support has been installed and set up correctly by running the following
     command.
 
-    ```
+    ```shell
     python -c "from llama_cpp import GGML_USE_CUBLAS; print(GGML_USE_CUBLAS)"
     ```
 
@@ -89,7 +89,7 @@ benefit from offloading some of the work to your GPU.
 5.  Finally, run the following command to use Open Interpreter with a local
     language model with GPU support.
 
-    ```
+    ```shell
     interpreter --local
     ```
 
@@ -120,7 +120,7 @@ benefit from offloading some of the work to your GPU.
 4.  Next, verify the path where the CUDA Toolkit was installed by running the
     following command.
 
-    ```
+    ```shell
     ls /usr/local/cuda/bin/nvcc
     ```
 
@@ -133,7 +133,7 @@ benefit from offloading some of the work to your GPU.
 5.  Ensure that you have the required build dependencies by running the
     following commands.
 
-    ```
+    ```shell
     sudo apt update
     sudo apt install build-essential cmake python3 python3-pip python-is-python3
     ```
@@ -153,7 +153,7 @@ benefit from offloading some of the work to your GPU.
     GPU support has been installed and set up correctly by running the following
     command.
 
-    ```
+    ```shell
     python -c "from llama_cpp import GGML_USE_CUBLAS; print(GGML_USE_CUBLAS)"
     ```
 
@@ -175,6 +175,6 @@ benefit from offloading some of the work to your GPU.
 8.  Finally, run the following command to use Open Interpreter with a local
     language model with GPU support.
 
-    ```
+    ```shell
     interpreter --local
     ```

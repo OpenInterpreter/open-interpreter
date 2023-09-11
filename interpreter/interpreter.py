@@ -133,7 +133,7 @@ class Interpreter:
 
   def get_info_for_system_message(self):
     """
-    Gets relevent information for the system message.
+    Gets relevant information for the system message.
     """
 
     info = ""
@@ -165,10 +165,10 @@ class Interpreter:
 
       try:
         relevant_procedures = requests.get(url, data=json.dumps(query)).json()["procedures"]
-        info += "\n\n# Recommended Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for depracation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
+        info += "\n\n# Recommended Procedures\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for depracation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevant to the task **directly in your plan.**"
       except:
         # For someone, this failed for a super secure SSL reason.
-        # Since it's not stricly necessary, let's worry about that another day. Should probably log this somehow though.
+        # Since it's not strictly necessary, let's worry about that another day. Should probably log this somehow though.
         pass
 
     elif self.local:
