@@ -307,6 +307,16 @@ files = [
 ]
 
 [[package]]
+name = "evdev"
+version = "1.6.1"
+description = "Bindings to the Linux input handling subsystem"
+optional = false
+python-versions = "*"
+files = [
+    {file = "evdev-1.6.1.tar.gz", hash = "sha256:299db8628cc73b237fc1cc57d3c2948faa0756e2a58b6194b5bf81dc2081f1e3"},
+]
+
+[[package]]
 name = "exceptiongroup"
 version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
@@ -786,6 +796,104 @@ files = [
 plugins = ["importlib-metadata"]
 
 [[package]]
+name = "pynput"
+version = "1.7.6"
+description = "Monitor and control user input devices"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pynput-1.7.6-py2.py3-none-any.whl", hash = "sha256:19861b2a0c430d646489852f89500e0c9332e295f2c020e7c2775e7046aa2e2f"},
+    {file = "pynput-1.7.6.tar.gz", hash = "sha256:3a5726546da54116b687785d38b1db56997ce1d28e53e8d22fc656d8b92e533c"},
+]
+
+[package.dependencies]
+evdev = {version = ">=1.3", markers = "sys_platform in \"linux\""}
+pyobjc-framework-ApplicationServices = {version = ">=8.0", markers = "sys_platform == \"darwin\""}
+pyobjc-framework-Quartz = {version = ">=8.0", markers = "sys_platform == \"darwin\""}
+python-xlib = {version = ">=0.17", markers = "sys_platform in \"linux\""}
+six = "*"
+
+[[package]]
+name = "pyobjc-core"
+version = "9.2"
+description = "Python<->ObjC Interoperability Module"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyobjc-core-9.2.tar.gz", hash = "sha256:d734b9291fec91ff4e3ae38b9c6839debf02b79c07314476e87da8e90b2c68c3"},
+    {file = "pyobjc_core-9.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:fa674a39949f5cde8e5c7bbcd24496446bfc67592b028aedbec7f81dc5fc4daa"},
+    {file = "pyobjc_core-9.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:bbc8de304ee322a1ee530b4d2daca135a49b4a49aa3cedc6b2c26c43885f4842"},
+    {file = "pyobjc_core-9.2-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:0fa950f092673883b8bd28bc18397415cabb457bf410920762109b411789ade9"},
+    {file = "pyobjc_core-9.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:586e4cae966282eaa61b21cae66ccdcee9d69c036979def26eebdc08ddebe20f"},
+    {file = "pyobjc_core-9.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:41189c2c680931c0395a55691763c481fc681f454f21bb4f1644f98c24a45954"},
+    {file = "pyobjc_core-9.2-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:2d23ee539f2ba5e9f5653d75a13f575c7e36586fc0086792739e69e4c2617eda"},
+    {file = "pyobjc_core-9.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:b9809cf96678797acb72a758f34932fe8e2602d5ab7abec15c5ac68ddb481720"},
+]
+
+[[package]]
+name = "pyobjc-framework-applicationservices"
+version = "9.2"
+description = "Wrappers for the framework ApplicationServices on macOS"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyobjc-framework-ApplicationServices-9.2.tar.gz", hash = "sha256:568c95dd1899b49f88af9d4a2da1e979b369f808c6854cf52c0035df09a2528a"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:e2c2ab49416c8307e669e01d5a3fc85a020a9e08c8f66e1bf510749bbd94b8d1"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:4001569355f03e6316417104cac03e3cf7009a9e54b03a02ca2efb6139413385"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:1952ccd27d6b72306c076795bea98094f502eb3b84cc8200a43016d21b145f39"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:7af207e950b5a8c0f59339e140e4cec4ba5e167f40e0b9a4bccb801010127bea"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:41808a8e44b7dc75b84fe62411a108617b567362ab1ff8db3a0661a6affd4a12"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:07015af65ca05a93c8e925a751946432e7ac337f7daae0b4dda7c469f7564376"},
+    {file = "pyobjc_framework_ApplicationServices-9.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:fc0198e02c9f9efa5e897f020b8c97a3dfd3ad219a024415efa4fc520850d2b2"},
+]
+
+[package.dependencies]
+pyobjc-core = ">=9.2"
+pyobjc-framework-Cocoa = ">=9.2"
+pyobjc-framework-Quartz = ">=9.2"
+
+[[package]]
+name = "pyobjc-framework-cocoa"
+version = "9.2"
+description = "Wrappers for the Cocoa frameworks on macOS"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyobjc-framework-Cocoa-9.2.tar.gz", hash = "sha256:efd78080872d8c8de6c2b97e0e4eac99d6203a5d1637aa135d071d464eb2db53"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:9e02d8a7cc4eb7685377c50ba4f17345701acf4c05b1e7480d421bff9e2f62a4"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:3b1e6287b3149e4c6679cdbccd8e9ef6557a4e492a892e80a77df143f40026d2"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:312977ce2e3989073c6b324c69ba24283de206fe7acd6dbbbaf3e29238a22537"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:aae7841cf40c26dd915f4dd828f91c6616e6b7998630b72e704750c09e00f334"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:739a421e14382a46cbeb9a883f192dceff368ad28ec34d895c48c0ad34cf2c1d"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:32d9ac1033fac1b821ddee8c68f972a7074ad8c50bec0bea9a719034c1c2fb94"},
+    {file = "pyobjc_framework_Cocoa-9.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:b236bb965e41aeb2e215d4e98a5a230d4b63252c6d26e00924ea2e69540a59d6"},
+]
+
+[package.dependencies]
+pyobjc-core = ">=9.2"
+
+[[package]]
+name = "pyobjc-framework-quartz"
+version = "9.2"
+description = "Wrappers for the Quartz frameworks on macOS"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyobjc-framework-Quartz-9.2.tar.gz", hash = "sha256:f586183b9b9ef7f165f0444a7b714ed965d79f6e92617caaf869150dcfd5a72b"},
+    {file = "pyobjc_framework_Quartz-9.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:fb700b24088c8fe126dc0fb5ab4caa156e1e48c1a94839e6bd31c18b570ed53a"},
+    {file = "pyobjc_framework_Quartz-9.2-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:6f983d26720f5f9786db5b525fc61b981be50d0456da1686fc533867d8990bb9"},
+    {file = "pyobjc_framework_Quartz-9.2-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:5c512837c211df6a5214d4015f1f85524607952b0619789861c490900e3d5fb9"},
+    {file = "pyobjc_framework_Quartz-9.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:0f81de8c846034e725b7ceaa2fec0cca16463a56bdbe099d1d44f20112182431"},
+    {file = "pyobjc_framework_Quartz-9.2-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:ab346bbf410a0eaeca26d713ac1f13c014346cd1b7e195017c9502a17f6273db"},
+    {file = "pyobjc_framework_Quartz-9.2-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:16a0e0677dae6db858cf19943e34deb0424776c9a90a7b67564d0e216861b20d"},
+    {file = "pyobjc_framework_Quartz-9.2-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:67909baadcfc3ad2864539af3e94c2c024a29d01d9d6da22bbf9b84eac50064e"},
+]
+
+[package.dependencies]
+pyobjc-core = ">=9.2"
+pyobjc-framework-Cocoa = ">=9.2"
+
+[[package]]
 name = "pyreadline3"
 version = "3.4.1"
 description = "A python implementation of GNU readline."
@@ -843,6 +951,20 @@ files = [
     {file = "python_editor-1.0.4-py2-none-any.whl", hash = "sha256:5f98b069316ea1c2ed3f67e7f5df6c0d8f10b689964a4a811ff64f0106819ec8"},
     {file = "python_editor-1.0.4-py3-none-any.whl", hash = "sha256:1bf6e860a8ad52a14c3ee1252d5dc25b2030618ed80c022598f00176adc8367d"},
 ]
+
+[[package]]
+name = "python-xlib"
+version = "0.33"
+description = "Python X Library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-xlib-0.33.tar.gz", hash = "sha256:55af7906a2c75ce6cb280a584776080602444f75815a7aff4d287bb2d7018b32"},
+    {file = "python_xlib-0.33-py2.py3-none-any.whl", hash = "sha256:c3534038d42e0df2f1392a1b30a15a4ff5fdc2b86cfa94f072bf11b10a164398"},
+]
+
+[package.dependencies]
+six = ">=1.10.0"
 
 [[package]]
 name = "pyyaml"
@@ -1335,4 +1457,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d2e10cbba339652111b7ff5ad74b1d55ad0116c12189046588f12ed5677bbe7e"
+content-hash = "6d47de28892691b79cfd0f9bdf6d87d8f90a109c5557abdcbc1566a2fc2d013c"

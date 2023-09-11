@@ -18,13 +18,14 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 - killian
 """
 
+from interpreter.hotkeys import HotkeyHandler
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
-
+from pynput import keyboard
 
 import os
 import time
@@ -186,6 +187,37 @@ class Interpreter:
   def load(self, messages):
     self.messages = messages
 
+  def remove_previous_conversation(self):
+    # Removes all messages after the most recent user entry (and the entry itself).
+    # Therefore user can jump back to the latest point of conversation.
+    # Also gives a visual representation of the messages removed.
+
+    if len(self.messages) == 0:
+      return
+    # Find the index of the last 'role': 'user' entry
+    last_user_index = None
+    for i, message in enumerate(self.messages):
+        if message.get('role') == 'user':
+            last_user_index = i
+
+    removed_messages = []
+
+    # Remove all messages after the last 'role': 'user'
+    if last_user_index is not None:
+        removed_messages = self.messages[last_user_index:]
+        self.messages = self.messages[:last_user_index]
+
+    print("") # Aesthetics.
+
+    # Print out a preview of what messages were removed.
+    for message in removed_messages:
+      if 'content' in message and message['content'] != None:
+        print(Markdown(f"**Removed message:** `\"{message['content'][:30]}...\"`"))
+      elif 'function_call' in message:
+        print(Markdown(f"**Removed codeblock**")) # Could add preview of code removed here.
+    
+    print("") # Aesthetics.
+
   def chat(self, message=None, return_messages=False):
 
     # Connect to an LLM (an large language model)
@@ -267,6 +299,13 @@ class Interpreter:
 
     else:
       # If it wasn't, we start an interactive chat
+
+      # Start listening to undo -hotkey. Calls remove_previous_conversation if activated.
+      # This would be added for the hotkey to work. Note that this is only a mac solution for now, and has not been tested on windows (cmd key doesn't excist).
+      # This also needs user permission from System Settings, hence it's not implemented right now, as it might add friction to get started.
+      #undo_hotkey = HotkeyHandler(key_combination={keyboard.Key.cmd, keyboard.KeyCode.from_char('z')}, callback_function=self.remove_previous_conversation)
+      #undo_hotkey.start()
+
       while True:
         try:
           user_input = input("> ").strip()
@@ -279,6 +318,11 @@ class Interpreter:
         # Use `readline` to let users up-arrow to previous user messages,
         # which is a common behavior in terminals.
         readline.add_history(user_input)
+
+        # Let the user undo previous conversation
+        if user_input == "%undo":
+          self.remove_previous_conversation()
+          continue
 
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
