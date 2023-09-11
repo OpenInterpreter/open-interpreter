@@ -43,7 +43,7 @@ from rich import print
 from rich.markdown import Markdown
 from rich.rule import Rule
 
-# Function schema for gpt-4 
+# Function schema for gpt-4
 function_schema = {
   "name": "run_code",
   "description":
