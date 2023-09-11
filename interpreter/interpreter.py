@@ -18,14 +18,14 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 - killian
 """
 
-from interpreter.hotkeys import HotkeyHandler
+#from interpreter.hotkeys import HotkeyHandler
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
-from pynput import keyboard
+#from pynput import keyboard
 
 import os
 import time
