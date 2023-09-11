@@ -1,7 +1,9 @@
-import threading
-from pynput import keyboard
+#import threading
+#from pynput import keyboard
 
+# Removed due to issues with pynput and automatic checks. Will revisit.
 
+'''
 class HotkeyHandler:
     # Uses pynput.keyboard to listen for key presses. Calls a callback function if the key combination defined
     # gets pressed. This works in the background as its own thread.
@@ -36,4 +38,4 @@ class HotkeyHandler:
 
     def start(self):
         # Start the listener thread in the background
-        self.listener_thread.start()
+        self.listener_thread.start()'''
