@@ -33,10 +33,10 @@ interpreter
 
 This provides a natural-language interface to your computer's general-purpose capabilities:
 
-- Create and edit photos, videos, PDFs, etc.
-- Control a Chrome browser to perform research
-- Plot, clean, and analyze large datasets
-- ...etc.
+-   Create and edit photos, videos, PDFs, etc.
+-   Control a Chrome browser to perform research
+-   Plot, clean, and analyze large datasets
+-   ...etc.
 
 **⚠️ Note: You'll be asked to approve code before it's run.**
 
@@ -78,10 +78,11 @@ interpreter.chat() # Starts an interactive chat
 OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
 
 However, OpenAI's service is hosted, closed-source, and heavily restricted:
-- No internet access.
-- [Limited set  of pre-installed packages](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/).
-- 100 MB maximum upload, 120.0 second runtime limit.
-- State is cleared (along with any generated files or links) when the environment dies.
+
+-   No internet access.
+-   [Limited set of pre-installed packages](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/).
+-   100 MB maximum upload, 120.0 second runtime limit.
+-   State is cleared (along with any generated files or links) when the environment dies.
 
 ---
 
@@ -165,7 +166,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### Running Open Interpreter locally
 
-ⓘ  **Issues running locally?** Read our new [GPU setup guide](/docs/GPU.md) and [Windows setup guide](/docs/WINDOWS.md).
+ⓘ **Issues running locally?** Read our new [GPU setup guide](/docs/GPU.md) and [Windows setup guide](/docs/WINDOWS.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
@@ -193,7 +194,7 @@ interpreter --max_tokens 2000 --context_window 16000
 
 To connect to an Azure deployment, the `--use-azure` flag will walk you through setting this up:
 
-```
+```shell
 interpreter --use-azure
 ```
 
@@ -210,17 +211,18 @@ interpreter.azure_api_type = "azure"
 
 ### Debug mode
 
-To help contributors inspect Open Interpreter, `--debug` mode is highly verbose. 
+To help contributors inspect Open Interpreter, `--debug` mode is highly verbose.
 
 You can activate debug mode by using it's flag (`interpreter --debug`), or mid-chat:
 
-```
+```shell
 $ interpreter
 ...
 > %debug # <- Turns on debug mode
 ```
 
 ### Configuration with .env
+
 Open Interpreter allows you to set default behaviors using a .env file. This provides a flexible way to configure the interpreter without changing command-line arguments every time.
 
 Here's a sample .env configuration:
@@ -243,19 +245,19 @@ Since generated code is executed in your local environment, it can interact with
 
 You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this confirmation, in which case:
 
-- Be cautious when requesting commands that modify files or system settings.
-- Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
-- Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
+-   Be cautious when requesting commands that modify files or system settings.
+-   Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
+-   Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
 ## How Does it Work?
 
-Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "python" or "javascript") and `code` to run.
+Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "Python" or "JavaScript") and `code` to run.
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
 
 # Contributing
 
-Thank you for your interest in contributing! We welcome involvement from the community. 
+Thank you for your interest in contributing! We welcome involvement from the community.
 
 Please see our [Contributing Guidelines](/docs/contributing.md) for more details on how to get involved.
 
@@ -264,6 +266,7 @@ Please see our [Contributing Guidelines](/docs/contributing.md) for more details
 Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
+
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >
 > — _OpenAI's Code Interpreter Release_
