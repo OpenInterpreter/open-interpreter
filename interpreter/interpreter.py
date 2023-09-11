@@ -33,6 +33,7 @@ import json
 import platform
 import openai
 import litellm
+import pkg_resources
 
 import getpass
 import requests
@@ -228,11 +229,18 @@ class Interpreter:
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
 
+      
+
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
     if not self.local and not self.auto_run:
-      welcome_message += f"\n> Model set to `{self.model.upper()}`"
 
+      if self.use_azure:
+        notice_model = f"{self.azure_deployment_name} (Azure)"
+      else:
+        notice_model = f"{self.model.upper()}"
+      welcome_message += f"\n> Model set to `{notice_model}`\n\n**Tip:** To run locally, use `interpreter --local`"
+      
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
 
@@ -312,7 +320,7 @@ class Interpreter:
         self.azure_api_type = os.environ.get('AZURE_API_TYPE', 'azure')
       else:
         # This is probably their first time here!
-        print('', Markdown("**Welcome to Open Interpreter.**"), '')
+        self._print_welcome_message()
         time.sleep(1)
 
         print(Rule(style="white"))
@@ -379,7 +387,7 @@ class Interpreter:
           self.api_key = os.environ['OPENAI_API_KEY']
         else:
           # This is probably their first time here!
-          print('', Markdown("**Welcome to Open Interpreter.**"), '')
+          self._print_welcome_message()
           time.sleep(1)
 
           print(Rule(style="white"))
@@ -823,3 +831,7 @@ class Interpreter:
 
           self.active_block.end()
           return
+
+  def _print_welcome_message(self):
+    current_version = pkg_resources.get_distribution("open-interpreter").version
+    print(f"\n Hello, Welcome to [bold white]⬤ Open Interpreter[/bold white]. (v{current_version})\n")
