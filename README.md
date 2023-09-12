@@ -27,6 +27,8 @@ pip install open-interpreter
 interpreter
 ```
 
+
+
 <br>
 
 **Open Interpreter** lets LLMs run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
@@ -72,6 +74,15 @@ import interpreter
 interpreter.chat("Plot AAPL and META's normalized stock prices") # Executes a single command
 interpreter.chat() # Starts an interactive chat
 ```
+
+## Quick Start with Docker
+
+```shell
+docker build -t open-interpreter .
+docker run -it -p 4000:80 -e "OPENAI_API_KEY=sk-your-openai-key-here" open-interpreter
+```
+
+Remember to change your key in the `docker run` command!
 
 ## Comparison to ChatGPT's Code Interpreter
 
