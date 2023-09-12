@@ -395,9 +395,9 @@ class Interpreter:
           print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
 
           while True: # Loop until they give us a valid or "" as the API key
-            response = input("OpenAI API key: ")
+            openai_api_token = input("OpenAI API key: ")
 
-            if response == "":
+            if openai_api_token == "":
                 # User pressed `enter`, requesting Code-Llama
 
                 print(Markdown(
@@ -432,18 +432,35 @@ class Interpreter:
                 
                 return
 
-            elif len(response) != 51: 
+            elif len(openai_api_token) != 51: 
                 # OpenAI API keys are 51 characters long
                 # if they entered a key that's not 51 characters long, it's not a valid API key
                 print('', Markdown("\n**Error:** Invalid API key. Please try again.\n"), '', Rule(style="red"))
 
             else:
-                self.api_key = response
-                print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
-                time.sleep(2)
-                print(Rule(style="white"))
-                
-                break
+                try:
+                  # Checking if the provided token is a valid openAI token by calling the completion endpoint
+
+                  litellm.api_key = openai_api_token
+                  response = litellm.completion(
+                    model=self.model,
+                    messages=[{"role": "user", "content": "test"}],
+                    functions=[function_schema],
+                    stream=True,
+                    temperature=self.temperature,
+                    max_tokens=10,
+                  )
+
+                  self.api_key = openai_api_token
+                  print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
+                  time.sleep(2)
+                  print(Rule(style="white"))
+                  break
+                except:
+                  # If it's not a valid API key, we'll get an error so we notify the user that the API key is invalid
+                  print('', Markdown("\n**Error:** This API key is not active.\n"), '', Rule(style="red"))
+
+
 
       litellm.api_key = self.api_key
       if self.api_base:
