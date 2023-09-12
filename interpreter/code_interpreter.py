@@ -257,7 +257,7 @@ class CodeInterpreter:
     # Return code output
     return self.output
 
-  def add_active_line_prints(self, code):
+  def add_active_line_prints(self, code: str) -> str:
     """
     This function takes a code snippet and adds print statements before each line,
     indicating the active line number during execution. The print statements respect
@@ -435,7 +435,7 @@ class AddLinePrints(ast.NodeTransformer):
 
         return new_node
 
-def add_active_line_prints_to_python(code):
+def add_active_line_prints_to_python(code: str):
     """
     Add print statements indicating line numbers to a python string.
     """

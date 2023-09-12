@@ -18,6 +18,7 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 - killian
 """
 
+from types import ModuleType
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
@@ -31,7 +32,6 @@ import time
 import traceback
 import json
 import platform
-import openai
 import litellm
 import pkg_resources
 
@@ -89,7 +89,7 @@ Press `CTRL-C` to exit.
 """
 
 
-class Interpreter:
+class Interpreter(ModuleType):
 
   def __init__(self):
     self.messages = []

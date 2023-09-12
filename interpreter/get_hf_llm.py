@@ -248,14 +248,22 @@ def confirm_action(message):
 import os
 import inquirer
 from huggingface_hub import list_files_info, hf_hub_download, login
-from typing import Dict, List, Union
+from typing import Dict, List, TypedDict
 
-def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
+class FileInfo(TypedDict):
+    filename: str
+    Size: float
+    RAM: float
+
+class FileInfoWithSplits(FileInfo):
+    SPLITS: List[str]
+
+def list_gguf_files(repo_id: str) -> List[FileInfo]:
     """
     Fetch all files from a given repository on Hugging Face Model Hub that contain 'gguf'.
 
     :param repo_id: Repository ID on Hugging Face Model Hub.
-    :return: A list of dictionaries, each dictionary containing filename, size, and RAM usage of a model.
+    :return: A list of FileInfo dictionaries, each dictionary containing filename, size, and RAM usage of a model.
     """
 
     try:
@@ -277,24 +285,25 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
     for file in gguf_files:
         size_in_gb = file.size / (1024**3)
         filename = file.rfilename
-        result.append({
+        info: FileInfo = {
             "filename": filename,
             "Size": size_in_gb,
             "RAM": size_in_gb + 2.5,
-        })
+        }
+        result.append(info)
 
     return result
 
-from typing import List, Dict, Union
+from typing import List, Dict
 
-def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List[Dict[str, Union[str, float]]]:
+def group_and_combine_splits(models: List[FileInfo]) -> List[FileInfoWithSplits]:
     """
     Groups filenames based on their base names and combines the sizes and RAM requirements.
 
     :param models: List of model details.
     :return: A list of combined model details.
     """
-    grouped_files = {}
+    grouped_files: Dict[str, FileInfoWithSplits] = {}
 
     for model in models:
         base_name = model["filename"].split('-split-')[0]
@@ -330,7 +339,7 @@ def actually_combine_files(default_path: str, base_name: str, files: List[str]) 
                 outfile.write(infile.read())
             os.remove(file_path)
 
-def format_quality_choice(model, name_override = None) -> str:
+def format_quality_choice(model: FileInfo, name_override = None) -> str:
     """
     Formats the model choice for display in the inquirer prompt.
     """

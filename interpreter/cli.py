@@ -27,6 +27,7 @@ import pkg_resources
 from rich import print as rprint
 from rich.markdown import Markdown
 import inquirer
+from .interpreter import Interpreter
 
 # Load .env file
 load_dotenv()
@@ -41,7 +42,7 @@ def check_for_update():
 
     return version.parse(latest_version) > version.parse(current_version)
 
-def cli(interpreter):
+def cli(interpreter: Interpreter):
   """
   Takes an instance of interpreter.
   Modifies it according to command line flags, then runs chat.
