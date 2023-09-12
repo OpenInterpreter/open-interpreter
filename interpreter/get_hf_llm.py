@@ -29,9 +29,10 @@ from rich.markdown import Markdown
 import os
 import inquirer
 from huggingface_hub import list_files_info, hf_hub_download
+from typing import Optional
 
 
-def get_hf_llm(repo_id, debug_mode, context_window):
+def get_hf_llm(repo_id: str, debug_mode: bool, context_window: int):
 
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
@@ -104,19 +105,19 @@ def get_hf_llm(repo_id, debug_mode, context_window):
 
     # Check for the file in each directory
     for directory in directories_to_check:
-        path = os.path.join(directory, selected_model)
+        path = os.path.join(directory, selected_model) if selected_model else directory
         if os.path.exists(path):
             model_path = path
             break
     else:
         # If the file was not found, ask for confirmation to download it
-        download_path = os.path.join(default_path, selected_model)
+        download_path = os.path.join(default_path, selected_model) if selected_model else default_path
       
         print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
         if confirm_action(""):
           
             # Check if model was originally split
-            split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
+            split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]] if selected_model is not None else []
             
             if len(split_files) > 1:
                 # Download splits
@@ -230,7 +231,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
       
     return llama_2
 
-def confirm_action(message):
+def confirm_action(message: str) -> Optional[str]:
     question = [
         inquirer.Confirm('confirm',
                          message=message,
@@ -248,7 +249,7 @@ def confirm_action(message):
 import os
 import inquirer
 from huggingface_hub import list_files_info, hf_hub_download, login
-from typing import Dict, List, TypedDict
+from typing import Dict, List, Optional, TypedDict
 
 class FileInfo(TypedDict):
     filename: str
@@ -323,7 +324,7 @@ def group_and_combine_splits(models: List[FileInfo]) -> List[FileInfoWithSplits]
     return list(grouped_files.values())
 
 
-def actually_combine_files(default_path: str, base_name: str, files: List[str]) -> None:
+def actually_combine_files(default_path: str, base_name: Optional[str], files: List[str]) -> None:
     """
     Combines files together and deletes the original split files.
 
@@ -331,7 +332,7 @@ def actually_combine_files(default_path: str, base_name: str, files: List[str]) 
     :param files: List of files to be combined.
     """
     files.sort()    
-    base_path = os.path.join(default_path, base_name)
+    base_path = os.path.join(default_path, base_name) if base_name else default_path
     with open(base_path, 'wb') as outfile:
         for file in files:
             file_path = os.path.join(default_path, file)

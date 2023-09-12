@@ -30,8 +30,7 @@ import sys
 import os
 import re
 
-
-def run_html(html_content):
+def run_html(html_content: str):
     # Create a temporary HTML file with the content
     with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
         f.write(html_content.encode())

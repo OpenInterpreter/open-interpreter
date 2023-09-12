@@ -19,6 +19,7 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 """
 
 from types import ModuleType
+from typing import Any, Optional, TypedDict, Dict
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
@@ -88,9 +89,19 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
+class FunctionCall(TypedDict):
+  arguments: str
+  parsed_arguments: Dict[str, Any]
+  language: str
+  code: str
+
+class Message(TypedDict):
+  role: str
+  content: str
+  name: str
+  function_call: Optional[FunctionCall]
 
 class Interpreter(ModuleType):
-
   def __init__(self):
     self.messages = []
     self.temperature = 0.001

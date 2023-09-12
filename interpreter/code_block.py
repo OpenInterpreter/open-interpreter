@@ -6,7 +6,6 @@ from rich.table import Table
 from rich.console import Group
 from rich.console import Console
 
-
 class CodeBlock:
   """
   Code Blocks display code and outputs in different languages.

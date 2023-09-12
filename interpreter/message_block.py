@@ -7,7 +7,6 @@ import re
 
 
 class MessageBlock:
-
   def __init__(self):
     self.live = Live(auto_refresh=False, console=Console())
     self.live.start()
@@ -36,7 +35,7 @@ class MessageBlock:
     self.live.refresh()
 
 
-def textify_markdown_code_blocks(text):
+def textify_markdown_code_blocks(text: str):
   """
   To distinguish CodeBlocks from markdown code, we simply turn all markdown code
   (like '```python...') into text code blocks ('```text') which makes the code black and white.

@@ -1,7 +1,6 @@
 import json
-import re
 
-def merge_deltas(original, delta):
+def merge_deltas(original: dict, delta: dict):
     """
     Pushes the delta into the original and returns that.
 
@@ -20,8 +19,7 @@ def merge_deltas(original, delta):
                 original[key] = value
     return original
 
-def parse_partial_json(s):
-
+def parse_partial_json(s: str):
     # Attempt to parse the string as-is.
     try:
         return json.loads(s)
