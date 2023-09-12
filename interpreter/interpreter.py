@@ -393,51 +393,57 @@ class Interpreter:
           print(Rule(style="white"))
 
           print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
-          response = input("OpenAI API key: ")
 
-          if response == "":
-              # User pressed `enter`, requesting Code-Llama
+          while True: # Loop until they give us a valid or "" as the API key
+            response = input("OpenAI API key: ")
 
-              print(Markdown(
-                "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
-                    '')
-              time.sleep(2)
-              print(Rule(style="white"))
+            if response == "":
+                # User pressed `enter`, requesting Code-Llama
 
-
-
-              # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
-              # AND ABOVE.
-              # This way, when folks hit interpreter --local, they get the same experience as before.
-              import inquirer
-
-              print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-
-              models = {
-                  '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
-                  '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
-                  '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
-              }
-
-              parameter_choices = list(models.keys())
-              questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
-              answers = inquirer.prompt(questions)
-              chosen_param = answers['param']
-
-              # THIS is more in line with the future. You just say the model you want by name:
-              self.model = models[chosen_param]
-              self.local = True
+                print(Markdown(
+                  "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                      '')
+                time.sleep(2)
+                print(Rule(style="white"))
 
 
 
+                # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+                # AND ABOVE.
+                # This way, when folks hit interpreter --local, they get the same experience as before.
+                import inquirer
 
-              return
+                print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
 
-          else:
-              self.api_key = response
-              print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
-              time.sleep(2)
-              print(Rule(style="white"))
+                models = {
+                    '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+                    '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+                    '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+                }
+
+                parameter_choices = list(models.keys())
+                questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+                answers = inquirer.prompt(questions)
+                chosen_param = answers['param']
+
+                # THIS is more in line with the future. You just say the model you want by name:
+                self.model = models[chosen_param]
+                self.local = True
+                
+                return
+
+            elif len(response) != 51: 
+                # OpenAI API keys are 51 characters long
+                # if they entered a key that's not 51 characters long, it's not a valid API key
+                print('', Markdown("\n**Error:** Invalid API key. Please try again.\n"), '', Rule(style="red"))
+
+            else:
+                self.api_key = response
+                print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
+                time.sleep(2)
+                print(Rule(style="white"))
+                
+                break
 
       litellm.api_key = self.api_key
       if self.api_base:
