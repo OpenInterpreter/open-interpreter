@@ -75,7 +75,7 @@ interpreter.chat("Plot AAPL and META's normalized stock prices") # Executes a si
 interpreter.chat() # Starts an interactive chat
 ```
 
-## Quick Start with Docker
+## Quick Start with [Docker](https://www.docker.com/)
 
 ```shell
 docker build -t open-interpreter .
