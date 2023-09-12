@@ -91,7 +91,7 @@ class CodeInterpreter:
   They can control code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
   """
 
-  def __init__(self, language, debug_mode):
+  def __init__(self, language: str, debug_mode: bool):
     self.language = language
     self.proc = None
     self.active_line = None

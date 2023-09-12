@@ -5,6 +5,7 @@ from rich.markdown import Markdown
 from rich.box import MINIMAL
 import re
 
+from .types import Message
 
 class MessageBlock:
   def __init__(self):
@@ -12,7 +13,7 @@ class MessageBlock:
     self.live.start()
     self.content = ""
 
-  def update_from_message(self, message):
+  def update_from_message(self, message: Message):
     self.content = message.get("content", "")
     if self.content:
       self.refresh()
