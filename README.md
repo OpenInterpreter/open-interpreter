@@ -221,6 +221,15 @@ $ interpreter
 > %debug # <- Turns on debug mode
 ```
 
+### Other chat commands
+
+You can also issue the following commands mid-chat:
+
+```shell
+> %reset # <- Clears chat history and resets interpreter
+> %exit # <- Exits to shell
+```
+
 ### Configuration with .env
 
 Open Interpreter allows you to set default behaviors using a .env file. This provides a flexible way to configure the interpreter without changing command-line arguments every time.

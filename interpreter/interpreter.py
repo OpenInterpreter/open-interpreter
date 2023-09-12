@@ -283,6 +283,16 @@ class Interpreter:
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
 
+        # Let the user reset messages mid-chat
+        if user_input == "%reset":
+            print('', Markdown(f"reset> Clearing **{len(self.messages)}** messages"), '')
+            self.reset()
+            continue
+
+        # Let the user make a gracefull exit mid-chat
+        if user_input == "%exit":
+            exit(0)
+
         # Let the user turn on debug mode mid-chat
         if user_input == "%debug":
             print('', Markdown("> Entered debug mode"), '')
