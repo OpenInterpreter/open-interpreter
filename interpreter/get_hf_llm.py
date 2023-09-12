@@ -121,10 +121,15 @@ def get_hf_llm(repo_id, debug_mode, context_window):
             if len(split_files) > 1:
                 # Download splits
                 for split_file in split_files:
+                    # Do we already have a file split downloaded?
+                    split_path = os.path.join(default_path, split_file)
+                    if os.path.exists(split_path):
+                        if not confirm_action(f"Split file {split_path} already exists. Download again?"):
+                            continue
                     hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
                 
                 # Combine and delete splits
-                actually_combine_files(selected_model, split_files)
+                actually_combine_files(default_path, selected_model, split_files)
             else:
                 hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
 
@@ -309,7 +314,7 @@ def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List
     return list(grouped_files.values())
 
 
-def actually_combine_files(base_name: str, files: List[str]) -> None:
+def actually_combine_files(default_path: str, base_name: str, files: List[str]) -> None:
     """
     Combines files together and deletes the original split files.
 
@@ -317,11 +322,13 @@ def actually_combine_files(base_name: str, files: List[str]) -> None:
     :param files: List of files to be combined.
     """
     files.sort()    
-    with open(base_name, 'wb') as outfile:
+    base_path = os.path.join(default_path, base_name)
+    with open(base_path, 'wb') as outfile:
         for file in files:
-            with open(file, 'rb') as infile:
+            file_path = os.path.join(default_path, file)
+            with open(file_path, 'rb') as infile:
                 outfile.write(infile.read())
-            os.remove(file)
+            os.remove(file_path)
 
 def format_quality_choice(model, name_override = None) -> str:
     """
