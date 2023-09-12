@@ -438,25 +438,15 @@ class Interpreter:
                 print('', Markdown("\n**Error:** Invalid API key. Please try again.\n"), '', Rule(style="red"))
 
             else:
-                try:
+                litellm.api_key = openai_api_token
+                if litellm.check_valid_key(model='gpt-3.5-turbo', api_key=openai_api_token) == True: 
                   # Checking if the provided token is a valid openAI token by calling the completion endpoint
-
-                  litellm.api_key = openai_api_token
-                  response = litellm.completion(
-                    model=self.model,
-                    messages=[{"role": "user", "content": "test"}],
-                    functions=[function_schema],
-                    stream=True,
-                    temperature=self.temperature,
-                    max_tokens=10,
-                  )
-
                   self.api_key = openai_api_token
                   print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
                   time.sleep(2)
                   print(Rule(style="white"))
                   break
-                except:
+                else:
                   # If it's not a valid API key, we'll get an error so we notify the user that the API key is invalid
                   print('', Markdown("\n**Error:** This API key is not active.\n"), '', Rule(style="red"))
 
