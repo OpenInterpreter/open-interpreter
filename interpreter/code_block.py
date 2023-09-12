@@ -6,6 +6,8 @@ from rich.table import Table
 from rich.console import Group
 from rich.console import Console
 
+from .types import Message
+
 class CodeBlock:
   """
   Code Blocks display code and outputs in different languages.
@@ -21,13 +23,11 @@ class CodeBlock:
     self.live = Live(auto_refresh=False, console=Console(), vertical_overflow="visible")
     self.live.start()
 
-  def update_from_message(self, message):
-    if "function_call" in message and "parsed_arguments" in message[
-        "function_call"]:
-
-      parsed_arguments = message["function_call"]["parsed_arguments"]
-
-      if parsed_arguments != None:
+  def update_from_message(self, message: Message):
+    function_call = message.get("function_call")
+    if function_call is not None:
+      parsed_arguments = function_call.get("parsed_arguments")
+      if parsed_arguments is not None:
         self.language = parsed_arguments.get("language")
         self.code = parsed_arguments.get("code")
 

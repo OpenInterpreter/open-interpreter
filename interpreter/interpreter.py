@@ -19,13 +19,14 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 """
 
 from types import ModuleType
-from typing import Any, Optional, TypedDict, Dict
+from typing import Any, List, Optional, TypedDict, Dict
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from .types import Message
 
 
 import os
@@ -89,21 +90,9 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
-class FunctionCall(TypedDict):
-  arguments: str
-  parsed_arguments: Dict[str, Any]
-  language: str
-  code: str
-
-class Message(TypedDict):
-  role: str
-  content: str
-  name: str
-  function_call: Optional[FunctionCall]
-
 class Interpreter(ModuleType):
   def __init__(self):
-    self.messages = []
+    self.messages: List[Message] = []
     self.temperature = 0.001
     self.api_key = None
     self.auto_run = False
@@ -142,7 +131,7 @@ class Interpreter(ModuleType):
     # modifies it according to command line flags, then runs chat.
     cli(self)
 
-  def get_info_for_system_message(self):
+  def get_info_for_system_message(self) -> str:
     """
     Gets relevent information for the system message.
     """
@@ -164,11 +153,15 @@ class Interpreter(ModuleType):
       # Use the last two messages' content or function call to semantically search
       query = []
       for message in self.messages[-2:]:
-        message_for_semantic_search = {"role": message["role"]}
+        message_for_semantic_search: dict = {"role": message["role"]}
         if "content" in message:
           message_for_semantic_search["content"] = message["content"]
-        if "function_call" in message and "parsed_arguments" in message["function_call"]:
-          message_for_semantic_search["function_call"] = message["function_call"]["parsed_arguments"]
+        
+        function_call_args = message.get("function_call")
+        if function_call_args is not None:
+          parsed_arguments = function_call_args.get("parsed_arguments")
+          if parsed_arguments is not None:
+            message_for_semantic_search["function_call"] = parsed_arguments
         query.append(message_for_semantic_search)
 
       # Use them to query Open Procedures
@@ -194,10 +187,10 @@ class Interpreter(ModuleType):
     self.messages = []
     self.code_interpreters = {}
 
-  def load(self, messages):
+  def load(self, messages: List[Message]):
     self.messages = messages
 
-  def chat(self, message=None, return_messages=False):
+  def chat(self, message=None, return_messages=False) -> Optional[List[Message]]:
 
     # Connect to an LLM (an large language model)
     if not self.local:
@@ -215,7 +208,7 @@ class Interpreter(ModuleType):
           self.llama_instance = get_hf_llm(self.model, self.debug_mode, self.context_window)
           if self.llama_instance == None:
             # They cancelled.
-            return
+            return None
         except:
           traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4
@@ -312,6 +305,8 @@ class Interpreter(ModuleType):
 
     if return_messages:
         return self.messages
+    else:
+        return None
 
   def verify_api_key(self):
     """
@@ -630,7 +625,7 @@ class Interpreter(ModuleType):
 
       # Check if we're in a function call
       if not self.local:
-        condition = "function_call" in self.messages[-1]
+        condition = self.messages[-1].get("function_call") != None
       elif self.local:
         # Since Code-Llama can't call functions, we just check if we're in a code block.
         # This simply returns true if the number of "```" in the message is odd.
