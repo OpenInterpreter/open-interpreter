@@ -1,0 +1,29 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+
+      - name: Install Black
+        run: |
+          python -m pip install --upgrade pip
+          pip install click==7.1.2
+          pip install black==21.4b2
+
+      - name: Run Black
+        run: |
+          black --check .

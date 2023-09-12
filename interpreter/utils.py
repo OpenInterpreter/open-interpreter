@@ -1,6 +1,7 @@
 import json
 import re
 
+
 def merge_deltas(original, delta):
     """
     Pushes the delta into the original and returns that.
@@ -20,6 +21,7 @@ def merge_deltas(original, delta):
                 original[key] = value
     return original
 
+
 def parse_partial_json(s):
 
     # Attempt to parse the string as-is.
@@ -27,7 +29,7 @@ def parse_partial_json(s):
         return json.loads(s)
     except json.JSONDecodeError:
         pass
-  
+
     # Initialize variables.
     new_s = ""
     stack = []
@@ -39,9 +41,9 @@ def parse_partial_json(s):
         if is_inside_string:
             if char == '"' and not escaped:
                 is_inside_string = False
-            elif char == '\n' and not escaped:
-                char = '\\n' # Replace the newline character with the escape sequence.
-            elif char == '\\':
+            elif char == "\n" and not escaped:
+                char = "\\n"  # Replace the newline character with the escape sequence.
+            elif char == "\\":
                 escaped = not escaped
             else:
                 escaped = False
@@ -49,17 +51,17 @@ def parse_partial_json(s):
             if char == '"':
                 is_inside_string = True
                 escaped = False
-            elif char == '{':
-                stack.append('}')
-            elif char == '[':
-                stack.append(']')
-            elif char == '}' or char == ']':
+            elif char == "{":
+                stack.append("}")
+            elif char == "[":
+                stack.append("]")
+            elif char == "}" or char == "]":
                 if stack and stack[-1] == char:
                     stack.pop()
                 else:
                     # Mismatched closing character; the input is malformed.
                     return None
-        
+
         # Append the processed character to the new string.
         new_s += char
 
