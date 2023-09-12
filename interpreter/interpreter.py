@@ -42,6 +42,7 @@ import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
 from rich.rule import Rule
+from rich.console import Console
 
 # Function schema for gpt-4
 function_schema = {
@@ -326,7 +327,7 @@ class Interpreter:
         print(Rule(style="white"))
 
         print(Markdown(missing_azure_info_message), '', Rule(style="white"), '')
-        response = input("Azure OpenAI API key: ")
+        response = Console().input("Azure OpenAI API [bold yellow]key[/]: ")
 
         if response == "":
           # User pressed `enter`, requesting Code-Llama
@@ -368,12 +369,14 @@ class Interpreter:
 
         else:
           self.api_key = response
-          self.azure_api_base = input("Azure OpenAI API base: ")
-          self.azure_deployment_name = input("Azure OpenAI deployment name of GPT: ")
-          self.azure_api_version = input("Azure OpenAI API version: ")
+          self.azure_api_base = Console().input("Azure OpenAI API [bold yellow]base[/]: ")
+          self.azure_deployment_name = Console().input("Azure OpenAI [bold yellow]deployment name[/] of GPT: ")
+          self.azure_api_version = Console().input("Azure OpenAI API [bold yellow]version[/]: ")
+          
           print('', Markdown(
             "**Tip:** To save this key for later, run `export AZURE_API_KEY=your_api_key AZURE_API_BASE=your_api_base AZURE_API_VERSION=your_api_version AZURE_DEPLOYMENT_NAME=your_gpt_deployment_name` on Mac/Linux or `setx AZURE_API_KEY your_api_key AZURE_API_BASE your_api_base AZURE_API_VERSION your_api_version AZURE_DEPLOYMENT_NAME your_gpt_deployment_name` on Windows."),
                 '')
+          
           time.sleep(2)
           print(Rule(style="white"))
 
@@ -393,7 +396,7 @@ class Interpreter:
           print(Rule(style="white"))
 
           print(Markdown(missing_api_key_message), '', Rule(style="white"), '')
-          response = input("OpenAI API key: ")
+          response = Console().input("OpenAI API [bold yellow]key[/]: ")
 
           if response == "":
               # User pressed `enter`, requesting Code-Llama
