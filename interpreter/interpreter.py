@@ -17,7 +17,7 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 
 - killian
 """
-from typing import Dict, List, Optional
+from typing import Optional, List, Dict
 
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
@@ -181,13 +181,99 @@ class Interpreter:
     return info
 
   def reset(self):
+    """
+    Resets the interpreter.
+    """
     self.messages = []
     self.code_interpreters = {}
 
-  def load(self, messages: List[Dict]):
+  def load(self, messages):
     self.messages = messages
 
-  def chat(self, message: Optional[List[Dict]] = None, return_messages: bool = False) -> Optional[List[Dict]]:
+  def handle_help(self, arguments):
+    commands_description = {
+      "%debug [true/false]": "Toggle debug mode. Without arguments or with 'true', it enters debug mode. With 'false', it exits debug mode.",
+      "%reset": "Resets the current session.",
+      "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%help": "Show this help message."
+    }
+
+    base_message = [
+      "> **Available Commands:**\n\n"
+    ]
+
+    # Add each command and its description to the message
+    for cmd, desc in commands_description.items():
+      base_message.append(f"- `{cmd}`: {desc}\n")
+
+    additional_info = [
+      "\n\nFor further assistance, please join our community Discord or consider contributing to the project's development."
+    ]
+
+    # Combine the base message with the additional info
+    full_message = base_message + additional_info
+
+    print(Markdown("".join(full_message)))
+
+
+  def handle_debug(self, arguments=None):
+    if arguments == "" or arguments == "true":
+        print(Markdown("> Entered debug mode"))
+        print(self.messages)
+        self.debug_mode = True
+    elif arguments == "false":
+        print(Markdown("> Exited debug mode"))
+        self.debug_mode = False
+    else:
+        print(Markdown("> Unknown argument to debug command."))
+
+  def handle_reset(self, arguments):
+    self.reset()
+    print(Markdown("> Reset Done"))
+
+  def default_handle(self, arguments):
+    print(Markdown("> Unknown command"))
+    self.handle_help(arguments)
+
+  def handle_save_message(self, json_path: str):
+    if json_path == "":
+      json_path = "messages.json"
+    if not json_path.endswith(".json"):
+      json_path += ".json"
+    with open(json_path, 'w') as f:
+      json.dump(self.messages, f, indent=2)
+
+    print(Markdown(f"> messages json export to {os.path.abspath(json_path)}"))
+
+  def handle_load_message(self, json_path: str):
+    if json_path == "":
+      json_path = "messages.json"
+    if not json_path.endswith(".json"):
+      json_path += ".json"
+    with open(json_path, 'r') as f:
+      self.load(json.load(f))
+
+    print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
+
+  def handle_command(self, user_input: str):
+    # split the command into the command and the arguments, by the first whitespace
+    switch = {
+      "help": self.handle_help,
+      "debug": self.handle_debug,
+      "reset": self.handle_reset,
+      "save_message": self.handle_save_message,
+      "load_message": self.handle_load_message,
+    }
+
+    user_input = user_input[1:].strip()  # Capture the part after the `%`
+    command = user_input.split(" ")[0]
+    arguments = user_input[len(command):].strip()
+    action = switch.get(command,
+                        self.default_handle)  # Get the function from the dictionary, or default_handle if not found
+    action(arguments)  # Execute the function
+
+  def chat(self, message: Optional[str] = None, return_messages: bool =False) -> Optional[List[Dict]]:
 
     # Connect to an LLM (an large language model)
     if not self.local:
@@ -281,15 +367,13 @@ class Interpreter:
         # which is a common behavior in terminals.
         readline.add_history(user_input)
 
+        # If the user input starts with a `%` or `/`, it's a command
+        if user_input.startswith("%") or user_input.startswith("/"):
+          self.handle_command(user_input)
+          continue
+
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
-
-        # Let the user turn on debug mode mid-chat
-        if user_input == "%debug":
-            print('', Markdown("> Entered debug mode"), '')
-            print(self.messages)
-            self.debug_mode = True
-            continue
 
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
         try:
@@ -361,10 +445,6 @@ class Interpreter:
           # THIS is more in line with the future. You just say the model you want by name:
           self.model = models[chosen_param]
           self.local = True
-
-
-
-
           return
 
         else:
@@ -404,9 +484,6 @@ class Interpreter:
                     '')
               time.sleep(2)
               print(Rule(style="white"))
-
-
-
               # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
               # AND ABOVE.
               # This way, when folks hit interpreter --local, they get the same experience as before.
@@ -428,10 +505,6 @@ class Interpreter:
               # THIS is more in line with the future. You just say the model you want by name:
               self.model = models[chosen_param]
               self.local = True
-
-
-
-
               return
 
           else:
@@ -449,7 +522,7 @@ class Interpreter:
       self.active_block.end()
       self.active_block = None
 
-  def respond(self):
+  def respond(self) -> Optional[str]:
     # Add relevant info to system_message
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
