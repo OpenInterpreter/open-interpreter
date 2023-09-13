@@ -118,6 +118,10 @@ def cli(interpreter):
                       action='store_true',
                       help='display current Open Interpreter version')
 
+  parser.add_argument('--voice',
+                      action='store_true',
+                      help='use voice assistant')
+
   args = parser.parse_args()
 
 
@@ -131,6 +135,8 @@ def cli(interpreter):
     interpreter.context_window = args.context_window
 
   # Modify interpreter according to command line flags
+  if args.voice:
+    interpreter.voice = True
   if args.yes:
     interpreter.auto_run = True
   if args.fast:
