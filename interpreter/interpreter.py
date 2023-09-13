@@ -189,7 +189,7 @@ class Interpreter:
     self.messages = messages
 
 
-  def handle_undo(self):
+  def handle_undo(self, arguments):
     # Removes all messages after the most recent user entry (and the entry itself).
     # Therefore user can jump back to the latest point of conversation.
     # Also gives a visual representation of the messages removed.
