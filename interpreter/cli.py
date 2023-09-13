@@ -63,7 +63,8 @@ def cli(interpreter):
 
   # Setup CLI
   parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
-  
+
+
   parser.add_argument('-y',
                       '--yes',
                       action='store_true',
@@ -117,9 +118,16 @@ def cli(interpreter):
   parser.add_argument('--version',
                       action='store_true',
                       help='display current Open Interpreter version')
+  
+  parser.add_argument('--lmstudio',
+                      action='store_true',
+                      default=False,
+                      help='enable lmstudio mode')  
 
   args = parser.parse_args()
 
+  if args.lmstudio:
+    interpreter.lmstudio_mode = True
 
   if args.version:
     print("Open Interpreter", pkg_resources.get_distribution("open-interpreter").version)

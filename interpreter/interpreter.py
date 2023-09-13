@@ -32,6 +32,12 @@ import traceback
 import json
 import platform
 import openai
+
+#openai.api_base = "http://localhost:1234/v1"
+#openai.api_key = "sx-xxx"
+#OPENAI_API_KEY = "sx-xxx"
+#os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+
 import litellm
 import pkg_resources
 
@@ -108,6 +114,8 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    # LM Studio
+    self.lmstudio_mode = False
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -306,6 +314,17 @@ class Interpreter:
     """
     Makes sure we have an AZURE_API_KEY or OPENAI_API_KEY.
     """
+    if self.lmstudio_mode:
+            openai.api_base = "http://localhost:1234/v1"
+            openai.api_key = "sx-xxx"
+            os.environ['OPENAI_API_KEY'] = openai.api_key
+
+            # Set litellm's variables
+            litellm.api_base = openai.api_base
+            litellm.api_key = openai.api_key
+
+            return
+
     if self.use_azure:
       all_env_available = (
         ('AZURE_API_KEY' in os.environ or 'OPENAI_API_KEY' in os.environ) and
