@@ -4,7 +4,10 @@ from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.box import MINIMAL
 import re
+from .voice import SpeechAssistant
 
+# initialize the speech assistant
+assistant = SpeechAssistant(wakeup_word="interpreter")
 
 class MessageBlock:
 
@@ -20,6 +23,8 @@ class MessageBlock:
 
   def end(self):
     self.refresh(cursor=False)
+    # read instructions may read last instruction twice
+    assistant.tts_and_play_audio(self.content)
     self.live.stop()
 
   def refresh(self, cursor=True):
