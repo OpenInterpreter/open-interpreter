@@ -231,12 +231,12 @@ In the interactive mode, you can use the below commands to enhance your experien
  • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
 enters debug mode. With 'false', it exits debug mode.  
  • `%reset`: Resets the current session.  
+ • `%undo`: Remove previous messages and its response from the message history.  
  • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
 provided, it defaults to 'messages.json'.  
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
  is provided, it defaults to 'messages.json'.  
  • `%help`: Show the help message.
-• `%undo`: Remove previous messages and its response from the message history.
 
 Feel free to try out these commands and let us know your feedback!
 
