@@ -218,8 +218,26 @@ You can activate debug mode by using it's flag (`interpreter --debug`), or mid-c
 ```shell
 $ interpreter
 ...
-> %debug # <- Turns on debug mode
+> %debug true <- Turns on debug mode
+
+> %debug false <- Turns off debug mode
 ```
+
+### Interactive Mode Commands
+
+In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
+
+ **Available Commands:**                                                         
+ • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it 
+   enters debug mode. With 'false', it exits debug mode.                        
+ • `%reset`: Resets the current session.                                          
+ • `%save_message [path]`: Saves messages to a specified JSON path. If no path is 
+   provided, it defaults to 'messages.json'.                                    
+ • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
+   is provided, it defaults to 'messages.json'.                                 
+ • `%help`: Show the help message.
+
+Feel free to try out these commands and let us know your feedback!
 
 ### Configuration with .env
 
