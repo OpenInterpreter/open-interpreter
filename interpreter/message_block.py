@@ -3,8 +3,8 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.box import MINIMAL
-import re
 from .voice import SpeechAssistant
+import re
 
 # initialize the speech assistant
 assistant = SpeechAssistant(wakeup_word="interpreter")
