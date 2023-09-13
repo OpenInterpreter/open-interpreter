@@ -30,10 +30,10 @@ The resolve this issue, perform the following steps.
 
     - C++ CMake tools for Windows
 
-3.  Once installed, open the Start menu, search for **Developer Command Prompt
-    for VS 2022**, and open it.
+3.  Once installed, open the Start menu, search for **x64 Native Tools Command
+    Prompt for VS 2022**, and open it.
 
-4.  Run the following command.
+5.  Run the following command.
 
     ```
     pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
