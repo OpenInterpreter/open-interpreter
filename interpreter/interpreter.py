@@ -43,9 +43,6 @@ from rich import print
 from rich.markdown import Markdown
 from rich.rule import Rule
 
-# create an instance of the speech assistant
-assistant = SpeechAssistant(wakeup_word="interpreter")
-
 # Function schema for gpt-4
 function_schema = {
   "name": "run_code",
@@ -134,6 +131,10 @@ class Interpreter:
     # The cli takes the current instance of Interpreter,
     # modifies it according to command line flags, then runs chat.
     cli(self)
+
+  #if voice init speech assistant
+  if self.voice:
+    assistant = SpeechAssistant(wakeup_word="interpreter")
 
   def get_info_for_system_message(self):
     """
