@@ -34,6 +34,7 @@ import platform
 import openai
 import litellm
 import pkg_resources
+import uuid
 
 import getpass
 import requests
@@ -88,6 +89,9 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
+# Create an API Budget to prevent high spend
+budget_manager = litellm.BudgetManager(project_name="open-interpreter")
+
 
 class Interpreter:
 
@@ -108,7 +112,21 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    self.session_id = str(uuid.uuid4()) # generate an id for this session
+    self.max_budget = 10 # default max session budget to $10
+    budget_manager.create_budget(total_budget=self.max_budget, user=self.session_id) # create a budget for this user session
 
+    def update_budget_manager_cost(
+        kwargs,                 # kwargs to completion
+        completion_response,    # response from completion
+        start_time, end_time    # start/end time
+    ):
+        # Your custom code here
+        budget_manager.update_cost(completion_obj=completion_response, user=self.session_id)
+    
+
+    litellm.success_callback = [update_budget_manager_cost]
+    
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
@@ -449,6 +467,10 @@ class Interpreter:
       self.active_block = None
 
   def respond(self):
+    # check if a given call can be made
+    if budget_manager.get_current_cost(user=self.session_id) > budget_manager.get_total_budget(self.session_id):
+      raise Exception(f"Exceeded the maximum budget for this session - {self.max_budget}")
+
     # Add relevant info to system_message
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
