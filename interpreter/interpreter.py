@@ -24,6 +24,7 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from .voice import SpeechAssistant
 
 
 import os
@@ -132,10 +133,6 @@ class Interpreter:
     # modifies it according to command line flags, then runs chat.
     cli(self)
 
-  #if voice init speech assistant
-  if self.voice:
-    assistant = SpeechAssistant(wakeup_word="interpreter")
-
   def get_info_for_system_message(self):
     """
     Gets relevent information for the system message.
@@ -219,7 +216,6 @@ class Interpreter:
     full_message = base_message + additional_info
 
     print(Markdown("".join(full_message)))
-
 
   def handle_debug(self, arguments=None):
     if arguments == "" or arguments == "true":
@@ -317,10 +313,12 @@ class Interpreter:
     # Display welcome message
     welcome_message = ""
 
+    # if voice init speech assistant
+    if self.voice:
+      assistant = SpeechAssistant(wakeup_word="interpreter")
+
     if self.debug_mode:
       welcome_message += "> Entered debug mode"
-
-      
 
     # If self.local, we actually don't use self.model
     # (self.auto_run is like advanced usage, we display no messages)
@@ -331,7 +329,7 @@ class Interpreter:
       else:
         notice_model = f"{self.model.upper()}"
       welcome_message += f"\n> Model set to `{notice_model}`\n\n**Tip:** To run locally, use `interpreter --local`"
-      
+
     if self.local:
       welcome_message += f"\n> Model set to `{self.model}`"
 
@@ -349,7 +347,7 @@ class Interpreter:
         print(Markdown(welcome_message), '')
       else:
         print('', Markdown(welcome_message), '')
-        
+
       if self.voice:
         assistant.tts_and_play_audio("welcome to open interpreter")
 
@@ -432,8 +430,6 @@ class Interpreter:
           time.sleep(2)
           print(Rule(style="white"))
 
-
-
           # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
           # AND BELOW.
           # This way, when folks hit interpreter --local, they get the same experience as before.
@@ -455,9 +451,6 @@ class Interpreter:
           # THIS is more in line with the future. You just say the model you want by name:
           self.model = models[chosen_param]
           self.local = True
-
-
-
 
           return
 
@@ -499,8 +492,6 @@ class Interpreter:
               time.sleep(2)
               print(Rule(style="white"))
 
-
-
               # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
               # AND ABOVE.
               # This way, when folks hit interpreter --local, they get the same experience as before.
@@ -522,9 +513,6 @@ class Interpreter:
               # THIS is more in line with the future. You just say the model you want by name:
               self.model = models[chosen_param]
               self.local = True
-
-
-
 
               return
 
@@ -569,9 +557,7 @@ class Interpreter:
     # Make LLM call
     if not self.local:
       # GPT
-      
       error = ""
-      
       for _ in range(3):  # 3 retries
         try:
 
@@ -588,7 +574,7 @@ class Interpreter:
                 # The user set the api_base. litellm needs this to be "custom/{model}"
                 response = litellm.completion(
                   api_base=self.api_base,
-                  model = "custom/" + self.model,
+                  model="custom/" + self.model,
                   messages=messages,
                   functions=[function_schema],
                   stream=True,
@@ -612,23 +598,19 @@ class Interpreter:
             time.sleep(3)
       else:
         raise Exception(error)
-            
+
     elif self.local:
       # Code-Llama
-
-
 
       # Convert messages to prompt
       # (This only works if the first message is the only system message)
 
       def messages_to_prompt(messages):
 
-
         for message in messages:
           # Happens if it immediatly writes code
           if "role" not in message:
             message["role"] = "assistant"
-
 
         # Falcon prompt template
         if "falcon" in self.model.lower():
@@ -789,7 +771,8 @@ class Interpreter:
               code = '\n'.join(lines[1:]).strip("` \n")
 
               arguments = {"code": code}
-              if language: # We only add this if we have it-- the second we have it, an interpreter gets fired up (I think? maybe I'm wrong)
+              # We only add this if we have it-- the second we have it, an interpreter gets fired up (I think? maybe I'm wrong)
+              if language:
                 if language == "bash":
                   language = "shell"
                 arguments["language"] = language
