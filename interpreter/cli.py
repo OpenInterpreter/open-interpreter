@@ -79,6 +79,11 @@ def cli(interpreter):
                       action='store_true',
                       default=LOCAL_RUN,
                       help='run fully local with code-llama')
+  parser.add_argument('--max_retries',
+                      type=int,
+                      default=3,  # Default can be set as needed
+                      required=False,
+                      help='maximum number of retries')
   parser.add_argument(
                       '--falcon',
                       action='store_true',
@@ -158,8 +163,8 @@ def cli(interpreter):
     # THIS is more in line with the future. You just say the model you want by name:
     interpreter.model = models[chosen_param]
     interpreter.local = True
-
-  
+  if args.max_retries:
+      interpreter.max_retries = args.max_retries
   if args.debug:
     interpreter.debug_mode = True
   if args.use_azure:

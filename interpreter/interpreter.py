@@ -125,7 +125,7 @@ class Interpreter:
     # gpt-4 is faster, smarter, can call functions, and is all-around easier to use.
     # This makes gpt-4 better aligned with Open Interpreters priority to be easy to use.
     self.llama_instance = None
-
+    self.max_retries = 3
   def cli(self):
     # The cli takes the current instance of Interpreter,
     # modifies it according to command line flags, then runs chat.
@@ -477,7 +477,7 @@ class Interpreter:
       
       error = ""
       
-      for _ in range(3):  # 3 retries
+      for _ in range(self.max_retries):  # 3 retries
         try:
 
             if self.use_azure:
