@@ -346,12 +346,11 @@ class Interpreter:
     if welcome_message != "":
       if welcome_message.startswith(">"):
         print(Markdown(welcome_message), '')
-        if self.voice:
-          assistant.tts_and_play_audio("welcome to open interpreter")
       else:
         print('', Markdown(welcome_message), '')
-        if self.voice:
-          assistant.tts_and_play_audio("welcome to open interpreter")
+        
+      if self.voice:
+        assistant.tts_and_play_audio("welcome to open interpreter")
 
     # Check if `message` was passed in by user
     if message:
