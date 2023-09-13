@@ -216,7 +216,7 @@ class Interpreter:
       if 'content' in message and message['content'] != None:
         print(Markdown(f"**Removed message:** `\"{message['content'][:30]}...\"`"))
       elif 'function_call' in message:
-        print(Markdown(f"**Removed codeblock**")) # Could add preview of code removed here.
+        print(Markdown(f"**Removed codeblock**")) # TODO: Could add preview of code removed here.
     
     print("") # Aesthetics.
 
