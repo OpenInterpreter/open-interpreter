@@ -28,6 +28,7 @@ from rich import print
 from rich.markdown import Markdown
 import os
 import inquirer
+import shutil
 from huggingface_hub import list_files_info, hf_hub_download
 
 
@@ -80,6 +81,15 @@ def get_hf_llm(repo_id, debug_mode, context_window):
             if format_quality_choice(model) == answers["selected_model"]:
                 selected_model = model["filename"]
                 break
+
+    for model_details in combined_models:
+        if model_details["filename"] == selected_model:
+            selected_model_details = model_details
+
+            # Check disk space and exit if not enough
+            if not enough_disk_space(selected_model_details['Size']):
+                print(f"You do not have enough disk space available to download this model.")
+                return None
 
     # Third stage: GPU confirm
     if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
@@ -340,3 +350,19 @@ def format_quality_choice(model, name_override = None) -> str:
         name = model['filename']
     return f"{name} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
 
+def enough_disk_space(size) -> bool:
+    """
+    Checks the disk to verify there is enough space to download the model.
+
+    :param size: The file size of the model.
+    """
+
+    _, _, free = shutil.disk_usage("/")
+
+    # Convert bytes to gigabytes
+    free_gb = free / (2**30) 
+
+    if free_gb > size:
+        return True
+
+    return False
