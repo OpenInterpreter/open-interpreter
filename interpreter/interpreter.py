@@ -224,10 +224,10 @@ class Interpreter:
     commands_description = {
       "%debug [true/false]": "Toggle debug mode. Without arguments or with 'true', it enters debug mode. With 'false', it exits debug mode.",
       "%reset": "Resets the current session.",
+      "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%help": "Show this help message.",
-      "%undo": "Remove previous messages and its response from the message history.",
     }
 
     base_message = [
