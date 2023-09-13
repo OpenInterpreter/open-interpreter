@@ -270,7 +270,7 @@ class Interpreter:
       # If it wasn't, we start an interactive chat
       while True:
         try:
-          user_input = input("> ").strip()
+          user_input = Console().input("[yellow]>[/] ").strip()
         except EOFError:
           break
         except KeyboardInterrupt:
@@ -753,7 +753,7 @@ class Interpreter:
             code = self.active_block.code
 
             # Prompt user
-            response = input("  Would you like to run this code? (y/n)\n\n  ")
+            response = Console().input("  Would you like to run this code? [bold green](y/n)[/]\n\n  ")
             print("")  # <- Aesthetic choice
 
             if response.strip().lower() == "y":
