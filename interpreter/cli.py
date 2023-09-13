@@ -31,7 +31,7 @@ import inquirer
 # Load .env file
 load_dotenv()
 
-def check_for_update():
+def check_for_update() -> bool:
     # Fetch the latest version from the PyPI API
     response = requests.get(f'https://pypi.org/pypi/open-interpreter/json')
     latest_version = response.json()['info']['version']

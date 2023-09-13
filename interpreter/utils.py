@@ -1,7 +1,9 @@
 import json
 import re
+from typing import Dict, List, Union, Optional
 
-def merge_deltas(original, delta):
+
+def merge_deltas(original: Dict, delta: Dict) -> Dict:
     """
     Pushes the delta into the original and returns that.
 
@@ -20,7 +22,7 @@ def merge_deltas(original, delta):
                 original[key] = value
     return original
 
-def parse_partial_json(s):
+def parse_partial_json(s: str) -> Optional[Union[Dict, List]]:
 
     # Attempt to parse the string as-is.
     try:

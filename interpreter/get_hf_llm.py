@@ -31,7 +31,7 @@ import inquirer
 from huggingface_hub import list_files_info, hf_hub_download
 
 
-def get_hf_llm(repo_id, debug_mode, context_window):
+def get_hf_llm(repo_id: str, debug_mode: bool, context_window: int):
 
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
@@ -330,7 +330,7 @@ def actually_combine_files(default_path: str, base_name: str, files: List[str]) 
                 outfile.write(infile.read())
             os.remove(file_path)
 
-def format_quality_choice(model, name_override = None) -> str:
+def format_quality_choice(model: Dict, name_override: Optional[str] = None) -> str:
     """
     Formats the model choice for display in the inquirer prompt.
     """

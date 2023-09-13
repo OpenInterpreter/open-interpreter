@@ -92,7 +92,7 @@ class CodeInterpreter:
   They can control code blocks on the terminal, then be executed to produce an output which will be displayed in real-time.
   """
 
-  def __init__(self, language, debug_mode):
+  def __init__(self, language: str, debug_mode: bool):
     self.language = language
     self.proc = None
     self.active_line = None
@@ -131,7 +131,7 @@ class CodeInterpreter:
       self.active_block.output = self.output
       self.active_block.refresh()
 
-  def run(self):
+  def run(self) -> str:
     """
     Executes code.
     """
@@ -257,7 +257,7 @@ class CodeInterpreter:
     # Return code output
     return self.output
 
-  def add_active_line_prints(self, code):
+  def add_active_line_prints(self, code: str) -> str:
     """
     This function takes a code snippet and adds print statements before each line,
     indicating the active line number during execution. The print statements respect
@@ -313,7 +313,7 @@ class CodeInterpreter:
     code = "\n".join(modified_code_lines)
     return code
 
-  def save_and_display_stream(self, stream, is_error_stream):
+  def save_and_display_stream(self, stream, is_error_stream: bool):
     # Handle each line of output
     for line in iter(stream.readline, ''):
 
@@ -361,7 +361,7 @@ class CodeInterpreter:
 
       self.update_active_block()
 
-def truncate_output(data):
+def truncate_output(data: str):
   needs_truncation = False
 
   # In the future, this will come from a config file
@@ -389,7 +389,7 @@ class AddLinePrints(ast.NodeTransformer):
     before every executable line in the AST.
     """
 
-    def insert_print_statement(self, line_number):
+    def insert_print_statement(self, line_number: int):
         """Inserts a print statement for a given line number."""
         return ast.Expr(
             value=ast.Call(
@@ -435,7 +435,7 @@ class AddLinePrints(ast.NodeTransformer):
 
         return new_node
 
-def add_active_line_prints_to_python(code):
+def add_active_line_prints_to_python(code: str) -> str:
     """
     Add print statements indicating line numbers to a python string.
     """
@@ -444,7 +444,7 @@ def add_active_line_prints_to_python(code):
     new_tree = transformer.visit(tree)
     return ast.unparse(new_tree)
 
-def wrap_in_try_except(code):
+def wrap_in_try_except(code: str) -> str:
     # Add import traceback
     code = "import traceback\n" + code
 

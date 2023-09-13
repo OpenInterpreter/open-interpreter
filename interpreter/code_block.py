@@ -1,3 +1,5 @@
+from typing import Dict
+
 from rich.live import Live
 from rich.panel import Panel
 from rich.box import MINIMAL
@@ -22,7 +24,7 @@ class CodeBlock:
     self.live = Live(auto_refresh=False, console=Console(), vertical_overflow="visible")
     self.live.start()
 
-  def update_from_message(self, message):
+  def update_from_message(self, message: Dict):
     if "function_call" in message and "parsed_arguments" in message[
         "function_call"]:
 
@@ -40,7 +42,7 @@ class CodeBlock:
     # Destroys live display
     self.live.stop()
 
-  def refresh(self, cursor=True):
+  def refresh(self, cursor: bool =True):
     # Get code, return if there is none
     code = self.code
     if not code:

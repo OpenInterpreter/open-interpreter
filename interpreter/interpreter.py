@@ -17,6 +17,7 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 
 - killian
 """
+from typing import Dict, List, Optional
 
 from .cli import cli
 from .utils import merge_deltas, parse_partial_json
@@ -131,7 +132,7 @@ class Interpreter:
     # modifies it according to command line flags, then runs chat.
     cli(self)
 
-  def get_info_for_system_message(self):
+  def get_info_for_system_message(self) -> str:
     """
     Gets relevent information for the system message.
     """
@@ -183,10 +184,10 @@ class Interpreter:
     self.messages = []
     self.code_interpreters = {}
 
-  def load(self, messages):
+  def load(self, messages: List[Dict]):
     self.messages = messages
 
-  def chat(self, message=None, return_messages=False):
+  def chat(self, message: Optional[List[Dict]] = None, return_messages: bool = False) -> Optional[List[Dict]]:
 
     # Connect to an LLM (an large language model)
     if not self.local:

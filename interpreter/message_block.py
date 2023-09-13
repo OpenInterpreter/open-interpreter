@@ -1,3 +1,5 @@
+from typing import Dict
+
 from rich.console import Console
 from rich.live import Live
 from rich.panel import Panel
@@ -13,7 +15,7 @@ class MessageBlock:
     self.live.start()
     self.content = ""
 
-  def update_from_message(self, message):
+  def update_from_message(self, message: Dict):
     self.content = message.get("content", "")
     if self.content:
       self.refresh()
@@ -22,7 +24,7 @@ class MessageBlock:
     self.refresh(cursor=False)
     self.live.stop()
 
-  def refresh(self, cursor=True):
+  def refresh(self, cursor: bool = True):
     # De-stylize any code blocks in markdown,
     # to differentiate from our Code Blocks
     content = textify_markdown_code_blocks(self.content)
@@ -36,7 +38,7 @@ class MessageBlock:
     self.live.refresh()
 
 
-def textify_markdown_code_blocks(text):
+def textify_markdown_code_blocks(text: str) -> str:
   """
   To distinguish CodeBlocks from markdown code, we simply turn all markdown code
   (like '```python...') into text code blocks ('```text') which makes the code black and white.
