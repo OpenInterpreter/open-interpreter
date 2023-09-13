@@ -311,8 +311,9 @@ class Interpreter:
         return self.messages
 
   def verify_api_key(self):
+
     """
-    Makes sure we have an AZURE_API_KEY or OPENAI_API_KEY.
+    Settings to make LM Studio compatible with the OpenAI API protocol
     """
     if self.lmstudio_mode:
             openai.api_base = "http://localhost:1234/v1"
@@ -324,7 +325,9 @@ class Interpreter:
             litellm.api_key = openai.api_key
 
             return
-
+    """
+    Makes sure we have an AZURE_API_KEY or OPENAI_API_KEY.
+    """
     if self.use_azure:
       all_env_available = (
         ('AZURE_API_KEY' in os.environ or 'OPENAI_API_KEY' in os.environ) and
