@@ -152,6 +152,14 @@ def get_hf_llm(repo_id, debug_mode, context_window):
     print(Markdown(f"Model found at `{model_path}`"))
   
     try:
+        # Add CUDA binaries to temporary PATH in case CUDA is supported on this machine.
+        # Has no effect otherwise.
+        import sysconfig
+        nvidia_root = os.path.join(sysconfig.get_paths()["purelib"], 'nvidia')
+        cudart_path = os.path.join(nvidia_root, 'cuda_runtime', 'bin')
+        cublas_path = os.path.join(nvidia_root, 'cublas', 'bin')
+        os.environ["PATH"] = cudart_path + os.pathsep + cublas_path + os.pathsep + os.environ["PATH"]
+
         from llama_cpp import Llama
     except:
         if debug_mode:
@@ -177,9 +185,14 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                 env_vars = {
                     "FORCE_CMAKE": "1"
                 }
+                additional_pip_args = []
                 
                 if backend == "cuBLAS":
-                    env_vars["CMAKE_ARGS"] = "-DLLAMA_CUBLAS=on"
+                    # Install official CUDA runtime and cublas wheels to avoid compiling them.
+                    subprocess.run([sys.executable, "-m", "pip", "install", "--extra-index-url=https://pypi.ngc.nvidia.com", "nvidia-cuda-runtime-cu12", "nvidia-cublas-cu12"], env={**os.environ, **env_vars}, check=True)
+                    # Install precompiled llama-cpp-python wheel that supports AVX2 and CUDA.
+                    # Users with CPUs that do not have AVX2 support will need to install a different wheel manually.
+                    additional_pip_args = ['--prefer-binary', '--extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu122']
                 elif backend == "hipBLAS":
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_HIPBLAS=on"
                 elif backend == "Metal":
@@ -188,7 +201,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
                 
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
+                    subprocess.run([sys.executable, "-m", "pip", "install", '--force-reinstall', "llama-cpp-python"] + additional_pip_args, env={**os.environ, **env_vars}, check=True)
                 except subprocess.CalledProcessError as e:
                     print(f"Error during installation with {backend}: {e}")
             
