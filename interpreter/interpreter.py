@@ -43,6 +43,9 @@ from rich import print
 from rich.markdown import Markdown
 from rich.rule import Rule
 
+# create an instance of the speech assistant
+assistant = SpeechAssistant(wakeup_word="interpreter")
+
 # Function schema for gpt-4
 function_schema = {
   "name": "run_code",
@@ -108,6 +111,7 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    self.voice = False
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -342,8 +346,12 @@ class Interpreter:
     if welcome_message != "":
       if welcome_message.startswith(">"):
         print(Markdown(welcome_message), '')
+        if self.voice:
+          assistant.tts_and_play_audio("welcome to open interpreter")
       else:
         print('', Markdown(welcome_message), '')
+        if self.voice:
+          assistant.tts_and_play_audio("welcome to open interpreter")
 
     # Check if `message` was passed in by user
     if message:
@@ -355,7 +363,10 @@ class Interpreter:
       # If it wasn't, we start an interactive chat
       while True:
         try:
-          user_input = input("> ").strip()
+          if self.voice:
+            user_input = assistant.start_speech_recognition()
+          else:
+            user_input = input("> ").strip()
         except EOFError:
           break
         except KeyboardInterrupt:
