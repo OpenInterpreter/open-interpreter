@@ -82,15 +82,6 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                 selected_model = model["filename"]
                 break
 
-    for model_details in combined_models:
-        if model_details["filename"] == selected_model:
-            selected_model_details = model_details
-
-            # Check disk space and exit if not enough
-            if not enough_disk_space(selected_model_details['Size']):
-                print(f"You do not have enough disk space available to download this model.")
-                return None
-
     # Third stage: GPU confirm
     if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
       n_gpu_layers = -1
@@ -124,7 +115,15 @@ def get_hf_llm(repo_id, debug_mode, context_window):
       
         print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
         if confirm_action(""):
-          
+            for model_details in combined_models:
+                if model_details["filename"] == selected_model:
+                    selected_model_details = model_details
+
+                    # Check disk space and exit if not enough
+                    if not enough_disk_space(selected_model_details['Size'], default_path):
+                        print(f"You do not have enough disk space available to download this model.")
+                        return None
+
             # Check if model was originally split
             split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
             
@@ -350,14 +349,13 @@ def format_quality_choice(model, name_override = None) -> str:
         name = model['filename']
     return f"{name} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
 
-def enough_disk_space(size) -> bool:
+def enough_disk_space(size, path) -> bool:
     """
     Checks the disk to verify there is enough space to download the model.
 
     :param size: The file size of the model.
     """
-
-    _, _, free = shutil.disk_usage("/")
+    _, _, free = shutil.disk_usage(path)
 
     # Convert bytes to gigabytes
     free_gb = free / (2**30) 
