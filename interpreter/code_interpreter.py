@@ -73,7 +73,7 @@ language_map = {
     "print_cmd": 'log "{}"'
   },
   "html": {
-    "open_subrocess": False,
+    "open_subprocess": False,
     "run_function": run_html,
   }
 }
@@ -150,10 +150,10 @@ class CodeInterpreter:
     """
 
     # Should we keep a subprocess open? True by default
-    open_subrocess = language_map[self.language].get("open_subrocess", True)
+    open_subprocess = language_map[self.language].get("open_subprocess", True)
 
     # Start the subprocess if it hasn't been started
-    if not self.proc and open_subrocess:
+    if not self.proc and open_subprocess:
       try:
         self.start_process()
       except:

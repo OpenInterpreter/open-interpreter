@@ -2,11 +2,11 @@
 
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm">
-        <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white">
+        <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/>
     </a>
-    <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"></a>
-    <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
+    <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
+    <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
     <br><br>
     <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
@@ -218,8 +218,26 @@ You can activate debug mode by using it's flag (`interpreter --debug`), or mid-c
 ```shell
 $ interpreter
 ...
-> %debug # <- Turns on debug mode
+> %debug true <- Turns on debug mode
+
+> %debug false <- Turns off debug mode
 ```
+
+### Interactive Mode Commands
+
+In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
+
+ **Available Commands:**                                                         
+ • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it 
+   enters debug mode. With 'false', it exits debug mode.                        
+ • `%reset`: Resets the current session.                                          
+ • `%save_message [path]`: Saves messages to a specified JSON path. If no path is 
+   provided, it defaults to 'messages.json'.                                    
+ • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
+   is provided, it defaults to 'messages.json'.                                 
+ • `%help`: Show the help message.
+
+Feel free to try out these commands and let us know your feedback!
 
 ### Configuration with .env
 
