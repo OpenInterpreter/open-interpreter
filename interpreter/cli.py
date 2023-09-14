@@ -108,7 +108,6 @@ def cli(interpreter):
   parser.add_argument('--load_message_path',
                       type=str,
                       help='load messages from the stored json file',
-                      default="",
                       required=False)
   parser.add_argument('--use-azure',
                       action='store_true',
@@ -162,7 +161,7 @@ def cli(interpreter):
   if args.debug:
     interpreter.debug_mode = True
 
-  if args.load_message:
+  if args.load_message_path:
     interpreter.load_message_path = args.load_message_path
 
   if args.use_azure:

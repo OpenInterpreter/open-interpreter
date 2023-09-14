@@ -113,6 +113,9 @@ class Interpreter:
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
       self.system_message = f.read().strip()
 
+    # load the stored messages
+    self.load_message_path = None
+
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
 
@@ -386,6 +389,14 @@ class Interpreter:
 
     else:
       # If it wasn't, we start an interactive chat
+      if self.load_message_path:
+        try:
+          self.handle_load_message(self.load_message_path)
+          self.load_message_path = None
+        except FileNotFoundError:
+          print(f"Error: Failed to load messages json from {self.load_message_path}")
+          return
+
       while True:
         try:
           user_input = input("> ").strip()

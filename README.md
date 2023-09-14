@@ -139,6 +139,12 @@ interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
+For the command line, you can load stored messages from a JSON file:
+
+```shell
+interpreter --load_message_path messages.json
+```
+
 ### Customize System Message
 
 You can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
