@@ -270,6 +270,14 @@ class CodeInterpreter:
     3) It really struggles with multiline stuff, so I've disabled that (but we really should fix and restore).
     """
 
+    # Doesn't work on Windows
+    if platform.system() == 'Windows':
+       return code
+    
+    # Doesn't work with R
+    if self.language == 'R':
+       return code
+
     if self.language == "python":
       return add_active_line_prints_to_python(code)
 
