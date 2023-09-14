@@ -162,7 +162,7 @@ def cli(interpreter):
   if args.debug:
     interpreter.debug_mode = True
 
-  if args.load_message:
+  if args.load_message_path:
     interpreter.load_message_path = args.load_message_path
 
   if args.use_azure:
