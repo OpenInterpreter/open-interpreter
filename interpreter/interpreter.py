@@ -418,15 +418,15 @@ class Interpreter:
         self.messages.append({"role": "user", "content": user_input})
 
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
-        try:          self.respond()
+        try:
+          self.respond()
         except KeyboardInterrupt:
           pass
         finally:
           # Always end the active block. Multiple Live displays = issues
           self.end_active_block()
 
-    if return_messages:
-        return self.messages
+    if return_messages:        return self.messages
 
   def verify_api_key(self):
     """
