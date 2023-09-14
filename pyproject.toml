@@ -9,7 +9,7 @@ authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9 || ^3.10"
 openai = "^0.27.8"
 rich = "^13.4.2"
 tiktoken = "^0.4.0"
