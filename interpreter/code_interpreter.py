@@ -53,7 +53,7 @@ language_map = {
   "R": {
     # R is run from this interpreter with R executable
     # in interactive, quiet, and unbuffered mode
-    "start_cmd": "R --slave -e",
+    "start_cmd": "R -q --vanilla",
     "print_cmd": 'print("{}")'
   },
   "shell": {
