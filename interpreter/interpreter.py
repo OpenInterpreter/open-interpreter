@@ -419,7 +419,7 @@ class Interpreter:
 
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
         try:
-          self.respond()
+           self.respond()
         except KeyboardInterrupt:
           pass
         finally:
