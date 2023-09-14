@@ -400,7 +400,8 @@ class Interpreter:
         try:
           user_input = input("> ").strip()
         except EOFError:
-          break        except KeyboardInterrupt:
+          break
+        except KeyboardInterrupt:
           print()  # Aesthetic choice
           break
 
@@ -409,15 +410,15 @@ class Interpreter:
         readline.add_history(user_input)
 
         # If the user input starts with a `%` or `/`, it's a command
-        if user_input.startswith("%") or user_input.startswith("/"):          self.handle_command(user_input)
+        if user_input.startswith("%") or user_input.startswith("/"):
+          self.handle_command(user_input)
           continue
 
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
 
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
-        try:
-          self.respond()
+        try:          self.respond()
         except KeyboardInterrupt:
           pass
         finally:
