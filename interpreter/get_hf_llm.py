@@ -27,7 +27,6 @@ import subprocess
 from rich import print
 from rich.markdown import Markdown
 import os
-import inquirer
 import shutil
 from huggingface_hub import list_files_info, hf_hub_download
 
