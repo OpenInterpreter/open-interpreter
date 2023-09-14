@@ -9,7 +9,7 @@ The code here has duplication. It has imports in weird places. It has been spagh
 
 In my opinion **this is critical** to keep up with the pace of demand for this project.
 
-At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 16th.
 
 After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
 
@@ -53,7 +53,7 @@ language_map = {
   "R": {
     # R is run from this interpreter with R executable
     # in interactive, quiet, and unbuffered mode
-    "start_cmd": "R -q --vanilla",
+    "start_cmd": "R --slave -e",
     "print_cmd": 'print("{}")'
   },
   "shell": {
@@ -351,6 +351,10 @@ class CodeInterpreter:
       if line.startswith("ACTIVE_LINE:"):
         self.active_line = int(line.split(":")[1])
       elif "END_OF_EXECUTION" in line:
+        self.done.set()
+        self.active_line = None
+      elif self.language == "R" "Execution halted" in line:
+        # We need to figure out how to wrap R code in a try: except: block so we don't have to do this.
         self.done.set()
         self.active_line = None
       elif is_error_stream and "KeyboardInterrupt" in line:
