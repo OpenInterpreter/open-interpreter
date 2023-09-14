@@ -391,16 +391,16 @@ class Interpreter:
       if self.load_message_path:
         try:
           self.handle_load_message(self.load_message_path)
-        except EOFError:
-          print(f"Failed to load messages from {self.load_message_path}")
+          self.load_message_path = None
+        except FileNotFoundError:
+          print(f"Error: Failed to load messages json from {self.load_message_path}")
           return
 
       while True:
         try:
           user_input = input("> ").strip()
         except EOFError:
-          break
-        except KeyboardInterrupt:
+          break        except KeyboardInterrupt:
           print()  # Aesthetic choice
           break
 
