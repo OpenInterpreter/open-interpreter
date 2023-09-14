@@ -113,6 +113,9 @@ class Interpreter:
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
       self.system_message = f.read().strip()
 
+    # load the stored messages
+    self.load_message_path = None
+
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
 
@@ -131,8 +134,7 @@ class Interpreter:
     cli(self)
 
   def get_info_for_system_message(self):
-    """
-    Gets relevent information for the system message.
+    """    Gets relevent information for the system message.
     """
 
     info = ""
@@ -386,14 +388,20 @@ class Interpreter:
 
     else:
       # If it wasn't, we start an interactive chat
+      if self.load_message_path:
+        try:
+          self.handle_load_message(self.load_message_path)
+        except EOFError:
+          print(f"Failed to load messages from {self.load_message_path}")
+          return
+
       while True:
         try:
           user_input = input("> ").strip()
         except EOFError:
           break
         except KeyboardInterrupt:
-          print()  # Aesthetic choice
-          break
+          print()  # Aesthetic choice          break
 
         # Use `readline` to let users up-arrow to previous user messages,
         # which is a common behavior in terminals.
