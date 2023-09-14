@@ -21,6 +21,7 @@ benefit from offloading some of the work to your GPU.
     - CUDA
       - Runtime
       - Development
+      - Integration with Visual Studio
     - Driver components
       - Display Driver
 

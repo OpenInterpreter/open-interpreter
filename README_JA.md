@@ -162,7 +162,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### ローカルのモデルを実行する
 
-ⓘ **ローカルでの実行に問題ですか？** 新しい[GPUセットアップガイド](/docs/GPU.md)と[Windowsセットアップガイド](/docs/WINDOWS.md)を参考にしてください。
+ⓘ **ローカルでの実行に問題ですか？** 新しい[GPUセットアップガイド](./docs/GPU.md)と[Windowsセットアップガイド](./docs/WINDOWS.md)を参考にしてください。
 
 `Code Llama` を使用するには、コマンドラインからローカルモードで `interpreter` を実行します。
 
@@ -254,7 +254,7 @@ Open Interpreterは、[関数が呼び出せる言語モデル](https://platform
 
 貢献に興味を持っていただき、ありがとうございます！コミュニティからの参加を歓迎しています。
 
-詳しくは、[貢献ガイドライン](/docs/contributing.md)を参照してください。
+詳しくは、[貢献ガイドライン](./CONTRIBUTING.md)を参照してください。
 
 ## ライセンス
 

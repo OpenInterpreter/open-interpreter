@@ -165,7 +165,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### 在本地运行 Open Interpreter（开放解释器）
 
-ⓘ **本地运行遇到问题？** 请阅读我们最新的 [GPU 设置指南](/docs/GPU.md)和 [Windows 设置指南](/docs/WINDOWS.md)。
+ⓘ **本地运行遇到问题？** 请阅读我们最新的 [GPU 设置指南](./docs/GPU.md)和 [Windows 设置指南](./docs/WINDOWS.md)。
 
 你可以从命令行以本地模式运行 `interpreter` 来使用 `Code Llama`：
 
@@ -248,7 +248,7 @@ Open Interpreter 为[函数调用语言模型](https://platform.openai.com/docs/
 
 感谢您对本项目参与的贡献！我们欢迎所有人贡献到本项目里面。
 
-请参阅我们的 [贡献准则](/docs/contributing.md)，了解如何参与贡献的更多详情。
+请参阅我们的 [贡献准则](./CONTRIBUTING.md)，了解如何参与贡献的更多详情。
 
 ## 许可证
 
