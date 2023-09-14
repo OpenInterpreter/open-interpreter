@@ -187,7 +187,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
                 
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env=env_vars, check=True)
+                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
                 except subprocess.CalledProcessError as e:
                     print(f"Error during installation with {backend}: {e}")
             
