@@ -361,7 +361,7 @@ class CodeInterpreter:
       elif "END_OF_EXECUTION" in line:
         self.done.set()
         self.active_line = None
-      elif self.language == "R" "Execution halted" in line:
+      elif self.language == "R" and "Execution halted" in line:
         # We need to figure out how to wrap R code in a try: except: block so we don't have to do this.
         self.done.set()
         self.active_line = None
