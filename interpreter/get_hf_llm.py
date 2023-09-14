@@ -111,38 +111,50 @@ def get_hf_llm(repo_id, debug_mode, context_window):
     else:
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, selected_model)
-      
-        print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
-        if confirm_action(""):
-            for model_details in combined_models:
-                if model_details["filename"] == selected_model:
-                    selected_model_details = model_details
-
-                    # Check disk space and exit if not enough
-                    if not enough_disk_space(selected_model_details['Size'], default_path):
-                        print(f"You do not have enough disk space available to download this model.")
-                        return None
-
-            # Check if model was originally split
-            split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
-            
-            if len(split_files) > 1:
-                # Download splits
-                for split_file in split_files:
-                    # Do we already have a file split downloaded?
-                    split_path = os.path.join(default_path, split_file)
-                    if os.path.exists(split_path):
-                        if not confirm_action(f"Split file {split_path} already exists. Download again?"):
-                            continue
-                    hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
-                
-                # Combine and delete splits
-                actually_combine_files(default_path, selected_model, split_files)
-            else:
-                hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
-
-            model_path = download_path
         
+        # Prompt for permission to use default download path
+        question = [inquirer.Confirm('download_confirm', message=f"This language model was not found on your system.\n\nDownload to `{default_path}`?", default=True)]
+        answer = inquirer.prompt(question)
+
+        # If not granted, prompt for custom download path
+        if not answer['download_confirm']:
+            question = [inquirer.Path('download_path', message='Enter the desired download path', validate=is_valid_directory)]
+            answers = inquirer.prompt(question)
+            download_path = answers['download_path']
+        
+        if download_path:
+            try:
+                for model_details in combined_models:
+                    if model_details["filename"] == selected_model:
+                        selected_model_details = model_details
+
+                        # Check disk space and exit if not enough
+                        if not enough_disk_space(selected_model_details['Size'], default_path):
+                            print(f"You do not have enough disk space available to download this model.")
+                            return None
+
+                # Check if model was originally split
+                split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
+                
+                if len(split_files) > 1:
+                    # Download splits
+                    for split_file in split_files:
+                        # Do we already have a file split downloaded?
+                        split_path = os.path.join(default_path, split_file)
+                        if os.path.exists(split_path):
+                            if not confirm_action(f"Split file {split_path} already exists. Download again?"):
+                                continue
+                        hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
+                    
+                    # Combine and delete splits
+                    actually_combine_files(default_path, selected_model, split_files)
+                else:
+                    hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
+
+                model_path = download_path
+            except Exception as e:
+                print('\n', f"Error {e} while downloading to {download_path}. Exiting.")
+                return None
         else:
             print('\n', "Download cancelled. Exiting.", '\n')
             return None
@@ -363,3 +375,12 @@ def enough_disk_space(size, path) -> bool:
         return True
 
     return False
+
+def is_valid_directory(_, path) -> bool:
+    """
+    Checks if the model download path is a valid directory.
+
+    :param path: The download path which the user entered.
+    """
+
+    return os.path.isdir(path)
