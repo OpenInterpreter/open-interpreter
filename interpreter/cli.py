@@ -89,31 +89,31 @@ def cli(interpreter):
                       action='store_true',
                       default=DEBUG,
                       help='prints extra information')
-  
   parser.add_argument('--model',
                       type=str,
                       help='model name (for OpenAI compatible APIs) or HuggingFace repo',
                       default="",
                       required=False)
-  
   parser.add_argument('--max_tokens',
                       type=int,
                       help='max tokens generated (for locally run models)')
   parser.add_argument('--context_window',
                       type=int,
                       help='context window in tokens (for locally run models)')
-  
   parser.add_argument('--api_base',
                       type=str,
                       help='change your api_base to any OpenAI compatible api',
                       default="",
                       required=False)
-  
+  parser.add_argument('--load_message_path',
+                      type=str,
+                      help='load messages from the stored json file',
+                      default="",
+                      required=False)
   parser.add_argument('--use-azure',
                       action='store_true',
                       default=USE_AZURE,
                       help='use Azure OpenAI Services')
-  
   parser.add_argument('--version',
                       action='store_true',
                       help='display current Open Interpreter version')
@@ -159,13 +159,15 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
-  
   if args.debug:
     interpreter.debug_mode = True
+
+  if args.load_message:
+    interpreter.load_message_path = args.load_message_path
+
   if args.use_azure:
     interpreter.use_azure = True
     interpreter.local = False
-
 
   if args.model != "":
     interpreter.model = args.model
