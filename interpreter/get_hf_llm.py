@@ -134,12 +134,22 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     if os.path.exists(split_path):
                         if not confirm_action(f"Split file {split_path} already exists. Download again?"):
                             continue
-                    hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
+                    hf_hub_download(
+                        repo_id=repo_id,
+                        filename=split_file,
+                        local_dir=default_path,
+                        local_dir_use_symlinks=False,
+                        resume_download=True)
                 
                 # Combine and delete splits
                 actually_combine_files(default_path, selected_model, split_files)
             else:
-                hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
+                hf_hub_download(
+                    repo_id=repo_id,
+                    filename=selected_model,
+                    local_dir=default_path,
+                    local_dir_use_symlinks=False,
+                    resume_download=True)
 
             model_path = download_path
         
