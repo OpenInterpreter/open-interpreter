@@ -90,7 +90,6 @@ Press `CTRL-C` to exit.
 """
 
 # Create an API Budget to prevent high spend
-budget_manager = litellm.BudgetManager(project_name="open-interpreter")
 
 
 class Interpreter:
@@ -112,20 +111,6 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
-    self.session_id = str(uuid.uuid4()) # generate an id for this session
-    self.max_budget = 10 # default max session budget to $10
-    budget_manager.create_budget(total_budget=self.max_budget, user=self.session_id) # create a budget for this user session
-
-    def update_budget_manager_cost(
-        kwargs,                 # kwargs to completion
-        completion_response,    # response from completion
-        start_time, end_time    # start/end time
-    ):
-        # Your custom code here
-        budget_manager.update_cost(completion_obj=completion_response, user=self.session_id)
-    
-
-    litellm.success_callback = [update_budget_manager_cost]
     
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -171,6 +156,7 @@ class Interpreter:
       # Use the last two messages' content or function call to semantically search
       query = []
       for message in self.messages[-2:]:
+        print(f"message: {message}")
         message_for_semantic_search = {"role": message["role"]}
         if "content" in message:
           message_for_semantic_search["content"] = message["content"]
@@ -279,6 +265,7 @@ class Interpreter:
 
     # Check if `message` was passed in by user
     if message:
+      print(f"user message: {message}")
       # If it was, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
       self.respond()
@@ -299,6 +286,7 @@ class Interpreter:
         readline.add_history(user_input)
 
         # Add the user message to self.messages
+        print(f"user input: {user_input}")
         self.messages.append({"role": "user", "content": user_input})
 
         # Let the user turn on debug mode mid-chat
@@ -467,10 +455,6 @@ class Interpreter:
       self.active_block = None
 
   def respond(self):
-    # check if a given call can be made
-    if budget_manager.get_current_cost(user=self.session_id) > budget_manager.get_total_budget(self.session_id):
-      raise Exception(f"Exceeded the maximum budget for this session - {self.max_budget}")
-
     # Add relevant info to system_message
     # (e.g. current working directory, username, os, etc.)
     info = self.get_info_for_system_message()
@@ -530,17 +514,23 @@ class Interpreter:
                   stream=True,
                   temperature=self.temperature,
                 )
-
             break
+        except litellm.BudgetExceededError as e:
+          print(f"Since your LLM API Budget limit was exceeded, you're being switched to local models. Budget: {litellm.max_budget} | Current Cost: {litellm._current_cost}")
+          self.local = True
+          continue
         except:
             if self.debug_mode:
               traceback.print_exc()
             error = traceback.format_exc()
             time.sleep(3)
       else:
-        raise Exception(error)
+        if self.local: 
+          pass
+        else:
+          raise Exception(error)
             
-    elif self.local:
+    if self.local:
       # Code-Llama
 
 
