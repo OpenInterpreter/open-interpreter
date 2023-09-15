@@ -187,12 +187,16 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                 }
                 additional_pip_args = []
                 
-                if backend == "cuBLAS":
+                if backend == "cuBLAS:windows":
                     # Install official CUDA runtime and cublas wheels to avoid compiling them.
                     subprocess.run([sys.executable, "-m", "pip", "install", "--extra-index-url=https://pypi.ngc.nvidia.com", "nvidia-cuda-runtime-cu12", "nvidia-cublas-cu12"], env={**os.environ, **env_vars}, check=True)
-                    # Install precompiled llama-cpp-python wheel that supports AVX2 and CUDA.
-                    # Users with CPUs that do not have AVX2 support will need to install a different wheel manually.
-                    additional_pip_args = ['--prefer-binary', '--extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu122']
+                    # Install precompiled llama-cpp-python wheel that supports CUDA.
+                    import cpuinfo
+                    cpu_flags = cpuinfo.get_cpu_info()["flags"]
+                    url_flag = "AVX2" if "avx2" in cpu_flags else "AVX" if "avx" in cpu_flags else "basic"
+                    additional_pip_args = ["--prefer-binary", f"--extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{url_flag}/cu122"]
+                elif backend == "cuBLAS":
+                    env_vars["CMAKE_ARGS"] = "-DLLAMA_CUBLAS=on"
                 elif backend == "hipBLAS":
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_HIPBLAS=on"
                 elif backend == "Metal":
@@ -216,7 +220,11 @@ def get_hf_llm(repo_id, debug_mode, context_window):
             
             # Check system capabilities
             if check_command(["nvidia-smi"]):
-                install_llama("cuBLAS")
+                import platform
+                if platform.system() == "Windows":
+                    install_llama("cuBLAS:windows")
+                else:
+                    install_llama("cuBLAS")
             elif check_command(["rocminfo"]):
                 install_llama("hipBLAS")
             elif supports_metal():
