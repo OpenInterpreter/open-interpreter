@@ -133,8 +133,8 @@ def cli(interpreter):
     interpreter.max_tokens = args.max_tokens
   if args.context_window:
     interpreter.context_window = args.context_window
-  if args.max_budget:
-    litellm.max_budget = args.max_budget
+  # check if user passed in a max budget (USD) for their LLM API Calls (e.g. `interpreter --max_budget 0.001` # sets a max API call budget of $0.01) - for more: https://docs.litellm.ai/docs/budget_manager
+  litellm.max_budget = (args.max_budget or os.getenv("LITELLM_MAX_BUDGET"))
   # Modify interpreter according to command line flags
   if args.yes:
     interpreter.auto_run = True
