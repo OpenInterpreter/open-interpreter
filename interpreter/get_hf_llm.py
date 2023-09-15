@@ -19,17 +19,20 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 """
 
 import os
-import sys
-import appdirs
-import traceback
-import inquirer
+import platform
+import shutil
 import subprocess
+import sys
+import sysconfig
+import traceback
+from typing import Dict, List, Union
+
+import appdirs
+import cpuinfo
+import inquirer
+from huggingface_hub import hf_hub_download, list_files_info, login
 from rich import print
 from rich.markdown import Markdown
-import os
-import inquirer
-import shutil
-from huggingface_hub import list_files_info, hf_hub_download
 
 
 def get_hf_llm(repo_id, debug_mode, context_window):
@@ -154,11 +157,11 @@ def get_hf_llm(repo_id, debug_mode, context_window):
     try:
         # Add CUDA binaries to temporary PATH in case CUDA is supported on this machine.
         # Has no effect otherwise.
-        import sysconfig
-        nvidia_root = os.path.join(sysconfig.get_paths("purelib"), 'nvidia')
-        cudart_path = os.path.join(nvidia_root, 'cuda_runtime', 'bin')
-        cublas_path = os.path.join(nvidia_root, 'cublas', 'bin')
-        os.environ["PATH"] = cudart_path + os.pathsep + cublas_path + os.pathsep + os.environ["PATH"]
+        nvidia_root = os.path.join(sysconfig.get_path("purelib"), 'nvidia')
+        if os.path.exists(nvidia_root):
+            cudart_path = os.path.join(nvidia_root, 'cuda_runtime', 'bin')
+            cublas_path = os.path.join(nvidia_root, 'cublas', 'bin')
+            os.environ["PATH"] = cudart_path + os.pathsep + cublas_path + os.pathsep + os.environ["PATH"]
 
         from llama_cpp import Llama
     except:
@@ -169,9 +172,6 @@ def get_hf_llm(repo_id, debug_mode, context_window):
         if confirm_action(message):
             
             # We're going to build llama-cpp-python correctly for the system we're on
-
-            import platform
-            
             def check_command(command):
                 try:
                     subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -191,7 +191,6 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     # Install official CUDA runtime and cublas wheels to avoid compiling them.
                     subprocess.run([sys.executable, "-m", "pip", "install", "--extra-index-url=https://pypi.ngc.nvidia.com", "nvidia-cuda-runtime-cu12", "nvidia-cublas-cu12"], env={**os.environ, **env_vars}, check=True)
                     # Install precompiled llama-cpp-python wheel that supports CUDA.
-                    import cpuinfo
                     cpu_flags = cpuinfo.get_cpu_info()["flags"]
                     url_flag = "AVX2" if "avx2" in cpu_flags else "AVX" if "avx" in cpu_flags else "basic"
                     additional_pip_args = ["--prefer-binary", f"--extra-index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{url_flag}/cu122"]
@@ -220,7 +219,6 @@ def get_hf_llm(repo_id, debug_mode, context_window):
             
             # Check system capabilities
             if check_command(["nvidia-smi"]):
-                import platform
                 if platform.system() == "Windows":
                     install_llama("cuBLAS:windows")
                 else:
@@ -270,16 +268,6 @@ def confirm_action(message):
     answers = inquirer.prompt(question)
     return answers['confirm']
 
-
-
-
-
-
-import os
-import inquirer
-from huggingface_hub import list_files_info, hf_hub_download, login
-from typing import Dict, List, Union
-
 def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
     """
     Fetch all files from a given repository on Hugging Face Model Hub that contain 'gguf'.
@@ -314,8 +302,6 @@ def list_gguf_files(repo_id: str) -> List[Dict[str, Union[str, float]]]:
         })
 
     return result
-
-from typing import List, Dict, Union
 
 def group_and_combine_splits(models: List[Dict[str, Union[str, float]]]) -> List[Dict[str, Union[str, float]]]:
     """
