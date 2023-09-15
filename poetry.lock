@@ -590,18 +590,18 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
-version = "0.1.609"
+version = "0.1.636"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.1.609-py3-none-any.whl", hash = "sha256:3d019875f398b6db7abe13ac3a6158891e676cd9bd550bb7bf4ad88fe613f32a"},
-    {file = "litellm-0.1.609.tar.gz", hash = "sha256:6f838062b310dd0a51c2d55b55eac5eb17fd7566bda4b7293199d602b726b832"},
+    {file = "litellm-0.1.636-py3-none-any.whl", hash = "sha256:43539e0a2c41ac121e40b3602f1d82ccae25e7d01d5008ec5eb43c0951788875"},
+    {file = "litellm-0.1.636.tar.gz", hash = "sha256:37548cd1e4f910c62506c7dad0b6403be12a24774cd1a5c03284225545e2432e"},
 ]
 
 [package.dependencies]
 importlib-metadata = ">=6.8.0,<7.0.0"
-openai = ">=0.27.8,<0.28.0"
+openai = ">=0.28.0,<0.29.0"
 python-dotenv = ">=0.2.0"
 tiktoken = ">=0.4.0,<0.5.0"
 
@@ -725,13 +725,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "0.27.10"
+version = "0.28.0"
 description = "Python client library for the OpenAI API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-0.27.10-py3-none-any.whl", hash = "sha256:beabd1757e3286fa166dde3b70ebb5ad8081af046876b47c14c41e203ed22a14"},
-    {file = "openai-0.27.10.tar.gz", hash = "sha256:60e09edf7100080283688748c6803b7b3b52d5a55d21890f3815292a0552d83b"},
+    {file = "openai-0.28.0-py3-none-any.whl", hash = "sha256:d207ece78469be5648eb87b825753282225155a29d0eec6e02013ddbf8c31c0c"},
+    {file = "openai-0.28.0.tar.gz", hash = "sha256:417b78c4c2864ba696aedaf1ccff77be1f04a581ab1739f0a56e0aae19e5a794"},
 ]
 
 [package.dependencies]
@@ -1335,4 +1335,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "46f9d71cdcf1ff6adb3cb478d069a3f5b6f53d5063ec690790d191723a361395"
+content-hash = "38cf9f149063069863fef0cd4f81c85d6d13575760f703ec33eaf48b9986e887"
