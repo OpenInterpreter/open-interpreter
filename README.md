@@ -1,54 +1,46 @@
-<h1 align="center">● Open Interpreter</h1>
 
-<p align="center">
-    <a href="https://discord.gg/6p3fD6rBVm">
-        <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/>
-    </a>
-    <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
-    <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
-    <br><br>
-    <b>Let language models run code on your computer.</b><br>
-    An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop application.</a><br>
-</p>
+# Open Interpreter
+---
+<center>
 
-<br>
+![Discord](https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white)
+[![JA doc](https://img.shields.io/badge/ドキュメント-日本語-white.svg)](README_JA.md)
+[![ZH doc](https://img.shields.io/badge/文档-中文版-white.svg)](README_ZH.md)
+![License](https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat)
+
+</center>
+
+Open Interpreter is an open-source, locally running implementation of OpenAI's Code Interpreter. Let language models run code on your computer, providing a natural-language interface to your machine's capabilities.
+
+[Get early access to the desktop application.](https://openinterpreter.com)
 
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
-<br>
-
+## Installation
 ```shell
 pip install open-interpreter
 ```
 
+## Usage
+To start the interpreter, run:
 ```shell
 interpreter
 ```
 
-<br>
+Open Interpreter allows LLMs to execute code (Python, Javascript, Shell, and more) on your local machine. Features include:
+- Creation and editing of photos, videos, PDFs, etc.
+- Controlling a Chrome browser for research.
+- Plotting, cleaning, and analyzing large datasets.
+- And more...
 
-**Open Interpreter** lets LLMs run code (Python, Javascript, Shell, and more) locally. You can chat with Open Interpreter through a ChatGPT-like interface in your terminal by running `$ interpreter` after installing.
-
-This provides a natural-language interface to your computer's general-purpose capabilities:
-
-- Create and edit photos, videos, PDFs, etc.
-- Control a Chrome browser to perform research
-- Plot, clean, and analyze large datasets
-- ...etc.
-
-**⚠️ Note: You'll be asked to approve code before it's run.**
-
-<br>
+> ⚠️ **Safety Note:** You'll be prompted to approve code before execution. Ensure to review generated code, as it can interact with your system potentially leading to data loss or security risks.
 
 ## Demo
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
-#### An interactive demo is also available on Google Colab:
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+#### For an interactive experience, try in Google Colab 
+[![Google Colab demo](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
 ## Quick Start
 
@@ -258,36 +250,30 @@ You can modify these values in the .env file to change the default behavior of t
 
 ## Safety Notice
 
-Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
-
-**⚠️ Open Interpreter will ask for user confirmation before executing code.**
+Since the generated code is executed in your environment, it can interact with files and settings, leading to unexpected outcomes.
 
 You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this confirmation, in which case:
 
-- Be cautious when requesting commands that modify files or system settings.
-- Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
-- Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
+> ⚠️ Always review the code before execution.  
+> - Be cautious with commands that modify files or system settings.  
+> - Consider running Open Interpreter in restricted environments like Google Colab or Replit for added safety.
 
 ## How Does it Work?
 
-Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "Python" or "JavaScript") and `code` to run.
+Open Interpreter integrates a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, accepting a `language` and `code` to run. Messages, code, and system outputs are streamed to the terminal in Markdown format.
 
-We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
+## Contributing
 
-# Contributing
-
-Thank you for your interest in contributing! We welcome involvement from the community.
-
-Please see our [Contributing Guidelines](./CONTRIBUTING.md) for more details on how to get involved.
+Interested in contributing? We appreciate community involvement. Check our [Contributing Guidelines](./CONTRIBUTING.md) to get started.
 
 ## License
 
-Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
+Open Interpreter is under the MIT License. Use, copy, modify, distribute, sublicense, and sell copies of the software as you please.
 
-**Note**: This software is not affiliated with OpenAI.
+**Disclaimer**: This software is not affiliated with OpenAI.
 
-> Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
->
+---
+
+> "Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences."  
 > — _OpenAI's Code Interpreter Release_
 
-<br>
