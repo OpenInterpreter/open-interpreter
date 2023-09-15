@@ -45,7 +45,6 @@ def save_message_trace_to_wandb(messages):
             assistant_timestamp = message["timestamp"]
             if "function_call" in message:
                 function_meta = dict(message["function_call"])
-                print(function_meta)
 
         if role == "function":
             function_output = message["content"]
