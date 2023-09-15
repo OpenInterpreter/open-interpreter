@@ -223,6 +223,24 @@ $ interpreter
 > %debug false <- Turns off debug mode
 ```
 
+### Autosave mode
+
+Save message history at regular intervals. Each interval is counted on user input
+
+```shell
+$ interpreter --autosave_after=3
+```
+
+### [Weights and Biases Tracing](https://docs.wandb.ai/guides/prompts)
+ W&B Prompts is a suite of LLMOps tools built for the development of LLM-powered applications. Use W&B Prompts to visualize and inspect the execution flow of your LLMs, analyze the inputs and outputs of your LLMs, view the intermediate results and securely store and manage your prompts and LLM chain configurations.
+
+ [Sign up here](wandb.ai)
+
+ ```shell
+$ export WANDB_API_KEY=
+$ interpreter --store-wandb
+```
+
 ### Interactive Mode Commands
 
 In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
