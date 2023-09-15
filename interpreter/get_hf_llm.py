@@ -161,7 +161,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
         if os.path.exists(nvidia_root):
             cudart_path = os.path.join(nvidia_root, 'cuda_runtime', 'bin')
             cublas_path = os.path.join(nvidia_root, 'cublas', 'bin')
-            os.environ["PATH"] = cudart_path + os.pathsep + cublas_path + os.pathsep + os.environ["PATH"]
+            os.environ["PATH"] = os.pathsep([cudart_path, cublas_path, os.environ["PATH"]])
 
         from llama_cpp import Llama
     except:
