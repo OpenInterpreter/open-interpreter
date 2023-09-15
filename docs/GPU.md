@@ -135,7 +135,7 @@ benefit from offloading some of the work to your GPU.
 
     ```
     CUDA_PATH=/usr/local/cuda FORCE_CMAKE=1 CMAKE_ARGS='-DLLAMA_CUBLAS=on' \
-    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir -vv
+    pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir --user -vv
     ```
 
     The command should complete with no errors. If you receive an error, ask for
