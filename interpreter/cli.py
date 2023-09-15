@@ -19,6 +19,7 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 """
 
 import argparse
+import json
 import os
 from dotenv import load_dotenv
 import requests
@@ -27,6 +28,8 @@ import pkg_resources
 from rich import print as rprint
 from rich.markdown import Markdown
 import inquirer
+
+from interpreter.models.prompt_format import DEFAULT_PROMPT_FORMATS, PromptFormat
 
 # Load .env file
 load_dotenv()
@@ -79,6 +82,12 @@ def cli(interpreter):
                       action='store_true',
                       default=LOCAL_RUN,
                       help='run fully local with code-llama')
+  parser.add_argument('-p',
+                      '--prompt_format',
+                      type=str,
+                      help='prompt format json file',
+                      default=None,
+                      required=False)
   parser.add_argument(
                       '--falcon',
                       action='store_true',
@@ -159,6 +168,43 @@ def cli(interpreter):
     interpreter.model = models[chosen_param]
     interpreter.local = True
 
+    if not args.prompt_format:
+      print('', Markdown("**Open Interpreter** will use a default prompt format. Use your arrow keys to set up the model."), '')
+
+      prompt_format_choices = [
+        'falcon',
+        'llama',
+        'wizard-coder',
+        'phindv2',
+        'custom'
+      ]
+
+      questions = [inquirer.List('param', message="Prompt format", choices=prompt_format_choices)]
+      answers = inquirer.prompt(questions)
+      chosen_format = answers['param']
+      if chosen_format == 'custom':
+        while True:
+          # ask the user for a prompt json file
+          prompt_json_path = input("Path to prompt json file: ")
+          if os.path.exists(prompt_json_path):
+            with open(prompt_json_path, 'r') as f:
+              try:
+                interpreter.prompt_format = PromptFormat(json.load(f))
+                break
+              except:
+                print("Invalid Prompt Format JSON file. Please try again.")
+            break
+          else:
+            print("Invalid path. Please try again.")
+      else:
+        interpreter.prompt_format = DEFAULT_PROMPT_FORMATS[chosen_format]
+    else:
+      with open(args.prompt_format, 'r') as f:
+        try:
+          interpreter.prompt_format = PromptFormat(json.load(f))
+        except Exception as e:
+          print("Invalid Prompt Format JSON file. Please try again.\n", e)
+          exit(1)
   
   if args.debug:
     interpreter.debug_mode = True
@@ -173,6 +219,14 @@ def cli(interpreter):
     # "/" in there means it's a HF repo we're going to run locally:
     if "/" in interpreter.model:
       interpreter.local = True
+
+      if args.prompt_format:
+        with open(args.prompt_format, 'r') as f:
+          try:
+            interpreter.prompt_format = PromptFormat(json.load(f))
+          except Exception as e:
+            print("Invalid Prompt Format JSON file. Please try again.\n", e)
+            exit(1)
 
   if args.api_base:
     interpreter.api_base = args.api_base
@@ -201,7 +255,40 @@ def cli(interpreter):
     # THIS is more in line with the future. You just say the model you want by name:
     interpreter.model = models[chosen_param]
     interpreter.local = True
+    interpreter.prompt_format = DEFAULT_PROMPT_FORMATS['falcon']
 
+
+  # ask the user if they want to pass a custom prompt format if we are in local mode
+  if interpreter.local and interpreter.prompt_format is None:
+    rprint(Markdown("**Open Interpreter** will use a default prompt format (llama2 chat). Use your arrow keys to select an alternative."))
+
+    prompt_format_choices = [
+      'falcon',
+      'llama',
+      'wizard-coder',
+      'phindv2',
+      'custom'
+    ]
+
+    questions = [inquirer.List('param', message="Prompt format", choices=prompt_format_choices)]
+    answers = inquirer.prompt(questions)
+    chosen_format = answers['param']
+    if chosen_format == 'custom':
+      while True:
+        # ask the user for a prompt json file
+        prompt_json_path = input("Path to prompt json file: ")
+        if os.path.exists(prompt_json_path):
+          with open(prompt_json_path, 'r') as f:
+            try:
+              interpreter.prompt_format = PromptFormat(json.load(f))
+              break
+            except Exception as e:
+              print("Invalid Prompt Format JSON file. Please try again.\n", e)
+          break
+        else:
+          print("Invalid path. Please try again.")
+    else:
+      interpreter.prompt_format = DEFAULT_PROMPT_FORMATS[chosen_format]
 
   # Run the chat method
   interpreter.chat()

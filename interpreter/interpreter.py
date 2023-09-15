@@ -17,8 +17,11 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 
 - killian
 """
+import re
+from typing import Optional
 
 from .cli import cli
+from .models.prompt_format import PromptFormat, DEFAULT_PROMPT_FORMATS
 from .utils import merge_deltas, parse_partial_json
 from .message_block import MessageBlock
 from .code_block import CodeBlock
@@ -97,6 +100,7 @@ class Interpreter:
     self.auto_run = False
     self.local = False
     self.model = "gpt-4"
+    self.prompt_format: Optional[PromptFormat] = None
     self.debug_mode = False
     self.api_base = None # Will set it to whatever OpenAI wants
     self.context_window = 2000 # For local models only
@@ -545,9 +549,6 @@ class Interpreter:
               self.model = models[chosen_param]
               self.local = True
 
-
-
-
               return
 
           else:
@@ -555,6 +556,40 @@ class Interpreter:
               print('', Markdown("**Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows."), '')
               time.sleep(2)
               print(Rule(style="white"))
+
+      # ask the user if they want to pass a custom prompt format if we are in local mode
+      if self.local and self.prompt_format is None:
+        import inquirer
+
+        print('', Markdown("**Open Interpreter** will use a default prompt format. Use your arrow keys to set up the model."), '')
+
+        prompt_format_choices = [
+          'falcon',
+          'llama',
+          'wizard-coder',
+          'phindv2',
+          'custom'
+        ]
+
+        questions = [inquirer.List('param', message="Prompt format", choices=prompt_format_choices)]
+        answers = inquirer.prompt(questions)
+        chosen_format = answers['param']
+        if chosen_format == 'custom':
+          while True:
+            # ask the user for a prompt json file
+            prompt_json_path = input("Path to prompt json file: ")
+            if os.path.exists(prompt_json_path):
+              with open(prompt_json_path, 'r') as f:
+                try:
+                  self.prompt_format = PromptFormat(json.load(f))
+                  break
+                except Exception as e:
+                  print("Invalid Prompt Format JSON file. Please try again.\n", e)
+              break
+            else:
+              print("Invalid path. Please try again.")
+        else:
+          self.prompt_format = DEFAULT_PROMPT_FORMATS[chosen_format]
 
       litellm.api_key = self.api_key
       if self.api_base:
@@ -643,6 +678,10 @@ class Interpreter:
       # Convert messages to prompt
       # (This only works if the first message is the only system message)
 
+      # fallback on llama prompt if one is not set
+      if self.prompt_format is None:
+        self.prompt_format = DEFAULT_PROMPT_FORMATS['llama']
+
       def messages_to_prompt(messages):
 
 
@@ -652,38 +691,41 @@ class Interpreter:
             message["role"] = "assistant"
 
 
-        # Falcon prompt template
-        if "falcon" in self.model.lower():
+        # format using the prompt format
+        pf: PromptFormat = self.prompt_format
+        print("Format:\n" + pf.model_dump_json(indent=2))
 
-          formatted_messages = ""
-          for message in messages:
-            formatted_messages += f"{message['role'].capitalize()}: {message['content']}\n"
-          formatted_messages = formatted_messages.strip()
+        p = ""
+        for i, message in enumerate(messages):
+          # system message is always first
+          if i == 0:
+            p += pf.system.format(system_prompt=message["content"])
+            continue
 
-        else:
-          # Llama prompt template
+          # if it's a user message, use the user prompt
+          if message["role"] == "user":
+            um = pf.user.format(user_prompt=message["content"])
+            # if this is the first message after the system prompt then optionally apply the first message formatting
+            if i == 1 and pf.trim_first_user_message is not None:
+              um = re.sub(pf.trim_first_user_message, "", um)
+            p += um
+            continue
 
-          # Extracting the system prompt and initializing the formatted string with it.
-          system_prompt = messages[0]['content']
-          formatted_messages = f"<s>[INST] <<SYS>>\n{system_prompt}\n<</SYS>>\n"
+          # if it's a function call, use the assistant prompt
+          if message["role"] == "function":
+            p += pf.assistant.format(assistant_prompt=f"Output: {message['content']}")
+            continue
 
-          # Loop starting from the first user message
-          for index, item in enumerate(messages[1:]):
-              role = item['role']
-              content = item['content']
+          # if it's an assistant message, use the assistant prompt
+          if message["role"] == "assistant":
+            p += pf.assistant.format(assistant_prompt=message["content"])
+            continue
 
-              if role == 'user':
-                  formatted_messages += f"{content} [/INST] "
-              elif role == 'function':
-                  formatted_messages += f"Output: {content} [/INST] "
-              elif role == 'assistant':
-                  formatted_messages += f"{content} </s><s>[INST] "
+        # optionally add the suffix
+        if pf.suffix is not None:
+          p += pf.suffix
 
-          # Remove the trailing '<s>[INST] ' from the final output
-          if formatted_messages.endswith("<s>[INST] "):
-              formatted_messages = formatted_messages[:-10]
-
-        return formatted_messages
+        return p
 
       prompt = messages_to_prompt(messages)
       # Lmao i can't believe this works (it does need this btw)
@@ -706,7 +748,7 @@ class Interpreter:
         prompt,
         stream=True,
         temperature=self.temperature,
-        stop=["</s>"],
+        stop=self.prompt_format.stop_tokens,
         max_tokens=750 # context window is set to 1800, messages are trimmed to 1000... 700 seems nice
       )
 
