@@ -156,7 +156,6 @@ class Interpreter:
       # Use the last two messages' content or function call to semantically search
       query = []
       for message in self.messages[-2:]:
-        print(f"message: {message}")
         message_for_semantic_search = {"role": message["role"]}
         if "content" in message:
           message_for_semantic_search["content"] = message["content"]
@@ -286,7 +285,6 @@ class Interpreter:
         readline.add_history(user_input)
 
         # Add the user message to self.messages
-        print(f"user input: {user_input}")
         self.messages.append({"role": "user", "content": user_input})
 
         # Let the user turn on debug mode mid-chat
@@ -517,6 +515,35 @@ class Interpreter:
             break
         except litellm.BudgetExceededError as e:
           print(f"Since your LLM API Budget limit was exceeded, you're being switched to local models. Budget: {litellm.max_budget} | Current Cost: {litellm._current_cost}")
+          
+          print(Markdown(
+                "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                    '')
+          time.sleep(2)
+          print(Rule(style="white"))
+
+
+
+          # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+          # AND ABOVE.
+          # This way, when folks hit interpreter --local, they get the same experience as before.
+          import inquirer
+
+          print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+
+          models = {
+              '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+              '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+              '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+          }
+
+          parameter_choices = list(models.keys())
+          questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+          answers = inquirer.prompt(questions)
+          chosen_param = answers['param']
+
+          # THIS is more in line with the future. You just say the model you want by name:
+          self.model = models[chosen_param]
           self.local = True
           continue
         except:
