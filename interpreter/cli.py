@@ -60,6 +60,7 @@ def cli(interpreter):
   LOCAL_RUN = os.getenv('INTERPRETER_CLI_LOCAL_RUN', 'False') == 'True'
   DEBUG = os.getenv('INTERPRETER_CLI_DEBUG', 'False') == 'True'
   USE_AZURE = os.getenv('INTERPRETER_CLI_USE_AZURE', 'False') == 'True'
+  STORE_WANDB = os.getenv('INTERPRETER_CLI_STORE_WANDB', 'False') == 'True'
 
   # Setup CLI
   parser = argparse.ArgumentParser(description='Chat with Open Interpreter.')
@@ -114,6 +115,15 @@ def cli(interpreter):
                       default=USE_AZURE,
                       help='use Azure OpenAI Services')
   
+  parser.add_argument('--store-wandb',
+                      action='store_true',
+                      default=STORE_WANDB,
+                      help='Store message trace to Weights and Biases')
+  
+  parser.add_argument('--autosave-after',
+                      type=int,
+                      help='Frequency to save the session of messages to messages.json')
+  
   parser.add_argument('--version',
                       action='store_true',
                       help='display current Open Interpreter version')
@@ -165,6 +175,12 @@ def cli(interpreter):
   if args.use_azure:
     interpreter.use_azure = True
     interpreter.local = False
+  
+  if args.store_wandb:
+    interpreter.store_wandb = True
+
+  if args.autosave_after:
+    interpreter.autosave_after = args.autosave_after
 
 
   if args.model != "":

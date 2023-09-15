@@ -77,3 +77,9 @@ def parse_partial_json(s):
     except json.JSONDecodeError:
         # If we still can't parse the string as JSON, return None to indicate failure.
         return None
+
+def count_value_for_key(data, key, value):
+    """
+    Count the occurrences of a specific value for a given key in a list of dictionaries.
+    """
+    return sum(1 for item in data if item.get(key) == value)

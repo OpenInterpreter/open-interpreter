@@ -19,14 +19,16 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 """
 
 from .cli import cli
-from .utils import merge_deltas, parse_partial_json
+from .utils import merge_deltas, parse_partial_json, count_value_for_key
 from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from .tracing import save_message_trace_to_wandb
 
 import os
 import time
+import datetime
 import traceback
 import json
 import platform
@@ -101,12 +103,15 @@ class Interpreter:
     self.api_base = None # Will set it to whatever OpenAI wants
     self.context_window = 2000 # For local models only
     self.max_tokens = 750 # For local models only
+    self.autosave_after = None
     # Azure OpenAI
     self.use_azure = False
     self.azure_api_base = None
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    # Weights & Biases
+    self.store_wandb = False
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -182,6 +187,8 @@ class Interpreter:
     """
     Resets the interpreter.
     """
+    if self.store_wandb:
+      save_message_trace_to_wandb(self.messages)
     self.messages = []
     self.code_interpreters = {}
 
@@ -274,6 +281,9 @@ class Interpreter:
       json_path += ".json"
     with open(json_path, 'w') as f:
       json.dump(self.messages, f, indent=2)
+    
+    if self.store_wandb:
+      save_message_trace_to_wandb(self.messages)
 
     print(Markdown(f"> messages json export to {os.path.abspath(json_path)}"))
 
@@ -381,8 +391,11 @@ class Interpreter:
     # Check if `message` was passed in by user
     if message:
       # If it was, we respond non-interactivley
-      self.messages.append({"role": "user", "content": message})
+      self.messages.append({"role": "user", "content": message, "timestamp": round(datetime.datetime.now().timestamp() * 1000)})
+      message_index = len(self.messages) - 1
       self.respond()
+      end_time_ms = round(datetime.datetime.now().timestamp() * 1000)
+      self.messages[message_index]["end_time_ms"] = end_time_ms 
 
     else:
       # If it wasn't, we start an interactive chat
@@ -405,18 +418,26 @@ class Interpreter:
           continue
 
         # Add the user message to self.messages
-        self.messages.append({"role": "user", "content": user_input})
+        self.messages.append({"role": "user", "content": user_input, "timestamp": round(datetime.datetime.now().timestamp() * 1000)})
 
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
         try:
+          message_index = len(self.messages) - 1
           self.respond()
+          end_time_ms = round(datetime.datetime.now().timestamp() * 1000)
+          self.messages[message_index]["end_time_ms"] = end_time_ms 
         except KeyboardInterrupt:
           pass
         finally:
           # Always end the active block. Multiple Live displays = issues
           self.end_active_block()
+          if self.autosave_after:
+            if count_value_for_key(self.messages, "role", "user") % self.autosave_after == 0:
+              self.handle_save_message("")
 
     if return_messages:
+        if self.store_wandb:
+          save_message_trace_to_wandb(self.messages)
         return self.messages
 
   def verify_api_key(self):
@@ -578,10 +599,13 @@ class Interpreter:
 
     system_message = self.system_message + "\n\n" + info
 
+    def remove_time_keys(lst):
+      return [{k: v for k, v in d.items() if k not in ["timestamp", "end_time_ms"]} for d in lst]
+
     if self.local:
-      messages = tt.trim(self.messages, max_tokens=(self.context_window-self.max_tokens-25), system_message=system_message)
+      messages = tt.trim(remove_time_keys(self.messages), max_tokens=(self.context_window-self.max_tokens-25), system_message=system_message)
     else:
-      messages = tt.trim(self.messages, self.model, system_message=system_message)
+      messages = tt.trim(remove_time_keys(self.messages), self.model, system_message=system_message)
 
     if self.debug_mode:
       print("\n", "Sending `messages` to LLM:", "\n")
@@ -589,6 +613,7 @@ class Interpreter:
       print()
 
     # Make LLM call
+    assistant_timestamp = round(datetime.datetime.now().timestamp() * 1000)
     if not self.local:
       # GPT
       
@@ -715,6 +740,7 @@ class Interpreter:
     in_function_call = False
     llama_function_call_finished = False
     self.active_block = None
+    self.messages[-1]["timestamp"] = assistant_timestamp
 
     for chunk in response:
       if self.use_azure and ('choices' not in chunk or len(chunk['choices']) == 0):
@@ -879,13 +905,16 @@ class Interpreter:
             else:
               # User declined to run code.
               self.active_block.end()
+              end_time_ms = round(datetime.datetime.now().timestamp() * 1000)
+              # self.messages[-1]["end_time_ms"] = end_time_ms
               self.messages.append({
                 "role":
                 "function",
                 "name":
                 "run_code",
                 "content":
-                "User decided not to run this code."
+                "User decided not to run this code.",
+                "timestamp": end_time_ms
               })
               return
 
@@ -902,11 +931,13 @@ class Interpreter:
 
             # Since it can't really be fixed without something complex,
             # let's just berate the LLM then go around again.
-
+            end_time_ms = round(datetime.datetime.now().timestamp() * 1000)
+            # self.messages[-1]["end_time_ms"] = end_time_ms
             self.messages.append({
               "role": "function",
               "name": "run_code",
-              "content": """Your function call could not be parsed. Please use ONLY the `run_code` function, which takes two parameters: `code` and `language`. Your response should be formatted as a JSON."""
+              "content": """Your function call could not be parsed. Please use ONLY the `run_code` function, which takes two parameters: `code` and `language`. Your response should be formatted as a JSON.""",
+              "timestamp": end_time_ms
             })
 
             self.respond()
@@ -928,10 +959,13 @@ class Interpreter:
 
           # Append the output to messages
           # Explicitly tell it if there was no output (sometimes "" = hallucinates output)
+          end_time_ms = round(datetime.datetime.now().timestamp() * 1000)
+          # self.messages[-1]["end_time_ms"]: end_time_ms
           self.messages.append({
             "role": "function",
             "name": "run_code",
-            "content": self.active_block.output if self.active_block.output else "No output"
+            "content": self.active_block.output if self.active_block.output else "No output",
+            "timestamp": end_time_ms
           })
 
           # Go around again
@@ -947,6 +981,8 @@ class Interpreter:
             time.sleep(0.1)
 
           self.active_block.end()
+          end_time_ms = round(datetime.datetime.now().timestamp() * 1000)
+          # self.messages[-1]["end_time_ms"] = end_time_ms
           return
 
   def _print_welcome_message(self):
