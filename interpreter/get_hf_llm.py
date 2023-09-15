@@ -155,7 +155,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
         # Add CUDA binaries to temporary PATH in case CUDA is supported on this machine.
         # Has no effect otherwise.
         import sysconfig
-        nvidia_root = os.path.join(sysconfig.get_paths()["purelib"], 'nvidia')
+        nvidia_root = os.path.join(sysconfig.get_paths("purelib"), 'nvidia')
         cudart_path = os.path.join(nvidia_root, 'cuda_runtime', 'bin')
         cublas_path = os.path.join(nvidia_root, 'cublas', 'bin')
         os.environ["PATH"] = cudart_path + os.pathsep + cublas_path + os.pathsep + os.environ["PATH"]
