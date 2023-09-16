@@ -588,38 +588,58 @@ class Interpreter:
     system_message = self.system_message + "\n\n" + info
 
     if self.local:
-      messages = tt.trim(self.messages, max_tokens=(self.context_window-self.max_tokens-25), system_message=system_message)
-    else:
-      messages = tt.trim(self.messages, self.model, system_message=system_message)
+      messages = tt.trim(se
+# ... (previous code)
 
-    if self.debug_mode:
-      print("\n", "Sending `messages` to LLM:", "\n")
-      print(messages)
-      print()
+# Make LLM call
+if not self.local:
+  # GPT
+  
+  error = ""
+  
+  for _ in range(3):  # 3 retries
+    try:
 
-    # Make LLM call
-    if not self.local:
-      # GPT
-      
-      error = ""
-      
-      for _ in range(3):  # 3 retries
-        try:
+        if self.use_azure:
+          response = litellm.completion(
+              f"azure/{self.azure_deployment_name}",
+              messages=messages,
+              functions=[function_schema],
+              temperature=self.temperature,
+              stream=True,
+              )
+        else:
+          if self.api_base:
+            # The user set the api_base. litellm needs this to be "custom/{model}"
+            response = litellm.completion(
+              api_base=self.api_base,
+              model = "custom/{self.model}",
+              messages=messages,
+              functions=[function_schema],
+              temperature=self.temperature,
+              stream=True,
+              )
+          else:
+            response = litellm.completion(
+              self.model,
+              messages=messages,
+              functions=[function_schema],
+              temperature=self.temperature,
+              stream=True,
+              )
+        break  # Break out of the loop if the API call succeeds
 
-            if self.use_azure:
-              response = litellm.completion(
-                  f"azure/{self.azure_deployment_name}",
-                  messages=messages,
-                  functions=[function_schema],
-                  temperature=self.temperature,
-                  stream=True,
-                  )
-            else:
-              if self.api_base:
-                # The user set the api_base. litellm needs this to be "custom/{model}"
-                response = litellm.completion(
-                  api_base=self.api_base,
-                  model = "custom/" + self.model,
+    except openai.error.RateLimitError as e:
+        # Extract the retry time from the error message and wait for that time before retrying
+        retry_after = int(re.search(r'Please try again in (\d+)ms', str(e)).group(1)) / 1000  # Convert ms to seconds
+        time.sleep(retry_after + 0.1)  # Wait for the retry time plus a small buffer time
+
+    except Exception as e:
+        error = str(e)
+        time.sleep(1)  # Wait for 1 second before retrying
+
+  # ... (remaining code to handle the 'response' and 'error')
+/" + self.model,
                   messages=messages,
                   functions=[function_schema],
                   stream=True,
