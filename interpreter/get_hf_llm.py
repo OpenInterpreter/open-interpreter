@@ -9,7 +9,7 @@ The code here has duplication. It has imports in weird places. It has been spagh
 
 In my opinion **this is critical** to keep up with the pace of demand for this project.
 
-At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 16th.
 
 After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
 
@@ -134,12 +134,22 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     if os.path.exists(split_path):
                         if not confirm_action(f"Split file {split_path} already exists. Download again?"):
                             continue
-                    hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
+                    hf_hub_download(
+                        repo_id=repo_id,
+                        filename=split_file,
+                        local_dir=default_path,
+                        local_dir_use_symlinks=False,
+                        resume_download=True)
                 
                 # Combine and delete splits
                 actually_combine_files(default_path, selected_model, split_files)
             else:
-                hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
+                hf_hub_download(
+                    repo_id=repo_id,
+                    filename=selected_model,
+                    local_dir=default_path,
+                    local_dir_use_symlinks=False,
+                    resume_download=True)
 
             model_path = download_path
         
@@ -187,7 +197,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
                 
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env=env_vars, check=True)
+                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
                 except subprocess.CalledProcessError as e:
                     print(f"Error during installation with {backend}: {e}")
             
