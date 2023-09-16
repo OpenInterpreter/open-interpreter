@@ -30,4 +30,3 @@ misc/
 
 # Ignore litellm_uuid.txt
 litellm_uuid.txt
-.history/
