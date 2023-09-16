@@ -356,8 +356,6 @@ class Interpreter:
       "name": "skill_loader",
       "content": return_str
     })
-    # Go around again
-    self.respond()
 
   def handle_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
