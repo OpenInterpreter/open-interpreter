@@ -1,3 +1,4 @@
+import json
 from rich.live import Live
 from rich.panel import Panel
 from rich.box import MINIMAL
@@ -90,3 +91,32 @@ class CodeBlock:
     # Update the live display
     self.live.update(group)
     self.live.refresh()
+
+  # Convert the object to a dictionary
+  def to_dict(self):
+    return {
+      "language": self.language,
+      "output": self.output,
+      "code": self.code,
+      "active_line": self.active_line
+    }
+
+  # Create an object from a dictionary
+  @classmethod
+  def from_dict(cls, data):
+    obj = cls()
+    obj.language = data.get("language", "")
+    obj.output = data.get("output", "")
+    obj.code = data.get("code", "")
+    obj.active_line = data.get("active_line")
+    return obj
+
+  # Export the object to a JSON string
+  def to_json(self):
+    return json.dumps(self.to_dict())
+
+  # Create an object from a JSON string
+  @classmethod
+  def from_json(cls, json_str):
+    data = json.loads(json_str)
+    return cls.from_dict(data)

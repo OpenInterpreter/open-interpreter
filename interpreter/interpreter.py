@@ -18,12 +18,12 @@ Especially if you have ideas and **EXCITEMENT** about the future of this project
 - killian
 """
 
-from .cli import cli
-from .utils import merge_deltas, parse_partial_json
-from .message_block import MessageBlock
-from .code_block import CodeBlock
-from .code_interpreter import CodeInterpreter
-from .get_hf_llm import get_hf_llm
+from cli import cli
+from utils import merge_deltas, parse_partial_json
+from message_block import MessageBlock
+from code_block import CodeBlock
+from code_interpreter import CodeInterpreter
+from get_hf_llm import get_hf_llm
 
 import os
 import time
@@ -92,6 +92,7 @@ class Interpreter:
 
   def __init__(self):
     self.messages = []
+    self.code_blocks = []
     self.temperature = 0.001
     self.api_key = None
     self.auto_run = False
@@ -230,6 +231,7 @@ class Interpreter:
       "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%export_code_block [path]": "Saves code blocks to a specified JSON path. If no path is provided, it defaults to 'code_block.json'.",
       "%help": "Show this help message.",
     }
 
@@ -250,7 +252,6 @@ class Interpreter:
 
     print(Markdown("".join(full_message)))
 
-
   def handle_debug(self, arguments=None):
     if arguments == "" or arguments == "true":
         print(Markdown("> Entered debug mode"))
@@ -269,6 +270,17 @@ class Interpreter:
   def default_handle(self, arguments):
     print(Markdown("> Unknown command"))
     self.handle_help(arguments)
+
+  def handle_export_code(self, json_path):
+    print("handle export code")
+    if json_path == "":
+      json_path = "code_block.json"
+    if not json_path.endswith(".json"):
+      json_path += ".json"
+    with open(json_path, 'w') as f:
+      json.dump(self.code_blocks, f, indent=2)
+
+    print(Markdown(f"> code block json export to {os.path.abspath(json_path)}"))
 
   def handle_save_message(self, json_path):
     if json_path == "":
@@ -298,6 +310,7 @@ class Interpreter:
       "reset": self.handle_reset,
       "save_message": self.handle_save_message,
       "load_message": self.handle_load_message,
+      "export_code_block": self.handle_export_code,
       "undo": self.handle_undo,
     }
 
@@ -931,6 +944,7 @@ class Interpreter:
           code_interpreter = self.code_interpreters[language]
 
           # Let this Code Interpreter control the active_block
+          self.code_blocks.append(self.active_block.to_dict())
           code_interpreter.active_block = self.active_block
           code_interpreter.run()
 
@@ -962,3 +976,5 @@ class Interpreter:
 
   def _print_welcome_message(self):
     print("", Markdown("●"), "", Markdown(f"\nWelcome to **Open Interpreter**.\n"), "")
+
+cli(Interpreter())
