@@ -132,7 +132,7 @@ class Interpreter:
 
   def get_info_for_system_message(self):
     """
-    Gets relevent information for the system message.
+    Gets relevant information for the system message.
     """
 
     info = ""
