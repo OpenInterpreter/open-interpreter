@@ -448,45 +448,55 @@ class AddLinePrints(ast.NodeTransformer):
         return new_node
 
 def add_active_line_prints_to_python(code):
-    """
-    Add print statements indicating line numbers to a python string.
-    """
-    tree = ast.parse(code)
-    transformer = AddLinePrints()
-    new_tree = transformer.visit(tree)
-    return ast.unparse(new_tree)
+    #print ('running add_active_line_prints_to_python') 
+    try:
+        """
+        Add print statements indicating line numbers to a python string.
+        """
+        tree = ast.parse(code)
+        transformer = AddLinePrints()
+        new_tree = transformer.visit(tree)
+        return ast.unparse(new_tree)
+    except:
+        print ('error in add_active_line_prints_to_python') 
+        return add_active_line_prints_to_python("print('CODE PARSE ERROR - INVALID SYNTAX?')")
 
+# wrapped in try block to avoid uncaught invalid syntax errors stopping open-interpreter
 def wrap_in_try_except(code):
-    # Add import traceback
-    code = "import traceback\n" + code
+    try:
+        # Add import traceback
+        code = "import traceback\n" + code
 
-    # Parse the input code into an AST
-    parsed_code = ast.parse(code)
+        # Parse the input code into an AST
+        parsed_code = ast.parse(code)
 
-    # Wrap the entire code's AST in a single try-except block
-    try_except = ast.Try(
-        body=parsed_code.body,
-        handlers=[
-            ast.ExceptHandler(
-                type=ast.Name(id="Exception", ctx=ast.Load()),
-                name=None,
-                body=[
-                    ast.Expr(
-                        value=ast.Call(
-                            func=ast.Attribute(value=ast.Name(id="traceback", ctx=ast.Load()), attr="print_exc", ctx=ast.Load()),
-                            args=[],
-                            keywords=[]
-                        )
-                    ),
-                ]
-            )
-        ],
-        orelse=[],
-        finalbody=[]
-    )
+        # Wrap the entire code's AST in a single try-except block
+        try_except = ast.Try(
+            body=parsed_code.body,
+            handlers=[
+                ast.ExceptHandler(
+                    type=ast.Name(id="Exception", ctx=ast.Load()),
+                    name=None,
+                    body=[
+                        ast.Expr(
+                            value=ast.Call(
+                                func=ast.Attribute(value=ast.Name(id="traceback", ctx=ast.Load()), attr="print_exc", ctx=ast.Load()),
+                                args=[],
+                                keywords=[]
+                            )
+                        ),
+                    ]
+                )
+            ],
+            orelse=[],
+            finalbody=[]
+        )
 
-    # Assign the try-except block as the new body
-    parsed_code.body = [try_except]
+        # Assign the try-except block as the new body
+        parsed_code.body = [try_except]
 
-    # Convert the modified AST back to source code
-    return ast.unparse(parsed_code)
+        # Convert the modified AST back to source code
+        return ast.unparse(parsed_code)
+    except:
+        print ('error in wrap_in_try_except') 
+        return wrap_in_try_except("print('CODE PARSE ERROR - INVALID SYNTAX?')")
