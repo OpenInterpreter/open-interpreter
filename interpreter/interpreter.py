@@ -397,7 +397,11 @@ class Interpreter:
 
         # Use `readline` to let users up-arrow to previous user messages,
         # which is a common behavior in terminals.
-        readline.add_history(user_input)
+        try:
+          readline.add_history(user_input)
+        except:
+          # Sometimes this doesn't work (https://stackoverflow.com/questions/10313765/simple-swig-python-example-in-vs2008-import-error-internal-pyreadline-erro)
+          pass
 
         # If the user input starts with a `%`
         if user_input.startswith("%"):
