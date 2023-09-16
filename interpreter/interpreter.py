@@ -299,12 +299,20 @@ class Interpreter:
 
   def handle_save_skill(self, json_path=""):
     print(Markdown("> I am going to extract a skill json object from the above conversation history."))
-    self.messages.append({"role": "user", "content": skill_extractor_prompt})
+    self.messages.append({"role": "system", "content": skill_extractor_prompt})
     orig_function = self.functions.pop()
     self.functions.append(skill_extractor_function_schema)
     self.respond()
-    skill_json = self.messages.pop().get("function_call", {}).get("parsed_arguments", {})
+    reply = self.messages.pop()
     self.messages.pop() # pop sys instruction
+    skill_json = reply.get("function_call", {}).get("parsed_arguments", {})
+    if len(skill_json) == 0:
+      content = reply.get("content", "")
+      if content == "":
+        print(Markdown("> No skill json object extracted. saved failture"))
+        return
+      skill_json = json.loads(content)
+
     self.functions.append(orig_function)
     skill_metadata = {
       "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),

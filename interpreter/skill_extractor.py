@@ -7,8 +7,9 @@ from .code_block import CodeBlock
 import json
 
 
-skill_extractor_prompt = """Extract one skill object from a conversation history, which is a list of messages.\nFollow the guidelines below:\n1. Only extract the properties mentioned in the 'extract_formmated_skill' function
-
+skill_extractor_prompt = """Extract one skill object from a conversation history, which is a list of messages.
+Follow the guidelines below:
+1. Only extract the properties mentioned in the 'extract_formmated_skill' function
 """
 
 skill_extractor_function_schema = {
@@ -109,7 +110,7 @@ default_skill_lib_path = os.path.expanduser("~") + "/.cache/open_interpreter/ski
 
 def save_skill_to_library(skill_json, save_path):
   if save_path == "":
-    save_path = default_skill_lib_path + skill_json['skill_name'] + ".json"
+    save_path = default_skill_lib_path + skill_json.get("skill_name", "no_skill_name_yet") + ".json"
   if not os.path.exists(os.path.dirname(save_path)):
     os.makedirs(os.path.dirname(save_path))
   with open(save_path, 'w') as f:
