@@ -24,6 +24,13 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from .skill_extractor import (
+    skill_extractor_function_schema, 
+    get_skill_from_library, 
+    print_format_skill,
+    skill_extractor_prompt,
+    save_skill_to_library
+)
 
 import os
 import time
@@ -107,6 +114,7 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    self.functions = [function_schema]
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -227,6 +235,8 @@ class Interpreter:
       "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%save_skill [path]": "Use reflection agent to construct a skill json object and save it to a specified JSON path. If no path is provided, it defaults to '~/.cache/open_interpreter/skill_library/{skill_name}.json'.",
+      "%load_skill [path]": "Loads a skill json object from a specified JSON path. If no path is provided, it defaults to list skills in '~/.cache/open_interpreter/skill_library/'.",
       "%help": "Show this help message.",
     }
 
@@ -287,6 +297,68 @@ class Interpreter:
 
     print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
 
+  def handle_save_skill(self, json_path=""):
+    print(Markdown("> I am going to extract a skill json object from the above conversation history."))
+    self.messages.append({"role": "user", "content": skill_extractor_prompt})
+    orig_function = self.functions.pop()
+    self.functions.append(skill_extractor_function_schema)
+    self.respond()
+    skill_json = self.messages.pop().get("function_call", {}).get("parsed_arguments", {})
+    self.messages.pop() # pop sys instruction
+    self.functions.append(orig_function)
+    skill_metadata = {
+      "created_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+      "author": getpass.getuser(),
+      "updated_at": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+      "usage_count": 0,
+    }
+    skill_json["skill_metadata"] = skill_metadata
+    skill_json["conversation_history"] = self.messages
+    json_path = save_skill_to_library(skill_json, json_path)
+    print(Markdown(f"> your skill json export to {os.path.abspath(json_path)}, you can use `%load_skill [json_path]` to load it"))
+    active_block, return_str = print_format_skill(skill_json)
+    self.code_interpreters[active_block.language] = CodeInterpreter(active_block.language, self.debug_mode)
+    code_interpreter = self.code_interpreters[active_block.language]
+    self.active_block = active_block
+    code_interpreter.active_block = self.active_block
+    code_interpreter.run()
+    skill_name = skill_json["skill_name"]
+    self.active_block.end()
+    self.active_block = None
+    print(Markdown(f"> {skill_name} run successfully"))
+
+  def handle_load_skill(self, json_path=""):
+    if json_path == "":
+      json_path = get_skill_from_library()
+      if json_path == "":
+        return
+    if not os.path.exists(json_path) or not json_path.endswith(".json"):
+      print(Markdown("> Invalid skill json path."))
+      return
+    with open(json_path, 'r') as f:
+      skill_obj = json.load(f)
+    print(Markdown(f"> your skill json loaded from {os.path.abspath(json_path)}"))
+    active_block, return_str = print_format_skill(skill_obj)
+    self.active_block = active_block
+    self.code_interpreters[active_block.language] = CodeInterpreter(active_block.language, self.debug_mode)
+    code_interpreter = self.code_interpreters[active_block.language]
+    # Let this Code Interpreter control the active_block
+    code_interpreter.active_block = self.active_block
+    code_interpreter.run()
+    skill_name = skill_obj["skill_name"]
+    print(Markdown(f"> {skill_name} run successfully"))
+    skill_obj["skill_metadata"]["usage_count"] += 1
+    # End the active_block
+    self.active_block.end()
+
+    self.messages.append({
+      "role": "function",
+      "name": "skill_loader",
+      "content": return_str
+    })
+    # Go around again
+    self.respond()
+
   def handle_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
     switch = {
@@ -296,6 +368,8 @@ class Interpreter:
       "save_message": self.handle_save_message,
       "load_message": self.handle_load_message,
       "undo": self.handle_undo,
+      "save_skill": self.handle_save_skill,
+      "load_skill": self.handle_load_skill,
     }
 
     user_input = user_input[1:].strip()  # Capture the part after the `%`
@@ -601,7 +675,7 @@ class Interpreter:
               response = litellm.completion(
                   f"azure/{self.azure_deployment_name}",
                   messages=messages,
-                  functions=[function_schema],
+                  functions=self.functions,
                   temperature=self.temperature,
                   stream=True,
                   )
@@ -612,7 +686,7 @@ class Interpreter:
                   api_base=self.api_base,
                   model = "custom/" + self.model,
                   messages=messages,
-                  functions=[function_schema],
+                  functions=self.functions,
                   stream=True,
                   temperature=self.temperature,
                 )
@@ -621,7 +695,7 @@ class Interpreter:
                 response = litellm.completion(
                   model=self.model,
                   messages=messages,
-                  functions=[function_schema],
+                  functions=self.functions,
                   stream=True,
                   temperature=self.temperature,
                 )
@@ -913,6 +987,9 @@ class Interpreter:
             return
 
           # Create or retrieve a Code Interpreter for this language
+          if self.messages[-1]["function_call"]["name"] != "run_code":
+            self.active_block.end()
+            return
           language = self.messages[-1]["function_call"]["parsed_arguments"][
             "language"]
           if language not in self.code_interpreters:

@@ -139,6 +139,15 @@ interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
+### Save and Load a Skill
+```python
+interpreter.auto_run
+interpreter.chat("Help me calculate how many prime numbers there are before 9123, using an efficient algorithm, such as the Euler's Sieve.")
+interpreter.handle_save_skill() # you can input your skill json path, default is ~/.cache/open-interpreter/skill_library/{skill_name}.json
+interpreter.reset() # remove messages
+interpreter.handle_load_skill()
+```
+
 ### Customize System Message
 
 You can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
@@ -236,6 +245,8 @@ enters debug mode. With 'false', it exits debug mode.
 provided, it defaults to 'messages.json'.  
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
  is provided, it defaults to 'messages.json'.  
+ • `%save_skill [path]`: Use reflection agent to construct a skill json object and save it to a specified JSON path. If no path is provided, it defaults to '~/.cache/open_interpreter/skill_library/{skill_name}.json'.  
+ • `%load_message [path]`: Loads a skill json object from a specified JSON path. If no path is provided, it defaults to list skills in '~/.cache/open_interpreter/skill_library/'."
  • `%help`: Show the help message.
 
 Feel free to try out these commands and let us know your feedback!
