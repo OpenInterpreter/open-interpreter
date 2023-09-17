@@ -33,6 +33,7 @@ import platform
 import openai
 import litellm
 import pkg_resources
+from pathlib import Path
 
 import getpass
 import requests
@@ -175,6 +176,9 @@ class Interpreter:
         # For someone, this failed for a super secure SSL reason.
         # Since it's not stricly necessary, let's worry about that another day. Should probably log this somehow though.
         pass
+    
+    if self.use_instructions:
+      info += "\n\n" + self.get_instructions_for_system_message(query)
 
     elif self.local:
 
@@ -185,7 +189,35 @@ class Interpreter:
     return info
 
   def get_instructions_for_system_message(self):
-      pass
+    instructions = get_relevant_instructions()
+    pass
+
+  def get_relevant_instructions(query: str):
+    pass
+
+  def create_instructions_db(self):
+    folder_path = Path("instructions")
+    if not folder_path.exists():
+      os.mkdir(folder_path)
+
+    embeddings_data = []
+    texts_data = {}
+    for idx, filename in enumerate(folder_path.glob("**/*.md")):
+      with open(filename) as f:
+        full_text = f.read().strip()
+        
+        response = openai.Embedding.create(
+            input=full_text,
+            model="text-embedding-ada-002"
+        )
+        embeddings_data.append({"id": str(idx), "embedding": response["data"][0]["embedding"]})
+        texts_data[str(idx)] = full_text
+
+    with open(Path(folder_path, "vector_db.json"), "wt") as f:
+      json.dump({"embeddings": embeddings_data}, f)
+
+    with open(Path(folder_path, "text_db.json"), "wt") as f:
+      json.dump({"texts": texts_data}, f)
 
   def reset(self):
     """

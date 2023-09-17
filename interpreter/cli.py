@@ -205,9 +205,10 @@ def cli(interpreter):
     # THIS is more in line with the future. You just say the model you want by name:
     interpreter.model = models[chosen_param]
     interpreter.local = True
+
   if args.instructions:
     interpreter.use_instructions = True
-
+    interpreter.create_instructions_db()
 
   # Run the chat method
   interpreter.chat()
