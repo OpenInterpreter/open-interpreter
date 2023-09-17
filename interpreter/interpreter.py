@@ -34,6 +34,7 @@ import openai
 import litellm
 import pkg_resources
 from pathlib import Path
+from sklearn.metrics.pairwise import cosine_similarity
 
 import getpass
 import requests
@@ -93,6 +94,7 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
+instructions_folder_path = Path("instructions")
 
 class Interpreter:
 
@@ -188,21 +190,51 @@ class Interpreter:
 
     return info
 
-  def get_instructions_for_system_message(self):
-    instructions = get_relevant_instructions()
-    pass
+  def get_instructions_for_system_message(self, *args, **kwargs):
+    relevant_instructions = self.get_relevant_instructions(*args, **kwargs)["instructions"]
+    return "# Instructions\n" + "\n---\n".join(relevant_instructions) + "\n **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above instructions if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the instructions above if they are relevent to the task **directly in your plan.**"
 
-  def get_relevant_instructions(query: str):
-    pass
+  def get_relevant_instructions(self, query: str, num_instructions: int = 2):
+
+    # Load the saved embeddings
+    with open(Path(instructions_folder_path, 'vector_db.json'), 'rt') as f:
+      embedding_data = json.load(f)
+      embeddings = [item['embedding'] for item in embedding_data['embeddings']]
+
+    # Load the saved texts
+    with open(Path(instructions_folder_path, 'text_db.json'), 'rt') as f:
+      texts = json.load(f)['texts']
+
+    response = openai.Embedding.create(input=json.dumps(query),
+                                       model="text-embedding-ada-002")
+    query_embedding = response['data'][0]['embedding']
+    
+    # Compute cosine similarity
+    similarities = cosine_similarity([query_embedding], embeddings)[0]
+
+    # Get the indices of the embeddings sorted by similarity
+    sorted_indices = similarities.argsort()[::-1]
+    
+    # Collect unique top instruction IDs
+    top_ids = set()
+    top_instructions = []
+    for idx in sorted_indices:
+      id_ = embedding_data['embeddings'][idx]['id']
+      if id_ not in top_ids:
+        top_instructions.append(texts[str(id_)])
+        top_ids.add(id_)
+        if len(top_instructions) == num_instructions:
+          break
+
+    return {"instructions": top_instructions}
 
   def create_instructions_db(self):
-    folder_path = Path("instructions")
-    if not folder_path.exists():
-      os.mkdir(folder_path)
+    if not instructions_folder_path.exists():
+      instructions_folder_path.mkdir()
 
     embeddings_data = []
     texts_data = {}
-    for idx, filename in enumerate(folder_path.glob("**/*.md")):
+    for idx, filename in enumerate(instructions_folder_path.glob("**/*.md")):
       with open(filename) as f:
         full_text = f.read().strip()
         
@@ -213,18 +245,18 @@ class Interpreter:
         embeddings_data.append({"id": str(idx), "embedding": response["data"][0]["embedding"]})
         texts_data[str(idx)] = full_text
 
-    with open(Path(folder_path, "vector_db.json"), "wt") as f:
+    with open(Path(instructions_folder_path, "vector_db.json"), "wt") as f:
       json.dump({"embeddings": embeddings_data}, f)
 
-    with open(Path(folder_path, "text_db.json"), "wt") as f:
+    with open(Path(instructions_folder_path, "text_db.json"), "wt") as f:
       json.dump({"texts": texts_data}, f)
 
   def reset(self):
     """
     Resets the interpreter.
     """
-    self.messages = []
-    self.code_interpreters = {}
+    self.messages: list[dict[str, str]] = []
+    self.code_interpreters: dict[str, str] = {}
 
   def load(self, messages):
     self.messages = messages
