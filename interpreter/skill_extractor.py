@@ -111,8 +111,13 @@ default_skill_lib_path = os.path.expanduser("~") + "/.cache/open_interpreter/ski
 def save_skill_to_library(skill_json, save_path):
   if save_path == "":
     save_path = default_skill_lib_path + skill_json.get("skill_name", "no_skill_name_yet") + ".json"
-  if not os.path.exists(os.path.dirname(save_path)):
-    os.makedirs(os.path.dirname(save_path))
+  if not save_path.endswith(".json"):
+    if not os.path.exists(save_path):
+      os.makedirs(save_path)
+    save_path += skill_json.get("skill_name", "no_skill_name_yet") + ".json"
+  else:
+    if not os.path.exists(os.path.dirname(save_path)):
+      os.makedirs(os.path.dirname(save_path))
   with open(save_path, 'w') as f:
     json.dump(skill_json, f, indent=2)
   return save_path
