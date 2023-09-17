@@ -142,7 +142,6 @@ def get_skill_from_library():
 
 
 def print_format_skill(skill_obj):
-  return_str = ""
   table = Table(title="Skill Details", header_style="bold magenta", show_lines=True)
 
   table.add_column("Name", style="cyan", no_wrap=True)
@@ -156,7 +155,6 @@ def print_format_skill(skill_obj):
   table.add_row("Program Language", skill_obj.get('skill_program_language', 'N/A'))
   
   print(table)
-  return_str += str(table) + "\n"
 
   table = Table(title="Parameters", header_style="bold magenta", show_lines=True)
   table.add_column("Parameters", style="cyan", no_wrap=True)
@@ -169,11 +167,6 @@ def print_format_skill(skill_obj):
     table.add_row(param.get('param_name', 'N/A'), param.get('param_type', 'N/A'), param.get('param_description', 'N/A'), str(param.get('param_required', 'N/A')), param.get('param_default', 'N/A'))
   
   print(table)
-  return_str += str(table) + "\n"
-
-  active_block = CodeBlock()
-  active_block.language = skill_obj.get('skill_program_language', 'text').lower()
-  active_block.code = skill_obj.get('skill_code', '')
 
   table = Table(title="Metadata", header_style="bold magenta", show_lines=True)
   table.add_column("Metadata", style="cyan", no_wrap=True)
@@ -184,8 +177,6 @@ def print_format_skill(skill_obj):
   table.add_row("Usage Count", str(skill_obj['skill_metadata']['usage_count']))
   
   print(table)
-
-  return active_block, return_str
 
 
 # TODO: handle test writer agent

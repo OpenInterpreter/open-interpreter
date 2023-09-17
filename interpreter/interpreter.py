@@ -324,10 +324,12 @@ class Interpreter:
     skill_json["conversation_history"] = self.messages
     json_path = save_skill_to_library(skill_json, json_path)
     print(Markdown(f"> your skill json export to {os.path.abspath(json_path)}, you can use `%load_skill [json_path]` to load it"))
-    active_block, return_str = print_format_skill(skill_json)
-    self.code_interpreters[active_block.language] = CodeInterpreter(active_block.language, self.debug_mode)
-    code_interpreter = self.code_interpreters[active_block.language]
-    self.active_block = active_block
+    print_format_skill(skill_json)
+    self.active_block = CodeBlock()
+    self.active_block.language = skill_json.get('skill_program_language', 'text').lower()
+    self.active_block.code = skill_json.get('skill_code', '')
+    self.code_interpreters[self.active_block.language] = CodeInterpreter(self.active_block.language, self.debug_mode)
+    code_interpreter = self.code_interpreters[self.active_block.language]
     code_interpreter.active_block = self.active_block
     code_interpreter.run()
     skill_name = skill_json["skill_name"]
@@ -344,19 +346,21 @@ class Interpreter:
       print(Markdown("> Invalid skill json path."))
       return
     with open(json_path, 'r') as f:
-      skill_obj = json.load(f)
+      skill_json = json.load(f)
     print(Markdown(f"> your skill json loaded from {os.path.abspath(json_path)}"))
-    active_block, return_str = print_format_skill(skill_obj)
-    self.active_block = active_block
-    self.code_interpreters[active_block.language] = CodeInterpreter(active_block.language, self.debug_mode)
-    code_interpreter = self.code_interpreters[active_block.language]
+    print_format_skill(skill_json)
+    self.active_block = CodeBlock()
+    self.active_block.language = skill_json.get('skill_program_language', 'text').lower()
+    self.active_block.code = skill_json.get('skill_code', '')
+    self.code_interpreters[self.active_block.language] = CodeInterpreter(self.active_block.language, self.debug_mode)
+    code_interpreter = self.code_interpreters[self.active_block.language]
     # Let this Code Interpreter control the active_block
     code_interpreter.active_block = self.active_block
     code_interpreter.run()
-    skill_name = skill_obj["skill_name"]
+    skill_name = skill_json.get("skill_name")
     print(Markdown(f"> {skill_name} run successfully"))
-    skill_obj["skill_metadata"]["usage_count"] += 1
-    save_skill_to_library(skill_obj, json_path)
+    skill_json["skill_metadata"]["usage_count"] += 1
+    save_skill_to_library(skill_json, json_path)
     # End the active_block
     self.active_block.end()
 
@@ -365,14 +369,14 @@ class Interpreter:
       "content": "",
       "function_call": {
         "name": "run_code",
-        "arguments": json.dumps({"language": active_block.language, "code": active_block.code}),
+        "arguments": json.dumps({"language": self.active_block.language, "code": self.active_block.code}),
       }
     })
 
     self.messages.append({
       "role": "function",
       "name": "run_code",
-      "content": active_block.output if active_block.output else "No output"
+      "content": self.active_block.output if self.active_block.output else "No output"
     })
 
   def handle_command(self, user_input):
