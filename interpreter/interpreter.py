@@ -489,7 +489,6 @@ class Interpreter:
       
       for _ in range(3):  # 3 retries
         try:
-
             if self.use_azure:
               response = litellm.completion(
                   f"azure/{self.azure_deployment_name}",
@@ -503,22 +502,27 @@ class Interpreter:
                 # The user set the api_base. litellm needs this to be "custom/{model}"
                 response = litellm.completion(
                   api_base=self.api_base,
-                  model = "custom/" + self.model,
+                  model = "custom_openai/" + self.model,
                   messages=messages,
                   functions=[function_schema],
                   stream=True,
                   temperature=self.temperature,
                 )
               else:
-                # Normal OpenAI call
+                def logger_fn(output):
+                  print(output)
+                if "litellm_proxy" in self.model: 
+                  litellm.api_base = "https://proxy.litellm.ai"
+                  # litellm.api_base = "http://0.0.0.0:8080"
+                  self.model = self.model.replace("litellm_proxy", "openai")
                 response = litellm.completion(
                   model=self.model,
                   messages=messages,
                   functions=[function_schema],
                   stream=True,
                   temperature=self.temperature,
+                  logger_fn=logger_fn
                 )
-
             break
         except:
             if self.debug_mode:
@@ -626,11 +630,10 @@ class Interpreter:
 
       # Accumulate deltas into the last message in messages
       self.messages[-1] = merge_deltas(self.messages[-1], delta)
-
       # Check if we're in a function call
-      if not self.local:
+      if not self.local and self.model in litellm.models_by_provider["openai"]:
         condition = "function_call" in self.messages[-1]
-      elif self.local:
+      elif self.local or self.model not in litellm.models_by_provider["openai"]:
         # Since Code-Llama can't call functions, we just check if we're in a code block.
         # This simply returns true if the number of "```" in the message is odd.
         if "content" in self.messages[-1]:
@@ -638,7 +641,7 @@ class Interpreter:
         else:
           # If it hasn't made "content" yet, we're certainly not in a function call.
           condition = False
-
+      
       if condition:
         # We are in a function call.
 
@@ -662,7 +665,7 @@ class Interpreter:
 
         # Now let's parse the function's arguments:
 
-        if not self.local:
+        if not self.local and self.model in litellm.models_by_provider["openai"]:
           # gpt-4
           # Parse arguments and save to parsed_arguments, under function_call
           if "arguments" in self.messages[-1]["function_call"]:
@@ -673,7 +676,7 @@ class Interpreter:
               self.messages[-1]["function_call"][
                 "parsed_arguments"] = new_parsed_arguments
 
-        elif self.local:
+        elif self.local or self.model not in litellm.models_by_provider["openai"]:
           # Code-Llama
           # Parse current code block and save to parsed_arguments, under function_call
           if "content" in self.messages[-1]:
@@ -685,9 +688,8 @@ class Interpreter:
               blocks = content.split("```")
 
               current_code_block = blocks[-1]
-
-              lines = current_code_block.split("\n")
-
+              import re
+              lines = re.split(r'\\n|\n', current_code_block)
               if content.strip() == "```": # Hasn't outputted a language yet
                 language = None
               else:
@@ -714,14 +716,13 @@ class Interpreter:
               self.messages[-1]["function_call"] = {}
 
             self.messages[-1]["function_call"]["parsed_arguments"] = arguments
-
       else:
         # We are not in a function call.
 
         # Check if we just left a function call
         if in_function_call == True:
 
-          if self.local:
+          if self.local or self.model not in litellm.models_by_provider["openai"]:
             # This is the same as when gpt-4 gives finish_reason as function_call.
             # We have just finished a code block, so now we should run it.
             llama_function_call_finished = True
