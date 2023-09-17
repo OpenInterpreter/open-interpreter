@@ -112,6 +112,7 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    self.use_instructions = False
 
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -182,6 +183,9 @@ class Interpreter:
       # We make references in system_message.txt to the "function" it can call, "run_code".
 
     return info
+
+  def get_instructions_for_system_message(self):
+      pass
 
   def reset(self):
     """

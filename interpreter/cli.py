@@ -118,6 +118,10 @@ def cli(interpreter):
                       action='store_true',
                       help='display current Open Interpreter version')
 
+  parser.add_argument('--instructions',
+                      action='store_true',
+                      help='use custom instructions to assist with code generation')
+
   args = parser.parse_args()
 
 
@@ -201,6 +205,8 @@ def cli(interpreter):
     # THIS is more in line with the future. You just say the model you want by name:
     interpreter.model = models[chosen_param]
     interpreter.local = True
+  if args.instructions:
+    interpreter.use_instructions = True
 
 
   # Run the chat method
