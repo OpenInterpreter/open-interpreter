@@ -356,13 +356,23 @@ class Interpreter:
     skill_name = skill_obj["skill_name"]
     print(Markdown(f"> {skill_name} run successfully"))
     skill_obj["skill_metadata"]["usage_count"] += 1
+    save_skill_to_library(skill_obj, json_path)
     # End the active_block
     self.active_block.end()
 
     self.messages.append({
+      "role": "assistant",
+      "content": "",
+      "function_call": {
+        "name": "run_code",
+        "arguments": json.dumps({"language": active_block.language, "code": active_block.code}),
+      }
+    })
+
+    self.messages.append({
       "role": "function",
-      "name": "skill_loader",
-      "content": return_str
+      "name": "run_code",
+      "content": active_block.output if active_block.output else "No output"
     })
 
   def handle_command(self, user_input):

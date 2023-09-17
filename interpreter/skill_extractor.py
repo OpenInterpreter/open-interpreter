@@ -137,8 +137,6 @@ def get_skill_from_library():
 
 
 def print_format_skill(skill_obj):
-  # print in markdown format
-  # 使用rich的Table来重写打印
   return_str = ""
   table = Table(title="Skill Details", header_style="bold magenta", show_lines=True)
 
