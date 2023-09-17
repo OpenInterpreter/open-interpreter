@@ -256,6 +256,12 @@ INTERPRETER_CLI_USE_AZURE=False
 
 You can modify these values in the .env file to change the default behavior of the Open Interpreter.
 
+### Use Custom Instructions
+
+When you want to more accurately execute intended behavior through Open Interpreter, you can provide custom instructions.
+
+By adding the `--instructions` flag, Open Interpreter search for related instructions from the `instructions` folder's `.md` files and reflect them in code generation.
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
