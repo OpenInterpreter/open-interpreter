@@ -36,11 +36,16 @@ import pkg_resources
 
 import getpass
 import requests
-import readline
 import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
 from rich.rule import Rule
+
+try:
+  import readline
+except:
+  # Sometimes this doesn't work (https://stackoverflow.com/questions/10313765/simple-swig-python-example-in-vs2008-import-error-internal-pyreadline-erro)
+  pass
 
 # Function schema for gpt-4
 function_schema = {
@@ -132,7 +137,7 @@ class Interpreter:
 
   def get_info_for_system_message(self):
     """
-    Gets relevent information for the system message.
+    Gets relevant information for the system message.
     """
 
     info = ""
@@ -397,10 +402,14 @@ class Interpreter:
 
         # Use `readline` to let users up-arrow to previous user messages,
         # which is a common behavior in terminals.
-        readline.add_history(user_input)
+        try:
+          readline.add_history(user_input)
+        except:
+          # Sometimes this doesn't work (https://stackoverflow.com/questions/10313765/simple-swig-python-example-in-vs2008-import-error-internal-pyreadline-erro)
+          pass
 
-        # If the user input starts with a `%` or `/`, it's a command
-        if user_input.startswith("%") or user_input.startswith("/"):
+        # If the user input starts with a `%`
+        if user_input.startswith("%"):
           self.handle_command(user_input)
           continue
 
