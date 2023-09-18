@@ -8,3 +8,10 @@
 - [ ] Windows
 - [ ] MacOS
 - [ ] Linux
+
+### My model is the following:
+- [ ] GPT4
+- [ ] GPT3
+- [ ] Llama 7B
+- [ ] Llama 13B
+- [ ] Llama 34B
