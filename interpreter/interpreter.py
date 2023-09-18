@@ -164,8 +164,12 @@ class Interpreter:
                               if config['model_name'].strip() and config['model_path'].strip():
                                   return config['model_name'], config['model_path']
           return None, None
-      except:
-          return None, None
+      except Exception as e:
+          print(f"An error occurred while loading the model configuration: {str(e)}")
+          if self.debug_mode:
+              traceback.print_exc()
+          error = traceback.format_exc()
+          raise Exception(error)
       
 
   def get_info_for_system_message(self):
@@ -352,22 +356,23 @@ class Interpreter:
     # ^ verify_api_key may set self.local to True, so we run this as an 'if', not 'elif':
     if self.local:
 
-      # Load the model configuration
-      model_name, model_path = self.load_model_config()
-
-      # If a model configuration was loaded, use it to set the llama_instance
-      if model_name is not None and model_path is not None:
-          self.model = model_name
-          self.model_path = model_path
-          print(f"Loading local model from saved state \nModel: '{self.model}',\nPath: '{self.model_path}'")
-          self.llama_instance,self.model_path = get_hf_llm(self.model, self.debug_mode, self.context_window,self.model_path)
-
       # Code-Llama
       if self.llama_instance == None:
         
         # Find or install Code-Llama
         try:
-          self.llama_instance,self.model_path = get_hf_llm(self.model, self.debug_mode, self.context_window)
+          # 1. Try to load model from saved config
+          model_name, model_path = self.load_model_config()
+
+          # If a model configuration was loaded, use it to set the llama_instance
+          if model_name is not None and model_path is not None:
+              self.model = model_name
+              self.model_path = model_path
+              print(f"Loading local model from saved state \nModel: '{self.model}',\nPath: '{self.model_path}'")
+              self.llama_instance,self.model_path = get_hf_llm(self.model, self.debug_mode, self.context_window,self.model_path)
+          else: #2. If config not found or model not found in config then try to install as new model.
+            self.llama_instance,self.model_path = get_hf_llm(self.model, self.debug_mode, self.context_window)
+          
           if self.llama_instance == None:
             # They cancelled.
             return
