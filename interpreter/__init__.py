@@ -1,4 +1,4 @@
-from .interpreter import Interpreter
+from .core.core import Interpreter
 import sys
 
 # This is done so when users `import interpreter`,
