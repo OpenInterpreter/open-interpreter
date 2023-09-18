@@ -9,7 +9,7 @@
 - [ ] MacOS
 - [ ] Linux
 
-### My model is the following:
+### AI Language Model (if applicable)
 - [ ] GPT4
 - [ ] GPT3
 - [ ] Llama 7B
