@@ -178,7 +178,7 @@ class Interpreter:
     elif self.local:
 
       # Tell Code-Llama how to run code.
-      info += "\n\nTo run code, write a fenced code block (i.e ```python, R or ```shell) in markdown. When you close it with ```, it will be run. You'll then be given its output."
+      info += "\n\nTo run code, write a fenced code block (i.e ```python, R or ```shell) in markdown. Whenever you are using bash, use ```shell. When you close it with ```, it will be run. You'll then be given its output."
       # We make references in system_message.txt to the "function" it can call, "run_code".
 
     return info
