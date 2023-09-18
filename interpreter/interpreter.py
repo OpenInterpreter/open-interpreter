@@ -98,6 +98,7 @@ class Interpreter:
     self.local = False
     self.model = "gpt-4"
     self.model_path = ""
+    self.model_config = "interpreter-model-config.json"
     self.debug_mode = False
     self.api_base = None # Will set it to whatever OpenAI wants
     self.context_window = 2000 # For local models only
@@ -131,8 +132,7 @@ class Interpreter:
     # modifies it according to command line flags, then runs chat.
     cli(self)
 
-
-  def save_model_config(self, model_name, model_path, config_file='model_config.json'):
+  def save_model_config(self, model_name, model_path):
       # Check if model_name and model_path are not empty
       if not model_name or not model_path:
           raise ValueError("Model name and model path cannot be empty.")
@@ -146,16 +146,24 @@ class Interpreter:
           }
           configs.append(config)
 
-          # Save configurations
-          with open(config_file, 'w') as file:
+          # Save configurations to user's home directory
+          home_dir = os.path.expanduser("~")
+          config_file_path = os.path.join(home_dir, self.model_config)
+          with open(config_file_path, 'w') as file:
               json.dump({'config': configs}, file)
       except:
-          traceback.print_exc()
+          if self.debug_mode:
+              traceback.print_exc()
+          error = traceback.format_exc()
+          raise Exception(error)
 
-  def load_model_config(self, config_file='model_config.json'):
+  def load_model_config(self):
       try:
-          if os.path.exists(config_file) and os.path.getsize(config_file) > 0:
-              with open(config_file, 'r') as file:
+          # Load configurations from user's home directory
+          home_dir = os.path.expanduser("~")
+          config_file_path = os.path.join(home_dir, self.model_config)
+          if os.path.exists(config_file_path) and os.path.getsize(config_file_path) > 0:
+              with open(config_file_path, 'r') as file:
                   configs = json.load(file)['config']
                   if configs:
                       for config in configs:
@@ -164,8 +172,7 @@ class Interpreter:
                               if config['model_name'].strip() and config['model_path'].strip():
                                   return config['model_name'], config['model_path']
           return None, None
-      except Exception as e:
-          print(f"An error occurred while loading the model configuration: {str(e)}")
+      except:
           if self.debug_mode:
               traceback.print_exc()
           error = traceback.format_exc()
