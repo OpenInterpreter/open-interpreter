@@ -287,10 +287,13 @@ class Interpreter:
       json_path = "messages.json"
     if not json_path.endswith(".json"):
       json_path += ".json"
-    with open(json_path, 'r') as f:
-      self.load(json.load(f))
+    if os.path.exists(json_path):
+      with open(json_path, 'r') as f:
+        self.load(json.load(f))
+      print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
+    else:
+      print(Markdown("No file found, please check the path and try again."))
 
-    print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
 
   def handle_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
