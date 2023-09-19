@@ -1,4 +1,3 @@
-
 # Open Interpreter
 ---
 <center>
@@ -6,6 +5,7 @@
 ![Discord](https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white)
 [![JA doc](https://img.shields.io/badge/ドキュメント-日本語-white.svg)](README_JA.md)
 [![ZH doc](https://img.shields.io/badge/文档-中文版-white.svg)](README_ZH.md)
+[![IN doc](https://img.shields.io/badge/Document-Hindi-white.svg)](README_IN.md)
 ![License](https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat)
 
 </center>
