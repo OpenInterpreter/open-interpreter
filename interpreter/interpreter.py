@@ -24,6 +24,7 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from openai.error import RateLimitError 
 
 import os
 import time
@@ -599,11 +600,14 @@ class Interpreter:
 
     # Make LLM call
     if not self.local:
+      
       # GPT
-      
+      max_attempts = 3  
+      attempts = 0  
       error = ""
-      
-      for _ in range(3):  # 3 retries
+
+      while attempts < max_attempts:
+        attempts += 1
         try:
 
             if self.use_azure:
@@ -636,7 +640,11 @@ class Interpreter:
                 )
 
             break
-        except:
+        except RateLimitError as rate_error:  # Catch the specific RateLimitError
+            print(Markdown(f"> We hit a rate limit. Cooling off for {attempts} seconds..."))
+            time.sleep(attempts)  
+            max_attempts += 1
+        except Exception as e:  # Catch other exceptions
             if self.debug_mode:
               traceback.print_exc()
             error = traceback.format_exc()
