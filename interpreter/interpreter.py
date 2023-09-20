@@ -34,6 +34,7 @@ import platform
 import openai
 import litellm
 import pkg_resources
+import uuid
 
 import getpass
 import requests
@@ -93,6 +94,8 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
+# Create an API Budget to prevent high spend
+
 
 class Interpreter:
 
@@ -113,7 +116,7 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
-
+    
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
@@ -389,6 +392,7 @@ class Interpreter:
 
     # Check if `message` was passed in by user
     if message:
+      print(f"user message: {message}")
       # If it was, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
       self.respond()
@@ -641,8 +645,40 @@ class Interpreter:
                   stream=True,
                   temperature=self.temperature,
                 )
-
             break
+        except litellm.BudgetExceededError as e:
+          print(f"Since your LLM API Budget limit was exceeded, you're being switched to local models. Budget: {litellm.max_budget} | Current Cost: {litellm._current_cost}")
+          
+          print(Markdown(
+                "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                    '')
+          time.sleep(2)
+          print(Rule(style="white"))
+
+
+
+          # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+          # AND ABOVE.
+          # This way, when folks hit interpreter --local, they get the same experience as before.
+          import inquirer
+
+          print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+
+          models = {
+              '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+              '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+              '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+          }
+
+          parameter_choices = list(models.keys())
+          questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+          answers = inquirer.prompt(questions)
+          chosen_param = answers['param']
+
+          # THIS is more in line with the future. You just say the model you want by name:
+          self.model = models[chosen_param]
+          self.local = True
+          continue
         except RateLimitError as rate_error:  # Catch the specific RateLimitError
             print(Markdown(f"> We hit a rate limit. Cooling off for {attempts} seconds..."))
             time.sleep(attempts)  
@@ -653,9 +689,12 @@ class Interpreter:
             error = traceback.format_exc()
             time.sleep(3)
       else:
-        raise Exception(error)
+        if self.local: 
+          pass
+        else:
+          raise Exception(error)
             
-    elif self.local:
+    if self.local:
       # Code-Llama
 
 
