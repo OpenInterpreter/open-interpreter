@@ -5,6 +5,7 @@ class SpeechAssistant:
     def __init__(self, wakeup_word="interpreter"):
         self.wakeup_word = wakeup_word
         self.speech_recognizer = SR.Recognizer()
+        # if os is windows use sapi5 else use nsss for mac os and espeak for linux
         self.engine = pyttsx3.init()
 
     def tts_and_play_audio(self, text):
