@@ -79,6 +79,11 @@ def cli(interpreter):
                       action='store_true',
                       default=LOCAL_RUN,
                       help='run fully local with code-llama')
+  parser.add_argument('-o',
+                      '--offline',
+                      action='store_true',
+                      default=False,
+                      help='if you want to run in offline (use if you have no internet)')
   parser.add_argument(
                       '--falcon',
                       action='store_true',
@@ -138,6 +143,8 @@ def cli(interpreter):
   # Modify interpreter according to command line flags
   if args.yes:
     interpreter.auto_run = True
+  if args.offline:
+    interpreter.offline = True
   if args.fast:
     interpreter.model = "gpt-3.5-turbo"
   if args.local and not args.falcon:
@@ -148,7 +155,22 @@ def cli(interpreter):
     # This way, when folks hit interpreter --local, they get the same experience as before.
     
     rprint('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-        
+    if interpreter.offline:
+      models = {}
+      # get all models in the models folder
+      user_data_dir = appdirs.user_data_dir("Open Interpreter")
+      default_path = os.path.join(user_data_dir, "models")
+
+      # Ensure the directory exists
+      os.makedirs(default_path, exist_ok=True)
+      # get all models in the models folder
+      for file in os.listdir(default_path):
+        # if the file ends in .gguf it is a model
+        if file.endswith(".gguf"):
+          # get the model name
+          model_name = file[:-5]
+          # add it to the models dict
+          models[model_name] = model_name
     models = {
         '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
         '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',

@@ -116,6 +116,7 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
+    self.offline = False
     
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
@@ -332,7 +333,7 @@ class Interpreter:
 
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_hf_llm(self.model, self.debug_mode, self.context_window)
+          self.llama_instance = get_hf_llm(self.model, self.debug_mode, self.context_window, self.offline)
           if self.llama_instance == None:
             # They cancelled.
             return
