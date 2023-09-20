@@ -27,7 +27,7 @@ import pkg_resources
 from rich import print as rprint
 from rich.markdown import Markdown
 import inquirer
-
+import litellm 
 # Load .env file
 load_dotenv()
 
@@ -117,9 +117,13 @@ def cli(interpreter):
   parser.add_argument('--version',
                       action='store_true',
                       help='display current Open Interpreter version')
-
+  
+  parser.add_argument('--max_budget',
+                    type=float,
+                    default=None,
+                    help='set a max budget for your LLM API Calls')
+  
   args = parser.parse_args()
-
 
   if args.version:
     print("Open Interpreter", pkg_resources.get_distribution("open-interpreter").version)
@@ -129,7 +133,8 @@ def cli(interpreter):
     interpreter.max_tokens = args.max_tokens
   if args.context_window:
     interpreter.context_window = args.context_window
-
+  # check if user passed in a max budget (USD) for their LLM API Calls (e.g. `interpreter --max_budget 0.001` # sets a max API call budget of $0.01) - for more: https://docs.litellm.ai/docs/budget_manager
+  litellm.max_budget = (args.max_budget or os.getenv("LITELLM_MAX_BUDGET"))
   # Modify interpreter according to command line flags
   if args.yes:
     interpreter.auto_run = True
