@@ -87,10 +87,10 @@ language_map = {
     "open_subprocess": False,
     "run_function": run_html,
   },
-	"go": {
+  "go": {
     "open_subprocess": False,    
-		"run_function": run_go,
-	}
+    "run_function": run_go,
+  }
 }
 
 # Get forbidden_commands (disabled)
