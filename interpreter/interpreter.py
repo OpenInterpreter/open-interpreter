@@ -61,7 +61,7 @@ function_schema = {
         "type": "string",
         "description":
         "The programming language",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
+        "enum": ["python", "R", "shell", "applescript", "javascript", "html", "go"]
       },
       "code": {
         "type": "string",

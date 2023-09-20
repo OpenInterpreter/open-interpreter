@@ -41,6 +41,17 @@ def run_html(html_content):
 
     return f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
 
+def run_go(go_content):
+  # Create temp go file with content
+  with tempfile.NamedTemporaryFile(delete=False, suffix=".go") as f:
+    f.write(go_content.encode())
+    f.close()
+    go_arr = ["go", "run", os.path.realpath(f.name) ]
+    result = subprocess.check_output(go_arr)
+    result_string = result.decode('utf-8')
+    print(result_string)
+    return result_string
+
 
 # Mapping of languages to their start, run, and print commands
 language_map = {
@@ -75,7 +86,11 @@ language_map = {
   "html": {
     "open_subprocess": False,
     "run_function": run_html,
-  }
+  },
+	"go": {
+    "open_subprocess": False,    
+		"run_function": run_go,
+	}
 }
 
 # Get forbidden_commands (disabled)
@@ -230,6 +245,11 @@ class CodeInterpreter:
     # HTML-specific processing (and running)
     if self.language == "html":
       output = language_map["html"]["run_function"](code)
+      return output
+    
+    # GoLang specific processing (and running)
+    if self.language == "go":
+      output = language_map["go"]["run_function"](code)
       return output
 
     # Reset self.done so we can .wait() for it
