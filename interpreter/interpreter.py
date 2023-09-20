@@ -9,7 +9,7 @@ The code here has duplication. It has imports in weird places. It has been spagh
 
 In my opinion **this is critical** to keep up with the pace of demand for this project.
 
-At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 21st.
 
 After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
 
@@ -24,7 +24,7 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
-
+from openai.error import RateLimitError 
 
 import os
 import time
@@ -38,11 +38,16 @@ import uuid
 
 import getpass
 import requests
-import readline
 import tokentrim as tt
 from rich import print
 from rich.markdown import Markdown
 from rich.rule import Rule
+
+try:
+  import readline
+except:
+  # Sometimes this doesn't work (https://stackoverflow.com/questions/10313765/simple-swig-python-example-in-vs2008-import-error-internal-pyreadline-erro)
+  pass
 
 # Function schema for gpt-4
 function_schema = {
@@ -136,7 +141,7 @@ class Interpreter:
 
   def get_info_for_system_message(self):
     """
-    Gets relevent information for the system message.
+    Gets relevant information for the system message.
     """
 
     info = ""
@@ -183,11 +188,134 @@ class Interpreter:
     return info
 
   def reset(self):
+    """
+    Resets the interpreter.
+    """
     self.messages = []
     self.code_interpreters = {}
 
   def load(self, messages):
     self.messages = messages
+
+
+  def handle_undo(self, arguments):
+    # Removes all messages after the most recent user entry (and the entry itself).
+    # Therefore user can jump back to the latest point of conversation.
+    # Also gives a visual representation of the messages removed.
+
+    if len(self.messages) == 0:
+      return
+    # Find the index of the last 'role': 'user' entry
+    last_user_index = None
+    for i, message in enumerate(self.messages):
+        if message.get('role') == 'user':
+            last_user_index = i
+
+    removed_messages = []
+
+    # Remove all messages after the last 'role': 'user'
+    if last_user_index is not None:
+        removed_messages = self.messages[last_user_index:]
+        self.messages = self.messages[:last_user_index]
+
+    print("") # Aesthetics.
+
+    # Print out a preview of what messages were removed.
+    for message in removed_messages:
+      if 'content' in message and message['content'] != None:
+        print(Markdown(f"**Removed message:** `\"{message['content'][:30]}...\"`"))
+      elif 'function_call' in message:
+        print(Markdown(f"**Removed codeblock**")) # TODO: Could add preview of code removed here.
+    
+    print("") # Aesthetics.
+
+  def handle_help(self, arguments):
+    commands_description = {
+      "%debug [true/false]": "Toggle debug mode. Without arguments or with 'true', it enters debug mode. With 'false', it exits debug mode.",
+      "%reset": "Resets the current session.",
+      "%undo": "Remove previous messages and its response from the message history.",
+      "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%help": "Show this help message.",
+    }
+
+    base_message = [
+      "> **Available Commands:**\n\n"
+    ]
+
+    # Add each command and its description to the message
+    for cmd, desc in commands_description.items():
+      base_message.append(f"- `{cmd}`: {desc}\n")
+
+    additional_info = [
+      "\n\nFor further assistance, please join our community Discord or consider contributing to the project's development."
+    ]
+
+    # Combine the base message with the additional info
+    full_message = base_message + additional_info
+
+    print(Markdown("".join(full_message)))
+
+
+  def handle_debug(self, arguments=None):
+    if arguments == "" or arguments == "true":
+        print(Markdown("> Entered debug mode"))
+        print(self.messages)
+        self.debug_mode = True
+    elif arguments == "false":
+        print(Markdown("> Exited debug mode"))
+        self.debug_mode = False
+    else:
+        print(Markdown("> Unknown argument to debug command."))
+
+  def handle_reset(self, arguments):
+    self.reset()
+    print(Markdown("> Reset Done"))
+
+  def default_handle(self, arguments):
+    print(Markdown("> Unknown command"))
+    self.handle_help(arguments)
+
+  def handle_save_message(self, json_path):
+    if json_path == "":
+      json_path = "messages.json"
+    if not json_path.endswith(".json"):
+      json_path += ".json"
+    with open(json_path, 'w') as f:
+      json.dump(self.messages, f, indent=2)
+
+    print(Markdown(f"> messages json export to {os.path.abspath(json_path)}"))
+
+  def handle_load_message(self, json_path):
+    if json_path == "":
+      json_path = "messages.json"
+    if not json_path.endswith(".json"):
+      json_path += ".json"
+    if os.path.exists(json_path):
+      with open(json_path, 'r') as f:
+        self.load(json.load(f))
+      print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
+    else:
+      print(Markdown("No file found, please check the path and try again."))
+
+
+  def handle_command(self, user_input):
+    # split the command into the command and the arguments, by the first whitespace
+    switch = {
+      "help": self.handle_help,
+      "debug": self.handle_debug,
+      "reset": self.handle_reset,
+      "save_message": self.handle_save_message,
+      "load_message": self.handle_load_message,
+      "undo": self.handle_undo,
+    }
+
+    user_input = user_input[1:].strip()  # Capture the part after the `%`
+    command = user_input.split(" ")[0]
+    arguments = user_input[len(command):].strip()
+    action = switch.get(command,
+                        self.default_handle)  # Get the function from the dictionary, or default_handle if not found
+    action(arguments)  # Execute the function
 
   def chat(self, message=None, return_messages=False):
 
@@ -282,17 +410,19 @@ class Interpreter:
 
         # Use `readline` to let users up-arrow to previous user messages,
         # which is a common behavior in terminals.
-        readline.add_history(user_input)
+        try:
+          readline.add_history(user_input)
+        except:
+          # Sometimes this doesn't work (https://stackoverflow.com/questions/10313765/simple-swig-python-example-in-vs2008-import-error-internal-pyreadline-erro)
+          pass
+
+        # If the user input starts with a `%`
+        if user_input.startswith("%"):
+          self.handle_command(user_input)
+          continue
 
         # Add the user message to self.messages
         self.messages.append({"role": "user", "content": user_input})
-
-        # Let the user turn on debug mode mid-chat
-        if user_input == "%debug":
-            print('', Markdown("> Entered debug mode"), '')
-            print(self.messages)
-            self.debug_mode = True
-            continue
 
         # Respond, but gracefully handle CTRL-C / KeyboardInterrupt
         try:
@@ -477,11 +607,14 @@ class Interpreter:
 
     # Make LLM call
     if not self.local:
+      
       # GPT
-      
+      max_attempts = 3  
+      attempts = 0  
       error = ""
-      
-      for _ in range(3):  # 3 retries
+
+      while attempts < max_attempts:
+        attempts += 1
         try:
 
             if self.use_azure:
@@ -546,7 +679,11 @@ class Interpreter:
           self.model = models[chosen_param]
           self.local = True
           continue
-        except:
+        except RateLimitError as rate_error:  # Catch the specific RateLimitError
+            print(Markdown(f"> We hit a rate limit. Cooling off for {attempts} seconds..."))
+            time.sleep(attempts)  
+            max_attempts += 1
+        except Exception as e:  # Catch other exceptions
             if self.debug_mode:
               traceback.print_exc()
             error = traceback.format_exc()
@@ -872,5 +1009,4 @@ class Interpreter:
           return
 
   def _print_welcome_message(self):
-    current_version = pkg_resources.get_distribution("open-interpreter").version
-    print(f"\n Hello, Welcome to [bold]● Open Interpreter[/bold]. (v{current_version})\n")
+    print("", Markdown("●"), "", Markdown(f"\nWelcome to **Open Interpreter**.\n"), "")

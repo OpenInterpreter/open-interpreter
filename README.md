@@ -6,6 +6,7 @@
     </a>
     <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="README_IN.md"><img src="https://img.shields.io/badge/Document-Hindi-white.svg" alt="IN doc"/></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
     <br><br>
     <b>Let language models run code on your computer.</b><br>
@@ -33,10 +34,10 @@ interpreter
 
 This provides a natural-language interface to your computer's general-purpose capabilities:
 
--   Create and edit photos, videos, PDFs, etc.
--   Control a Chrome browser to perform research
--   Plot, clean, and analyze large datasets
--   ...etc.
+- Create and edit photos, videos, PDFs, etc.
+- Control a Chrome browser to perform research
+- Plot, clean, and analyze large datasets
+- ...etc.
 
 **⚠️ Note: You'll be asked to approve code before it's run.**
 
@@ -79,10 +80,10 @@ OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#c
 
 However, OpenAI's service is hosted, closed-source, and heavily restricted:
 
--   No internet access.
--   [Limited set of pre-installed packages](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/).
--   100 MB maximum upload, 120.0 second runtime limit.
--   State is cleared (along with any generated files or links) when the environment dies.
+- No internet access.
+- [Limited set of pre-installed packages](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/).
+- 100 MB maximum upload, 120.0 second runtime limit.
+- State is cleared (along with any generated files or links) when the environment dies.
 
 ---
 
@@ -166,7 +167,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### Running Open Interpreter locally
 
-ⓘ **Issues running locally?** Read our new [GPU setup guide](/docs/GPU.md) and [Windows setup guide](/docs/WINDOWS.md).
+ⓘ **Issues running locally?** Read our new [GPU setup guide](./docs/GPU.md) and [Windows setup guide](./docs/WINDOWS.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
@@ -218,8 +219,27 @@ You can activate debug mode by using it's flag (`interpreter --debug`), or mid-c
 ```shell
 $ interpreter
 ...
-> %debug # <- Turns on debug mode
+> %debug true <- Turns on debug mode
+
+> %debug false <- Turns off debug mode
 ```
+
+### Interactive Mode Commands
+
+In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
+
+**Available Commands:**  
+ • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
+enters debug mode. With 'false', it exits debug mode.  
+ • `%reset`: Resets the current session.  
+ • `%undo`: Remove previous messages and its response from the message history.  
+ • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
+provided, it defaults to 'messages.json'.  
+ • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
+ is provided, it defaults to 'messages.json'.  
+ • `%help`: Show the help message.
+
+Feel free to try out these commands and let us know your feedback!
 
 ### Configuration with .env
 
@@ -245,9 +265,9 @@ Since generated code is executed in your local environment, it can interact with
 
 You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this confirmation, in which case:
 
--   Be cautious when requesting commands that modify files or system settings.
--   Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
--   Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
+- Be cautious when requesting commands that modify files or system settings.
+- Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
+- Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
 ## How Does it Work?
 
@@ -259,7 +279,7 @@ We then stream the model's messages, code, and your system's outputs to the term
 
 Thank you for your interest in contributing! We welcome involvement from the community.
 
-Please see our [Contributing Guidelines](/docs/contributing.md) for more details on how to get involved.
+Please see our [Contributing Guidelines](./CONTRIBUTING.md) for more details on how to get involved.
 
 ## License
 

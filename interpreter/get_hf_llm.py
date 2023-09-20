@@ -9,7 +9,7 @@ The code here has duplication. It has imports in weird places. It has been spagh
 
 In my opinion **this is critical** to keep up with the pace of demand for this project.
 
-At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 11th.
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 21st.
 
 After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
 
@@ -27,7 +27,7 @@ import subprocess
 from rich import print
 from rich.markdown import Markdown
 import os
-import inquirer
+import shutil
 from huggingface_hub import list_files_info, hf_hub_download
 
 
@@ -114,7 +114,15 @@ def get_hf_llm(repo_id, debug_mode, context_window):
       
         print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
         if confirm_action(""):
-          
+            for model_details in combined_models:
+                if model_details["filename"] == selected_model:
+                    selected_model_details = model_details
+
+                    # Check disk space and exit if not enough
+                    if not enough_disk_space(selected_model_details['Size'], default_path):
+                        print(f"You do not have enough disk space available to download this model.")
+                        return None
+
             # Check if model was originally split
             split_files = [model["filename"] for model in raw_models if selected_model in model["filename"]]
             
@@ -126,12 +134,22 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     if os.path.exists(split_path):
                         if not confirm_action(f"Split file {split_path} already exists. Download again?"):
                             continue
-                    hf_hub_download(repo_id=repo_id, filename=split_file, local_dir=default_path, local_dir_use_symlinks=False)
+                    hf_hub_download(
+                        repo_id=repo_id,
+                        filename=split_file,
+                        local_dir=default_path,
+                        local_dir_use_symlinks=False,
+                        resume_download=True)
                 
                 # Combine and delete splits
                 actually_combine_files(default_path, selected_model, split_files)
             else:
-                hf_hub_download(repo_id=repo_id, filename=selected_model, local_dir=default_path, local_dir_use_symlinks=False)
+                hf_hub_download(
+                    repo_id=repo_id,
+                    filename=selected_model,
+                    local_dir=default_path,
+                    local_dir_use_symlinks=False,
+                    resume_download=True)
 
             model_path = download_path
         
@@ -179,7 +197,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
                 
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env=env_vars, check=True)
+                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
                 except subprocess.CalledProcessError as e:
                     print(f"Error during installation with {backend}: {e}")
             
@@ -340,3 +358,18 @@ def format_quality_choice(model, name_override = None) -> str:
         name = model['filename']
     return f"{name} | Size: {model['Size']:.1f} GB, Estimated RAM usage: {model['RAM']:.1f} GB"
 
+def enough_disk_space(size, path) -> bool:
+    """
+    Checks the disk to verify there is enough space to download the model.
+
+    :param size: The file size of the model.
+    """
+    _, _, free = shutil.disk_usage(path)
+
+    # Convert bytes to gigabytes
+    free_gb = free / (2**30) 
+
+    if free_gb > size:
+        return True
+
+    return False
