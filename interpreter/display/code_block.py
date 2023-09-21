@@ -7,11 +7,13 @@ from .block import Block
 
 class CodeBlock(Block):
   """
-  Code Blocks display code and outputs in different languages.
+  Code Blocks display code and outputs in different languages. You can also set the active_line!
   """
 
   def __init__(self):
     super().__init__()
+
+    self.type = "code"
 
     # Define these for IDE auto-completion
     self.language = ""

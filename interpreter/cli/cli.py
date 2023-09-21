@@ -57,7 +57,7 @@ def cli(interpreter):
         else:
             parser.add_argument(f'--{arg["name"]}', dest=arg["name"], help=arg["help_text"], type=arg["type"])
 
-    # Add special --config and --models arguments
+    # Add special arguments
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')
     parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
 
@@ -80,7 +80,8 @@ def cli(interpreter):
 
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
-        if attr_value is not None:
+        # Ignore things that aren't possible attributes on interpreter
+        if attr_value is not None and hasattr(interpreter, attr_name):
             setattr(interpreter, attr_name, attr_value)
 
     # Default to CodeLlama if --local is on but --model is unset

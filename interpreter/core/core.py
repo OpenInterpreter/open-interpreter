@@ -6,7 +6,7 @@ from ..cli.cli import cli
 from ..utils.get_config import get_config
 from .respond import respond
 from ..llm.setup_llm import setup_llm
-from ..display.display import display as display_
+from ..display.interactive_display import interactive_display
 
 class Interpreter:
     def cli(self):
@@ -36,40 +36,35 @@ class Interpreter:
         self.__dict__.update(config)
 
     def chat(self, message=None, display=True, stream=False):
-
-        # sometimes to get a simple user experience
-        # we need the code to be a little more complex
-
-        if stream == False:
-            # Pull from the generator. This is so interpreter.chat() works magically
-            for chunk in self.chat(display=display, stream=True):
-                pass
-            return
+        if stream:
+            return self._streaming_chat(message=message, display=display)
         
-        # Display mode actually runs interpreter.chat(display=False) from within a display.
-        # wraps the vanilla .chat(display=False) generator in a display.
-        # Quite different from the plain generator stuff. So redirect to that
-        if display:
-            # We only imported this as `display_` 
-            # so we could reserve `display` for this parameter name
-            yield from display_(self, message)
-            return
+        # If stream=False, *pull* from the stream.
+        for chunk in self._streaming_chat(message=message, display=display):
+            pass
         
+        return self.messages
+    
+    def _streaming_chat(self, message=None, display=True):
+
         # We need an LLM
         if not self._llm:
             self._llm = setup_llm(self)
+
+        # Display mode actually runs interpreter.chat(display=False, stream=True) from within a display.
+        # wraps the vanilla .chat(display=False) generator in a display.
+        # Quite different from the plain generator stuff. So redirect to that
+        if display:
+            yield from interactive_display(self, message)
+            return
         
         # One-off message
         if message:
-            self.messages.append({"role": "user", "content": message})
+            self.messages.append({"role": "user", "message": message})
             yield from self._respond()
             return
-
-        # Chat loop
-        while True:
-            message = input("> ").strip()
-            self.messages.append({"role": "user", "content": message})
-            yield from self._respond()
+        
+        raise Exception("`interpreter.chat()` requires a display. Set `display=True`.")
 
     def _respond(self):
         yield from respond(self)
