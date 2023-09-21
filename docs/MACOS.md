@@ -1,5 +1,7 @@
 # Code-Llama on MacOS (Apple Silicon)
 
+> __ATTENTION: This tutorial is intended for Apple Silicon only Macs. Intel based Macs cannot use the GPU mode.__
+
 When running Open Interpreter on macOS with Code-Llama (either because you did
 not enter an OpenAI API key or you ran `interpreter --local`) you may want to
 make sure it works correctly by following the instructions below.
