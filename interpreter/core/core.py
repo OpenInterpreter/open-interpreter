@@ -6,7 +6,7 @@ from ..cli.cli import cli
 from ..utils.get_config import get_config
 from .respond import respond
 from ..llm.setup_llm import setup_llm
-from ..display.interactive_display import interactive_display
+from ..terminal_gui.terminal_gui import terminal_gui
 
 class Interpreter:
     def cli(self):
@@ -51,11 +51,11 @@ class Interpreter:
         if not self._llm:
             self._llm = setup_llm(self)
 
-        # Display mode actually runs interpreter.chat(display=False, stream=True) from within a display.
+        # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_gui.
         # wraps the vanilla .chat(display=False) generator in a display.
         # Quite different from the plain generator stuff. So redirect to that
         if display:
-            yield from interactive_display(self, message)
+            yield from terminal_gui(self, message)
             return
         
         # One-off message

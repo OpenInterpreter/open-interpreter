@@ -2,9 +2,9 @@ from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.box import MINIMAL
 import re
-from .block import Block
+from .base_block import BaseBlock
 
-class MessageBlock(Block):
+class MessageBlock(BaseBlock):
 
   def __init__(self):
     super().__init__()

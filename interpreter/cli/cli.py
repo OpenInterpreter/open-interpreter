@@ -63,11 +63,12 @@ def cli(interpreter):
 
     args = parser.parse_args()
 
-    # If --config is used, open the config.yaml file in the user's favorite text editor
+    # If --config is used, open the config.yaml file in the Open Interpreter folder of the user's config dir
     if args.config:
-        config_path = os.path.join(appdirs.user_config_dir(), 'config.yaml')
-        editor = os.environ.get('EDITOR','vi') # default to 'vi' if no editor set
-        subprocess.call([editor, config_path])
+        config_path = os.path.join(appdirs.user_config_dir(), 'Open Interpreter', 'config.yaml')
+        print(f"Opening `{config_path}`...")
+        # Use the default system editor to open the file
+        subprocess.call(['open', config_path])
         return
     
     # TODO Implement model explorer

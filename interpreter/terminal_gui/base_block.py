@@ -1,7 +1,7 @@
 from rich.live import Live
 from rich.console import Console
 
-class Block:
+class BaseBlock:
     """
     a visual "block" on the terminal.
     """
