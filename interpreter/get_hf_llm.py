@@ -31,8 +31,28 @@ import shutil
 from huggingface_hub import list_files_info, hf_hub_download
 
 
-def get_hf_llm(repo_id, debug_mode, context_window):
+def get_hf_llm(repo_id, debug_mode, context_window,model_path=None):
 
+    # Check if model path has already been loaded.
+    if model_path:
+        # Third stage: GPU confirm
+        if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
+            n_gpu_layers = -1
+        else:
+            n_gpu_layers = 0
+            
+        # Import the Llama Cpp
+        try:
+            from llama_cpp import Llama
+        except:
+            if debug_mode:
+                traceback.print_exc()
+        
+        # Set the Llama model from saved path.
+        assert os.path.isfile(model_path)
+        llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=context_window)
+        return llama_2,model_path
+    
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
       # Hacky. Not happy with this
@@ -246,7 +266,7 @@ def get_hf_llm(repo_id, debug_mode, context_window):
     assert os.path.isfile(model_path)
     llama_2 = Llama(model_path=model_path, n_gpu_layers=n_gpu_layers, verbose=debug_mode, n_ctx=context_window)
       
-    return llama_2
+    return llama_2,model_path
 
 def confirm_action(message):
     question = [

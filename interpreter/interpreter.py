@@ -106,6 +106,8 @@ class Interpreter:
     self.auto_run = False
     self.local = False
     self.model = "gpt-4"
+    self.model_path = ""
+    self.model_config = "interpreter-model-config.json"
     self.debug_mode = False
     self.api_base = None # Will set it to whatever OpenAI wants
     self.context_window = 2000 # For local models only
@@ -138,6 +140,53 @@ class Interpreter:
     # The cli takes the current instance of Interpreter,
     # modifies it according to command line flags, then runs chat.
     cli(self)
+
+  def save_model_config(self, model_name, model_path):
+      # Check if model_name and model_path are not empty
+      if not model_name or not model_path:
+          raise ValueError("Model name and model path cannot be empty.")
+      try:
+          configs = []
+
+          # Add new configuration
+          config = {
+              'model_name': model_name,
+              'model_path': model_path
+          }
+          configs.append(config)
+
+          # Save configurations to user's home directory
+          home_dir = os.path.expanduser("~")
+          config_file_path = os.path.join(home_dir, self.model_config)
+          with open(config_file_path, 'w') as file:
+              json.dump({'config': configs}, file)
+      except:
+          if self.debug_mode:
+              traceback.print_exc()
+          error = traceback.format_exc()
+          raise Exception(error)
+
+  def load_model_config(self):
+      try:
+          # Load configurations from user's home directory
+          home_dir = os.path.expanduser("~")
+          config_file_path = os.path.join(home_dir, self.model_config)
+          if os.path.exists(config_file_path) and os.path.getsize(config_file_path) > 0:
+              with open(config_file_path, 'r') as file:
+                  configs = json.load(file)['config']
+                  if configs:
+                      for config in configs:
+                          if 'model_name' in config and 'model_path' in config:
+                              # Check if model_name and model_path are not empty strings
+                              if config['model_name'].strip() and config['model_path'].strip():
+                                  return config['model_name'], config['model_path']
+          return None, None
+      except:
+          if self.debug_mode:
+              traceback.print_exc()
+          error = traceback.format_exc()
+          raise Exception(error)
+      
 
   def get_info_for_system_message(self):
     """
@@ -318,7 +367,6 @@ class Interpreter:
     action(arguments)  # Execute the function
 
   def chat(self, message=None, return_messages=False):
-
     # Connect to an LLM (an large language model)
     if not self.local:
       # gpt-4
@@ -329,13 +377,27 @@ class Interpreter:
 
       # Code-Llama
       if self.llama_instance == None:
-
+        
         # Find or install Code-Llama
         try:
-          self.llama_instance = get_hf_llm(self.model, self.debug_mode, self.context_window)
+          # 1. Try to load model from saved config
+          model_name, model_path = self.load_model_config()
+
+          # If a model configuration was loaded, use it to set the llama_instance
+          if model_name is not None and model_path is not None:
+              self.model = model_name
+              self.model_path = model_path
+              print(f"Loading local model from saved state \nModel: '{self.model}',\nPath: '{self.model_path}'")
+              self.llama_instance,self.model_path = get_hf_llm(self.model, self.debug_mode, self.context_window,self.model_path)
+          else: #2. If config not found or model not found in config then try to install as new model.
+            self.llama_instance,self.model_path = get_hf_llm(self.model, self.debug_mode, self.context_window)
+          
           if self.llama_instance == None:
             # They cancelled.
             return
+          else:
+            # Save the model configuration
+            self.save_model_config(self.model, self.model_path)
         except:
           traceback.print_exc()
           # If it didn't work, apologize and switch to GPT-4

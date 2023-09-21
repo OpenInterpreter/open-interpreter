@@ -140,29 +140,35 @@ def cli(interpreter):
     interpreter.auto_run = True
   if args.fast:
     interpreter.model = "gpt-3.5-turbo"
+    
   if args.local and not args.falcon:
-
-
-
     # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
     # This way, when folks hit interpreter --local, they get the same experience as before.
     
-    rprint('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
-        
-    models = {
-        '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
-        '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
-        '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
-    }
-    
-    parameter_choices = list(models.keys())
-    questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
-    answers = inquirer.prompt(questions)
-    chosen_param = answers['param']
+    # Load the model configuration
+    model_name, model_path = interpreter.load_model_config()
+    if model_name is not None and model_path is not None:
+      interpreter.model = model_name
+      interpreter.model_path = model_path
+      interpreter.local = True # Set local mode to true.
+      
+    else:
+      rprint('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+          
+      models = {
+          '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+          '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+          '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+      }
+      
+      parameter_choices = list(models.keys())
+      questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+      answers = inquirer.prompt(questions)
+      chosen_param = answers['param']
 
-    # THIS is more in line with the future. You just say the model you want by name:
-    interpreter.model = models[chosen_param]
-    interpreter.local = True
+      # THIS is more in line with the future. You just say the model you want by name:
+      interpreter.model = models[chosen_param]
+      interpreter.local = True
 
   
   if args.debug:
