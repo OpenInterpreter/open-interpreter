@@ -57,8 +57,9 @@ def cli(interpreter):
         else:
             parser.add_argument(f'--{arg["name"]}', dest=arg["name"], help=arg["help_text"], type=arg["type"])
 
-    # Add special --config argument
+    # Add special --config and --models arguments
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')
+    parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
 
     args = parser.parse_args()
 
@@ -68,10 +69,22 @@ def cli(interpreter):
         editor = os.environ.get('EDITOR','vi') # default to 'vi' if no editor set
         subprocess.call([editor, config_path])
         return
+    
+    # TODO Implement model explorer
+    """
+    # If --models is used, list models
+    if args.models:
+        # If they pick a model, set model to that then proceed
+        args.model = model_explorer()
+    """
 
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
         if attr_value is not None:
             setattr(interpreter, attr_name, attr_value)
+
+    # Default to CodeLlama if --local is on but --model is unset
+    if interpreter.local and interpreter.model is None:
+        interpreter.model = "huggingface/TheBloke/CodeLlama-7B-GGUF"
 
     interpreter.chat()
