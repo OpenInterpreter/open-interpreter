@@ -116,11 +116,24 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
-    
-    # Get default system message
-    here = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(here, 'system_message.txt'), 'r') as f:
-      self.system_message = f.read().strip()
+
+    try:
+      # Get default system message
+      here = os.path.abspath(os.path.dirname(__file__))
+
+      # Sanitization of the path
+      path_safe = os.path.join(here, 'system_message.txt')
+
+      # Is the file existing and a regular file?
+      if os.path.exists(path_safe) and os.path.isfile(path_safe):
+        with open(path_safe, 'r', encoding='utf-8') as f:
+          self.system_message = f.read().strip()
+      else:
+        self.system_message = "Default message"
+
+    except (FileNotFoundError, PermissionError, OSError) as file_error:
+      self.system_message = "Error: Could not read system message file."
+      print(f"File handling failed: {file_error}")
 
     # Store Code Interpreter instances for each language
     self.code_interpreters = {}
