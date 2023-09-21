@@ -42,8 +42,9 @@ We welcome code contributions through pull requests. Here are some guidelines:
 Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
 
 1. CD into the project folder `/open-interpreter`
-2. Install dependencies `poetry install`
-3. Run the program `poetry run interpreter`
+2. Remove poetry.lock `rm poetry.lock`
+3. Install dependencies `poetry install`
+4. Run the program `poetry run interpreter`
 
 After modifying the source code, you will need to do `poetry run interpreter` again.
 
