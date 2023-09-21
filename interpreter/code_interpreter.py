@@ -33,9 +33,12 @@ import re
 
 def run_html(html_content):
     # Create a temporary HTML file with the content
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".html", mode='w+', encoding='utf-8') as f:
         f.write(html_content.encode())
 
+    # More restrictive permissions, r+w only for the owner, no one else
+    os.chmod(f.fanem, 0o600)
+    
     # Open the HTML file with the default web browser
     webbrowser.open('file://' + os.path.realpath(f.name))
 
