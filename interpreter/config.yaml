@@ -1,0 +1,8 @@
+local: false
+model: "gpt-4"
+system_prompt: |
+  you
+  are
+  an
+  AI
+temperature: 0
