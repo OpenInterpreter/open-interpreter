@@ -167,7 +167,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### Running Open Interpreter locally
 
-ⓘ **Issues running locally?** Read our new [GPU setup guide](./docs/GPU.md) and [Windows setup guide](./docs/WINDOWS.md).
+ⓘ **Issues running locally?** Read our new [GPU setup guide](./docs/GPU.md), [Windows setup guide](./docs/WINDOWS.md) or [MacOS (Apple Silicon only) setup guide](./docs/MACOS.md).
 
 You can run `interpreter` in local mode from the command line to use `Code Llama`:
 
