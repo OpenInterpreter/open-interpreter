@@ -40,12 +40,17 @@ def get_hf_llm(repo_id, debug_mode, context_window, offline_mode):
         # get the local models instead
         print("Offline mode enabled. Using local model.")
         from llama_cpp import Llama
-        #  TODO: make this path configurable
-        # should not be hardcoded to jeff's path, we've already selected the model and assigned it to interpreter.model in cli.py
-        # we should just use that, or we have the repo_id here, so we can just use that to find the model in the local directory
-        # none of which have wanted to work for me so far, so I'm just hardcoding it for now
-        llama_2 = Llama(model_path="C:/Users/Jeff/AppData/Local/Open Interpreter/Open Interpreter/models/codellama-7b-instruct.Q2_K.gguf", # just hardcode jeff's path for now
-                        n_gpu_layers=-1, verbose=debug_mode, n_ctx=context_window)
+        # get the appdirectories path and add on the selected model
+        user_data_dir = appdirs.user_data_dir("Open Interpreter")
+        default_path = os.path.join(user_data_dir, "models")
+        model_path = os.path.join(default_path, repo_id)
+        # replace \ with \\ for windows and add the .gguf extension
+        model_path = model_path.replace("\\", "\\\\")
+        model_path += ".gguf"
+        # print(Markdown(f"Model found at `{model_path}`"))
+
+        llama_2 = Llama(model_path=model_path,
+                        verbose=debug_mode, n_ctx=context_window)
         return llama_2
 
     if "TheBloke/CodeLlama-" not in repo_id:
