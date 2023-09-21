@@ -87,9 +87,10 @@ class Interpreter:
             return
         
         # One-off message
-        if message:
+        if message or message == "":
+            if message == "":
+                message = "No entry from user - please suggest something to enter"
             self.messages.append({"role": "user", "message": message})
-            
             yield from self._respond()
 
             # Save conversation
@@ -102,7 +103,6 @@ class Interpreter:
                     json.dump(self.messages, f)
                 
             return
-        
         raise Exception("`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`.")
 
     def _respond(self):
