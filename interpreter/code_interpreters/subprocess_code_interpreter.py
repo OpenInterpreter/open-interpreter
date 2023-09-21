@@ -29,6 +29,12 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         return line
     
     def preprocess_code(self, code):
+        """
+        This needs to insert an end_of_execution marker of some kind,
+        which can be detected by detect_end_of_execution.
+
+        Optionally, add active line markers for detect_active_line.
+        """
         return code
     
     def terminate(self):
@@ -102,7 +108,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
                 time.sleep(0.1)
                 self.done.set()
             elif is_error_stream and "KeyboardInterrupt" in line:
-                self.output_queue.put({"error": "KeyboardInterrupt"})
+                self.output_queue.put({"output": "KeyboardInterrupt"})
                 time.sleep(0.1)
                 self.done.set()
             else:

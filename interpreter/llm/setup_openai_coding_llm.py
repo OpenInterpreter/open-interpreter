@@ -7,6 +7,8 @@
 import litellm
 from ..utils.merge_deltas import merge_deltas
 from ..utils.parse_partial_json import parse_partial_json
+from ..utils.convert_to_openai_messages import convert_to_openai_messages
+import tokentrim as tt
 
 function_schema = {
   "name": "run_code",
@@ -37,7 +39,15 @@ def setup_openai_coding_llm(interpreter):
     """
 
     def coding_llm(messages):
+        
+        # Convert and trim messages
+        messages = convert_to_openai_messages(messages)
+        messages = tt.trim(messages, model=interpreter.model)
 
+        if interpreter.debug_mode:
+            print("Sending this to the OpenAI LLM:", messages)
+
+        # Create LiteLLM generator
         params = {
             'model': interpreter.model,
             'messages': messages,
@@ -46,16 +56,23 @@ def setup_openai_coding_llm(interpreter):
             'stream': True,
         }
 
+        # TODO: What needs to be optional? Can't everything be env vars?
+        """
         # Optional inputs
         if interpreter.api_base:
             params["api_base"] = interpreter.api_base
+        """
 
         response = litellm.completion(**params)
+
         accumulated_deltas = {}
         language = None
         code = ""
 
         for chunk in response:
+            
+            if interpreter.debug_mode:
+                print(chunk)
 
             if ('choices' not in chunk or len(chunk['choices']) == 0):
                 # This happens sometimes
@@ -66,7 +83,10 @@ def setup_openai_coding_llm(interpreter):
             # Accumulate deltas
             accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
-            if (accumulated_deltas["function_call"] 
+            if "content" in delta and delta["content"]:
+                yield {"message": delta["content"]}
+
+            if ("function_call" in accumulated_deltas 
                 and "arguments" in accumulated_deltas["function_call"]):
 
                 arguments = accumulated_deltas["function_call"]["arguments"]
@@ -74,7 +94,9 @@ def setup_openai_coding_llm(interpreter):
 
                 if arguments:
 
-                    if language is None and "language" in arguments:
+                    if (language is None
+                        and "language" in arguments
+                        and arguments["language"]):
                         language = arguments["language"]
                         yield {"language": language}
                     

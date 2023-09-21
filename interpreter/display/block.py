@@ -2,6 +2,9 @@ from rich.live import Live
 from rich.console import Console
 
 class Block:
+    """
+    a visual "block" on the terminal.
+    """
     def __init__(self):
         self.live = Live(auto_refresh=False, console=Console(), vertical_overflow="visible")
         self.live.start()

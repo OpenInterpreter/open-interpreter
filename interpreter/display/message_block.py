@@ -9,6 +9,7 @@ class MessageBlock(Block):
   def __init__(self):
     super().__init__()
 
+    self.type = "message"
     self.message = ""
 
   def refresh(self, cursor=True):
