@@ -40,9 +40,16 @@ def setup_openai_coding_llm(interpreter):
 
     def coding_llm(messages):
         
-        # Convert and trim messages
+        # Convert messages
         messages = convert_to_openai_messages(messages)
-        messages = tt.trim(messages, model=interpreter.model)
+
+        # Seperate out the system_message from messages
+        # (We expect the first message to always be a system_message)
+        system_message = messages[0]["content"]
+        messages = messages[1:]
+
+        # Trim messages, preserving the system_message
+        messages = tt.trim(messages=messages, system_message=system_message, model=interpreter.model)
 
         if interpreter.debug_mode:
             print("Sending this to the OpenAI LLM:", messages)

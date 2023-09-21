@@ -3,9 +3,9 @@ from rich.box import MINIMAL
 from rich.syntax import Syntax
 from rich.table import Table
 from rich.console import Group
-from .block import Block
+from .base_block import BaseBlock
 
-class CodeBlock(Block):
+class CodeBlock(BaseBlock):
   """
   Code Blocks display code and outputs in different languages. You can also set the active_line!
   """
