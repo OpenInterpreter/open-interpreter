@@ -688,6 +688,11 @@ class Interpreter:
               traceback.print_exc()
             error = traceback.format_exc()
             time.sleep(3)
+         except openai.error.InvalidRequestError as ie:
+            msg = str(ie)
+            print(f"Error from OpenAI: {msg}")
+            print("This could mean: Your API Key could be invalid, or anything else blocks openinterpreter to access GPT4. Please check your OpenAI Account.")
+
       else:
         if self.local: 
           pass
