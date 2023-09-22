@@ -1,13 +1,13 @@
 from interpreter.code_interpreters.create_code_interpreter import create_code_interpreter
-from interpreter.utils import get_user_info_string
+from interpreter.utils import display_markdown_message, get_user_info_string
 from ..utils.merge_deltas import merge_deltas
 from ..utils.get_user_info_string import get_user_info_string
 from ..rag.get_relevant_procedures import get_relevant_procedures
-import tokentrim as tt
+import traceback
 
 def respond(interpreter):
     """
-    Yields tokens, but also adds them to interpreter.messages
+    Yields tokens, but also adds them to interpreter.messages. TBH probably would be good to seperate those two responsibilities someday soon
     Responds until it decides not to run any more code or say anything else.
     """
 
@@ -36,6 +36,11 @@ def respond(interpreter):
         messages_for_llm = interpreter.messages.copy()
         messages_for_llm = [system_message] + messages_for_llm
 
+        # It's best to explicitly tell these LLMs when they don't get an output
+        for message in messages_for_llm:
+            if "output" in message and message["output"] == "":
+                message["output"] = "No output"
+
 
         ### RUN THE LLM ###
 
@@ -45,39 +50,77 @@ def respond(interpreter):
 
         # Start putting chunks into the new message
         # + yielding chunks to the user
-        for chunk in interpreter._llm(messages_for_llm):
+        try:
 
-            # Add chunk to the last message
-            interpreter.messages[-1] = merge_deltas(interpreter.messages[-1], chunk)
+            for chunk in interpreter._llm(messages_for_llm):
 
-            # This is a coding llm
-            # It will yield dict with either a message, language, or code (or language AND code)
-            yield chunk
+                # Add chunk to the last message
+                interpreter.messages[-1] = merge_deltas(interpreter.messages[-1], chunk)
 
+                # This is a coding llm
+                # It will yield dict with either a message, language, or code (or language AND code)
+                yield chunk
+
+        # Provide extra information on how to change API keys, if we encounter that error
+        # (Many people writing GitHub issues were struggling with this)
+        except Exception as e:
+            if 'authentication' in str(e).lower() or 'no api key provided' in str(e).lower():
+                output = traceback.format_exc()
+                raise Exception(f"{output}\n\nThere appears to be an issue with your API key(s).\n\nTo reset your OPENAI_API_KEY (for example):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY=your-key-here' then restart terminal.\n\n")
+            else:
+                raise e
+        
         
         ### OPTIONALLY RUN CODE ###
 
         if "code" in interpreter.messages[-1]:
+
+            if not interpreter.auto_run:
+                display_markdown_message("""
+                Run this code?
+                """)
+            
             if interpreter.debug_mode:
                 print("Running code:", interpreter.messages[-1])
 
-            # What code do you want to run?
-            code = interpreter.messages[-1]["code"]
+            try:
+                # What code do you want to run?
+                code = interpreter.messages[-1]["code"]
 
-            # Get a code interpreter to run it
-            language = interpreter.messages[-1]["language"]
-            if language not in interpreter._code_interpreters:
-                interpreter._code_interpreters[language] = create_code_interpreter(language)
-            code_interpreter = interpreter._code_interpreters[language]
+                # Fix a common error where the LLM thinks it's in a Jupyter notebook
+                if interpreter.messages[-1]["language"] == "python" and code.startswith("!"):
+                    code = code[1:]
+                    interpreter.messages[-1]["code"] = code
+                    interpreter.messages[-1]["language"] = "shell"
 
-            # Yield each line, also append it to last messages' output
-            interpreter.messages[-1]["output"] = ""
-            for line in code_interpreter.run(code):
-                yield line
-                if "output" in line:
-                    output = interpreter.messages[-1]["output"]
-                    output += "\n" + line["output"]
-                    interpreter.messages[-1]["output"] = output.strip()
+                # Get a code interpreter to run it
+                language = interpreter.messages[-1]["language"]
+                if language not in interpreter._code_interpreters:
+                    interpreter._code_interpreters[language] = create_code_interpreter(language)
+                code_interpreter = interpreter._code_interpreters[language]
+
+                # Track if you've sent_output.
+                # If you never do, we'll send an empty string (to indicate that code has been run)
+                sent_output = False
+
+                # Yield each line, also append it to last messages' output
+                interpreter.messages[-1]["output"] = ""
+                for line in code_interpreter.run(code):
+                    yield line
+                    if "output" in line:
+                        sent_output = True
+                        output = interpreter.messages[-1]["output"]
+                        output += "\n" + line["output"]
+                        interpreter.messages[-1]["output"] = output.strip()
+
+                if sent_output == False:
+                    # Indicate that the code has been run by sending an empty string
+                    yield {"output": ""}
+
+            except:
+                output = traceback.format_exc()
+                yield {"output": output.strip()}
+                interpreter.messages[-1]["output"] = output.strip()
 
         else:
             # Doesn't want to run code. We're done
