@@ -35,6 +35,8 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
 
     def terminate(self):
         self.process.terminate()
+        self.proc.stdin.close()
+        self.proc.stdout.close()
 
     def start_process(self):
         if self.process:
