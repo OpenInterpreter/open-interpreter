@@ -40,6 +40,7 @@ class Interpreter:
         self.context_window = None
         self.max_tokens = None
         self.api_base = None
+        self.api_key = None
         self._llm = None
 
         # Load config defaults
