@@ -8,6 +8,10 @@ from .respond import respond
 from ..llm.setup_llm import setup_llm
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
+import appdirs
+import os
+import json
+from datetime import datetime
 
 class Interpreter:
     def cli(self):
@@ -22,6 +26,12 @@ class Interpreter:
         self.local = False
         self.auto_run = False
         self.debug_mode = False
+        self.max_output = 2000
+
+        # Conversation history
+        self.conversation_history = True
+        self.conversation_name = datetime.now().strftime("%B %d, %Y, %H:%M:%S")
+        self.conversation_history_path = os.path.join(appdirs.user_data_dir("Open Interpreter"), "conversations")
 
         # LLM settings
         self.model = ""
@@ -29,6 +39,7 @@ class Interpreter:
         self.system_message = ""
         self.context_window = None
         self.max_tokens = None
+        self.api_base = None
         self._llm = None
 
         # Load config defaults
@@ -68,6 +79,16 @@ class Interpreter:
         if message:
             self.messages.append({"role": "user", "message": message})
             yield from self._respond()
+
+            # Save conversation
+            if self.conversation_history:
+                # Check if the directory exists, if not, create it
+                if not os.path.exists(self.conversation_history_path):
+                    os.makedirs(self.conversation_history_path)
+                # Write or overwrite the file
+                with open(os.path.join(self.conversation_history_path, self.conversation_name + '.json'), 'w') as f:
+                    json.dump(self.messages, f)
+                
             return
         
         raise Exception("`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`.")
@@ -77,6 +98,7 @@ class Interpreter:
 
     def reset(self):
         self.messages = []
+        self.conversation_name = datetime.now().strftime("%B %d, %Y")
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}

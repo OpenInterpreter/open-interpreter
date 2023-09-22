@@ -3,6 +3,7 @@ from interpreter.utils import display_markdown_message, get_user_info_string
 from ..utils.merge_deltas import merge_deltas
 from ..utils.get_user_info_string import get_user_info_string
 from ..rag.get_relevant_procedures import get_relevant_procedures
+from ..utils.truncate_output import truncate_output
 import traceback
 
 def respond(interpreter):
@@ -64,21 +65,16 @@ def respond(interpreter):
         # Provide extra information on how to change API keys, if we encounter that error
         # (Many people writing GitHub issues were struggling with this)
         except Exception as e:
-            if 'authentication' in str(e).lower() or 'no api key provided' in str(e).lower():
+            if 'auth' in str(e).lower() or 'api key' in str(e).lower():
                 output = traceback.format_exc()
-                raise Exception(f"{output}\n\nThere appears to be an issue with your API key(s).\n\nTo reset your OPENAI_API_KEY (for example):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY=your-key-here' then restart terminal.\n\n")
+                raise Exception(f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your OPENAI_API_KEY (for example):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY=your-key-here' then restart terminal.\n\n")
             else:
                 raise e
         
         
-        ### OPTIONALLY RUN CODE ###
+        ### RUN CODE (if it's there) ###
 
         if "code" in interpreter.messages[-1]:
-
-            if not interpreter.auto_run:
-                display_markdown_message("""
-                Run this code?
-                """)
             
             if interpreter.debug_mode:
                 print("Running code:", interpreter.messages[-1])
@@ -99,6 +95,9 @@ def respond(interpreter):
                     interpreter._code_interpreters[language] = create_code_interpreter(language)
                 code_interpreter = interpreter._code_interpreters[language]
 
+                # Yield a message, such that the user can stop code execution if they want to
+                yield {"executing": {"code": code, "language": language}}
+
                 # Track if you've sent_output.
                 # If you never do, we'll send an empty string (to indicate that code has been run)
                 sent_output = False
@@ -111,10 +110,15 @@ def respond(interpreter):
                         sent_output = True
                         output = interpreter.messages[-1]["output"]
                         output += "\n" + line["output"]
+
+                        # Truncate output
+                        output = truncate_output(output, interpreter.max_output)
+
                         interpreter.messages[-1]["output"] = output.strip()
 
                 if sent_output == False:
                     # Indicate that the code has been run by sending an empty string
+                    # I think we can remove this now that we send "executing".. right?
                     yield {"output": ""}
 
             except:
