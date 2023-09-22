@@ -69,12 +69,23 @@ def setup_text_llm(interpreter):
 
         litellm.set_verbose = interpreter.debug_mode
     
-        return litellm.completion(
-            model,
-            messages=messages,
-            temperature=interpreter.temperature,
-            max_tokens=interpreter.max_tokens,
-            stream=True,
-        )
+        # Create LiteLLM generator
+        params = {
+            'model': interpreter.model,
+            'messages': messages,
+            'stream': True,
+        }
+
+        # Optional inputs
+        if interpreter.api_base:
+            params["api_base"] = interpreter.api_base
+        if interpreter.api_key:
+            params["api_key"] = interpreter.api_key
+        if interpreter.max_tokens:
+            params["max_tokens"] = interpreter.max_tokens
+        if interpreter.temperature:
+            params["temperature"] = interpreter.temperature
+
+        return litellm.completion(**params)
 
     return base_llm
