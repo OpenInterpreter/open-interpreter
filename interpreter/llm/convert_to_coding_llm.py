@@ -4,15 +4,18 @@
  * See LICENSE in the project root for license information.
 """
 
+from ..utils.convert_to_openai_messages import convert_to_openai_messages
 from .setup_text_llm import setup_text_llm
 
 def convert_to_coding_llm(text_llm):
     """
     Takes a text_llm
-    returns a Coding LLM (a generator that streams deltas with `message`, 'language', and `code`).
+    returns an OI Coding LLM (a generator that takes OI messages and streams deltas with `message`, 'language', and `code`).
     """
 
     def coding_llm(messages):
+        messages = convert_to_openai_messages(messages)
+
         inside_code_block = False
         accumulated_block = ""
         language = None

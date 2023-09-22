@@ -64,6 +64,7 @@ class CodeBlock(BaseBlock):
 
     # Create a group with the code table and output panel
     group = Group(
+      "", # Some space at the top. Just looks good
       code_panel,
       output_panel,
     )

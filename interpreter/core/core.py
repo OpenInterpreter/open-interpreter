@@ -6,14 +6,14 @@ from ..cli.cli import cli
 from ..utils.get_config import get_config
 from .respond import respond
 from ..llm.setup_llm import setup_llm
-from ..terminal_gui.terminal_gui import terminal_gui
+from ..terminal_interface.terminal_interface import terminal_interface
+from ..terminal_interface.validate_llm_settings import validate_llm_settings
 
 class Interpreter:
     def cli(self):
         cli(self)
 
     def __init__(self):
-
         # State
         self.messages = []
         self._code_interpreters = {}
@@ -40,22 +40,28 @@ class Interpreter:
             return self._streaming_chat(message=message, display=display)
         
         # If stream=False, *pull* from the stream.
-        for chunk in self._streaming_chat(message=message, display=display):
+        for _ in self._streaming_chat(message=message, display=display):
             pass
         
         return self.messages
     
     def _streaming_chat(self, message=None, display=True):
 
-        # We need an LLM
+        # If we have a display,
+        # we can validate our LLM settings w/ the user first
+        if display:
+            validate_llm_settings(self)
+
+        # Setup the LLM
         if not self._llm:
             self._llm = setup_llm(self)
 
-        # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_gui.
+        # Sometimes a little more code -> a much better experience!
+        # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
         # Quite different from the plain generator stuff. So redirect to that
         if display:
-            yield from terminal_gui(self, message)
+            yield from terminal_interface(self, message)
             return
         
         # One-off message
@@ -64,13 +70,13 @@ class Interpreter:
             yield from self._respond()
             return
         
-        raise Exception("`interpreter.chat()` requires a display. Set `display=True`.")
+        raise Exception("`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`.")
 
     def _respond(self):
         yield from respond(self)
 
     def reset(self):
         self.messages = []
-        for code_interpreter in self._code_interpreters:
+        for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}

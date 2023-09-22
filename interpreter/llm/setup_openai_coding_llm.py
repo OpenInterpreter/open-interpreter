@@ -10,22 +10,23 @@ from ..utils.parse_partial_json import parse_partial_json
 from ..utils.convert_to_openai_messages import convert_to_openai_messages
 import tokentrim as tt
 
+
 function_schema = {
-  "name": "run_code",
+  "name": "execute",
   "description":
-  "Executes code on the user's machine and returns the output",
+  "Executes code on the user's machine, **in the users local environment**, and returns the output",
   "parameters": {
     "type": "object",
     "properties": {
       "language": {
         "type": "string",
         "description":
-        "The programming language",
+        "The programming language (required parameter to the `execute` function)",
         "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
       },
       "code": {
         "type": "string",
-        "description": "The code to execute"
+        "description": "The code to execute (required)"
       }
     },
     "required": ["language", "code"]
@@ -35,13 +36,16 @@ function_schema = {
 def setup_openai_coding_llm(interpreter):
     """
     Takes an Interpreter (which includes a ton of LLM settings),
-    returns a Coding LLM (a generator that streams deltas with `message`, `language`, and `code`).
+    returns a OI Coding LLM (a generator that takes OI messages and streams deltas with `message`, `language`, and `code`).
     """
 
     def coding_llm(messages):
         
         # Convert messages
         messages = convert_to_openai_messages(messages)
+
+        # Add OpenAI's reccomended function message
+        messages[0]["content"] += "\n\nOnly use the function you have been provided with."
 
         # Seperate out the system_message from messages
         # (We expect the first message to always be a system_message)
@@ -77,9 +81,6 @@ def setup_openai_coding_llm(interpreter):
         code = ""
 
         for chunk in response:
-            
-            if interpreter.debug_mode:
-                print(chunk)
 
             if ('choices' not in chunk or len(chunk['choices']) == 0):
                 # This happens sometimes
@@ -103,6 +104,7 @@ def setup_openai_coding_llm(interpreter):
 
                     if (language is None
                         and "language" in arguments
+                        and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
                         and arguments["language"]):
                         language = arguments["language"]
                         yield {"language": language}
