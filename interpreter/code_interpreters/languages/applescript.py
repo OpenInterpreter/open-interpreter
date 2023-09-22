@@ -1,9 +1,3 @@
-"""
- * Copyright (c) 2023 Killian Lucas
- * Licensed under the GNU Affero General Public License, Version 3.
- * See LICENSE in the project root for license information.
-"""
-
 import os
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 

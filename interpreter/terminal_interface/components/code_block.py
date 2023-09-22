@@ -20,6 +20,7 @@ class CodeBlock(BaseBlock):
     self.output = ""
     self.code = ""
     self.active_line = None
+    self.margin_top = True
 
   def refresh(self, cursor=True):
     # Get code, return if there is none
@@ -63,11 +64,11 @@ class CodeBlock(BaseBlock):
                            style="#FFFFFF on #3b3b37")
 
     # Create a group with the code table and output panel
-    group = Group(
-      "", # Some space at the top. Just looks good
-      code_panel,
-      output_panel,
-    )
+    group_items = [code_panel, output_panel]
+    if self.margin_top:
+        # This adds some space at the top. Just looks good!
+        group_items = [""] + group_items
+    group = Group(*group_items)
 
     # Update the live display
     self.live.update(group)
