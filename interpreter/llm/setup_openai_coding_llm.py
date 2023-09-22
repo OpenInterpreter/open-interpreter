@@ -56,17 +56,19 @@ def setup_openai_coding_llm(interpreter):
         params = {
             'model': interpreter.model,
             'messages': messages,
-            'temperature': interpreter.temperature,
-            'functions': [function_schema],
             'stream': True,
+            'functions': [function_schema]
         }
 
-        # TODO: What needs to be optional? Can't everything be env vars?
-        """
         # Optional inputs
         if interpreter.api_base:
             params["api_base"] = interpreter.api_base
-        """
+        if interpreter.api_key:
+            params["api_key"] = interpreter.api_key
+        if interpreter.max_tokens:
+            params["max_tokens"] = interpreter.max_tokens
+        if interpreter.temperature:
+            params["temperature"] = interpreter.temperature
 
         response = litellm.completion(**params)
 
