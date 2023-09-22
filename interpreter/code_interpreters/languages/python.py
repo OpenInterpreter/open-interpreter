@@ -7,6 +7,7 @@
 import sys
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import ast
+import re
 
 class Python(SubprocessCodeInterpreter):
     def __init__(self):
@@ -17,6 +18,8 @@ class Python(SubprocessCodeInterpreter):
         return preprocess_python(code)
     
     def line_postprocessor(self, line):
+        if re.match(r'^(\s*>>>\s*|\s*\.\.\.\s*)', line):
+            return None
         return line
 
     def detect_active_line(self, line):

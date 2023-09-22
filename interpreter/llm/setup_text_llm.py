@@ -5,6 +5,8 @@
 """
 
 import litellm
+from .setup_local_text_llm import setup_local_text_llm
+import os
 
 def setup_text_llm(interpreter):
     """
@@ -16,15 +18,14 @@ def setup_text_llm(interpreter):
 
         # Download HF models
         if interpreter.model.startswith("huggingface/"):
-            model = interpreter.model.split("huggingface/")[1]
-            return get_HF_model(model)
+            return setup_local_text_llm(interpreter)
         
         # If we're here, it means the user wants to use
         # an OpenAI compatible endpoint running on localhost
 
-        if interpreter.api_base is None:
+        if os.environ.get('OPENAI_API_BASE') is None:
             raise Exception("""To use Open Interpreter locally, provide a huggingface model via `interpreter --model huggingface/{huggingface repo name}`
-                            or a localhost URL that exposes an OpenAI compatible endpoint via `interpreter --local --api_base {localhost url}`""")
+                            or a localhost URL that exposes an OpenAI compatible endpoint by setting your OPENAI_API_BASE environment variable to a localhost URL.""")
         
         # Tell LiteLLM to treat the endpoint as an OpenAI proxy
         model = "openai-proxy/" + interpreter.model
@@ -39,6 +40,8 @@ def setup_text_llm(interpreter):
         """
         Returns a generator
         """
+
+        messages = tt.trim(messages)
     
         return litellm.completion(
             model=model,

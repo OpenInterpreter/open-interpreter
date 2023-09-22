@@ -11,6 +11,7 @@ class MessageBlock(BaseBlock):
 
     self.type = "message"
     self.message = ""
+    self.has_run = False
 
   def refresh(self, cursor=True):
     # De-stylize any code blocks in markdown,

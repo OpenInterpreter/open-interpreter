@@ -6,7 +6,7 @@
 
 import subprocess
 import threading
-from queue import Queue
+import queue
 import time
 import traceback
 from .base_code_interpreter import BaseCodeInterpreter
@@ -16,7 +16,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         self.start_cmd = ""
         self.process = None
         self.debug_mode = False
-        self.output_queue = Queue()
+        self.output_queue = queue.Queue()
         self.done = threading.Event()
 
     def detect_active_line(self, line):
@@ -41,12 +41,16 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         self.process.terminate()
 
     def start_process(self):
+        if self.process:
+            self.terminate()
+
         self.process = subprocess.Popen(self.start_cmd.split(),
                                         stdin=subprocess.PIPE,
                                         stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE,
                                         text=True,
-                                        bufsize=0)
+                                        bufsize=0,
+                                        universal_newlines=True)
         threading.Thread(target=self.handle_stream_output,
                             args=(self.process.stdout, False),
                             daemon=True).start()
@@ -79,19 +83,38 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
                 self.process.stdin.flush()
                 break
             except:
-                yield {"output": traceback.format_exc()}
-                yield {"output": f"Retrying... ({retry_count}/{max_retries})"}
+                if retry_count != 0:
+                    # For UX, I like to hide this if it happens once. Obviously feels better to not see errors
+                    # Most of the time it doesn't matter, but we should figure out why it happens frequently with:
+                    # applescript
+                    yield {"output": traceback.format_exc()}
+                    yield {"output": f"Retrying... ({retry_count}/{max_retries})"}
+                    yield {"output": "Restarting process."}
+
+                self.start_process()
+
                 retry_count += 1
                 if retry_count > max_retries:
                     yield {"output": "Maximum retries reached. Could not execute code."}
                     return
 
-        while not self.done.is_set():
+        while True:
             if not self.output_queue.empty():
-                item = self.output_queue.get()
-                yield item
+                yield self.output_queue.get()
             else:
-                self.done.wait(0.1)
+                time.sleep(0.1)
+            try:
+                output = self.output_queue.get(timeout=0.3)  # Waits for 0.3 seconds
+                yield output
+            except queue.Empty:
+                if self.done.is_set():
+                    # Try to yank 3 more times from it... maybe there's something in there...
+                    # (I don't know if this actually helps. Maybe we just need to yank 1 more time)
+                    for _ in range(3):
+                        if not self.output_queue.empty():
+                            yield self.output_queue.get()
+                        time.sleep(0.2)
+                    break
 
     def handle_stream_output(self, stream, is_error_stream):
         for line in iter(stream.readline, ''):
@@ -99,6 +122,9 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
                 print(f"Received output line:\n{line}\n---")
 
             line = self.line_postprocessor(line)
+
+            if line is None:
+                continue # `line = None` is the postprocessor's signal to discard completely
 
             if self.detect_active_line(line):
                 active_line = self.detect_active_line(line)
@@ -113,3 +139,4 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
                 self.done.set()
             else:
                 self.output_queue.put({"output": line})
+
