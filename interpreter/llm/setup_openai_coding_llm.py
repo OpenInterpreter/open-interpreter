@@ -1,9 +1,3 @@
-"""
- * Copyright (c) 2023 Killian Lucas
- * Licensed under the GNU Affero General Public License, Version 3.
- * See LICENSE in the project root for license information.
-"""
-
 import litellm
 from ..utils.merge_deltas import merge_deltas
 from ..utils.parse_partial_json import parse_partial_json

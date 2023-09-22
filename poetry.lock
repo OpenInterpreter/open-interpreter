@@ -408,13 +408,13 @@ files = [
 
 [[package]]
 name = "fsspec"
-version = "2023.9.1"
+version = "2023.9.2"
 description = "File-system specification"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "fsspec-2023.9.1-py3-none-any.whl", hash = "sha256:99a974063b6cced36cfaa61aa8efb05439c6fea2dafe65930e7ab46f9d2f8930"},
-    {file = "fsspec-2023.9.1.tar.gz", hash = "sha256:da8cfe39eeb65aaa69074d5e0e4bbc9b7ef72d69c0587a31cab981eefdb3da13"},
+    {file = "fsspec-2023.9.2-py3-none-any.whl", hash = "sha256:603dbc52c75b84da501b9b2ec8c11e1f61c25984c4a0dda1f129ef391fbfc9b4"},
+    {file = "fsspec-2023.9.2.tar.gz", hash = "sha256:80bfb8c70cc27b2178cc62a935ecf242fc6e8c3fb801f9c571fc01b1e715ba7d"},
 ]
 
 [package.extras]
@@ -471,20 +471,20 @@ smmap = ">=3.0.1,<6"
 
 [[package]]
 name = "gitpython"
-version = "3.1.36"
+version = "3.1.37"
 description = "GitPython is a Python library used to interact with Git repositories"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "GitPython-3.1.36-py3-none-any.whl", hash = "sha256:8d22b5cfefd17c79914226982bb7851d6ade47545b1735a9d010a2a4c26d8388"},
-    {file = "GitPython-3.1.36.tar.gz", hash = "sha256:4bb0c2a6995e85064140d31a33289aa5dce80133a23d36fcd372d716c54d3ebf"},
+    {file = "GitPython-3.1.37-py3-none-any.whl", hash = "sha256:5f4c4187de49616d710a77e98ddf17b4782060a1788df441846bddefbb89ab33"},
+    {file = "GitPython-3.1.37.tar.gz", hash = "sha256:f9b9ddc0761c125d5780eab2d64be4873fc6817c2899cbcb34b02344bdc7bc54"},
 ]
 
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
 
 [package.extras]
-test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-sugar", "virtualenv"]
+test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-sugar"]
 
 [[package]]
 name = "huggingface-hub"
@@ -591,13 +591,13 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
-version = "0.1.716"
+version = "0.1.729"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.1.716-py3-none-any.whl", hash = "sha256:e00a2e030a054e723c63ae7e9daee6cea0f045f1d56470d14221671a5ce359e4"},
-    {file = "litellm-0.1.716.tar.gz", hash = "sha256:bd3250dba645c432d22c89edf2b12a387c83f735bd256ef9ce35e41be9f0275a"},
+    {file = "litellm-0.1.729-py3-none-any.whl", hash = "sha256:8c2a104efe4a8a2665c2dc5875cec032d4528cec9e9843910d86a2e781eec565"},
+    {file = "litellm-0.1.729.tar.gz", hash = "sha256:d6053f7d558840a133dce5ef12ea1f8efc111be0994a10445fb68b33024f61c6"},
 ]
 
 [package.dependencies]

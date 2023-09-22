@@ -1,10 +1,16 @@
+"""
+
+This needs to be refactored. Prob replaced with GPT4ALL.
+
+"""
+
 import os
 import sys
 import appdirs
 import traceback
 import inquirer
 import subprocess
-from rich import print
+from rich import print as rprint
 from rich.markdown import Markdown
 import os
 import shutil
@@ -22,12 +28,12 @@ def setup_local_text_llm(interpreter):
     if "TheBloke/CodeLlama-" not in repo_id:
       # ^ This means it was prob through the old --local, so we have already displayed this message.
       # Hacky. Not happy with this
-      print('', Markdown(f"**Open Interpreter** will use `{repo_id}` for local execution. Use your arrow keys to set up the model."), '')
+      rprint('', Markdown(f"**Open Interpreter** will use `{repo_id}` for local execution. Use your arrow keys to set up the model."), '')
 
     raw_models = list_gguf_files(repo_id)
     
     if not raw_models:
-        print(f"Failed. Are you sure there are GGUF files in `{repo_id}`?")
+        rprint(f"Failed. Are you sure there are GGUF files in `{repo_id}`?")
         return None
 
     combined_models = group_and_combine_splits(raw_models)
@@ -98,7 +104,7 @@ def setup_local_text_llm(interpreter):
         # If the file was not found, ask for confirmation to download it
         download_path = os.path.join(default_path, selected_model)
       
-        print(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
+        rprint(f"This language model was not found on your system.\n\nDownload to `{default_path}`?", "")
         if confirm_action(""):
             for model_details in combined_models:
                 if model_details["filename"] == selected_model:
@@ -106,7 +112,7 @@ def setup_local_text_llm(interpreter):
 
                     # Check disk space and exit if not enough
                     if not enough_disk_space(selected_model_details['Size'], default_path):
-                        print(f"You do not have enough disk space available to download this model.")
+                        rprint(f"You do not have enough disk space available to download this model.")
                         return None
 
             # Check if model was originally split
@@ -140,11 +146,11 @@ def setup_local_text_llm(interpreter):
             model_path = download_path
         
         else:
-            print('\n', "Download cancelled. Exiting.", '\n')
+            rprint('\n', "Download cancelled. Exiting.", '\n')
             return None
 
     # This is helpful for folks looking to delete corrupted ones and such
-    print(Markdown(f"Model found at `{model_path}`"))
+    rprint(Markdown(f"Model found at `{model_path}`"))
   
     try:
         from llama_cpp import Llama
@@ -185,7 +191,7 @@ def setup_local_text_llm(interpreter):
                 try:
                     subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
                 except subprocess.CalledProcessError as e:
-                    print(f"Error during installation with {backend}: {e}")
+                    rprint(f"Error during installation with {backend}: {e}")
             
             def supports_metal():
                 # Check for macOS version
@@ -207,7 +213,7 @@ def setup_local_text_llm(interpreter):
                 install_llama("OpenBLAS")
           
             from llama_cpp import Llama
-            print('', Markdown("Finished downloading `Code-Llama` interface."), '')
+            rprint('', Markdown("Finished downloading `Code-Llama` interface."), '')
 
             # Tell them if their architecture won't work well
 
@@ -225,7 +231,7 @@ def setup_local_text_llm(interpreter):
                     print("")
       
         else:
-            print('', "Installation cancelled. Exiting.", '')
+            rprint('', "Installation cancelled. Exiting.", '')
             return None
 
     # Initialize and return Code-Llama
@@ -269,24 +275,56 @@ def setup_local_text_llm(interpreter):
         prompt = messages_to_prompt(messages, interpreter.model)
         # Lmao i can't believe this works (it does need this btw)
         if messages[-1]["role"] != "function":
-            prompt += "Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works for shell, javascript, python, R, and applescript. I'm going to try to do this for your task. Anyway, "
+            if messages[-1]["content"].lower() not in ["hello", "hi", "hey", "helo", "hii"]: # :)
+                prompt += """Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works if I put a newline after ```shell, ```javascript, ```python, ```R, and ```applescript then write code. I'm going to try to do this for your task, and I'll put the *correct* language after the "```" now. Anyway, """
         elif messages[-1]["role"] == "function" and messages[-1]["content"] != "No output":
             prompt += "Given the output of the code I just ran, "
         elif messages[-1]["role"] == "function" and messages[-1]["content"] == "No output":
             prompt += "Given the fact that the code I just ran produced no output, "
 
-        return llama_2(prompt)
+        if interpreter.debug_mode:
+            print("Prompt:", prompt)
+
+        first_token = True
+
+        for chunk in llama_2(
+                prompt=prompt,
+                stream=True,
+                temperature=interpreter.temperature,
+                stop=["</s>"],
+                max_tokens=max_tokens
+            ):
+
+            # Get generated content
+            content = chunk["choices"][0]["text"]
+
+            # Add delta for OpenAI compatability
+            chunk["choices"][0]["delta"] = {}
+
+            if first_token:
+                # Don't capitalize or anything if it's just a space first
+                if content.strip() != "":
+                    first_token = False
+                    # This is the first chunk. We'll need to capitalize it, because our prompt ends in a ", "
+                    content = content.capitalize()
+                    
+                    # We'll also need to yield "role: assistant" for OpenAI compatability. 
+                    # CodeLlama will not generate this
+                    chunk["choices"][0]["delta"]["role"] = "assistant"
+
+            # Put content into a delta for OpenAI compatability.
+            chunk["choices"][0]["delta"]["content"] = content
+
+            yield chunk
       
     return local_text_llm
 
 def messages_to_prompt(messages, model):
 
-
         for message in messages:
           # Happens if it immediatly writes code
           if "role" not in message:
             message["role"] = "assistant"
-
 
         # Falcon prompt template
         if "falcon" in model.lower():
@@ -294,6 +332,13 @@ def messages_to_prompt(messages, model):
           formatted_messages = ""
           for message in messages:
             formatted_messages += f"{message['role'].capitalize()}: {message['content']}\n"
+
+            if "function_call" in message and "parsed_arguments" in message['function_call']:
+                if "code" in message['function_call']['parsed_arguments'] and "language" in message['function_call']['parsed_arguments']:
+                    code = message['function_call']['parsed_arguments']["code"]
+                    language = message['function_call']['parsed_arguments']["language"]
+                    formatted_messages += f"\n```{language}\n{code}\n```"
+
           formatted_messages = formatted_messages.strip()
 
         else:
@@ -313,7 +358,17 @@ def messages_to_prompt(messages, model):
               elif role == 'function':
                   formatted_messages += f"Output: {content} [/INST] "
               elif role == 'assistant':
-                  formatted_messages += f"{content} </s><s>[INST] "
+                    formatted_messages += content
+
+                    # Add code
+                    if "function_call" in item and "parsed_arguments" in item['function_call']:
+                        if "code" in item['function_call']['parsed_arguments'] and "language" in item['function_call']['parsed_arguments']:
+                            code = item['function_call']['parsed_arguments']["code"]
+                            language = item['function_call']['parsed_arguments']["language"]
+                            formatted_messages += f"\n```{language}\n{code}\n```"
+
+                    formatted_messages += " </s><s>[INST] "
+
 
           # Remove the trailing '<s>[INST] ' from the final output
           if formatted_messages.endswith("<s>[INST] "):

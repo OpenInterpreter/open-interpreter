@@ -3,6 +3,7 @@ import subprocess
 import os
 import appdirs
 from ..utils.display_markdown_message import display_markdown_message
+from ..terminal_interface.conversation_navigator import conversation_navigator
 
 arguments = [
     {
@@ -69,6 +70,7 @@ def cli(interpreter):
     # Add special arguments
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')
     parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
+    parser.add_argument('--conversations', dest='conversations', action='store_true', help='list conversations to resume')
 
     args = parser.parse_args()
 
@@ -98,5 +100,10 @@ def cli(interpreter):
     if interpreter.local and args.model is None:
         # This will cause the terminal_interface to walk the user through setting up a local LLM
         interpreter.model = ""
+
+    # If --conversations is used, run conversation_navigator
+    if args.conversations:
+        conversation_navigator(interpreter)
+        return
 
     interpreter.chat()
