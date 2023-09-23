@@ -90,6 +90,7 @@ def cli(interpreter):
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')
     parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
     parser.add_argument('--conversations', dest='conversations', action='store_true', help='list conversations to resume')
+    parser.add_argument('-f', '--fast', dest='fast', action='store_true', help='(depracated) runs `interpreter --model gpt-3.5-turbo`')
 
     args = parser.parse_args()
 
@@ -132,5 +133,11 @@ def cli(interpreter):
     if args.conversations:
         conversation_navigator(interpreter)
         return
+    
+    # Depracated --fast
+    if args.fast:
+        # This will cause the terminal_interface to walk the user through setting up a local LLM
+        interpreter.model = "gpt-3.5-turbo"
+        print("`interpreter --fast` is depracated and will be removed in the next version. Please use `interpreter --model gpt-3.5-turbo`")
 
     interpreter.chat()
