@@ -17,7 +17,6 @@ def validate_llm_settings(interpreter):
             # Ensure model is downloaded and ready to be set up
 
             if interpreter.model == "":
-                display_welcome_message_once()
 
                 # Interactive prompt to download the best local model we know of
 

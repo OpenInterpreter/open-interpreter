@@ -39,20 +39,38 @@ arguments = [
     {
         "name": "temperature",
         "nickname": "t",
-        "help_text": "temperature setting for the language model",
+        "help_text": "optional temperature setting for the language model",
         "type": float
     },
     {
         "name": "context_window",
         "nickname": "c",
-        "help_text": "context window size for the language model",
+        "help_text": "optional context window size for the language model",
         "type": int
     },
     {
         "name": "max_tokens",
         "nickname": "x",
-        "help_text": "maximum number of tokens for the language model",
+        "help_text": "optional maximum number of tokens for the language model",
         "type": int
+    },
+    {
+        "name": "max_budget",
+        "nickname": "b",
+        "help_text": "optionally set the max budget (in USD) for your llm calls",
+        "type": float
+    },
+    {
+        "name": "api_base",
+        "nickname": "ab",
+        "help_text": "optionally set the API base URL for your llm calls (this will override environment variables)",
+        "type": str
+    },
+    {
+        "name": "api_key",
+        "nickname": "ak",
+        "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
+        "type": str
     }
 ]
 
