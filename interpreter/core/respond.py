@@ -121,12 +121,12 @@ def respond(interpreter):
                     # I think we can remove this now that we send "executing".. right?
                     yield {"output": ""}
 
-                yield {"end_of_execution": True}
-
             except:
                 output = traceback.format_exc()
                 yield {"output": output.strip()}
                 interpreter.messages[-1]["output"] = output.strip()
+
+            yield {"end_of_execution": True}
 
         else:
             # Doesn't want to run code. We're done
