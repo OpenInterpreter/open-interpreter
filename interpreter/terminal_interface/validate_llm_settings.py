@@ -24,8 +24,6 @@ def validate_llm_settings(interpreter):
                 **Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model.
                 """)
 
-                print("interpreter.local_models", interpreter.local_models)
-                print("type(interpreter.local_models)", type(interpreter.local_models))
                 parameter_choices = list(interpreter.local_models['llama'].keys())
                 questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
                 answers = inquirer.prompt(questions)
