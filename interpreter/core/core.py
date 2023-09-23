@@ -2,6 +2,7 @@
 This file defines the Interpreter class.
 It's the main file. `import interpreter` will import an instance of this class.
 """
+from interpreter.utils import display_markdown_message
 from ..cli.cli import cli
 from ..utils.get_config import get_config
 from .respond import respond
@@ -12,6 +13,8 @@ import appdirs
 import os
 import json
 from datetime import datetime
+from ..utils.check_for_update import check_for_update
+from ..utils.display_markdown_message import display_markdown_message
 
 class Interpreter:
     def cli(self):
@@ -30,7 +33,7 @@ class Interpreter:
 
         # Conversation history
         self.conversation_history = True
-        self.conversation_name = datetime.now().strftime("%B %d, %Y, %H:%M:%S")
+        self.conversation_name = datetime.now().strftime("%B_%d_%Y_%H-%M-%S")
         self.conversation_history_path = os.path.join(appdirs.user_data_dir("Open Interpreter"), "conversations")
 
         # LLM settings
@@ -41,11 +44,18 @@ class Interpreter:
         self.max_tokens = None
         self.api_base = None
         self.api_key = None
+        self.max_budget = None
         self._llm = None
 
         # Load config defaults
         config = get_config()
         self.__dict__.update(config)
+
+        # Check for update
+        if not self.local:
+            # This should actually be pushed into the utility
+            if check_for_update():
+                display_markdown_message("> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---")
 
     def chat(self, message=None, display=True, stream=False):
         if stream:

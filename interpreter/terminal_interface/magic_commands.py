@@ -1,5 +1,6 @@
 from ..utils.display_markdown_message import display_markdown_message
 import json
+import os
 
 def handle_undo(self, arguments):
     # Removes all messages after the most recent user entry (and the entry itself).
