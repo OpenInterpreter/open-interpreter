@@ -277,9 +277,11 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 Open Intepreter provides a way to enable code scanning via [semgrep](https://semgrep.dev/) before executing code blocks by using the `--scan` flag.
 
 - `--scan` allows you to control the behavior Open Interpreter uses to scan code with semgrep
-  - `auto` scans all code automatically before executing it
+  - `auto` scans all code automatically before asking if you want to execute it
   - `ask` asks you if you want to scan a code block before asking if you want to execute it
   - `off` does not scan code before asking if you want to execute it
+
+**⚠️ Enabling `auto_run` disables code scanning.**
 
 ## How Does it Work?
 

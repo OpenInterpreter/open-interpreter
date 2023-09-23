@@ -140,6 +140,10 @@ def cli(interpreter):
         if attr_value is not None and hasattr(interpreter, attr_name):
             setattr(interpreter, attr_name, attr_value)
 
+    # if auto_run is enabled, we won't bother scanning code
+    if interpreter.auto_run and not interpreter.scan_code == "off":
+        setattr(interpreter, "scan_code", "off")
+
     # Default to CodeLlama if --local is on but --model is unset
     if interpreter.local and args.model is None:
         # This will cause the terminal_interface to walk the user through setting up a local LLM
