@@ -14,7 +14,7 @@ class JavaScript(SubprocessCodeInterpreter):
         # So we clean it up:
         if "Welcome to Node.js" in line:
             return None
-        if line in ["undefined", 'Type ".help" for more information.']:
+        if line.strip() in ["undefined", 'Type ".help" for more information.']:
             return None
         # Remove trailing ">"s
         line = re.sub(r'^\s*(>\s*)+', '', line)
