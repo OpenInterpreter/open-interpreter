@@ -69,6 +69,8 @@ def setup_openai_coding_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature:
             params["temperature"] = interpreter.temperature
+        if interpreter.max_budget:
+            params["max_budget"] = interpreter.max_budget
 
         response = litellm.completion(**params)
 
