@@ -8,6 +8,7 @@ from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
+from ..utils.scan_code import scan_code
 
 def terminal_interface(interpreter, message):
     if not interpreter.auto_run:
@@ -86,6 +87,26 @@ def terminal_interface(interpreter, message):
 
                         # End the active block so you can run input() below it
                         active_block.end()
+
+                        should_scan_code = False
+
+                        if not interpreter.scan_code == "off":
+                            if interpreter.scan_code == "auto":
+                                should_scan_code = True
+                            elif interpreter.scan_code == 'ask':
+                                response = input(" Would you like to scan this code? (y/n)\n\n  ")
+                                print("")  # <- Aesthetic choice
+
+                                if response.strip().lower() == "y":
+                                    should_scan_code = True
+
+                        if should_scan_code:
+                            # Get code language and actual code from the chunk
+                            # We need to give these to semgrep when we start our scan
+                            language = chunk["executing"]["language"]
+                            code = chunk["executing"]["code"]
+
+                            scan_code(code, language, interpreter)
 
                         response = input("  Would you like to run this code? (y/n)\n\n  ")
                         print("")  # <- Aesthetic choice

@@ -73,6 +73,14 @@ arguments = [
         "nickname": "ak",
         "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
         "type": str
+    },
+    {
+        "name": "scan_code",
+        "nickname": "scan",
+        "help_text": "optionally scan code with semgrep",
+        "type": str,
+        "default": "off",
+        "choices": ["off", "ask", "auto"]
     }
 ]
 
@@ -85,7 +93,10 @@ def cli(interpreter):
         if arg["type"] == bool:
             parser.add_argument(f'-{arg["nickname"]}', f'--{arg["name"]}', dest=arg["name"], help=arg["help_text"], action='store_true', default=None)
         else:
-            parser.add_argument(f'-{arg["nickname"]}', f'--{arg["name"]}', dest=arg["name"], help=arg["help_text"], type=arg["type"])
+            choices = arg["choices"] if "choices" in arg else None
+            default = arg["default"] if "default" in arg else None
+
+            parser.add_argument(f'-{arg["nickname"]}', f'--{arg["name"]}', dest=arg["name"], help=arg["help_text"], type=arg["type"], choices=choices, default=default)
 
     # Add special arguments
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')

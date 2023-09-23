@@ -272,6 +272,15 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
+### Code Scanning
+
+Open Intepreter provides a way to enable code scanning via [semgrep](https://semgrep.dev/) before executing code blocks by using the `--scan` flag.
+
+- `--scan` allows you to control the behavior Open Interpreter uses to scan code with semgrep
+  - `auto` scans all code automatically before executing it
+  - `ask` asks you if you want to scan a code block before asking if you want to execute it
+  - `off` does not scan code before asking if you want to execute it
+
 ## How Does it Work?
 
 Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "Python" or "JavaScript") and `code` to run.

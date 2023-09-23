@@ -4,6 +4,8 @@ import os
 from ..base_code_interpreter import BaseCodeInterpreter
 
 class HTML(BaseCodeInterpreter):
+    file_extension = "html"
+
     def __init__(self):
         super().__init__()
 
