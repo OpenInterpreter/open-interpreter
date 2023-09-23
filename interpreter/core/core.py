@@ -30,7 +30,7 @@ class Interpreter:
         self.auto_run = False
         self.debug_mode = False
         self.max_output = 2000
-        self.scan_code = False
+        self.scan_code = "off"
 
         # Conversation history
         self.conversation_history = True
