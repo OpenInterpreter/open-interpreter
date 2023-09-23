@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import os
+import platform
 import appdirs
 from ..utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.conversation_navigator import conversation_navigator
@@ -97,7 +98,10 @@ def cli(interpreter):
         config_path = os.path.join(appdirs.user_config_dir(), 'Open Interpreter', 'config.yaml')
         print(f"Opening `{config_path}`...")
         # Use the default system editor to open the file
-        subprocess.call(['open', config_path])
+        if platform.system() == 'Windows':
+            subprocess.call(['start', config_path], shell=True)
+        else:
+            subprocess.call(['open', config_path])
         return
     
     # TODO Implement model explorer
