@@ -70,8 +70,6 @@ def setup_text_llm(interpreter):
 
         if interpreter.debug_mode:
             print("Passing messages into LLM:", messages)
-
-        litellm.set_verbose = interpreter.debug_mode
     
         # Create LiteLLM generator
         params = {
@@ -89,8 +87,12 @@ def setup_text_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature:
             params["temperature"] = interpreter.temperature
+
+        # These are set directly on LiteLLM
         if interpreter.max_budget:
-            params["max_budget"] = interpreter.max_budget
+            litellm.max_budget = interpreter.max_budget
+        if interpreter.debug_mode:
+            litellm.set_verbose = True
 
         return litellm.completion(**params)
 
