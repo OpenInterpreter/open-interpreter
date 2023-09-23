@@ -37,8 +37,12 @@ def setup_text_llm(interpreter):
 
         """
 
-        # Download and use HF model
-        return setup_local_text_llm(interpreter)
+        try:
+            # Download and use HF model
+            return setup_local_text_llm(interpreter)
+        except:
+            # Local model was unable to be set up. Try again
+            pass
 
     else:
         # For non-local use, pass in the model directly
