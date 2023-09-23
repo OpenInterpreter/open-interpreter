@@ -219,9 +219,9 @@ interpreter.azure_api_type = "azure"
 ```shell
 $ interpreter
 ...
-> %debug true <- <- デバッグモードを有効にする
+> %debug true <- デバッグモードを有効にする
 
-> %debug false <- <- デバッグモードを無効にする
+> %debug false <- デバッグモードを無効にする
 ```
 
 ### インタラクティブモードのコマンド
