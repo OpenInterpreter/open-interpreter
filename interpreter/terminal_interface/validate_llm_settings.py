@@ -24,18 +24,14 @@ def validate_llm_settings(interpreter):
                 **Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model.
                 """)
 
-                models = {
-                    '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
-                    '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
-                    '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
-                }
-
-                parameter_choices = list(models.keys())
+                print("interpreter.local_models", interpreter.local_models)
+                print("type(interpreter.local_models)", type(interpreter.local_models))
+                parameter_choices = list(interpreter.local_models['llama'].keys())
                 questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
                 answers = inquirer.prompt(questions)
                 chosen_param = answers['param']
 
-                interpreter.model = "huggingface/" + models[chosen_param]
+                interpreter.model = "huggingface/" + interpreter.local_models['llama'][chosen_param]
                 break
 
             else:

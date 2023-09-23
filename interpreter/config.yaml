@@ -15,3 +15,11 @@ system_message: |
 local: false
 model: "gpt-4"
 temperature: 0
+local_models:
+  llama:
+    7B-CodeLlama: "TheBloke/CodeLlama-7B-Instruct-GGUF"
+    13B-CodeLlama: "TheBloke/CodeLlama-13B-Instruct-GGUF"
+    34B-CodeLlama: "TheBloke/CodeLlama-34B-Instruct-GGUF"
+    7B-Xwin-LM: "TheBloke/Xwin-LM-7B-V0.1-GGUF"
+    13B-Xwin-LM: "TheBloke/Xwin-LM-13B-V0.1-GGUF"
+    70B-Xwin-LM: "TheBloke/Xwin-LM-70B-V0.1-GGUF"

@@ -39,6 +39,7 @@ class Interpreter:
         # LLM settings
         self.model = ""
         self.temperature = 0
+        self.local_models = {}
         self.system_message = ""
         self.context_window = None
         self.max_tokens = None
