@@ -408,13 +408,22 @@ files = [
 
 [[package]]
 name = "fsspec"
+<<<<<<< HEAD
 version = "2023.9.2"
+=======
+version = "2023.9.1"
+>>>>>>> main
 description = "File-system specification"
 optional = false
 python-versions = ">=3.8"
 files = [
+<<<<<<< HEAD
     {file = "fsspec-2023.9.2-py3-none-any.whl", hash = "sha256:603dbc52c75b84da501b9b2ec8c11e1f61c25984c4a0dda1f129ef391fbfc9b4"},
     {file = "fsspec-2023.9.2.tar.gz", hash = "sha256:80bfb8c70cc27b2178cc62a935ecf242fc6e8c3fb801f9c571fc01b1e715ba7d"},
+=======
+    {file = "fsspec-2023.9.1-py3-none-any.whl", hash = "sha256:99a974063b6cced36cfaa61aa8efb05439c6fea2dafe65930e7ab46f9d2f8930"},
+    {file = "fsspec-2023.9.1.tar.gz", hash = "sha256:da8cfe39eeb65aaa69074d5e0e4bbc9b7ef72d69c0587a31cab981eefdb3da13"},
+>>>>>>> main
 ]
 
 [package.extras]
@@ -471,20 +480,33 @@ smmap = ">=3.0.1,<6"
 
 [[package]]
 name = "gitpython"
+<<<<<<< HEAD
 version = "3.1.37"
+=======
+version = "3.1.36"
+>>>>>>> main
 description = "GitPython is a Python library used to interact with Git repositories"
 optional = false
 python-versions = ">=3.7"
 files = [
+<<<<<<< HEAD
     {file = "GitPython-3.1.37-py3-none-any.whl", hash = "sha256:5f4c4187de49616d710a77e98ddf17b4782060a1788df441846bddefbb89ab33"},
     {file = "GitPython-3.1.37.tar.gz", hash = "sha256:f9b9ddc0761c125d5780eab2d64be4873fc6817c2899cbcb34b02344bdc7bc54"},
+=======
+    {file = "GitPython-3.1.36-py3-none-any.whl", hash = "sha256:8d22b5cfefd17c79914226982bb7851d6ade47545b1735a9d010a2a4c26d8388"},
+    {file = "GitPython-3.1.36.tar.gz", hash = "sha256:4bb0c2a6995e85064140d31a33289aa5dce80133a23d36fcd372d716c54d3ebf"},
+>>>>>>> main
 ]
 
 [package.dependencies]
 gitdb = ">=4.0.1,<5"
 
 [package.extras]
+<<<<<<< HEAD
 test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-sugar"]
+=======
+test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-sugar", "virtualenv"]
+>>>>>>> main
 
 [[package]]
 name = "huggingface-hub"
@@ -591,13 +613,22 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
+<<<<<<< HEAD
 version = "0.1.736"
+=======
+version = "0.1.720"
+>>>>>>> main
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
+<<<<<<< HEAD
     {file = "litellm-0.1.736-py3-none-any.whl", hash = "sha256:2918b3b0e807b39b6575e36c02624352fafd5ba2f01c923782f8f3b863793bb4"},
     {file = "litellm-0.1.736.tar.gz", hash = "sha256:3d4dc22bee2cb11243d8111f61493acc0f32b4bfe46eb478b2b940c85e1b546b"},
+=======
+    {file = "litellm-0.1.720-py3-none-any.whl", hash = "sha256:650b9f5f879718f15c11f55daf49f2157c93b3d0d31b96448fe28a9b43208401"},
+    {file = "litellm-0.1.720.tar.gz", hash = "sha256:3e0e0d9f325542a2912d92fd2a58c67b5b4b760758d9b451d62b96a71c4d883c"},
+>>>>>>> main
 ]
 
 [package.dependencies]
@@ -727,13 +758,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "0.27.10"
+version = "0.28.0"
 description = "Python client library for the OpenAI API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-0.27.10-py3-none-any.whl", hash = "sha256:beabd1757e3286fa166dde3b70ebb5ad8081af046876b47c14c41e203ed22a14"},
-    {file = "openai-0.27.10.tar.gz", hash = "sha256:60e09edf7100080283688748c6803b7b3b52d5a55d21890f3815292a0552d83b"},
+    {file = "openai-0.28.0-py3-none-any.whl", hash = "sha256:d207ece78469be5648eb87b825753282225155a29d0eec6e02013ddbf8c31c0c"},
+    {file = "openai-0.28.0.tar.gz", hash = "sha256:417b78c4c2864ba696aedaf1ccff77be1f04a581ab1739f0a56e0aae19e5a794"},
 ]
 
 [package.dependencies]
@@ -1452,4 +1483,8 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
+<<<<<<< HEAD
 content-hash = "9904f381b1b296229dfd02257526beee3b300211e9fc32014083290ac8dcebce"
+=======
+content-hash = "f2234799f794bcde303eb5c918d6467b752153ce52143b1529ed1a0e7b9b627c"
+>>>>>>> main

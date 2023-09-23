@@ -9,7 +9,7 @@ The code here has duplication. It has imports in weird places. It has been spagh
 
 In my opinion **this is critical** to keep up with the pace of demand for this project.
 
-At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 16th.
+At the same time, I plan on pushing a significant re-factor of `interpreter.py` and `code_interpreter.py` ~ September 21st.
 
 After the re-factor, Open Interpreter's source code will be much simpler, and much more fun to dive into.
 
@@ -24,6 +24,7 @@ from .message_block import MessageBlock
 from .code_block import CodeBlock
 from .code_interpreter import CodeInterpreter
 from .get_hf_llm import get_hf_llm
+from openai.error import RateLimitError 
 
 import os
 import time
@@ -33,6 +34,7 @@ import platform
 import openai
 import litellm
 import pkg_resources
+import uuid
 
 import getpass
 import requests
@@ -92,6 +94,8 @@ confirm_mode_message = """
 Press `CTRL-C` to exit.
 """
 
+# Create an API Budget to prevent high spend
+
 
 class Interpreter:
 
@@ -112,7 +116,7 @@ class Interpreter:
     self.azure_api_version = None
     self.azure_deployment_name = None
     self.azure_api_type = "azure"
-
+    
     # Get default system message
     here = os.path.abspath(os.path.dirname(__file__))
     with open(os.path.join(here, 'system_message.txt'), 'r') as f:
@@ -287,10 +291,13 @@ class Interpreter:
       json_path = "messages.json"
     if not json_path.endswith(".json"):
       json_path += ".json"
-    with open(json_path, 'r') as f:
-      self.load(json.load(f))
+    if os.path.exists(json_path):
+      with open(json_path, 'r') as f:
+        self.load(json.load(f))
+      print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
+    else:
+      print(Markdown("No file found, please check the path and try again."))
 
-    print(Markdown(f"> messages json loaded from {os.path.abspath(json_path)}"))
 
   def handle_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
@@ -385,6 +392,7 @@ class Interpreter:
 
     # Check if `message` was passed in by user
     if message:
+      print(f"user message: {message}")
       # If it was, we respond non-interactivley
       self.messages.append({"role": "user", "content": message})
       self.respond()
@@ -599,11 +607,14 @@ class Interpreter:
 
     # Make LLM call
     if not self.local:
+      
       # GPT
-      
+      max_attempts = 3  
+      attempts = 0  
       error = ""
-      
-      for _ in range(3):  # 3 retries
+
+      while attempts < max_attempts:
+        attempts += 1
         try:
 
             if self.use_azure:
@@ -634,17 +645,56 @@ class Interpreter:
                   stream=True,
                   temperature=self.temperature,
                 )
-
             break
-        except:
+        except litellm.BudgetExceededError as e:
+          print(f"Since your LLM API Budget limit was exceeded, you're being switched to local models. Budget: {litellm.max_budget} | Current Cost: {litellm._current_cost}")
+          
+          print(Markdown(
+                "> Switching to `Code-Llama`...\n\n**Tip:** Run `interpreter --local` to automatically use `Code-Llama`."),
+                    '')
+          time.sleep(2)
+          print(Rule(style="white"))
+
+
+
+          # Temporarily, for backwards (behavioral) compatability, we've moved this part of llama_2.py here.
+          # AND ABOVE.
+          # This way, when folks hit interpreter --local, they get the same experience as before.
+          import inquirer
+
+          print('', Markdown("**Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model."), '')
+
+          models = {
+              '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
+              '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
+              '34B': 'TheBloke/CodeLlama-34B-Instruct-GGUF'
+          }
+
+          parameter_choices = list(models.keys())
+          questions = [inquirer.List('param', message="Parameter count (smaller is faster, larger is more capable)", choices=parameter_choices)]
+          answers = inquirer.prompt(questions)
+          chosen_param = answers['param']
+
+          # THIS is more in line with the future. You just say the model you want by name:
+          self.model = models[chosen_param]
+          self.local = True
+          continue
+        except RateLimitError as rate_error:  # Catch the specific RateLimitError
+            print(Markdown(f"> We hit a rate limit. Cooling off for {attempts} seconds..."))
+            time.sleep(attempts)  
+            max_attempts += 1
+        except Exception as e:  # Catch other exceptions
             if self.debug_mode:
               traceback.print_exc()
             error = traceback.format_exc()
             time.sleep(3)
       else:
-        raise Exception(error)
+        if self.local: 
+          pass
+        else:
+          raise Exception(error)
             
-    elif self.local:
+    if self.local:
       # Code-Llama
 
 
