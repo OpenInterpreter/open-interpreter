@@ -93,16 +93,21 @@ def cli(interpreter):
 
     args = parser.parse_args()
 
+    # This should be pushed into an open_config.py util
     # If --config is used, open the config.yaml file in the Open Interpreter folder of the user's config dir
     if args.config:
         config_path = os.path.join(appdirs.user_config_dir(), 'Open Interpreter', 'config.yaml')
         print(f"Opening `{config_path}`...")
         # Use the default system editor to open the file
         if platform.system() == 'Windows':
-            subprocess.call(['start', config_path], shell=True)
+            os.startfile(config_path)  # This will open the file with the default application, e.g., Notepad
         else:
-            subprocess.call(['open', config_path])
-        return
+            try:
+                # Try using xdg-open on non-Windows platforms
+                subprocess.call(['xdg-open', config_path])
+            except FileNotFoundError:
+                # Fallback to using 'open' on macOS if 'xdg-open' is not available
+                subprocess.call(['open', config_path])
     
     # TODO Implement model explorer
     """
