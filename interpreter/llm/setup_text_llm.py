@@ -85,6 +85,8 @@ def setup_text_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature:
             params["temperature"] = interpreter.temperature
+        if interpreter.max_budget:
+            params["max_budget"] = interpreter.max_budget
 
         return litellm.completion(**params)
 
