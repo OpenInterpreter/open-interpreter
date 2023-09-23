@@ -68,6 +68,8 @@ def setup_text_llm(interpreter):
 
         system_message = messages[0]["content"]
 
+        system_message += "\n\nTo execute code on the user's machine, write a markdown code block *with a language*, i.e ```python, ```shell, ```r, ```html, or ```javascript. You will recieve the code output."
+
         # TODO swap tt.trim for litellm util
         
         if interpreter.context_window and interpreter.max_tokens:
