@@ -155,7 +155,7 @@ class Interpreter:
 
     if not self.local:
 
-      # Open Procedures is an open-source database of tiny, structured coding tutorials.
+      # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
       # We can query it semantically and append relevant tutorials/procedures to our system message:
 
       # Use the last two messages' content or function call to semantically search
