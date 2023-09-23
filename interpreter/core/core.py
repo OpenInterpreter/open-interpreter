@@ -89,6 +89,7 @@ class Interpreter:
         # One-off message
         if message:
             self.messages.append({"role": "user", "message": message})
+            
             yield from self._respond()
 
             # Save conversation
@@ -106,7 +107,7 @@ class Interpreter:
 
     def _respond(self):
         yield from respond(self)
-
+            
     def reset(self):
         self.messages = []
         self.conversation_name = datetime.now().strftime("%B %d, %Y")
