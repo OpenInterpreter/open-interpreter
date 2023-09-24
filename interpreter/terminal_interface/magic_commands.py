@@ -78,7 +78,7 @@ def handle_reset(self, arguments):
 
 def default_handle(self, arguments):
     display_markdown_message("> Unknown command")
-    self.handle_help(arguments)
+    handle_help(self,arguments)    
 
 def handle_save_message(self, json_path):
     if json_path == "":
