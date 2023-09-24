@@ -88,9 +88,11 @@ def cli(interpreter):
 
     # Add special arguments
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')
-    parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
     parser.add_argument('--conversations', dest='conversations', action='store_true', help='list conversations to resume')
     parser.add_argument('-f', '--fast', dest='fast', action='store_true', help='(depracated) runs `interpreter --model gpt-3.5-turbo`')
+
+    # TODO: Implement model explorer
+    # parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
 
     args = parser.parse_args()
 
