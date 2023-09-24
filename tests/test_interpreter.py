@@ -1,12 +1,7 @@
 import interpreter
 interpreter.auto_run = True
-interpreter.model = "gpt-4"
+interpreter.model = "gpt-3.5-turbo"
 interpreter.temperature = 0
-
-def test_math_2():
-    interpreter.reset()
-    messages = interpreter.chat("""Please print the answer to 3490*39048. DO NOT SEND ME A MESSAGE AT THIS POINT. IMMEDIATLY print the answer to 34908*39480. And then tell both to me. You will run run_code twice.""")
-    messages = interpreter.chat("""Now do some python for loops. anything""")    
 
 def test_hello_world():
     interpreter.reset()
@@ -17,7 +12,6 @@ def test_math():
     interpreter.reset()
     messages = interpreter.chat("""Please perform the calculation 27073*7397 then reply with just the integer answer with no commas or anything, nothing else.""")
     assert "200258981" in messages[-1]["message"]
-
 
 def test_delayed_exec():
     interpreter.reset()
