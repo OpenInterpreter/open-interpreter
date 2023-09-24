@@ -1,10 +1,11 @@
-from interpreter.code_interpreters.create_code_interpreter import create_code_interpreter
-from interpreter.utils import display_markdown_message, get_user_info_string
+from ..code_interpreters.create_code_interpreter import create_code_interpreter
 from ..utils.merge_deltas import merge_deltas
 from ..utils.get_user_info_string import get_user_info_string
+from ..utils.display_markdown_message import display_markdown_message
 from ..rag.get_relevant_procedures import get_relevant_procedures
 from ..utils.truncate_output import truncate_output
 import traceback
+import litellm
 
 def respond(interpreter):
     """
@@ -52,7 +53,6 @@ def respond(interpreter):
         # Start putting chunks into the new message
         # + yielding chunks to the user
         try:
-
             for chunk in interpreter._llm(messages_for_llm):
 
                 # Add chunk to the last message
@@ -61,7 +61,15 @@ def respond(interpreter):
                 # This is a coding llm
                 # It will yield dict with either a message, language, or code (or language AND code)
                 yield chunk
+        except litellm.exceptions.BudgetExceededError:
+            display_markdown_message(f"""> Max budget exceeded
 
+                **Session spend:** ${litellm._current_cost}
+                **Max budget:** ${interpreter.max_budget}
+
+                Press CTRL-C then run `interpreter --max_budget [higher USD amount]` to proceed.
+            """)
+            break
         # Provide extra information on how to change API keys, if we encounter that error
         # (Many people writing GitHub issues were struggling with this)
         except Exception as e:
@@ -69,7 +77,8 @@ def respond(interpreter):
                 output = traceback.format_exc()
                 raise Exception(f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your OPENAI_API_KEY (for example):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n")
             else:
-                raise e
+                raise
+        
         
         
         ### RUN CODE (if it's there) ###
