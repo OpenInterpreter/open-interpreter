@@ -96,7 +96,12 @@ def respond(interpreter):
                 code_interpreter = interpreter._code_interpreters[language]
 
                 # Yield a message, such that the user can stop code execution if they want to
-                yield {"executing": {"code": code, "language": language}}
+                try:
+                    yield {"executing": {"code": code, "language": language}}
+                except GeneratorExit:
+                    # The user might exit here.
+                    # We need to tell python what we (the generator) should do if they exit
+                    break
 
                 # Track if you've sent_output.
                 # If you never do, we'll send an empty string (to indicate that code has been run)
