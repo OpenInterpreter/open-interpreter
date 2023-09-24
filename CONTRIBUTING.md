@@ -1,7 +1,5 @@
 # Contributing to Open Interpreter 
 
-> **Important Note:** A major update is coming to Open Interpreter ~ September 21st. Please refrain from making structural changes until then! Only small commits will be accepted (after the update, large commits will be accepted).
-
 Thank you for your interest in contributing! As an open source project, we rely on developers like you to make conversational AI accessible.
 
 There are many ways to contribute, from reporting bugs and suggesting features to improving the code. We appreciate you taking the time to get involved.
