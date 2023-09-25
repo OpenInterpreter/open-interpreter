@@ -109,6 +109,12 @@ def cli(interpreter):
                       default="",
                       required=False)
   
+  parser.add_argument('--system_message',
+                      type=str,
+                      help='append the given string to the beginning of every message',
+                      default="",
+                      required=False)
+  
   parser.add_argument('--use-azure',
                       action='store_true',
                       default=USE_AZURE,
@@ -181,6 +187,9 @@ def cli(interpreter):
 
   if args.api_base:
     interpreter.api_base = args.api_base
+
+  if args.system_message:
+    interpreter.system_message = args.api_base
 
   if args.falcon or args.model == "tiiuae/falcon-180B": # because i tweeted <-this by accident lol, we actually need TheBloke's quantized version of Falcon:
 
