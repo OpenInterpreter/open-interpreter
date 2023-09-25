@@ -189,7 +189,7 @@ def cli(interpreter):
     interpreter.api_base = args.api_base
 
   if args.system_message:
-    interpreter.system_message = args.api_base
+    interpreter.system_message = args.system_message
 
   if args.falcon or args.model == "tiiuae/falcon-180B": # because i tweeted <-this by accident lol, we actually need TheBloke's quantized version of Falcon:
 
