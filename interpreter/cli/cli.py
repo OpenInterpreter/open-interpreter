@@ -72,7 +72,13 @@ arguments = [
         "nickname": "ak",
         "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
         "type": str
-    }
+    },
+    {
+        "name": "guarddog",
+        "nickname": "guarddog",
+        "help_text": "scan PyPI and npm packages for malicious code with guarddog",
+        "type": bool,
+    },
 ]
 
 def cli(interpreter):

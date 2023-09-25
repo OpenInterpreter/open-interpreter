@@ -6,6 +6,7 @@ from ..rag.get_relevant_procedures import get_relevant_procedures
 from ..utils.truncate_output import truncate_output
 import traceback
 import litellm
+import platform
 
 def respond(interpreter):
     """
@@ -19,6 +20,28 @@ def respond(interpreter):
 
         system_message = interpreter.system_message
         
+        # Add isntructions for LLM to run guarddog to system message if it's enabled
+        if interpreter.guarddog:
+            guarddog_message = "\n\nBEFORE INSTALLING ANY PACKAGES WITH pip OR npm YOU MUST SCAN THEM WITH `guarddog` FIRST. Run `guarddog pypi scan $package` for each pip package. Run `guarddog npm scan $package` for each npm package. Display the scan results to the user and ask if they still want to install the package before proceeding with installation. `guarddog` only accepts one package name at a time so you will need to run it once for every dependency if you are installing multiple packages. If guarddog isn't available, ask the user if you can install it."
+
+            # guarddog currently requires installation via Docker on Windows
+            # https://github.com/datadog/guarddog#installation
+            if platform.system() == "Windows":
+                guarddog_message += """\n\nThe user will need Docker to run guarddog. Once Docker is running, you can install guarddog by executing the following code.
+
+                ```shell
+                docker pull ghcr.io/datadog/guarddog
+                docker run --rm ghcr.io/datadog/guarddog
+                ```
+                """
+            else:
+                guarddog_message += "\n\nYou can install `guarddog` via `pip` without needing to run `guarddog` against it first, but scan every package other than guarddog."
+
+            system_message += guarddog_message
+
+            if interpreter.debug_mode:
+                print("guarddog enabled")
+
         # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
         # We can query it semantically and append relevant tutorials/procedures to our system message
         if not interpreter.local:
