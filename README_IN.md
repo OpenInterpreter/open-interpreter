@@ -8,6 +8,7 @@
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Document-Hindi-white.svg" alt="IN doc"/></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
+    <img src="https://github.com/KillianLucas/open-interpreter/actions/workflows/python-package.yml/badge.svg" alt="Status"/>
     <br><br>
     <b>अपने कंप्यूटर पर कोड चलाने के लिए भाषा मॉडल को चलाएं।</b><br>
     ओपनएआई कोड इंटरप्रेटर का एक ओपन-सोर्स, स्थानीय चलने वाला अमल।<br>
