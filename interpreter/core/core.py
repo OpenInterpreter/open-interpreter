@@ -114,3 +114,5 @@ class Interpreter:
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}
+    def load(self, messages):
+        self.messages = messages
