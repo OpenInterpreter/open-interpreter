@@ -131,13 +131,13 @@ interpreter.reset()
 
 ### Save and Restore Chats
 
-`interpreter.chat()` returns a List of messages when return_messages=True, which can be used to resume a conversation with `interpreter.load(messages)`:
+`interpreter.chat()` returns a List of messages, which can be used to resume a conversation with `interpreter.messages = messages`:
 
 ```python
-messages = interpreter.chat("My name is Killian.", return_messages=True) # Save messages to 'messages'
+messages = interpreter.chat("My name is Killian.") # Save messages to 'messages'
 interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
 
-interpreter.load(messages) # Resume chat from 'messages' ("Killian" will be remembered)
+interpreter.messages = messages # Resume chat from 'messages' ("Killian" will be remembered)
 ```
 
 ### Customize System Message
@@ -151,19 +151,25 @@ Run shell commands with -y so the user doesn't have to confirm them.
 print(interpreter.system_message)
 ```
 
-### Change the Model
+### Change your Language Model
 
-For `gpt-3.5-turbo`, use fast mode:
+Open Interpreter uses [LiteLLM](https://docs.litellm.ai/docs/providers/) to connect to language models.
+
+You can change the model by setting the model parameter:
 
 ```shell
-interpreter --fast
+interpreter --model gpt-3.5-turbo
+interpreter --model claude-2
+interpreter --model command-nightly
 ```
 
-In Python, you will need to set the model manually:
+In Python, set the model on the object:
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
 ```
+
+[Find the appropriate "model" string for your language model here.](https://docs.litellm.ai/docs/providers/)
 
 ### Running Open Interpreter locally
 
@@ -175,10 +181,10 @@ You can run `interpreter` in local mode from the command line to use `Code Llama
 interpreter --local
 ```
 
-Or run any Hugging Face model **locally** by using its repo ID (e.g. "tiiuae/falcon-180B"):
+Or run any Hugging Face model **locally** by running `--local` in conjunction with a repo ID (e.g. "tiiuae/falcon-180B"):
 
 ```shell
-interpreter --model tiiuae/falcon-180B
+interpreter --local --model tiiuae/falcon-180B
 ```
 
 #### Local model params
@@ -189,25 +195,6 @@ Smaller context windows will use less RAM, so we recommend trying a shorter wind
 
 ```shell
 interpreter --max_tokens 2000 --context_window 16000
-```
-
-### Azure Support
-
-To connect to an Azure deployment, the `--use-azure` flag will walk you through setting this up:
-
-```shell
-interpreter --use-azure
-```
-
-In Python, set the following variables:
-
-```
-interpreter.use_azure = True
-interpreter.api_key = "your_openai_api_key"
-interpreter.azure_api_base = "your_azure_api_base"
-interpreter.azure_api_version = "your_azure_api_version"
-interpreter.azure_deployment_name = "your_azure_deployment_name"
-interpreter.azure_api_type = "azure"
 ```
 
 ### Debug mode
@@ -239,23 +226,17 @@ provided, it defaults to 'messages.json'.
  is provided, it defaults to 'messages.json'.  
  • `%help`: Show the help message.
 
-Feel free to try out these commands and let us know your feedback!
+### Configuration
 
-### Configuration with .env
+Open Interpreter allows you to set default behaviors using a `config.yaml` file.
 
-Open Interpreter allows you to set default behaviors using a .env file. This provides a flexible way to configure the interpreter without changing command-line arguments every time.
+This provides a flexible way to configure the interpreter without changing command-line arguments every time.
 
-Here's a sample .env configuration:
+Run the following command to open the configuration file:
 
 ```
-INTERPRETER_CLI_AUTO_RUN=False
-INTERPRETER_CLI_FAST_MODE=False
-INTERPRETER_CLI_LOCAL_RUN=False
-INTERPRETER_CLI_DEBUG=False
-INTERPRETER_CLI_USE_AZURE=False
+interpreter --config
 ```
-
-You can modify these values in the .env file to change the default behavior of the Open Interpreter.
 
 ## Safety Notice
 
