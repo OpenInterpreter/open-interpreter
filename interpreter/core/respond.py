@@ -112,16 +112,11 @@ def respond(interpreter):
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
-                # Track if you've sent_output.
-                # If you never do, we'll send an empty string (to indicate that code has been run)
-                sent_output = False
-
                 # Yield each line, also append it to last messages' output
                 interpreter.messages[-1]["output"] = ""
                 for line in code_interpreter.run(code):
                     yield line
                     if "output" in line:
-                        sent_output = True
                         output = interpreter.messages[-1]["output"]
                         output += "\n" + line["output"]
 
@@ -129,11 +124,6 @@ def respond(interpreter):
                         output = truncate_output(output, interpreter.max_output)
 
                         interpreter.messages[-1]["output"] = output.strip()
-
-                if sent_output == False:
-                    # Indicate that the code has been run by sending an empty string
-                    # I think we can remove this now that we send "executing".. right?
-                    yield {"output": ""}
 
             except:
                 output = traceback.format_exc()

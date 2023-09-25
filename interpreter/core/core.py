@@ -11,8 +11,8 @@ from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
 import appdirs
 import os
-import json
 from datetime import datetime
+import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
 
@@ -33,7 +33,7 @@ class Interpreter:
 
         # Conversation history
         self.conversation_history = True
-        self.conversation_name = datetime.now().strftime("%B_%d_%Y_%H-%M-%S")
+        self.conversation_filename = None
         self.conversation_history_path = os.path.join(appdirs.user_data_dir("Open Interpreter"), "conversations")
 
         # LLM settings
@@ -94,11 +94,22 @@ class Interpreter:
 
             # Save conversation
             if self.conversation_history:
+
+                # If it's the first message, set the conversation name
+                if len([m for m in self.messages if m["role"] == "user"]) == 1:
+
+                    first_few_words = "_".join(self.messages[0]["message"][:25].split(" ")[:-1])
+                    for char in "<>:\"/\\|?*!": # Invalid characters for filenames
+                        first_few_words = first_few_words.replace(char, "")
+
+                    date = datetime.now().strftime("%B_%d_%Y_%H-%M-%S")
+                    self.conversation_filename = "__".join([first_few_words, date]) + ".json"
+
                 # Check if the directory exists, if not, create it
                 if not os.path.exists(self.conversation_history_path):
                     os.makedirs(self.conversation_history_path)
                 # Write or overwrite the file
-                with open(os.path.join(self.conversation_history_path, self.conversation_name + '.json'), 'w') as f:
+                with open(os.path.join(self.conversation_history_path, self.conversation_filename), 'w') as f:
                     json.dump(self.messages, f)
                 
             return
@@ -110,7 +121,7 @@ class Interpreter:
             
     def reset(self):
         self.messages = []
-        self.conversation_name = datetime.now().strftime("%B %d, %Y")
+        self.conversation_filename = None
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}
