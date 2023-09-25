@@ -28,24 +28,34 @@ def conversation_navigator(interpreter):
 
     # Get list of all JSON files in the directory
     json_files = [f for f in os.listdir(conversations_dir) if f.endswith('.json')]
-    json_files.append("> Open folder")  # Add the option to open the folder
+
+    # Make a dict that maps reformatted "First few words... (September 23rd)" -> "First_few_words__September_23rd.json" (original file name)
+    readable_names_and_filenames = {}
+    for filename in json_files:
+        name = filename.replace(".json", "").replace(".JSON", "").replace("__", "... (").replace("_", " ") + ")"
+        readable_names_and_filenames[name] = filename
+
+    # Add the option to open the folder. This doesn't map to a filename, we'll catch it
+    readable_names_and_filenames["> Open folder"] = None
 
     # Use inquirer to let the user select a file
     questions = [
-        inquirer.List('file',
+        inquirer.List('name',
                       message="",
-                      choices=json_files,
+                      choices=readable_names_and_filenames.keys(),
                       ),
     ]
     answers = inquirer.prompt(questions)
 
     # If the user selected to open the folder, do so and return
-    if answers['file'] == "> Open folder":
+    if answers['name'] == "> Open folder":
         open_folder(conversations_dir)
         return
 
+    selected_filename = readable_names_and_filenames[answers['name']]
+
     # Open the selected file and load the JSON data
-    with open(os.path.join(conversations_dir, answers['file']), 'r') as f:
+    with open(os.path.join(conversations_dir, selected_filename), 'r') as f:
         messages = json.load(f)
 
     # Pass the data into render_past_conversation
@@ -53,7 +63,7 @@ def conversation_navigator(interpreter):
 
     # Set the interpreter's settings to the loaded messages
     interpreter.messages = messages
-    interpreter.conversation_name = answers['file'].replace(".json", "")
+    interpreter.conversation_filename = selected_filename
 
     # Start the chat
     interpreter.chat()

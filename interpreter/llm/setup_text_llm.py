@@ -79,7 +79,11 @@ def setup_text_llm(interpreter):
             try:
                 messages = tt.trim(messages, system_message=system_message, model=interpreter.model)
             except:
-                # If we don't know the model, just do 3000.
+                display_markdown_message("""
+                **We were unable to determine the context window of this model.** Defaulting to 3000.
+                If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
+                Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.max_tokens = {max tokens per response}`
+                """)
                 messages = tt.trim(messages, system_message=system_message, max_tokens=3000)
 
         if interpreter.debug_mode:
@@ -107,6 +111,10 @@ def setup_text_llm(interpreter):
             litellm.max_budget = interpreter.max_budget
         if interpreter.debug_mode:
             litellm.set_verbose = True
+
+        # Report what we're sending to LiteLLM
+        if interpreter.debug_mode:
+            print("Sending this to LiteLLM:", params)
 
         return litellm.completion(**params)
 

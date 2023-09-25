@@ -20,6 +20,10 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
 
             if debug_mode:
                 print("Chunk in coding_llm", chunk)
+
+            if ('choices' not in chunk or len(chunk['choices']) == 0):
+                # This happens sometimes
+                continue
             
             content = chunk['choices'][0]['delta'].get('content', "")
             

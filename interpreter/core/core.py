@@ -11,10 +11,11 @@ from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
 import appdirs
 import os
-import json
 from datetime import datetime
+import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
+from ..code_interpreters.container_utils.container_utils import build_docker_images
 
 class Interpreter:
     def cli(self):
@@ -30,10 +31,11 @@ class Interpreter:
         self.auto_run = False
         self.debug_mode = False
         self.max_output = 2000
+        self.safe_mode = "off"
 
         # Conversation history
         self.conversation_history = True
-        self.conversation_name = datetime.now().strftime("%B_%d_%Y_%H-%M-%S")
+        self.conversation_filename = None
         self.conversation_history_path = os.path.join(appdirs.user_data_dir("Open Interpreter"), "conversations")
 
         # LLM settings
@@ -51,13 +53,23 @@ class Interpreter:
         config = get_config()
         self.__dict__.update(config)
 
+        # Container options
+        self.use_containers = False
+        
+
         # Check for update
         if not self.local:
             # This should actually be pushed into the utility
             if check_for_update():
                 display_markdown_message("> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---")
+        
+
 
     def chat(self, message=None, display=True, stream=False):
+
+        if self.use_containers:
+            build_docker_images() # Build images if needed. does nothing if already built
+
         if stream:
             return self._streaming_chat(message=message, display=display)
         
@@ -87,30 +99,43 @@ class Interpreter:
             return
         
         # One-off message
-        if message:
+        if message or message == "":
+            if message == "":
+                message = "No entry from user - please suggest something to enter"
             self.messages.append({"role": "user", "message": message})
-            
             yield from self._respond()
 
-            # Save conversation
+            # Save conversation if we've turned conversation_history on
             if self.conversation_history:
+
+                # If it's the first message, set the conversation name
+                if not self.conversation_filename:
+
+                    first_few_words = "_".join(self.messages[0]["message"][:25].split(" ")[:-1])
+                    for char in "<>:\"/\\|?*!": # Invalid characters for filenames
+                        first_few_words = first_few_words.replace(char, "")
+
+                    date = datetime.now().strftime("%B_%d_%Y_%H-%M-%S")
+                    self.conversation_filename = "__".join([first_few_words, date]) + ".json"
+
                 # Check if the directory exists, if not, create it
                 if not os.path.exists(self.conversation_history_path):
                     os.makedirs(self.conversation_history_path)
                 # Write or overwrite the file
-                with open(os.path.join(self.conversation_history_path, self.conversation_name + '.json'), 'w') as f:
+
+                with open(os.path.join(self.conversation_history_path, self.conversation_filename), 'w') as f:
                     json.dump(self.messages, f)
                 
             return
-        
-        raise Exception("`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`.")
 
+        raise Exception("`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`.")
+        
     def _respond(self):
         yield from respond(self)
             
     def reset(self):
         self.messages = []
-        self.conversation_name = datetime.now().strftime("%B %d, %Y")
+        self.conversation_filename = None
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}

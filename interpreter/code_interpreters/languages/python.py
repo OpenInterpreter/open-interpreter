@@ -4,9 +4,21 @@ import ast
 import re
 
 class Python(SubprocessCodeInterpreter):
+<<<<<<< HEAD
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if 'use_docker' in kwargs and kwargs['use_docker']:
+            self.start_cmd = "python3 -i -q -u"
+        else:
+            self.start_cmd = sys.executable + " -i -q -u"
+=======
+    file_extension = "py"
+    proper_name = "Python"
+
     def __init__(self):
         super().__init__()
         self.start_cmd = sys.executable + " -i -q -u"
+>>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
         
     def preprocess_code(self, code):
         return preprocess_python(code)
@@ -45,7 +57,7 @@ def preprocess_python(code):
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    code += '\n\nprint("## end_of_execution ##")'
+    code += '\n\nprint("## end_of_execution ##")\n'
 
     return code
 

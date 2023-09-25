@@ -83,7 +83,8 @@ def validate_llm_settings(interpreter):
                     **Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows.
                     
                     ---""")
-                    
+
+                    interpreter.api_key = response
                     time.sleep(2)
                     break
 

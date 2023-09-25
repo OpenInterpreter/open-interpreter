@@ -4,8 +4,16 @@ import ast
 import os
 
 class Shell(SubprocessCodeInterpreter):
+<<<<<<< HEAD
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+=======
+    file_extension = "sh"
+    proper_name = "Shell"
+
     def __init__(self):
         super().__init__()
+>>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
 
         # Determine the start command based on the platform
         if platform.system() == 'Windows':
@@ -39,7 +47,8 @@ def preprocess_shell(code):
     code = add_active_line_prints(code)
     
     # Wrap in a trap for errors
-    code = wrap_in_trap(code)
+    if platform.system() != 'Windows':
+        code = wrap_in_trap(code)
     
     # Add end command (we'll be listening for this so we know when it ends)
     code += '\necho "## end_of_execution ##"'
@@ -63,7 +72,7 @@ def wrap_in_trap(code):
     Wrap Bash code with a trap to catch errors and display them.
     """
     trap_code = """
-trap 'echo "An error occurred on line $LINENO"; exit' ERR
-set -E
-"""
+    trap 'echo "An error occurred on line $LINENO"; exit' ERR
+    set -E
+    """
     return trap_code + code

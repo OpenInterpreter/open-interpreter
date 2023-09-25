@@ -60,7 +60,7 @@ def setup_local_text_llm(interpreter):
         elif answers["selected_model"].startswith("Large"):
             selected_model = combined_models[-1]["filename"]
     
-    if selected_model == None:
+    if selected_model is None:
         # This means they either selected See More,
         # Or the model only had 1 or 2 options
 
@@ -265,7 +265,6 @@ def setup_local_text_llm(interpreter):
         else:
             max_tokens = DEFAULT_MAX_TOKENS
         
-
         messages = tt.trim(
             messages,
             max_tokens=(context_window-max_tokens-25),

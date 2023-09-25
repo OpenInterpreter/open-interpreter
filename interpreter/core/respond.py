@@ -21,11 +21,12 @@ def respond(interpreter):
         
         # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
         # We can query it semantically and append relevant tutorials/procedures to our system message
+        get_relevant_procedures(interpreter.messages[-2:])
         if not interpreter.local:
             try:
                 system_message += "\n\n" + get_relevant_procedures(interpreter.messages[-2:])
             except:
-                # This can fail for odd SLL reasons. It's not necessary, so we can continue
+                # This can fail for odd SSL reasons. It's not necessary, so we can continue
                 pass
         
         # Add user info to system_message, like OS, CWD, etc
@@ -75,7 +76,7 @@ def respond(interpreter):
         except Exception as e:
             if 'auth' in str(e).lower() or 'api key' in str(e).lower():
                 output = traceback.format_exc()
-                raise Exception(f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your OPENAI_API_KEY (for example):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n")
+                raise Exception(f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n")
             else:
                 raise
         
@@ -101,7 +102,11 @@ def respond(interpreter):
                 # Get a code interpreter to run it
                 language = interpreter.messages[-1]["language"]
                 if language not in interpreter._code_interpreters:
-                    interpreter._code_interpreters[language] = create_code_interpreter(language)
+                    if interpreter.use_containers:
+                        interpreter._code_interpreters[language] = create_code_interpreter(language, use_containers=True)
+                    else:
+                        interpreter._code_interpreters[language] = create_code_interpreter(language)
+                        
                 code_interpreter = interpreter._code_interpreters[language]
 
                 # Yield a message, such that the user can stop code execution if they want to
@@ -112,16 +117,17 @@ def respond(interpreter):
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
-                # Track if you've sent_output.
-                # If you never do, we'll send an empty string (to indicate that code has been run)
-                sent_output = False
-
                 # Yield each line, also append it to last messages' output
                 interpreter.messages[-1]["output"] = ""
-                for line in code_interpreter.run(code):
+
+                code_to_run = code
+
+                if not code_to_run.endswith("\n"):
+                    code_to_run += "\n"
+                    
+                for line in code_interpreter.run(code_to_run):
                     yield line
                     if "output" in line:
-                        sent_output = True
                         output = interpreter.messages[-1]["output"]
                         output += "\n" + line["output"]
 
@@ -129,11 +135,6 @@ def respond(interpreter):
                         output = truncate_output(output, interpreter.max_output)
 
                         interpreter.messages[-1]["output"] = output.strip()
-
-                if sent_output == False:
-                    # Indicate that the code has been run by sending an empty string
-                    # I think we can remove this now that we send "executing".. right?
-                    yield {"output": ""}
 
             except:
                 output = traceback.format_exc()
