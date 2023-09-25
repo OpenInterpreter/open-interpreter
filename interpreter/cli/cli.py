@@ -111,6 +111,7 @@ def cli(interpreter):
             except FileNotFoundError:
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
                 subprocess.call(['open', config_path])
+        return
     
     # TODO Implement model explorer
     """
