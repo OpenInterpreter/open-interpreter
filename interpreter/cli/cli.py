@@ -75,9 +75,9 @@ arguments = [
         "type": str
     },
     {
-        "name": "scan_code",
-        "nickname": "scan",
-        "help_text": "optionally scan code with semgrep",
+        "name": "safe_mode",
+        "nickname": "safe",
+        "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
         "type": str,
         "default": "off",
         "choices": ["off", "ask", "auto"]
@@ -137,9 +137,9 @@ def cli(interpreter):
         if attr_value is not None and hasattr(interpreter, attr_name):
             setattr(interpreter, attr_name, attr_value)
 
-    # if auto_run is enabled, we won't bother scanning code
-    if interpreter.auto_run and not interpreter.scan_code == "off":
-        setattr(interpreter, "scan_code", "off")
+    # if safe_mode and auto_run are enabled, safe_mode disables auto_run
+    if interpreter.auto_run and not interpreter.safe_mode == "off":
+        setattr(interpreter, "auto_run", False)
 
     # Default to CodeLlama if --local is on but --model is unset
     if interpreter.local and args.model is None:

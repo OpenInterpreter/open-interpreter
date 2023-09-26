@@ -5,6 +5,7 @@ import re
 
 class Python(SubprocessCodeInterpreter):
     file_extension = "py"
+    proper_name = "Python"
 
     def __init__(self):
         super().__init__()

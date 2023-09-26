@@ -272,16 +272,29 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
-### Code Scanning
+### Safe Mode
 
-Open Intepreter provides a way to enable code scanning via [semgrep](https://semgrep.dev/) before executing code blocks by using the `--scan` flag.
+Open Intepreter provides a way to enable some safety measures, like disabling `auto_run` and scanning generated code with [semgrep](https://semgrep.dev/) before executing it by using the `-safety` CLI flag or the `safe_mode` option in your `config.yml`.
 
-- `--scan` allows you to control the behavior Open Interpreter uses to scan code with semgrep
-  - `auto` scans all code automatically before asking if you want to execute it
-  - `ask` asks you if you want to scan a code block before asking if you want to execute it
-  - `off` does not scan code before asking if you want to execute it
+**⚠️ Enabling `safe_mode` disables `auto_run`.**
 
-**⚠️ Enabling `auto_run` disables code scanning.**
+It currently has three options:
+
+- `auto`: automatically applies safety features before asking if you want to execute a code block
+- `ask`: asks you if you want to apply safety features to a code block before asking if you want to execute it
+- `off`: does not apply safety features to any code block before asking if you want to execute it
+
+#### Safety Toolkit
+
+Open Interpreter currently includes the following features in Safe Mode.
+
+##### Code Scanning with Semgrep
+
+Open Interpreter allows you to scan generated code blocks for vulnerabilities using [semgrep](https://semgrep.dev/), which is available for free, without an account, and runs locally on your machine.
+
+If you have a Semgrep account, you can also login via the [Semgrep CLI](https://github.com/returntocorp/semgrep) and enable advanced features.
+
+Code scanning current runs with `--config auto`
 
 ## How Does it Work?
 
