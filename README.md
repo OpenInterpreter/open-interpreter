@@ -96,7 +96,9 @@ This combines the power of GPT-4's Code Interpreter with the flexibility of your
 **Update:** The Generator Update (0.1.5) introduced streaming:
 
 ```python
-for chunk in interpreter.chat(display=False, stream=True):
+message = "What operating system are we on?"
+
+for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
 ```
 
@@ -117,7 +119,9 @@ interpreter.chat()
 **You can also stream each chunk:**
 
 ```python
-for chunk in interpreter.chat(display=False, stream=True):
+message = "What operating system are we on?"
+
+for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
 ```
 
