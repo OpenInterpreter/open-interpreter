@@ -72,6 +72,12 @@ arguments = [
         "nickname": "ak",
         "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
         "type": str
+    },
+    {
+        "name": "custom_llm_provider",
+        "nickname": "cp",
+        "help_text": "custom llm provider name, used for litellm",
+        "type": str
     }
 ]
 

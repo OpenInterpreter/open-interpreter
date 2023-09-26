@@ -46,6 +46,7 @@ class Interpreter:
         self.api_key = None
         self.max_budget = None
         self._llm = None
+        self.custom_llm_provider = None
 
         # Load config defaults
         config = get_config()

@@ -71,7 +71,7 @@ def setup_text_llm(interpreter):
         system_message += "\n\nTo execute code on the user's machine, write a markdown code block *with a language*, i.e ```python, ```shell, ```r, ```html, or ```javascript. You will recieve the code output."
 
         # TODO swap tt.trim for litellm util
-        
+        messages = messages[1:]
         if interpreter.context_window and interpreter.max_tokens:
             trim_to_be_this_many_tokens = interpreter.context_window - interpreter.max_tokens - 25 # arbitrary buffer
             messages = tt.trim(messages, system_message=system_message, max_tokens=trim_to_be_this_many_tokens)
@@ -90,6 +90,7 @@ def setup_text_llm(interpreter):
             'model': interpreter.model,
             'messages': messages,
             'stream': True,
+	        'custom_llm_provider': interpreter.custom_llm_provider
         }
 
         # Optional inputs
