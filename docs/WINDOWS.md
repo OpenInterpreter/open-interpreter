@@ -40,3 +40,7 @@ The resolve this issue, perform the following steps.
     ```
 
     Alternatively, if you want to include GPU suppport, follow the steps in [Local Language Models with GPU Support](./GPU.md)
+
+6.  Make sure you close and re-launch any cmd windows that were running interpreter
+
+
