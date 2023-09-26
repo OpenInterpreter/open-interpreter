@@ -73,4 +73,4 @@ def scan_code(code, language, interpreter):
         print(e)
         print("")  # <- Aesthetic choice
 
-    cleanup_temporary_file(temp_file)
+    cleanup_temporary_file(temp_file, verbose=interpreter.debug_mode)
