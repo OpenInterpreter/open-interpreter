@@ -274,15 +274,15 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 
 ### Safe Mode
 
-Open Intepreter provides a way to enable some safety measures, like disabling `auto_run` and scanning generated code with [semgrep](https://semgrep.dev/) before executing it by using the `-safety` CLI flag or the `safe_mode` option in your `config.yml`.
+Open Intepreter provides a way to enable some safety measures, like disabling `auto_run` and scanning generated code with [semgrep](https://semgrep.dev/) before executing it by using the `-safe` CLI flag or the `safe_mode` option in your `config.yml`.
 
 **⚠️ Enabling `safe_mode` disables `auto_run`.**
 
-It currently has three options:
+Safe Mode currently has three options:
 
-- `auto`: automatically applies safety features before asking if you want to execute a code block
+- `off`: (_default_) does not apply safety features to any code block before asking if you want to execute it
 - `ask`: asks you if you want to apply safety features to a code block before asking if you want to execute it
-- `off`: does not apply safety features to any code block before asking if you want to execute it
+- `auto`: automatically applies safety features before asking if you want to execute a code block
 
 #### Safety Toolkit
 
