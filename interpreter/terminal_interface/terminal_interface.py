@@ -12,10 +12,20 @@ from ..utils.scan_code import scan_code
 
 def terminal_interface(interpreter, message):
     if not interpreter.auto_run:
-        display_markdown_message("""**Open Interpreter** will require approval before running code. Use `interpreter -y` to bypass this.
+        interpreter_intro_message = [
+            "**Open Interpreter** will require approval before running code."
+        ]
 
-        Press `CTRL-C` to exit.
-        """)
+        if interpreter.safe_mode != "off":
+            interpreter_intro_message.append(f"**Safe Mode**: {interpreter.safe_mode}")
+        else:
+            interpreter_intro_message.append(
+                "Use `interpreter -y` or set `auto_run: true` to bypass this."
+            )
+
+        interpreter_intro_message.append("Press `CTRL-C` to exit.")
+
+        display_markdown_message("\n\n".join(interpreter_intro_message))
     
     active_block = None
 
@@ -94,7 +104,7 @@ def terminal_interface(interpreter, message):
                             if interpreter.scan_code == "auto":
                                 should_scan_code = True
                             elif interpreter.scan_code == 'ask':
-                                response = input(" Would you like to scan this code? (y/n)\n\n  ")
+                                response = input("  Would you like to scan this code? (y/n)\n\n  ")
                                 print("")  # <- Aesthetic choice
 
                                 if response.strip().lower() == "y":

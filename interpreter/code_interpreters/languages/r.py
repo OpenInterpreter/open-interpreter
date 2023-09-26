@@ -3,6 +3,7 @@ import re
 
 class R(SubprocessCodeInterpreter):
     file_extension = "r"
+    proper_name = "R"
 
     def __init__(self):
         super().__init__()

@@ -2,10 +2,11 @@ import os
 import tempfile
 import subprocess
 
+from .temporary_file import create_temporary_file, cleanup_temporary_file
 from ..code_interpreters.language_map import language_map
 
 
-def get_extension(language_name):
+def get_language_file_extension(language_name):
     """
     Get the file extension for a given language
     """
@@ -17,24 +18,31 @@ def get_extension(language_name):
         return language
 
 
-def scan_code(code, language, self):
+def get_language_proper_name(language_name):
+    """
+    Get the proper name for a given language
+    """
+    language = language_map[language_name.lower()]
+
+    if language.proper_name:
+        return language.proper_name
+    else:
+        return language
+
+
+def scan_code(code, language, interpreter):
     """
     Scan code with semgrep
     """
 
-    # Create a temporary file
-    with tempfile.NamedTemporaryFile(
-        mode="w", delete=False, suffix=f".{get_extension(language)}"
-    ) as f:
-        f.write(code)
-        temp_file_name = f.name
-        f.close()
+    temp_file = create_temporary_file(
+        code, get_language_file_extension(language), verbose=interpreter.debug_mode
+    )
 
-    temp_path = os.path.dirname(temp_file_name)
-    file_name = os.path.basename(temp_file_name)
+    temp_path = os.path.dirname(temp_file)
+    file_name = os.path.basename(temp_file)
 
-    if self.debug_mode:
-        print(f"Created temporary file {temp_file_name}")
+    if interpreter.debug_mode:
         print(f"Scanning {language} code in {file_name}")
         print("---")
 
@@ -45,10 +53,17 @@ def scan_code(code, language, self):
         # pinned to an old semgrep version that has issues with reading the semgrep registry
         # while scanning a single file like the temporary one we generate
         # if guarddog solves [#249](https://github.com/DataDog/guarddog/issues/249) we can change this approach a bit
-        subprocess.run(
-            f"cd {temp_path} && semgrep scan --config auto --dryrun {file_name}",
+        scan = subprocess.run(
+            f"cd {temp_path} && semgrep scan --config auto --quiet --error {file_name}",
             shell=True,
         )
+
+        if scan.returncode == 0:
+            language_name = get_language_proper_name(language)
+            print(
+                f"  {'Code Scaner: ' if interpreter.safe_mode == 'auto' else ''}No issues were found in this {language_name} code."
+            )
+            print("")
 
         # TODO: it would be great if we could capture any vulnerabilities identified by semgrep
         # and add them to the conversation history
@@ -58,5 +73,4 @@ def scan_code(code, language, self):
         print(e)
         print("")  # <- Aesthetic choice
 
-    # clean up temporary file
-    os.remove(temp_file_name)
+    cleanup_temporary_file(temp_file)

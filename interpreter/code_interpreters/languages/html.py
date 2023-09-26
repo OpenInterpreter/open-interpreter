@@ -5,6 +5,7 @@ from ..base_code_interpreter import BaseCodeInterpreter
 
 class HTML(BaseCodeInterpreter):
     file_extension = "html"
+    proper_name = "HTML"
 
     def __init__(self):
         super().__init__()

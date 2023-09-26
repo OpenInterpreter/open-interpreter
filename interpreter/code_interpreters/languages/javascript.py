@@ -3,6 +3,7 @@ import re
 
 class JavaScript(SubprocessCodeInterpreter):
     file_extension = "js"
+    proper_name = "JavaScript"
 
     def __init__(self):
         super().__init__()
