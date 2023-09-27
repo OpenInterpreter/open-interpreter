@@ -1,5 +1,7 @@
 import os
 import subprocess
+from yaspin import yaspin
+from yaspin.spinners import Spinners
 
 from .temporary_file import create_temporary_file, cleanup_temporary_file
 from ..code_interpreters.language_map import language_map
@@ -52,10 +54,11 @@ def scan_code(code, language, interpreter):
         # pinned to an old semgrep version that has issues with reading the semgrep registry
         # while scanning a single file like the temporary one we generate
         # if guarddog solves [#249](https://github.com/DataDog/guarddog/issues/249) we can change this approach a bit
-        scan = subprocess.run(
-            f"cd {temp_path} && semgrep scan --config auto --quiet --error {file_name}",
-            shell=True,
-        )
+        with yaspin(text="  Scanning code...").green.right.binary as loading:
+            scan = subprocess.run(
+                f"cd {temp_path} && semgrep scan --config auto --quiet --error {file_name}",
+                shell=True,
+            )
 
         if scan.returncode == 0:
             language_name = get_language_proper_name(language)
