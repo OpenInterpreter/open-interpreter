@@ -296,6 +296,20 @@ files = [
 ]
 
 [[package]]
+name = "click"
+version = "8.1.7"
+description = "Composable command line interface toolkit"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -591,21 +605,22 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
-version = "0.1.738"
+version = "0.1.781"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.1.738-py3-none-any.whl", hash = "sha256:dbb563aa1658ba90a1678a7bed0b53fe8712476cdadca61245c21f053ac54177"},
-    {file = "litellm-0.1.738.tar.gz", hash = "sha256:67069c76b215e5f5deae91777f205f27641337ba5aa963c2abe720f3e3bee077"},
+    {file = "litellm-0.1.781-py3-none-any.whl", hash = "sha256:244b4b57bd01b2258beb149f16a52b777e5e955728ce67d56457da6117c48474"},
+    {file = "litellm-0.1.781.tar.gz", hash = "sha256:3b8e875ad5ee8cae5ea2cf9affc5c998d069111cee827e5eda2926bcf5ff8810"},
 ]
 
 [package.dependencies]
-importlib-metadata = ">=6.8.0,<7.0.0"
+click = "*"
+importlib-metadata = ">=6.8.0"
 openai = ">=0.27.0,<0.29.0"
 python-dotenv = ">=0.2.0"
-tiktoken = ">=0.4.0,<0.5.0"
-tokenizers = ">=0.14.0,<0.15.0"
+tiktoken = ">=0.4.0"
+tokenizers = "*"
 
 [[package]]
 name = "markdown-it-py"
@@ -727,13 +742,13 @@ files = [
 
 [[package]]
 name = "openai"
-version = "0.28.0"
+version = "0.28.1"
 description = "Python client library for the OpenAI API"
 optional = false
 python-versions = ">=3.7.1"
 files = [
-    {file = "openai-0.28.0-py3-none-any.whl", hash = "sha256:d207ece78469be5648eb87b825753282225155a29d0eec6e02013ddbf8c31c0c"},
-    {file = "openai-0.28.0.tar.gz", hash = "sha256:417b78c4c2864ba696aedaf1ccff77be1f04a581ab1739f0a56e0aae19e5a794"},
+    {file = "openai-0.28.1-py3-none-any.whl", hash = "sha256:d18690f9e3d31eedb66b57b88c2165d760b24ea0a01f150dd3f068155088ce68"},
+    {file = "openai-0.28.1.tar.gz", hash = "sha256:4be1dad329a65b4ce1a660fe6d5431b438f429b5855c883435f0f7fcb6d2dcc8"},
 ]
 
 [package.dependencies]
