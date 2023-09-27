@@ -2,6 +2,7 @@ import litellm
 from ..utils.merge_deltas import merge_deltas
 from ..utils.parse_partial_json import parse_partial_json
 from ..utils.convert_to_openai_messages import convert_to_openai_messages
+from ..utils.display_markdown_message import display_markdown_message
 import tokentrim as tt
 
 
@@ -47,7 +48,17 @@ def setup_openai_coding_llm(interpreter):
         messages = messages[1:]
 
         # Trim messages, preserving the system_message
-        messages = tt.trim(messages=messages, system_message=system_message, model=interpreter.model)
+        try:
+            messages = tt.trim(messages=messages, system_message=system_message, model=interpreter.model)
+        except:
+            if interpreter.context_window:
+                messages = tt.trim(messages=messages, system_message=system_message, max_tokens=interpreter.context_window)
+            else:
+                display_markdown_message("""
+                **We were unable to determine the context window of this model.** Defaulting to 3000.
+                If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
+                """)
+                messages = tt.trim(messages=messages, system_message=system_message, max_tokens=3000)
 
         if interpreter.debug_mode:
             print("Sending this to the OpenAI LLM:", messages)
