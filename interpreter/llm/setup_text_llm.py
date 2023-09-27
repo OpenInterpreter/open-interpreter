@@ -108,6 +108,10 @@ def setup_text_llm(interpreter):
         if interpreter.debug_mode:
             litellm.set_verbose = True
 
+        # Report what we're sending to LiteLLM
+        if interpreter.debug_mode:
+            print("Sending this to LiteLLM:", params)
+
         return litellm.completion(**params)
 
     return base_llm
