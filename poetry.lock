@@ -1477,6 +1477,20 @@ files = [
 ]
 
 [[package]]
+name = "termcolor"
+version = "2.3.0"
+description = "ANSI color formatting for output in terminal"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "termcolor-2.3.0-py3-none-any.whl", hash = "sha256:3afb05607b89aed0ffe25202399ee0867ad4d3cb4180d98aaf8eefa6a5f7d475"},
+    {file = "termcolor-2.3.0.tar.gz", hash = "sha256:b5b08f68937f138fe92f6c089b99f1e2da0ae56c52b78bf7075fd95420fd9a5a"},
+]
+
+[package.extras]
+tests = ["pytest", "pytest-cov"]
+
+[[package]]
 name = "tiktoken"
 version = "0.4.0"
 description = "tiktoken is a fast BPE tokeniser for use with OpenAI's models"
@@ -1901,6 +1915,20 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [[package]]
+name = "yaspin"
+version = "3.0.1"
+description = "Yet Another Terminal Spinner"
+optional = false
+python-versions = ">=3.9,<4.0"
+files = [
+    {file = "yaspin-3.0.1-py3-none-any.whl", hash = "sha256:c4b5d2ca23ae664b87a5cd53401c5107cef12668a71d9ee5ea5536045f364121"},
+    {file = "yaspin-3.0.1.tar.gz", hash = "sha256:9c04aa69cce9be83e1ea3134a6712e749e6c0c9cd02599023713e6befd7bf369"},
+]
+
+[package.dependencies]
+termcolor = ">=2.3,<3.0"
+
+[[package]]
 name = "zipp"
 version = "3.17.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -1918,4 +1946,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "87377d33bbe74e1ebc114878798d463d645015784475b584fd1504931400e0de"
+content-hash = "8fc08ba2916be2552a008bbc3415f561de7d484a34816d7ac732095064506265"

@@ -10,6 +10,7 @@ from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
 from ..utils.scan_code import scan_code
 
+
 def terminal_interface(interpreter, message):
     if not interpreter.auto_run:
         interpreter_intro_message = [
@@ -100,10 +101,10 @@ def terminal_interface(interpreter, message):
 
                         should_scan_code = False
 
-                        if not interpreter.scan_code == "off":
-                            if interpreter.scan_code == "auto":
+                        if not interpreter.safe_mode == "off":
+                            if interpreter.safe_mode == "auto":
                                 should_scan_code = True
-                            elif interpreter.scan_code == 'ask':
+                            elif interpreter.safe_mode == 'ask':
                                 response = input("  Would you like to scan this code? (y/n)\n\n  ")
                                 print("")  # <- Aesthetic choice
 
