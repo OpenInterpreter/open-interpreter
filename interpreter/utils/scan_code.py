@@ -1,5 +1,4 @@
 import os
-import tempfile
 import subprocess
 
 from .temporary_file import create_temporary_file, cleanup_temporary_file
