@@ -38,7 +38,7 @@ def setup_openai_coding_llm(interpreter):
         # Convert messages
         messages = convert_to_openai_messages(messages)
 
-        # Add OpenAI's reccomended function message
+        # Add OpenAI's recommended function message
         messages[0]["content"] += "\n\nOnly use the function you have been provided with."
 
         # Seperate out the system_message from messages
@@ -75,6 +75,10 @@ def setup_openai_coding_llm(interpreter):
             litellm.max_budget = interpreter.max_budget
         if interpreter.debug_mode:
             litellm.set_verbose = True
+
+        # Report what we're sending to LiteLLM
+        if interpreter.debug_mode:
+            print("Sending this to LiteLLM:", params)
 
         response = litellm.completion(**params)
 
