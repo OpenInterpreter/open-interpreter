@@ -13,7 +13,7 @@ def setup_llm(interpreter):
     """
 
     if (not interpreter.local
-        and (interpreter.model in litellm.open_ai_chat_completion_models or interpreter.model.startswith("azure/")):
+        and (interpreter.model in litellm.open_ai_chat_completion_models or interpreter.model.startswith("azure/"))):
         # Function calling LLM
         coding_llm = setup_openai_coding_llm(interpreter)
     else:
