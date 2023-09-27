@@ -20,7 +20,7 @@ class Interpreter:
     def cli(self):
         cli(self)
 
-    def __init__(self):
+    def __init__(self, config=None):
         # State
         self.messages = []
         self._code_interpreters = {}
@@ -48,7 +48,8 @@ class Interpreter:
         self._llm = None
 
         # Load config defaults
-        config = get_config()
+        if config is None:
+            config = get_config()
         self.__dict__.update(config)
 
         # Check for update
