@@ -2,6 +2,7 @@ import argparse
 import subprocess
 import os
 import platform
+import pkg_resources
 import appdirs
 from ..utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.conversation_navigator import conversation_navigator
@@ -90,6 +91,7 @@ def cli(interpreter):
     parser.add_argument('--config', dest='config', action='store_true', help='open config.yaml file in text editor')
     parser.add_argument('--conversations', dest='conversations', action='store_true', help='list conversations to resume')
     parser.add_argument('-f', '--fast', dest='fast', action='store_true', help='(depracated) runs `interpreter --model gpt-3.5-turbo`')
+    parser.add_argument('--version', dest='version', action='store_true', help="get Open Interpreter's version number")
 
     # TODO: Implement model explorer
     # parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
@@ -135,6 +137,11 @@ def cli(interpreter):
     # If --conversations is used, run conversation_navigator
     if args.conversations:
         conversation_navigator(interpreter)
+        return
+    
+    if args.version:
+        version = pkg_resources.get_distribution("open-interpreter").version
+        print(f"Open Interpreter {version}")
         return
     
     # Depracated --fast

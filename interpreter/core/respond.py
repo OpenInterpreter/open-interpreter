@@ -21,6 +21,7 @@ def respond(interpreter):
         
         # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
         # We can query it semantically and append relevant tutorials/procedures to our system message
+        get_relevant_procedures(interpreter.messages[-2:])
         if not interpreter.local:
             try:
                 system_message += "\n\n" + get_relevant_procedures(interpreter.messages[-2:])
