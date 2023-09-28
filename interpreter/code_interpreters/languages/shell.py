@@ -39,7 +39,8 @@ def preprocess_shell(code):
     code = add_active_line_prints(code)
     
     # Wrap in a trap for errors
-    code = wrap_in_trap(code)
+    if platform.system() != 'Windows':
+        code = wrap_in_trap(code)
     
     # Add end command (we'll be listening for this so we know when it ends)
     code += '\necho "## end_of_execution ##"'
