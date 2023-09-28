@@ -51,6 +51,10 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
+#### Along with an example implementation of a voice interface (inspired by _Her_):
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
+
 ## Quick Start
 
 ```shell
