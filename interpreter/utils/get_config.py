@@ -7,8 +7,7 @@ import shutil
 config_filename = "config.yaml"
 
 # Using appdirs to determine user-specific config path
-config_dir = appdirs.user_config_dir("Open Interpreter")
-user_config_path = os.path.join(config_dir, config_filename)
+user_config_path = os.path.join(appdirs.user_config_dir(), 'Open Interpreter', 'config.yaml')
 
 def get_config():
     if not os.path.exists(user_config_path):
