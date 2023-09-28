@@ -2,6 +2,9 @@ from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import re
 
 class R(SubprocessCodeInterpreter):
+    file_extension = "r"
+    proper_name = "R"
+
     def __init__(self):
         super().__init__()
         self.start_cmd = "R -q --vanilla"  # Start R in quiet and vanilla mode
