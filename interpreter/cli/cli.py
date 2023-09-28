@@ -73,6 +73,14 @@ arguments = [
         "nickname": "ak",
         "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
         "type": str
+    },
+    {
+        "name": "safe_mode",
+        "nickname": "safe",
+        "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
+        "type": str,
+        "default": "off",
+        "choices": ["off", "ask", "auto"]
     }
 ]
 
@@ -131,6 +139,10 @@ def cli(interpreter):
         # Ignore things that aren't possible attributes on interpreter
         if attr_value is not None and hasattr(interpreter, attr_name):
             setattr(interpreter, attr_name, attr_value)
+
+    # if safe_mode and auto_run are enabled, safe_mode disables auto_run
+    if interpreter.auto_run and not interpreter.safe_mode == "off":
+        setattr(interpreter, "auto_run", False)
 
     # Default to CodeLlama if --local is on but --model is unset
     if interpreter.local and args.model is None:

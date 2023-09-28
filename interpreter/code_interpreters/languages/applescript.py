@@ -2,6 +2,9 @@ import os
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 
 class AppleScript(SubprocessCodeInterpreter):
+    file_extension = "applescript"
+    proper_name = "AppleScript"
+
     def __init__(self):
         super().__init__()
         self.start_cmd = os.environ.get('SHELL', '/bin/zsh')

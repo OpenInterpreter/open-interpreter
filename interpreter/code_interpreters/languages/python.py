@@ -4,6 +4,9 @@ import ast
 import re
 
 class Python(SubprocessCodeInterpreter):
+    file_extension = "py"
+    proper_name = "Python"
+
     def __init__(self):
         super().__init__()
         self.start_cmd = sys.executable + " -i -q -u"
