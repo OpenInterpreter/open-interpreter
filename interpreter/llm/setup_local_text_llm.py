@@ -265,7 +265,6 @@ def setup_local_text_llm(interpreter):
         else:
             max_tokens = DEFAULT_MAX_TOKENS
         
-
         messages = tt.trim(
             messages,
             max_tokens=(context_window-max_tokens-25),
