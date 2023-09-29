@@ -49,7 +49,7 @@ class Interpreter:
         self._llm = None
 
         # Load config defaults
-        config = get_config(debug_mode=self.debug_mode)
+        config = get_config()
         self.__dict__.update(config)
 
         # Check for update
