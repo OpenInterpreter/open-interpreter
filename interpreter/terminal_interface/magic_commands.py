@@ -96,7 +96,7 @@ def handle_load_message(self, json_path):
     if not json_path.endswith(".json"):
       json_path += ".json"
     with open(json_path, 'r') as f:
-      self.load(json.load(f))
+      self.messages = json.load(f)
 
     display_markdown_message(f"> messages json loaded from {os.path.abspath(json_path)}")
 
