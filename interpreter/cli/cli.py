@@ -111,7 +111,8 @@ def cli(interpreter):
     # This should be pushed into an open_config.py util
     # If --config is used, open the config.yaml file in the Open Interpreter folder of the user's config dir
     if args.config:
-        config_path = os.path.join(appdirs.user_config_dir(), 'Open Interpreter', 'config.yaml')
+        config_dir = appdirs.user_config_dir("Open Interpreter")
+        config_path = os.path.join(config_dir, 'config.yaml')
         print(f"Opening `{config_path}`...")
         # Use the default system editor to open the file
         if platform.system() == 'Windows':
