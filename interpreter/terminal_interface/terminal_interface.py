@@ -21,7 +21,7 @@ def terminal_interface(interpreter, message):
             interpreter_intro_message.append(f"**Safe Mode**: {interpreter.safe_mode}")
         else:
             interpreter_intro_message.append(
-                "Use `interpreter -y` or set `auto_run: true` to bypass this."
+                "Use `interpreter -y` to bypass this."
             )
 
         interpreter_intro_message.append("Press `CTRL-C` to exit.")
