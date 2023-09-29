@@ -272,30 +272,6 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
 
-### Safe Mode
-
-Open Intepreter provides a way to enable some safety measures, like disabling `auto_run` and scanning generated code with [semgrep](https://semgrep.dev/) before executing it by using the `-safe` CLI flag or the `safe_mode` option in your `config.yml`.
-
-**⚠️ Enabling `safe_mode` disables `auto_run`.**
-
-Safe Mode currently has three options:
-
-- `off`: (_default_) does not apply safety features to any code block before asking if you want to execute it
-- `ask`: asks you if you want to apply safety features to a code block before asking if you want to execute it
-- `auto`: automatically applies safety features before asking if you want to execute a code block
-
-#### Safety Toolkit
-
-Open Interpreter currently includes the following features in Safe Mode.
-
-##### Code Scanning with Semgrep
-
-Open Interpreter allows you to scan generated code blocks for vulnerabilities using [semgrep](https://semgrep.dev/), which is available for free, without an account, and runs locally on your machine.
-
-If you have a Semgrep account, you can also login via the [Semgrep CLI](https://github.com/returntocorp/semgrep) and enable advanced features.
-
-Code scanning current runs with `--config auto`
-
 ## How Does it Work?
 
 Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "Python" or "JavaScript") and `code` to run.

@@ -79,7 +79,6 @@ arguments = [
         "nickname": "safe",
         "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
         "type": str,
-        "default": "off",
         "choices": ["off", "ask", "auto"]
     }
 ]
