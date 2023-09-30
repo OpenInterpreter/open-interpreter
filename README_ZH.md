@@ -8,7 +8,7 @@
     <br>
     <br>
     <b>让语言模型在您的计算机上运行代码。</b><br>
-    在本地实现开源的OpenAI的代码解释器。<br>
+    在本地实现的开源OpenAI的代码解释器。<br>
     <br><a href="https://openinterpreter.com">登记以提前获取Open Interpreter（开放解释器）桌面应用程序</a><br>
 </p>
 
@@ -57,7 +57,7 @@ pip install open-interpreter
 
 ### 终端
 
-安装后，简单地运行 `interpreter`：
+安装后，运行 `interpreter`：
 
 ```shell
 interpreter
@@ -151,10 +151,14 @@ print(interpreter.system_message)
 
 ### 更改模型
 
-在 `gpt-3.5-turbo` 下，使用快速模式：
+Open Interpreter使用[LiteLLM](https://docs.litellm.ai/docs/providers/)连接到语言模型。
+
+您可以通过设置模型参数来更改模型：
 
 ```shell
-interpreter --fast
+interpreter --model gpt-3.5-turbo
+interpreter --model claude-2
+interpreter --model command-nightly
 ```
 
 在 Python 环境下，您需要手动设置模型：
@@ -202,12 +206,14 @@ interpreter.azure_api_type = "azure"
 
 为了帮助贡献者检查和调试 Open Interpreter，`--debug` 模式提供了详细的日志。
 
-您可以使用 `interpreter --debug` 来激活调试模式，或者直接在聊天时输入：
+您可以使用 `interpreter --debug` 来激活调试模式，或者直接在终端输入：
 
 ```shell
 $ interpreter
 ...
-> %debug # <- 开启调试模式
+> %debug true <- 开启调试模式
+
+> %debug false <- 关闭调试模式
 ```
 
 ### 使用 .env 配置
@@ -230,13 +236,13 @@ INTERPRETER_CLI_USE_AZURE=False
 
 由于生成的代码是在本地环境中运行的，因此会与文件和系统设置发生交互，从而可能导致本地数据丢失或安全风险等意想不到的结果。
 
-**⚠️ 所以在执行任何代码之前，Open Interpreter 都会要求用户确认是否运行。**
+**⚠️ 所以在执行任何代码之前，Open Interpreter 都会询问用户是否运行。**
 
 您可以运行 `interpreter -y` 或设置 `interpreter.auto_run = True` 来绕过此确认，此时：
 
 -   在运行请求修改本地文件或系统设置的命令时要谨慎。
--   请像驾驶自动驾驶汽车一样留意 Open Interpreter，并随时做好通过关闭终端来结束进程的准备。
--   考虑在 Google Colab 或 Replit 等受限环境中运行 Open Interpreter。主要是这些环境更加独立，从而降低执行任意代码导致出现问题的风险。
+-   请像驾驶自动驾驶汽车一直握着方向盘一样留意 Open Interpreter，并随时做好通过关闭终端来结束进程的准备。
+-   考虑在 Google Colab 或 Replit 等受限环境中运行 Open Interpreter的主要原因是这些环境更加独立，从而降低执行任意代码导致出现问题的风险。
 
 ## 它是如何工作的？
 
@@ -258,6 +264,6 @@ Open Interpreter 采用 MIT 许可授权。您可以使用、复制、修改、�
 
 > 拥有一个像您的指尖一样快速工作的初级程序员...可以使新的工作流程变得轻松高效，同时也能让新的受众群体享受到编程的好处。
 >
-> — _OpenAI 的代码解释器发布_
+> — _OpenAI 的代码解释器发布宣传语_
 
 <br>
