@@ -118,7 +118,7 @@ def handle_delete_messages(self, num_to_keep):
     num_to_keep = "0"
   num_to_keep = int(num_to_keep)
   print(num_to_keep)
-  json_paths = glob.glob("*.json")
+  json_paths = glob.glob("*_messages_*.json")
   print(json_paths)
   if len(json_paths) <= num_to_keep:
     print("No files to delete")
