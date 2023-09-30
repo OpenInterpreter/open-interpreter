@@ -40,8 +40,9 @@ def handle_help(self, arguments):
       "%debug [true/false]": "Toggle debug mode. Without arguments or with 'true', it enters debug mode. With 'false', it exits debug mode.",
       "%reset": "Resets the current session.",
       "%undo": "Remove previous messages and its response from the message history.",
-      "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
-      "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to '[date]_messages_[counter].json'.",
+      "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it loads the latest default message '[date]_messages_[counter].json'.",
+      "%delete_message [number]": "Deletes saved messages, preserving the most recent 'number' files. If no number is provided, it deletes all but the most recent file.",
       "%help": "Show this help message.",
     }
 
@@ -115,7 +116,7 @@ def handle_load_message(self, json_path):
   
 def handle_delete_messages(self, num_to_keep):
   if num_to_keep == "":
-    num_to_keep = "0"
+    num_to_keep = "1"
   num_to_keep = int(num_to_keep)
   print(num_to_keep)
   json_paths = glob.glob("*_messages_*.json")
