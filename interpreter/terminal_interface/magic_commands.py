@@ -1,6 +1,7 @@
 from ..utils.display_markdown_message import display_markdown_message
 import json
 import os
+import datetime
 
 def handle_undo(self, arguments):
     # Removes all messages after the most recent user entry (and the entry itself).
@@ -82,7 +83,13 @@ def default_handle(self, arguments):
 
 def handle_save_message(self, json_path):
     if json_path == "":
-      json_path = "messages.json"
+      now = datetime.datetime.now()
+      msg_counter = 0
+      while True:
+        json_path = now.strftime("%Y-%m-%d") + "_messages_" + str(msg_counter) + ".json"
+        if not os.path.exists(json_path):
+          break
+        msg_counter += 1
     if not json_path.endswith(".json"):
       json_path += ".json"
     with open(json_path, 'w') as f:
