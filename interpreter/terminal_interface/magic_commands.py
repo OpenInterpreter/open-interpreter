@@ -112,6 +112,29 @@ def handle_load_message(self, json_path):
       self.messages = json.load(f)
 
     display_markdown_message(f"> messages json loaded from {os.path.abspath(json_path)}")
+  
+def handle_delete_messages(self, num_to_keep):
+  if num_to_keep == "":
+    num_to_keep = "0"
+  num_to_keep = int(num_to_keep)
+  print(num_to_keep)
+  json_paths = glob.glob("*.json")
+  print(json_paths)
+  if len(json_paths) <= num_to_keep:
+    print("No files to delete")
+    return
+  json_paths.sort(key=os.path.getmtime)
+  print(json_paths)
+  if num_to_keep < 0:
+    print("Number of files to keep must be positive")
+    return
+  elif num_to_keep > 0:
+    json_paths = json_paths[:-num_to_keep]
+  print(json_paths)
+  for path in json_paths:
+    os.remove(path)
+  print(f"Deleted {len(json_paths)} old json files")  
+   
 
 def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
@@ -121,6 +144,7 @@ def handle_magic_command(self, user_input):
       "reset": handle_reset,
       "save_message": handle_save_message,
       "load_message": handle_load_message,
+      "delete_messages": handle_delete_messages,
       "undo": handle_undo,
     }
 
