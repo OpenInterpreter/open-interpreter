@@ -31,6 +31,8 @@ We welcome code contributions through pull requests. Here are some guidelines:
 
 - Open a PR to `main` linking any related issues. Provide detailed context on your changes.
 
+- Add your `OPENAI_API_KEY` environment variable to the repository secrets to make sure your tests can pass.
+
 - We will review PRs when possible and work with you to integrate your contribution. Please be patient as reviews take time. 
 
 - Once approved, your code will be merged - thank you for improving Open Interpreter!
