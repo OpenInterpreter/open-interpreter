@@ -30,8 +30,8 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         self.debug_mode = False
         self.output_queue = queue.Queue()
         self.done = threading.Event()
-        self.contain = kwargs.get("use_docker", False)
-        if self.contain:
+        self.use_containers = kwargs.get("use_docker", False)
+        if self.use_containers:
             self.session_id = kwargs.get("session_id")
 
     @staticmethod
@@ -71,7 +71,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             None
         """
         
-        if self.contain:
+        if self.use_containers:
             self.process = DockerProcWrapper(
                 self.start_cmd,  # splitting cmd causes problems with docker
                 session_path=os.path.join(

@@ -16,6 +16,8 @@ import time
 import docker
 from docker import DockerClient
 from docker.errors import DockerException
+from docker.utils import kwargs_from_env
+from docker.tls import TLSConfig
 from rich import print as Print
 
 
@@ -45,9 +47,9 @@ def build_docker_images(
     try:
         client = DockerClient.from_env()
     except DockerException:
-        Print("ERROR: Could not connect to Docker daemon. Is Docker Engine installed and running?")
+        Print("[bold red]ERROR[/bold red]: Could not connect to Docker daemon. Is Docker Engine installed and running?")
         Print(
-            "\nFor information on Docker installation, visit: https://docs.docker.com/engine/install/"
+            "\nFor information on Docker installation, visit: https://docs.docker.com/engine/install/ and follow the instructions for your system."
         )
         return
 
@@ -79,7 +81,9 @@ def build_docker_images(
         images = client.images.list(name=image_name, all=True)
         if not images:
             Print("Downloading default image from Docker Hub, please wait...")
-            client.images.pull("unaidedelf/openinterpreter-runtime-container", tag="latest")
+            subprocess.run(["docker", "pull", "unaidedelf/openinterpreter-runtime-container:latest"])
+            subprocess.run(["docker", "tag", "unaidedelf/openinterpreter-runtime-container:latest", image_name ],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     elif current_hash != previous_hash:
         Print("Dockerfile or requirements.txt has changed. Building container...")
 
@@ -99,7 +103,7 @@ def build_docker_images(
             )
 
             # Update the stored current hash
-            stored_hashes["current_hash"] = current_hash
+            stored_hashes["last_hash"] = current_hash
             with open(hash_file_path, "w") as f:
                 json.dump(stored_hashes, f)
 
@@ -208,7 +212,7 @@ class DockerStreamWrapper:
     def flush(self):
         pass
 
-    def close(self):
+    def terminate(self):
         self._stop_event.set()
         self._thread.join()
         os.close(self._stdout_r)
@@ -220,7 +224,10 @@ class DockerStreamWrapper:
 
 class DockerProcWrapper:
     def __init__(self, command, session_path):
-        self.client = docker.APIClient()
+        client_kwargs = kwargs_from_env()
+        if client_kwargs.get('tls'):
+            client_kwargs['tls'] = TLSConfig(**client_kwargs['tls'])
+        self.client = docker.APIClient(**client_kwargs)
         self.image_name = "openinterpreter-runtime-container:latest"
         self.session_path = session_path
         self.exec_id = None
@@ -263,7 +270,6 @@ class DockerProcWrapper:
                 self.container = self.client.create_container(
                     image=self.image_name,
                     detach=True,
-                    command="/bin/bash -i",
                     labels={'session_id': os.path.basename(self.session_path)},
                     host_config=host_config,
                     user="docker",
@@ -280,6 +286,11 @@ class DockerProcWrapper:
 
     def init_exec_instance(self, command):
         if self.container:
+            container_info = self.client.inspect_container(self.container.get('Id'))
+
+            if container_info.get("State").get('Running') is False: # Not sure of the cause of this, but this works for now.
+                self.client.start(self.container.get("Id"))
+
             self.exec_id = self.client.exec_create(
                 self.container.get("Id"),
                 cmd="/bin/bash",
@@ -291,8 +302,11 @@ class DockerProcWrapper:
                 tty=False
 
             )['Id']
+            # when socket=True, this returns a socketIO socket, so we just kinda hijack the underlying socket
+            # since docker sets up the socketio wierd and tries to make it hard to mess with and write to.
+            # We make the socket "Cooperative"
             self.exec_socket = self.client.exec_start(
-                self.exec_id, socket=True, tty=False, demux=False)._sock
+                self.exec_id, socket=True, tty=False, demux=False)._sock 
 
 
     def wait_for_container_start(self, container_id, timeout=30):

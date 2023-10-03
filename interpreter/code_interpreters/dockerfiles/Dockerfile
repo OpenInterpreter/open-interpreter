@@ -4,8 +4,20 @@ FROM debian:bullseye
 # Set environment variables to disable prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Create user with sudo only in the container for security.
+RUN useradd docker && echo "docker:docker" | chpasswd && mkdir -p /home/docker && chown docker:docker /home/docker
+RUN mkdir -p /mnt/data && chown -R docker:docker /mnt/data
+
+RUN apt-get update && apt-get install -y sudo
+
+RUN usermod -aG sudo docker
+
+RUN echo "docker ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+# add write perms for user 'docker' in the correct dirs ( where it cant mess things up much. it does have passwordless sudo, so it can override this if it figures out it has sudo.)
+RUN chown -R docker:docker /mnt/data
+
 # Update package list and install essential utilities and runtimes
-RUN apt-get update && apt-get install -y \
+RUN sudo apt-get update && apt-get install -y \
     jq \
     build-essential \
     python3 \
@@ -17,9 +29,16 @@ RUN apt-get update && apt-get install -y \
     r-base \
     r-base-dev
 
-# Install NodeJS
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get install -y nodejs
+# install nodejs stuff
+RUN sudo apt-get update
+RUN sudo apt-get install -y ca-certificates curl gnupg
+RUN sudo mkdir -p /etc/apt/keyrings
+RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+RUN NODE_MAJOR=20
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+RUN sudo apt-get update
+RUN sudo apt-get install nodejs -y
+
 
 # Copy unified requirements.txt into the image
 COPY ./requirements.txt /tmp/
@@ -55,17 +74,5 @@ RUN awk '/\[r\]/,/^\s*$/' /tmp/requirements.txt | grep -v '^\[r\]' > /tmp/r_requ
 # Remove temporary files
 RUN rm /tmp/package.json /tmp/node_requirements.txt /tmp/python_requirements.txt /tmp/r_requirements.txt
 
-# Create user with sudo only in the container for security.
-RUN useradd docker && echo "docker:docker" | chpasswd
-RUN mkdir -p /mnt/data && chown -R docker:docker /mnt/data
-
-RUN apt-get update && apt-get install -y sudo
-
-RUN usermod -aG sudo docker
-
-RUN echo "docker ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-
-USER docker
-
-# Set work directory
+# workdir set. pray it dosent try to go exploring.
 WORKDIR /mnt/data

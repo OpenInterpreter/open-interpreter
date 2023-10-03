@@ -4,17 +4,12 @@ import ast
 import os
 
 class Shell(SubprocessCodeInterpreter):
-<<<<<<< HEAD
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-=======
+     
     file_extension = "sh"
     proper_name = "Shell"
 
-    def __init__(self):
-        super().__init__()
->>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
-
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         # Determine the start command based on the platform
         if platform.system() == 'Windows':
             self.start_cmd = 'cmd.exe'

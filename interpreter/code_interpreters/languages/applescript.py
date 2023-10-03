@@ -2,16 +2,13 @@ import os
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 
 class AppleScript(SubprocessCodeInterpreter):
-<<<<<<< HEAD
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-=======
+
     file_extension = "applescript"
     proper_name = "AppleScript"
 
-    def __init__(self):
-        super().__init__()
->>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
         self.start_cmd = os.environ.get('SHELL', '/bin/zsh')
 
     def preprocess_code(self, code):

@@ -27,11 +27,8 @@ wget = "^3.2"
 huggingface-hub = "^0.16.4"
 litellm = "^0.1.590"
 pyyaml = "^6.0.1"
-<<<<<<< HEAD
 docker = "^6.1.3"
-=======
 semgrep = "^1.41.0"
->>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
 [tool.poetry.dependencies.pyreadline3]
 version = "^3.4.1"
 markers = "sys_platform == 'win32'"

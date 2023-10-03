@@ -1,29 +1,12 @@
-<<<<<<< HEAD
 import inspect
 import os
 import uuid
 import weakref
 
 import appdirs
-from .languages.applescript import AppleScript
-from .languages.html import HTML
-from .languages.javascript import JavaScript
-from .languages.python import Python
-from .languages.r import R
-from .languages.shell import Shell
-=======
 from .language_map import language_map
->>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
 
-LANGUAGE_MAP = {
-    "python": Python,
-    "bash": Shell,
-    "shell": Shell,
-    "javascript": JavaScript,
-    "html": HTML,
-    "applescript": AppleScript,
-    "r": R,
-}
+
 
 # Global dictionary to store the session IDs by the weak reference of the calling objects
 SESSION_IDS_BY_OBJECT = weakref.WeakKeyDictionary()
@@ -57,7 +40,6 @@ def create_code_interpreter(language, use_containers=False):
     # Case in-sensitive
     language = language.lower()
 
-<<<<<<< HEAD
     caller_object = None
 
     if use_containers:
@@ -90,16 +72,14 @@ def create_code_interpreter(language, use_containers=False):
             session_id = f"ses-{str(uuid.uuid4())}"
             SESSION_IDS_BY_OBJECT[caller_object] = session_id
 
-=======
->>>>>>> 76a220ef (feat: add semgrep code scanning via --safe flag)
     try:
         # Retrieve the specific CodeInterpreter class based on the language
-        CodeInterpreter = LANGUAGE_MAP[language]
+        CodeInterpreter = language_map[language]
 
         # Retrieve the session ID for the current calling object, if available
         session_id = SESSION_IDS_BY_OBJECT.get(caller_object, None) if caller_object else None
 
-        if not use_containers:
+        if not use_containers or session_id is None:
             return CodeInterpreter()
 
         session_path = os.path.join(
