@@ -5,28 +5,36 @@ from ..utils.convert_to_openai_messages import convert_to_openai_messages
 from ..utils.display_markdown_message import display_markdown_message
 import tokentrim as tt
 
-
 function_schema = {
-  "name": "execute",
-  "description":
-  "Executes code on the user's machine, **in the users local environment**, and returns the output",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "language": {
-        "type": "string",
-        "description":
-        "The programming language (required parameter to the `execute` function)",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
-      },
-      "code": {
-        "type": "string",
-        "description": "The code to execute (required)"
-      }
+    "name": "execute",
+    "description":
+        "Executes code on the user's machine, **in the users local environment**, and returns the output",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "language": {
+                "type": "string",
+                "description":
+                    "The programming language (required parameter to the `execute` function)",
+                "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
+            },
+            "code": {
+                "type": "string",
+                "description": "The code to execute (required)"
+            }
+        },
+        "required": ["language", "code"]
     },
-    "required": ["language", "code"]
-  },
 }
+
+
+# Define a helper function to validate arguments based on the schema
+def validate_arguments(arguments, schema):
+    required_args = schema["parameters"]["required"]
+    if all(key in arguments and arguments[key] for key in required_args):
+        return True
+    return False
+
 
 def setup_openai_coding_llm(interpreter):
     """
@@ -35,7 +43,7 @@ def setup_openai_coding_llm(interpreter):
     """
 
     def coding_llm(messages):
-        
+
         # Convert messages
         messages = convert_to_openai_messages(messages)
 
@@ -68,7 +76,7 @@ def setup_openai_coding_llm(interpreter):
             'model': interpreter.model,
             'messages': messages,
             'stream': True,
-            'functions': [function_schema]
+            'functions': interpreter.functions_schemas
         }
 
         # Optional inputs
@@ -80,7 +88,7 @@ def setup_openai_coding_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature:
             params["temperature"] = interpreter.temperature
-        
+
         # These are set directly on LiteLLM
         if interpreter.max_budget:
             litellm.max_budget = interpreter.max_budget
@@ -111,28 +119,39 @@ def setup_openai_coding_llm(interpreter):
             if "content" in delta and delta["content"]:
                 yield {"message": delta["content"]}
 
-            if ("function_call" in accumulated_deltas 
-                and "arguments" in accumulated_deltas["function_call"]):
+            if ("function_call" in accumulated_deltas
+                    and "arguments" in accumulated_deltas["function_call"]):
 
                 arguments = accumulated_deltas["function_call"]["arguments"]
-                arguments = parse_partial_json(arguments)
+                arguments = parse_partial_json(arguments)  # Assuming this function exists and works as expected
 
                 if arguments:
+                    # Get the current schema based on the function name in the deltas
+                    current_schema = [c for c in interpreter.functions_schemas if c['name'] == accumulated_deltas["function_call"]["name"]][0]
 
-                    if (language is None
-                        and "language" in arguments
-                        and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
-                        and arguments["language"]):
-                        language = arguments["language"]
-                        yield {"language": language}
-                    
-                    if language is not None and "code" in arguments:
-                        # Calculate the delta (new characters only)
-                        code_delta = arguments["code"][len(code):]
-                        # Update the code
-                        code = arguments["code"]
-                        # Yield the delta
-                        if code_delta:
-                          yield {"code": code_delta}
-            
+                    required_props = current_schema['parameters']['required']
+                    schema_props = current_schema['parameters']['properties']
+
+                    for prop in schema_props:
+                        if prop not in arguments:
+                            continue  # Skip if the current property is not in arguments
+
+                        # Initialize if not already
+                        if prop not in locals():
+                            locals()[prop] = None
+
+                        if locals()[prop] is None and all(req in arguments for req in required_props):
+                            # This ensures we're *finished* typing all required properties, as opposed to partially done
+                            locals()[prop] = arguments[prop]
+                            yield {prop: locals()[prop]}
+
+                        if locals()[prop] is not None:
+                            # Calculate the delta (new characters only)
+                            prop_delta = arguments[prop][len(locals()[prop]):]
+                            # Update the property value
+                            locals()[prop] = arguments[prop]
+                            # Yield the delta
+                            if prop_delta:
+                                yield {prop: prop_delta}
+
     return coding_llm

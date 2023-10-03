@@ -1,5 +1,4 @@
 
-
 class BaseCodeInterpreter:
     """
     .run is a generator that yields a dict with attributes: active_line, output
@@ -12,3 +11,6 @@ class BaseCodeInterpreter:
 
     def terminate(self):
         pass
+
+class BreakLoop(Exception):
+    pass
