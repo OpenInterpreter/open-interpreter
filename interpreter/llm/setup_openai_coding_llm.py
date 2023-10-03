@@ -102,56 +102,38 @@ def setup_openai_coding_llm(interpreter):
         response = litellm.completion(**params)
 
         accumulated_deltas = {}
-        language = None
-        code = ""
 
+        # Initialize empty arguments dictionary
+        arguments = {}
+        accumulated_deltas = {}
         for chunk in response:
-
-            if ('choices' not in chunk or len(chunk['choices']) == 0):
-                # This happens sometimes
+            if 'choices' not in chunk or len(chunk['choices']) == 0:
                 continue
 
             delta = chunk["choices"][0]["delta"]
-
-            # Accumulate deltas
             accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
-            if "content" in delta and delta["content"]:
-                yield {"message": delta["content"]}
+            if "function_call" in accumulated_deltas and "arguments" in accumulated_deltas["function_call"]:
+                partial_arguments = parse_partial_json(accumulated_deltas["function_call"]["arguments"])
+                if partial_arguments:
+                    arguments.update(partial_arguments)  # Update the arguments dictionary with new values
 
-            if ("function_call" in accumulated_deltas
-                    and "arguments" in accumulated_deltas["function_call"]):
+        # Fetch current function schema based on the function name
+        current_schema = next(
+            (c for c in interpreter.functions_schemas if c['name'] == accumulated_deltas.get('function_call', {}).get('name')),
+            None
+        )
 
-                arguments = accumulated_deltas["function_call"]["arguments"]
-                arguments = parse_partial_json(arguments)  # Assuming this function exists and works as expected
+        if current_schema is not None:
+            # Check if all required keys are present
+            if all(key in arguments for key in current_schema['parameters']['required']):
 
-                if arguments:
-                    # Get the current schema based on the function name in the deltas
-                    current_schema = [c for c in interpreter.functions_schemas if c['name'] == accumulated_deltas["function_call"]["name"]][0]
-
-                    required_props = current_schema['parameters']['required']
-                    schema_props = current_schema['parameters']['properties']
-
-                    for prop in schema_props:
-                        if prop not in arguments:
-                            continue  # Skip if the current property is not in arguments
-
-                        # Initialize if not already
-                        if prop not in locals():
-                            locals()[prop] = None
-
-                        if locals()[prop] is None and all(req in arguments for req in required_props):
-                            # This ensures we're *finished* typing all required properties, as opposed to partially done
-                            locals()[prop] = arguments[prop]
-                            yield {prop: locals()[prop]}
-
-                        if locals()[prop] is not None:
-                            # Calculate the delta (new characters only)
-                            prop_delta = arguments[prop][len(locals()[prop]):]
-                            # Update the property value
-                            locals()[prop] = arguments[prop]
-                            # Yield the delta
-                            if prop_delta:
-                                yield {prop: prop_delta}
+                # Yield each argument individually
+                for key, value in arguments.items():
+                    yield {key: value}
+        else:
+            # If the function name is not in the schema, we can't validate the arguments
+            # So we'll just yield the entire arguments dictionary
+            yield accumulated_deltas
 
     return coding_llm
