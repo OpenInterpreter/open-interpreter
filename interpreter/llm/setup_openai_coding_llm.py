@@ -113,6 +113,9 @@ def setup_openai_coding_llm(interpreter):
             delta = chunk["choices"][0]["delta"]
             accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
+            if "content" in delta and delta["content"]:
+                yield {"message": delta["content"]}
+
             if "function_call" in accumulated_deltas and "arguments" in accumulated_deltas["function_call"]:
                 partial_arguments = parse_partial_json(accumulated_deltas["function_call"]["arguments"])
                 if partial_arguments:
@@ -131,9 +134,5 @@ def setup_openai_coding_llm(interpreter):
                 # Yield each argument individually
                 for key, value in arguments.items():
                     yield {key: value}
-        else:
-            # If the function name is not in the schema, we can't validate the arguments
-            # So we'll just yield the entire arguments dictionary
-            yield accumulated_deltas
 
     return coding_llm
