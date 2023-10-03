@@ -19,16 +19,9 @@ def respond(interpreter):
         ### PREPARE MESSAGES ###
 
         system_message = interpreter.system_message
-        
-        # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
-        # We can query it semantically and append relevant tutorials/procedures to our system message
-        get_relevant_procedures(interpreter.messages[-2:])
-        if not interpreter.local:
-            try:
-                system_message += "\n\n" + get_relevant_procedures(interpreter.messages[-2:])
-            except:
-                # This can fail for odd SLL reasons. It's not necessary, so we can continue
-                pass
+
+        if interpreter.build_relevant_procedures_function is not None:
+            system_message += "\n\n" + interpreter.build_relevant_procedures_function(interpreter)
         
         # Add user info to system_message, like OS, CWD, etc
         system_message += "\n\n" + get_user_info_string()

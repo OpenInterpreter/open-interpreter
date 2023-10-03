@@ -13,3 +13,15 @@ def get_relevant_procedures(messages):
     relevant_procedures = "[Recommended Procedures]\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for deprecation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
 
     return relevant_procedures
+
+
+def build_relevant_procedures(interpreter):
+    # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
+    # We can query it semantically and append relevant tutorials/procedures to our system message
+
+    if not interpreter.local:
+        try:
+            return get_relevant_procedures(interpreter.messages[-2:])
+        except:
+            # This can fail for odd SLL reasons. It's not necessary, so we can continue
+            return ""

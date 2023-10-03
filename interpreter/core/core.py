@@ -6,6 +6,7 @@ from interpreter.utils import display_markdown_message
 from ..cli.cli import cli
 from ..code_interpreters.code_function_handler import code_function
 from ..llm.setup_openai_coding_llm import function_schema
+from ..rag.get_relevant_procedures import build_relevant_procedures
 from ..utils.get_config import get_config
 from .respond import respond
 from ..llm.setup_llm import setup_llm
@@ -51,6 +52,7 @@ class Interpreter:
         self._llm = None
         self.functions_schemas = [function_schema]
         self.functions = [code_function]
+        self.build_relevant_procedures_function = build_relevant_procedures
 
         # Load config defaults
         config = get_config()
