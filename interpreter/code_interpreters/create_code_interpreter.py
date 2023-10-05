@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import inspect
 import os
 import uuid
@@ -8,9 +7,6 @@ import appdirs
 from .language_map import language_map
 
 
-=======
-from .language_map import language_map
->>>>>>> upstream/main
 
 # Global dictionary to store the session IDs by the weak reference of the calling objects
 SESSION_IDS_BY_OBJECT = weakref.WeakKeyDictionary()
@@ -44,7 +40,6 @@ def create_code_interpreter(language, use_containers=False):
     # Case in-sensitive
     language = language.lower()
 
-<<<<<<< HEAD
     caller_object = None
 
     if use_containers:
@@ -77,8 +72,6 @@ def create_code_interpreter(language, use_containers=False):
             session_id = f"ses-{str(uuid.uuid4())}"
             SESSION_IDS_BY_OBJECT[caller_object] = session_id
 
-=======
->>>>>>> upstream/main
     try:
         # Retrieve the specific CodeInterpreter class based on the language
         CodeInterpreter = language_map[language]
