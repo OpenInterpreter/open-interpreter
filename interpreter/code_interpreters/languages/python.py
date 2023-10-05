@@ -4,6 +4,7 @@ import ast
 import re
 
 class Python(SubprocessCodeInterpreter):
+<<<<<<< HEAD
 
     file_extension = "py"
     proper_name = "Python"
@@ -14,6 +15,14 @@ class Python(SubprocessCodeInterpreter):
             self.start_cmd = "python3 -i -q -u"
         else:
             self.start_cmd = sys.executable + " -i -q -u"
+=======
+    file_extension = "py"
+    proper_name = "Python"
+
+    def __init__(self):
+        super().__init__()
+        self.start_cmd = sys.executable + " -i -q -u"
+>>>>>>> upstream/main
         
     def preprocess_code(self, code):
         return preprocess_python(code)

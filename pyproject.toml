@@ -29,6 +29,7 @@ litellm = "^0.1.590"
 pyyaml = "^6.0.1"
 docker = "^6.1.3"
 semgrep = "^1.41.0"
+yaspin = "^3.0.1"
 [tool.poetry.dependencies.pyreadline3]
 version = "^3.4.1"
 markers = "sys_platform == 'win32'"

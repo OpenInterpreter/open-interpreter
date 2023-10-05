@@ -2,6 +2,7 @@ from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import re
 
 class R(SubprocessCodeInterpreter):
+<<<<<<< HEAD
      
 
     file_extension = "r"
@@ -9,6 +10,13 @@ class R(SubprocessCodeInterpreter):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+=======
+    file_extension = "r"
+    proper_name = "R"
+
+    def __init__(self):
+        super().__init__()
+>>>>>>> upstream/main
         self.start_cmd = "R -q --vanilla"  # Start R in quiet and vanilla mode
         
     def preprocess_code(self, code):

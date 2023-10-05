@@ -778,13 +778,13 @@ referencing = ">=0.28.0"
 
 [[package]]
 name = "litellm"
-version = "0.1.819"
+version = "0.1.820"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.1.819-py3-none-any.whl", hash = "sha256:4aefb79dc3a10bdf9d42ac69a0b3f07b1553b81e3a9bcb9add077a5e34f643a3"},
-    {file = "litellm-0.1.819.tar.gz", hash = "sha256:d253825781236fd42c8c8d0199ac4453d6bad5d78e496f7581fd15b11468c959"},
+    {file = "litellm-0.1.820-py3-none-any.whl", hash = "sha256:bd50cbdfd52b97c3c0a6a2084f265aa7a6e17565fada1b4d9c46c68ab067a294"},
+    {file = "litellm-0.1.820.tar.gz", hash = "sha256:740a1336d614aa7f78106bdbbdcc7edfa65ecb5ef0fb1eed05179df293f98ead"},
 ]
 
 [package.dependencies]
@@ -1618,6 +1618,20 @@ files = [
 ]
 
 [[package]]
+name = "termcolor"
+version = "2.3.0"
+description = "ANSI color formatting for output in terminal"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "termcolor-2.3.0-py3-none-any.whl", hash = "sha256:3afb05607b89aed0ffe25202399ee0867ad4d3cb4180d98aaf8eefa6a5f7d475"},
+    {file = "termcolor-2.3.0.tar.gz", hash = "sha256:b5b08f68937f138fe92f6c089b99f1e2da0ae56c52b78bf7075fd95420fd9a5a"},
+]
+
+[package.extras]
+tests = ["pytest", "pytest-cov"]
+
+[[package]]
 name = "tiktoken"
 version = "0.4.0"
 description = "tiktoken is a fast BPE tokeniser for use with OpenAI's models"
@@ -2058,6 +2072,20 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [[package]]
+name = "yaspin"
+version = "3.0.1"
+description = "Yet Another Terminal Spinner"
+optional = false
+python-versions = ">=3.9,<4.0"
+files = [
+    {file = "yaspin-3.0.1-py3-none-any.whl", hash = "sha256:c4b5d2ca23ae664b87a5cd53401c5107cef12668a71d9ee5ea5536045f364121"},
+    {file = "yaspin-3.0.1.tar.gz", hash = "sha256:9c04aa69cce9be83e1ea3134a6712e749e6c0c9cd02599023713e6befd7bf369"},
+]
+
+[package.dependencies]
+termcolor = ">=2.3,<3.0"
+
+[[package]]
 name = "zipp"
 version = "3.17.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -2075,4 +2103,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "878bd3a8334d3178d84c396045acb5d5f9400fa273fa53f32d4eb98d01a031e0"
+content-hash = "ccf0aaa9ae52c3b6d45011661827e845956721114202585962d4b07098edf903"
