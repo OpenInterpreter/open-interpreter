@@ -81,6 +81,7 @@ def build_docker_images(
         images = client.images.list(name=image_name, all=True)
         if not images:
             Print("Downloading default image from Docker Hub, please wait...")
+            
             subprocess.run(["docker", "pull", "unaidedelf/openinterpreter-runtime-container:latest"])
             subprocess.run(["docker", "tag", "unaidedelf/openinterpreter-runtime-container:latest", image_name ],
                        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
@@ -306,7 +307,7 @@ class DockerProcWrapper:
             # since docker sets up the socketio wierd and tries to make it hard to mess with and write to.
             # We make the socket "Cooperative"
             self.exec_socket = self.client.exec_start(
-                self.exec_id, socket=True, tty=False, demux=False)._sock 
+                self.exec_id, socket=True, tty=False, demux=False)._sock  # type: ignore
 
 
     def wait_for_container_start(self, container_id, timeout=30):

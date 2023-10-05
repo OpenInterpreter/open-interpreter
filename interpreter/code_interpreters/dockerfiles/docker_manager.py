@@ -1,14 +1,17 @@
-class DockerManager:
-    def __init__(self, requirements_file='requirements.txt', docker_file='Dockerfile'):
-        self.requirements_file = requirements_file
-        self.docker_file = docker_file
+import os
 
-    def add_dependency(self, language, dependency):
+class DockerManager:
+    
+    here = os.path.abspath(__file__)
+    requirements_file = os.path.normpath(os.path.join(here, "..", "requirements.txt"))
+    docker_file = os.path.normpath(os.path.join(here,"..", "Dockerfile"))
+
+    def add_dependency(language, dependency):
         lines = []
         language_section_found = False
         dependency_name = dependency.split('==')[0]
 
-        with open(self.requirements_file, 'r') as f:
+        with open(DockerManager.requirements_file, 'r') as f:
             lines = f.readlines()
 
         for i, line in enumerate(lines):
@@ -28,14 +31,14 @@ class DockerManager:
 
         lines.insert(i, f"{dependency}\n")
 
-        with open(self.requirements_file, 'w') as f:
+        with open(DockerManager.requirements_file, 'w') as f:
             f.writelines(lines)
 
-    def remove_dependency(self, language, dependency_name):
+    def remove_dependency(language, dependency_name):
         lines = []
         language_section_found = False
 
-        with open(self.requirements_file, 'r') as f:
+        with open(DockerManager.requirements_file, 'r') as f:
             lines = f.readlines()
 
         for i, line in enumerate(lines):
@@ -49,15 +52,8 @@ class DockerManager:
                     del lines[i]
                     break
         else:
-            raise ValueError(f"Error: Language section [{language}] or dependency {dependency_name} not found. please add the language using the '.add_language' method")
+            raise ValueError(f"Error: Language section [{language}] or dependency {dependency_name} not found.")
 
-        with open(self.requirements_file, 'w') as f:
+        with open(DockerManager.requirements_file, 'w') as f:
             f.writelines(lines)
 
-
-    def add_language(self, language, install_command):
-        with open(self.docker_file, 'a') as f:
-            f.write(f'\n# Install {language}\nRUN {install_command}\n')
-
-        with open(self.requirements_file, 'a') as f:
-            f.write(f"\n[{language}]\n")

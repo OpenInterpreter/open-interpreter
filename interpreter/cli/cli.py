@@ -6,6 +6,7 @@ import pkg_resources
 import appdirs
 from ..utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.conversation_navigator import conversation_navigator
+from ..core.core import Interpreter
 
 arguments = [
     {
@@ -90,7 +91,7 @@ arguments = [
     }
 ]
 
-def cli(interpreter):
+def cli():
 
     parser = argparse.ArgumentParser(description="Open Interpreter")
 
@@ -111,6 +112,8 @@ def cli(interpreter):
     # parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
 
     args = parser.parse_args()
+
+    interpreter = Interpreter()
 
     # This should be pushed into an open_config.py util
     # If --config is used, open the config.yaml file in the Open Interpreter folder of the user's config dir

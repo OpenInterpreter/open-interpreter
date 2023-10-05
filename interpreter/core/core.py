@@ -1,9 +1,7 @@
 """
 This file defines the Interpreter class.
-It's the main file. `import interpreter` will import an instance of this class.
+running ```import interpreter``` followed by ```interpreter.create_interpreter(**kwargs)``` will create an instance of this class.
 """
-from interpreter.utils import display_markdown_message
-from ..cli.cli import cli
 from ..utils.get_config import get_config
 from .respond import respond
 from ..llm.setup_llm import setup_llm
@@ -18,8 +16,6 @@ from ..utils.display_markdown_message import display_markdown_message
 from ..code_interpreters.container_utils.container_utils import build_docker_images
 
 class Interpreter:
-    def cli(self):
-        cli(self)
 
     def __init__(self):
         # State
@@ -49,12 +45,14 @@ class Interpreter:
         self.max_budget = None
         self._llm = None
 
+        # Container options
+        self.use_containers = False
+
         # Load config defaults
         config = get_config()
         self.__dict__.update(config)
 
-        # Container options
-        self.use_containers = False
+        
         
 
         # Check for update

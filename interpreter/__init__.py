@@ -1,15 +1,41 @@
-from .core.core import Interpreter
 import sys
+from .core.core import Interpreter
+from .cli.cli import cli
 
-# This is done so when users `import interpreter`,
-# they get an instance of interpreter:
 
-sys.modules["interpreter"] = Interpreter()
 
-# **This is a controversial thing to do,**
-# because perhaps modules ought to behave like modules.
+def create_interpreter(**kwargs):
+    """
+    Factory function to create an instance of Interpreter with the provided keyword arguments.
+    
+    Parameters:
+        **kwargs: Keyword arguments to be set as attributes in the Interpreter instance.
+    
+    Returns:
+        An instance of Interpreter initialized with the provided arguments.
+    """
+    # Create a new interpreter instance
+    new_interpreter = Interpreter()
+    
+    # Iterate through the provided keyword arguments
+    for key, value in kwargs.items():
+        # Check if the attribute exists in the interpreter
+        if hasattr(new_interpreter, key):
+            # Check if the provided value is of the correct type
+            if isinstance(value, type(getattr(new_interpreter, key))):
+                setattr(new_interpreter, key, value)
+            else:
+                print(
+                    f"Type mismatch: '{key}' should be of type {type(getattr(new_interpreter, key))}. Using the default value instead.")
+                
+        else:
+            print(
+                f"Unknown attribute: '{key}'. Ignoring.")
+            
+    
+    return new_interpreter
 
-# But I think it saves a step, removes friction, and looks good.
+
 
 #     ____                      ____      __                            __           
 #    / __ \____  ___  ____     /  _/___  / /____  _________  ________  / /____  _____
