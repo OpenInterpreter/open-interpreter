@@ -4,17 +4,9 @@ import ast
 import os
 
 class Shell(SubprocessCodeInterpreter):
-<<<<<<< HEAD
      
     file_extension = "sh"
     proper_name = "Shell"
-=======
-    file_extension = "sh"
-    proper_name = "Shell"
-
-    def __init__(self):
-        super().__init__()
->>>>>>> upstream/main
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
