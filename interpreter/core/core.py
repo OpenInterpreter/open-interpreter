@@ -15,6 +15,7 @@ from datetime import datetime
 import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
+from ..plugins.plugin_manager import register_plugins
 
 class Interpreter:
     def cli(self):
@@ -51,6 +52,9 @@ class Interpreter:
         # Load config defaults
         config = get_config()
         self.__dict__.update(config)
+
+        # Load plugins
+        register_plugins(self)
 
         # Check for update
         if not self.local:

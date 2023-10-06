@@ -3,36 +3,17 @@ from ..utils.merge_deltas import merge_deltas
 from ..utils.parse_partial_json import parse_partial_json
 from ..utils.convert_to_openai_messages import convert_to_openai_messages
 from ..utils.display_markdown_message import display_markdown_message
+from ..plugins.function_manager import extend_functions
 import tokentrim as tt
 
-
-function_schema = {
-  "name": "execute",
-  "description":
-  "Executes code on the user's machine, **in the users local environment**, and returns the output",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "language": {
-        "type": "string",
-        "description":
-        "The programming language (required parameter to the `execute` function)",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
-      },
-      "code": {
-        "type": "string",
-        "description": "The code to execute (required)"
-      }
-    },
-    "required": ["language", "code"]
-  },
-}
 
 def setup_openai_coding_llm(interpreter):
     """
     Takes an Interpreter (which includes a ton of LLM settings),
     returns a OI Coding LLM (a generator that takes OI messages and streams deltas with `message`, `language`, and `code`).
     """
+
+    functions = extend_functions(interpreter)
 
     def coding_llm(messages):
         
@@ -68,7 +49,7 @@ def setup_openai_coding_llm(interpreter):
             'model': interpreter.model,
             'messages': messages,
             'stream': True,
-            'functions': [function_schema]
+            'functions': functions
         }
 
         # Optional inputs
