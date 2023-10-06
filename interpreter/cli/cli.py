@@ -80,6 +80,18 @@ arguments = [
         "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
         "type": str,
         "choices": ["off", "ask", "auto"]
+    },
+    {
+        "name": "threads",
+        "nickname": "thr",
+        "help_text": "number of threads on cpu",
+        "type": int
+    },
+    {
+        "name": "num_gpu_layers",
+        "nickname": "ngl",
+        "help_text": "number of layers to offload to gpu",
+        "type": int
     }
 ]
 
