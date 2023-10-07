@@ -54,6 +54,7 @@ class Interpreter:
         self.__dict__.update(config)
 
         # Load plugins
+        self.functions = {}
         register_plugins(self)
 
         # Check for update

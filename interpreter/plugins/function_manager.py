@@ -20,5 +20,6 @@ def extend_functions(interpreter):
                 print(f"Loading function: {function['name']}")
 
             function_schemas.append(function)
+            interpreter.functions[function["name"]] = interpreter.plugins[plugin].execute_function
 
     return function_schemas

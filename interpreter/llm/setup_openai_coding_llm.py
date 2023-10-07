@@ -21,7 +21,7 @@ def setup_openai_coding_llm(interpreter):
         messages = convert_to_openai_messages(messages)
 
         # Add OpenAI's recommended function message
-        messages[0]["content"] += "\n\nOnly use the function you have been provided with."
+        messages[0]["content"] += "\n\nOnly use the functions you have been provided with."
 
         # Seperate out the system_message from messages
         # (We expect the first message to always be a system_message)
@@ -77,6 +77,7 @@ def setup_openai_coding_llm(interpreter):
         accumulated_deltas = {}
         language = None
         code = ""
+        accumulated_arguments = {}
 
         for chunk in response:
 
@@ -99,21 +100,35 @@ def setup_openai_coding_llm(interpreter):
                 arguments = parse_partial_json(arguments)
 
                 if arguments:
+                    accumulated_arguments = {**accumulated_arguments, **arguments}
 
-                    if (language is None
-                        and "language" in arguments
-                        and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
-                        and arguments["language"]):
-                        language = arguments["language"]
-                        yield {"language": language}
-                    
-                    if language is not None and "code" in arguments:
-                        # Calculate the delta (new characters only)
-                        code_delta = arguments["code"][len(code):]
-                        # Update the code
-                        code = arguments["code"]
-                        # Yield the delta
-                        if code_delta:
-                          yield {"code": code_delta}
-            
+                    if accumulated_deltas["function_call"]["name"] == "execute":
+                        if (language is None
+                            and "language" in arguments
+                            and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
+                            and arguments["language"]):
+                            language = arguments["language"]
+                            yield {"language": language}
+                        
+                        if language is not None and "code" in arguments:
+                            # Calculate the delta (new characters only)
+                            code_delta = arguments["code"][len(code):]
+                            # Update the code
+                            code = arguments["code"]
+                            # Yield the delta
+                            if code_delta:
+                                yield {"code": code_delta}
+
+        # execute plugin function if we have one
+        if "function_call" in accumulated_deltas and accumulated_deltas["function_call"]["name"] != "execute" and accumulated_deltas["function_call"]["name"] in interpreter.functions:
+            # Execute the function
+            function_name = accumulated_deltas["function_call"]["name"]
+            parameters = accumulated_arguments
+            function = interpreter.functions[function_name]
+            results = function(function_name=function_name, parameters=parameters)
+
+            # Yield the result
+            if results:
+                yield { "message": results }
+
     return coding_llm
