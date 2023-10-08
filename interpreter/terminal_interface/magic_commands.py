@@ -104,10 +104,12 @@ def handle_load_message(self, json_path):
 
 def handle_count_tokens(self, arguments):
     if len(self.messages) == 0:
-      display_markdown_message(f"> System Prompt Tokens: {count_messages_tokens(messages=[self.system_message], model=self.model)}")
+      (tokens, cost) = count_messages_tokens(messages=[self.system_message], model=self.model)
+      display_markdown_message(f"> System Prompt Tokens: {tokens} (${cost})")
     else:
       messages_including_system = [self.system_message] + self.messages
-      display_markdown_message(f"> Total Tokens Used: {count_messages_tokens(messages=messages_including_system, model=self.model)}")
+      (tokens, cost) = count_messages_tokens(messages=messages_including_system, model=self.model)
+      display_markdown_message(f"> Total Tokens Used: {tokens} (${cost})")
 
 def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
