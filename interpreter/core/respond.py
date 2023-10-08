@@ -90,6 +90,14 @@ def respond(interpreter):
                 print("Running code:", interpreter.messages[-1])
 
             try:
+                # Yield a message, such that the user can stop code execution if they want to
+                try:
+                    yield {"executing": {"code": interpreter.messages[-1]["code"], "language": interpreter.messages[-1]["language"]}}
+                except GeneratorExit:
+                    # The user might exit here.
+                    # We need to tell python what we (the generator) should do if they exit
+                    break
+
                 # What code do you want to run?
                 code = interpreter.messages[-1]["code"]
 
@@ -105,13 +113,6 @@ def respond(interpreter):
                     interpreter._code_interpreters[language] = create_code_interpreter(language)
                 code_interpreter = interpreter._code_interpreters[language]
 
-                # Yield a message, such that the user can stop code execution if they want to
-                try:
-                    yield {"executing": {"code": code, "language": language}}
-                except GeneratorExit:
-                    # The user might exit here.
-                    # We need to tell python what we (the generator) should do if they exit
-                    break
 
                 # Yield each line, also append it to last messages' output
                 interpreter.messages[-1]["output"] = ""

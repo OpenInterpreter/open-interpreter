@@ -9,6 +9,7 @@ from .magic_commands import handle_magic_command
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
 from ..utils.scan_code import scan_code
+from ..utils.edit_code import edit_code
 
 
 def terminal_interface(interpreter, message):
@@ -119,10 +120,37 @@ def terminal_interface(interpreter, message):
 
                             scan_code(code, language, interpreter)
 
-                        response = input("  Would you like to run this code? (y/n)\n\n  ")
+                        response = input("  Would you like to run this code? (y/n/%edit)\n\n  ")
                         print("")  # <- Aesthetic choice
 
-                        if response.strip().lower() == "y":
+                        if response.strip().lower() == "%edit":
+                            # open a code editor with this code in a temporary file
+                            # when the user saves and exits, run the code
+                            # Get code language and actual code from the chunk
+                            # We need to give these to our editor to open the file
+                            language = chunk["executing"]["language"]
+                            code = chunk["executing"]["code"]
+
+                            edited_code = edit_code(code, language, interpreter)
+
+                            # Get the last message, so we can extend it with the edited code
+                            old_message = interpreter.messages[-1]
+
+                            # Remove the last message, which is the code we're about to edit
+                            interpreter.messages = interpreter.messages[:-1]
+
+                            ran_code_block = True
+                            render_cursor = False
+
+                            active_block.end()
+
+                            # Add the edited code to the messages
+                            interpreter.messages.append({
+                                **old_message,
+                                "code": edited_code,
+                            })
+
+                        elif response.strip().lower() == "y":
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock()

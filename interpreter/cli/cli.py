@@ -1,10 +1,8 @@
 import argparse
-import subprocess
 import os
-import platform
 import pkg_resources
 import appdirs
-from ..utils.display_markdown_message import display_markdown_message
+from ..utils.open_file import open_file
 from ..terminal_interface.conversation_navigator import conversation_navigator
 
 arguments = [
@@ -114,16 +112,9 @@ def cli(interpreter):
         config_dir = appdirs.user_config_dir("Open Interpreter")
         config_path = os.path.join(config_dir, 'config.yaml')
         print(f"Opening `{config_path}`...")
-        # Use the default system editor to open the file
-        if platform.system() == 'Windows':
-            os.startfile(config_path)  # This will open the file with the default application, e.g., Notepad
-        else:
-            try:
-                # Try using xdg-open on non-Windows platforms
-                subprocess.call(['xdg-open', config_path])
-            except FileNotFoundError:
-                # Fallback to using 'open' on macOS if 'xdg-open' is not available
-                subprocess.call(['open', config_path])
+        
+        open_file(file_path=config_path)
+
         return
     
     # TODO Implement model explorer
