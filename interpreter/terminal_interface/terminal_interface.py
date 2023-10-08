@@ -111,6 +111,9 @@ def terminal_interface(interpreter, message):
 
                                 if response.strip().lower() == "y":
                                     should_scan_code = True
+                                
+                                # remove y/n from history so that user can more easily find last command
+                                readline.remove_history_item(readline.get_current_history_length() - 1)
 
                         if should_scan_code:
                             # Get code language and actual code from the chunk
@@ -137,6 +140,9 @@ def terminal_interface(interpreter, message):
                                 "message": "I have declined to run this code."
                             })
                             break
+
+                        # remove y/n from history so that user can more easily find last command
+                        readline.remove_history_item(readline.get_current_history_length() - 1)
 
                 # Output
                 if "output" in chunk:
