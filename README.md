@@ -1,5 +1,4 @@
-
-![banner 2](https://github.com/KillianLucas/open-interpreter/assets/63927363/c1aec011-6d3c-4960-ab55-749326b8a7c9)
+<h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm">
@@ -9,11 +8,16 @@
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
-    <br><br>
-    <b>Open Interpreter</b> lets language models run code on your computer.<br>
+    <br>
+    <br>
+    <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
     <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">Read our new docs</a></b><br>
 </p>
+
+<br>
+
+![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 
