@@ -240,13 +240,14 @@ In the interactive mode, you can use the below commands to enhance your experien
 
 **Available Commands:**  
  • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
-enters debug mode. With 'false', it exits debug mode.  
- • `%reset`: Resets the current session.  
- • `%undo`: Remove previous messages and its response from the message history.  
+enters debug mode. With 'false', it exits debug mode.
+ • `%reset`: Resets the current session.
+ • `%undo`: Remove previous messages and its response from the message history.
  • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
-provided, it defaults to 'messages.json'.  
+provided, it defaults to 'messages.json'.
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
- is provided, it defaults to 'messages.json'.  
+ is provided, it defaults to 'messages.json'.
+ • `%tokens`: Counts the number of tokens used by the current conversation's messages and displays a cost estimate via [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token). **Note**: This only accounts for messages currently in the conversation, not messages that have been sent or received and then removed via `%undo`.
  • `%help`: Show the help message.
 
 ### Configuration
