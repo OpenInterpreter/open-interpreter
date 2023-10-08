@@ -3,6 +3,7 @@ The terminal interface is just a view. Just handles the very top layer.
 If you were to build a frontend this would be a way to do it
 """
 
+import readline
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
