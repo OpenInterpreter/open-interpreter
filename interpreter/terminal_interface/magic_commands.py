@@ -41,7 +41,7 @@ def handle_help(self, arguments):
       "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
-      "%tokens": "Show the tokens used in the current session.",
+      "%tokens": "Show the tokens used by the current conversation's messages. **Note**: this will not take into account tokens that have already been used and then removed from the conversation with `%undo`.",
       "%help": "Show this help message.",
     }
 
@@ -109,7 +109,7 @@ def handle_count_tokens(self, arguments):
     else:
       messages_including_system = [self.system_message] + self.messages
       (tokens, cost) = count_messages_tokens(messages=messages_including_system, model=self.model)
-      display_markdown_message(f"> Total Tokens Used: {tokens} (${cost})")
+      display_markdown_message(f"> Tokens in Current Conversation: {tokens} (${cost})")
 
 def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
