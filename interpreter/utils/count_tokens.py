@@ -17,7 +17,7 @@ def token_cost(tokens=0, model="gpt-4"):
 
     (prompt_cost, _) = cost_per_token(model=model, prompt_tokens=tokens)
 
-    return prompt_cost
+    return round(prompt_cost, 6)
 
 def count_messages_tokens(messages=[], model=None):
     """
@@ -31,6 +31,12 @@ def count_messages_tokens(messages=[], model=None):
             tokens_used += count_tokens(message, model=model)
         elif "message" in message:
             tokens_used += count_tokens(message["message"], model=model)
+
+            if "code" in message:
+                tokens_used += count_tokens(message["code"], model=model)
+
+            if "output" in message:
+                tokens_used += count_tokens(message["output"], model=model)
 
     prompt_cost = token_cost(tokens_used, model=model)
 
