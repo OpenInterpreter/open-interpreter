@@ -262,6 +262,57 @@ Run the following command to open the configuration file:
 interpreter --config
 ```
 
+#### Multiple Configuration Files
+
+Open Interpreter supports multiple `config.yaml` files, allowing you to easily switch between configurations via the `--config_file` argument.
+
+**Note**: `--config_file` accepts either a file name or a file path. File names will use the default configuration directory, while file paths will use the specified path.
+
+To create or edit a new configuration, run:
+
+```
+interpreter --config --config_file $config_path
+```
+
+To have Open Interpreter load a specific configuration file run:
+
+```
+interpreter --config_file $config_path
+```
+
+**Note**: Replace `$config_path` with the name of or path to your configuration file.
+
+##### CLI Example
+
+1. Create a new `config.turbo.yaml` file
+   ```
+   interpreter --config --config_file config.turbo.yaml
+   ```
+2. Edit the `config.turbo.yaml` file to set `model` to `gpt-3.5-turbo`
+3. Run Open Interpreter with the `config.turbo.yaml` configuration
+   ```
+   interpreter --config_file config.turbo.yaml
+   ```
+
+##### Python Example
+
+You can also load configuration files when calling Open Interpreter from Python scripts:
+
+```python
+import os
+import interpreter
+
+currentPath = os.path.dirname(os.path.abspath(__file__))
+config_path=os.path.join(currentPath, './config.test.yaml')
+
+interpreter.extend_config(config_path=config_path)
+
+message = "What operating system are we on?"
+
+for chunk in interpreter.chat(message, display=False, stream=True):
+  print(chunk)
+```
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.

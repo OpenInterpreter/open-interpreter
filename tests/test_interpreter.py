@@ -1,16 +1,17 @@
+import os
 from random import randint
-import interpreter
 import time
-
-interpreter.auto_run = True
-interpreter.model = "gpt-4"
-interpreter.temperature = 0
-
+import pytest
+import interpreter
 
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():
     interpreter.reset()
+    interpreter.temperature = 0
+    interpreter.auto_run = True
+    interpreter.model = "gpt-4"
+    interpreter.debug_mode = False
 
 
 # this function will run after each test
@@ -18,6 +19,22 @@ def setup_function():
 def teardown_function():
     time.sleep(5)
 
+
+def test_config_loading():
+    # because our test is running from the root directory, we need to do some
+    # path manipulation to get the actual path to the config file or our config
+    # loader will try to load from the wrong directory and fail
+    currentPath = os.path.dirname(os.path.abspath(__file__))
+    config_path=os.path.join(currentPath, './config.test.yaml')
+
+    interpreter.extend_config(config_path=config_path)
+
+    # check the settings we configured in our config.test.yaml file
+    temperature_ok = interpreter.temperature == 0.25
+    model_ok = interpreter.model == "gpt-3.5-turbo"
+    debug_mode_ok = interpreter.debug_mode == True
+
+    assert temperature_ok and model_ok and debug_mode_ok
 
 def test_system_message_appending():
     ping_system_message = (
@@ -54,7 +71,7 @@ def test_hello_world():
         {"role": "assistant", "message": hello_world_response},
     ]
 
-"""
+@pytest.mark.skip(reason="Math is hard")
 def test_math():
     # we'll generate random integers between this min and max in our math tests
     min_number = randint(1, 99)
@@ -73,10 +90,7 @@ def test_math():
 
     messages = interpreter.chat(order_of_operations_message)
 
-    print(messages)
-
     assert str(round(test_result, 2)) in messages[-1]["message"]
-"""
 
 
 def test_delayed_exec():
