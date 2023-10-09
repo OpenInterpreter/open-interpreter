@@ -4,6 +4,7 @@ This needs to be refactored. Prob replaced with GPT4ALL.
 
 """
 
+import shlex
 import os
 import sys
 import appdirs
@@ -189,7 +190,7 @@ def setup_local_text_llm(interpreter):
                     env_vars["CMAKE_ARGS"] = "-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
                 
                 try:
-                    subprocess.run([sys.executable, "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
+                    subprocess.run([shlex.quote(sys.executable), "-m", "pip", "install", "llama-cpp-python"], env={**os.environ, **env_vars}, check=True)
                 except subprocess.CalledProcessError as e:
                     rprint(f"Error during installation with {backend}: {e}")
             
