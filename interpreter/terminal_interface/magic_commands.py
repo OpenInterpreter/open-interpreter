@@ -1,4 +1,5 @@
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.count_tokens import count_messages_tokens
 import json
 import os
 
@@ -40,6 +41,7 @@ def handle_help(self, arguments):
       "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+      "%tokens": "Show the tokens used by the current conversation's messages. **Note**: this will not take into account tokens that have already been used and then removed from the conversation with `%undo`.",
       "%help": "Show this help message.",
     }
 
@@ -100,6 +102,16 @@ def handle_load_message(self, json_path):
 
     display_markdown_message(f"> messages json loaded from {os.path.abspath(json_path)}")
 
+def handle_count_tokens(self, arguments):
+    messages = [{"role": "system", "message": self.system_message}] + self.messages
+
+    if len(self.messages) == 0:
+      (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
+      display_markdown_message(f"> System Prompt Tokens: {tokens} (${cost})")
+    else:
+      (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
+      display_markdown_message(f"> Conversation Tokens: {tokens} (${cost})")
+
 def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
     switch = {
@@ -109,6 +121,7 @@ def handle_magic_command(self, user_input):
       "save_message": handle_save_message,
       "load_message": handle_load_message,
       "undo": handle_undo,
+      "tokens": handle_count_tokens,
     }
 
     user_input = user_input[1:].strip()  # Capture the part after the `%`
