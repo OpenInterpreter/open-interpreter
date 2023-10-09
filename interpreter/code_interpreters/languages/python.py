@@ -2,6 +2,7 @@ import sys
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import ast
 import re
+import shlex
 
 class Python(SubprocessCodeInterpreter):
     file_extension = "py"
@@ -9,7 +10,7 @@ class Python(SubprocessCodeInterpreter):
 
     def __init__(self):
         super().__init__()
-        self.start_cmd = sys.executable + " -i -q -u"
+        self.start_cmd = shlex.quote(sys.executable) + " -i -q -u"
         
     def preprocess_code(self, code):
         return preprocess_python(code)
