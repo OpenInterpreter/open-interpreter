@@ -80,6 +80,12 @@ arguments = [
         "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
         "type": str,
         "choices": ["off", "ask", "auto"]
+    },
+    {
+        "name": "gguf_quality",
+        "nickname": "q",
+        "help_text": "(experimental) value from 0-1 which will select the gguf quality/quantization level. lower = smaller, faster, more quantized",
+        "type": float,
     }
 ]
 
