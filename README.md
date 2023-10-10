@@ -1,5 +1,7 @@
 <h1 align="center">● Open Interpreter</h1>
 
+**⚠️ Note: This README refers to functionality available in the `main` branch of this repository. For the latest documentation for the package available via `pip`, please refer to the [Open Interpreter's PyPI page](https://pypi.org/project/open-interpreter/) or the [Open Interpreter Docs](https://docs.openinterpreter.com/).**
+
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm">
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/>
@@ -238,17 +240,19 @@ $ interpreter
 
 In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
 
-**Available Commands:**  
- • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
+#### Available Commands:
+
+- `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
 enters debug mode. With 'false', it exits debug mode.
- • `%reset`: Resets the current session.
- • `%undo`: Remove previous messages and its response from the message history.
- • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
+- `%reset`: Resets the current session.
+- `%undo`: Remove previous messages and its response from the message history.
+- `%save_message [path]`: Saves messages to a specified JSON path. If no path is
 provided, it defaults to 'messages.json'.
- • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
+- `%load_message [path]`: Loads messages from a specified JSON path. If no path  
  is provided, it defaults to 'messages.json'.
- • `%tokens`: Counts the number of tokens used by the current conversation's messages and displays a cost estimate via [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token). **Note**: This only accounts for messages currently in the conversation, not messages that have been sent or received and then removed via `%undo`.
- • `%help`: Show the help message.
+- `%tokens`: Counts the number of tokens used by the current conversation's messages and displays a cost estimate via [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token).
+   **Note**: This only accounts for messages currently in the conversation, not messages that have been sent or received and then removed via `%undo`.
+- `%help`: Show the help message.
 
 ### Configuration
 
