@@ -4,7 +4,6 @@ import os
 import platform
 import pkg_resources
 import appdirs
-from ..utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.conversation_navigator import conversation_navigator
 
 arguments = [
