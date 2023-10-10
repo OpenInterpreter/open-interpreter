@@ -42,7 +42,7 @@ def validate_llm_settings(interpreter):
                 interpreter.model = "huggingface/" + models[chosen_param]
                 """
 
-                interpreter.model = "huggingface/" + "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
+                interpreter.model = "huggingface/TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
                 
                 break
 
