@@ -73,6 +73,8 @@ def test_math():
 
     messages = interpreter.chat(order_of_operations_message)
 
+    print(messages)
+
     assert round(float(messages[-1]["message"]), 2) == round(test_result, 2)
 
 
