@@ -31,14 +31,14 @@ def setup_local_text_llm(interpreter):
         answers = inquirer.prompt(questions)
         interpreter.gguf_quality = gguf_quality_choices[answers['gguf_quality']]
 
-
     path = ooba.download(f"https://huggingface.co/{repo_id}")
 
     ooba_llm = ooba.llm(path)
+    print("\nReady.\n")
 
     def local_text_llm(messages):
         """
-        Returns a generator
+        Returns a generator. Makes ooba fully openai compatible
         """
 
         # I think ooba handles this?
@@ -66,11 +66,9 @@ def setup_local_text_llm(interpreter):
         """
 
         if interpreter.debug_mode:
-            print("messages going to ooba:", messages)
+            print("Messages going to ooba:", messages)
 
-        for token in ooba_llm(
-                messages=messages
-            ):
+        for token in ooba_llm.chat(messages):
 
             chunk = {
                 "choices": [
