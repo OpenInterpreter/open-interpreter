@@ -1,12 +1,14 @@
 import os
+from typing import Optional
+
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 
 class AppleScript(SubprocessCodeInterpreter):
     file_extension = "applescript"
     proper_name = "AppleScript"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sandbox: bool, e2b_api_key: Optional[str]):
+        super().__init__(sandbox=sandbox, e2b_api_key=e2b_api_key)
         self.start_cmd = os.environ.get('SHELL', '/bin/zsh')
 
     def preprocess_code(self, code):

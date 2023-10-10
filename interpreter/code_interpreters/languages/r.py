@@ -1,3 +1,5 @@
+from typing import Optional
+
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import re
 
@@ -5,8 +7,8 @@ class R(SubprocessCodeInterpreter):
     file_extension = "r"
     proper_name = "R"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sandbox: bool, e2b_api_key: Optional[str]):
+        super().__init__(sandbox=sandbox, e2b_api_key=e2b_api_key)
         self.start_cmd = "R -q --vanilla"  # Start R in quiet and vanilla mode
         
     def preprocess_code(self, code):

@@ -21,7 +21,6 @@ def respond(interpreter):
         
         # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
         # We can query it semantically and append relevant tutorials/procedures to our system message
-        get_relevant_procedures(interpreter.messages[-2:])
         if not interpreter.local:
             try:
                 system_message += "\n\n" + get_relevant_procedures(interpreter.messages[-2:])
@@ -30,7 +29,7 @@ def respond(interpreter):
                 pass
         
         # Add user info to system_message, like OS, CWD, etc
-        system_message += "\n\n" + get_user_info_string()
+        system_message += "\n\n" + get_user_info_string(interpreter.sandbox)
 
         # Create message object
         system_message = {"role": "system", "message": system_message}
@@ -102,7 +101,7 @@ def respond(interpreter):
                 # Get a code interpreter to run it
                 language = interpreter.messages[-1]["language"]
                 if language not in interpreter._code_interpreters:
-                    interpreter._code_interpreters[language] = create_code_interpreter(language)
+                    interpreter._code_interpreters[language] = create_code_interpreter(language, interpreter.sandbox, interpreter.e2b_api_key)
                 code_interpreter = interpreter._code_interpreters[language]
 
                 # Yield a message, such that the user can stop code execution if they want to

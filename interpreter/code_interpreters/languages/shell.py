@@ -1,17 +1,21 @@
 import platform
+from typing import Optional
+
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
-import ast
 import os
 
 class Shell(SubprocessCodeInterpreter):
     file_extension = "sh"
     proper_name = "Shell"
+    environment_name = "Bash"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, sandbox: bool, e2b_api_key: Optional[str]):
+        super().__init__(sandbox=sandbox, e2b_api_key=e2b_api_key)
 
         # Determine the start command based on the platform
-        if platform.system() == 'Windows':
+        if sandbox:
+            self.start_cmd = ''
+        elif platform.system() == 'Windows':
             self.start_cmd = 'cmd.exe'
         else:
             self.start_cmd = os.environ.get('SHELL', 'bash')

@@ -1,14 +1,19 @@
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import re
 
+
 class JavaScript(SubprocessCodeInterpreter):
     file_extension = "js"
     proper_name = "JavaScript"
+    environment_name = "Node16"
 
-    def __init__(self):
-        super().__init__()
-        self.start_cmd = "node -i"
-        
+    def __init__(self, sandbox: bool, e2b_api_key: str):
+        super().__init__(sandbox=sandbox, e2b_api_key=e2b_api_key)
+        if sandbox:
+            self.start_cmd = "node -e"
+        else:
+            self.start_cmd = "node -i"
+
     def preprocess_code(self, code):
         return preprocess_javascript(code)
     

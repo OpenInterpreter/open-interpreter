@@ -15,6 +15,8 @@ from datetime import datetime
 import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.validate_sandbox_settings import validate_sandbox_settings
+
 
 class Interpreter:
     def cli(self):
@@ -49,6 +51,10 @@ class Interpreter:
         self._llm = None
         self.gguf_quality = None
 
+        # Sandbox settings
+        self.e2b_api_key = os.environ.get("E2B_API_KEY")
+        self.sandbox = False
+
         # Load config defaults
         config = get_config()
         self.__dict__.update(config)
@@ -75,6 +81,7 @@ class Interpreter:
         # we can validate our LLM settings w/ the user first
         if display:
             validate_llm_settings(self)
+            validate_sandbox_settings(self)
 
         # Setup the LLM
         if not self._llm:

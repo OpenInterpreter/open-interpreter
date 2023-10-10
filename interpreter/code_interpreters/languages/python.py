@@ -1,17 +1,24 @@
 import sys
+from typing import Optional
+
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import ast
 import re
 import shlex
 
+
 class Python(SubprocessCodeInterpreter):
     file_extension = "py"
     proper_name = "Python"
+    environment_name = "Python3_DataAnalysis"
 
-    def __init__(self):
-        super().__init__()
-        self.start_cmd = shlex.quote(sys.executable) + " -i -q -u"
-        
+    def __init__(self, sandbox: bool, e2b_api_key: Optional[str]):
+        super().__init__(sandbox, e2b_api_key)
+        if sandbox:
+            self.start_cmd = 'python3 -c'
+        else:
+            self.start_cmd = shlex.quote(sys.executable) + " -i -q -u"
+
     def preprocess_code(self, code):
         return preprocess_python(code)
     
@@ -54,11 +61,23 @@ def preprocess_python(code):
     return code
 
 
+def add_last_line_print(tree):
+    node = tree.body[-1]
+    if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+        if isinstance(node.value.func, ast.Name) and node.value.func.id == 'print':
+            return tree
+    tree.body[-1] = ast.Expr(value=ast.Call(func=ast.Name(id='print', ctx=ast.Load()),
+                                     args=[node.value],
+                                     keywords=[]))
+    return tree
+
+
 def add_active_line_prints(code):
     """
     Add print statements indicating line numbers to a python string.
     """
     tree = ast.parse(code)
+    tree = add_last_line_print(tree)
     transformer = AddLinePrints()
     new_tree = transformer.visit(tree)
     return ast.unparse(new_tree)

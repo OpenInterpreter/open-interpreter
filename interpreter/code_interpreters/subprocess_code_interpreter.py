@@ -1,19 +1,32 @@
-
-
 import subprocess
 import threading
 import queue
 import time
 import traceback
+from typing import Optional
+
+import typing
+from e2b.session.run_code import CodeRuntime
+
 from .base_code_interpreter import BaseCodeInterpreter
 
+from e2b import run_code_sync
+
+
 class SubprocessCodeInterpreter(BaseCodeInterpreter):
-    def __init__(self):
+    environment_name: CodeRuntime = None
+
+    def __init__(self, sandbox: bool, e2b_api_key: Optional[str]):
+        if sandbox and self.environment_name not in typing.get_args(CodeRuntime):
+            raise Exception(f"Sandboxes are not supported for {self.environment_name}. You can't use this code interpreter.")
+
+        super().__init__(sandbox, e2b_api_key)
         self.start_cmd = ""
         self.process = None
         self.debug_mode = False
         self.output_queue = queue.Queue()
         self.done = threading.Event()
+        self.sandbox = sandbox
 
     def detect_active_line(self, line):
         return None
@@ -61,38 +74,42 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         # Setup
         try:
             code = self.preprocess_code(code)
-            if not self.process:
+            if self.sandbox:
+                stdout, err = run_code_sync(self.environment_name, code)
+                self.handle_sandbox_output(stdout, False)
+                self.handle_sandbox_output(err, True)
+            elif not self.process:
                 self.start_process()
         except:
             yield {"output": traceback.format_exc()}
             return
             
+        if not self.sandbox:
+            while retry_count <= max_retries:
+                if self.debug_mode:
+                    print(f"Running code:\n{code}\n---")
 
-        while retry_count <= max_retries:
-            if self.debug_mode:
-                print(f"Running code:\n{code}\n---")
+                self.done.clear()
 
-            self.done.clear()
+                try:
+                    self.process.stdin.write(code + "\n")
+                    self.process.stdin.flush()
+                    break
+                except:
+                    if retry_count != 0:
+                        # For UX, I like to hide this if it happens once. Obviously feels better to not see errors
+                        # Most of the time it doesn't matter, but we should figure out why it happens frequently with:
+                        # applescript
+                        yield {"output": traceback.format_exc()}
+                        yield {"output": f"Retrying... ({retry_count}/{max_retries})"}
+                        yield {"output": "Restarting process."}
 
-            try:
-                self.process.stdin.write(code + "\n")
-                self.process.stdin.flush()
-                break
-            except:
-                if retry_count != 0:
-                    # For UX, I like to hide this if it happens once. Obviously feels better to not see errors
-                    # Most of the time it doesn't matter, but we should figure out why it happens frequently with:
-                    # applescript
-                    yield {"output": traceback.format_exc()}
-                    yield {"output": f"Retrying... ({retry_count}/{max_retries})"}
-                    yield {"output": "Restarting process."}
+                    self.start_process()
 
-                self.start_process()
-
-                retry_count += 1
-                if retry_count > max_retries:
-                    yield {"output": "Maximum retries reached. Could not execute code."}
-                    return
+                    retry_count += 1
+                    if retry_count > max_retries:
+                        yield {"output": "Maximum retries reached. Could not execute code."}
+                        return
 
         while True:
             if not self.output_queue.empty():
@@ -122,17 +139,31 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             if line is None:
                 continue # `line = None` is the postprocessor's signal to discard completely
 
-            if self.detect_active_line(line):
-                active_line = self.detect_active_line(line)
-                self.output_queue.put({"active_line": active_line})
-            elif self.detect_end_of_execution(line):
-                self.output_queue.put({"active_line": None})
-                time.sleep(0.1)
-                self.done.set()
-            elif is_error_stream and "KeyboardInterrupt" in line:
-                self.output_queue.put({"output": "KeyboardInterrupt"})
-                time.sleep(0.1)
-                self.done.set()
-            else:
-                self.output_queue.put({"output": line})
+            self.process_line(line, is_error_stream)
 
+    def handle_sandbox_output(self, output, is_error_stream):
+        for line in output.split('\n'):
+            if self.debug_mode:
+                print(f"Received output line:\n{line}\n---")
+
+            line = self.line_postprocessor(line)
+
+            if line is None:
+                continue
+
+            self.process_line(line, is_error_stream)
+
+    def process_line(self, line: str, is_error_stream) -> None:
+        if self.detect_active_line(line):
+            active_line = self.detect_active_line(line)
+            self.output_queue.put({"active_line": active_line})
+        elif self.detect_end_of_execution(line):
+            self.output_queue.put({"active_line": None})
+            time.sleep(0.1)
+            self.done.set()
+        elif is_error_stream and "KeyboardInterrupt" in line:
+            self.output_queue.put({"output": "KeyboardInterrupt"})
+            time.sleep(0.1)
+            self.done.set()
+        else:
+            self.output_queue.put({"output": line})

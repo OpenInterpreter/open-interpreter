@@ -86,8 +86,15 @@ arguments = [
         "nickname": "q",
         "help_text": "(experimental) value from 0-1 which will select the gguf quality/quantization level. lower = smaller, faster, more quantized",
         "type": float,
-    }
+    },
+    {
+        "name": "sandbox",
+        "nickname": "sb",
+        "help_text": "run in sandbox mode (no code will run on your computer)",
+        "type": bool
+    },
 ]
+
 
 def cli(interpreter):
 
@@ -164,11 +171,14 @@ def cli(interpreter):
         version = pkg_resources.get_distribution("open-interpreter").version
         print(f"Open Interpreter {version}")
         return
-    
+
     # Depracated --fast
     if args.fast:
         # This will cause the terminal_interface to walk the user through setting up a local LLM
         interpreter.model = "gpt-3.5-turbo"
         print("`interpreter --fast` is depracated and will be removed in the next version. Please use `interpreter --model gpt-3.5-turbo`")
+
+    if interpreter.local and interpreter.sandbox:
+        raise Exception("You can't run in sandbox mode and local mode at the same time.")
 
     interpreter.chat()
