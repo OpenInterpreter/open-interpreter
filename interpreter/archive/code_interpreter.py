@@ -75,6 +75,10 @@ language_map = {
   "html": {
     "open_subprocess": False,
     "run_function": run_html,
+  },
+  "powershell": {
+    "start_cmd": 'powershell.exe',
+    "print_cmd": 'Write-Output "{}"',
   }
 }
 
