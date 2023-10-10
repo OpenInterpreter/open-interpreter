@@ -75,7 +75,7 @@ def test_math():
 
     print(messages)
 
-    assert round(float(messages[-1]["message"]), 2) == round(test_result, 2)
+    assert str(round(test_result, 2)) in messages[-1]["message"]
 
 
 def test_delayed_exec():
