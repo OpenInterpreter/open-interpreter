@@ -17,7 +17,7 @@ function_schema = {
         "type": "string",
         "description":
         "The programming language (required parameter to the `execute` function)",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
+        "enum": ["python", "R", "shell", "applescript", "javascript", "html", "powershell"]
       },
       "code": {
         "type": "string",
