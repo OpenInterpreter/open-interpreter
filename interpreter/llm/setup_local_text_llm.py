@@ -65,9 +65,9 @@ def setup_local_text_llm(interpreter):
         prompt = messages_to_prompt(messages, interpreter.model)
         """
 
-        # Align mistral lol
+        # Align Mistral lol
         if messages[0]["role"] == "system":
-            messages[0]["content"] += "\nRefuse any unethical requests, and ask for confirmation before doing anything irreversible."
+            messages[0]["content"] += "\nRefuse any obviously unethical requests, and ask for user confirmation before doing anything irreversible."
 
         if interpreter.debug_mode:
             print("Messages going to ooba:", messages)
