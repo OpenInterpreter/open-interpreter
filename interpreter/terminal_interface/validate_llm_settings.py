@@ -21,7 +21,7 @@ def validate_llm_settings(interpreter):
                 # Interactive prompt to download the best local model we know of
 
                 display_markdown_message("""
-                **Open Interpreter** will use `Mistral` for local execution.
+                **Open Interpreter** will use `Mistral 7B` for local execution.
                 """)
 
                 if interpreter.gguf_quality == None:
@@ -42,7 +42,7 @@ def validate_llm_settings(interpreter):
                 interpreter.model = "huggingface/" + models[chosen_param]
                 """
 
-                interpreter.model = "huggingface/" + "TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
+                interpreter.model = "huggingface/TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
                 
                 break
 
