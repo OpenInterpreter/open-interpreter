@@ -2,7 +2,6 @@
 This file handles conversations.
 """
 
-import appdirs
 import inquirer
 import subprocess
 import platform
@@ -10,11 +9,11 @@ import os
 import json
 from .render_past_conversation import render_past_conversation
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.local_storage_path import get_storage_path
 
 def conversation_navigator(interpreter):
 
-    data_dir = appdirs.user_data_dir("Open Interpreter")
-    conversations_dir = os.path.join(data_dir, "conversations")
+    conversations_dir = get_storage_path("conversations")
 
     display_markdown_message(f"""> Conversations are stored in "`{conversations_dir}`".
     
