@@ -38,7 +38,7 @@ class CodeBlock(BaseBlock):
 
     # Add cursor    
     if cursor:
-      code += "█"
+      code += "●"
 
     # Add each line of code to the table
     code_lines = code.strip().split('\n')
