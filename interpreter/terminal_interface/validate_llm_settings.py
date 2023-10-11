@@ -21,8 +21,7 @@ def validate_llm_settings(interpreter):
                 # Interactive prompt to download the best local model we know of
 
                 display_markdown_message("""
-                **Open Interpreter** will use `Mistral 7B` for local execution (experimental).
-                """)
+                **Open Interpreter** will use `Mistral 7B` for local execution.""")
 
                 if interpreter.gguf_quality == None:
                     interpreter.gguf_quality = 0.35
@@ -102,7 +101,8 @@ def validate_llm_settings(interpreter):
     # If we're here, we passed all the checks.
 
     # Auto-run is for fast, light useage -- no messages.
-    if not interpreter.auto_run:
+    # If mistral, we've already displayed a message.
+    if not interpreter.auto_run and "mistral" not in interpreter.model.lower():
         display_markdown_message(f"> Model set to `{interpreter.model.upper()}`")
     return
 
