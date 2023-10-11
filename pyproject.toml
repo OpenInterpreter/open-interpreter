@@ -29,7 +29,7 @@ litellm = "^0.1.590"
 pyyaml = "^6.0.1"
 semgrep = "^1.41.0"
 yaspin = "^3.0.1"
-ooba = "^0.0.16"
+ooba = "^0.0.18"
 [tool.poetry.dependencies.pyreadline3]
 version = "^3.4.1"
 markers = "sys_platform == 'win32'"

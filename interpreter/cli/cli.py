@@ -3,6 +3,7 @@ import subprocess
 import os
 import platform
 import pkg_resources
+import ooba
 import appdirs
 from ..terminal_interface.conversation_navigator import conversation_navigator
 
@@ -107,6 +108,8 @@ def cli(interpreter):
     parser.add_argument('--conversations', dest='conversations', action='store_true', help='list conversations to resume')
     parser.add_argument('-f', '--fast', dest='fast', action='store_true', help='(depracated) runs `interpreter --model gpt-3.5-turbo`')
     parser.add_argument('--version', dest='version', action='store_true', help="get Open Interpreter's version number")
+    parser.add_argument('--change_local_device', dest='change_local_device', action='store_true', help="change the device used for local execution (if GPU fails, will use CPU)")
+    
 
     # TODO: Implement model explorer
     # parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
@@ -162,6 +165,28 @@ def cli(interpreter):
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
         print(f"Open Interpreter {version}")
+        return
+    
+    if args.change_local_device:
+        print("This will uninstall the local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)")
+        if input().lower() == "n":
+            return
+        
+        print("Please choose your GPU:\n")
+
+        print("A) NVIDIA")
+        print("B) AMD (Linux/MacOS only. Requires ROCm SDK 5.4.2/5.4.3 on Linux)")
+        print("C) Apple M Series")
+        print("D) Intel Arc (IPEX)")
+        print("N) None (I want to run models in CPU mode)\n")
+
+        gpu_choice = input("> ").upper()
+
+        while gpu_choice not in 'ABCDN':
+            print("Invalid choice. Please try again.")
+            gpu_choice = input("> ").upper()
+
+        ooba.install(force_reinstall=True, gpu_choice=gpu_choice, verbose=args.debug_mode)
         return
     
     # Depracated --fast
