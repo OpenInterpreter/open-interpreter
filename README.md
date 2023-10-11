@@ -247,7 +247,7 @@ enters debug mode. With 'false', it exits debug mode.
 provided, it defaults to 'messages.json'.
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
  is provided, it defaults to 'messages.json'.
- • `%tokens`: Counts the number of tokens used by the current conversation's messages and displays a cost estimate via [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token). **Note**: This only accounts for messages currently in the conversation, not messages that have been sent or received and then removed via `%undo`.
+ • `%tokens [prompt]`: Calculate the tokens used by the current conversation's messages and estimate their cost, and optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated cost.
  • `%help`: Show the help message.
 
 ### Configuration
