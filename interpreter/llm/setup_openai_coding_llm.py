@@ -48,7 +48,7 @@ def setup_openai_coding_llm(interpreter):
         messages = convert_to_openai_messages(messages)
 
         # Add OpenAI's recommended function message
-        messages[0]["content"] += "\n\nOnly use the function you have been provided with."
+        messages[0]["content"] += "\n\nOnly use the functions you have been provided with."
 
         # Seperate out the system_message from messages
         # (We expect the first message to always be a system_message)
