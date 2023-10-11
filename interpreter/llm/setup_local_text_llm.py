@@ -67,6 +67,9 @@ def setup_local_text_llm(interpreter):
         prompt = messages_to_prompt(messages, interpreter.model)
         """
 
+        # Convert messages with function calls and outputs into "assistant" and "user" calls.
+        
+
         # Align Mistral lol
         if "mistral" in repo_id.lower():
             # just.. let's try a simple system message. this seems to work fine.
