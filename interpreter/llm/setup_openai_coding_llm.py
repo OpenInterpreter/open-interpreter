@@ -6,25 +6,25 @@ from ..utils.display_markdown_message import display_markdown_message
 import tokentrim as tt
 
 function_schema = {
-    "name": "execute",
-    "description":
-        "Executes code on the user's machine, **in the users local environment**, and returns the output",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "language": {
-                "type": "string",
-                "description":
-                    "The programming language (required parameter to the `execute` function)",
-                "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
-            },
-            "code": {
-                "type": "string",
-                "description": "The code to execute (required)"
-            }
-        },
-        "required": ["language", "code"]
+  "name": "execute",
+  "description":
+  "Executes code on the user's machine, **in the users local environment**, and returns the output",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "language": {
+        "type": "string",
+        "description":
+        "The programming language (required parameter to the `execute` function)",
+        "enum": ["python", "R", "shell", "applescript", "javascript", "html", "powershell"]
+      },
+      "code": {
+        "type": "string",
+        "description": "The code to execute (required)"
+      }
     },
+    "required": ["language", "code"]
+  },
 }
 
 
@@ -45,7 +45,7 @@ def setup_openai_coding_llm(interpreter):
     def coding_llm(messages):
 
         # Convert messages
-        messages = convert_to_openai_messages(messages)
+        messages = convert_to_openai_messages(messages, function_calling=True)
 
         # Add OpenAI's recommended function message
         messages[0]["content"] += "\n\nOnly use the functions you have been provided with."
@@ -88,7 +88,7 @@ def setup_openai_coding_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature:
             params["temperature"] = interpreter.temperature
-
+        
         # These are set directly on LiteLLM
         if interpreter.max_budget:
             litellm.max_budget = interpreter.max_budget
@@ -111,6 +111,8 @@ def setup_openai_coding_llm(interpreter):
                 continue
 
             delta = chunk["choices"][0]["delta"]
+
+            # Accumulate deltas
             accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
             if "content" in delta and delta["content"]:

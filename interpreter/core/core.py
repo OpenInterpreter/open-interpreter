@@ -7,7 +7,8 @@ from ..cli.cli import cli
 from ..code_interpreters.code_function_handler import code_function
 from ..llm.setup_openai_coding_llm import function_schema
 from ..rag.get_relevant_procedures import build_relevant_procedures
-from ..utils.get_config import get_config
+from ..utils.get_config import get_config, user_config_path
+from ..utils.local_storage_path import get_storage_path
 from .respond import respond
 from ..llm.setup_llm import setup_llm
 from ..terminal_interface.terminal_interface import terminal_interface
@@ -28,6 +29,8 @@ class Interpreter:
         self.messages = []
         self._code_interpreters = {}
 
+        self.config_file = user_config_path
+
         # Settings
         self.local = False
         self.auto_run = False
@@ -38,7 +41,7 @@ class Interpreter:
         # Conversation history
         self.conversation_history = True
         self.conversation_filename = None
-        self.conversation_history_path = os.path.join(appdirs.user_data_dir("Open Interpreter"), "conversations")
+        self.conversation_history_path = get_storage_path("conversations")
 
         # LLM settings
         self.model = ""
@@ -50,19 +53,26 @@ class Interpreter:
         self.api_key = None
         self.max_budget = None
         self._llm = None
+        self.gguf_quality = None
         self.functions_schemas = [function_schema]
         self.functions = [code_function]
         self.build_relevant_procedures_function = build_relevant_procedures
 
         # Load config defaults
-        config = get_config()
-        self.__dict__.update(config)
+        self.extend_config(self.config_file)
 
         # Check for update
         if not self.local:
             # This should actually be pushed into the utility
             if check_for_update():
                 display_markdown_message("> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---")
+
+    def extend_config(self, config_path):
+        if self.debug_mode:
+            print(f'Extending configuration from `{config_path}`')
+
+        config = get_config(config_path)
+        self.__dict__.update(config)
 
     def chat(self, message=None, display=True, stream=False):
         if stream:

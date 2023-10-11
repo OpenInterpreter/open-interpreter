@@ -26,7 +26,7 @@ def terminal_interface(interpreter, message):
 
         interpreter_intro_message.append("Press `CTRL-C` to exit.")
 
-        display_markdown_message("\n\n".join(interpreter_intro_message))
+        display_markdown_message("\n\n".join(interpreter_intro_message) + "\n")
     
     active_block = None
 
@@ -56,7 +56,7 @@ def terminal_interface(interpreter, message):
         # We'll use this to determine if we should render a new code block,
         # In the event we get code -> output -> code again
         ran_code_block = False
-        render_cursor = False
+        render_cursor = True
             
         try:
             for chunk in interpreter.chat(message, display=False, stream=True):
@@ -71,6 +71,7 @@ def terminal_interface(interpreter, message):
                         active_block.end()
                         active_block = MessageBlock()
                     active_block.message += chunk["message"]
+                    render_cursor = True
 
                 # Code
                 if "code" in chunk or "language" in chunk:

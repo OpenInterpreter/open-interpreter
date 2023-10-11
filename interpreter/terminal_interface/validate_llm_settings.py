@@ -21,9 +21,12 @@ def validate_llm_settings(interpreter):
                 # Interactive prompt to download the best local model we know of
 
                 display_markdown_message("""
-                **Open Interpreter** will use `Code Llama` for local execution. Use your arrow keys to set up the model.
-                """)
+                **Open Interpreter** will use `Mistral 7B` for local execution.""")
 
+                if interpreter.gguf_quality == None:
+                    interpreter.gguf_quality = 0.35
+
+                """
                 models = {
                     '7B': 'TheBloke/CodeLlama-7B-Instruct-GGUF',
                     '13B': 'TheBloke/CodeLlama-13B-Instruct-GGUF',
@@ -36,6 +39,10 @@ def validate_llm_settings(interpreter):
                 chosen_param = answers['param']
 
                 interpreter.model = "huggingface/" + models[chosen_param]
+                """
+
+                interpreter.model = "huggingface/TheBloke/Mistral-7B-Instruct-v0.1-GGUF"
+                
                 break
 
             else:
@@ -94,7 +101,8 @@ def validate_llm_settings(interpreter):
     # If we're here, we passed all the checks.
 
     # Auto-run is for fast, light useage -- no messages.
-    if not interpreter.auto_run:
+    # If mistral, we've already displayed a message.
+    if not interpreter.auto_run and "mistral" not in interpreter.model.lower():
         display_markdown_message(f"> Model set to `{interpreter.model.upper()}`")
     return
 

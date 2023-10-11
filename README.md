@@ -1,5 +1,4 @@
-
-![banner 2](https://github.com/KillianLucas/open-interpreter/assets/63927363/c1aec011-6d3c-4960-ab55-749326b8a7c9)
+<h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm">
@@ -9,11 +8,16 @@
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
-    <br><br>
-    <b>Open Interpreter</b> lets language models run code on your computer.<br>
+    <br>
+    <br>
+    <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
     <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">Read our new docs</a></b><br>
 </p>
+
+<br>
+
+![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 
@@ -236,13 +240,14 @@ In the interactive mode, you can use the below commands to enhance your experien
 
 **Available Commands:**  
  • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
-enters debug mode. With 'false', it exits debug mode.  
- • `%reset`: Resets the current session.  
- • `%undo`: Remove previous messages and its response from the message history.  
+enters debug mode. With 'false', it exits debug mode.
+ • `%reset`: Resets the current session.
+ • `%undo`: Remove previous messages and its response from the message history.
  • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
-provided, it defaults to 'messages.json'.  
+provided, it defaults to 'messages.json'.
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
- is provided, it defaults to 'messages.json'.  
+ is provided, it defaults to 'messages.json'.
+ • `%tokens [prompt]`: Calculate the tokens used by the current conversation's messages and estimate their cost, and optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated cost.
  • `%help`: Show the help message.
 
 ### Configuration
@@ -255,6 +260,57 @@ Run the following command to open the configuration file:
 
 ```
 interpreter --config
+```
+
+#### Multiple Configuration Files
+
+Open Interpreter supports multiple `config.yaml` files, allowing you to easily switch between configurations via the `--config_file` argument.
+
+**Note**: `--config_file` accepts either a file name or a file path. File names will use the default configuration directory, while file paths will use the specified path.
+
+To create or edit a new configuration, run:
+
+```
+interpreter --config --config_file $config_path
+```
+
+To have Open Interpreter load a specific configuration file run:
+
+```
+interpreter --config_file $config_path
+```
+
+**Note**: Replace `$config_path` with the name of or path to your configuration file.
+
+##### CLI Example
+
+1. Create a new `config.turbo.yaml` file
+   ```
+   interpreter --config --config_file config.turbo.yaml
+   ```
+2. Edit the `config.turbo.yaml` file to set `model` to `gpt-3.5-turbo`
+3. Run Open Interpreter with the `config.turbo.yaml` configuration
+   ```
+   interpreter --config_file config.turbo.yaml
+   ```
+
+##### Python Example
+
+You can also load configuration files when calling Open Interpreter from Python scripts:
+
+```python
+import os
+import interpreter
+
+currentPath = os.path.dirname(os.path.abspath(__file__))
+config_path=os.path.join(currentPath, './config.test.yaml')
+
+interpreter.extend_config(config_path=config_path)
+
+message = "What operating system are we on?"
+
+for chunk in interpreter.chat(message, display=False, stream=True):
+  print(chunk)
 ```
 
 ## Safety Notice
