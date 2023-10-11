@@ -21,7 +21,7 @@ def validate_llm_settings(interpreter):
                 # Interactive prompt to download the best local model we know of
 
                 display_markdown_message("""
-                **Open Interpreter** will use `Mistral 7B` for local execution.
+                **Open Interpreter** will use `Mistral 7B` for local execution (experimental).
                 """)
 
                 if interpreter.gguf_quality == None:
