@@ -15,7 +15,7 @@ arguments = [
         "help_text": "prompt / custom instructions for the language model",
         "type": str,
     },
-    {"name": "local", "nickname": "l", "help_text": "run in local mode", "type": bool},
+    {"name": "local", "nickname": "l", "help_text": "run the language model locally (experimental)", "type": bool},
     {
         "name": "auto_run",
         "nickname": "y",
@@ -206,7 +206,7 @@ def cli(interpreter):
     if interpreter.auto_run and not interpreter.safe_mode == "off":
         setattr(interpreter, "auto_run", False)
 
-    # Default to CodeLlama if --local is on but --model is unset
+    # Default to Mistral if --local is on but --model is unset
     if interpreter.local and args.model is None:
         # This will cause the terminal_interface to walk the user through setting up a local LLM
         interpreter.model = ""
@@ -222,7 +222,7 @@ def cli(interpreter):
         return
     
     if args.change_local_device:
-        print("This will uninstall the local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)")
+        print("This will uninstall the experimental local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)")
         if input().lower() == "n":
             return
         
