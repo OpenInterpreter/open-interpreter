@@ -92,6 +92,12 @@ arguments = [
         "nickname": "ngl",
         "help_text": "number of layers to offload to gpu",
         "type": int
+    },
+    {
+        "name": "gguf_quality",
+        "nickname": "q",
+        "help_text": "(experimental) value from 0-1 which will select the gguf quality/quantization level. lower = smaller, faster, more quantized",
+        "type": float,
     }
 ]
 
