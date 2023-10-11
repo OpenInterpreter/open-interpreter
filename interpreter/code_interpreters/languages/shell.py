@@ -1,6 +1,5 @@
 import platform
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
-import ast
 import os
 
 class Shell(SubprocessCodeInterpreter):
@@ -41,10 +40,6 @@ def preprocess_shell(code):
     # Add commands that tell us what the active line is
     code = add_active_line_prints(code)
     
-    # Wrap in a trap for errors
-    if platform.system() != 'Windows':
-        code = wrap_in_trap(code)
-    
     # Add end command (we'll be listening for this so we know when it ends)
     code += '\necho "## end_of_execution ##"'
     
@@ -60,14 +55,3 @@ def add_active_line_prints(code):
         # Insert the echo command before the actual line
         lines[index] = f'echo "## active_line {index + 1} ##"\n{line}'
     return '\n'.join(lines)
-
-
-def wrap_in_trap(code):
-    """
-    Wrap Bash code with a trap to catch errors and display them.
-    """
-    trap_code = """
-trap 'echo "An error occurred on line $LINENO"; exit' ERR
-set -E
-"""
-    return trap_code + code
