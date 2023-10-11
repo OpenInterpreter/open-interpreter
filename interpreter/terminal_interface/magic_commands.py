@@ -41,7 +41,7 @@ def handle_help(self, arguments):
       "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
-      "%tokens": "Show the tokens used by the current conversation's messages. **Note**: this will not take into account tokens that have already been used and then removed from the conversation with `%undo`.",
+      "%tokens [prompt]": "Calculate the tokens used by the current conversation's messages and estimate their cost and optionally calculate the tokens and estimated cost of a `prompt` if one is provided.",
       "%help": "Show this help message.",
     }
 
@@ -102,15 +102,24 @@ def handle_load_message(self, json_path):
 
     display_markdown_message(f"> messages json loaded from {os.path.abspath(json_path)}")
 
-def handle_count_tokens(self, arguments):
+def handle_count_tokens(self, prompt):
     messages = [{"role": "system", "message": self.system_message}] + self.messages
+
+    outputs = []
 
     if len(self.messages) == 0:
       (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
-      display_markdown_message(f"> System Prompt Tokens: {tokens} (${cost})")
+      outputs.append((f"> System Prompt Tokens: {tokens} (${cost})"))
     else:
       (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
-      display_markdown_message(f"> Conversation Tokens: {tokens} (${cost})")
+      outputs.append(f"> Conversation Tokens: {tokens} (${cost})")
+
+    if prompt and prompt != '':
+      (tokens, cost) = count_messages_tokens(messages=[prompt], model=self.model)
+      outputs.append(f"> Prompt Tokens: {tokens} (${cost})") 
+
+    display_markdown_message("\n".join(outputs))
+
 
 def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace

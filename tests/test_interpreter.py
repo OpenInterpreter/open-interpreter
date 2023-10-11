@@ -3,6 +3,13 @@ from random import randint
 import time
 import pytest
 import interpreter
+from interpreter.utils.count_tokens import count_tokens, count_messages_tokens
+import time
+
+interpreter.auto_run = True
+interpreter.model = "gpt-4"
+interpreter.temperature = 0
+
 
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
@@ -57,6 +64,28 @@ def test_system_message_appending():
 def test_reset():
     # make sure that interpreter.reset() clears out the messages Array
     assert interpreter.messages == []
+
+
+def test_token_counter():
+    system_tokens = count_tokens(text=interpreter.system_message, model=interpreter.model)
+    
+    prompt = "How many tokens is this?"
+
+    prompt_tokens = count_tokens(text=prompt, model=interpreter.model)
+
+    messages = [{"role": "system", "message": interpreter.system_message}] + interpreter.messages
+
+    system_token_test = count_messages_tokens(messages=messages, model=interpreter.model)
+
+    system_tokens_ok = system_tokens == system_token_test[0]
+
+    messages.append({"role": "user", "message": prompt})
+
+    prompt_token_test = count_messages_tokens(messages=messages, model=interpreter.model)
+
+    prompt_tokens_ok = system_tokens + prompt_tokens == prompt_token_test[0]
+
+    assert system_tokens_ok and prompt_tokens_ok
 
 
 def test_hello_world():
