@@ -12,6 +12,8 @@ def setup_local_text_llm(interpreter):
 
     repo_id = interpreter.model.replace("huggingface/", "")
 
+    display_markdown_message(f"> **Warning**: Local LLM usage is an experimental, unstable feature.")
+
     if repo_id != "TheBloke/Mistral-7B-Instruct-v0.1-GGUF":
         # ^ This means it was prob through the old --local, so we have already displayed this message.
         # Hacky. Not happy with this

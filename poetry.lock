@@ -966,13 +966,13 @@ files = [
 
 [[package]]
 name = "ooba"
-version = "0.0.18"
+version = "0.0.21"
 description = "Run language models on consumer hardware."
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "ooba-0.0.18-py3-none-any.whl", hash = "sha256:d6a94557d98ccdeea49846ba66d85ac3ff98b8b9d3693fbc7f804e51a592ca5a"},
-    {file = "ooba-0.0.18.tar.gz", hash = "sha256:ecca6139597f9354028d5567a766869b789247905339a6e5a2cdc8f65ac65589"},
+    {file = "ooba-0.0.21-py3-none-any.whl", hash = "sha256:c9d7d88265e0e3565edadafbf0a3ceac343dfc2f2f93dd15b09d23df2611f519"},
+    {file = "ooba-0.0.21.tar.gz", hash = "sha256:14df0cbd24e679636a9c5466871f64e7e2c57efb1162e199ad7434a44d80309d"},
 ]
 
 [package.dependencies]
@@ -2147,4 +2147,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d815c9e77da4e340e17bcaac3c0db42fa046c8557659a2a4eb6e3e60764440fa"
+content-hash = "301630c73d1b42b11ac8418d0ec1fcee6df9ab8a683d1277071ac6e2599f2f93"
