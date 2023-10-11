@@ -19,7 +19,7 @@ class MessageBlock(BaseBlock):
     content = textify_markdown_code_blocks(self.message)
     
     if cursor:
-      content += "█"
+      content += "●"
       
     markdown = Markdown(content.strip())
     panel = Panel(markdown, box=MINIMAL)
