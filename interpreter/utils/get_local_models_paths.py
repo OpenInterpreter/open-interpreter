@@ -1,10 +1,8 @@
 import os
-import appdirs
 
-# Using appdirs to determine user-specific config path
-config_dir = appdirs.user_config_dir("Open Interpreter")
+from ..utils.local_storage_path import get_storage_path
 
 def get_local_models_paths():
-    models_dir = os.path.join(config_dir, "models")
+    models_dir = get_storage_path("models")
     files = [os.path.join(models_dir, f) for f in os.listdir(models_dir)]
     return files
