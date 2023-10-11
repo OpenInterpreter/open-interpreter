@@ -1,16 +1,17 @@
+import os
 from random import randint
-import interpreter
 import time
-
-interpreter.auto_run = True
-interpreter.model = "gpt-3.5-turbo"
-interpreter.temperature = 0
-
+import pytest
+import interpreter
 
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():
     interpreter.reset()
+    interpreter.temperature = 0
+    interpreter.auto_run = True
+    interpreter.model = "gpt-4"
+    interpreter.debug_mode = False
 
 
 # this function will run after each test
@@ -18,6 +19,22 @@ def setup_function():
 def teardown_function():
     time.sleep(5)
 
+
+def test_config_loading():
+    # because our test is running from the root directory, we need to do some
+    # path manipulation to get the actual path to the config file or our config
+    # loader will try to load from the wrong directory and fail
+    currentPath = os.path.dirname(os.path.abspath(__file__))
+    config_path=os.path.join(currentPath, './config.test.yaml')
+
+    interpreter.extend_config(config_path=config_path)
+
+    # check the settings we configured in our config.test.yaml file
+    temperature_ok = interpreter.temperature == 0.25
+    model_ok = interpreter.model == "gpt-3.5-turbo"
+    debug_mode_ok = interpreter.debug_mode == True
+
+    assert temperature_ok and model_ok and debug_mode_ok
 
 def test_system_message_appending():
     ping_system_message = (
@@ -53,6 +70,27 @@ def test_hello_world():
         {"role": "user", "message": hello_world_message},
         {"role": "assistant", "message": hello_world_response},
     ]
+
+@pytest.mark.skip(reason="Math is hard")
+def test_math():
+    # we'll generate random integers between this min and max in our math tests
+    min_number = randint(1, 99)
+    max_number = randint(1001, 9999)
+
+    n1 = randint(min_number, max_number)
+    n2 = randint(min_number, max_number)
+
+    test_result = n1 + n2 * (n1 - n2) / (n2 + n1)
+
+    order_of_operations_message = f"""
+    Please perform the calculation `{n1} + {n2} * ({n1} - {n2}) / ({n2} + {n1})` then reply with just the answer, nothing else. No confirmation. No explanation. No words. Do not use commas. Do not show your work. Just return the result of the calculation. Do not introduce the results with a phrase like \"The result of the calculation is...\" or \"The answer is...\"
+    
+    Round to 2 decimal places.
+    """.strip()
+
+    messages = interpreter.chat(order_of_operations_message)
+
+    assert str(round(test_result, 2)) in messages[-1]["message"]
 
 
 def test_delayed_exec():
