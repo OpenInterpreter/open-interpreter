@@ -3,7 +3,7 @@ import interpreter
 import time
 
 interpreter.auto_run = True
-interpreter.model = "gpt-3.5-turbo"
+interpreter.model = "gpt-4"
 interpreter.temperature = 0
 
 
