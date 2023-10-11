@@ -10,7 +10,7 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
     """
 
     def coding_llm(messages):
-        messages = convert_to_openai_messages(messages)
+        messages = convert_to_openai_messages(messages, function_calling=False)
 
         inside_code_block = False
         accumulated_block = ""

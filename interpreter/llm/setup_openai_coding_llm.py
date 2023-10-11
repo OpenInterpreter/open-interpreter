@@ -37,7 +37,7 @@ def setup_openai_coding_llm(interpreter):
     def coding_llm(messages):
         
         # Convert messages
-        messages = convert_to_openai_messages(messages)
+        messages = convert_to_openai_messages(messages, function_calling=True)
 
         # Add OpenAI's recommended function message
         messages[0]["content"] += "\n\nOnly use the function you have been provided with."
