@@ -75,7 +75,7 @@ def setup_local_text_llm(interpreter):
 
     # Third stage: GPU confirm
     if confirm_action("Use GPU? (Large models might crash on GPU, but will run more quickly)"):
-      n_gpu_layers = interpreter.num_gpu_layers
+      n_gpu_layers = interpreter.n_gpu_layers
     else:
       n_gpu_layers = 0
 
@@ -237,7 +237,7 @@ def setup_local_text_llm(interpreter):
     # Initialize and return Code-Llama
     assert os.path.isfile(model_path)
     params = {
-        'n_threads': interpreter.num_threads,
+        'n_threads': interpreter.n_threads,
         'model_path': model_path,
         'n_gpu_layers': n_gpu_layers,
         'verbose': interpreter.debug_mode

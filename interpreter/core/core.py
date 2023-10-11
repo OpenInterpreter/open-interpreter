@@ -31,8 +31,8 @@ class Interpreter:
         self.debug_mode = False
         self.max_output = 2000
         self.safe_mode = "off"
-        self.num_gpu_layers = -1 
-        self.num_threads = 8
+        self.n_gpu_layers = -1 
+        self.n_threads = 8
 
         # Conversation history
         self.conversation_history = True
