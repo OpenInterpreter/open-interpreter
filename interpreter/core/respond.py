@@ -54,6 +54,10 @@ def respond(interpreter):
         # Start putting chunks into the new message
         # + yielding chunks to the user
         try:
+
+            # Track the type of chunk that the coding LLM is emitting
+            chunk_type = None
+
             for chunk in interpreter._llm(messages_for_llm):
 
                 # Add chunk to the last message
@@ -61,6 +65,26 @@ def respond(interpreter):
 
                 # This is a coding llm
                 # It will yield dict with either a message, language, or code (or language AND code)
+
+                # We also want to track which it's sending to we can send useful flags.
+                # (otherwise pretty much everyone needs to implement this)
+                if "message" in chunk and chunk_type != "message":
+                    chunk_type = "message"
+                    yield {"start_of_message": True}
+                elif "language" in chunk and chunk_type != "code":
+                    chunk_type = "code"
+                    yield {"start_of_code": True}
+                if "code" in chunk and chunk_type != "code":
+                    # (This shouldn't happen though — ^ "language" should be emitted first)
+                    chunk_type = "code"
+                    yield {"start_of_code": True}
+                elif "message" not in chunk and chunk_type == "message":
+                    chunk_type = None
+                    yield {"end_of_message": True}
+                elif "code" not in chunk and "language" not in chunk and chunk_type == "code":
+                    chunk_type = None
+                    yield {"end_of_code": True}
+
                 yield chunk
         except litellm.exceptions.BudgetExceededError:
             display_markdown_message(f"""> Max budget exceeded
