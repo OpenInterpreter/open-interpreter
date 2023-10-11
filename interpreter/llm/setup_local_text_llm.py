@@ -276,7 +276,7 @@ def setup_local_text_llm(interpreter):
         # Lmao i can't believe this works (it does need this btw)
         if messages[-1]["role"] != "function":
             if messages[-1]["content"].lower() not in ["hello", "hi", "hey", "helo", "hii"]: # :)
-                prompt += """Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works if I put a newline after ```shell, ```javascript, ```python, ```R, and ```applescript then write code. I'm going to try to do this for your task, and I'll put the *correct* language after the "```" now. Anyway, """
+                prompt += """Let's explore this. By the way, I can run code on your machine by writing the code in a markdown code block. This works if I put a newline after ```shell, ```javascript, ```python, ```R, ```applescript, and ```powershell then write code. I'm going to try to do this for your task, and I'll put the *correct* language after the "```" now. Anyway, """
         elif messages[-1]["role"] == "function" and messages[-1]["content"] != "No output":
             prompt += "Given the output of the code I just ran, "
         elif messages[-1]["role"] == "function" and messages[-1]["content"] == "No output":
