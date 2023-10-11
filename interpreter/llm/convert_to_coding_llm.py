@@ -28,6 +28,10 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
             content = chunk['choices'][0]['delta'].get('content', "")
             
             accumulated_block += content
+
+            if accumulated_block.endswith("`"):
+                # We might be writing "```" one token at a time.
+                continue
             
             # Did we just enter a code block?
             if "```" in accumulated_block and not inside_code_block:
