@@ -54,11 +54,7 @@ def setup_text_llm(interpreter):
             \n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development.
             """)
             
-            raise Exception("Architecture not yet supported for local LLM inference. Please run `interpreter` to connect to a cloud model, then try `--local` again in a few days.")
-
-    else:
-        # For non-local use, pass in the model directly
-        model = interpreter.model
+            raise Exception("Architecture not yet supported for local LLM inference. Please run `interpreter` to connect to a cloud model, then try `--local` again in a few days. Scroll up for more tips.")
 
     # Pass remaining parameters to LiteLLM
     def base_llm(messages):

@@ -33,7 +33,7 @@ def setup_local_text_llm(interpreter):
 
     path = ooba.download(f"https://huggingface.co/{repo_id}")
 
-    ooba_llm = ooba.llm(path)
+    ooba_llm = ooba.llm(path, verbose=interpreter.debug_mode)
     print("\nReady.\n")
 
     def local_text_llm(messages):
