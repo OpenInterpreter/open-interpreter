@@ -58,6 +58,7 @@ class Interpreter:
 
         # Procedures / RAG
         self.procedures = None
+        self._procedures_db = {}
         self.download_open_procedures = True
         self.embed_function = embed_function
         # Number of procedures to add to the system message
