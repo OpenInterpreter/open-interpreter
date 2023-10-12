@@ -35,11 +35,16 @@ def get_relevant_procedures_string(interpreter):
             query_string += "\n" + message["code"]
         if "output" in message:
             query_string += "\n" + message["output"]
-    query_string = query_string[-2000:].strip()
+    query_string = query_string[-3000:].strip()
 
-    relevant_procedures = search(query_string, interpreter._procedures_db, interpreter.embed_function)
+    num_results = interpreter.num_procedures
+
+    relevant_procedures = search(query_string, interpreter._procedures_db, interpreter.embed_function, num_results=num_results)
 
     # This can be done better. Some procedures should just be "sticky"...
     relevant_procedures_string = "[Recommended Procedures]\n" + "\n---\n".join(relevant_procedures) + "\nIn your plan, include steps and, if present, **EXACT CODE SNIPPETS** (especially for deprecation notices, **WRITE THEM INTO YOUR PLAN -- underneath each numbered step** as they will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them) from the above procedures if they are relevant to the task. Again, include **VERBATIM CODE SNIPPETS** from the procedures above if they are relevent to the task **directly in your plan.**"
+
+    if interpreter.debug_mode:
+        print("Generated relevant_procedures_string:", relevant_procedures_string)
 
     return relevant_procedures_string
