@@ -5,6 +5,10 @@ def get_relevant_procedures_string(interpreter):
 
     # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
     # We can query it semantically and append relevant tutorials/procedures to our system message
+
+    # If download_open_procedures is True and interpreter.procedures is None,
+    # We download the bank of procedures:
+
     if interpreter.procedures is None and interpreter.download_open_procedures and not interpreter.local:
         # Let's get Open Procedures from Github
         url = "https://raw.githubusercontent.com/KillianLucas/open-procedures/main/procedures_db.json"

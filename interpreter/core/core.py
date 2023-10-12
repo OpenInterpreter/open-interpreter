@@ -14,6 +14,7 @@ from .generate_system_message import generate_system_message
 import appdirs
 import os
 from datetime import datetime
+from ..rag.get_relevant_procedures_string import get_relevant_procedures_string
 import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
@@ -145,5 +146,9 @@ class Interpreter:
             code_interpreter.terminate()
         self._code_interpreters = {}
 
+    # These functions are worth exposing to developers
+    # I wish we could just dynamically expose all of our functions to devs...
     def generate_system_message(self):
         return generate_system_message(self)
+    def get_relevant_procedures_string(self):
+        return get_relevant_procedures_string(self)
