@@ -66,7 +66,7 @@ def validate_llm_settings(interpreter):
 
                     To use `GPT-4` (recommended) please provide an OpenAI API key.
 
-                    To use `Code-Llama` (free but less capable) press `enter`.
+                    To use `Mistral-7B` (free but less capable) press `enter`.
                     
                     ---
                     """)
@@ -74,10 +74,10 @@ def validate_llm_settings(interpreter):
                     response = input("OpenAI API key: ")
 
                     if response == "":
-                        # User pressed `enter`, requesting Code-Llama
-                        display_markdown_message("""> Switching to `Code-Llama`...
+                        # User pressed `enter`, requesting Mistral-7B
+                        display_markdown_message("""> Switching to `Mistral-7B`...
                         
-                        **Tip:** Run `interpreter --local` to automatically use `Code-Llama`.
+                        **Tip:** Run `interpreter --local` to automatically use `Mistral-7B`.
                         
                         ---""")
                         time.sleep(1.5)

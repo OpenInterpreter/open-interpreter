@@ -1,5 +1,4 @@
 from ..utils.get_user_info_string import get_user_info_string
-from ..rag.get_relevant_procedures_string import get_relevant_procedures_string
 
 
 def generate_system_message(interpreter):
@@ -22,7 +21,7 @@ def generate_system_message(interpreter):
 
     system_message += "\n" + get_user_info_string()
     try:
-        system_message += "\n" + get_relevant_procedures_string(interpreter)
+        system_message += "\n" + interpreter.get_relevant_procedures_string(interpreter)
     except:
         # In case some folks can't install the embedding model (I'm not sure if this ever happens)
         pass
