@@ -143,8 +143,6 @@ class Interpreter:
         yield from respond(self)
             
     def reset(self):
-        self.messages = []
-        self.conversation_filename = None
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}
@@ -152,6 +150,9 @@ class Interpreter:
         # Reset the two functions below, in case the user set them
         self.generate_system_message = lambda: generate_system_message(self)
         self.get_relevant_procedures_string = lambda: get_relevant_procedures_string(self)
+
+        self.__init__()
+
 
     # These functions are worth exposing to developers
     # I wish we could just dynamically expose all of our functions to devs...
