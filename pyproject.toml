@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.1.8"
+version = "0.1.9"
 description = "Let language models run code locally."
 authors = ["Killian Lucas <killian@drinkwater.ai>"]
 readme = "README.md"
@@ -30,6 +30,8 @@ pyyaml = "^6.0.1"
 semgrep = "^1.41.0"
 yaspin = "^3.0.1"
 ooba = "^0.0.21"
+chroma = "^0.2.0"
+chromadb = "^0.4.14"
 [tool.poetry.dependencies.pyreadline3]
 version = "^3.4.1"
 markers = "sys_platform == 'win32'"

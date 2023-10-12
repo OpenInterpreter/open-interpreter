@@ -13,12 +13,16 @@ from .respond import respond
 from ..llm.setup_llm import setup_llm
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
+from .generate_system_message import generate_system_message
 import appdirs
 import os
 from datetime import datetime
+from ..rag.get_relevant_procedures_string import get_relevant_procedures_string
 import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.embed import embed_function
+
 
 class Interpreter:
     def cli(self):
@@ -57,6 +61,14 @@ class Interpreter:
         self.functions_schemas = [function_schema]
         self.functions = [code_function]
         self.build_relevant_procedures_function = build_relevant_procedures
+
+        # Procedures / RAG
+        self.procedures = None
+        self._procedures_db = {}
+        self.download_open_procedures = True
+        self.embed_function = embed_function
+        # Number of procedures to add to the system message
+        self.num_procedures = 2
 
         # Load config defaults
         self.extend_config(self.config_file)
@@ -137,8 +149,20 @@ class Interpreter:
         yield from respond(self)
             
     def reset(self):
-        self.messages = []
-        self.conversation_filename = None
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}
+
+        # Reset the two functions below, in case the user set them
+        self.generate_system_message = lambda: generate_system_message(self)
+        self.get_relevant_procedures_string = lambda: get_relevant_procedures_string(self)
+
+        self.__init__()
+
+
+    # These functions are worth exposing to developers
+    # I wish we could just dynamically expose all of our functions to devs...
+    def generate_system_message(self):
+        return generate_system_message(self)
+    def get_relevant_procedures_string(self):
+        return get_relevant_procedures_string(self)

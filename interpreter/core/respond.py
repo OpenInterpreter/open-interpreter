@@ -1,10 +1,6 @@
 from ..code_interpreters.base_code_interpreter import BreakLoop
-from ..code_interpreters.create_code_interpreter import create_code_interpreter
 from ..utils.merge_deltas import merge_deltas
-from ..utils.get_user_info_string import get_user_info_string
 from ..utils.display_markdown_message import display_markdown_message
-from ..rag.get_relevant_procedures import get_relevant_procedures
-from ..utils.truncate_output import truncate_output
 import traceback
 import litellm
 
@@ -16,15 +12,7 @@ def respond(interpreter):
 
     while True:
 
-        ### PREPARE MESSAGES ###
-
-        system_message = interpreter.system_message
-
-        if interpreter.build_relevant_procedures_function is not None:
-            system_message += "\n\n" + interpreter.build_relevant_procedures_function(interpreter)
-        
-        # Add user info to system_message, like OS, CWD, etc
-        system_message += "\n\n" + get_user_info_string()
+        system_message = interpreter.generate_system_message()
 
         # Create message object
         system_message = {"role": "system", "message": system_message}
@@ -92,8 +80,7 @@ def respond(interpreter):
         except Exception as e:
             if 'auth' in str(e).lower() or 'api key' in str(e).lower():
                 output = traceback.format_exc()
-                raise Exception(
-                    f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n")
+                raise Exception(f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n")
             else:
                 raise
 
