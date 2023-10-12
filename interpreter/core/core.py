@@ -6,7 +6,6 @@ from interpreter.utils import display_markdown_message
 from ..cli.cli import cli
 from ..code_interpreters.code_function_handler import code_function
 from ..llm.setup_openai_coding_llm import function_schema
-from ..rag.get_relevant_procedures import build_relevant_procedures
 from ..utils.get_config import get_config, user_config_path
 from ..utils.local_storage_path import get_storage_path
 from .respond import respond
@@ -60,7 +59,7 @@ class Interpreter:
         self.gguf_quality = None
         self.functions_schemas = [function_schema]
         self.functions = [code_function]
-        self.build_relevant_procedures_function = build_relevant_procedures
+        #self.build_relevant_procedures_function = build_relevant_procedures
 
         # Procedures / RAG
         self.procedures = None
@@ -89,13 +88,13 @@ class Interpreter:
     def chat(self, message=None, display=True, stream=False):
         if stream:
             return self._streaming_chat(message=message, display=display)
-        
+
         # If stream=False, *pull* from the stream.
         for _ in self._streaming_chat(message=message, display=display):
             pass
-        
+
         return self.messages
-    
+
     def _streaming_chat(self, message=None, display=True):
 
         # If we have a display,
@@ -114,7 +113,7 @@ class Interpreter:
         if display:
             yield from terminal_interface(self, message)
             return
-        
+
         # One-off message
         if message or message == "":
             if message == "":
@@ -141,13 +140,13 @@ class Interpreter:
                 # Write or overwrite the file
                 with open(os.path.join(self.conversation_history_path, self.conversation_filename), 'w') as f:
                     json.dump(self.messages, f)
-                
+
             return
         raise Exception("`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`.")
 
     def _respond(self):
         yield from respond(self)
-            
+
     def reset(self):
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
