@@ -10,12 +10,15 @@ from .respond import respond
 from ..llm.setup_llm import setup_llm
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
+from .generate_system_message import generate_system_message
 import appdirs
 import os
 from datetime import datetime
 import json
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.embed import embed_function
+
 
 class Interpreter:
     def cli(self):
@@ -51,6 +54,11 @@ class Interpreter:
         self.max_budget = None
         self._llm = None
         self.gguf_quality = None
+
+        # Procedures / RAG
+        self.procedures = None
+        self.download_open_procedures = True
+        self.embed_function = embed_function
 
         # Load config defaults
         self.extend_config(self.config_file)
@@ -136,3 +144,6 @@ class Interpreter:
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}
+
+    def generate_system_message(self):
+        return generate_system_message(self)

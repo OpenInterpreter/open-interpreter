@@ -1,8 +1,6 @@
 from ..code_interpreters.create_code_interpreter import create_code_interpreter
 from ..utils.merge_deltas import merge_deltas
-from ..utils.get_user_info_string import get_user_info_string
 from ..utils.display_markdown_message import display_markdown_message
-from ..rag.get_relevant_procedures import get_relevant_procedures
 from ..utils.truncate_output import truncate_output
 import traceback
 import litellm
@@ -15,22 +13,7 @@ def respond(interpreter):
 
     while True:
 
-        ### PREPARE MESSAGES ###
-
-        system_message = interpreter.system_message
-        
-        # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
-        # We can query it semantically and append relevant tutorials/procedures to our system message
-        get_relevant_procedures(interpreter.messages[-2:])
-        if not interpreter.local:
-            try:
-                system_message += "\n\n" + get_relevant_procedures(interpreter.messages[-2:])
-            except:
-                # This can fail for odd SLL reasons. It's not necessary, so we can continue
-                pass
-        
-        # Add user info to system_message, like OS, CWD, etc
-        system_message += "\n\n" + get_user_info_string()
+        system_message = interpreter.generate_system_message()
 
         # Create message object
         system_message = {"role": "system", "message": system_message}
