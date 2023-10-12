@@ -60,6 +60,8 @@ class Interpreter:
         self.procedures = None
         self.download_open_procedures = True
         self.embed_function = embed_function
+        # Number of procedures to add to the system message
+        self.num_procedures = 2
 
         # Load config defaults
         self.extend_config(self.config_file)
@@ -145,6 +147,10 @@ class Interpreter:
         for code_interpreter in self._code_interpreters.values():
             code_interpreter.terminate()
         self._code_interpreters = {}
+
+        # Reset the two functions below, in case the user set them
+        self.generate_system_message = lambda: generate_system_message(self)
+        self.get_relevant_procedures_string = lambda: get_relevant_procedures_string(self)
 
     # These functions are worth exposing to developers
     # I wish we could just dynamically expose all of our functions to devs...
