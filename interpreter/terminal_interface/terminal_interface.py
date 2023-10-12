@@ -163,8 +163,13 @@ def terminal_interface(interpreter, message):
                 break
 
         except KeyboardInterrupt:
-            # Exit gracefully (this cancels LLM, returns to the interactive "> " input)
+            # Exit gracefully
             if active_block:
                 active_block.end()
                 active_block = None
-            continue
+                
+            if interactive:
+                # (this cancels LLM, returns to the interactive "> " input)
+                continue
+            else:
+                break
