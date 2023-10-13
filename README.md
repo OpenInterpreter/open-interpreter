@@ -1,3 +1,11 @@
+<br>
+<p align="center">
+    The Open Interpreter Hackathon <strong>has been extended 24 hours!</strong> <a href="https://lablab.ai/event/open-interpreter-hackathon">Submit here.</a><br>
+    <br>
+    <a href="https://docs.openinterpreter.com/usage/python/streaming-response"><b>Docs</b></a> ‎ |‎ ‎ <a href="https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb">Demo Colab</a> ‎ |‎ ‎ <a href="https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK">Voice interface Colab</a><br><a href="https://github.com/Arrendy/open-interpreter-termux">Mike's Android guide</a> ‎ |‎ ‎ <a href="https://colab.research.google.com/drive/1DUVYLAstnXs22Ov4YuHMngjvNB4Mfx0Y?usp=sharing">RAG Colab</a> ‎ |‎ ‎ <a href="https://github.com/KillianLucas/open-interpreter-imessage-server">Morisy's Mac server</a>
+</p>
+<br>
+
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
