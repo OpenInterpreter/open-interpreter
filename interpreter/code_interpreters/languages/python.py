@@ -10,7 +10,7 @@ class Python(SubprocessCodeInterpreter):
 
     def __init__(self):
         super().__init__()
-        self.start_cmd = shlex.quote(sys.executable) + " -i -q -u"
+        self.start_cmd = shlex.quote(sys.executable).strip("'") + " -i -q -u"
         
     def preprocess_code(self, code):
         return preprocess_python(code)
