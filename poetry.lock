@@ -1057,6 +1057,67 @@ files = [
 plugins = ["importlib-metadata"]
 
 [[package]]
+name = "pyqt5"
+version = "5.15.10"
+description = "Python bindings for the Qt cross platform application toolkit"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "PyQt5-5.15.10-cp37-abi3-macosx_10_13_x86_64.whl", hash = "sha256:93288d62ebd47b1933d80c27f5d43c7c435307b84d480af689cef2474e87e4c8"},
+    {file = "PyQt5-5.15.10-cp37-abi3-manylinux_2_17_x86_64.whl", hash = "sha256:b89478d16d4118664ff58ed609e0a804d002703c9420118de7e4e70fa1cb5486"},
+    {file = "PyQt5-5.15.10-cp37-abi3-win32.whl", hash = "sha256:ff99b4f91aa8eb60510d5889faad07116d3340041916e46c07d519f7cad344e1"},
+    {file = "PyQt5-5.15.10-cp37-abi3-win_amd64.whl", hash = "sha256:501355f327e9a2c38db0428e1a236d25ebcb99304cd6e668c05d1188d514adec"},
+    {file = "PyQt5-5.15.10.tar.gz", hash = "sha256:d46b7804b1b10a4ff91753f8113e5b5580d2b4462f3226288e2d84497334898a"},
+]
+
+[package.dependencies]
+PyQt5-Qt5 = ">=5.15.2"
+PyQt5-sip = ">=12.13,<13"
+
+[[package]]
+name = "pyqt5-qt5"
+version = "5.15.2"
+description = "The subset of a Qt installation needed by PyQt5."
+optional = false
+python-versions = "*"
+files = [
+    {file = "PyQt5_Qt5-5.15.2-py3-none-macosx_10_13_intel.whl", hash = "sha256:76980cd3d7ae87e3c7a33bfebfaee84448fd650bad6840471d6cae199b56e154"},
+    {file = "PyQt5_Qt5-5.15.2-py3-none-manylinux2014_x86_64.whl", hash = "sha256:1988f364ec8caf87a6ee5d5a3a5210d57539988bf8e84714c7d60972692e2f4a"},
+    {file = "PyQt5_Qt5-5.15.2-py3-none-win32.whl", hash = "sha256:9cc7a768b1921f4b982ebc00a318ccb38578e44e45316c7a4a850e953e1dd327"},
+    {file = "PyQt5_Qt5-5.15.2-py3-none-win_amd64.whl", hash = "sha256:750b78e4dba6bdf1607febedc08738e318ea09e9b10aea9ff0d73073f11f6962"},
+]
+
+[[package]]
+name = "pyqt5-sip"
+version = "12.13.0"
+description = "The sip module support for PyQt5"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "PyQt5_sip-12.13.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:a7e3623b2c743753625c4650ec7696362a37fb36433b61824cf257f6d3d43cca"},
+    {file = "PyQt5_sip-12.13.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:6e4ac714252370ca037c7d609da92388057165edd4f94e63354f6d65c3ed9d53"},
+    {file = "PyQt5_sip-12.13.0-cp310-cp310-win32.whl", hash = "sha256:d5032da3fff62da055104926ffe76fd6044c1221f8ad35bb60804bcb422fe866"},
+    {file = "PyQt5_sip-12.13.0-cp310-cp310-win_amd64.whl", hash = "sha256:9a8cdd6cb66adcbe5c941723ed1544eba05cf19b6c961851b58ccdae1c894afb"},
+    {file = "PyQt5_sip-12.13.0-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:0f85fb633a522f04e48008de49dce1ff1d947011b48885b8428838973fbca412"},
+    {file = "PyQt5_sip-12.13.0-cp311-cp311-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:ec60162e034c42fb99859206d62b83b74f987d58937b3a82bdc07b5c3d190dec"},
+    {file = "PyQt5_sip-12.13.0-cp311-cp311-win32.whl", hash = "sha256:205cd449d08a2b024a468fb6100cd7ed03e946b4f49706f508944006f955ae1a"},
+    {file = "PyQt5_sip-12.13.0-cp311-cp311-win_amd64.whl", hash = "sha256:1c8371682f77852256f1f2d38c41e2e684029f43330f0635870895ab01c02f6c"},
+    {file = "PyQt5_sip-12.13.0-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:7fe3375b508c5bc657d73b9896bba8a768791f1f426c68053311b046bcebdddf"},
+    {file = "PyQt5_sip-12.13.0-cp312-cp312-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:773731b1b5ab1a7cf5621249f2379c95e3d2905e9bd96ff3611b119586daa876"},
+    {file = "PyQt5_sip-12.13.0-cp312-cp312-win32.whl", hash = "sha256:fb4a5271fa3f6bc2feb303269a837a95a6d8dd16be553aa40e530de7fb81bfdf"},
+    {file = "PyQt5_sip-12.13.0-cp312-cp312-win_amd64.whl", hash = "sha256:3a4498f3b1b15f43f5d12963accdce0fd652b0bcaae6baf8008663365827444c"},
+    {file = "PyQt5_sip-12.13.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:9b984c2620a7a7eaf049221b09ae50a345317add2624c706c7d2e9e6632a9587"},
+    {file = "PyQt5_sip-12.13.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:3188a06956aef86f604fb0d14421a110fad70d2a9e943dbacbfc3303f651dade"},
+    {file = "PyQt5_sip-12.13.0-cp38-cp38-win32.whl", hash = "sha256:108a15f603e1886988c4b0d9d41cb74c9f9815bf05cefc843d559e8c298a10ce"},
+    {file = "PyQt5_sip-12.13.0-cp38-cp38-win_amd64.whl", hash = "sha256:db228cd737f5cbfc66a3c3e50042140cb80b30b52edc5756dbbaa2346ec73137"},
+    {file = "PyQt5_sip-12.13.0-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:5338773bbaedaa4f16a73c142fb23cc18c327be6c338813af70260b756c7bc92"},
+    {file = "PyQt5_sip-12.13.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:29fa9cc964517c9fc3f94f072b9a2aeef4e7a2eda1879cb835d9e06971161cdf"},
+    {file = "PyQt5_sip-12.13.0-cp39-cp39-win32.whl", hash = "sha256:96414c93f3d33963887cf562d50d88b955121fbfd73f937c8eca46643e77bf61"},
+    {file = "PyQt5_sip-12.13.0-cp39-cp39-win_amd64.whl", hash = "sha256:bbc7cd498bf19e0862097be1ad2243e824dea56726f00c11cff1b547c2d31d01"},
+    {file = "PyQt5_sip-12.13.0.tar.gz", hash = "sha256:7f321daf84b9c9dbca61b80e1ef37bdaffc0e93312edae2cd7da25b953971d91"},
+]
+
+[[package]]
 name = "pyreadline3"
 version = "3.4.1"
 description = "A python implementation of GNU readline."
@@ -1512,30 +1573,36 @@ python-versions = ">=3.6"
 files = [
     {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:b42169467c42b692c19cf539c38d4602069d8c1505e97b86387fcf7afb766e1d"},
     {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-macosx_13_0_arm64.whl", hash = "sha256:07238db9cbdf8fc1e9de2489a4f68474e70dffcb32232db7c08fa61ca0c7c462"},
+    {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:d92f81886165cb14d7b067ef37e142256f1c6a90a65cd156b063a43da1708cfd"},
     {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:fff3573c2db359f091e1589c3d7c5fc2f86f5bdb6f24252c2d8e539d4e45f412"},
     {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-win32.whl", hash = "sha256:c69212f63169ec1cfc9bb44723bf2917cbbd8f6191a00ef3410f5a7fe300722d"},
     {file = "ruamel.yaml.clib-0.2.8-cp310-cp310-win_amd64.whl", hash = "sha256:cabddb8d8ead485e255fe80429f833172b4cadf99274db39abc080e068cbcc31"},
     {file = "ruamel.yaml.clib-0.2.8-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:bef08cd86169d9eafb3ccb0a39edb11d8e25f3dae2b28f5c52fd997521133069"},
     {file = "ruamel.yaml.clib-0.2.8-cp311-cp311-macosx_13_0_arm64.whl", hash = "sha256:b16420e621d26fdfa949a8b4b47ade8810c56002f5389970db4ddda51dbff248"},
+    {file = "ruamel.yaml.clib-0.2.8-cp311-cp311-manylinux2014_aarch64.whl", hash = "sha256:b5edda50e5e9e15e54a6a8a0070302b00c518a9d32accc2346ad6c984aacd279"},
     {file = "ruamel.yaml.clib-0.2.8-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:25c515e350e5b739842fc3228d662413ef28f295791af5e5110b543cf0b57d9b"},
     {file = "ruamel.yaml.clib-0.2.8-cp311-cp311-win32.whl", hash = "sha256:53a300ed9cea38cf5a2a9b069058137c2ca1ce658a874b79baceb8f892f915a7"},
     {file = "ruamel.yaml.clib-0.2.8-cp311-cp311-win_amd64.whl", hash = "sha256:c2a72e9109ea74e511e29032f3b670835f8a59bbdc9ce692c5b4ed91ccf1eedb"},
     {file = "ruamel.yaml.clib-0.2.8-cp312-cp312-macosx_10_9_universal2.whl", hash = "sha256:ebc06178e8821efc9692ea7544aa5644217358490145629914d8020042c24aa1"},
     {file = "ruamel.yaml.clib-0.2.8-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:edaef1c1200c4b4cb914583150dcaa3bc30e592e907c01117c08b13a07255ec2"},
+    {file = "ruamel.yaml.clib-0.2.8-cp312-cp312-manylinux2014_aarch64.whl", hash = "sha256:7048c338b6c86627afb27faecf418768acb6331fc24cfa56c93e8c9780f815fa"},
     {file = "ruamel.yaml.clib-0.2.8-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d176b57452ab5b7028ac47e7b3cf644bcfdc8cacfecf7e71759f7f51a59e5c92"},
     {file = "ruamel.yaml.clib-0.2.8-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:a5aa27bad2bb83670b71683aae140a1f52b0857a2deff56ad3f6c13a017a26ed"},
     {file = "ruamel.yaml.clib-0.2.8-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:c58ecd827313af6864893e7af0a3bb85fd529f862b6adbefe14643947cfe2942"},
     {file = "ruamel.yaml.clib-0.2.8-cp37-cp37m-macosx_12_0_arm64.whl", hash = "sha256:f481f16baec5290e45aebdc2a5168ebc6d35189ae6fea7a58787613a25f6e875"},
+    {file = "ruamel.yaml.clib-0.2.8-cp37-cp37m-manylinux2014_aarch64.whl", hash = "sha256:3fcc54cb0c8b811ff66082de1680b4b14cf8a81dce0d4fbf665c2265a81e07a1"},
     {file = "ruamel.yaml.clib-0.2.8-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:7f67a1ee819dc4562d444bbafb135832b0b909f81cc90f7aa00260968c9ca1b3"},
     {file = "ruamel.yaml.clib-0.2.8-cp37-cp37m-win32.whl", hash = "sha256:75e1ed13e1f9de23c5607fe6bd1aeaae21e523b32d83bb33918245361e9cc51b"},
     {file = "ruamel.yaml.clib-0.2.8-cp37-cp37m-win_amd64.whl", hash = "sha256:3f215c5daf6a9d7bbed4a0a4f760f3113b10e82ff4c5c44bec20a68c8014f675"},
     {file = "ruamel.yaml.clib-0.2.8-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:1b617618914cb00bf5c34d4357c37aa15183fa229b24767259657746c9077615"},
     {file = "ruamel.yaml.clib-0.2.8-cp38-cp38-macosx_12_0_arm64.whl", hash = "sha256:a6a9ffd280b71ad062eae53ac1659ad86a17f59a0fdc7699fd9be40525153337"},
+    {file = "ruamel.yaml.clib-0.2.8-cp38-cp38-manylinux2014_aarch64.whl", hash = "sha256:665f58bfd29b167039f714c6998178d27ccd83984084c286110ef26b230f259f"},
     {file = "ruamel.yaml.clib-0.2.8-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:700e4ebb569e59e16a976857c8798aee258dceac7c7d6b50cab63e080058df91"},
     {file = "ruamel.yaml.clib-0.2.8-cp38-cp38-win32.whl", hash = "sha256:955eae71ac26c1ab35924203fda6220f84dce57d6d7884f189743e2abe3a9fbe"},
     {file = "ruamel.yaml.clib-0.2.8-cp38-cp38-win_amd64.whl", hash = "sha256:56f4252222c067b4ce51ae12cbac231bce32aee1d33fbfc9d17e5b8d6966c312"},
     {file = "ruamel.yaml.clib-0.2.8-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:03d1162b6d1df1caa3a4bd27aa51ce17c9afc2046c31b0ad60a0a96ec22f8001"},
     {file = "ruamel.yaml.clib-0.2.8-cp39-cp39-macosx_12_0_arm64.whl", hash = "sha256:bba64af9fa9cebe325a62fa398760f5c7206b215201b0ec825005f1b18b9bccf"},
+    {file = "ruamel.yaml.clib-0.2.8-cp39-cp39-manylinux2014_aarch64.whl", hash = "sha256:9eb5dee2772b0f704ca2e45b1713e4e5198c18f515b52743576d196348f374d3"},
     {file = "ruamel.yaml.clib-0.2.8-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.whl", hash = "sha256:da09ad1c359a728e112d60116f626cc9f29730ff3e0e7db72b9a2dbc2e4beed5"},
     {file = "ruamel.yaml.clib-0.2.8-cp39-cp39-win32.whl", hash = "sha256:84b554931e932c46f94ab306913ad7e11bba988104c5cff26d90d03f68258cd5"},
     {file = "ruamel.yaml.clib-0.2.8-cp39-cp39-win_amd64.whl", hash = "sha256:25ac8c08322002b06fa1d49d1646181f0b2c72f5cbc15a85e80b4c30a544bb15"},
@@ -2103,4 +2170,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "ccf0aaa9ae52c3b6d45011661827e845956721114202585962d4b07098edf903"
+content-hash = "0f576cb3fa5a373d22ebac0ceb7510e290bf38584a9249c76d3a3d76ba79c63a"

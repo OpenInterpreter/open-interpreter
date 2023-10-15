@@ -8,6 +8,8 @@ from ..code_interpreters.container_utils.download_file import download_file_from
 from ..code_interpreters.container_utils.upload_file import copy_file_to_container
 from ..code_interpreters.create_code_interpreter import SESSION_IDS_BY_OBJECT
 
+from rich import print as Print
+
 
 def handle_undo(self, arguments):
     # Removes all messages after the most recent user entry (and the entry itself).
@@ -51,6 +53,10 @@ def handle_help(self, arguments):
         "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
         "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
         "%help": "Show this help message.",
+        "%upload": "open a File Dialog, and select a file to upload to the container. only used when using containerized code execution",
+        "%upload folder": "same as upload command, except you can upload a folder instead of just a file.",
+        "%upload file": "same as upload command, except you can upload a file.",
+        "%download" : "Download a file or directory given the file or folder name in the container."
     }
 
     base_message = [
@@ -115,8 +121,18 @@ def handle_load_message(self, json_path):
     display_markdown_message(
         f"> messages json loaded from {os.path.abspath(json_path)}")
 
-def handle_container_upload(self, *args):
-
+def handle_container_upload(self,type=None, *args):
+    def is_gui_available():
+        try:
+            from PyQt5.QtWidgets import QApplication
+            app = QApplication([])
+            del app
+            return True
+        except Exception as e:
+            print(f"An error occurred: {str(e)}")
+            return False
+        
+    args = list(args)
     if self.use_containers:
         try:
             client = docker.APIClient()
@@ -128,7 +144,28 @@ def handle_container_upload(self, *args):
             )
             display_markdown_message(f"{error_message}")
             return
+        if len(args) == 0:
+            if is_gui_available():
+                try:
+                    from .components.file_dialog import FileDialog
 
+                    fd = FileDialog()
+                    if type is not None:
+                        path = fd.get_path(type=type)
+                    else:
+                        path = fd.get_path(type=None)
+                    if path is not None: # if none, they exited
+                        
+                        args.append(path)
+                    else: # We shall now exit on them out of spite
+                        return
+                except ImportError as e:
+                    Print(f"Internal import error {e}")
+                    return    
+            else:
+                Print(f" No filepath provided. please provide one. use the command %upload <filetype (file or folder)> <path>")
+                return
+                 
         for filepath in args:
             if os.path.exists(filepath):
                 session_id = SESSION_IDS_BY_OBJECT.get(self)
@@ -159,7 +196,7 @@ def handle_container_download(self, *args):
         try:
             client = docker.APIClient()
         except Exception as e:
-            print("[BOLD][RED]Unable to connect to the Docker Container daemon. Please ensure Docker is installed and running. ignoring command[/BOLD]")
+            print("[BOLD][RED]Unable to connect to the Docker Container daemon. Please ensure Docker is installed and running. ignoring command[/RED][/BOLD]")
             return
         
         session_id = SESSION_IDS_BY_OBJECT.get(self)

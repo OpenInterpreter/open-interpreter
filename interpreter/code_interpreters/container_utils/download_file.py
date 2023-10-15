@@ -22,7 +22,7 @@ def download_file_from_container(container_id, file_path_in_container, local_dir
     container = client.containers.get(container_id)
 
     # Use get_archive to get a file from the container
-    stream, stat = container.get_archive(file_path_in_container)
+    stream, stat = container.get_archive(os.path.join("/mnt/data/", file_path_in_container))
     
     # Get the file name from the stat info
     file_name = os.path.basename(stat['name'])
