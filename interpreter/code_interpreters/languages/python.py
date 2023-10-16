@@ -1,7 +1,9 @@
+import os
 import sys
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import ast
 import re
+import shlex
 
 class Python(SubprocessCodeInterpreter):
 
@@ -13,7 +15,10 @@ class Python(SubprocessCodeInterpreter):
         if 'use_docker' in kwargs and kwargs['use_docker']:
             self.start_cmd = "python3 -i -q -u"
         else:
-            self.start_cmd = sys.executable + " -i -q -u"
+            executable = sys.executable
+            if os.name != 'nt':  # not Windows
+                executable = shlex.quote(executable)
+            self.start_cmd = executable + " -i -q -u"
         
     def preprocess_code(self, code):
         return preprocess_python(code)

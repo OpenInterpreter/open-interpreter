@@ -4,6 +4,8 @@ import appdirs
 import docker
 
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.count_tokens import count_messages_tokens
+from ..utils.display_markdown_message import display_markdown_message
 from ..code_interpreters.container_utils.download_file import download_file_from_container
 from ..code_interpreters.container_utils.upload_file import copy_file_to_container
 from ..code_interpreters.create_code_interpreter import SESSION_IDS_BY_OBJECT
@@ -52,6 +54,7 @@ def handle_help(self, arguments):
         "%undo": "Remove previous messages and its response from the message history.",
         "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
         "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
+        "%tokens [prompt]": "Calculate the tokens used by the current conversation's messages and estimate their cost and optionally calculate the tokens and estimated cost of a `prompt` if one is provided.",
         "%help": "Show this help message.",
         "%upload": "open a File Dialog, and select a file to upload to the container. only used when using containerized code execution",
         "%upload folder": "same as upload command, except you can upload a folder instead of just a file.",
@@ -229,6 +232,25 @@ def handle_container_download(self, *args):
         print("File downloads are only used when using containerized code execution. Ignoring command.")
 
 
+def handle_count_tokens(self, prompt):
+    messages = [{"role": "system", "message": self.system_message}] + self.messages
+
+    outputs = []
+
+    if len(self.messages) == 0:
+      (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
+      outputs.append((f"> System Prompt Tokens: {tokens} (${cost})"))
+    else:
+      (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
+      outputs.append(f"> Conversation Tokens: {tokens} (${cost})")
+
+    if prompt and prompt != '':
+      (tokens, cost) = count_messages_tokens(messages=[prompt], model=self.model)
+      outputs.append(f"> Prompt Tokens: {tokens} (${cost})") 
+
+    display_markdown_message("\n".join(outputs))
+
+
 def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
     switch = {
@@ -237,6 +259,7 @@ def handle_magic_command(self, user_input):
         "reset": handle_reset,
         "save_message": handle_save_message,
         "load_message": handle_load_message,
+        "tokens": handle_count_tokens,
         "undo": handle_undo,
         "upload": handle_container_upload,
         "download": handle_container_download,

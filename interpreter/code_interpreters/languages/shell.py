@@ -1,6 +1,5 @@
 import platform
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
-import ast
 import os
 
 class Shell(SubprocessCodeInterpreter):
@@ -40,10 +39,6 @@ def preprocess_shell(code):
     
     # Add commands that tell us what the active line is
     code = add_active_line_prints(code)
-    
-    # Wrap in a trap for errors
-    if platform.system() != 'Windows':
-        code = wrap_in_trap(code)
     
     # Add end command (we'll be listening for this so we know when it ends)
     code += '\necho "## end_of_execution ##"'

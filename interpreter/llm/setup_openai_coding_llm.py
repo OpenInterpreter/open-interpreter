@@ -17,7 +17,7 @@ function_schema = {
         "type": "string",
         "description":
         "The programming language (required parameter to the `execute` function)",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html"]
+        "enum": ["python", "R", "shell", "applescript", "javascript", "html", "powershell"]
       },
       "code": {
         "type": "string",
@@ -37,7 +37,7 @@ def setup_openai_coding_llm(interpreter):
     def coding_llm(messages):
         
         # Convert messages
-        messages = convert_to_openai_messages(messages)
+        messages = convert_to_openai_messages(messages, function_calling=True)
 
         # Add OpenAI's recommended function message
         messages[0]["content"] += "\n\nOnly use the function you have been provided with."
