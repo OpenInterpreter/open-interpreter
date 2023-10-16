@@ -138,7 +138,7 @@ def cli(interpreter):
         "--fast",
         dest="fast",
         action="store_true",
-        help="(depracated) runs `interpreter --model gpt-3.5-turbo`",
+        help="(deprecated) runs `interpreter --model gpt-3.5-turbo`",
     )
     parser.add_argument(
         "--version",
@@ -220,12 +220,12 @@ def cli(interpreter):
         version = pkg_resources.get_distribution("open-interpreter").version
         print(f"Open Interpreter {version}")
         return
-    
+
     if args.change_local_device:
         print("This will uninstall the experimental local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)")
         if input().lower() == "n":
             return
-        
+
         print("Please choose your GPU:\n")
 
         print("A) NVIDIA")
@@ -243,12 +243,12 @@ def cli(interpreter):
         ooba.install(force_reinstall=True, gpu_choice=gpu_choice, verbose=args.debug_mode)
         return
 
-    # Depracated --fast
+    # Deprecated --fast
     if args.fast:
         # This will cause the terminal_interface to walk the user through setting up a local LLM
         interpreter.model = "gpt-3.5-turbo"
         print(
-            "`interpreter --fast` is depracated and will be removed in the next version. Please use `interpreter --model gpt-3.5-turbo`"
+            "`interpreter --fast` is deprecated and will be removed in the next version. Please use `interpreter --model gpt-3.5-turbo`"
         )
 
     interpreter.chat()
