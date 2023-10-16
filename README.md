@@ -1,10 +1,3 @@
-<br>
-<p align="center">
-    <strong>The Open Interpreter Hackathon is today.</strong><br>
-    <br>
-    <a href="https://docs.openinterpreter.com/usage/python/streaming-response"><b>Docs</b></a> ‎ |‎ ‎ <a href="https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb">Demo Colab</a> ‎ |‎ ‎ <a href="https://github.com/KillianLucas/open-interpreter-imessage-server">Morisy's Mac server</a><br><a href="https://github.com/Arrendy/open-interpreter-termux">Run on Android</a> ‎ |‎ ‎ <a href="https://colab.research.google.com/drive/1DUVYLAstnXs22Ov4YuHMngjvNB4Mfx0Y?usp=sharing">RAG Colab</a> ‎ |‎ ‎ <a href="https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK">Voice interface Colab</a>
-</p>
-<br>
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
@@ -318,6 +311,31 @@ message = "What operating system are we on?"
 
 for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
+```
+
+## Sample FastAPI Server
+
+The generator update enables Open Interpreter to be controlled via HTTP REST endpoints:
+
+```python
+# server.py
+
+from fastapi import FastAPI, Response
+import interpreter
+
+app = FastAPI()
+
+@app.get("/chat")
+def chat_endpoint(message):
+    return Response(interpreter.chat(message, stream=True), media_type="text/event-stream")
+
+@app.get("/history")
+def history_endpoint():
+    return interpreter.messages
+```
+```shell
+pip install fastapi uvicorn
+uvicorn server:app --reload
 ```
 
 ## Safety Notice
