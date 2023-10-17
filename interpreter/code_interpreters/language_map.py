@@ -15,5 +15,5 @@ language_map = {
     "html": HTML,
     "applescript": AppleScript,
     "r": R,
-	"powershell": PowerShell,
+    "powershell": PowerShell,
 }
