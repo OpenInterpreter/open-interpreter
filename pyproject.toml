@@ -3,9 +3,9 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.1.9"
+version = "0.1.10"
 description = "Let language models run code locally."
-authors = ["Killian Lucas <killian@drinkwater.ai>"]
+authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
@@ -20,21 +20,22 @@ appdirs = "^1.4.4"
 six = "^1.16.0"
 python-dotenv = "^1.0.0"
 
-# On non-windows systems, you can just `import readline`.
-# On windows, `pyreadline3` replaces that, so you can also just `import readline`.
 inquirer = "^3.1.3"
 wget = "^3.2"
 huggingface-hub = "^0.17.3"
-litellm = "^0.7.5"
+litellm = "0.8.6"
 pyyaml = "^6.0.1"
-semgrep = "^1.41.0"
 yaspin = "^3.0.1"
 ooba = "^0.0.21"
 chroma = "^0.2.0"
 chromadb = "^0.4.14"
-[tool.poetry.dependencies.pyreadline3]
-version = "^3.4.1"
-markers = "sys_platform == 'win32'"
+
+# DISABLED # but perhaps we should re-enable soon. Windows + readline errors sometimes, need more testing
+# On non-windows systems, you can just `import readline`.
+# On windows, `pyreadline3` replaces that, so you can also just `import readline`.
+# [tool.poetry.dependencies.pyreadline3]
+# version = "^3.4.1"
+# markers = "sys_platform == 'win32'"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
