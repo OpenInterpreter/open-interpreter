@@ -58,17 +58,22 @@ def respond(interpreter):
                     chunk_type = "code"
                     yield {"start_of_code": True}
                 if "code" in chunk and chunk_type != "code":
-                    # (This shouldn't happen though — ^ "language" should be emitted first)
+                    # (This shouldn't happen though — ^ "language" should be emitted first, but sometimes GPT-3.5 forgets this)
+                    # (But I'm pretty sure we handle that? If it forgets we emit Python anyway?)
                     chunk_type = "code"
                     yield {"start_of_code": True}
                 elif "message" not in chunk and chunk_type == "message":
                     chunk_type = None
                     yield {"end_of_message": True}
-                elif "code" not in chunk and "language" not in chunk and chunk_type == "code":
-                    chunk_type = None
-                    yield {"end_of_code": True}
 
                 yield chunk
+
+            # We don't trigger the end_of_message or end_of_code flag if we actually end on either
+            if chunk_type == "message":
+                yield {"end_of_message": True}
+            elif chunk_type == "code":
+                yield {"end_of_code": True}
+            
         except litellm.exceptions.BudgetExceededError:
             display_markdown_message(f"""> Max budget exceeded
 
