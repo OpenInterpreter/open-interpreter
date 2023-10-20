@@ -110,9 +110,9 @@ def respond(interpreter):
                 language = interpreter.messages[-1]["language"]
                 if language not in interpreter._code_interpreters:
                     if interpreter.use_containers:
-                        interpreter._code_interpreters[language] = create_code_interpreter(language, use_containers=True)
+                        interpreter._code_interpreters[language] = create_code_interpreter(interpreter, language, use_containers=True)
                     else:
-                        interpreter._code_interpreters[language] = create_code_interpreter(language)
+                        interpreter._code_interpreters[language] = create_code_interpreter(interpreter, language, use_containers=False)
                         
                 code_interpreter = interpreter._code_interpreters[language]
 

@@ -1,127 +1,21 @@
-# Standard library imports
-import atexit
-import hashlib
-import json
+"""wrapper classes of the Docker python sdk which allows interaction like its a subprocess object."""
 import os
 import re
 import select
-import shutil
 import struct
-import subprocess
 import threading
 import time
 
 
-# Third-party imports
+# Third-party imports       
+import appdirs
 import docker
-from docker import DockerClient
-from docker.errors import DockerException
 from docker.utils import kwargs_from_env
 from docker.tls import TLSConfig
 from rich import print as Print
 
-
-def get_files_hash(*file_paths):
-    """Return the SHA256 hash of multiple files."""
-    hasher = hashlib.sha256()
-    for file_path in file_paths:
-        with open(file_path, "rb") as f:
-            while chunk := f.read(4096):
-                hasher.update(chunk)
-    return hasher.hexdigest()
-
-
-def build_docker_images(
-    dockerfile_dir = os.path.join(os.path.abspath(os.path.dirname(os.path.dirname(__file__))), "dockerfiles")
-,
-):
-    """
-    Builds a Docker image for the Open Interpreter runtime container if needed.
-
-    Args:
-        dockerfile_dir (str): The directory containing the Dockerfile and requirements.txt files.
-
-    Returns:
-        None
-    """
-    try:
-        client = DockerClient.from_env()
-    except DockerException:
-        Print("[bold red]ERROR[/bold red]: Could not connect to Docker daemon. Is Docker Engine installed and running?")
-        Print(
-            "\nFor information on Docker installation, visit: https://docs.docker.com/engine/install/ and follow the instructions for your system."
-        )
-        return
-
-    image_name = "openinterpreter-runtime-container"
-    hash_file_path = os.path.join(dockerfile_dir, "hash.json")
-
-    dockerfile_name = "Dockerfile"
-    requirements_name = "requirements.txt"
-    dockerfile_path = os.path.join(dockerfile_dir, dockerfile_name)
-    requirements_path = os.path.join(dockerfile_dir, requirements_name)
-
-    if not os.path.exists(dockerfile_path) or not os.path.exists(requirements_path):
-        Print("ERROR: Dockerfile or requirements.txt not found. Did you delete or rename them?")
-        raise RuntimeError(
-            "No container Dockerfiles or requirements.txt found. Make sure they are in the dockerfiles/ subdir of the module."
-        )
-
-    current_hash = get_files_hash(dockerfile_path, requirements_path)
-
-    stored_hashes = {}
-    if os.path.exists(hash_file_path):
-        with open(hash_file_path, "rb") as f:
-            stored_hashes = json.load(f)
-
-    original_hash = stored_hashes.get("original_hash")
-    previous_hash = stored_hashes.get("last_hash")
-
-    if current_hash == original_hash:
-        images = client.images.list(name=image_name, all=True)
-        if not images:
-            Print("Downloading default image from Docker Hub, please wait...")
-            
-            subprocess.run(["docker", "pull", "unaidedelf/openinterpreter-runtime-container:latest"])
-            subprocess.run(["docker", "tag", "unaidedelf/openinterpreter-runtime-container:latest", image_name ],
-                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    elif current_hash != previous_hash:
-        Print("Dockerfile or requirements.txt has changed. Building container...")
-
-        try:
-            # Run the subprocess without capturing stdout and stderr
-            # This will allow Docker's output to be printed to the console in real-time
-            subprocess.run(
-                [
-                    "docker",
-                    "build",
-                    "-t",
-                    f"{image_name}:latest",
-                    dockerfile_dir,
-                ],
-                check=True,  # This will raise a CalledProcessError if the command returns a non-zero exit code
-                text=True,
-            )
-
-            # Update the stored current hash
-            stored_hashes["last_hash"] = current_hash
-            with open(hash_file_path, "w") as f:
-                json.dump(stored_hashes, f)
-
-        except subprocess.CalledProcessError:
-            # Suppress Docker's error messages and display your own error message
-            Print("Docker Build Error: Building Docker image failed. Please review the error message above and resolve the issue.")
-
-        except FileNotFoundError:
-            Print("ERROR: The 'docker' command was not found on your system.")
-            Print(
-                "Please ensure Docker Engine is installed and the 'docker' command is available in your PATH."
-            )
-            Print(
-                "For information on Docker installation, visit: https://docs.docker.com/engine/install/"
-            )
-            Print("If Docker is installed, try starting a new terminal session.")
-
+# Modules
+from .auto_remove import access_aware
 
 class DockerStreamWrapper:
     def __init__(self, exec_id, sock):
@@ -222,26 +116,41 @@ class DockerStreamWrapper:
         os.close(self._stderr_w)
 
 
-
+# The `@access_aware` decorator enables automatic container cleanup based on activity monitoring.
+# It functions under the following conditions:
+# 1. The container is subject to removal when it remains unaccessed beyond the duration specified by `auto_remove_timeout`.
+# 2. This feature necessitates a non-None argument; absence of a valid argument renders this functionality inactive.
+# 3. During interactive sessions, the auto-removal feature is disabled to prevent unintended interruptions.
+# 4. The "INTERPRETER_CONTAINER_TIMEOUT" environment variable allows customization of the timeout period. 
+#    It accepts an integer value representing the desired timeout in seconds.
+# 5. In the event of an unexpected program termination, the container is still ensured to be removed,
+#    courtesy of the integration with the `atexit` module, safeguarding system resources from being unnecessarily occupied.
+@access_aware 
 class DockerProcWrapper:
-    def __init__(self, command, session_path):
+    def __init__(self, command, session_id, auto_remove_timeout=None, close_callback=None, mount=False): ## Mounting isnt implemented in main code, but i did it here prior so we just hide it behind a flag for now.
+        
+        # Docker stuff
         client_kwargs = kwargs_from_env()
         if client_kwargs.get('tls'):
             client_kwargs['tls'] = TLSConfig(**client_kwargs['tls'])
         self.client = docker.APIClient(**client_kwargs)
         self.image_name = "openinterpreter-runtime-container:latest"
-        self.session_path = session_path
         self.exec_id = None
         self.exec_socket = None
-        atexit.register(atexit_destroy, self)
 
-        os.makedirs(self.session_path, exist_ok=True)
+        # close callback
+        self.close_callback = close_callback
+
+        # session info
+        self.session_id = session_id
+        self.session_path = os.path.join(appdirs.user_data_dir("Open Interpreter"), "sessions", session_id)
+        self.mount = mount
 
 
         # Initialize container
         self.init_container()
 
-        self.init_exec_instance(command)
+        self.init_exec_instance()
         
 
         self.wrapper = DockerStreamWrapper(self.exec_id, self.exec_socket)
@@ -255,7 +164,7 @@ class DockerProcWrapper:
         self.container = None
         try:
             containers = self.client.containers(
-                filters={"label": f"session_id={os.path.basename(self.session_path)}"}, all=True)
+                filters={"label": f"session_id={self.session_id}"}, all=True)
             if containers:
                 self.container = containers[0]
                 container_id = self.container.get('Id')
@@ -264,9 +173,15 @@ class DockerProcWrapper:
                     self.client.start(container=container_id)
                     self.wait_for_container_start(container_id)
             else:
-                host_config = self.client.create_host_config(
-                    binds={self.session_path: {'bind': '/mnt/data', 'mode': 'rw'}}
-                )
+                if self.mount:
+
+                    os.makedirs(self.session_path, exist_ok=True)
+
+                    host_config = self.client.create_host_config(
+                        binds={self.session_path: {'bind': '/mnt/data', 'mode': 'rw'}}
+                    )
+                else:
+                    host_config = None
                 
                 self.container = self.client.create_container(
                     image=self.image_name,
@@ -285,7 +200,7 @@ class DockerProcWrapper:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def init_exec_instance(self, command):
+    def init_exec_instance(self):
         if self.container:
             container_info = self.client.inspect_container(self.container.get('Id'))
 
@@ -320,9 +235,21 @@ class DockerProcWrapper:
                 raise TimeoutError(
                     "Container did not start within the specified timeout.")
             time.sleep(1)
+    
+    def terminate(self):
+        self.wrapper.terminate()
+        self.client.stop(self.container.get("Id"))
+        self.client.remove_container(self.container.get("Id"))
+
+    def stop(self):
+        self.wrapper.terminate()
+        self.client.stop(self.container.get("Id"), 30)
 
 
-def atexit_destroy(self):
-    shutil.rmtree(self.session_path)
-    self.client.stop(self.container.get("Id"))
-    self.client.remove_container(self.container.get("Id"))
+    def __del__(self):
+        self.terminate()
+
+
+
+
+

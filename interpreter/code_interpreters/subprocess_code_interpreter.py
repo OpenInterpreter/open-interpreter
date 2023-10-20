@@ -4,8 +4,8 @@ import subprocess
 import threading
 import time
 import traceback
-
 import appdirs
+
 from .base_code_interpreter import BaseCodeInterpreter
 from .container_utils.container_utils import DockerProcWrapper
 
@@ -24,15 +24,16 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
     - session_id (str): The ID of the Docker container session, if `contain` is True.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, use_containers=False, **container_args):
+        self.container_args = container_args
         self.start_cmd = ""
         self.process = None
         self.debug_mode = False
         self.output_queue = queue.Queue()
         self.done = threading.Event()
-        self.use_containers = kwargs.get("use_docker", False)
+        self.use_containers = use_containers
         if self.use_containers:
-            self.session_id = kwargs.get("session_id")
+            self.session_id = container_args.get("session_id")
 
     @staticmethod
     def detect_active_line(line):
@@ -73,10 +74,9 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         
         if self.use_containers:
             self.process = DockerProcWrapper(
-                self.start_cmd,  # splitting cmd causes problems with docker
-                session_path=os.path.join(
-                    appdirs.user_data_dir("Open Interpreter"), "sessions", self.session_id
-            ),)
+                command=self.start_cmd,
+                **self.container_args
+                )
         else:
             self.process = subprocess.Popen(
                 self.start_cmd.split(),

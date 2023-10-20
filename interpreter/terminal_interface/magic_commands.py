@@ -8,7 +8,6 @@ from ..utils.count_tokens import count_messages_tokens
 from ..utils.display_markdown_message import display_markdown_message
 from ..code_interpreters.container_utils.download_file import download_file_from_container
 from ..code_interpreters.container_utils.upload_file import copy_file_to_container
-from ..code_interpreters.create_code_interpreter import SESSION_IDS_BY_OBJECT
 
 from rich import print as Print
 
@@ -164,14 +163,17 @@ def handle_container_upload(self,type=None, *args):
                         return
                 except ImportError as e:
                     Print(f"Internal import error {e}")
-                    return    
+                    return 
             else:
-                Print(f" No filepath provided. please provide one. use the command %upload <filetype (file or folder)> <path>")
+                Print(f"No GUI available for your system.\n please provide a filepath manually. use the command %upload <filetype (file or folder)> <path>")
                 return
                  
         for filepath in args:
             if os.path.exists(filepath):
-                session_id = SESSION_IDS_BY_OBJECT.get(self)
+                session_id = self.session_id
+                if session_id is None:
+                    Print("[BOLD] [RED] No session found. Please run any code to start one. [/RED] [/BOLD]")
+                    return
                 containers = client.containers(filters={"label": f"session_id={session_id}"})
                 if containers:
                     container_id = containers[0]['Id']
@@ -179,7 +181,7 @@ def handle_container_upload(self,type=None, *args):
                     copy_file_to_container(
                         container_id=container_id, local_path=filepath, path_in_container=f"/mnt/data/{os.path.basename(filepath)}"
                     )
-                    success_message = f"File [{filepath}](#) successfully uploaded to container in dir `/mnt/data`."
+                    success_message = f"[{filepath}](#) successfully uploaded to container in dir `/mnt/data`."
                     display_markdown_message(success_message)
                 else:
                     no_container_message = (
@@ -202,7 +204,7 @@ def handle_container_download(self, *args):
             print("[BOLD][RED]Unable to connect to the Docker Container daemon. Please ensure Docker is installed and running. ignoring command[/RED][/BOLD]")
             return
         
-        session_id = SESSION_IDS_BY_OBJECT.get(self)
+        session_id = self.session_id
         if session_id is None:
             print("No session found. Please run any code to start one.")
             return
@@ -219,6 +221,10 @@ def handle_container_download(self, *args):
         local_dir = appdirs.user_data_dir(appname="Open Interpreter")
 
         for file_path_in_container in args:
+
+            if not file_path_in_container.startswith("/mnt/data"):
+                file_path_in_container = os.path.join("/mnt/data", file_path_in_container)
+
             # Construct the local file path
             local_file_path = os.path.join(local_dir, os.path.basename(file_path_in_container))
             
