@@ -29,7 +29,6 @@ from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
 from ..code_interpreters.container_utils.build_image import build_docker_images
 from ..utils.embed import embed_function
-from ..terminal_interface.magic_commands import handle_magic_command
 
 
 

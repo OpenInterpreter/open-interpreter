@@ -2,23 +2,24 @@ import os
 from random import randint
 import time
 import pytest
-import interpreter
+import interpreter as i
 from interpreter.utils.count_tokens import count_tokens, count_messages_tokens
 import time
-
-interpreter.auto_run = True
-interpreter.model = "gpt-4"
-interpreter.temperature = 0
 
 
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
-def setup_function():
+
+@pytest.fixture(scope="function") # This will make the interpreter instance available to all test cases.
+def interpreter():
+    interpreter = i.create_interpreter()
     interpreter.reset()
     interpreter.temperature = 0
     interpreter.auto_run = True
     interpreter.model = "gpt-4"
     interpreter.debug_mode = False
+
+    yield interpreter
 
 
 # this function will run after each test
@@ -27,7 +28,7 @@ def teardown_function():
     time.sleep(5)
 
 
-def test_config_loading():
+def test_config_loading(interpreter):
     # because our test is running from the root directory, we need to do some
     # path manipulation to get the actual path to the config file or our config
     # loader will try to load from the wrong directory and fail
@@ -43,7 +44,7 @@ def test_config_loading():
 
     assert temperature_ok and model_ok and debug_mode_ok
 
-def test_system_message_appending():
+def test_system_message_appending(interpreter):
     ping_system_message = (
         "Respond to a `ping` with a `pong`. No code. No explanations. Just `pong`."
     )
@@ -61,12 +62,12 @@ def test_system_message_appending():
     ]
 
 
-def test_reset():
+def test_reset(interpreter):
     # make sure that interpreter.reset() clears out the messages Array
     assert interpreter.messages == []
 
 
-def test_token_counter():
+def test_token_counter(interpreter):
     system_tokens = count_tokens(text=interpreter.system_message, model=interpreter.model)
     
     prompt = "How many tokens is this?"
@@ -88,12 +89,14 @@ def test_token_counter():
     assert system_tokens_ok and prompt_tokens_ok
 
 
-def test_hello_world():
+def test_hello_world(interpreter):
     hello_world_response = "Hello, World!"
 
     hello_world_message = f"Please reply with just the words {hello_world_response} and nothing else. Do not run code. No confirmation just the text."
 
     messages = interpreter.chat(hello_world_message)
+
+    print(messages)
 
     assert messages == [
         {"role": "user", "message": hello_world_message},
@@ -101,7 +104,7 @@ def test_hello_world():
     ]
 
 @pytest.mark.skip(reason="Math is hard")
-def test_math():
+def test_math(interpreter):
     # we'll generate random integers between this min and max in our math tests
     min_number = randint(1, 99)
     max_number = randint(1001, 9999)
@@ -122,19 +125,19 @@ def test_math():
     assert str(round(test_result, 2)) in messages[-1]["message"]
 
 
-def test_delayed_exec():
+def test_delayed_exec(interpreter):
     interpreter.chat(
         """Can you write a single block of code and run_code it that prints something, then delays 1 second, then prints something else? No talk just code. Thanks!"""
     )
 
 @pytest.mark.skip(reason="This works fine when I run it but fails frequently in Github Actions... will look into it after the hackathon")
-def test_nested_loops_and_multiple_newlines():
+def test_nested_loops_and_multiple_newlines(interpreter):
     interpreter.chat(
         """Can you write a nested for loop in python and shell and run them? Don't forget to properly format your shell script and use semicolons where necessary. Also put 1-3 newlines between each line in the code. Only generate and execute the code. No explanations. Thanks!"""
     )
 
 
-def test_markdown():
+def test_markdown(interpreter):
     interpreter.chat(
         """Hi, can you test out a bunch of markdown features? Try writing a fenced code block, a table, headers, everything. DO NOT write the markdown inside a markdown code block, just write it raw."""
     )
