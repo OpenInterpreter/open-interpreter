@@ -66,7 +66,7 @@ def setup_text_llm(interpreter):
         # Tell it how to run code.
         # THIS MESSAGE IS DUPLICATED IN `setup_local_text_llm.py`
         # (We should deduplicate it somehow soon)
-        system_message += "\nTo execute code on the user's machine, write a markdown code block *with the language*, i.e:\n\n```python\nprint('Hi!')\n```\n\nYou will recieve the output ('Hi!'). Use any language."
+        system_message += "\nTo execute code on the user's machine, write a markdown code block *with the language*, i.e:\n\n```python\nprint('Hi!')\n```\n\nYou will receive the output ('Hi!'). Use any language."
 
         # TODO swap tt.trim for litellm util
         messages = messages[1:]
