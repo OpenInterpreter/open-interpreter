@@ -7,9 +7,8 @@ class HTML(BaseCodeInterpreter):
     file_extension = "html"
     proper_name = "HTML"
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs) # include kwargs though they dont do anything in this case.
-                                   # This is just so we dont need more logic in the create interpreter function
+    def __init__(self, **kwargs): ## accept the kwargs though we dont use them, since its easier this way.
+        super().__init__() 
 
     def run(self, code):
         # Create a temporary HTML file with the content
