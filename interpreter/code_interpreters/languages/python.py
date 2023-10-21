@@ -12,7 +12,7 @@ class Python(SubprocessCodeInterpreter):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        if 'use_docker' in kwargs and kwargs['use_docker']:
+        if 'use_containers' in kwargs and kwargs['use_containers']:
             self.start_cmd = "python3 -i -q -u"
         else:
             executable = sys.executable
