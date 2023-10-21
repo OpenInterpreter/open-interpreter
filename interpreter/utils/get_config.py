@@ -1,6 +1,5 @@
 import os
 import yaml
-from importlib import resources
 import shutil
 
 from .local_storage_path import get_storage_path
@@ -10,35 +9,34 @@ config_filename = "config.yaml"
 user_config_path = os.path.join(get_storage_path(), config_filename)
 
 def get_config_path(path=user_config_path):
-    # check to see if we were given a path that exists
+    # Verificar si se proporcionó una ruta que existe
     if not os.path.exists(path):
-        # check to see if we were given a filename that exists in the config directory
+        # Verificar si se proporcionó un nombre de archivo que existe en el directorio de configuración
         if os.path.exists(os.path.join(get_storage_path(), path)):
             path = os.path.join(get_storage_path(), path)
         else:
-            # check to see if we were given a filename that exists in the current directory
+            # Verificar si se proporcionó un nombre de archivo que existe en el directorio actual
             if os.path.exists(os.path.join(os.getcwd(), path)):
                 path = os.path.join(os.path.curdir, path)
-            # if we weren't given a path that exists, we'll create a new file
+            # Si no se proporcionó una ruta que existe, crearemos un nuevo archivo
             else:
-                # if the user gave us a path that isn't our default config directory
-                # but doesn't already exist, let's create it
+                # Si el usuario proporcionó una ruta que no es nuestro directorio de configuración predeterminado
+                # pero aún no existe, la crearemos
                 if os.path.dirname(path) and not os.path.exists(os.path.dirname(path)):
                     os.makedirs(os.path.dirname(path), exist_ok=True)
                 else:
-                    # Ensure the user-specific directory exists
+                    # Asegurémonos de que exista el directorio específico del usuario
                     os.makedirs(get_storage_path(), exist_ok=True)
-                    
-                    # otherwise, we'll create the file in our default config directory
+
+                    # En caso contrario, crearemos el archivo en nuestro directorio de configuración predeterminado
                     path = os.path.join(get_storage_path(), path)
 
-
-                # If user's config doesn't exist, copy the default config from the package
+                # Si la configuración del usuario no existe, copiaremos la configuración predeterminada desde el paquete
                 here = os.path.abspath(os.path.dirname(__file__))
                 parent_dir = os.path.dirname(here)
                 default_config_path = os.path.join(parent_dir, 'config.yaml')
 
-                # Copying the file using shutil.copy
+                # Copiamos el archivo utilizando shutil.copy
                 new_file = shutil.copy(default_config_path, path)
 
     return path
