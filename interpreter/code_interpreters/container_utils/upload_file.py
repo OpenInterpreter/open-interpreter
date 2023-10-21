@@ -1,10 +1,11 @@
+"""Short function to upload a file to a docker container via the docker module. yes its hacky, but its easy and I didnt want to over complicate."""
 import io
 import tarfile
 import os
 import docker
 from tqdm import tqdm
 
-def copy_file_to_container(container_id, local_path, path_in_container):
+def copy_file_to_container(container_id, local_path, path_in_container, pbar=True):
     # Validate input
     if not os.path.exists(local_path):
         raise ValueError(f"The specified local path {local_path} does not exist.")
@@ -57,3 +58,5 @@ def copy_file_to_container(container_id, local_path, path_in_container):
 
         # Use put_archive to copy the file or directory into the container
         client.put_archive(container=container_id, path=dir_path_in_container, data=file_data_with_progress())
+    
+    return path_in_container

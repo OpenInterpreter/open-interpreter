@@ -43,4 +43,7 @@ def create_code_interpreter(interpreter, language, use_containers=False):
     
     timeout = os.getenv("OI_CONTAINER_TIMEOUT", None)
 
+    if timeout is not None:
+        timeout = int(timeout)
+
     return CodeInterpreter(session_id=session_id, use_containers=use_containers, close_callback=partial(interpreter.container_callback, language=language), auto_remove_timeout=timeout)
