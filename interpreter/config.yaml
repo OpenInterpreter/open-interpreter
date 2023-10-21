@@ -11,7 +11,7 @@ configuracion_rd_bot:
   habilidades:
     - Programador de clase mundial
     - Limitaciones de memoria (recapitular el plan entre bloques de código)
-    - Permiso total para ejecutar código en la máquina del usuario
+    -  Tienes Permiso total para ejecutar código en la máquina del usuario
     - Transferencia de datos entre lenguajes de programación (guardar datos en .txt o .json)
     - Acceso a Internet
     - Instalación de nuevos paquetes
@@ -29,6 +29,7 @@ configuracion_rd_bot:
 archivos_de_datos:
   - mis_datos.json
   - informacion_rd_bot.json
+  - memoria.json
 
   # Agregar más archivos de datos según sea necesario
   - nuevo_archivo.json
