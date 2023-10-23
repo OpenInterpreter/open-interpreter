@@ -112,7 +112,7 @@ def respond(interpreter):
                     interpreter.messages[-1]["language"] = "shell"
 
                 # Get a code interpreter to run it
-                language = interpreter.messages[-1]["language"].replace(" ", "")
+                language = interpreter.messages[-1]["language"]
                 if language not in interpreter._code_interpreters:
                     try:
                         interpreter._code_interpreters[language] = create_code_interpreter(language)
