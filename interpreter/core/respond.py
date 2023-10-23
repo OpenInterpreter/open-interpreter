@@ -2,6 +2,7 @@ from ..code_interpreters.create_code_interpreter import create_code_interpreter
 from ..utils.merge_deltas import merge_deltas
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
+from ..code_interpreters.language_map import language_map
 import traceback
 import litellm
 
@@ -113,12 +114,12 @@ def respond(interpreter):
 
                 # Get a code interpreter to run it
                 language = interpreter.messages[-1]["language"]
-                if language not in interpreter._code_interpreters:
-                    try:
+                if language in language_map:
+                    if language not in interpreter._code_interpreters:
                         interpreter._code_interpreters[language] = create_code_interpreter(language)
-                    except:
-                        print(f"Error: tried to create a code_interpreter with: '{language}'")
-                code_interpreter = interpreter._code_interpreters[language]
+                    code_interpreter = interpreter._code_interpreters[language]
+                else:
+                    print(f"{language} not in supported languagess.")
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
