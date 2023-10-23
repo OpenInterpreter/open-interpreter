@@ -9,7 +9,7 @@ authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 openai = "^0.28.0"
 rich = "^13.4.2"
 tiktoken = "^0.4.0"
