@@ -119,7 +119,7 @@ def respond(interpreter):
                         interpreter._code_interpreters[language] = create_code_interpreter(language)
                     code_interpreter = interpreter._code_interpreters[language]
                 else:
-                    print(f"{language} not in supported languagess.")
+                    print(f"{language} not in supported languages.")
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
