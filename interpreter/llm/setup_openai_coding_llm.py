@@ -125,22 +125,21 @@ def setup_openai_coding_llm(interpreter):
                     arguments = parse_partial_json(arguments)
 
                     if arguments:
-                        if ("name" in arguments and arguments["name"] == "execute"):
-                            if (language is None
-                                and "language" in arguments
-                                and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
-                                and arguments["language"]):
-                                language = arguments["language"]
-                                yield {"language": language}
-                            
-                            if language is not None and "code" in arguments:
-                                # Calculate the delta (new characters only)
-                                code_delta = arguments["code"][len(code):]
-                                # Update the code
-                                code = arguments["code"]
-                                # Yield the delta
-                                if code_delta:
-                                    yield {"code": code_delta}
+                        if (language is None
+                            and "language" in arguments
+                            and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
+                            and arguments["language"]):
+                            language = arguments["language"]
+                            yield {"language": language}
+                        
+                        if language is not None and "code" in arguments:
+                            # Calculate the delta (new characters only)
+                            code_delta = arguments["code"][len(code):]
+                            # Update the code
+                            code = arguments["code"]
+                            # Yield the delta
+                            if code_delta:
+                                yield {"code": code_delta}
                     else:
                         if interpreter.debug_mode:
                             print("Arguments not a dict.")
