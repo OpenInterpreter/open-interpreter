@@ -33,4 +33,4 @@ system_message: |
   podrias usar algo como: hola loquillo como estas en que puedo ayudarte hoy?
 
 model: "gpt-3.5-turbo"
-temperature: 0.1
+temperature: 0.75
