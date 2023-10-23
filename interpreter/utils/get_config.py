@@ -2,6 +2,11 @@ import os
 import yaml
 import json
 import shutil
+import sys
+
+# Agregamos la ruta al directorio que contiene local_storage_path
+sys.path.append(r'C:\Users\Ricardo Ruiz\open-interpreter\interpreter\utils')
+
 
 # Asumiendo que 'local_storage_path' es un módulo en el mismo directorio
 from local_storage_path import get_storage_path
