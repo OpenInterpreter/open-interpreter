@@ -112,9 +112,12 @@ def respond(interpreter):
                     interpreter.messages[-1]["language"] = "shell"
 
                 # Get a code interpreter to run it
-                language = interpreter.messages[-1]["language"]
+                language = interpreter.messages[-1]["language"].replace(" ", "")
                 if language not in interpreter._code_interpreters:
-                    interpreter._code_interpreters[language] = create_code_interpreter(language)
+                    try:
+                        interpreter._code_interpreters[language] = create_code_interpreter(language)
+                    except:
+                        print(f"Error: tried to create a code_interpreter with: '{language}'")
                 code_interpreter = interpreter._code_interpreters[language]
 
                 # Yield a message, such that the user can stop code execution if they want to
