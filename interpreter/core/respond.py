@@ -120,10 +120,11 @@ def respond(interpreter):
                     code_interpreter = interpreter._code_interpreters[language]
                 else:
                     #This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message
-                    print(f"Error: Open-Interpreter do not currently support {language}.")
+                    error_output = f"Error: Open Interpreter does not currently support {language}."
+                    print(error_output)
 
                     interpreter.messages[-1]["output"] = ""
-                    output = "\n" + f"Error: Open-Interpreter do not currently support {language}."
+                    output = "\n" + error_output
 
                     # Truncate output
                     output = truncate_output(output, interpreter.max_output)
