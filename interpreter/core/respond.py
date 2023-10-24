@@ -119,7 +119,9 @@ def respond(interpreter):
                         interpreter._code_interpreters[language] = create_code_interpreter(language)
                     code_interpreter = interpreter._code_interpreters[language]
                 else:
-                    print(f"{language} not in supported languages.")
+                    #This still prints the code but don't allow Y/N
+                    print(f"Error: Open-Interpreter do not currently support {language}.")
+                    break
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
