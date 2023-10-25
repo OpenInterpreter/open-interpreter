@@ -213,7 +213,7 @@ interpreter --local --model tiiuae/falcon-180B
 
 You can easily modify the `max_tokens` and `context_window` (in tokens) of locally running models.
 
-Smaller context windows will use less RAM, so we recommend trying a shorter window if GPU is failing.
+Smaller context windows will use less RAM, so we recommend trying a shorter window if the GPU is failing.
 
 ```shell
 interpreter --max_tokens 2000 --context_window 16000
@@ -241,7 +241,7 @@ In the interactive mode, you can use the below commands to enhance your experien
  • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
 enters debug mode. With 'false', it exits debug mode.
  • `%reset`: Resets the current session.
- • `%undo`: Remove previous messages and their response from the message history.
+ • `%undo`: Remove the previous user message and the AI's response from the message history.
  • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
 provided, it defaults to 'messages.json'.
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
@@ -347,7 +347,7 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 
 - Be cautious when requesting commands that modify files or system settings.
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
-- Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks associated with executing arbitrary code.
+- Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks of executing arbitrary code.
 
 ## How Does it Work?
 
@@ -363,7 +363,7 @@ Please see our [Contributing Guidelines](./CONTRIBUTING.md) for more details on 
 
 ## License
 
-Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense and sell copies of the software.
+Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense, and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
 
