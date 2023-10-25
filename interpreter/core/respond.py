@@ -2,6 +2,7 @@ from ..code_interpreters.create_code_interpreter import create_code_interpreter
 from ..utils.merge_deltas import merge_deltas
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
+from ..code_interpreters.language_map import language_map
 import traceback
 import litellm
 
@@ -113,9 +114,22 @@ def respond(interpreter):
 
                 # Get a code interpreter to run it
                 language = interpreter.messages[-1]["language"]
-                if language not in interpreter._code_interpreters:
-                    interpreter._code_interpreters[language] = create_code_interpreter(language)
-                code_interpreter = interpreter._code_interpreters[language]
+                if language in language_map:
+                    if language not in interpreter._code_interpreters:
+                        interpreter._code_interpreters[language] = create_code_interpreter(language)
+                    code_interpreter = interpreter._code_interpreters[language]
+                else:
+                    #This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message
+                    error_output = f"Error: Open Interpreter does not currently support {language}."
+                    print(error_output)
+
+                    interpreter.messages[-1]["output"] = ""
+                    output = "\n" + error_output
+
+                    # Truncate output
+                    output = truncate_output(output, interpreter.max_output)
+                    interpreter.messages[-1]["output"] = output.strip()
+                    break
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:

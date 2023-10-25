@@ -2,8 +2,7 @@
 
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm">
-        <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/>
-    </a>
+        <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
     <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
@@ -92,7 +91,7 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 
 ---
 
-Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
+Open Interpreter overcomes these limitations by running in your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
 This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
 
@@ -242,7 +241,7 @@ In the interactive mode, you can use the below commands to enhance your experien
  • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
 enters debug mode. With 'false', it exits debug mode.
  • `%reset`: Resets the current session.
- • `%undo`: Remove the previous message and its response from the message history.
+ • `%undo`: Remove the previous user message and the AI's response from the message history.
  • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
 provided, it defaults to 'messages.json'.
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
