@@ -91,7 +91,7 @@ However, OpenAI's service is hosted, closed-source, and heavily restricted:
 
 ---
 
-Open Interpreter overcomes these limitations by running on your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
+Open Interpreter overcomes these limitations by running in your local environment. It has full access to the internet, isn't restricted by time or file size, and can utilize any package or library.
 
 This combines the power of GPT-4's Code Interpreter with the flexibility of your local development environment.
 
@@ -241,7 +241,7 @@ In the interactive mode, you can use the below commands to enhance your experien
  • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
 enters debug mode. With 'false', it exits debug mode.
  • `%reset`: Resets the current session.
- • `%undo`: Remove previous messages and its response from the message history.
+ • `%undo`: Remove previous messages and their response from the message history.
  • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
 provided, it defaults to 'messages.json'.
  • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
