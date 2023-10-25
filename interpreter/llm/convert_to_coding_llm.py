@@ -52,6 +52,9 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
                     # Default to python if not specified
                     if language == "":
                         language = "python"
+                    else:
+                        #Removes hallucinations containing spaces or non letters.
+                        language = ''.join(char for char in language if char.isalpha())
 
                     output = {"language": language}
 
