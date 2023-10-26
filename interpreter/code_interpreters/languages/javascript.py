@@ -1,5 +1,7 @@
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 import re
+
+from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+
 
 class JavaScript(SubprocessCodeInterpreter):
     file_extension = "js"
@@ -8,10 +10,10 @@ class JavaScript(SubprocessCodeInterpreter):
     def __init__(self):
         super().__init__()
         self.start_cmd = "node -i"
-        
+
     def preprocess_code(self, code):
         return preprocess_javascript(code)
-    
+
     def line_postprocessor(self, line):
         # Node's interactive REPL outputs a billion things
         # So we clean it up:
@@ -20,7 +22,7 @@ class JavaScript(SubprocessCodeInterpreter):
         if line.strip() in ["undefined", 'Type ".help" for more information.']:
             return None
         # Remove trailing ">"s
-        line = re.sub(r'^\s*(>\s*)+', '', line)
+        line = re.sub(r"^\s*(>\s*)+", "", line)
         return line
 
     def detect_active_line(self, line):
@@ -30,7 +32,7 @@ class JavaScript(SubprocessCodeInterpreter):
 
     def detect_end_of_execution(self, line):
         return "## end_of_execution ##" in line
-    
+
 
 def preprocess_javascript(code):
     """

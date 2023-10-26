@@ -1,6 +1,7 @@
 import json
 import re
 
+
 def merge_deltas(original, delta):
     """
     Pushes the delta into the original and returns that.
