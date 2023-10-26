@@ -8,12 +8,6 @@ import litellm
 import os
 
 
-# Enable logging with Helicone
-if os.getenv("HELICONE_API_KEY"):
-    litellm.api_base = "https://oai.hconeai.com/v1"
-    litellm.headers = {"Helicone-Auth": f"Bearer {os.getenv('HELICONE_API_KEY')}"}
-
-
 def respond(interpreter):
     """
     Yields tokens, but also adds them to interpreter.messages. TBH probably would be good to seperate those two responsibilities someday soon

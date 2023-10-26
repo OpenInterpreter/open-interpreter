@@ -15,3 +15,4 @@ system_message: |
 local: false
 model: "gpt-4"
 temperature: 0
+integrations: [helicone]

@@ -56,6 +56,9 @@ class Interpreter:
         self._llm = None
         self.gguf_quality = None
 
+        # Service integrations
+        self.integrations = []
+
         # Procedures / RAG
         self.procedures = None
         self._procedures_db = {}
