@@ -1,12 +1,14 @@
 import argparse
-import subprocess
 import os
 import platform
-import pkg_resources
-import ooba
+import subprocess
+
 import appdirs
-from ..utils.get_config import get_config_path
+import ooba
+import pkg_resources
+
 from ..terminal_interface.conversation_navigator import conversation_navigator
+from ..utils.get_config import get_config_path
 
 arguments = [
     {
@@ -15,7 +17,12 @@ arguments = [
         "help_text": "prompt / custom instructions for the language model",
         "type": str,
     },
-    {"name": "local", "nickname": "l", "help_text": "run the language model locally (experimental)", "type": bool},
+    {
+        "name": "local",
+        "nickname": "l",
+        "help_text": "run the language model locally (experimental)",
+        "type": bool,
+    },
     {
         "name": "auto_run",
         "nickname": "y",
@@ -148,10 +155,10 @@ def cli(interpreter):
         help="get Open Interpreter's version number",
     )
     parser.add_argument(
-        '--change_local_device',
-        dest='change_local_device',
-        action='store_true',
-        help="change the device used for local execution (if GPU fails, will use CPU)"
+        "--change_local_device",
+        dest="change_local_device",
+        action="store_true",
+        help="change the device used for local execution (if GPU fails, will use CPU)",
     )
 
     # TODO: Implement model explorer
@@ -223,7 +230,9 @@ def cli(interpreter):
         return
 
     if args.change_local_device:
-        print("This will uninstall the experimental local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)")
+        print(
+            "This will uninstall the experimental local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)"
+        )
         if input().lower() == "n":
             return
 
@@ -237,11 +246,13 @@ def cli(interpreter):
 
         gpu_choice = input("> ").upper()
 
-        while gpu_choice not in 'ABCDN':
+        while gpu_choice not in "ABCDN":
             print("Invalid choice. Please try again.")
             gpu_choice = input("> ").upper()
 
-        ooba.install(force_reinstall=True, gpu_choice=gpu_choice, verbose=args.debug_mode)
+        ooba.install(
+            force_reinstall=True, gpu_choice=gpu_choice, verbose=args.debug_mode
+        )
         return
 
     # Deprecated --fast

@@ -25,16 +25,16 @@ def terminal_interface(interpreter, message):
 
         if interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto":
             if not check_for_package("semgrep"):
-                interpreter_intro_message.append(f"**Safe Mode**: {interpreter.safe_mode}\n\n>Note: **Safe Mode** requires `semgrep` (`pip install semgrep`)")
+                interpreter_intro_message.append(
+                    f"**Safe Mode**: {interpreter.safe_mode}\n\n>Note: **Safe Mode** requires `semgrep` (`pip install semgrep`)"
+                )
         else:
-            interpreter_intro_message.append(
-                "Use `interpreter -y` to bypass this."
-            )
+            interpreter_intro_message.append("Use `interpreter -y` to bypass this.")
 
         interpreter_intro_message.append("Press `CTRL-C` to exit.")
 
         display_markdown_message("\n\n".join(interpreter_intro_message) + "\n")
-    
+
     active_block = None
 
     if message:
@@ -64,12 +64,12 @@ def terminal_interface(interpreter, message):
         # In the event we get code -> output -> code again
         ran_code_block = False
         render_cursor = True
-            
+
         try:
             for chunk in interpreter.chat(message, display=False, stream=True):
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
-                
+
                 # Message
                 if "message" in chunk:
                     if active_block is None:
@@ -91,7 +91,7 @@ def terminal_interface(interpreter, message):
                         active_block = CodeBlock()
                     ran_code_block = False
                     render_cursor = True
-                
+
                 if "language" in chunk:
                     active_block.language = chunk["language"]
                 if "code" in chunk:
@@ -112,8 +112,10 @@ def terminal_interface(interpreter, message):
                         if not interpreter.safe_mode == "off":
                             if interpreter.safe_mode == "auto":
                                 should_scan_code = True
-                            elif interpreter.safe_mode == 'ask':
-                                response = input("  Would you like to scan this code? (y/n)\n\n  ")
+                            elif interpreter.safe_mode == "ask":
+                                response = input(
+                                    "  Would you like to scan this code? (y/n)\n\n  "
+                                )
                                 print("")  # <- Aesthetic choice
 
                                 if response.strip().lower() == "y":
@@ -127,22 +129,26 @@ def terminal_interface(interpreter, message):
 
                             scan_code(code, language, interpreter)
 
-                        response = input("  Would you like to run this code? (y/n)\n\n  ")
+                        response = input(
+                            "  Would you like to run this code? (y/n)\n\n  "
+                        )
                         print("")  # <- Aesthetic choice
 
                         if response.strip().lower() == "y":
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock()
-                            active_block.margin_top = False # <- Aesthetic choice
+                            active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = chunk["executing"]["language"]
                             active_block.code = chunk["executing"]["code"]
                         else:
                             # User declined to run code.
-                            interpreter.messages.append({
-                                "role": "user",
-                                "message": "I have declined to run this code."
-                            })
+                            interpreter.messages.append(
+                                {
+                                    "role": "user",
+                                    "message": "I have declined to run this code.",
+                                }
+                            )
                             break
 
                 # Output
@@ -150,10 +156,14 @@ def terminal_interface(interpreter, message):
                     ran_code_block = True
                     render_cursor = False
                     active_block.output += "\n" + chunk["output"]
-                    active_block.output = active_block.output.strip() # <- Aesthetic choice
-                    
+                    active_block.output = (
+                        active_block.output.strip()
+                    )  # <- Aesthetic choice
+
                     # Truncate output
-                    active_block.output = truncate_output(active_block.output, interpreter.max_output)
+                    active_block.output = truncate_output(
+                        active_block.output, interpreter.max_output
+                    )
 
                 if active_block:
                     active_block.refresh(cursor=render_cursor)
@@ -174,7 +184,7 @@ def terminal_interface(interpreter, message):
             if active_block:
                 active_block.end()
                 active_block = None
-                
+
             if interactive:
                 # (this cancels LLM, returns to the interactive "> " input)
                 continue
