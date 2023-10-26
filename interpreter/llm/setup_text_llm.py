@@ -49,16 +49,11 @@ def setup_text_llm(interpreter):
 
             display_markdown_message(f"""
             > Failed to install `{interpreter.model}`.
-            \n\n**Common Fixes:** You can follow our simple setup docs at the link below to resolve common errors.\n\n> `https://github.com/KillianLucas/open-interpreter/tree/main/docs`
-            \n\n**If you've tried that and you're still getting an error, we have likely not built the proper `{interpreter.model}` support for your system.**
-            \n\n*( Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the Open Interpreter community Discord and consider contributing the project's development.
+            \n\n**We have likely not built the proper `{interpreter.model}` support for your system.**
+            \n\n(*Running language models locally is a difficult task!* If you have insight into the best way to implement this across platforms/architectures, please join the `Open Interpreter` community Discord, or the `Oobabooga` community Discord, and consider contributing the development of these projects.)
             """)
             
-            raise Exception("Architecture not yet supported for local LLM inference. Please run `interpreter` to connect to a cloud model, then try `--local` again in a few days.")
-
-    else:
-        # For non-local use, pass in the model directly
-        model = interpreter.model
+            raise Exception("Architecture not yet supported for local LLM inference via `Oobabooga`. Please run `interpreter` to connect to a cloud model.")
 
     # Pass remaining parameters to LiteLLM
     def base_llm(messages):
@@ -68,7 +63,10 @@ def setup_text_llm(interpreter):
 
         system_message = messages[0]["content"]
 
-        system_message += "\n\nTo execute code on the user's machine, write a markdown code block *with a language*, i.e ```python, ```shell, ```r, ```html, or ```javascript. You will recieve the code output."
+        # Tell it how to run code.
+        # THIS MESSAGE IS DUPLICATED IN `setup_local_text_llm.py`
+        # (We should deduplicate it somehow soon)
+        system_message += "\nTo execute code on the user's machine, write a markdown code block *with the language*, i.e:\n\n```python\nprint('Hi!')\n```\n\nYou will receive the output ('Hi!'). Use any language."
 
         # TODO swap tt.trim for litellm util
         messages = messages[1:]
@@ -103,7 +101,7 @@ def setup_text_llm(interpreter):
             params["api_key"] = interpreter.api_key
         if interpreter.max_tokens:
             params["max_tokens"] = interpreter.max_tokens
-        if interpreter.temperature:
+        if interpreter.temperature is not None:
             params["temperature"] = interpreter.temperature
 
         # These are set directly on LiteLLM
