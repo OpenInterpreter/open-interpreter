@@ -39,7 +39,7 @@ The resolve this issue, perform the following steps.
     pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
     ```
 
-    Alternatively, if you want to include GPU suppport, follow the steps in [Local Language Models with GPU Support](./GPU.md)
+    Alternatively, if you want to include GPU support, follow the steps in [Local Language Models with GPU Support](./GPU.md)
 
 6.  Make sure you close and re-launch any cmd windows that were running interpreter
 

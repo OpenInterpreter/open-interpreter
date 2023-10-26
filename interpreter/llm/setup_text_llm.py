@@ -101,7 +101,7 @@ def setup_text_llm(interpreter):
             params["api_key"] = interpreter.api_key
         if interpreter.max_tokens:
             params["max_tokens"] = interpreter.max_tokens
-        if interpreter.temperature:
+        if interpreter.temperature is not None:
             params["temperature"] = interpreter.temperature
 
         # These are set directly on LiteLLM
