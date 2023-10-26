@@ -30,6 +30,9 @@ wget = "^3.2"
 yaspin = "^3.0.1"
 
 [tool.poetry.group.dev.dependencies]
+black = "^23.10.1"
+isort = "^5.12.0"
+pre-commit = "^3.5.0"
 pytest = "^7.4.0"
 
 [build-system]
@@ -41,3 +44,11 @@ interpreter = "interpreter:cli"
 
 [tool.poetry.extras]
 safe = ["semgrep"]
+
+[tool.black]
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
