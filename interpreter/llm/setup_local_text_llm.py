@@ -91,13 +91,12 @@ def setup_local_text_llm(interpreter):
         buffer = ''  # Hold potential entity tokens and other characters.
 
         for token in ooba_llm.chat(messages):
-
-            if "mistral" not in repo_id.lower():
-                yield make_chunk(token)
-                continue
-
-            # For Mistral, we need to deal with weird HTML entities it likes to make.
-            # If it wants to make a quote, it will do &quot;, for example.
+            # Some models like to generate HTML Entities (like &quot;, &amp; &#x27;)
+            # instead of symbols in their code when used with Open Interpreter.
+            # This is a hack to handle that and convert those entities into actual
+            # symbols so that the code can be rendered, parsed, and run accordingly.
+            # This could have unintended consequences when generating actual HTML,
+            # where you may need actual HTML Entities.
 
             buffer += token
 
