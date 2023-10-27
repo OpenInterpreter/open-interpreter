@@ -3,6 +3,7 @@ from ..utils.display_markdown_message import display_markdown_message
 import time
 import inquirer
 import litellm
+import getpass
 
 def validate_llm_settings(interpreter):
     """
@@ -71,7 +72,8 @@ def validate_llm_settings(interpreter):
                     ---
                     """)
 
-                    response = input("OpenAI API key: ")
+                    response = getpass.getpass("OpenAI API key: ")
+                    print(f"OpenAI API key: {response[:4]}...{response[-4:]}")
 
                     if response == "":
                         # User pressed `enter`, requesting Mistral-7B
