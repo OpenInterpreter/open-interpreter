@@ -3,7 +3,7 @@ import json
 def convert_to_openai_messages(messages, function_calling=True):
     new_messages = []
 
-    for message in messages:
+    for message in messages:  
         new_message = {
             "role": message["role"],
             "content": ""
@@ -15,7 +15,7 @@ def convert_to_openai_messages(messages, function_calling=True):
         if "code" in message:
             if function_calling:
                 new_message["function_call"] = {
-                    "name": "run_code",
+                    "name": "execute",
                     "arguments": json.dumps({
                         "language": message["language"],
                         "code": message["code"]
@@ -47,6 +47,7 @@ def convert_to_openai_messages(messages, function_calling=True):
 
                 new_output_message = {
                     "role": "function",
+                    "name": "run_code",
                     "content": message["output"]
                 }
                 if function_name_key:
