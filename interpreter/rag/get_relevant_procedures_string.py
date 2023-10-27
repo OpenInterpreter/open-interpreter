@@ -19,11 +19,12 @@ def get_relevant_procedures_string(interpreter):
     # Update the procedures database to reflect any changes in interpreter.procedures
     if interpreter._procedures_db.keys() != interpreter.procedures:
         updated_procedures_db = {}
-        for key in interpreter.procedures:
-            if key in interpreter._procedures_db:
-                updated_procedures_db[key] = interpreter._procedures_db[key]
-            else:
-                updated_procedures_db[key] = interpreter.embed_function(key)
+        if interpreter.procedures is not None:
+            for key in interpreter.procedures:
+                if key in interpreter._procedures_db:
+                    updated_procedures_db[key] = interpreter._procedures_db[key]
+                else:
+                    updated_procedures_db[key] = interpreter.embed_function(key)
         interpreter._procedures_db = updated_procedures_db
 
     # Assemble the procedures query string. Last two messages
