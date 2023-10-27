@@ -11,7 +11,6 @@ from ..llm.setup_llm import setup_llm
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
 from .generate_system_message import generate_system_message
-import appdirs
 import os
 from datetime import datetime
 from ..rag.get_relevant_procedures_string import get_relevant_procedures_string

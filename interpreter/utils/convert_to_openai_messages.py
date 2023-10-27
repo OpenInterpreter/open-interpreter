@@ -15,7 +15,7 @@ def convert_to_openai_messages(messages, function_calling=True):
         if "code" in message:
             if function_calling:
                 new_message["function_call"] = {
-                    "name": "run_code",
+                    "name": "execute",
                     "arguments": json.dumps({
                         "language": message["language"],
                         "code": message["code"]
@@ -37,7 +37,7 @@ def convert_to_openai_messages(messages, function_calling=True):
             if function_calling:
                 new_messages.append({
                     "role": "function",
-                    "name": "run_code",
+                    "name": "execute",
                     "content": message["output"]
                 })
             else:
