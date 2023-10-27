@@ -124,7 +124,7 @@ def test_math():
 
 def test_delayed_exec():
     interpreter.chat(
-        """Can you write a single block of code and run_code it that prints something, then delays 1 second, then prints something else? No talk just code. Thanks!"""
+        """Can you write a single block of code and execute it that prints something, then delays 1 second, then prints something else? No talk just code. Thanks!"""
     )
 
 @pytest.mark.skip(reason="This works fine when I run it but fails frequently in Github Actions... will look into it after the hackathon")
