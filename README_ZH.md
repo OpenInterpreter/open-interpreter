@@ -9,7 +9,7 @@
     <br>
     <b>让语言模型在您的计算机上运行代码。</b><br>
     在本地实现的开源OpenAI的代码解释器。<br>
-    <br><a href="https://openinterpreter.com">登记以提前获取Open Interpreter（开放解释器）桌面应用程序</a><br>
+    <br><a href="https://openinterpreter.com">登记以提前获取Open Interpreter（开放解释器）桌面应用程序</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">阅读新文档</a></b><br>
 </p>
 
 <br>
@@ -171,7 +171,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ⓘ **本地运行遇到问题？** 请阅读我们最新的 [GPU 设置指南](./docs/GPU.md)和 [Windows 设置指南](./docs/WINDOWS.md)。
 
-你可以从命令行以本地模式运行 `interpreter` 来使用 `Code Llama`：
+你可以从命令行以本地模式运行 `interpreter` 来使用 `Mistral 7B`：
 
 ```shell
 interpreter --local
