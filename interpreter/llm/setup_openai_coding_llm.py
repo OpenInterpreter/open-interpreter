@@ -80,7 +80,9 @@ def setup_openai_coding_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature is not None:
             params["temperature"] = interpreter.temperature
-        
+        else:
+            params["temperature"] = 0.0
+
         # These are set directly on LiteLLM
         if interpreter.max_budget:
             litellm.max_budget = interpreter.max_budget
