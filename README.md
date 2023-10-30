@@ -24,6 +24,8 @@
 pip install open-interpreter
 ```
 
+**⚠️ Note: Open Interpreter currently supports Python 3.10 and 3.11.**
+
 ```shell
 interpreter
 ```
