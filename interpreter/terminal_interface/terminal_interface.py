@@ -9,6 +9,7 @@ from .magic_commands import handle_magic_command
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
 from ..utils.scan_code import scan_code
+from ..utils.check_for_package import check_for_package
 
 
 def terminal_interface(interpreter, message):
@@ -17,8 +18,9 @@ def terminal_interface(interpreter, message):
             "**Open Interpreter** will require approval before running code."
         ]
 
-        if interpreter.safe_mode != "off":
-            interpreter_intro_message.append(f"**Safe Mode**: {interpreter.safe_mode}\n\n>Note: **Safe Mode** requires `semgrep` (`pip install semgrep`)")
+        if interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto":
+            if not check_for_package("semgrep"):
+                interpreter_intro_message.append(f"**Safe Mode**: {interpreter.safe_mode}\n\n>Note: **Safe Mode** requires `semgrep` (`pip install semgrep`)")
         else:
             interpreter_intro_message.append(
                 "Use `interpreter -y` to bypass this."
