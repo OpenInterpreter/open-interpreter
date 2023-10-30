@@ -41,7 +41,7 @@ def handle_help(self, arguments):
       "%undo": "Remove previous messages and its response from the message history.",
       "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
       "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
-      "%tokens [prompt]": "Calculate the tokens used by the current conversation's messages and estimate their cost and optionally calculate the tokens and estimated cost of a `prompt` if one is provided.",
+      "%tokens [prompt]": "EXPERIMENTAL: Calculate the tokens used by the next request based on the current conversation's messages and estimate the cost of that request; optionally provide a prompt to also calulate the tokens used by that prompt and the total amount of tokens that will be sent with the next request",
       "%help": "Show this help message.",
     }
 
@@ -108,15 +108,22 @@ def handle_count_tokens(self, prompt):
     outputs = []
 
     if len(self.messages) == 0:
-      (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
-      outputs.append((f"> System Prompt Tokens: {tokens} (${cost})"))
+      (conversation_tokens, conversation_cost) = count_messages_tokens(messages=messages, model=self.model)
     else:
-      (tokens, cost) = count_messages_tokens(messages=messages, model=self.model)
-      outputs.append(f"> Conversation Tokens: {tokens} (${cost})")
+      (conversation_tokens, conversation_cost) = count_messages_tokens(messages=messages, model=self.model)
 
-    if prompt and prompt != '':
-      (tokens, cost) = count_messages_tokens(messages=[prompt], model=self.model)
-      outputs.append(f"> Prompt Tokens: {tokens} (${cost})") 
+    outputs.append((f"> Tokens sent with next request as context: {conversation_tokens} (Estimated Cost: ${conversation_cost})"))
+
+    if prompt:
+      (prompt_tokens, prompt_cost) = count_messages_tokens(messages=[prompt], model=self.model)
+      outputs.append(f"> Tokens used by this prompt: {prompt_tokens} (Estimated Cost: ${prompt_cost})")
+
+      total_tokens = conversation_tokens + prompt_tokens
+      total_cost = conversation_cost + prompt_cost
+
+      outputs.append(f"> Total tokens for next request with this prompt: {total_tokens} (Estimated Cost: ${total_cost})")
+
+    outputs.append(f"**Note**: This functionality is currently experimental and may not be accurate. Please report any issues you find to the [Open Interpreter GitHub repository](https://github.com/KillianLucas/open-interpreter).")
 
     display_markdown_message("\n".join(outputs))
 
