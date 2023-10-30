@@ -38,3 +38,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 interpreter = "interpreter:cli"
+
+[tool.poetry.extras]
+safe = ["semgrep"]
