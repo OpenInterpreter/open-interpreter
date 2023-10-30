@@ -83,7 +83,7 @@ arguments = [
         "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
         "type": str,
         "choices": ["off", "ask", "auto"],
-        "default": "off"
+        "default": "off",
     },
     {
         "name": "gguf_quality",
@@ -211,7 +211,9 @@ def cli(interpreter):
                 setattr(interpreter, attr_name, attr_value)
 
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
-    if interpreter.auto_run and (interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"):
+    if interpreter.auto_run and (
+        interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
+    ):
         setattr(interpreter, "auto_run", False)
 
     # Default to Mistral if --local is on but --model is unset
