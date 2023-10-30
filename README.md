@@ -239,17 +239,16 @@ $ interpreter
 
 In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
 
-**Available Commands:**  
- • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
-enters debug mode. With 'false', it exits debug mode.
- • `%reset`: Resets the current session.
- • `%undo`: Remove the previous user message and the AI's response from the message history.
- • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
-provided, it defaults to 'messages.json'.
- • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
- is provided, it defaults to 'messages.json'.
- • `%tokens [prompt]`: Calculate the tokens used by the current conversation's messages and estimate their cost, and optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated cost.
- • `%help`: Show the help message.
+**Available Commands:**
+
+- `%debug [true/false]`: Toggle debug mode. Without arguments or with `true` it
+enters debug mode. With `false` it exits debug mode.
+- `%reset`: Resets the current session's conversation.
+- `%undo`: Removes the previous user message and the AI's response from the message history.
+- `%save_message [path]`: Saves messages to a specified JSON path. If no path is provided, it defaults to `messages.json`.
+- `%load_message [path]`: Loads messages from a specified JSON path. If no path is provided, it defaults to `messages.json`.
+- `%tokens [prompt]`: (_Experimental_) Calculate the tokens that will be sent with the next prompt as context and estimate their cost. Optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated costs.
+- `%help`: Show the help message.
 
 ### Configuration
 
