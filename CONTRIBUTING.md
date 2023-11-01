@@ -35,6 +35,30 @@ We welcome code contributions through pull requests. Here are some guidelines:
 
 - Once approved, your code will be merged - thank you for improving Open Interpreter!
 
+### Code Formatting and Linting
+
+Our project uses `black` for code formatting and `isort` for import sorting. To ensure consistency across contributions, please adhere to the following guidelines:
+
+1. **Install Pre-commit Hooks**:
+   
+   If you want to automatically format your code every time you make a commit, install the pre-commit hooks.
+   
+   ```bash
+   pip install pre-commit
+   pre-commit install
+   ```
+
+   After installing, the hooks will automatically check and format your code every time you commit.
+
+2. **Manual Formatting**:
+
+   If you choose not to use the pre-commit hooks, you can manually format your code using:
+
+   ```bash
+   black .
+   isort .
+   ```
+
 ## Running Your Local Fork
 
 Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
