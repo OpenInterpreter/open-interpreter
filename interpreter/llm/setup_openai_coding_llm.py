@@ -1,32 +1,36 @@
 import litellm
-from ..utils.merge_deltas import merge_deltas
-from ..utils.parse_partial_json import parse_partial_json
-from ..utils.convert_to_openai_messages import convert_to_openai_messages
-from ..utils.display_markdown_message import display_markdown_message
 import tokentrim as tt
 
+from ..utils.convert_to_openai_messages import convert_to_openai_messages
+from ..utils.display_markdown_message import display_markdown_message
+from ..utils.merge_deltas import merge_deltas
+from ..utils.parse_partial_json import parse_partial_json
 
 function_schema = {
-  "name": "execute",
-  "description":
-  "Executes code on the user's machine, **in the users local environment**, and returns the output",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "language": {
-        "type": "string",
-        "description":
-        "The programming language (required parameter to the `execute` function)",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html", "powershell"]
-      },
-      "code": {
-        "type": "string",
-        "description": "The code to execute (required)"
-      }
+    "name": "execute",
+    "description": "Executes code on the user's machine, **in the users local environment**, and returns the output",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "language": {
+                "type": "string",
+                "description": "The programming language (required parameter to the `execute` function)",
+                "enum": [
+                    "python",
+                    "R",
+                    "shell",
+                    "applescript",
+                    "javascript",
+                    "html",
+                    "powershell",
+                ],
+            },
+            "code": {"type": "string", "description": "The code to execute (required)"},
+        },
+        "required": ["language", "code"],
     },
-    "required": ["language", "code"]
-  },
 }
+
 
 def setup_openai_coding_llm(interpreter):
     """
@@ -35,12 +39,13 @@ def setup_openai_coding_llm(interpreter):
     """
 
     def coding_llm(messages):
-        
         # Convert messages
         messages = convert_to_openai_messages(messages, function_calling=True)
 
         # Add OpenAI's recommended function message
-        messages[0]["content"] += "\n\nOnly use the function you have been provided with."
+        messages[0][
+            "content"
+        ] += "\n\nOnly use the function you have been provided with."
 
         # Seperate out the system_message from messages
         # (We expect the first message to always be a system_message)
@@ -49,26 +54,38 @@ def setup_openai_coding_llm(interpreter):
 
         # Trim messages, preserving the system_message
         try:
-            messages = tt.trim(messages=messages, system_message=system_message, model=interpreter.model)
+            messages = tt.trim(
+                messages=messages,
+                system_message=system_message,
+                model=interpreter.model,
+            )
         except:
             if interpreter.context_window:
-                messages = tt.trim(messages=messages, system_message=system_message, max_tokens=interpreter.context_window)
+                messages = tt.trim(
+                    messages=messages,
+                    system_message=system_message,
+                    max_tokens=interpreter.context_window,
+                )
             else:
-                display_markdown_message("""
+                display_markdown_message(
+                    """
                 **We were unable to determine the context window of this model.** Defaulting to 3000.
                 If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
-                """)
-                messages = tt.trim(messages=messages, system_message=system_message, max_tokens=3000)
+                """
+                )
+                messages = tt.trim(
+                    messages=messages, system_message=system_message, max_tokens=3000
+                )
 
         if interpreter.debug_mode:
             print("Sending this to the OpenAI LLM:", messages)
 
         # Create LiteLLM generator
         params = {
-            'model': interpreter.model,
-            'messages': messages,
-            'stream': True,
-            'functions': [function_schema]
+            "model": interpreter.model,
+            "messages": messages,
+            "stream": True,
+            "functions": [function_schema],
         }
 
         # Optional inputs
@@ -100,11 +117,10 @@ def setup_openai_coding_llm(interpreter):
         code = ""
 
         for chunk in response:
-
             if interpreter.debug_mode:
                 print("Chunk from LLM", chunk)
 
-            if ('choices' not in chunk or len(chunk['choices']) == 0):
+            if "choices" not in chunk or len(chunk["choices"]) == 0:
                 # This happens sometimes
                 continue
 
@@ -119,24 +135,31 @@ def setup_openai_coding_llm(interpreter):
             if "content" in delta and delta["content"]:
                 yield {"message": delta["content"]}
 
-            if ("function_call" in accumulated_deltas 
-                and "arguments" in accumulated_deltas["function_call"]):
-
-                if ("name" in accumulated_deltas["function_call"] and accumulated_deltas["function_call"]["name"] == "execute"):
+            if (
+                "function_call" in accumulated_deltas
+                and "arguments" in accumulated_deltas["function_call"]
+            ):
+                if (
+                    "name" in accumulated_deltas["function_call"]
+                    and accumulated_deltas["function_call"]["name"] == "execute"
+                ):
                     arguments = accumulated_deltas["function_call"]["arguments"]
                     arguments = parse_partial_json(arguments)
 
                     if arguments:
-                        if (language is None
+                        if (
+                            language is None
                             and "language" in arguments
-                            and "code" in arguments # <- This ensures we're *finished* typing language, as opposed to partially done
-                            and arguments["language"]):
+                            and "code"
+                            in arguments  # <- This ensures we're *finished* typing language, as opposed to partially done
+                            and arguments["language"]
+                        ):
                             language = arguments["language"]
                             yield {"language": language}
-                        
+
                         if language is not None and "code" in arguments:
                             # Calculate the delta (new characters only)
-                            code_delta = arguments["code"][len(code):]
+                            code_delta = arguments["code"][len(code) :]
                             # Update the code
                             code = arguments["code"]
                             # Yield the delta
@@ -147,17 +170,22 @@ def setup_openai_coding_llm(interpreter):
                             print("Arguments not a dict.")
 
                 # 3.5 REALLY likes to halucinate a function named `python` and you can't really fix that, it seems.
-                # We just need to deal with it. 
-                elif ("name" in accumulated_deltas["function_call"] and accumulated_deltas["function_call"]["name"] == "python"):
+                # We just need to deal with it.
+                elif (
+                    "name" in accumulated_deltas["function_call"]
+                    and accumulated_deltas["function_call"]["name"] == "python"
+                ):
                     if interpreter.debug_mode:
                         print("Got direct python call")
-                    if (language is None):
+                    if language is None:
                         language = "python"
                         yield {"language": language}
 
                     if language is not None:
                         # Pull the code string straight out of the "arguments" string
-                        code_delta = accumulated_deltas["function_call"]["arguments"][len(code):]
+                        code_delta = accumulated_deltas["function_call"]["arguments"][
+                            len(code) :
+                        ]
                         # Update the code
                         code = accumulated_deltas["function_call"]["arguments"]
                         # Yield the delta
@@ -166,7 +194,9 @@ def setup_openai_coding_llm(interpreter):
 
                 else:
                     if interpreter.debug_mode:
-                        print("GOT BAD FUNCTION CALL: ", accumulated_deltas["function_call"])
+                        print(
+                            "GOT BAD FUNCTION CALL: ",
+                            accumulated_deltas["function_call"],
+                        )
 
-                
     return coding_llm
