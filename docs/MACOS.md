@@ -58,7 +58,6 @@ Follow the on-screen instructions to complete the installation. Once installed, 
 
 ```bash
 CMAKE_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64 -DLLAMA_METAL=on" FORCE_CMAKE=1 pip install --upgrade --force-reinstall llama-cpp-python --no-cache-dir
---no-cache-dir
 ```
 
 ### Step 2: Verifying Installation of llama-cpp-python with ARM64 Support
