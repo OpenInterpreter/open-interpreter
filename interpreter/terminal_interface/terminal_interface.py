@@ -9,6 +9,7 @@ from .magic_commands import handle_magic_command
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.truncate_output import truncate_output
 from ..utils.scan_code import scan_code
+from ..utils.system_debug_info import system_info
 
 
 def terminal_interface(interpreter, message):
@@ -173,3 +174,4 @@ def terminal_interface(interpreter, message):
                 continue
             else:
                 break
+    system_info()
