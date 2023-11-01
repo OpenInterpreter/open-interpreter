@@ -24,6 +24,8 @@
 pip install open-interpreter
 ```
 
+**⚠️ Note: Open Interpreter currently supports Python 3.10 and 3.11.**
+
 ```shell
 interpreter
 ```
@@ -197,7 +199,7 @@ interpreter.model = "gpt-3.5-turbo"
 
 ⓘ **Issues running locally?** Read our new [GPU setup guide](./docs/GPU.md), [Windows setup guide](./docs/WINDOWS.md) or [MacOS (Apple Silicon only) setup guide](./docs/MACOS.md).
 
-You can run `interpreter` in local mode from the command line to use `Code Llama`:
+You can run `interpreter` in local mode from the command line to use `Mistral 7B`:
 
 ```shell
 interpreter --local
@@ -237,17 +239,16 @@ $ interpreter
 
 In the interactive mode, you can use the below commands to enhance your experience. Here's a list of available commands:
 
-**Available Commands:**  
- • `%debug [true/false]`: Toggle debug mode. Without arguments or with 'true', it
-enters debug mode. With 'false', it exits debug mode.
- • `%reset`: Resets the current session.
- • `%undo`: Remove the previous user message and the AI's response from the message history.
- • `%save_message [path]`: Saves messages to a specified JSON path. If no path is
-provided, it defaults to 'messages.json'.
- • `%load_message [path]`: Loads messages from a specified JSON path. If no path  
- is provided, it defaults to 'messages.json'.
- • `%tokens [prompt]`: Calculate the tokens used by the current conversation's messages and estimate their cost, and optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated cost.
- • `%help`: Show the help message.
+**Available Commands:**
+
+- `%debug [true/false]`: Toggle debug mode. Without arguments or with `true` it
+enters debug mode. With `false` it exits debug mode.
+- `%reset`: Resets the current session's conversation.
+- `%undo`: Removes the previous user message and the AI's response from the message history.
+- `%save_message [path]`: Saves messages to a specified JSON path. If no path is provided, it defaults to `messages.json`.
+- `%load_message [path]`: Loads messages from a specified JSON path. If no path is provided, it defaults to `messages.json`.
+- `%tokens [prompt]`: (_Experimental_) Calculate the tokens that will be sent with the next prompt as context and estimate their cost. Optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated costs.
+- `%help`: Show the help message.
 
 ### Configuration
 
@@ -348,6 +349,8 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Be cautious when requesting commands that modify files or system settings.
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks of executing arbitrary code.
+
+There is **experimental** support for a [safe mode](./docs/SAFE_MODE.md) to help mitigate some risks.
 
 ## How Does it Work?
 
