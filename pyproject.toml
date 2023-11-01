@@ -9,35 +9,30 @@ authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-openai = "^0.28.0"
-rich = "^13.4.2"
-tiktoken = "^0.4.0"
-astor = "^0.8.1"
-git-python = "^1.0.3"
-tokentrim = "^0.1.9"
+python = ">=3.10,<3.12"
+
 appdirs = "^1.4.4"
-six = "^1.16.0"
-python-dotenv = "^1.0.0"
-
-inquirer = "^3.1.3"
-wget = "^3.2"
-huggingface-hub = "^0.17.3"
-litellm = "0.8.6"
-pyyaml = "^6.0.1"
-yaspin = "^3.0.1"
-ooba = "^0.0.21"
-chroma = "^0.2.0"
+astor = "^0.8.1"
 chromadb = "^0.4.14"
-
-# DISABLED # but perhaps we should re-enable soon. Windows + readline errors sometimes, need more testing
-# On non-windows systems, you can just `import readline`.
-# On windows, `pyreadline3` replaces that, so you can also just `import readline`.
-# [tool.poetry.dependencies.pyreadline3]
-# version = "^3.4.1"
-# markers = "sys_platform == 'win32'"
+git-python = "^1.0.3"
+huggingface-hub = "^0.17.3"
+inquirer = "^3.1.3"
+litellm = "0.8.6"
+ooba = "^0.0.21"
+openai = "^0.28.0"
+python-dotenv = "^1.0.0"
+pyyaml = "^6.0.1"
+rich = "^13.4.2"
+six = "^1.16.0"
+tiktoken = "^0.4.0"
+tokentrim = "^0.1.9"
+wget = "^3.2"
+yaspin = "^3.0.1"
 
 [tool.poetry.group.dev.dependencies]
+black = "^23.10.1"
+isort = "^5.12.0"
+pre-commit = "^3.5.0"
 pytest = "^7.4.0"
 
 [build-system]
@@ -46,3 +41,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 interpreter = "interpreter:cli"
+
+[tool.poetry.extras]
+safe = ["semgrep"]
+
+[tool.black]
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true

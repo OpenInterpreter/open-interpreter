@@ -1,5 +1,6 @@
-from chromadb.utils.distance_functions import cosine
 import numpy as np
+from chromadb.utils.distance_functions import cosine
+
 
 def search(query, db, embed_function, num_results=2):
     """
@@ -19,7 +20,9 @@ def search(query, db, embed_function, num_results=2):
     query_embedding = embed_function(query)
 
     # Calculate the cosine distance between the query embedding and each embedding in the database
-    distances = {value: cosine(query_embedding, embedding) for value, embedding in db.items()}
+    distances = {
+        value: cosine(query_embedding, embedding) for value, embedding in db.items()
+    }
 
     # Sort the values by their distance to the query, and select the top num_results
     most_similar_values = sorted(distances, key=distances.get)[:num_results]

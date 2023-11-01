@@ -1,7 +1,9 @@
-import webbrowser
-import tempfile
 import os
+import tempfile
+import webbrowser
+
 from ..base_code_interpreter import BaseCodeInterpreter
+
 
 class HTML(BaseCodeInterpreter):
     file_extension = "html"
@@ -16,6 +18,8 @@ class HTML(BaseCodeInterpreter):
             f.write(code.encode())
 
         # Open the HTML file with the default web browser
-        webbrowser.open('file://' + os.path.realpath(f.name))
+        webbrowser.open("file://" + os.path.realpath(f.name))
 
-        yield {"output": f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."}
+        yield {
+            "output": f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
+        }

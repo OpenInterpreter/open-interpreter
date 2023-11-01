@@ -8,7 +8,6 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -26,6 +25,10 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 -
     - name: Install dependencies
       run: |
+        # Update poetry to the latest version.
+        poetry self update
+        # Ensure dependencies are installed without relying on a lock file.
+        poetry update
         poetry install
     - name: Test with pytest
       run: |
