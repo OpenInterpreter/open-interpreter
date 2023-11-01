@@ -1,5 +1,7 @@
-from ..utils.get_user_info_string import get_user_info_string
 import traceback
+
+from ..utils.get_user_info_string import get_user_info_string
+
 
 def generate_system_message(interpreter):
     """
@@ -15,7 +17,6 @@ def generate_system_message(interpreter):
     #### Start with the static system message
 
     system_message = interpreter.system_message
-    
 
     #### Add dynamic components, like the user's OS, username, etc
 

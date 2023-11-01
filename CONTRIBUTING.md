@@ -69,9 +69,15 @@ Once you've forked the code and created a new branch for your work, you can run 
 
 After modifying the source code, you will need to do `poetry run interpreter` again.
 
+**Note**: This project uses [`black`](https://black.readthedocs.io/en/stable/index.html) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
+
 ### Installing New Packages
 
 If you wish to install new dependencies into the project, please use `poetry add package-name`.
+
+#### Installing Developer Dependencies
+
+If you need to install dependencies specific to development, like testing tools, formatting tools, etc. please use `poetry add package-name --group dev`.
 
 ### Known Issues
 

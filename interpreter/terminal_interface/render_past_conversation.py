@@ -1,7 +1,8 @@
+from ..utils.display_markdown_message import display_markdown_message
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
-from ..utils.display_markdown_message import display_markdown_message
+
 
 def render_past_conversation(messages):
     # This is a clone of the terminal interface.
@@ -40,7 +41,7 @@ def render_past_conversation(messages):
                 active_block = CodeBlock()
             ran_code_block = False
             render_cursor = True
-        
+
         if "language" in chunk:
             active_block.language = chunk["language"]
         if "code" in chunk:
@@ -53,7 +54,7 @@ def render_past_conversation(messages):
             ran_code_block = True
             render_cursor = False
             active_block.output += "\n" + chunk["output"]
-            active_block.output = active_block.output.strip() # <- Aesthetic choice
+            active_block.output = active_block.output.strip()  # <- Aesthetic choice
 
         if active_block:
             active_block.refresh(cursor=render_cursor)

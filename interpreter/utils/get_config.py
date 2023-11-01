@@ -1,13 +1,15 @@
 import os
-import yaml
-from importlib import resources
 import shutil
+from importlib import resources
+
+import yaml
 
 from .local_storage_path import get_storage_path
 
 config_filename = "config.yaml"
 
 user_config_path = os.path.join(get_storage_path(), config_filename)
+
 
 def get_config_path(path=user_config_path):
     # check to see if we were given a path that exists
@@ -28,23 +30,23 @@ def get_config_path(path=user_config_path):
                 else:
                     # Ensure the user-specific directory exists
                     os.makedirs(get_storage_path(), exist_ok=True)
-                    
+
                     # otherwise, we'll create the file in our default config directory
                     path = os.path.join(get_storage_path(), path)
-
 
                 # If user's config doesn't exist, copy the default config from the package
                 here = os.path.abspath(os.path.dirname(__file__))
                 parent_dir = os.path.dirname(here)
-                default_config_path = os.path.join(parent_dir, 'config.yaml')
+                default_config_path = os.path.join(parent_dir, "config.yaml")
 
                 # Copying the file using shutil.copy
                 new_file = shutil.copy(default_config_path, path)
 
     return path
 
+
 def get_config(path=user_config_path):
     path = get_config_path(path)
 
-    with open(path, 'r') as file:
+    with open(path, "r") as file:
         return yaml.safe_load(file)
