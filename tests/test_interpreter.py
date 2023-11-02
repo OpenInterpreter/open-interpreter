@@ -147,18 +147,14 @@ def test_nested_loops_and_multiple_newlines():
         """Can you write a nested for loop in python and shell and run them? Don't forget to properly format your shell script and use semicolons where necessary. Also put 1-3 newlines between each line in the code. Only generate and execute the code. No explanations. Thanks!"""
     )
 
-#@pytest.mark.skip(
-#    reason="Skipping until can verify it runs on the Github build server"
-#)
-# 
-EXPECTED_FIBONACCI_NUMBERS = [
+@pytest.mark.skip(
+    reason="Skipping until can verify it runs on the Github build server"
+)
+@pytest.mark.parametrize("expected_integers", [
     0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144,
     233, 377, 610, 987, 1597, 2584, 4181, 6765, 10946, 17711,
     28657, 46368, 75025, 121393, 196418, 317811, 514229
-]
-
-# Parameterize the test with the list of expected Fibonacci numbers
-@pytest.mark.parametrize("expected_integers", [EXPECTED_FIBONACCI_NUMBERS])
+])
 def test_powershell_gen_exec(expected_integers):
     TASK_RESULT_PREFIX = "TaskResult:"
     num_fibs = str(len(expected_integers))  # Convert to string
