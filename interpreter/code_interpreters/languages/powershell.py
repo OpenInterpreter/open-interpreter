@@ -1,5 +1,6 @@
 import os
 import platform
+import shutil
 
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
 
