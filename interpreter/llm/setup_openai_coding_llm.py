@@ -1,31 +1,36 @@
 import litellm
-from ..utils.merge_deltas import merge_deltas
-from ..utils.parse_partial_json import parse_partial_json
-from ..utils.convert_to_openai_messages import convert_to_openai_messages
-from ..utils.display_markdown_message import display_markdown_message
 import tokentrim as tt
 
+from ..utils.convert_to_openai_messages import convert_to_openai_messages
+from ..utils.display_markdown_message import display_markdown_message
+from ..utils.merge_deltas import merge_deltas
+from ..utils.parse_partial_json import parse_partial_json
+
 function_schema = {
-  "name": "execute",
-  "description":
-  "Executes code on the user's machine, **in the users local environment**, and returns the output",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "language": {
-        "type": "string",
-        "description":
-        "The programming language (required parameter to the `execute` function)",
-        "enum": ["python", "R", "shell", "applescript", "javascript", "html", "powershell"]
-      },
-      "code": {
-        "type": "string",
-        "description": "The code to execute (required)"
-      }
+    "name": "execute",
+    "description": "Executes code on the user's machine, **in the users local environment**, and returns the output",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "language": {
+                "type": "string",
+                "description": "The programming language (required parameter to the `execute` function)",
+                "enum": [
+                    "python",
+                    "R",
+                    "shell",
+                    "applescript",
+                    "javascript",
+                    "html",
+                    "powershell",
+                ],
+            },
+            "code": {"type": "string", "description": "The code to execute (required)"},
+        },
+        "required": ["language", "code"],
     },
-    "required": ["language", "code"]
-  },
 }
+
 
 
 # Define a helper function to validate arguments based on the schema
@@ -43,12 +48,13 @@ def setup_openai_coding_llm(interpreter):
     """
 
     def coding_llm(messages):
-
         # Convert messages
         messages = convert_to_openai_messages(messages, function_calling=True)
 
         # Add OpenAI's recommended function message
-        messages[0]["content"] += "\n\nOnly use the functions you have been provided with."
+        messages[0][
+            "content"
+        ] += "\n\nOnly use the functions you have been provided with."
 
         # Seperate out the system_message from messages
         # (We expect the first message to always be a system_message)
@@ -57,16 +63,28 @@ def setup_openai_coding_llm(interpreter):
 
         # Trim messages, preserving the system_message
         try:
-            messages = tt.trim(messages=messages, system_message=system_message, model=interpreter.model)
+            messages = tt.trim(
+                messages=messages,
+                system_message=system_message,
+                model=interpreter.model,
+            )
         except:
             if interpreter.context_window:
-                messages = tt.trim(messages=messages, system_message=system_message, max_tokens=interpreter.context_window)
+                messages = tt.trim(
+                    messages=messages,
+                    system_message=system_message,
+                    max_tokens=interpreter.context_window,
+                )
             else:
-                display_markdown_message("""
+                display_markdown_message(
+                    """
                 **We were unable to determine the context window of this model.** Defaulting to 3000.
                 If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
-                """)
-                messages = tt.trim(messages=messages, system_message=system_message, max_tokens=3000)
+                """
+                )
+                messages = tt.trim(
+                    messages=messages, system_message=system_message, max_tokens=3000
+                )
 
         if interpreter.debug_mode:
             print("Sending this to the OpenAI LLM:", messages)
@@ -88,7 +106,9 @@ def setup_openai_coding_llm(interpreter):
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature is not None:
             params["temperature"] = interpreter.temperature
-        
+        else:
+            params["temperature"] = 0.0
+
         # These are set directly on LiteLLM
         if interpreter.max_budget:
             litellm.max_budget = interpreter.max_budget
@@ -101,17 +121,14 @@ def setup_openai_coding_llm(interpreter):
 
         response = litellm.completion(**params)
 
-        accumulated_deltas = {}
-
         # Initialize empty arguments dictionary
         arguments = {}
         accumulated_deltas = {}
         for chunk in response:
-
             if interpreter.debug_mode:
                 print("Chunk from LLM", chunk)
 
-            if ('choices' not in chunk or len(chunk['choices']) == 0):
+            if "choices" not in chunk or len(chunk["choices"]) == 0:
                 # This happens sometimes
                 continue
 
