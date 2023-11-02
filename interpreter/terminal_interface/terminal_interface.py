@@ -46,6 +46,14 @@ def terminal_interface(interpreter, message):
         try:
             if interactive:
                 message = input("> ").strip()
+
+                try:
+                    # This lets users hit the up arrow key for past messages
+                    readline.add_history(message)
+                except:
+                    # If the user doesn't have readline (may be the case on windows), that's fine
+                    pass
+
         except KeyboardInterrupt:
             # Exit gracefully
             break
