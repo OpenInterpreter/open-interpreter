@@ -1080,13 +1080,13 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
-version = "0.8.6"
+version = "0.11.1"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.8.6-py3-none-any.whl", hash = "sha256:ad3e9c42eb678c19343e5a0f11fa6031ee115ff58d8098a401fc85a5c26d9ea9"},
-    {file = "litellm-0.8.6.tar.gz", hash = "sha256:b236e6b58f1c7967bcf4955ce64ac56001d909e05bddc8e1f8f6a90ca986b71b"},
+    {file = "litellm-0.11.1-py3-none-any.whl", hash = "sha256:eff68b7e1fdd4451673a6634ca949870fea7e7d3835ce2bc98185a35fcf40690"},
+    {file = "litellm-0.11.1.tar.gz", hash = "sha256:eeb07db119f0028a925736a842cb4edf74afb9d91d924d1a48aa7fd1fe33fa82"},
 ]
 
 [package.dependencies]
@@ -2821,4 +2821,4 @@ safe = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "5118b4a14d06fa13216e9e676f5d80b3853d9629003a03449823c19e6bbbc31d"
+content-hash = "4fa0a31562374042b3f14868c01636160aff3de3391742332b7a9b9f91f5af66"
