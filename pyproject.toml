@@ -26,6 +26,8 @@ tiktoken = "^0.4.0"
 tokentrim = "^0.1.9"
 wget = "^3.2"
 
+pyreadline3 = { platform = "windows" }
+
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
 isort = "^5.12.0"
