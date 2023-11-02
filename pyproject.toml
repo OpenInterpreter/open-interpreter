@@ -25,8 +25,8 @@ six = "^1.16.0"
 tiktoken = "^0.4.0"
 tokentrim = "^0.1.9"
 wget = "^3.2"
+pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
 
-pyreadline3 = { platform = "windows" }
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
@@ -42,7 +42,7 @@ build-backend = "poetry.core.masonry.api"
 interpreter = "interpreter:cli"
 
 [tool.poetry.extras]
-safe = ["semgrep", "yaspin = '^3.0.1'"]
+safe = ["semgrep", "yaspin"]
 
 [tool.black]
 target-version = ['py311']
