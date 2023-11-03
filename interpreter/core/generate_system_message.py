@@ -1,5 +1,6 @@
 import traceback
 
+from ..rag.get_relevant_procedures_string import get_relevant_procedures_string
 from ..utils.get_user_info_string import get_user_info_string
 
 
@@ -18,15 +19,18 @@ def generate_system_message(interpreter):
 
     system_message = interpreter.system_message
 
-    #### Add dynamic components, like the user's OS, username, etc
+    #### Add dynamic components, like the user's OS, username, relevant procedures, etc
 
     system_message += "\n" + get_user_info_string()
-    try:
-        system_message += "\n" + interpreter.get_relevant_procedures_string()
-    except:
-        if interpreter.debug_mode:
-            print(traceback.format_exc())
-        # In case some folks can't install the embedding model (I'm not sure if this ever happens)
-        pass
+
+    if not interpreter.local:
+        try:
+            system_message += "\n" + get_relevant_procedures_string(
+                interpreter.messages
+            )
+        except:
+            if interpreter.debug_mode:
+                print(traceback.format_exc())
+            # It's okay if they can't. This just fixes some common mistakes it makes.
 
     return system_message

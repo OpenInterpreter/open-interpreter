@@ -2330,17 +2330,17 @@ testing = ["black (==22.3)", "datasets", "numpy", "pytest", "requests"]
 
 [[package]]
 name = "tokentrim"
-version = "0.1.12"
+version = "0.1.13"
 description = "Easily trim 'messages' arrays for use with GPTs."
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "tokentrim-0.1.12-py3-none-any.whl", hash = "sha256:53e36fba385cb83c2f849d2d04fa30975889d4858383d06174a290a2f6cbbf9f"},
-    {file = "tokentrim-0.1.12.tar.gz", hash = "sha256:71d6f6f49a3cf540c9aaef63a495e2ba7ad837d1afc7ac4a10d4b87a3d13e4e4"},
+    {file = "tokentrim-0.1.13-py3-none-any.whl", hash = "sha256:83c1b8b7d9db391e521ef9a9e054fa1e9cff56398ace259e0b1342a4d3223953"},
+    {file = "tokentrim-0.1.13.tar.gz", hash = "sha256:379e64bb0bd2d713d9e6a9142946d613249376a9234cfaad838b1b31c4d75d30"},
 ]
 
 [package.dependencies]
-tiktoken = ">=0.4.0,<0.5.0"
+tiktoken = ">=0.4.0"
 
 [[package]]
 name = "tomli"
