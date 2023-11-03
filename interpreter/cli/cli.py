@@ -257,12 +257,7 @@ def cli(interpreter):
         )
         return
 
-    # Deprecated --fast
     if args.fast:
-        # This will cause the terminal_interface to walk the user through setting up a local LLM
         interpreter.model = "gpt-3.5-turbo"
-        print(
-            "`interpreter --fast` is deprecated and will be removed in the next version. Please use `interpreter --model gpt-3.5-turbo`"
-        )
 
     interpreter.chat()
