@@ -3,11 +3,10 @@ import os
 import platform
 import subprocess
 
-import appdirs
-import ooba
 import pkg_resources
 
 from ..terminal_interface.conversation_navigator import conversation_navigator
+from ..utils.display_markdown_message import display_markdown_message
 from ..utils.get_config import get_config_path
 
 arguments = [
@@ -20,13 +19,13 @@ arguments = [
     {
         "name": "local",
         "nickname": "l",
-        "help_text": "run the language model locally (experimental)",
+        "help_text": "run the language model locally (via LM Studio)",
         "type": bool,
     },
     {
         "name": "auto_run",
         "nickname": "y",
-        "help_text": "automatically run the interpreter",
+        "help_text": "automatically run generated code",
         "type": bool,
     },
     {
@@ -38,7 +37,7 @@ arguments = [
     {
         "name": "model",
         "nickname": "m",
-        "help_text": "model to use for the language model",
+        "help_text": "language model to use",
         "type": str,
     },
     {
@@ -84,12 +83,6 @@ arguments = [
         "type": str,
         "choices": ["off", "ask", "auto"],
         "default": "off",
-    },
-    {
-        "name": "gguf_quality",
-        "nickname": "q",
-        "help_text": "(experimental) value from 0-1 which will select the gguf quality/quantization level. lower = smaller, faster, more quantized",
-        "type": float,
     },
     {
         "name": "config_file",
@@ -146,7 +139,7 @@ def cli(interpreter):
         "--fast",
         dest="fast",
         action="store_true",
-        help="(deprecated) runs `interpreter --model gpt-3.5-turbo`",
+        help="run `interpreter --model gpt-3.5-turbo`",
     )
     parser.add_argument(
         "--version",
@@ -154,15 +147,6 @@ def cli(interpreter):
         action="store_true",
         help="get Open Interpreter's version number",
     )
-    parser.add_argument(
-        "--change_local_device",
-        dest="change_local_device",
-        action="store_true",
-        help="change the device used for local execution (if GPU fails, will use CPU)",
-    )
-
-    # TODO: Implement model explorer
-    # parser.add_argument('--models', dest='models', action='store_true', help='list avaliable models')
 
     args = parser.parse_args()
 
@@ -190,13 +174,33 @@ def cli(interpreter):
                 subprocess.call(["open", config_file])
         return
 
-    # TODO Implement model explorer
-    """
-    # If --models is used, list models
-    if args.models:
-        # If they pick a model, set model to that then proceed
-        args.model = model_explorer()
-    """
+    if args.local:
+        # Default local (LM studio) attributes
+        interpreter.system_message = "You are an AI."
+        interpreter.model = (
+            "openai/" + interpreter.model
+        )  # This tells LiteLLM it's an OpenAI compatible server
+        interpreter.api_base = "http://localhost:1234/v1"
+        interpreter.max_tokens = 600
+        interpreter.context_window = 3000
+        interpreter.api_key = "0"
+
+        display_markdown_message(
+            """
+> **Open Interpreter**'s local mode is powered by **`LM Studio`**.
+
+
+You will need to run **LM Studio** in the background.
+
+1. Download [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
+2. Select a model then click **↓ Download**.
+3. Click the **↔️** button on the left (below 💬).
+4. Select your model at the top, then click **Start Server**.
+
+
+Once the server is running, you can begin your conversation below.
+"""
+        )
 
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
@@ -216,11 +220,6 @@ def cli(interpreter):
     ):
         setattr(interpreter, "auto_run", False)
 
-    # Default to Mistral if --local is on but --model is unset
-    if interpreter.local and args.model is None:
-        # This will cause the terminal_interface to walk the user through setting up a local LLM
-        interpreter.model = ""
-
     # If --conversations is used, run conversation_navigator
     if args.conversations:
         conversation_navigator(interpreter)
@@ -229,32 +228,6 @@ def cli(interpreter):
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
         print(f"Open Interpreter {version}")
-        return
-
-    if args.change_local_device:
-        print(
-            "This will uninstall the experimental local LLM interface (Ooba) in order to reinstall it for a new local device. Proceed? (y/n)"
-        )
-        if input().lower() == "n":
-            return
-
-        print("Please choose your GPU:\n")
-
-        print("A) NVIDIA")
-        print("B) AMD (Linux/MacOS only. Requires ROCm SDK 5.4.2/5.4.3 on Linux)")
-        print("C) Apple M Series")
-        print("D) Intel Arc (IPEX)")
-        print("N) None (I want to run models in CPU mode)\n")
-
-        gpu_choice = input("> ").upper()
-
-        while gpu_choice not in "ABCDN":
-            print("Invalid choice. Please try again.")
-            gpu_choice = input("> ").upper()
-
-        ooba.install(
-            force_reinstall=True, gpu_choice=gpu_choice, verbose=args.debug_mode
-        )
         return
 
     if args.fast:
