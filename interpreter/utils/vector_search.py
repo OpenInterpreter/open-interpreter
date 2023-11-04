@@ -1,3 +1,7 @@
+"""
+This is not used. See "unused_local_get_relevant_procedures_string.py" for more info.
+"""
+
 import numpy as np
 from chromadb.utils.distance_functions import cosine
 
