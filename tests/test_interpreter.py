@@ -151,9 +151,7 @@ def test_write_to_file():
     )
     assert os.path.exists("text_file.txt")
     interpreter.reset()
-    messages = interpreter.chat(
-        """Read test_file.txt and expect 'Washington' to be in its response"""
-    )
+    messages = interpreter.chat("""Read test_file.txt and tell me what's in it.""")
     assert "Washington" in messages[-1]["message"]
 
 
