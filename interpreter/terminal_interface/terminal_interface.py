@@ -30,7 +30,9 @@ for example in examples:
 
 
 def terminal_interface(interpreter, message):
-    if not interpreter.auto_run:
+    # Auto run and local don't display messages.
+    # Probably worth abstracting this to something like "verbose_cli" at some point.
+    if not interpreter.auto_run and not interpreter.local:
         interpreter_intro_message = [
             "**Open Interpreter** will require approval before running code."
         ]
