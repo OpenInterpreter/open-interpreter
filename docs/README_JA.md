@@ -2,7 +2,7 @@
 
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a>
-    <a href="README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
+    <a href="../README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
     <br>
@@ -209,7 +209,7 @@ Open Interpreter は、[関数が呼び出せる言語モデル](https://platfor
 
 貢献に興味を持っていただき、ありがとうございます！コミュニティからの参加を歓迎しています。
 
-詳しくは、[貢献ガイドライン](./CONTRIBUTING.md)を参照してください。
+詳しくは、[貢献ガイドライン](CONTRIBUTING.md)を参照してください。
 
 ## ライセンス
 
