@@ -28,6 +28,7 @@ tiktoken = "^0.4.0"
 tokentrim = "^0.1.9"
 wget = "^3.2"
 yaspin = "^3.0.1"
+psutil = "^5.9.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
