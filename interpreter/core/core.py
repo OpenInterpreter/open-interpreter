@@ -7,8 +7,6 @@ import json
 import os
 from datetime import datetime
 
-import appdirs
-
 from interpreter.utils import display_markdown_message
 
 from ..cli.cli import cli
@@ -17,7 +15,6 @@ from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.validate_llm_settings import validate_llm_settings
 from ..utils.check_for_update import check_for_update
 from ..utils.display_markdown_message import display_markdown_message
-from ..utils.embed import embed_function
 from ..utils.get_config import get_config, user_config_path
 from ..utils.local_storage_path import get_storage_path
 from .generate_system_message import generate_system_message
