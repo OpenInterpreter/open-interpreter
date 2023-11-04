@@ -150,7 +150,7 @@ def test_write_to_file():
         """Write the word 'Washington' to a .txt file called text_file.txt"""
     )
     assert os.path.exists("text_file.txt")
-    setup_function()
+    interpreter.messages = []  # Just reset message history, nothing else for this test
     messages = interpreter.chat("""Read test_file.txt and tell me what's in it.""")
     assert "Washington" in messages[-1]["message"]
 
