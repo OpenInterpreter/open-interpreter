@@ -214,14 +214,16 @@ Once the server is running, you can begin your conversation with Open Interprete
 
 (When you run the command `interpreter --local`, the steps above will be displayed.)
 
-#### Local model params
+> **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 600. If your model has different requirements, set these parameters manually (see below).
+
+#### Context Window, Max Tokens
 
 You can modify the `max_tokens` and `context_window` (in tokens) of locally running models.
 
-Smaller context windows will use less RAM, so we recommend trying a shorter window if it's is failing, or if it's slow.
+For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's is failing / if it's slow. Make sure `max_tokens` is less than `context_window`.
 
 ```shell
-interpreter --max_tokens 1000 --context_window 3000
+interpreter --local --max_tokens 1000 --context_window 3000
 ```
 
 ### Debug mode
