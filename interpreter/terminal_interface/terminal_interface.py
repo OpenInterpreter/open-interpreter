@@ -8,6 +8,8 @@ try:
 except ImportError:
     pass
 
+import random
+
 from ..utils.check_for_package import check_for_package
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.scan_code import scan_code
@@ -15,6 +17,16 @@ from ..utils.truncate_output import truncate_output
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
+
+# Add examples to the readline history
+examples = [
+    "How many files are on my desktop?",
+    "What time is it in Seattle?",
+    "Check all the links on `openinterpreter.com`.",
+]
+random.shuffle(examples)
+for example in examples:
+    readline.add_history(example)
 
 
 def terminal_interface(interpreter, message):

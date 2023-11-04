@@ -88,10 +88,19 @@ def respond(interpreter):
         # Provide extra information on how to change API keys, if we encounter that error
         # (Many people writing GitHub issues were struggling with this)
         except Exception as e:
-            if "auth" in str(e).lower() or "api key" in str(e).lower():
+            if (
+                interpreter.local == False
+                and "auth" in str(e).lower()
+                or "api key" in str(e).lower()
+            ):
                 output = traceback.format_exc()
                 raise Exception(
                     f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
+                )
+            elif interpreter.local:
+                raise Exception(
+                    str(e)
+                    + "\n\nPlease make sure LM Studio's local server is running by following the steps above."
                 )
             else:
                 raise
