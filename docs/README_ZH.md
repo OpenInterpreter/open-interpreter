@@ -9,7 +9,7 @@
     <br>
     <b>让语言模型在您的计算机上运行代码。</b><br>
     在本地实现的开源OpenAI的代码解释器。<br>
-    <br><a href="https://openinterpreter.com">登记以提前获取Open Interpreter（开放解释器）桌面应用程序</a><br>
+    <br><a href="https://openinterpreter.com">登记以提前获取Open Interpreter（开放解释器）桌面应用程序</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">阅读新文档</a></b><br>
 </p>
 
 <br>
@@ -32,10 +32,10 @@ interpreter
 
 本软件为计算机的通用功能提供了一个自然语言界面，比如：
 
--   创建和编辑照片、视频、PDF 等
--   控制 Chrome 浏览器进行搜索
--   绘制、清理和分析大型数据集
--   ...
+- 创建和编辑照片、视频、PDF 等
+- 控制 Chrome 浏览器进行搜索
+- 绘制、清理和分析大型数据集
+- ...
 
 **⚠️ 注意：在代码运行前都会要求您批准执行代码。**
 
@@ -78,10 +78,10 @@ OpenAI 发布的 [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code
 
 但是，OpenAI 的服务是托管的，闭源的，并且受到严格限制：
 
--   无法访问互联网。
--   [预装软件包数量有限](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
--   允许的最大上传为 100 MB，且最大运行时间限制为 120.0 秒
--   当运行环境中途结束时，之前的状态会被清除（包括任何生成的文件或链接）。
+- 无法访问互联网。
+- [预装软件包数量有限](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
+- 允许的最大上传为 100 MB，且最大运行时间限制为 120.0 秒
+- 当运行环境中途结束时，之前的状态会被清除（包括任何生成的文件或链接）。
 
 ---
 
@@ -129,13 +129,11 @@ interpreter.reset()
 
 ### 保存和恢复聊天
 
-当 `return_messages=True` 时，`interpreter.chat()` 会返回一个信息列表，可以用`interpreter.load(messages)` 来恢复之前的对话：
-
 ```python
-messages = interpreter.chat("My name is Killian.", return_messages=True) # 保存消息到 'messages'
+messages = interpreter.chat("My name is Killian.") # 保存消息到 'messages'
 interpreter.reset() # 重置解释器 ("Killian" 将被遗忘)
 
-interpreter.load(messages) # 从 'messages' 恢复聊天 ("Killian" 将被记住)
+interpreter.messages = messages # 从 'messages' 恢复聊天 ("Killian" 将被记住)
 ```
 
 ### 自定义系统消息
@@ -151,7 +149,7 @@ print(interpreter.system_message)
 
 ### 更改模型
 
-Open Interpreter使用[LiteLLM](https://docs.litellm.ai/docs/providers/)连接到语言模型。
+Open Interpreter 使用[LiteLLM](https://docs.litellm.ai/docs/providers/)连接到语言模型。
 
 您可以通过设置模型参数来更改模型：
 
@@ -169,37 +167,8 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### 在本地运行 Open Interpreter（开放解释器）
 
-ⓘ **本地运行遇到问题？** 请阅读我们最新的 [GPU 设置指南](./docs/GPU.md)和 [Windows 设置指南](./docs/WINDOWS.md)。
-
-你可以从命令行以本地模式运行 `interpreter` 来使用 `Code Llama`：
-
 ```shell
 interpreter --local
-```
-
-或使用其 HuggingFace 的 repo ID（如 "tiiuae/falcon-180B"）来**本地**运行任何 HuggingFace 模型：
-
-```shell
-interpreter --model tiiuae/falcon-180B
-```
-
-### Azure 支持
-
-要连接到 Azure 部署，请使用 `--use-azure` 以进行设置：
-
-```shell
-interpreter --use-azure
-```
-
-在 Python 中，需要设置以下变量：
-
-```
-interpreter.use_azure = True
-interpreter.api_key = "your_openai_api_key"
-interpreter.azure_api_base = "your_azure_api_base"
-interpreter.azure_api_version = "your_azure_api_version"
-interpreter.azure_deployment_name = "your_azure_deployment_name"
-interpreter.azure_api_type = "azure"
 ```
 
 ### 调试模式
@@ -216,22 +185,6 @@ $ interpreter
 > %debug false <- 关闭调试模式
 ```
 
-### 使用 .env 配置
-
-Open Interpreter 允许你使用 .env 文件设置默认行为。这提供了一种灵活的方式来配置 Open Interpreter，而无需每次都手动更改命令行参数。
-
-下面是一个 .env 的配置示例：
-
-```
-INTERPRETER_CLI_AUTO_RUN=False
-INTERPRETER_CLI_FAST_MODE=False
-INTERPRETER_CLI_LOCAL_RUN=False
-INTERPRETER_CLI_DEBUG=False
-INTERPRETER_CLI_USE_AZURE=False
-```
-
-您可以修改 .env 文件中的这些值，以更改 Open Interpreter 的默认行为。
-
 ## 安全提示
 
 由于生成的代码是在本地环境中运行的，因此会与文件和系统设置发生交互，从而可能导致本地数据丢失或安全风险等意想不到的结果。
@@ -240,9 +193,9 @@ INTERPRETER_CLI_USE_AZURE=False
 
 您可以运行 `interpreter -y` 或设置 `interpreter.auto_run = True` 来绕过此确认，此时：
 
--   在运行请求修改本地文件或系统设置的命令时要谨慎。
--   请像驾驶自动驾驶汽车一直握着方向盘一样留意 Open Interpreter，并随时做好通过关闭终端来结束进程的准备。
--   考虑在 Google Colab 或 Replit 等受限环境中运行 Open Interpreter的主要原因是这些环境更加独立，从而降低执行任意代码导致出现问题的风险。
+- 在运行请求修改本地文件或系统设置的命令时要谨慎。
+- 请像驾驶自动驾驶汽车一直握着方向盘一样留意 Open Interpreter，并随时做好通过关闭终端来结束进程的准备。
+- 考虑在 Google Colab 或 Replit 等受限环境中运行 Open Interpreter 的主要原因是这些环境更加独立，从而降低执行任意代码导致出现问题的风险。
 
 ## 它是如何工作的？
 

@@ -19,7 +19,7 @@ arguments = [
     {
         "name": "local",
         "nickname": "l",
-        "help_text": "run the language model locally (via LM Studio)",
+        "help_text": "experimentally run the language model locally (via LM Studio)",
         "type": bool,
     },
     {
@@ -187,7 +187,7 @@ def cli(interpreter):
 
         display_markdown_message(
             """
-> **Open Interpreter**'s local mode is powered by **`LM Studio`**.
+> **Open Interpreter**'s experimental local mode is powered by **`LM Studio`**.
 
 
 You will need to run **LM Studio** in the background.

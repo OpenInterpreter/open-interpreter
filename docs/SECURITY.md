@@ -33,9 +33,6 @@ We appreciate your cooperation in helping keep our users safe by following this
 policy.
 
 [github security advisories]: https://github.com/KillianLucas/open-interpreter/security/advisories
-[new security advisory on github]:
-  https://github.com/KillianLucas/open-interpreter/security/advisories/new
-[privately reporting a security vulnerability]:
-  https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability
-[temporary private fork]:
-  https://docs.github.com/en/code-security/security-advisories/repository-security-advisories/collaborating-in-a-temporary-private-fork-to-resolve-a-repository-security-vulnerability
+[new security advisory on github]: https://github.com/KillianLucas/open-interpreter/security/advisories/new
+[privately reporting a security vulnerability]: https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing/privately-reporting-a-security-vulnerability
+[temporary private fork]: https://docs.github.com/en/code-security/security-advisories/repository-security-advisories/collaborating-in-a-temporary-private-fork-to-resolve-a-repository-security-vulnerability

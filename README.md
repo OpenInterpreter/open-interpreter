@@ -3,9 +3,9 @@
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm">
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
-    <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
-    <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
-    <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
+    <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
+    <a href="docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="docs/README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
     <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
     <br>
     <br>
@@ -23,8 +23,6 @@
 ```shell
 pip install open-interpreter
 ```
-
-**⚠️ Note: Open Interpreter currently supports Python 3.10 and 3.11.**
 
 ```shell
 interpreter
@@ -177,7 +175,7 @@ print(interpreter.system_message)
 
 ### Change your Language Model
 
-Open Interpreter uses [LiteLLM](https://docs.litellm.ai/docs/providers/) to connect to language models.
+Open Interpreter uses [LiteLLM](https://docs.litellm.ai/docs/providers/) to connect to hosted language models.
 
 You can change the model by setting the model parameter:
 
@@ -197,28 +195,33 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### Running Open Interpreter locally
 
-ⓘ **Issues running locally?** Read our new [GPU setup guide](./docs/GPU.md), [Windows setup guide](./docs/WINDOWS.md) or [MacOS (Apple Silicon only) setup guide](./docs/MACOS.md).
+Open Interpreter uses [LM Studio](https://lmstudio.ai/) to connect to local language models (experimental).
 
-You can run `interpreter` in local mode from the command line to use `Mistral 7B`:
+Simply run `interpreter` in local mode from the command line:
 
 ```shell
 interpreter --local
 ```
 
-Or run any Hugging Face model **locally** by running `--local` in conjunction with a repo ID (e.g. "tiiuae/falcon-180B"):
+**You will need to run LM Studio in the background.**
 
-```shell
-interpreter --local --model tiiuae/falcon-180B
-```
+1. Download [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
+2. Select a model then click **↓ Download**.
+3. Click the **↔️** button on the left (below 💬).
+4. Select your model at the top, then click **Start Server**.
+
+Once the server is running, you can begin your conversation with Open Interpreter.
+
+(When you run the command `interpreter --local`, the steps above will be displayed.)
 
 #### Local model params
 
-You can easily modify the `max_tokens` and `context_window` (in tokens) of locally running models.
+You can modify the `max_tokens` and `context_window` (in tokens) of locally running models.
 
-Smaller context windows will use less RAM, so we recommend trying a shorter window if the GPU is failing.
+Smaller context windows will use less RAM, so we recommend trying a shorter window if it's is failing, or if it's slow.
 
 ```shell
-interpreter --max_tokens 2000 --context_window 16000
+interpreter --max_tokens 1000 --context_window 3000
 ```
 
 ### Debug mode
@@ -242,7 +245,7 @@ In the interactive mode, you can use the below commands to enhance your experien
 **Available Commands:**
 
 - `%debug [true/false]`: Toggle debug mode. Without arguments or with `true` it
-enters debug mode. With `false` it exits debug mode.
+  enters debug mode. With `false` it exits debug mode.
 - `%reset`: Resets the current session's conversation.
 - `%undo`: Removes the previous user message and the AI's response from the message history.
 - `%save_message [path]`: Saves messages to a specified JSON path. If no path is provided, it defaults to `messages.json`.
@@ -331,13 +334,14 @@ def chat_endpoint(message: str):
     def event_stream():
         for result in interpreter.chat(message, stream=True):
             yield f"data: {result}\n\n"
-            
+
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 @app.get("/history")
 def history_endpoint():
     return interpreter.messages
 ```
+
 ```shell
 pip install fastapi uvicorn
 uvicorn server:app --reload
@@ -355,7 +359,7 @@ You can run `interpreter -y` or set `interpreter.auto_run = True` to bypass this
 - Watch Open Interpreter like a self-driving car, and be prepared to end the process by closing your terminal.
 - Consider running Open Interpreter in a restricted environment like Google Colab or Replit. These environments are more isolated, reducing the risks of executing arbitrary code.
 
-There is **experimental** support for a [safe mode](./docs/SAFE_MODE.md) to help mitigate some risks.
+There is **experimental** support for a [safe mode](docs/SAFE_MODE.md) to help mitigate some risks.
 
 ## How Does it Work?
 
