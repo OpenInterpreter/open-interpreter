@@ -193,10 +193,12 @@ def setup_openai_coding_llm(interpreter):
                             yield {"code": code_delta}
 
                 else:
-                    if interpreter.debug_mode:
+                    # If name exists and it's not "execute" or "python", who knows what's going on.
+                    if "name" in accumulated_deltas["function_call"]:
                         print(
-                            "GOT BAD FUNCTION CALL: ",
+                            "Encountered an unexpected function call: ",
                             accumulated_deltas["function_call"],
+                            "\nPlease open an issue and provide the above info at: https://github.com/KillianLucas/open-interpreter",
                         )
 
     return coding_llm

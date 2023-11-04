@@ -8,14 +8,27 @@ try:
 except ImportError:
     pass
 
+import random
+
 from ..utils.check_for_package import check_for_package
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.scan_code import scan_code
-from ..utils.truncate_output import truncate_output
 from ..utils.system_debug_info import system_info
+from ..utils.truncate_output import truncate_output
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
+
+# Add examples to the readline history
+examples = [
+    "How many files are on my desktop?",
+    "What time is it in Seattle?",
+    "Check all the links on `openinterpreter.com`.",
+]
+random.shuffle(examples)
+for example in examples:
+    readline.add_history(example)
+
 
 def terminal_interface(interpreter, message):
     if not interpreter.auto_run:
@@ -46,6 +59,14 @@ def terminal_interface(interpreter, message):
         try:
             if interactive:
                 message = input("> ").strip()
+
+                try:
+                    # This lets users hit the up arrow key for past messages
+                    readline.add_history(message)
+                except:
+                    # If the user doesn't have readline (may be the case on windows), that's fine
+                    pass
+
         except KeyboardInterrupt:
             # Exit gracefully
             break
