@@ -733,13 +733,13 @@ ansicon = {version = "*", markers = "platform_system == \"Windows\""}
 
 [[package]]
 name = "litellm"
-version = "0.12.11"
+version = "0.13.0"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "litellm-0.12.11-py3-none-any.whl", hash = "sha256:c241a6c45b854b9ae656350ca8e366aeac940c671776ad5a23bfb3914bfa5f2e"},
-    {file = "litellm-0.12.11.tar.gz", hash = "sha256:14b45acfadb3f60dcf4bf29535e5a17eeae901a54f182fc717fd6748bf448cfa"},
+    {file = "litellm-0.13.0-py3-none-any.whl", hash = "sha256:e2385e4f5ac31454be92ae856708b2e6d47b40dd5dd81da162b5d1d97d7e9c22"},
+    {file = "litellm-0.13.0.tar.gz", hash = "sha256:bd7a5e33d180a513d62e47bf1cf2bfd3ce247ab30cba312fa955e7f96b6efe69"},
 ]
 
 [package.dependencies]
@@ -1787,4 +1787,4 @@ safe = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "49ae4b424291e8830f0c1ae494a58089daa1c106a4a71bf3bfebb208e545170a"
+content-hash = "6929c82b82d653343611949630df9b6dfb53f50be232b83a5e55fcbd88c98e02"

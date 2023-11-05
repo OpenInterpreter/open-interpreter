@@ -29,8 +29,12 @@ def conversation_navigator(interpreter):
         print(f"No conversations found in {conversations_dir}")
         return None
 
-    # Get list of all JSON files in the directory
-    json_files = [f for f in os.listdir(conversations_dir) if f.endswith(".json")]
+    # Get list of all JSON files in the directory and sort them by modification time, newest first
+    json_files = sorted(
+        [f for f in os.listdir(conversations_dir) if f.endswith(".json")],
+        key=lambda x: os.path.getmtime(os.path.join(conversations_dir, x)),
+        reverse=True,
+    )
 
     # Make a dict that maps reformatted "First few words... (September 23rd)" -> "First_few_words__September_23rd.json" (original file name)
     readable_names_and_filenames = {}

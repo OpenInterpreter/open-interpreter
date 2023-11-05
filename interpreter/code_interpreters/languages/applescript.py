@@ -28,7 +28,7 @@ class AppleScript(SubprocessCodeInterpreter):
         code = "osascript -e " + code
 
         # Append end of execution indicator
-        code += '; echo "## end_of_execution ##"'
+        code += '; echo "##end_of_execution##"'
 
         return code
 
@@ -42,7 +42,7 @@ class AppleScript(SubprocessCodeInterpreter):
         for idx, line in enumerate(lines):
             # Add log command to indicate the line number
             if line.strip():  # Only add if line is not empty
-                modified_lines.append(f'log "## active_line {idx + 1} ##"')
+                modified_lines.append(f'log "##active_line{idx + 1} ##"')
             modified_lines.append(line)
 
         return "\n".join(modified_lines)
@@ -51,7 +51,7 @@ class AppleScript(SubprocessCodeInterpreter):
         """
         Detects active line indicator in the output.
         """
-        prefix = "## active_line "
+        prefix = "##active_line"
         if prefix in line:
             try:
                 return int(line.split(prefix)[1].split()[0])
@@ -63,4 +63,4 @@ class AppleScript(SubprocessCodeInterpreter):
         """
         Detects end of execution marker in the output.
         """
-        return "## end_of_execution ##" in line
+        return "##end_of_execution##" in line

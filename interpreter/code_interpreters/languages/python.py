@@ -27,12 +27,12 @@ class Python(SubprocessCodeInterpreter):
         return line
 
     def detect_active_line(self, line):
-        if "## active_line " in line:
-            return int(line.split("## active_line ")[1].split(" ##")[0])
+        if "##active_line" in line:
+            return int(line.split("##active_line")[1].split("##")[0])
         return None
 
     def detect_end_of_execution(self, line):
-        return "## end_of_execution ##" in line
+        return "##end_of_execution##" in line
 
 
 def preprocess_python(code):
@@ -55,7 +55,7 @@ def preprocess_python(code):
     code = "\n".join(code_lines)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    code += '\n\nprint("## end_of_execution ##")'
+    code += '\n\nprint("##end_of_execution##")'
 
     return code
 
@@ -81,7 +81,7 @@ class AddLinePrints(ast.NodeTransformer):
         return ast.Expr(
             value=ast.Call(
                 func=ast.Name(id="print", ctx=ast.Load()),
-                args=[ast.Constant(value=f"## active_line {line_number} ##")],
+                args=[ast.Constant(value=f"##active_line{line_number} ##")],
                 keywords=[],
             )
         )
