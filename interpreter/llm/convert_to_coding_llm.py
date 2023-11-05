@@ -9,6 +9,48 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
     """
 
     def coding_llm(messages):
+        # First, tell it how to run code.
+
+        # Old way:
+        # system_message += "\nTo execute code on the user's machine, write a markdown code block *with the language*, i.e:\n\n```python\nprint('Hi!')\n```\n\nYou will receive the output ('Hi!'). Use any language."
+
+        # New way:
+        gaslight = None
+        if messages[-1]["role"] == "user":
+            # Last message came from the user.
+            if messages[-1]["message"].lower() not in [
+                "hello",
+                "hi",
+                "hey",
+                "helo",
+                "hii",
+                "hi!",
+            ]:  # :)
+                gaslight = """Let's explore this. I can run code on your machine by writing the code in a markdown code block. This works if I put a newline after ```shell, ```python, ```applescript, etc. then write code. I'm going to try to do this for your task **after I make a plan**. I'll put the *correct* language after the "```"."""
+        else:
+            # Last message came from the assistant.
+
+            # (The below should actually always be True in OI if last message came from the assistant)
+            # I think we don't need this actually.
+            """
+            if "output" in messages[-1]:
+                if messages[-1]["output"] != "No output":
+                    gaslight = "(Thought: I see that the code I just ran produced an output. The next message I send will go to the user.)"
+                elif messages[-1]["output"] == "No output":
+                    gaslight = "(Thought: I see that the code I just ran produced no output. The next message I send will go to the user.)"
+            """
+
+        if gaslight:
+            messages.append({"role": "assistant", "message": gaslight})
+
+        # If it tried to use Jupyter, let it know.
+        if "code" in messages[-1]:
+            if any([line.startswith("!") for line in messages[-1]["code"].split("\n")]):
+                if "syntax" in messages[-1]["output"].lower():  # Detect error
+                    messages[-1][
+                        "output"
+                    ] += "\nRemember you are not in a Jupyter notebook. Run shell by writing a markdown shell codeblock, not '!'."
+
         messages = convert_to_openai_messages(messages, function_calling=False)
 
         inside_code_block = False

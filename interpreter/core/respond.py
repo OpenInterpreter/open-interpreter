@@ -100,7 +100,13 @@ def respond(interpreter):
             elif interpreter.local:
                 raise Exception(
                     str(e)
-                    + "\n\nPlease make sure LM Studio's local server is running by following the steps above."
+                    + """
+
+Please make sure LM Studio's local server is running by following the steps above.
+
+If LM Studio's local server is running, please try a language model with a different architecture.
+
+                    """
                 )
             else:
                 raise

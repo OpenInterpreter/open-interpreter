@@ -7,8 +7,6 @@ import json
 import os
 from datetime import datetime
 
-from interpreter.utils import display_markdown_message
-
 from ..cli.cli import cli
 from ..llm.setup_llm import setup_llm
 from ..terminal_interface.terminal_interface import terminal_interface
@@ -54,18 +52,21 @@ class Interpreter:
         self.api_key = None
         self.max_budget = None
         self._llm = None
-        self.gguf_quality = None
 
         # Load config defaults
         self.extend_config(self.config_file)
 
         # Check for update
-        if not self.local:
-            # This should actually be pushed into the utility
-            if check_for_update():
-                display_markdown_message(
-                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
-                )
+        try:
+            if not self.local:
+                # This should actually be pushed into the utility
+                if check_for_update():
+                    display_markdown_message(
+                        "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                    )
+        except:
+            # Doesn't matter
+            pass
 
     def extend_config(self, config_path):
         if self.debug_mode:
@@ -105,7 +106,7 @@ class Interpreter:
         # One-off message
         if message or message == "":
             if message == "":
-                message = "No entry from user - please suggest something to enter"
+                message = "No entry from user - please suggest something to enter."
             self.messages.append({"role": "user", "message": message})
             yield from self._respond()
 

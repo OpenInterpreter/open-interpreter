@@ -192,13 +192,17 @@ def cli(interpreter):
 
 You will need to run **LM Studio** in the background.
 
-1. Download it from [https://lmstudio.ai/](https://lmstudio.ai/), then start the application.
-2. Select a model then click **Download**.
+1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
+2. Select a language model then click **Download**.
 3. Click the **<->** button on the left (below the chat button).
 4. Select your model at the top, then click **Start Server**.
 
 
 Once the server is running, you can begin your conversation below.
+
+> **Warning:** This feature is highly experimental.
+> Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!
+
 """
         )
 

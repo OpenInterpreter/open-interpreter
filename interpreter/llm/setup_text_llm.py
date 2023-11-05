@@ -5,7 +5,6 @@ import litellm
 import tokentrim as tt
 
 from ..utils.display_markdown_message import display_markdown_message
-from .setup_local_text_llm import setup_local_text_llm
 
 
 def setup_text_llm(interpreter):
@@ -22,12 +21,6 @@ def setup_text_llm(interpreter):
 
         system_message = messages[0]["content"]
 
-        # Tell it how to run code.
-        # THIS MESSAGE IS DUPLICATED IN `setup_local_text_llm.py`
-        # (We should deduplicate it somehow soon)
-        system_message += "\nTo execute code on the user's machine, write a markdown code block *with the language*, i.e:\n\n```python\nprint('Hi!')\n```\n\nYou will receive the output ('Hi!'). Use any language."
-
-        # TODO swap tt.trim for litellm util
         messages = messages[1:]
         if interpreter.context_window and interpreter.max_tokens:
             trim_to_be_this_many_tokens = (
