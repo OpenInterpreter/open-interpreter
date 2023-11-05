@@ -63,7 +63,7 @@ def validate_llm_settings(interpreter):
     # Auto-run is for fast, light useage -- no messages.
     # If local, we've already displayed a message.
     if not interpreter.auto_run and not interpreter.local:
-        display_markdown_message(f"> Model set to `{interpreter.model.upper()}`")
+        display_markdown_message(f"> Model set to `{interpreter.model}`")
     return
 
 
