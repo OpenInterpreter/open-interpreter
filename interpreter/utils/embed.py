@@ -1,5 +1,5 @@
 """
-This is not used. See "unused_local_get_relevant_procedures_string.py" for more info.
+This is not used. See "ARCHIVE_local_get_relevant_procedures_string.py" for more info.
 """
 
 import os
