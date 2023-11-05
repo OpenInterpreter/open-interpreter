@@ -146,12 +146,12 @@ def test_nested_loops_and_multiple_newlines():
 
 
 def test_write_to_file():
-    interpreter.chat(
-        """Write the word 'Washington' to a .txt file called text_file.txt"""
-    )
-    assert os.path.exists("text_file.txt")
+    interpreter.chat("""Write the word 'Washington' to a .txt file called file.txt""")
+    assert os.path.exists("file.txt")
     interpreter.messages = []  # Just reset message history, nothing else for this test
-    messages = interpreter.chat("""Read test_file.txt and tell me what's in it.""")
+    messages = interpreter.chat(
+        """Read file.txt in the current directory and tell me what's in it."""
+    )
     assert "Washington" in messages[-1]["message"]
 
 
