@@ -26,12 +26,12 @@ class JavaScript(SubprocessCodeInterpreter):
         return line
 
     def detect_active_line(self, line):
-        if "## active_line " in line:
-            return int(line.split("## active_line ")[1].split(" ##")[0])
+        if "##active_line" in line:
+            return int(line.split("##active_line")[1].split("##")[0])
         return None
 
     def detect_end_of_execution(self, line):
-        return "## end_of_execution ##" in line
+        return "##end_of_execution##" in line
 
 
 def preprocess_javascript(code):
@@ -47,7 +47,7 @@ def preprocess_javascript(code):
 
     for i, line in enumerate(lines, 1):
         # Add active line print
-        processed_lines.append(f'console.log("## active_line {i} ##");')
+        processed_lines.append(f'console.log("##active_line{i} ##");')
         processed_lines.append(line)
 
     # Join lines to form the processed code
@@ -60,7 +60,7 @@ try {{
 }} catch (e) {{
     console.log(e);
 }}
-console.log("## end_of_execution ##");
+console.log("##end_of_execution##");
 """
 
     return processed_code

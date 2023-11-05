@@ -75,7 +75,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
 
         while retry_count <= max_retries:
             if self.debug_mode:
-                print(f"Running code:\n{code}\n---")
+                print(f"(after processing) Running processed code:\n{code}\n---")
 
             self.done.clear()
 

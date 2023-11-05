@@ -24,12 +24,12 @@ class Shell(SubprocessCodeInterpreter):
         return line
 
     def detect_active_line(self, line):
-        if "## active_line " in line:
-            return int(line.split("## active_line ")[1].split(" ##")[0])
+        if "##active_line" in line:
+            return int(line.split("##active_line")[1].split("##")[0])
         return None
 
     def detect_end_of_execution(self, line):
-        return "## end_of_execution ##" in line
+        return "##end_of_execution##" in line
 
 
 def preprocess_shell(code):
@@ -43,7 +43,7 @@ def preprocess_shell(code):
     code = add_active_line_prints(code)
 
     # Add end command (we'll be listening for this so we know when it ends)
-    code += '\necho "## end_of_execution ##"'
+    code += '\necho "##end_of_execution##"'
 
     return code
 
@@ -55,5 +55,5 @@ def add_active_line_prints(code):
     lines = code.split("\n")
     for index, line in enumerate(lines):
         # Insert the echo command before the actual line
-        lines[index] = f'echo "## active_line {index + 1} ##"\n{line}'
+        lines[index] = f'echo "##active_line{index + 1} ##"\n{line}'
     return "\n".join(lines)
