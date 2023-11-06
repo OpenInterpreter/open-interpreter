@@ -37,13 +37,14 @@ def setup_text_llm(interpreter):
                     messages, system_message=system_message, model=interpreter.model
                 )
             except:
-                display_markdown_message(
+                if len(messages) == 1:
+                    display_markdown_message(
+                        """
+                    **We were unable to determine the context window of this model.** Defaulting to 3000.
+                    If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
+                    Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.max_tokens = {max tokens per response}`
                     """
-                **We were unable to determine the context window of this model.** Defaulting to 3000.
-                If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
-                Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.max_tokens = {max tokens per response}`
-                """
-                )
+                    )
                 messages = tt.trim(
                     messages, system_message=system_message, max_tokens=3000
                 )

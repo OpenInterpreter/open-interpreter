@@ -214,7 +214,7 @@ Once the server is running, you can begin your conversation with Open Interprete
 
 (When you run the command `interpreter --local`, the steps above will be displayed.)
 
-> **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 600. If your model has different requirements, set these parameters manually (see below).
+> **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually (see below).
 
 #### Context Window, Max Tokens
 

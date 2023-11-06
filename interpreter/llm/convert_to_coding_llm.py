@@ -11,10 +11,14 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
     def coding_llm(messages):
         # First, tell it how to run code.
 
-        # Old way:
-        # system_message += "\nTo execute code on the user's machine, write a markdown code block *with the language*, i.e:\n\n```python\nprint('Hi!')\n```\n\nYou will receive the output ('Hi!'). Use any language."
+        # System message method:
+        assert messages[0]["role"] == "system"
+        messages[0][
+            "message"
+        ] += "\nTo execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language."
 
-        # New way:
+        # Gaslight method (DISABLED):
+        '''
         gaslight = None
         if messages[-1]["role"] == "user":
             # Last message came from the user.
@@ -42,6 +46,7 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
 
         if gaslight:
             messages.append({"role": "assistant", "message": gaslight})
+        '''
 
         # If it tried to use Jupyter, let it know.
         if "code" in messages[-1]:
