@@ -37,7 +37,7 @@ arguments = [
     {
         "name": "disable_procedures",
         "nickname": "dp",
-        "help_text": "disables procedures (RAG of some common OI use-cases). disable to shrink system message",
+        "help_text": "disables procedures (RAG of some common OI use-cases). disable to shrink system message. auto-disabled for non-OpenAI models",
         "type": bool,
     },
     {
@@ -187,7 +187,7 @@ def cli(interpreter):
             "openai/" + interpreter.model
         )  # This tells LiteLLM it's an OpenAI compatible server
         interpreter.api_base = "http://localhost:1234/v1"
-        interpreter.max_tokens = 600
+        interpreter.max_tokens = 1000
         interpreter.context_window = 3000
         interpreter.api_key = "0"
 

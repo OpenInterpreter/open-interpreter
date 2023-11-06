@@ -10,6 +10,7 @@ language_map = {
     "python": Python,
     "bash": Shell,
     "shell": Shell,
+    "zsh": Shell,
     "javascript": JavaScript,
     "html": HTML,
     "applescript": AppleScript,
