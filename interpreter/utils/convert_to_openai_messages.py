@@ -42,11 +42,18 @@ def convert_to_openai_messages(messages, function_calling=True):
                     }
                 )
             else:
+                if message["output"] == "No output":
+                    content = (
+                        "Code output: "
+                        + message["output"]
+                        + "\n\nThe output is obfuscated to me. What does it mean / how should we proceed if there's more to do?"
+                    )
+                else:
+                    content = "The code above was executed on my machine. It produced no output. Was that expected?"
                 new_messages.append(
                     {
-                        "role": "assistant",
-                        "content": "The code above was executed on the user's machine. Output: "
-                        + message["output"],
+                        "role": "user",
+                        "content": content,
                     }
                 )
 

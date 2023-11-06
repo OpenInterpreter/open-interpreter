@@ -81,7 +81,7 @@ class AddLinePrints(ast.NodeTransformer):
         return ast.Expr(
             value=ast.Call(
                 func=ast.Name(id="print", ctx=ast.Load()),
-                args=[ast.Constant(value=f"##active_line{line_number} ##")],
+                args=[ast.Constant(value=f"##active_line{line_number}##")],
                 keywords=[],
             )
         )

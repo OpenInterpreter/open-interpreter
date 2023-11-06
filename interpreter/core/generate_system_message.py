@@ -23,7 +23,7 @@ def generate_system_message(interpreter):
 
     system_message += "\n" + get_user_info_string()
 
-    if not interpreter.local:
+    if not interpreter.local and not interpreter.disable_procedures:
         try:
             system_message += "\n" + get_relevant_procedures_string(
                 interpreter.messages

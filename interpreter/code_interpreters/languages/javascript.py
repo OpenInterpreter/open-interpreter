@@ -47,7 +47,7 @@ def preprocess_javascript(code):
 
     for i, line in enumerate(lines, 1):
         # Add active line print
-        processed_lines.append(f'console.log("##active_line{i} ##");')
+        processed_lines.append(f'console.log("##active_line{i}##");')
         processed_lines.append(line)
 
     # Join lines to form the processed code

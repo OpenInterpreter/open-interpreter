@@ -23,7 +23,7 @@ class R(SubprocessCodeInterpreter):
 
         for i, line in enumerate(lines, 1):
             # Add active line print
-            processed_lines.append(f'cat("##active_line{i} ##\\n");{line}')
+            processed_lines.append(f'cat("##active_line{i}##\\n");{line}')
 
         # Join lines to form the processed code
         processed_code = "\n".join(processed_lines)

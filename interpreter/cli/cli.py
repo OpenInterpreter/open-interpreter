@@ -35,6 +35,12 @@ arguments = [
         "type": bool,
     },
     {
+        "name": "disable_procedures",
+        "nickname": "dp",
+        "help_text": "disables procedures (RAG of some common OI use-cases). disable to shrink system message",
+        "type": bool,
+    },
+    {
         "name": "model",
         "nickname": "m",
         "help_text": "language model to use",

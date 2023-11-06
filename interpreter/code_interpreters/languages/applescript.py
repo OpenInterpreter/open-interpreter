@@ -42,7 +42,7 @@ class AppleScript(SubprocessCodeInterpreter):
         for idx, line in enumerate(lines):
             # Add log command to indicate the line number
             if line.strip():  # Only add if line is not empty
-                modified_lines.append(f'log "##active_line{idx + 1} ##"')
+                modified_lines.append(f'log "##active_line{idx + 1}##"')
             modified_lines.append(line)
 
         return "\n".join(modified_lines)
