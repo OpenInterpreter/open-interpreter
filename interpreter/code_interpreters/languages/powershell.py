@@ -60,7 +60,7 @@ def add_active_line_prints(code):
     lines = code.split("\n")
     for index, line in enumerate(lines):
         # Insert the Write-Output command before the actual line
-        lines[index] = f'Write-Output "##active_line{index + 1} ##"\n{line}'
+        lines[index] = f'Write-Output "##active_line{index + 1}##"\n{line}'
     return "\n".join(lines)
 
 
