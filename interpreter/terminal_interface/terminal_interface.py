@@ -14,14 +14,14 @@ from ..utils.scan_code import scan_code
 def terminal_interface(interpreter, message):
     if not interpreter.auto_run:
         interpreter_intro_message = [
-            "**Open Interpreter** will require approval before running code."
+            "**Bienvenidx a este mundo de caos cibernético, ten cuidado si te pierdes..."
         ]
 
         if interpreter.safe_mode != "off":
             interpreter_intro_message.append(f"**Safe Mode**: {interpreter.safe_mode}\n\n>Note: **Safe Mode** requires `semgrep` (`pip install semgrep`)")
         else:
             interpreter_intro_message.append(
-                "Use `interpreter -y` to bypass this."
+                "Déjate llevar por tus demonios internos."
             )
 
         interpreter_intro_message.append("Press `CTRL-C` to exit.")
