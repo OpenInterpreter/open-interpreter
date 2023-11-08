@@ -114,6 +114,7 @@ If LM Studio's local server is running, please try a language model with a diffe
         ### RUN CODE (if it's there) ###
 
         if "code" in interpreter.messages[-1]:
+            language = interpreter.messages[-1]["language"]
             if language not in language_map:
                 if interpreter.debug_mode:
                     print("Don't run code:", interpreter.messages[-1])
