@@ -151,12 +151,16 @@ def terminal_interface(interpreter, message):
 
                             scan_code(code, language, interpreter)
 
+                        interpreter.run_code_promt = False
                         response = input(
                             "  Would you like to run this code? (y/n)\n\n  "
                         )
                         print("")  # <- Aesthetic choice
 
                         if response.strip().lower() == "y":
+                            interpreter.run_code_promt = True
+
+                        if interpreter.run_code_promt:
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock()
@@ -168,10 +172,12 @@ def terminal_interface(interpreter, message):
                             interpreter.messages.append(
                                 {
                                     "role": "user",
-                                    "message": "I have declined to run this code.",
+                                    "message": "I have declined to run this code, continue with the next step.",
                                 }
                             )
-                            break
+                            yield {
+                                "output": "continue if not finished. User declined to run the code"
+                            }
 
                 # Output
                 if "output" in chunk:

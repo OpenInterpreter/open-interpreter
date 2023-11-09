@@ -114,12 +114,6 @@ If LM Studio's local server is running, please try a language model with a diffe
         ### RUN CODE (if it's there) ###
 
         if "code" in interpreter.messages[-1]:
-            language = interpreter.messages[-1]["language"]
-            if language not in language_map:
-                if interpreter.debug_mode:
-                    print("Don't run code:", interpreter.messages[-1])
-                break
-
             if interpreter.debug_mode:
                 print("Running code:", interpreter.messages[-1])
 
@@ -143,6 +137,28 @@ If LM Studio's local server is running, please try a language model with a diffe
                             language
                         ] = create_code_interpreter(language)
                     code_interpreter = interpreter._code_interpreters[language]
+
+                    # Yield a message, such that the user can stop code execution if they want to
+                    try:
+                        yield {"executing": {"code": code, "language": language}}
+                    except GeneratorExit:
+                        # The user might exit here.
+                        # We need to tell python what we (the generator) should do if they exit
+                        break
+
+                    if interpreter.run_code_promt:
+                        # Yield each line, also append it to last messages' output
+                        interpreter.messages[-1]["output"] = ""
+                        for line in code_interpreter.run(code):
+                            yield line
+                            if "output" in line:
+                                output = interpreter.messages[-1]["output"]
+                                output += "\n" + line["output"]
+
+                                # Truncate output
+                                output = truncate_output(output, interpreter.max_output)
+
+                                interpreter.messages[-1]["output"] = output.strip()
                 else:
                     # This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message
                     error_output = f"Error: Open Interpreter does not currently support {language}."
@@ -154,28 +170,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                     # Truncate output
                     output = truncate_output(output, interpreter.max_output)
                     interpreter.messages[-1]["output"] = output.strip()
-                    break
-
-                # Yield a message, such that the user can stop code execution if they want to
-                try:
-                    yield {"executing": {"code": code, "language": language}}
-                except GeneratorExit:
-                    # The user might exit here.
-                    # We need to tell python what we (the generator) should do if they exit
-                    break
-
-                # Yield each line, also append it to last messages' output
-                interpreter.messages[-1]["output"] = ""
-                for line in code_interpreter.run(code):
-                    yield line
-                    if "output" in line:
-                        output = interpreter.messages[-1]["output"]
-                        output += "\n" + line["output"]
-
-                        # Truncate output
-                        output = truncate_output(output, interpreter.max_output)
-
-                        interpreter.messages[-1]["output"] = output.strip()
+                    yield {"output": output.strip()}
 
             except:
                 output = traceback.format_exc()
