@@ -1,3 +1,4 @@
+import os
 import queue
 import subprocess
 import threading
@@ -40,6 +41,8 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         if self.process:
             self.terminate()
 
+        my_env = os.environ.copy()
+        my_env['PYTHONIOENCODING'] = 'utf-8'
         self.process = subprocess.Popen(
             self.start_cmd.split(),
             stdin=subprocess.PIPE,
@@ -48,6 +51,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             text=True,
             bufsize=0,
             universal_newlines=True,
+            env=my_env
         )
         threading.Thread(
             target=self.handle_stream_output,
