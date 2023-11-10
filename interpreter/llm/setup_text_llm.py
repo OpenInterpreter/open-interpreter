@@ -2,6 +2,7 @@ import os
 import traceback
 
 import litellm
+import openai
 import tokentrim as tt
 
 from ..utils.display_markdown_message import display_markdown_message
@@ -30,6 +31,13 @@ def setup_text_llm(interpreter):
                 messages,
                 system_message=system_message,
                 max_tokens=trim_to_be_this_many_tokens,
+            )
+        elif interpreter.context_window and not interpreter.max_tokens:
+            # Just trim to the context window if max_tokens not set
+            messages = tt.trim(
+                messages,
+                system_message=system_message,
+                max_tokens=interpreter.context_window,
             )
         else:
             try:
@@ -70,6 +78,12 @@ def setup_text_llm(interpreter):
             params["temperature"] = interpreter.temperature
         else:
             params["temperature"] = 0.0
+
+        if interpreter.model == "gpt-4-vision-preview":
+            # We need to go straight to OpenAI for this, LiteLLM doesn't work
+            return openai.ChatCompletion.create(**params)
+
+        # LiteLLM
 
         # These are set directly on LiteLLM
         if interpreter.max_budget:

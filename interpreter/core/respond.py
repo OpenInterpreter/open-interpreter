@@ -170,6 +170,12 @@ If LM Studio's local server is running, please try a language model with a diffe
                         output = truncate_output(output, interpreter.max_output)
 
                         interpreter.messages[-1]["output"] = output.strip()
+                    # Vision
+                    if "image" in line:
+                        base64_image = line["image"]
+                        interpreter.messages[-1][
+                            "image"
+                        ] = f"data:image/jpeg;base64,{base64_image}"
 
             except:
                 output = traceback.format_exc()
