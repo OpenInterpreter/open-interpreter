@@ -25,6 +25,7 @@ tokentrim = "^0.1.13"
 wget = "^3.2"
 yaspin = "^3.0.1"
 pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
+html2image = "^2.0.4.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"

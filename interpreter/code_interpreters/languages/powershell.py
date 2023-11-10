@@ -9,8 +9,9 @@ class PowerShell(SubprocessCodeInterpreter):
     file_extension = "ps1"
     proper_name = "PowerShell"
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
 
         # Determine the start command based on the platform (use "powershell" for Windows)
         if platform.system() == "Windows":

@@ -9,8 +9,9 @@ class Shell(SubprocessCodeInterpreter):
     file_extension = "sh"
     proper_name = "Shell"
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
 
         # Determine the start command based on the platform
         if platform.system() == "Windows":
