@@ -23,39 +23,50 @@ def setup_text_llm(interpreter):
         system_message = messages[0]["content"]
 
         messages = messages[1:]
-        if interpreter.context_window and interpreter.max_tokens:
-            trim_to_be_this_many_tokens = (
-                interpreter.context_window - interpreter.max_tokens - 25
-            )  # arbitrary buffer
-            messages = tt.trim(
-                messages,
-                system_message=system_message,
-                max_tokens=trim_to_be_this_many_tokens,
-            )
-        elif interpreter.context_window and not interpreter.max_tokens:
-            # Just trim to the context window if max_tokens not set
-            messages = tt.trim(
-                messages,
-                system_message=system_message,
-                max_tokens=interpreter.context_window,
-            )
-        else:
-            try:
+
+        try:
+            if interpreter.context_window and interpreter.max_tokens:
+                trim_to_be_this_many_tokens = (
+                    interpreter.context_window - interpreter.max_tokens - 25
+                )  # arbitrary buffer
                 messages = tt.trim(
-                    messages, system_message=system_message, model=interpreter.model
+                    messages,
+                    system_message=system_message,
+                    max_tokens=trim_to_be_this_many_tokens,
                 )
-            except:
-                if len(messages) == 1:
-                    display_markdown_message(
-                        """
-                    **We were unable to determine the context window of this model.** Defaulting to 3000.
-                    If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
-                    Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.max_tokens = {max tokens per response}`
-                    """
+            elif interpreter.context_window and not interpreter.max_tokens:
+                # Just trim to the context window if max_tokens not set
+                messages = tt.trim(
+                    messages,
+                    system_message=system_message,
+                    max_tokens=interpreter.context_window,
+                )
+            else:
+                try:
+                    messages = tt.trim(
+                        messages, system_message=system_message, model=interpreter.model
                     )
-                messages = tt.trim(
-                    messages, system_message=system_message, max_tokens=3000
-                )
+                except:
+                    if len(messages) == 1:
+                        display_markdown_message(
+                            """
+                        **We were unable to determine the context window of this model.** Defaulting to 3000.
+                        If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
+                        Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.max_tokens = {max tokens per response}`
+                        """
+                        )
+                    messages = tt.trim(
+                        messages, system_message=system_message, max_tokens=3000
+                    )
+
+        except TypeError as e:
+            if interpreter.vision and str(e) == "expected string or buffer":
+                # There's just no way to use tokentrim on vision-enabled models yet.
+                if interpreter.debug_mode:
+                    print("Couldn't token trim image messages. Error:", e)
+                pass
+            else:
+                raise
 
         if interpreter.debug_mode:
             print("Passing messages into LLM:", messages)
@@ -78,8 +89,6 @@ def setup_text_llm(interpreter):
             params["temperature"] = interpreter.temperature
         else:
             params["temperature"] = 0.0
-
-        assert False
 
         if interpreter.model == "gpt-4-vision-preview":
             # We need to go straight to OpenAI for this, LiteLLM doesn't work
