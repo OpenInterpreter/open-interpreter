@@ -54,6 +54,7 @@ class Interpreter:
         self.max_budget = None
         self._llm = None
         self.function_calling_llm = None
+        self.vision = False  # LLM supports vision
 
         # Load config defaults
         self.extend_config(self.config_file)

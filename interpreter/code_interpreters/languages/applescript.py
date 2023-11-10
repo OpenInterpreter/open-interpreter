@@ -7,8 +7,9 @@ class AppleScript(SubprocessCodeInterpreter):
     file_extension = "applescript"
     proper_name = "AppleScript"
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
         self.start_cmd = os.environ.get("SHELL", "/bin/zsh")
 
     def preprocess_code(self, code):

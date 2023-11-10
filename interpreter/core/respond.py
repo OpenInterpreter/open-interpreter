@@ -133,9 +133,11 @@ If LM Studio's local server is running, please try a language model with a diffe
                 language = interpreter.messages[-1]["language"]
                 if language in language_map:
                     if language not in interpreter._code_interpreters:
+                        # Create code interpreter
+                        config = {"language": language, "vision": interpreter.vision}
                         interpreter._code_interpreters[
                             language
-                        ] = create_code_interpreter(language)
+                        ] = create_code_interpreter(config)
                     code_interpreter = interpreter._code_interpreters[language]
                 else:
                     # This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message

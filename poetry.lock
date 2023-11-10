@@ -580,6 +580,21 @@ gitdb = ">=4.0.1,<5"
 test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-instafail", "pytest-subtests", "pytest-sugar"]
 
 [[package]]
+name = "html2image"
+version = "2.0.4.3"
+description = "Package acting as a wrapper around the headless mode of existing web browsers to generate images from URLs and from HTML+CSS strings or files."
+optional = false
+python-versions = ">=3.6,<4.0"
+files = [
+    {file = "html2image-2.0.4.3-py3-none-any.whl", hash = "sha256:e39bc1be8cb39bd36a1b9412d22f5db88d56e762f9ad3461124fa05fa7982945"},
+    {file = "html2image-2.0.4.3.tar.gz", hash = "sha256:878e69122eabf8263415784888c4366f04a8b301516fc5d13b9e0acf8db591e7"},
+]
+
+[package.dependencies]
+requests = "*"
+websocket-client = ">=1.0.0,<2.0.0"
+
+[[package]]
 name = "huggingface-hub"
 version = "0.17.3"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
@@ -1656,6 +1671,22 @@ files = [
 ]
 
 [[package]]
+name = "websocket-client"
+version = "1.6.4"
+description = "WebSocket client for Python with low level API options"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "websocket-client-1.6.4.tar.gz", hash = "sha256:b3324019b3c28572086c4a319f91d1dcd44e6e11cd340232978c684a7650d0df"},
+    {file = "websocket_client-1.6.4-py3-none-any.whl", hash = "sha256:084072e0a7f5f347ef2ac3d8698a5e0b4ffbfcab607628cadabc650fc9a83a24"},
+]
+
+[package.extras]
+docs = ["Sphinx (>=6.0)", "sphinx-rtd-theme (>=1.1.0)"]
+optional = ["python-socks", "wsaccel"]
+test = ["websockets"]
+
+[[package]]
 name = "wget"
 version = "3.2"
 description = "pure python download utility"
@@ -1787,4 +1818,4 @@ safe = []
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.12"
-content-hash = "13c2eff5609e1e6091de8a2f00eb8673df186957df7f8372c12d7999e99a9ccc"
+content-hash = "426912020f295d033a5a8bf110add72b256528a32a6ed77ac1920b8e86d35a22"

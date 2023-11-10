@@ -60,21 +60,28 @@ def convert_to_openai_messages(messages, function_calling=True):
                     )
 
         if "image" in message and message["role"] == "assistant":
-            new_messages.append(
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "This is the result. Does that look right..? Could it be closer to the FULL vision of what we're aiming for (not just one part of it) or is it done? Be detailed in exactly how we could improve it first, then write code to improve it.",
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": message["image"], "detail": "high"},
-                        },
-                    ],
+            new_message = {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": message["image"], "detail": "high"},
+                    }
+                ],
+            }
+
+            if message == messages[-1]:
+                # Save some tokens and be less repetitive by only adding this to the last message
+                new_message["content"] += {
+                    "type": "text",
+                    "text": "This is the result. Does that look right? Could it be closer to the FULL vision of what we're aiming for (not just one part of it) or is it done? Be detailed in exactly how we could improve it first, then write code to improve it.",
                 }
-            )
+                new_message[
+                    "content"
+                ].reverse()  # Text comes first in OpenAI's docs. IDK if this is important.
+
+            new_messages.append(new_message)
+
             if "output" in message:
                 # This is hacky, but only display the message if it's the placeholder warning for now:
                 if (
