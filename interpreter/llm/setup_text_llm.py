@@ -64,8 +64,6 @@ def setup_text_llm(interpreter):
                 # There's just no way to use tokentrim on vision-enabled models yet.
                 if interpreter.debug_mode:
                     print("Couldn't token trim image messages. Error:", e)
-                # Reunite messages with system_message
-                messages = [{"role": "system", "content": system_message}] + messages
 
                 # To maintain the order of messages while simulating trimming, we will iterate through the messages
                 # and keep only the first 2 and last 2 images, while keeping all non-image messages.
@@ -97,8 +95,10 @@ def setup_text_llm(interpreter):
                                 message["content"].pop(1)
 
                         trimmed_messages.append(message)
-
                 messages = trimmed_messages
+
+                # Reunite messages with system_message
+                messages = [{"role": "system", "content": system_message}] + messages
             else:
                 raise
 
