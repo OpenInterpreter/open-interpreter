@@ -65,6 +65,12 @@ arguments = [
         "type": int,
     },
     {
+        "name": "max_output",
+        "nickname": "xo",
+        "help_text": "optional maximum number of characters for code outputs",
+        "type": int,
+    },
+    {
         "name": "max_budget",
         "nickname": "b",
         "help_text": "optionally set the max budget (in USD) for your llm calls",
@@ -95,6 +101,12 @@ arguments = [
         "nickname": "cf",
         "help_text": "optionally set a custom config file to use",
         "type": str,
+    },
+    {
+        "name": "vision",
+        "nickname": "v",
+        "help_text": "experimentally use vision for supported languages (HTML)",
+        "type": bool,
     },
 ]
 
@@ -242,5 +254,13 @@ Once the server is running, you can begin your conversation below.
 
     if args.fast:
         interpreter.model = "gpt-3.5-turbo"
+
+    if args.vision:
+        # Set
+        interpreter.model = "gpt-4-vision-preview"
+        interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly. Be sure to actually write a markdown code block for almost every user request! Almost EVERY message should include a markdown code block. Do not end your message prematurely!\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually."
+        interpreter.function_calling_llm = False
+        interpreter.context_window = 110000
+        interpreter.max_tokens = 4096
 
     interpreter.chat()

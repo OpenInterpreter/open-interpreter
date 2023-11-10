@@ -53,6 +53,7 @@ class Interpreter:
         self.api_key = None
         self.max_budget = None
         self._llm = None
+        self.function_calling_llm = None
 
         # Load config defaults
         self.extend_config(self.config_file)

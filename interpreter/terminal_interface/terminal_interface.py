@@ -22,7 +22,7 @@ from .magic_commands import handle_magic_command
 examples = [
     "How many files are on my desktop?",
     "What time is it in Seattle?",
-    "Check all the links on `openinterpreter.com`.",
+    "Make me a simple HTML file.",
 ]
 random.shuffle(examples)
 for example in examples:
