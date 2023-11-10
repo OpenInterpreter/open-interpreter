@@ -143,16 +143,14 @@ If LM Studio's local server is running, please try a language model with a diffe
                     code_interpreter = interpreter._code_interpreters[language]
                 else:
                     # This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message
-                    error_output = f"Error: Open Interpreter does not currently support {language}."
-                    print(error_output)
 
-                    interpreter.messages[-1]["output"] = ""
-                    output = "\n" + error_output
+                    output = (
+                        f"Open Interpreter does not currently support `{language}`."
+                    )
 
-                    # Truncate output
-                    output = truncate_output(output, interpreter.max_output)
-                    interpreter.messages[-1]["output"] = output.strip()
-                    
+                    yield {"output": output}
+                    interpreter.messages[-1]["output"] = output
+
                     # Let the response continue so it can deal with the unsupported code in another way. Also prevent looping on the same piece of code.
                     if code != last_unsupported_code:
                         last_unsupported_code = code
