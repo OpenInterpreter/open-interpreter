@@ -213,4 +213,6 @@ def terminal_interface(interpreter, message):
                 continue
             else:
                 break
-    system_info()
+        except:
+            system_info()
+            raise
