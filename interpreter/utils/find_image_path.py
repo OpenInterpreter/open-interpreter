@@ -10,6 +10,9 @@ def find_image_path(text):
     # Find all matches using the finditer method
     matches = [match.group(1) for match in re.finditer(pattern, text)]
 
+    # Add to matches a version of matches where each has had "\" removed (present for some terminals)
+    matches += [match.replace("\\", "") for match in matches]
+
     # Filter out the matches that actually exist on the filesystem
     existing_paths = [match for match in matches if os.path.exists(match)]
 

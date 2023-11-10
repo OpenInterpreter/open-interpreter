@@ -79,6 +79,8 @@ def setup_text_llm(interpreter):
         else:
             params["temperature"] = 0.0
 
+        assert False
+
         if interpreter.model == "gpt-4-vision-preview":
             # We need to go straight to OpenAI for this, LiteLLM doesn't work
             return openai.ChatCompletion.create(**params)
