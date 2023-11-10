@@ -1,0 +1,20 @@
+import os
+import re
+
+
+# Function to find all paths ending with .png, .jpg, or .jpeg
+def find_image_path(text):
+    # Regex pattern to find all the specified paths with extensions .png, .jpg, or .jpeg
+    pattern = r"(?=(/.*?\.(png|jpg|jpeg)))"
+
+    # Find all matches using the finditer method
+    matches = [match.group(1) for match in re.finditer(pattern, text)]
+
+    # Filter out the matches that actually exist on the filesystem
+    existing_paths = [match for match in matches if os.path.exists(match)]
+
+    # Return the longest one if any exist
+    if existing_paths:
+        return max(existing_paths, key=len)
+    else:
+        return None

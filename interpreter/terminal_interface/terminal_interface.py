@@ -10,9 +10,11 @@ except ImportError:
 
 import base64
 import random
+import re
 
 from ..utils.check_for_package import check_for_package
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.find_image_path import find_image_path
 from ..utils.scan_code import scan_code
 from ..utils.system_debug_info import system_info
 from ..utils.truncate_output import truncate_output
@@ -27,7 +29,7 @@ examples = [
     "Make me a simple Pomodoro app.",
     "Open Chrome and go to YouTube.",
 ]
-random.shuffle(examples)
+# random.shuffle(examples)
 for example in examples:
     readline.add_history(example)
 
@@ -79,24 +81,26 @@ def terminal_interface(interpreter, message):
             handle_magic_command(interpreter, message)
             continue
 
-        if interpreter.vision:
-            # If we can handle vision,
-            # Is the input a path to an image? Like they just dragged it into the terminal?
-            if message.startswith("/") and (
-                message.lower().endswith(".png") or message.lower().endswith(".jpg")
-            ):
-                # Turn it into base64
-                with open(message, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-                file_extension = message.split(".")[-1]
-                message = {
-                    "image": f"data:image/{file_extension};base64,{encoded_string}"
-                }
-
         # Many users do this
         if message.strip() == "interpreter --local":
             print("Please press CTRL-C then run `interpreter --local`.")
             continue
+
+        if True:  ################## interpreter.vision:
+            # Is the input a path to an image? Like they just dragged it into the terminal?
+            image_path = find_image_path(message)
+
+            ## If we found an image, add it to the message
+            if image_path:
+                # Turn it into base64
+                with open(image_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+                file_extension = image_path.split(".")[-1]
+                message = {
+                    "role": "user",
+                    "message": message,
+                    "image": f"data:image/{file_extension};base64,{encoded_string}",
+                }
 
         # Track if we've ran a code block.
         # We'll use this to determine if we should render a new code block,
