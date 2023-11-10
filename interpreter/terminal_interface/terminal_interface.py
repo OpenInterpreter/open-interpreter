@@ -92,6 +92,8 @@ def terminal_interface(interpreter, message):
 
             ## If we found an image, add it to the message
             if image_path:
+                if interpreter.debug_mode:
+                    print("Found image:", image_path)
                 # Turn it into base64
                 with open(image_path, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
