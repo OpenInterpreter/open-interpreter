@@ -44,7 +44,9 @@ class HTML(BaseCodeInterpreter):
 
             # Generate a random filename for the temporary image
             temp_filename = "".join(random.choices(string.digits, k=10)) + ".png"
-            hti.screenshot(html_str=code, save_as=temp_filename)
+            hti.screenshot(
+                html_str=code, save_as=temp_filename, size=(720, 720)
+            )  # 1280, 720
 
             # Convert the image to base64
             with open(temp_filename, "rb") as image_file:
