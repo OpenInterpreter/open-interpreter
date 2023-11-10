@@ -34,9 +34,9 @@ class R(SubprocessCodeInterpreter):
 tryCatch({{
 {processed_code}
 }}, error=function(e){{
-    cat("## execution_error ##\\n", conditionMessage(e), "\\n");
+    cat("##execution_error##\\n", conditionMessage(e), "\\n");
 }})
-cat("## end_of_execution ##\\n");
+cat("##end_of_execution##\\n");
 """
         # Count the number of lines of processed_code
         # (R echoes all code back for some reason, but we can skip it if we track this!)
@@ -71,4 +71,4 @@ cat("## end_of_execution ##\\n");
         return None
 
     def detect_end_of_execution(self, line):
-        return "##end_of_execution##" in line or "## execution_error ##" in line
+        return "##end_of_execution##" in line or "##execution_error##" in line
