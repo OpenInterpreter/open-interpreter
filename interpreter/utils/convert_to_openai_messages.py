@@ -7,7 +7,7 @@ def convert_to_openai_messages(messages, function_calling=True):
     for message in messages:
         new_message = {"role": message["role"], "content": ""}
 
-        if "message" in message:
+        if "message" in message and "image" not in message:
             new_message["content"] = message["message"]
 
         if "code" in message:
@@ -70,13 +70,29 @@ def convert_to_openai_messages(messages, function_calling=True):
                 ],
             }
 
+            if message["role"] == "user":
+                if "message" in message:
+                    new_message["content"].append(
+                        {
+                            "type": "text",
+                            "text": message["message"],
+                        }
+                    )
+                    new_message[
+                        "content"
+                    ].reverse()  # Text comes first in OpenAI's docs. IDK if this is important.
+
+                new_messages.append(new_message)
+
             if message["role"] == "assistant":
                 if message == messages[-1]:
                     # Save some tokens and be less repetitive by only adding this to the last message
-                    new_message["content"] += {
-                        "type": "text",
-                        "text": "This is the result. Does that look right? Could it be closer to the FULL vision of what we're aiming for (not just one part of it) or is it done? Be detailed in exactly how we could improve it first, then write code to improve it.",
-                    }
+                    new_message["content"].append(
+                        {
+                            "type": "text",
+                            "text": "This is the result. Does that look right? Could it be closer to the FULL vision of what we're aiming for (not just one part of it) or is it done? Be detailed in exactly how we could improve it first, then write code to improve it.",
+                        }
+                    )
                     new_message[
                         "content"
                     ].reverse()  # Text comes first in OpenAI's docs. IDK if this is important.
