@@ -65,37 +65,38 @@ def setup_text_llm(interpreter):
                 if interpreter.debug_mode:
                     print("Couldn't token trim image messages. Error:", e)
 
+                ### DISABLED image trimming
                 # To maintain the order of messages while simulating trimming, we will iterate through the messages
                 # and keep only the first 2 and last 2 images, while keeping all non-image messages.
-                trimmed_messages = []
-                image_counter = 0
-                for message in messages:
-                    if (
-                        "content" in message
-                        and isinstance(message["content"], list)
-                        and len(message["content"]) > 1
-                    ):
-                        if message["content"][1]["type"] == "image":
-                            image_counter += 1
-                            if (
-                                image_counter <= 2
-                                or image_counter
-                                > len(
-                                    [
-                                        m
-                                        for m in messages
-                                        if m["content"][1]["type"] == "image"
-                                    ]
-                                )
-                                - 2
-                            ):
-                                # keep message normal
-                                pass
-                            else:
-                                message["content"].pop(1)
+                # trimmed_messages = []
+                # image_counter = 0
+                # for message in messages:
+                #     if (
+                #         "content" in message
+                #         and isinstance(message["content"], list)
+                #         and len(message["content"]) > 1
+                #     ):
+                #         if message["content"][1]["type"] == "image":
+                #             image_counter += 1
+                #             if (
+                #                 image_counter <= 2
+                #                 or image_counter
+                #                 > len(
+                #                     [
+                #                         m
+                #                         for m in messages
+                #                         if m["content"][1]["type"] == "image"
+                #                     ]
+                #                 )
+                #                 - 2
+                #             ):
+                #                 # keep message normal
+                #                 pass
+                #             else:
+                #                 message["content"].pop(1)
 
-                        trimmed_messages.append(message)
-                messages = trimmed_messages
+                #         trimmed_messages.append(message)
+                # messages = trimmed_messages
 
                 # Reunite messages with system_message
                 messages = [{"role": "system", "content": system_message}] + messages
