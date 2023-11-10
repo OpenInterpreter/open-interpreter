@@ -7,8 +7,9 @@ class R(SubprocessCodeInterpreter):
     file_extension = "r"
     proper_name = "R"
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
         self.start_cmd = "R -q --vanilla"  # Start R in quiet and vanilla mode
 
     def preprocess_code(self, code):

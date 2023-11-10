@@ -11,8 +11,9 @@ class Python(SubprocessCodeInterpreter):
     file_extension = "py"
     proper_name = "Python"
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
         executable = sys.executable
         if os.name != "nt":  # not Windows
             executable = shlex.quote(executable)

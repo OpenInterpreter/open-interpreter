@@ -7,8 +7,9 @@ class JavaScript(SubprocessCodeInterpreter):
     file_extension = "js"
     proper_name = "JavaScript"
 
-    def __init__(self):
+    def __init__(self, config):
         super().__init__()
+        self.config = config
         self.start_cmd = "node -i"
 
     def preprocess_code(self, code):
