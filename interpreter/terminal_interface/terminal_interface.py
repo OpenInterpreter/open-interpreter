@@ -79,15 +79,19 @@ def terminal_interface(interpreter, message):
             handle_magic_command(interpreter, message)
             continue
 
-        # Is it a path to an image? Like they just dragged it into the terminal?
-        if message.startswith("/") and (
-            message.lower().endswith(".png") or message.lower().endswith(".jpg")
-        ):
-            # Turn it into base64
-            with open(message, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-            file_extension = message.split(".")[-1]
-            message = {"image": f"data:image/{file_extension};base64,{encoded_string}"}
+        if interpreter.vision:
+            # If we can handle vision,
+            # Is the input a path to an image? Like they just dragged it into the terminal?
+            if message.startswith("/") and (
+                message.lower().endswith(".png") or message.lower().endswith(".jpg")
+            ):
+                # Turn it into base64
+                with open(message, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+                file_extension = message.split(".")[-1]
+                message = {
+                    "image": f"data:image/{file_extension};base64,{encoded_string}"
+                }
 
         # Many users do this
         if message.strip() == "interpreter --local":
