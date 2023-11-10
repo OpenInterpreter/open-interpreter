@@ -110,7 +110,20 @@ class Interpreter:
         if message or message == "":
             if message == "":
                 message = "No entry from user - please suggest something to enter."
-            self.messages.append({"role": "user", "message": message})
+
+            ## We support multiple formats for the incoming message:
+            # Dict (these are passed directly in)
+            if isinstance(message, dict):
+                if "role" not in message:
+                    message["role"] = "user"
+                self.messages.append(message)
+            # String (we construct a user message dict)
+            elif isinstance(message, str):
+                self.messages.append({"role": "user", "message": message})
+            # List (this is like the OpenAI API)
+            elif isinstance(message, list):
+                self.messages = message
+
             yield from self._respond()
 
             # Save conversation if we've turned conversation_history on
@@ -139,8 +152,8 @@ class Interpreter:
                     "w",
                 ) as f:
                     json.dump(self.messages, f)
-
             return
+
         raise Exception(
             "`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`."
         )
