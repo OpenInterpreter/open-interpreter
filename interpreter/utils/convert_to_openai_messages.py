@@ -99,12 +99,12 @@ def convert_to_openai_messages(messages, function_calling=True):
 
                 new_messages.append(new_message)
 
-                if "output" in message:
+                if "output" in message and message == messages[-1]:
                     # This is hacky, but only display the message if it's the placeholder warning for now:
                     if (
                         "placeholder" in message["output"].lower()
                         or "traceback" in message["output"].lower()
-                    ):
+                    ) and "text" in new_messages[-1]["content"][0]:
                         new_messages[-1]["content"][0]["text"] += (
                             "\n\nAlso, I recieved this output from the Open Interpreter code execution system we're using, which executes your markdown code blocks automatically: "
                             + message["output"]
