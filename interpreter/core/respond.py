@@ -15,6 +15,8 @@ def respond(interpreter):
     Responds until it decides not to run any more code or say anything else.
     """
 
+    last_unsupported_code = ""
+
     while True:
         system_message = interpreter.generate_system_message()
 
@@ -150,7 +152,13 @@ If LM Studio's local server is running, please try a language model with a diffe
                     # Truncate output
                     output = truncate_output(output, interpreter.max_output)
                     interpreter.messages[-1]["output"] = output.strip()
-                    break
+                    
+                    # Let the response continue so it can deal with the unsupported code in another way. Also prevent looping on the same piece of code.
+                    if code != last_unsupported_code:
+                        last_unsupported_code = code
+                        continue
+                    else:
+                        break
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
