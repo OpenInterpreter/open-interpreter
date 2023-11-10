@@ -263,4 +263,6 @@ Once the server is running, you can begin your conversation below.
         interpreter.context_window = 110000
         interpreter.max_tokens = 4096
 
+        display_markdown_message("> `Vision` mode enabled\n")
+
     interpreter.chat()
