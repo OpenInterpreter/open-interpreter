@@ -130,7 +130,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                     interpreter.messages[-1]["language"] = "shell"
 
                 # Get a code interpreter to run it
-                language = interpreter.messages[-1]["language"]
+                language = interpreter.messages[-1]["language"].lower()
                 if language in language_map:
                     if language not in interpreter._code_interpreters:
                         # Create code interpreter
