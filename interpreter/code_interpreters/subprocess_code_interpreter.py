@@ -131,8 +131,6 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
                 active_line = self.detect_active_line(line)
                 self.output_queue.put({"active_line": active_line})
             elif self.detect_end_of_execution(line):
-                self.output_queue.put({"active_line": None})
-                time.sleep(0.1)
                 self.done.set()
             elif is_error_stream and "KeyboardInterrupt" in line:
                 self.output_queue.put({"output": "KeyboardInterrupt"})

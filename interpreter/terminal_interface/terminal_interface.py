@@ -14,6 +14,7 @@ import re
 
 from ..utils.check_for_package import check_for_package
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.display_output import display_output
 from ..utils.find_image_path import find_image_path
 from ..utils.scan_code import scan_code
 from ..utils.system_debug_info import system_info
@@ -195,6 +196,20 @@ def terminal_interface(interpreter, message):
                                 }
                             )
                             break
+
+                if "image" in chunk or "html" in chunk or "javascript" in chunk:
+                    # Good to keep the LLM informed <3
+                    message_for_llm = display_output(chunk)
+                    if message_for_llm:
+                        if "output" in interpreter.messages[-1]:
+                            interpreter.messages[-1]["output"] += "\n" + message_for_llm
+                        else:
+                            interpreter.messages[-1]["output"] = message_for_llm
+
+                        # I know this is insane, but the easiest way to now display this
+                        # is to set the chunk to an output chunk, which will trigger the next conditional!
+
+                        chunk = {"output": message_for_llm}
 
                 # Output
                 if "output" in chunk:
