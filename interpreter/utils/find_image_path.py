@@ -5,7 +5,7 @@ import re
 # Function to find all paths ending with .png, .jpg, or .jpeg
 def find_image_path(text):
     # Regex pattern to find all the specified paths with extensions .png, .jpg, or .jpeg
-    pattern = r"([A-Za-z]:\\[^:\n]*?\.(png|jpg|jpeg))|(/[^:\n]*?\.(png|jpg|jpeg))"
+    pattern = r"([A-Za-z]:\\[^:\n]*?\.(png|jpg|jpeg|PNG|JPG|JPEG))|(/[^:\n]*?\.(png|jpg|jpeg|PNG|JPG|JPEG))"
 
     # Find all matches using the finditer method
     matches = [match.group(1) for match in re.finditer(pattern, text)]
