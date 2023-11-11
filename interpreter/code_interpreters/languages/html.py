@@ -19,38 +19,28 @@ class HTML(BaseCodeInterpreter):
         self.config = config
 
     def run(self, code):
+        ## This has been offloaded to the terminal interface
         # Create a temporary HTML file with the content
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
-            f.write(code.encode())
+        # with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as f:
+        #     f.write(code.encode())
 
-        # Open the HTML file with the default web browser
-        webbrowser.open("file://" + os.path.realpath(f.name))
+        # # Open the HTML file with the default web browser
+        # webbrowser.open("file://" + os.path.realpath(f.name))
 
-        yield {
-            "output": f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
-        }
+        # yield {
+        #     "output": f"Saved to {os.path.realpath(f.name)} and opened with the user's default web browser."
+        # }
 
         if self.config["vision"]:
-            yield {"output": "\n\nSending image to GPT-4V..."}
+            pass
 
+            # disabled because placeholder is a normal html element lol. how to fix this?
             # Warn LLM about placeholders.
-            if "placeholder" in code.lower() or "will go here" in code.lower():
-                yield {
-                    "output": "\n\nWARNING TO LLM: Placeholder detected. Do NOT use placeholders in HTML code, write the users entire request at once."
-                }
+            # if "placeholder" in code.lower() or "will go here" in code.lower():
+            #     yield {
+            #         "output": "\n\nWARNING TO LLM: Placeholder detected. Do NOT use placeholders in HTML code, write the users entire request at once."
+            #     }
 
-            # Convert the HTML into an image using html2image
-            hti = Html2Image()
+            # Lmao this is so thin. But html should be accepted output, it's actually terminal interface that will figure out how to render it
 
-            # Generate a random filename for the temporary image
-            temp_filename = "".join(random.choices(string.digits, k=10)) + ".png"
-            hti.screenshot(html_str=code, save_as=temp_filename, size=(1280, 720))
-
-            # Convert the image to base64
-            with open(temp_filename, "rb") as image_file:
-                screenshot_base64 = base64.b64encode(image_file.read()).decode()
-
-            # Delete the temporary image file
-            os.remove(temp_filename)
-
-            yield {"image": screenshot_base64}
+        yield {"html": code}

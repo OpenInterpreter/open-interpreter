@@ -1,3 +1,4 @@
+import time
 import traceback
 
 import litellm
@@ -5,6 +6,7 @@ import litellm
 from ..code_interpreters.create_code_interpreter import create_code_interpreter
 from ..code_interpreters.language_map import language_map
 from ..utils.display_markdown_message import display_markdown_message
+from ..utils.html_to_base64 import html_to_base64
 from ..utils.merge_deltas import merge_deltas
 from ..utils.truncate_output import truncate_output
 
@@ -179,17 +181,25 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                         interpreter.messages[-1]["output"] = output.strip()
                     # Vision
-                    if "image" in line:
-                        base64_image = line["image"]
-                        interpreter.messages[-1][
-                            "image"
-                        ] = f"data:image/jpeg;base64,{base64_image}"
+                    if interpreter.vision:
+                        base64_image = None
+                        if "image" in line:
+                            base64_image = line["image"]
+                        if "html" in line:
+                            base64_image = html_to_base64(line["html"])
+
+                        if base64_image:
+                            yield {"output": "Sending image output to GPT-4V..."}
+                            interpreter.messages[-1][
+                                "image"
+                            ] = f"data:image/jpeg;base64,{base64_image}"
 
             except:
                 output = traceback.format_exc()
                 yield {"output": output.strip()}
                 interpreter.messages[-1]["output"] = output.strip()
 
+            yield {"active_line": None}
             yield {"end_of_execution": True}
 
         else:

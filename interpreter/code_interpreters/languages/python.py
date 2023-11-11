@@ -7,6 +7,7 @@ import shlex
 import sys
 
 from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+from .python_vision import PythonVision
 
 
 class Python(SubprocessCodeInterpreter):
@@ -16,10 +17,15 @@ class Python(SubprocessCodeInterpreter):
     def __init__(self, config):
         super().__init__()
         self.config = config
-        executable = sys.executable
-        if os.name != "nt":  # not Windows
-            executable = shlex.quote(executable)
-        self.start_cmd = executable + " -i -q -u"
+
+        if config["vision"]:
+            self.__class__ = PythonVision
+            self.__init__(config)
+        else:
+            executable = sys.executable
+            if os.name != "nt":  # not Windows
+                executable = shlex.quote(executable)
+            self.start_cmd = executable + " -i -q -u"
 
     def preprocess_code(self, code):
         return preprocess_python(code)

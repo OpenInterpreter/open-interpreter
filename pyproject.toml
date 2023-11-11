@@ -27,6 +27,8 @@ yaspin = "^3.0.1"
 psutil = "^5.9.6"
 pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
 html2image = "^2.0.4.3"
+ipykernel = "^6.26.0"
+jupyter-client = "^8.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
