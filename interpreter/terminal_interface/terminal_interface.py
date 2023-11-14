@@ -251,5 +251,5 @@ def terminal_interface(interpreter, message):
             else:
                 break
         except:
-            system_info()
+            system_info(interpreter)
             raise
