@@ -20,7 +20,7 @@
 
 <br>
 
-**Update:** ● 0.1.12 supports `--vision` (experimental) on **Mac OS X**.
+**Update:** ● 0.1.12 supports `--vision` (experimental).
 
 <br>
 
