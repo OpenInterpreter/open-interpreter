@@ -36,15 +36,15 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
 
     def terminate(self):
         self.process.terminate()
-        self.proc.stdin.close()
-        self.proc.stdout.close()
+        self.process.stdin.close()
+        self.process.stdout.close()
 
     def start_process(self):
         if self.process:
             self.terminate()
 
         my_env = os.environ.copy()
-        my_env['PYTHONIOENCODING'] = 'utf-8'
+        my_env["PYTHONIOENCODING"] = "utf-8"
         self.process = subprocess.Popen(
             self.start_cmd.split(),
             stdin=subprocess.PIPE,
@@ -53,7 +53,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             text=True,
             bufsize=0,
             universal_newlines=True,
-            env=my_env
+            env=my_env,
         )
         threading.Thread(
             target=self.handle_stream_output,
