@@ -1,0 +1,28 @@
+.rounded-lg {
+    border-radius: 0;
+}
+
+/*
+
+.rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl {
+    border-radius: 0.125rem;
+}
+
+.rounded-full {
+    border-radius: 0.125rem;
+}
+
+*/
+
+.font-extrabold {
+  font-weight: 600;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    font-weight: normal;
+}
+
+.body {
+    font-weight: normal;
+}
+

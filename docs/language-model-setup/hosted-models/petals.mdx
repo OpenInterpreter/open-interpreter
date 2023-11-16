@@ -1,0 +1,50 @@
+---
+title: Petals
+---
+
+To use Open Interpreter with a model from Petals, set the `model` flag to begin with `petals/`:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model petals/petals-team/StableBeluga2
+```
+
+```python Python
+import interpreter
+
+interpreter.model = "petals/petals-team/StableBeluga2"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Pre-Requisites
+
+Ensure you have petals installed:
+
+```bash Terminal
+pip install git+https://github.com/bigscience-workshop/petals
+```
+
+# Supported Models
+
+We support any model on [Petals:](https://github.com/bigscience-workshop/petals)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model petals/petals-team/StableBeluga2
+interpreter --model petals/huggyllama/llama-65b
+```
+
+```python Python
+interpreter.model = "petals/petals-team/StableBeluga2"
+interpreter.model = "petals/huggyllama/llama-65b"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+No environment variables are required to use these models.

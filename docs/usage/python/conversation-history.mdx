@@ -1,0 +1,20 @@
+---
+title: Conversation History
+---
+
+Conversations will be saved in your application directory. **This is true for python and for the terminal interface.**
+
+The command below, when run in your terminal, will show you which folder they're being saved in (use your arrow keys to move down and press enter over `> Open Folder`):
+
+```shell
+interpreter --conversations
+```
+
+You can turn off conversation history for a particular conversation:
+
+```python
+import interpreter
+
+interpreter.conversation_history = False
+interpreter.chat() # Conversation history will not be saved
+```

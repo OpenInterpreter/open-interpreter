@@ -1,0 +1,54 @@
+---
+title: Cohere
+---
+
+To use Open Interpreter with a model from Cohere, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model command-nightly
+```
+
+```python Python
+import interpreter
+
+interpreter.model = "command-nightly"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support any model on [Cohere's models page:](https://www.cohere.ai/models)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model command
+interpreter --model command-light
+interpreter --model command-medium
+interpreter --model command-medium-beta
+interpreter --model command-xlarge-beta
+interpreter --model command-nightly
+```
+
+```python Python
+interpreter.model = "command"
+interpreter.model = "command-light"
+interpreter.model = "command-medium"
+interpreter.model = "command-medium-beta"
+interpreter.model = "command-xlarge-beta"
+interpreter.model = "command-nightly"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable  | Description  | Where to Find  |
+| --------------------- | ------------ | -------------- |
+| `COHERE_API_KEY`       | The API key for authenticating to Cohere's services. | [Cohere Account Page](https://app.cohere.ai/login) |
