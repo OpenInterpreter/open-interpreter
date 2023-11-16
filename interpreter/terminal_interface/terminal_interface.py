@@ -87,7 +87,7 @@ def terminal_interface(interpreter, message):
             print("Please press CTRL-C then run `interpreter --local`.")
             continue
 
-        if True:  ################## interpreter.vision:
+        if interpreter.vision:
             # Is the input a path to an image? Like they just dragged it into the terminal?
             image_path = find_image_path(message)
 
