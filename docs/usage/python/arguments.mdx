@@ -1,0 +1,209 @@
+---
+title: Arguments
+---
+
+<Card
+  title="New: Streaming responses in Python"
+  icon="arrow-up-right"
+  href="/usage/python/streaming-response"
+>
+  Learn how to build Open Interpreter into your application.
+</Card>
+
+#### `messages`
+
+This property holds a list of `messages` between the user and the interpreter. 
+
+You can use it to restore a conversation:
+
+```python
+interpreter.chat("Hi! Can you print hello world?")
+
+print(interpreter.messages)
+
+# This would output:
+
+[
+   {
+      "role": "user",
+      "message": "Hi! Can you print hello world?"
+   },
+   {
+      "role": "assistant",
+      "message": "Sure!"
+   }
+   {
+      "role": "assistant",
+      "language": "python",
+      "code": "print('Hello, World!')",
+      "output": "Hello, World!"
+   }
+]
+```
+
+You can use this to restore `interpreter` to a previous conversation.
+
+```python
+interpreter.messages = messages # A list that resembles the one above
+```
+
+---
+
+#### `local`
+
+This boolean flag determines whether the model [runs locally](/language-model-setup/local-models/overview) (`True`) or in the cloud (`False`). 
+
+```python
+interpreter.local = True  # Run locally
+interpreter.local = False  # Run in the cloud
+```
+
+Use this in conjunction with the `model` parameter to set your language model.
+
+---
+
+#### `auto_run`
+
+Setting this flag to `True` allows Open Interpreter to automatically run the generated code without user confirmation.
+
+```python
+interpreter.auto_run = True  # Don't require user confirmation
+interpreter.auto_run = False  # Require user confirmation (default)
+```
+
+---
+
+#### `debug_mode`
+
+Use this boolean flag to toggle debug mode on or off. Debug mode will print information at every step to help diagnose problems.
+
+```python
+interpreter.debug_mode = True  # Turns on debug mode
+interpreter.debug_mode = False  # Turns off debug mode
+```
+
+---
+
+#### `max_output`
+
+This property sets the maximum number of tokens for the output response.
+
+```python
+interpreter.max_output = 2000
+```
+
+---
+
+#### `conversation_history`
+
+A boolean flag to indicate if the conversation history should be stored or not.
+
+```python
+interpreter.conversation_history = True  # To store history
+interpreter.conversation_history = False  # To not store history
+```
+
+---
+
+#### `conversation_filename`
+
+This property sets the filename where the conversation history will be stored.
+
+```python
+interpreter.conversation_filename = "my_conversation.json"
+```
+
+---
+
+#### `conversation_history_path`
+
+You can set the path where the conversation history will be stored.
+
+```python
+import os
+interpreter.conversation_history_path = os.path.join("my_folder", "conversations")
+```
+
+---
+
+#### `model`
+
+Specifies the language model to be used.
+
+If `interpreter.local` is set to `True`, [the language model will be run locally.](/language-model-setup/local-models/overview)
+
+```python
+interpreter.model = "gpt-3.5-turbo"
+```
+
+---
+
+#### `temperature`
+
+Sets the randomness level of the model's output.
+
+```python
+interpreter.temperature = 0.7
+```
+
+---
+
+#### `system_message`
+
+This stores the model's system message as a string. Explore or modify it:
+
+```python
+interpreter.system_message += "\nRun all shell commands with -y."
+```
+
+---
+
+#### `context_window`
+
+This manually sets the context window size in tokens.
+
+We try to guess the right context window size for you model, but you can override it with this parameter.
+
+```python
+interpreter.context_window = 16000
+```
+
+---
+
+#### `max_tokens`
+
+Sets the maximum number of tokens the model can generate in a single response.
+
+```python
+interpreter.max_tokens = 100
+```
+
+---
+
+#### `api_base`
+
+If you are using a custom API, you can specify its base URL here.
+
+```python
+interpreter.api_base = "https://api.example.com"
+```
+
+---
+
+#### `api_key`
+
+Set your API key for authentication.
+
+```python
+interpreter.api_key = "your_api_key_here"
+```
+
+---
+
+#### `max_budget`
+
+This property sets the maximum budget limit for the session in USD.
+
+```python
+interpreter.max_budget = 0.01 # 1 cent
+```

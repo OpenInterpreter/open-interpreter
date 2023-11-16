@@ -1,0 +1,24 @@
+---
+title: Overview
+---
+
+To run Open Interpreter locally, use `local` mode:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --local
+```
+
+```python Python
+import interpreter
+
+interpreter.local = True
+interpreter.chat()
+```
+
+</CodeGroup>
+
+This will automatically select Code Llama. If you include a `model`, the `local` flag will try to run it locally.
+
+Currently we support running [any GGUF quantized language models from HuggingFace](/language-model-setup/local-models/getting-models).
