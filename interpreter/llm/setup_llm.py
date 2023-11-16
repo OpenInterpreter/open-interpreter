@@ -6,6 +6,7 @@ from .convert_to_coding_llm import convert_to_coding_llm
 from .setup_openai_coding_llm import setup_openai_coding_llm
 from .setup_text_llm import setup_text_llm
 
+
 def setup_llm(interpreter):
     """
     Takes an Interpreter (which includes a ton of LLM settings),
@@ -15,7 +16,8 @@ def setup_llm(interpreter):
     # Detect whether or not it's a function calling LLM
     if interpreter.function_calling_llm == None:
         if not interpreter.local and (
-            interpreter.model in litellm.open_ai_chat_completion_models
+            interpreter.model != "gpt-4-vision-preview"
+            and interpreter.model in litellm.open_ai_chat_completion_models
             or interpreter.model.startswith("azure/")
         ):
             interpreter.function_calling_llm = True
