@@ -23,6 +23,101 @@ def teardown_function():
     time.sleep(5)
 
 
+def test_generator():
+    """
+    Sends two messages, makes sure all the flags are correct.
+    """
+    start_of_message_emitted = False
+    end_of_message_emitted = False
+    start_of_code_emitted = False
+    end_of_code_emitted = False
+    executing_emitted = False
+    end_of_execution_emitted = False
+
+    for chunk in interpreter.chat("What's 38023*40334?", stream=True, display=False):
+        print(chunk)
+        if "start_of_message" in chunk:
+            start_of_message_emitted = True
+        if "end_of_message" in chunk:
+            end_of_message_emitted = True
+        if "start_of_code" in chunk:
+            start_of_code_emitted = True
+        if "end_of_code" in chunk:
+            end_of_code_emitted = True
+        if "executing" in chunk:
+            executing_emitted = True
+        if "end_of_execution" in chunk:
+            end_of_execution_emitted = True
+
+        permitted_flags = [
+            "message",
+            "language",
+            "code",
+            "output",
+            "active_line",
+            "start_of_message",
+            "end_of_message",
+            "start_of_code",
+            "end_of_code",
+            "executing",
+            "end_of_execution",
+        ]
+        if list(chunk.keys())[0] not in permitted_flags:
+            assert False, f"{chunk} is invalid"
+
+    assert start_of_message_emitted
+    assert end_of_message_emitted
+    assert start_of_code_emitted
+    assert end_of_code_emitted
+    assert executing_emitted
+    assert end_of_execution_emitted
+
+    start_of_message_emitted = False
+    end_of_message_emitted = False
+    start_of_code_emitted = False
+    end_of_code_emitted = False
+    executing_emitted = False
+    end_of_execution_emitted = False
+
+    for chunk in interpreter.chat("What's 2334*34335555?", stream=True, display=False):
+        print(chunk)
+        if "start_of_message" in chunk:
+            start_of_message_emitted = True
+        if "end_of_message" in chunk:
+            end_of_message_emitted = True
+        if "start_of_code" in chunk:
+            start_of_code_emitted = True
+        if "end_of_code" in chunk:
+            end_of_code_emitted = True
+        if "executing" in chunk:
+            executing_emitted = True
+        if "end_of_execution" in chunk:
+            end_of_execution_emitted = True
+
+        permitted_flags = [
+            "message",
+            "language",
+            "code",
+            "output",
+            "active_line",
+            "start_of_message",
+            "end_of_message",
+            "start_of_code",
+            "end_of_code",
+            "executing",
+            "end_of_execution",
+        ]
+        if list(chunk.keys())[0] not in permitted_flags:
+            assert False, f"{chunk} is invalid"
+
+    assert start_of_message_emitted
+    assert end_of_message_emitted
+    assert start_of_code_emitted
+    assert end_of_code_emitted
+    assert executing_emitted
+    assert end_of_execution_emitted
+
+
 def test_hello_world():
     hello_world_response = "Hello, World!"
 
@@ -83,37 +178,6 @@ def test_markdown():
     interpreter.chat(
         """Hi, can you test out a bunch of markdown features? Try writing a fenced code block, a table, headers, everything. DO NOT write the markdown inside a markdown code block, just write it raw."""
     )
-
-
-def test_generator():
-    start_of_message_emitted = False
-    end_of_message_emitted = False
-    start_of_code_emitted = False
-    end_of_code_emitted = False
-    executing_emitted = False
-    end_of_execution_emitted = False
-
-    for chunk in interpreter.chat("What's 38023*40334?", stream=True, display=False):
-        print(chunk)
-        if "start_of_message" in chunk:
-            start_of_message_emitted = True
-        if "end_of_message" in chunk:
-            end_of_message_emitted = True
-        if "start_of_code" in chunk:
-            start_of_code_emitted = True
-        if "end_of_code" in chunk:
-            end_of_code_emitted = True
-        if "executing" in chunk:
-            executing_emitted = True
-        if "end_of_execution" in chunk:
-            end_of_execution_emitted = True
-
-    assert start_of_message_emitted
-    assert end_of_message_emitted
-    assert start_of_code_emitted
-    assert end_of_code_emitted
-    assert executing_emitted
-    assert end_of_execution_emitted
 
 
 def test_config_loading():
