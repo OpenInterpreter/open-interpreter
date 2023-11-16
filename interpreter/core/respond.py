@@ -57,7 +57,7 @@ def respond(interpreter):
                 # (otherwise pretty much everyone needs to implement this)
                 for new_chunk_type in ["message", "language", "code"]:
                     if new_chunk_type in chunk and chunk_type != new_chunk_type:
-                        if chunk_type:
+                        if chunk_type != None:
                             yield {f"end_of_{chunk_type}": True}
                         # Language is actually from a code block
                         if new_chunk_type == "language":
@@ -68,7 +68,8 @@ def respond(interpreter):
                 yield chunk
 
             # We don't trigger the end_of_message or end_of_code flag if we actually end on either (we just exit the loop above)
-            yield {f"end_of_{chunk_type}": True}
+            if chunk_type:
+                yield {f"end_of_{chunk_type}": True}
 
         except litellm.exceptions.BudgetExceededError:
             display_markdown_message(
