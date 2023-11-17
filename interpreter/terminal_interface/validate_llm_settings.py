@@ -9,7 +9,7 @@ from ..utils.display_markdown_message import display_markdown_message
 
 def validate_llm_settings(interpreter):
     """
-    Interactivley prompt the user for required LLM settings
+    Interactively prompt the user for required LLM settings
     """
 
     # This runs in a while loop so `continue` lets us start from the top

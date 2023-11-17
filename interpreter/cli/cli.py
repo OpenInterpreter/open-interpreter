@@ -265,4 +265,13 @@ Once the server is running, you can begin your conversation below.
 
         display_markdown_message("> `Vision` enabled **(experimental)**\n")
 
+    # At some point in the future gpt-4 or gpt-4-turbo will probably point at the updated model automatically.
+    if interpreter.model == "gpt-4":
+        interpreter.model = "gpt-4-1106-preview"
+    
+    if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
+        interpreter.context_window = 128000
+        interpreter.max_tokens = 4096
+        interpreter.function_calling_llm = True
+
     interpreter.chat()
