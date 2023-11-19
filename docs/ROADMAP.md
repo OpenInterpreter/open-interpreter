@@ -1,6 +1,9 @@
 # Roadmap
 
 - [ ] Allow for limited functions (`interpreter.functions`)
+- [ ] Switch core code interpreter to by Jupyter-powered
+- [ ] Create more intensive tests for benchmarks
+- [ ] Connect benchmarks to multiple open-source LLMs
 - [ ] Allow for custom llms (`interpreter.llm`)
 - [ ] Allow for custom languages (`interpreter.languages.append(class_that_conforms_to_base_language)`)
 - [ ] Stateless core python package, config passed in by TUI
