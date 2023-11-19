@@ -20,7 +20,7 @@
 
 <br>
 
-**Update:** ● 0.1.12 supports `interpreter --vision` (experimental).
+**Update:** ● 0.1.12 supports `interpreter --vision` ([documentation](https://docs.openinterpreter.com/usage/terminal/vision))
 
 <br>
 

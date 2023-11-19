@@ -47,7 +47,8 @@
             "usage/terminal/settings",
             "usage/terminal/conversation-history",
             "usage/terminal/magic-commands",
-            "usage/terminal/budget-manager"
+            "usage/terminal/budget-manager",
+            "usage/terminal/vision"
           ]
         },
         {
