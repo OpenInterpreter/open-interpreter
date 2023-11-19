@@ -1,24 +1,24 @@
 ---
-title: Overview
+title: Local Mode
 ---
 
-To run Open Interpreter locally, use `local` mode:
+Open Interpreter uses [LM Studio](https://lmstudio.ai/) to connect to local language models (experimental).
 
-<CodeGroup>
+Simply run `interpreter` in local mode from the command line:
 
-```bash Terminal
+```shell
 interpreter --local
 ```
 
-```python Python
-import interpreter
+**You will need to run LM Studio in the background.**
 
-interpreter.local = True
-interpreter.chat()
-```
+1. Download [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
+2. Select a model then click **↓ Download**.
+3. Click the **↔️** button on the left (below 💬).
+4. Select your model at the top, then click **Start Server**.
 
-</CodeGroup>
+Once the server is running, you can begin your conversation with Open Interpreter.
 
-This will automatically select Code Llama. If you include a `model`, the `local` flag will try to run it locally.
+(When you run the command `interpreter --local`, the steps above will be displayed.)
 
-Currently we support running [any GGUF quantized language models from HuggingFace](/language-model-setup/local-models/getting-models).
+> **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually.

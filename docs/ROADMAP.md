@@ -2,9 +2,10 @@
 
 - [ ] Allow for limited functions (`interpreter.functions`)
 - [ ] Switch core code interpreter to by Jupyter-powered
+- [ ] Local and vision should be reserved for TUI, more granular settings for Python
 - [ ] Create more intensive tests for benchmarks
 - [ ] Connect benchmarks to multiple open-source LLMs
-- [ ] Allow for custom llms (`interpreter.llm`)
+- [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] Allow for custom languages (`interpreter.languages.append(class_that_conforms_to_base_language)`)
 - [ ] Stateless core python package, config passed in by TUI
 - [ ] Expand "safe mode" to have proper Docker support

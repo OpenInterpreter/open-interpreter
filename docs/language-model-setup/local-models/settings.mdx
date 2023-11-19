@@ -1,0 +1,31 @@
+---
+title: 'Local Settings'
+---
+
+Most settings — like model architecture and GPU offloading — can be adjusted via [LM Studio.](https://lmstudio.ai/)
+
+**However, `max_tokens` and `context_window` should be set via Open Interpreter.**
+
+For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's is failing or if it's slow. 
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --local --max_tokens 1000 --context_window 3000
+```
+
+```python Python
+import interpreter
+
+interpreter.local = True
+interpreter.max_tokens = 1000 
+interpreter.context_window = 3000
+
+interpreter.chat()
+```
+
+</CodeGroup>
+
+<br/>
+
+<Info>Make sure `max_tokens` is less than `context_window`.</Info>
