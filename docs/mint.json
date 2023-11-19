@@ -61,7 +61,12 @@
             "usage/python/budget-manager"
           ]
         },
-        "usage/desktop-app"
+        {
+          "group": "Desktop",
+          "pages": [
+            "usage/desktop/install"
+          ]
+        }
       ]
     },
     {
