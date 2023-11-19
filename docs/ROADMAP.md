@@ -29,7 +29,7 @@
     /code_interpreter
       core.py
       /languages
-        __init__.py # Imports interfaces
+        __init__.py
         python.py
         shell.py
         ...
