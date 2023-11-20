@@ -40,6 +40,20 @@ def test_config_loading():
     assert temperature_ok and model_ok and debug_mode_ok
 
 
+def test_multiple_instances():
+    import interpreter
+
+    interpreter.system_message = "i"
+    agent_1 = interpreter.Interpreter()
+    agent_1.system_message = "<3"
+    agent_2 = interpreter.Interpreter()
+    agent_2.system_message = "u"
+
+    assert interpreter.system_message == "i"
+    assert agent_1.system_message == "<3"
+    assert agent_2.system_message == "u"
+
+
 def test_generator():
     """
     Sends two messages, makes sure all the flags are correct.

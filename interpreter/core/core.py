@@ -61,6 +61,9 @@ class Interpreter:
         # Load config defaults
         self.extend_config(self.config_file)
 
+        # Expose class so people can make new instances
+        self.Interpreter = Interpreter
+
         # Check for update
         try:
             if not self.local:
