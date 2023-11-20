@@ -6,7 +6,6 @@ _singleton_instance = None
 def get_instance():
     global _singleton_instance
     if _singleton_instance is None:
-        print("CREATING A NEW INSTANCE")
         _singleton_instance = Interpreter()
     return _singleton_instance
 
