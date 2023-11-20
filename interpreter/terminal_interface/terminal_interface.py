@@ -12,16 +12,16 @@ import base64
 import random
 import re
 
-from ..utils.check_for_package import check_for_package
-from ..utils.display_markdown_message import display_markdown_message
-from ..utils.display_output import display_output
-from ..utils.find_image_path import find_image_path
-from ..utils.scan_code import scan_code
-from ..utils.system_debug_info import system_info
-from ..utils.truncate_output import truncate_output
+from ..core.utils.scan_code import scan_code
+from ..core.utils.system_debug_info import system_info
+from ..core.utils.truncate_output import truncate_output
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
+from .utils.check_for_package import check_for_package
+from .utils.display_markdown_message import display_markdown_message
+from .utils.display_output import display_output
+from .utils.find_image_path import find_image_path
 
 # Add examples to the readline history
 examples = [

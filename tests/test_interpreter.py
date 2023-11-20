@@ -4,7 +4,10 @@ import time
 from random import randint
 
 import interpreter
-from interpreter.utils.count_tokens import count_messages_tokens, count_tokens
+from interpreter.terminal_interface.utils.count_tokens import (
+    count_messages_tokens,
+    count_tokens,
+)
 
 
 # this function will run before each test

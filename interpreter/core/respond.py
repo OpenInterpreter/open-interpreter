@@ -3,12 +3,12 @@ import traceback
 
 import litellm
 
-from ..code_interpreters.create_code_interpreter import create_code_interpreter
-from ..code_interpreters.language_map import language_map
-from ..utils.display_markdown_message import display_markdown_message
-from ..utils.html_to_base64 import html_to_base64
-from ..utils.merge_deltas import merge_deltas
-from ..utils.truncate_output import truncate_output
+from ..terminal_interface.utils.display_markdown_message import display_markdown_message
+from .code_interpreters.create_code_interpreter import create_code_interpreter
+from .code_interpreters.language_map import language_map
+from .utils.html_to_base64 import html_to_base64
+from .utils.merge_deltas import merge_deltas
+from .utils.truncate_output import truncate_output
 
 
 def respond(interpreter):

@@ -1,8 +1,10 @@
 import litellm
 import tokentrim as tt
 
+from ...terminal_interface.utils.display_markdown_message import (
+    display_markdown_message,
+)
 from ..utils.convert_to_openai_messages import convert_to_openai_messages
-from ..utils.display_markdown_message import display_markdown_message
 from ..utils.merge_deltas import merge_deltas
 from ..utils.parse_partial_json import parse_partial_json
 
