@@ -1,7 +1,6 @@
 from ..utils.display_markdown_message import display_markdown_message
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
-from .magic_commands import handle_magic_command
 
 
 def render_past_conversation(messages):

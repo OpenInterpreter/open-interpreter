@@ -37,6 +37,8 @@ class Interpreter:
         self.max_output = 2000
         self.safe_mode = "off"
         self.disable_procedures = False
+        # In the future, we'll use this to start with all languages
+        # self.languages = [i.name for i in self.computer.interfaces]
 
         # Conversation history
         self.conversation_history = True
