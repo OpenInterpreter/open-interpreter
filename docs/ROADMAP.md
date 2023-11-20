@@ -1,12 +1,13 @@
 # Roadmap
 
+- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
+- [x] Support multiple instances
 - [ ] Add %% (shell) magic command
 - [ ] Allow for limited functions (`interpreter.functions`)
 - [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
 - [ ] Switch core code interpreter to be Jupyter-powered
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
 - [ ] Create more intensive tests for benchmarks
-- [x] Support multiple instances
 - [ ] Connect benchmarks to multiple open-source LLMs
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] Allow for custom interfaces (`interpreter.computer.interfaces.append(class_that_conforms_to_base_interface)`)
@@ -22,7 +23,6 @@
 - [ ] Better storage of different model keys in TUI / config file
 - [ ] Better comments throughout the package (they're like docs for contributors)
 - [ ] Up-to-date documentation, requiring documentation for PRs
-- [ ] Split TUI from core — two seperate folders (see below)
 
 # What's in our scope?
 
