@@ -6,7 +6,7 @@
 - [ ] Switch core code interpreter to be Jupyter-powered
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
 - [ ] Create more intensive tests for benchmarks
-- [ ] Support multiple instances (see below)
+- [x] Support multiple instances
 - [ ] Connect benchmarks to multiple open-source LLMs
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] Allow for custom interfaces (`interpreter.computer.interfaces.append(class_that_conforms_to_base_interface)`)
@@ -61,21 +61,6 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
         shell.py
         ...
     ...
-```
-
-### New import structure to support multiple instances
-
-```python
-# Get an instance of OI quickly
-import interpreter
-interpreter.chat()
-```
-```python
-# Create multiple instances
-from interpreter import Interpreter
-agent_1 = Interpreter()
-agent_2 = Interpreter(all, parameters, from, config, can, be, set, here)
-agent_1.chat()
 ```
 
 ### New streaming structure
