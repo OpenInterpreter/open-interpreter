@@ -2,6 +2,10 @@
 
 - [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
 - [x] Support multiple instances
+- [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
+- [ ] **Easy 🟢** Require documentation for PRs
+- [ ] Stateless core python package, config passed in by TUI
+- [ ] Expose tool (`interpreter.computer.run(language, code)`)
 - [ ] Add %% (shell) magic command
 - [ ] Allow for limited functions (`interpreter.functions`)
 - [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
@@ -9,20 +13,16 @@
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
 - [ ] Create more intensive tests for benchmarks
 - [ ] Connect benchmarks to multiple open-source LLMs
+- [ ] Further split TUI from core (some utils still reach across)
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] Allow for custom interfaces (`interpreter.computer.interfaces.append(class_that_conforms_to_base_interface)`)
-- [ ] Stateless core python package, config passed in by TUI
 - [ ] Work with mintlfy to translate docs
-- [ ] Add more hosted models to docs from [litellm docs](https://docs.litellm.ai/docs/)
-- [ ] Expand "safe mode" to have proper Docker support
+- [ ] Expand "safe mode" to have proper, simple Docker support
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
-- [ ] Support multiple instances of OI (`import Interpreter`)
-- [ ] Expose tool (`interpreter.computer.run_code(language, code)`)
 - [ ] Improve partnership with `languagetools`
 - [ ] Remove `procedures` (there must be a better way)
-- [ ] Better storage of different model keys in TUI / config file
+- [ ] Better storage of different model keys in TUI / config file. All keys, to multiple providers, should be stored in there. Easy switching
 - [ ] Better comments throughout the package (they're like docs for contributors)
-- [ ] Up-to-date documentation, requiring documentation for PRs
 
 # What's in our scope?
 
