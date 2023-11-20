@@ -1,3 +1,4 @@
+import sys
 from .core.core import Interpreter
 
 sys.modules["interpreter"] = Interpreter()
