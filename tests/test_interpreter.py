@@ -23,6 +23,38 @@ def teardown_function():
     time.sleep(5)
 
 
+def test_config_loading():
+    # because our test is running from the root directory, we need to do some
+    # path manipulation to get the actual path to the config file or our config
+    # loader will try to load from the wrong directory and fail
+    currentPath = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(currentPath, "./config.test.yaml")
+
+    interpreter.extend_config(config_path=config_path)
+
+    # check the settings we configured in our config.test.yaml file
+    temperature_ok = interpreter.temperature == 0.25
+    model_ok = interpreter.model == "gpt-3.5-turbo"
+    debug_mode_ok = interpreter.debug_mode == True
+
+    assert temperature_ok and model_ok and debug_mode_ok
+
+
+def test_instance_import():
+    import interpreter
+    from interpreter import Interpreter
+
+    interpreter.system_message = "i"
+    agent_1 = Interpreter()
+    agent_1.system_message = "<3"
+    agent_2 = Interpreter()
+    agent_2.system_message = "u"
+
+    assert interpreter.system_message == "i"
+    assert agent_1.system_message == "<3"
+    assert agent_2.system_message == "u"
+
+
 def test_generator():
     """
     Sends two messages, makes sure all the flags are correct.
@@ -178,23 +210,6 @@ def test_markdown():
     interpreter.chat(
         """Hi, can you test out a bunch of markdown features? Try writing a fenced code block, a table, headers, everything. DO NOT write the markdown inside a markdown code block, just write it raw."""
     )
-
-
-def test_config_loading():
-    # because our test is running from the root directory, we need to do some
-    # path manipulation to get the actual path to the config file or our config
-    # loader will try to load from the wrong directory and fail
-    currentPath = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(currentPath, "./config.test.yaml")
-
-    interpreter.extend_config(config_path=config_path)
-
-    # check the settings we configured in our config.test.yaml file
-    temperature_ok = interpreter.temperature == 0.25
-    model_ok = interpreter.model == "gpt-3.5-turbo"
-    debug_mode_ok = interpreter.debug_mode == True
-
-    assert temperature_ok and model_ok and debug_mode_ok
 
 
 def test_system_message_appending():

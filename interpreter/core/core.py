@@ -60,6 +60,7 @@ class Interpreter:
 
         # Load config defaults
         self.extend_config(self.config_file)
+        print("RESTORING")
 
         # Check for update
         try:

@@ -1,11 +1,22 @@
-import sys
-
 from .core.core import Interpreter
 
-# This is done so when users `import interpreter`,
-# they get an instance of interpreter:
+_singleton_instance = None
 
-sys.modules["interpreter"] = Interpreter()
+
+def get_instance():
+    global _singleton_instance
+    if _singleton_instance is None:
+        print("CREATING A NEW INSTANCE")
+        _singleton_instance = Interpreter()
+    return _singleton_instance
+
+
+def __getattr__(name):
+    return getattr(get_instance(), name)
+
+
+# ^ This is done so when users `import interpreter`,
+# they are basically controlling the singleton instance — e.g. interpreter.chat() will work.
 
 # **This is a controversial thing to do,**
 # because perhaps modules ought to behave like modules.
