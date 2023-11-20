@@ -283,8 +283,6 @@ Once the server is running, you can begin your conversation below.
         # Doesn't matter
         pass
 
-    validate_llm_settings(interpreter)
-
     # At some point in the future these model names redirects wont be necessary anymore, but legacy names will remain for a while
     if interpreter.model == "gpt-4" or interpreter.model == "gpt-4-32k":
         interpreter.model = "gpt-4-1106-preview"
@@ -301,5 +299,7 @@ Once the server is running, you can begin your conversation below.
         interpreter.context_window = 16000
         interpreter.max_tokens = 4096
         interpreter.function_calling_llm = True
+
+    validate_llm_settings(interpreter)
 
     interpreter.chat()
