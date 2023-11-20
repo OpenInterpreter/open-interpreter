@@ -265,12 +265,20 @@ Once the server is running, you can begin your conversation below.
 
         display_markdown_message("> `Vision` enabled **(experimental)**\n")
 
-    # At some point in the future gpt-4 or gpt-4-turbo will probably point at the updated model automatically.
-    if interpreter.model == "gpt-4":
+    # At some point in the future these model names redirects wont be necessary anymore, but legacy names will remain for a while
+    if interpreter.model == "gpt-4" or interpreter.model == "gpt-4-32k":
         interpreter.model = "gpt-4-1106-preview"
+        
+    if interpreter.model == "gpt-3.5-turbo" or interpreter.model == "gpt-3.5-turbo-16k":
+        interpreter.model = "gpt-3.5-turbo-1106"
     
     if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
         interpreter.context_window = 128000
+        interpreter.max_tokens = 4096
+        interpreter.function_calling_llm = True
+
+    if not interpreter.local and interpreter.model == "gpt-3.5-turbo-1106":
+        interpreter.context_window = 16000
         interpreter.max_tokens = 4096
         interpreter.function_calling_llm = True
 
