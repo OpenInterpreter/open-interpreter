@@ -4,7 +4,10 @@ import time
 from random import randint
 
 import interpreter
-from interpreter.utils.count_tokens import count_messages_tokens, count_tokens
+from interpreter.terminal_interface.utils.count_tokens import (
+    count_messages_tokens,
+    count_tokens,
+)
 
 
 # this function will run before each test
@@ -40,14 +43,13 @@ def test_config_loading():
     assert temperature_ok and model_ok and debug_mode_ok
 
 
-def test_instance_import():
+def test_multiple_instances():
     import interpreter
-    from interpreter import Interpreter
 
     interpreter.system_message = "i"
-    agent_1 = Interpreter()
+    agent_1 = interpreter.Interpreter()
     agent_1.system_message = "<3"
-    agent_2 = Interpreter()
+    agent_2 = interpreter.Interpreter()
     agent_2.system_message = "u"
 
     assert interpreter.system_message == "i"

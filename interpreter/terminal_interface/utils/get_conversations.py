@@ -1,6 +1,6 @@
 import os
 
-from ..utils.local_storage_path import get_storage_path
+from .local_storage_path import get_storage_path
 
 
 def get_conversations():

@@ -5,7 +5,9 @@ import litellm
 import openai
 import tokentrim as tt
 
-from ..utils.display_markdown_message import display_markdown_message
+from ...terminal_interface.utils.display_markdown_message import (
+    display_markdown_message,
+)
 
 
 def setup_text_llm(interpreter):

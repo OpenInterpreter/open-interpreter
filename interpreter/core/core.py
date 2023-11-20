@@ -7,21 +7,18 @@ import json
 import os
 from datetime import datetime
 
-from ..cli.cli import cli
-from ..llm.setup_llm import setup_llm
+from ..terminal_interface.start_terminal_interface import start_terminal_interface
 from ..terminal_interface.terminal_interface import terminal_interface
-from ..terminal_interface.validate_llm_settings import validate_llm_settings
-from ..utils.check_for_update import check_for_update
-from ..utils.display_markdown_message import display_markdown_message
-from ..utils.get_config import get_config, user_config_path
-from ..utils.local_storage_path import get_storage_path
+from ..terminal_interface.utils.get_config import get_config, user_config_path
+from ..terminal_interface.utils.local_storage_path import get_storage_path
 from .generate_system_message import generate_system_message
+from .llm.setup_llm import setup_llm
 from .respond import respond
 
 
 class Interpreter:
-    def cli(self):
-        cli(self)
+    def start_terminal_interface(self):
+        start_terminal_interface(self)
 
     def __init__(self):
         # State
@@ -61,17 +58,8 @@ class Interpreter:
         # Load config defaults
         self.extend_config(self.config_file)
 
-        # Check for update
-        try:
-            if not self.local:
-                # This should actually be pushed into the utility
-                if check_for_update():
-                    display_markdown_message(
-                        "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
-                    )
-        except:
-            # Doesn't matter
-            pass
+        # Expose class so people can make new instances
+        self.Interpreter = Interpreter
 
     def extend_config(self, config_path):
         if self.debug_mode:
@@ -91,11 +79,6 @@ class Interpreter:
         return self.messages
 
     def _streaming_chat(self, message=None, display=True):
-        # If we have a display,
-        # we can validate our LLM settings w/ the user first
-        if display:
-            validate_llm_settings(self)
-
         # Setup the LLM
         if not self._llm:
             self._llm = setup_llm(self)

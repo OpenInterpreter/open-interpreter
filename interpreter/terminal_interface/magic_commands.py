@@ -2,8 +2,8 @@ import json
 import os
 import subprocess
 
-from ..utils.count_tokens import count_messages_tokens
-from ..utils.display_markdown_message import display_markdown_message
+from .utils.count_tokens import count_messages_tokens
+from .utils.display_markdown_message import display_markdown_message
 
 
 def handle_undo(self, arguments):

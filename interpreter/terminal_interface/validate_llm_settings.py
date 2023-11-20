@@ -4,7 +4,7 @@ import time
 
 import litellm
 
-from ..utils.display_markdown_message import display_markdown_message
+from .utils.display_markdown_message import display_markdown_message
 
 
 def validate_llm_settings(interpreter):

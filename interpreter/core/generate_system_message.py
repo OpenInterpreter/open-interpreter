@@ -1,7 +1,7 @@
 import traceback
 
-from ..rag.get_relevant_procedures_string import get_relevant_procedures_string
-from ..utils.get_user_info_string import get_user_info_string
+from .rag.get_relevant_procedures_string import get_relevant_procedures_string
+from .utils.get_user_info_string import get_user_info_string
 
 
 def generate_system_message(interpreter):

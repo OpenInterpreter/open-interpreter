@@ -5,9 +5,11 @@ import subprocess
 
 import pkg_resources
 
-from ..terminal_interface.conversation_navigator import conversation_navigator
-from ..utils.display_markdown_message import display_markdown_message
-from ..utils.get_config import get_config_path
+from .conversation_navigator import conversation_navigator
+from .utils.check_for_update import check_for_update
+from .utils.display_markdown_message import display_markdown_message
+from .utils.get_config import get_config_path
+from .validate_llm_settings import validate_llm_settings
 
 arguments = [
     {
@@ -111,7 +113,11 @@ arguments = [
 ]
 
 
-def cli(interpreter):
+def start_terminal_interface(interpreter):
+    """
+    Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
+    """
+
     parser = argparse.ArgumentParser(description="Open Interpreter")
 
     # Add arguments
@@ -264,6 +270,20 @@ Once the server is running, you can begin your conversation below.
         interpreter.max_tokens = 4096
 
         display_markdown_message("> `Vision` enabled **(experimental)**\n")
+
+    # Check for update
+    try:
+        if not interpreter.local:
+            # This should actually be pushed into the utility
+            if check_for_update():
+                display_markdown_message(
+                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                )
+    except:
+        # Doesn't matter
+        pass
+
+    validate_llm_settings(interpreter)
 
     # At some point in the future these model names redirects wont be necessary anymore, but legacy names will remain for a while
     if interpreter.model == "gpt-4" or interpreter.model == "gpt-4-32k":
