@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 
 from ..utils.count_tokens import count_messages_tokens
 from ..utils.display_markdown_message import display_markdown_message
@@ -157,6 +158,18 @@ def handle_count_tokens(self, prompt):
 
 
 def handle_magic_command(self, user_input):
+    # Handle shell
+    if user_input.startswith("%%"):
+        # This is not implemented yet.
+        print("%% magic command not supported yet.")
+        return
+        # user_input = user_input[2:].split()
+        # # Run as shell
+        # for chunk in self.computer.run("shell", user_input):
+        #     if "output" in chunk:
+        #         print(chunk["output"]["content"]) # Just print it for now. Should hook up to TUI later
+        # return
+
     # split the command into the command and the arguments, by the first whitespace
     switch = {
         "help": handle_help,
