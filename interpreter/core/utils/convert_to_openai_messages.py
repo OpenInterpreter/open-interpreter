@@ -48,7 +48,7 @@ def convert_to_openai_messages(messages, function_calling=True):
                     content = (
                         "Code output: "
                         + message["output"]
-                        + "\n\nWhat does this output mean / what's next (if anything)?"
+                        + "\n\nWhat does this output mean / what's next (if anything, or are we done)?"
                     )
 
                 new_messages.append(
@@ -85,7 +85,9 @@ def convert_to_openai_messages(messages, function_calling=True):
 
             if message["role"] == "assistant":
                 if message == messages[-1]:
+                    # DISABLED self-improving image message (it loops forever)
                     # Save some tokens and be less repetitive by only adding this to the last message
+                    """
                     new_message["content"].append(
                         {
                             "type": "text",
@@ -95,6 +97,8 @@ def convert_to_openai_messages(messages, function_calling=True):
                     new_message[
                         "content"
                     ].reverse()  # Text comes first in OpenAI's docs. IDK if this is important.
+                    """
+                    pass
 
                 new_messages.append(new_message)
 
