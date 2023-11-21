@@ -4,6 +4,7 @@ import subprocess
 
 from .utils.count_tokens import count_messages_tokens
 from .utils.display_markdown_message import display_markdown_message
+from ..core.utils.system_debug_info import system_info
 
 
 def handle_undo(self, arguments):
@@ -44,6 +45,7 @@ def handle_undo(self, arguments):
 
 def handle_help(self, arguments):
     commands_description = {
+        "%% [commands]": "Run commands in system shell",
         "%debug [true/false]": "Toggle debug mode. Without arguments or with 'true', it enters debug mode. With 'false', it exits debug mode.",
         "%reset": "Resets the current session.",
         "%undo": "Remove previous messages and its response from the message history.",
@@ -51,6 +53,7 @@ def handle_help(self, arguments):
         "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
         "%tokens [prompt]": "EXPERIMENTAL: Calculate the tokens used by the next request based on the current conversation's messages and estimate the cost of that request; optionally provide a prompt to also calulate the tokens used by that prompt and the total amount of tokens that will be sent with the next request",
         "%help": "Show this help message.",
+        "%info": "Show system and interpreter information",
     }
 
     base_message = ["> **Available Commands:**\n\n"]
@@ -79,6 +82,9 @@ def handle_debug(self, arguments=None):
         self.debug_mode = False
     else:
         display_markdown_message("> Unknown argument to debug command.")
+
+def handle_info(self, arguments):
+    system_info(self)
 
 
 def handle_reset(self, arguments):
@@ -156,19 +162,20 @@ def handle_count_tokens(self, prompt):
 
     display_markdown_message("\n".join(outputs))
 
+def handle_shell(self, code):
+    result = subprocess.run(code, shell=True, capture_output=True)
+
+    if result.stdout:
+        print(result.stdout.decode())
+
+    if result.stderr:
+        print(result.stderr.decode())
 
 def handle_magic_command(self, user_input):
     # Handle shell
     if user_input.startswith("%%"):
-        # This is not implemented yet.
-        print("%% magic command not supported yet.")
+        handle_shell(self,user_input[2:])
         return
-        # user_input = user_input[2:].split()
-        # # Run as shell
-        # for chunk in self.computer.run("shell", user_input):
-        #     if "output" in chunk:
-        #         print(chunk["output"]["content"]) # Just print it for now. Should hook up to TUI later
-        # return
 
     # split the command into the command and the arguments, by the first whitespace
     switch = {
@@ -179,6 +186,7 @@ def handle_magic_command(self, user_input):
         "load_message": handle_load_message,
         "undo": handle_undo,
         "tokens": handle_count_tokens,
+        "info": handle_info,
     }
 
     user_input = user_input[1:].strip()  # Capture the part after the `%`
