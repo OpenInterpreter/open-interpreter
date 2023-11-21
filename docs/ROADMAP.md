@@ -4,6 +4,7 @@
 - [x] Support multiple instances
 - [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
 - [ ] **Easy 🟢** Require documentation for PRs
+- [ ] Make sure breaking from generator during execution stops the execution
 - [ ] Stateless core python package, config passed in by TUI
 - [ ] Expose tool (`interpreter.computer.run(language, code)`)
 - [ ] Add %% (shell) magic command
