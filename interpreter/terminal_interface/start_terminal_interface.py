@@ -110,6 +110,12 @@ arguments = [
         "help_text": "experimentally use vision for supported languages (HTML)",
         "type": bool,
     },
+    {
+        "name": "profile",
+        "nickname": "p",
+        "help_text": "select profile to load",
+        "type": str,
+    },
 ]
 
 
@@ -206,7 +212,7 @@ def start_terminal_interface(interpreter):
             if attr_name == "config_file":
                 user_config = get_config_path(attr_value)
                 interpreter.config_file = user_config
-                interpreter.extend_config(config_path=user_config)
+                interpreter.load_config()
             else:
                 setattr(interpreter, attr_name, attr_value)
 
@@ -234,6 +240,9 @@ def start_terminal_interface(interpreter):
 
     if args.local:
         interpreter.load_config("local")
+
+    if args.profile:
+        interpreter.load_config(args.profile)
 
     # Check for update
     try:

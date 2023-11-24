@@ -73,9 +73,12 @@ class Interpreter:
 
         # Load profile-specific configuration
         if profile in config:
+            #Load default values first
+            self.update_attributes(config['base'])
             self.update_attributes(config[profile])
         else:
             print(f"Profile '{profile}' not found in the configuration file.")
+            raise
     
     def update_attributes(self, config):
         for key, value in config.items():
