@@ -66,7 +66,16 @@ class Interpreter:
             print(f"Extending configuration from `{config_path}`")
 
         config = get_config(config_path)
-        self.__dict__.update(config)
+        
+        # Accessing the default profile parameter
+        default_profile = config.get('default_profile', None)
+        if default_profile is not None:
+            print(f"default_profile: {default_profile}")
+        else:
+            print("default_profile is not set in the configuration")
+
+        self.__dict__.update(config['base']) #Get system messages
+        self.__dict__.update(config[default_profile])
 
     def chat(self, message=None, display=True, stream=False):
         if stream:
