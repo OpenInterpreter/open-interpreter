@@ -218,7 +218,7 @@ def terminal_interface(interpreter, message):
                     active_block.output += "\n" + chunk["output"]
                     active_block.output = (
                         active_block.output.strip()
-                    )  # <- Aesthetic choice
+                    )  # ^ Aesthetic choice
 
                     # Truncate output
                     active_block.output = truncate_output(

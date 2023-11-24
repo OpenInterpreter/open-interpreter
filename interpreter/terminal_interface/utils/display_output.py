@@ -36,7 +36,7 @@ def display_output_cli(output):
             image_data = output["image"]
             tmp_file.write(base64.b64decode(image_data))
             open_file(tmp_file.name)
-            print(f"Image saved and opened from {tmp_file.name}")
+            # print(f"Image saved and opened from {tmp_file.name}")
     elif "html" in output:
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".html", mode="w"
@@ -46,14 +46,14 @@ def display_output_cli(output):
                 html = "<html>\n" + html + "\n</html>"
             tmp_file.write(html)
             open_file(tmp_file.name)
-            print(f"HTML content saved and opened from {tmp_file.name}")
+            # print(f"HTML content saved and opened from {tmp_file.name}")
     elif "javascript" in output:
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".js", mode="w"
         ) as tmp_file:
             tmp_file.write(output["javascript"])
             open_file(tmp_file.name)
-            print(f"JavaScript content saved and opened from {tmp_file.name}")
+            # print(f"JavaScript content saved and opened from {tmp_file.name}")
 
 
 def open_file(file_path):

@@ -1,11 +1,8 @@
-import time
 import traceback
 
 import litellm
 
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
-from .code_interpreters.create_code_interpreter import create_code_interpreter
-from .code_interpreters.language_map import language_map
 from .utils.html_to_base64 import html_to_base64
 from .utils.merge_deltas import merge_deltas
 from .utils.truncate_output import truncate_output
@@ -115,33 +112,13 @@ If LM Studio's local server is running, please try a language model with a diffe
                 print("Running code:", interpreter.messages[-1])
 
             try:
-                # What code do you want to run?
+                # What language/code do you want to run?
+                language = interpreter.messages[-1]["language"].lower().strip()
                 code = interpreter.messages[-1]["code"]
 
-                # Fix a common error where the LLM thinks it's in a Jupyter notebook
-                if interpreter.messages[-1]["language"] == "python" and code.startswith(
-                    "!"
-                ):
-                    code = code[1:]
-                    interpreter.messages[-1]["code"] = code
-                    interpreter.messages[-1]["language"] = "shell"
-
-                # Get a code interpreter to run it
-                language = interpreter.messages[-1]["language"].lower().strip()
-                if language in language_map:
-                    if language not in interpreter._code_interpreters:
-                        # Create code interpreter
-                        config = {"language": language, "vision": interpreter.vision}
-                        interpreter._code_interpreters[
-                            language
-                        ] = create_code_interpreter(config)
-                    code_interpreter = interpreter._code_interpreters[language]
-                else:
-                    # This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message
-
-                    output = (
-                        f"Open Interpreter does not currently support `{language}`."
-                    )
+                # Is this language enabled/supported?
+                if language not in interpreter.languages:
+                    output = f"`{language}` disabled or not supported."
 
                     yield {"output": output}
                     interpreter.messages[-1]["output"] = output
@@ -153,6 +130,12 @@ If LM Studio's local server is running, please try a language model with a diffe
                     else:
                         break
 
+                # Fix a common error where the LLM thinks it's in a Jupyter notebook
+                if language == "python" and code.startswith("!"):
+                    code = code[1:]
+                    interpreter.messages[-1]["code"] = code
+                    interpreter.messages[-1]["language"] = "shell"
+
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
                     yield {"executing": {"code": code, "language": language}}
@@ -161,9 +144,11 @@ If LM Studio's local server is running, please try a language model with a diffe
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
+                yield {"start_of_output": True}
+
                 # Yield each line, also append it to last messages' output
                 interpreter.messages[-1]["output"] = ""
-                for line in code_interpreter.run(code):
+                for line in interpreter.computer.run(language, code):
                     yield line
                     if "output" in line:
                         output = interpreter.messages[-1]["output"]
@@ -193,10 +178,10 @@ If LM Studio's local server is running, please try a language model with a diffe
                 interpreter.messages[-1]["output"] = output.strip()
 
             yield {"active_line": None}
-            yield {"end_of_execution": True}
+            yield {"end_of_output": True}
 
         else:
-            # Doesn't want to run code. We're done
+            # Doesn't want to run code. We're done!
             break
 
     return

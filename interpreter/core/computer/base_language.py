@@ -1,4 +1,4 @@
-class BaseCodeInterpreter:
+class BaseLanguage:
     """
     .run is a generator that yields a dict with attributes: active_line, output
     """
@@ -7,6 +7,9 @@ class BaseCodeInterpreter:
         pass
 
     def run(self, code):
+        pass
+
+    def stop(self):
         pass
 
     def terminate(self):
