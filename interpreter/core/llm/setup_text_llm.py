@@ -129,6 +129,10 @@ def setup_text_llm(interpreter):
 
         if interpreter.model == "gpt-4-vision-preview":
             # We need to go straight to OpenAI for this, LiteLLM doesn't work
+            if interpreter.api_base:
+                openai.api_base = interpreter.api_base
+            if interpreter.api_key:
+                openai.api_key = interpreter.api_key
             return openai.ChatCompletion.create(**params)
 
         # LiteLLM
