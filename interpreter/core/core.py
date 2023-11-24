@@ -75,8 +75,18 @@ class Interpreter:
         elif default_profile is None:
             print(f"default_profile: {default_profile}")
 
-        self.__dict__.update(config['base']) #Get system messages
+        self.__dict__.update(config['base']) #Load default
         self.__dict__.update(config[default_profile])
+    
+    def load_profile(self, profile):
+        if self.debug_mode:
+            print(f"Loading profile from config: `{self.config_file}`")
+
+        config = get_config(self.config_file)
+
+        self.__dict__.update(config['base']) #Load default
+        self.launch_message = ""
+        self.__dict__.update(config[profile])
 
     def chat(self, message=None, display=True, stream=False):
         if stream:

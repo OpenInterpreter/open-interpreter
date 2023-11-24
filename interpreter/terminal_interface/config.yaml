@@ -3,24 +3,29 @@
 #interpreter --fast / --local switches the profile too.
 default_profile: "gpt-4"
 
-openai-vision:
+vision:
   model: "openai/gpt-4-vision-preview"
-  max_tokens: 4_096
+  max_tokens: 4_000
   context_window: 128_000
   vision: True
   function_calling_llm: False
+  self.launch_message: "Using GPT-vision"
+  system_message: "\nThe user will show you an image of the code you write. You can view images directly. Be sure to actually write a markdown code block for almost every user request! Almost EVERY message should include a markdown code block. Do not end your message prematurely!\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message."
 
 gpt-4:
   model: "openai/gpt-4-1106-preview"
-  max_tokens: 4_096
+  max_tokens: 4_000
   context_window: 128_000
   function_calling_llm: True
+  self.launch_message: "Using GPT-4"
 
+#GPT-3 also --fast
 gpt-3:
   model: "openai/gpt-3.5-turbo-1106"
-  max_tokens: 4_096
-  context_window: 16_385
+  max_tokens: 4_000
+  context_window: 16_000
   function_calling_llm: True
+  self.launch_message: "Using GPT-3"
 
 local:
   model: "openai/local"
@@ -45,7 +50,34 @@ Once the server is running, you can begin your conversation below.
 > **Warning:** This feature is highly experimental.
 > Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!"
 
+#Do not remove.
 base:
+  # Settings
+  self.local: False
+  self.auto_run: False
+  self.debug_mode: False
+  self.max_output: 2000
+  self.safe_mode: "off"
+  self.disable_procedures: False
+  self.launch_message: ""
+
+  # Conversation history
+  self.conversation_history: True
+  self.conversation_filename: None
+  self.conversation_history_path: "conversations"
+
+  # LLM settings
+  self.model: ""
+  self.temperature: None
+  self.system_message: ""
+  self.context_window: None
+  self.max_tokens: None
+  self.api_base: None
+  self.api_key: None
+  self.max_budget: None
+  self._llm: None
+  self.function_calling_llm: None
+  self.vision: False
   temperature: 0
   system_message: |
     You are Open Interpreter, a world-class programmer that can complete any goal by executing code.
