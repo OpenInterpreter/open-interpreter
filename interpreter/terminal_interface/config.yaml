@@ -1,22 +1,24 @@
 #Choose which profile to run using "interpreter"
 #use interpreter --profile <profile> to override
 #interpreter --fast / --local switches the profile too.
-default_profile: "local"
+default_profile: "gpt-4"
 
 openai-vision:
-  model: "openai/"
-  max_tokens: 1024
-  context_window: 3000
+  model: "openai/gpt-4-vision-preview"
+  max_tokens: 4_096
+  context_window: 128_000
+  vision: True
+  function_calling_llm: False
 
 gpt-4:
-  model: "openai/gpt-4"
-  max_tokens: 1024
-  context_window: 3000
+  model: "openai/gpt-4-1106-preview"
+  max_tokens: 4_096
+  context_window: 128_000
 
 gpt-3:
-  model: "openai/gpt-3.5-turbo"
-  max_tokens: 1024
-  context_window: 3000
+  model: "openai/gpt-3.5-turbo-1106"
+  max_tokens: 4_096
+  context_window: 16_385
 
 local:
   model: "openai/local"
