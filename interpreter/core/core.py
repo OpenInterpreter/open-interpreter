@@ -4,6 +4,7 @@ It's the main file. `import interpreter` will import an instance of this class.
 """
 
 import json
+import yaml
 import os
 from datetime import datetime
 
@@ -57,36 +58,34 @@ class Interpreter:
         self.vision = False  # LLM supports vision
 
         # Load config defaults
-        self.extend_config(self.config_file)
+        self.load_config()
 
         # Expose class so people can make new instances
         self.Interpreter = Interpreter
 
-    def extend_config(self, config_path):
-        if self.debug_mode:
-            print(f"Extending configuration from `{config_path}`")
+    def load_config(self, profile=None):
+        with open(self.config_file, 'r') as file:
+            config = yaml.safe_load(file)
 
-        config = get_config(config_path)
-        
-        # Accessing the default profile parameter
-        default_profile = config.get('default_profile', None)
-        if default_profile is not None and self.debug_mode:
-            print(f"default_profile: {default_profile}")
-        elif default_profile is None:
-            print(f"default_profile: {default_profile}")
+        # Use default_profile if no specific profile is provided
+        if profile is None:
+            profile = config.get('default_profile', None)
 
-        self.__dict__.update(config['base']) #Load default
-        self.__dict__.update(config[default_profile])
+        # Load profile-specific configuration
+        if profile in config:
+            self.update_attributes(config[profile])
+        else:
+            print(f"Profile '{profile}' not found in the configuration file.")
     
-    def load_profile(self, profile):
-        if self.debug_mode:
-            print(f"Loading profile from config: `{self.config_file}`")
-
-        config = get_config(self.config_file)
-
-        self.__dict__.update(config['base']) #Load default
-        self.launch_message = ""
-        self.__dict__.update(config[profile])
+    def update_attributes(self, config):
+        for key, value in config.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            elif key.startswith('self.'):
+                # Handle attributes prefixed with 'self.'
+                actual_key = key.split('self.', 1)[1]
+                if hasattr(self, actual_key):
+                    setattr(self, actual_key, value)
 
     def chat(self, message=None, display=True, stream=False):
         if stream:

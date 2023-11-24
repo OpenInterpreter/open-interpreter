@@ -227,13 +227,13 @@ def start_terminal_interface(interpreter):
         return
 
     if args.fast:
-        interpreter.load_profile("gpt-3")
+        interpreter.load_config("gpt-3")
 
     if args.vision:
-        interpreter.load_profile("vision")
+        interpreter.load_config("vision")
 
     if args.local:
-        interpreter.load_profile("local")
+        interpreter.load_config("local")
 
     # Check for update
     try:
