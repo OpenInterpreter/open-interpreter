@@ -34,6 +34,7 @@ class Interpreter:
         self.max_output = 2000
         self.safe_mode = "off"
         self.disable_procedures = False
+        self.launch_message = ""
         # In the future, we'll use this to start with all languages
         # self.languages = [i.name for i in self.computer.interfaces]
 
@@ -69,10 +70,10 @@ class Interpreter:
         
         # Accessing the default profile parameter
         default_profile = config.get('default_profile', None)
-        if default_profile is not None:
+        if default_profile is not None and self.debug_mode:
             print(f"default_profile: {default_profile}")
-        else:
-            print("default_profile is not set in the configuration")
+        elif default_profile is None:
+            print(f"default_profile: {default_profile}")
 
         self.__dict__.update(config['base']) #Get system messages
         self.__dict__.update(config[default_profile])

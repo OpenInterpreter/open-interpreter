@@ -14,11 +14,13 @@ gpt-4:
   model: "openai/gpt-4-1106-preview"
   max_tokens: 4_096
   context_window: 128_000
+  function_calling_llm: True
 
 gpt-3:
   model: "openai/gpt-3.5-turbo-1106"
   max_tokens: 4_096
   context_window: 16_385
+  function_calling_llm: True
 
 local:
   model: "openai/local"
@@ -26,6 +28,22 @@ local:
   max_tokens: 1024
   context_window: 3000
   api_key: "0"
+  launch_message: "
+> Open Interpreter's local mode is powered by **`LM Studio`**.
+
+
+You will need to run **LM Studio** in the background.
+
+1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/) then start it.\n
+2. Select a language model then click **Download**.\n
+3. Click the **<->** button on the left (below the chat button).\n
+4. Select your model at the top, then click **Start Server**.\n
+
+
+Once the server is running, you can begin your conversation below.
+
+> **Warning:** This feature is highly experimental.
+> Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!"
 
 base:
   temperature: 0
