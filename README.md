@@ -14,25 +14,6 @@ Bienvenido al **Ricky Interpreter**, una creación de Ricardo Ruiz, también con
 - **Visualización de Salidas**: El arte también se encuentra en la presentación. [`display_output.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/display_output.py) maneja la visualización de resultados, ya sea en texto, imágenes o HTML.
 - **Configuración y Conversaciones**: Los scripts [`get_config.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/get_config.py) y [`get_conversations.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/get_conversations.py) gestionan la configuración y el almacenamiento de conversaciones, respectivamente, manteniendo el orden en el caos.
 
- markdown
-# Instalación y Configuración
-
-Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
-
-
-## Requisitos Previos
-
-Asegúrate de tener instalado Python y Poetry en tu sistema. Puedes descargar Python desde [python.org](https://www.python.org/downloads/) y obtener Poetry desde [python-poetry.org](https://python-poetry.org/docs/).
-
-
-## Clonar el Repositorio
-
-Primero, clona el repositorio en tu máquina local usando Git. Si no tienes Git instalado, puedes descargarlo desde [git-scm.com](https://git-scm.com/downloads).
-
-Abre una terminal y ejecuta el siguiente comando:
-
-
-markdown
 # Instalación y Configuración
 
 Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
@@ -49,29 +30,7 @@ Abre una terminal y ejecuta el siguiente comando:
 
 ```bash
 git clone https://github.com/RDvibe/Ricky-interpreter.git
-Esto creará una copia local del proyecto en tu máquina.
 
-Instalar Dependencias con Poetry
-Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
-
-markdown
-Copy code
-# Instalación y Configuración
-
-Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
-
-## Requisitos Previos
-
-Asegúrate de tener instalado Python y Poetry en tu sistema. Puedes descargar Python desde [python.org](https://www.python.org/downloads/) y obtener Poetry desde [python-poetry.org](https://python-poetry.org/docs/).
-
-## Clonar el Repositorio
-
-Primero, clona el repositorio en tu máquina local usando Git. Si no tienes Git instalado, puedes descargarlo desde [git-scm.com](https://git-scm.com/downloads).
-
-Abre una terminal y ejecuta el siguiente comando:
-
-```bash
-git clone https://github.com/RDvibe/Ricky-interpreter.git
 Esto creará una copia local del proyecto en tu máquina.
 
 Instalar Dependencias con Poetry
@@ -88,49 +47,3 @@ Para personalizar el intérprete con tu propia información, debes modificar cie
 
 Archivo de Configuración: Modifica el archivo config.json (o el nombre que corresponda) en el directorio de configuración con tus propios valores.
 Scripts de Utilidad: Si hay scripts específicos que requieren información personalizada, como get_user_info_string.py, actualízalos con la información relevante.
-Ejecutar el Intérprete
-Una vez completada la instalación y configuración, puedes iniciar el intérprete ejecutando el script principal con Poetry:
-
-```bash
-poetry run python interpreter/main.py
-Reemplaza main.py con el nombre del script principal de tu proyecto si es diferente.
-cd Ricky-interpreter
-poetry install
-Este comando configurará un entorno virtual y instalará todas las dependencias definidas en tu archivo pyproject.toml.
-
-Personalización del Intérprete
-Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos:
-
-Archivo de Configuración: Modifica el archivo config.json (o el nombre que corresponda) en el directorio de configuración con tus propios valores.
-Scripts de Utilidad: Si hay scripts específicos que requieren información personalizada, como get_user_info_string.py, actualízalos con la información relevante.
-Ejecutar el Intérprete
-Una vez completada la instalación y configuración, puedes iniciar el intérprete ejecutando el script principal con Poetry:
-
-bash
-Copy code
-poetry run python interpreter/main.py
-Reemplaza main.py con el nombre del script principal de tu proyecto si es diferente.
-git clone https://github.com/RDvibe/Ricky-interpreter.git
-Esto creará una copia local del proyecto en tu máquina.
-
-
-Instalar Dependencias con Poetry
-Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
-
-
-```bash
-cd Ricky-interpreter
-poetry install
-Este comando configurará un entorno virtual y instalará todas las dependencias definidas en tu archivo pyproject.toml.
-
-Personalización del Intérprete
-Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos:
-
-Archivo de Configuración: Modifica el archivo config.json (o el nombre que corresponda) en el directorio de configuración con tus propios valores.
-Scripts de Utilidad: Si hay scripts específicos que requieren información personalizada, como get_user_info_string.py, actualízalos con la información relevante.
-Ejecutar el Intérprete
-Una vez completada la instalación y configuración, puedes iniciar el intérprete ejecutando el script principal con Poetry:
-
-```bash
-poetry run python interpreter/main.py
-Reemplaza main.py con el nombre del script principal de tu proyecto si es diferente.
