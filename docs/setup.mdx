@@ -1,0 +1,41 @@
+---
+title: Setup
+---
+
+<Check> You will need to install Python [3.10](https://chat.openai.com/share/019abc2b-78bf-4477-a315-a61672247651) or [3.11](https://chat.openai.com/share/019abc2b-78bf-4477-a315-a61672247651).</Check>
+
+<Info>If you're having trouble, please review our [common issues and solutions](https://github.com/KillianLucas/open-interpreter/issues/164) document.</Info>
+
+## Installation
+
+Run the following command in your terminal to install Open Interpreter.
+
+```bash
+pip install open-interpreter
+```
+
+## Terminal usage
+
+After installation, you can start an interactive chat in your terminal by running:
+
+```bash
+interpreter
+```
+
+## Python usage
+
+To start an interactive chat in Python, run the following:
+
+```python
+import interpreter
+
+interpreter.chat()
+```
+
+You can also pass messages to `interpreter` programatically:
+
+```python
+interpreter.chat("Get the last 5 BBC news headlines.")
+```
+
+[Click here](/usage/python/streaming-response) to learn how to stream its response into your application.

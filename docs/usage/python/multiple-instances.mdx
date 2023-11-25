@@ -1,0 +1,37 @@
+You may have noticed that `import interpreter` imports an _instance_ of Open Interpreter, which is unusual for a module.
+
+To create multiple instances, the instance exposes the base class via `interpreter.Interpreter`:
+
+```python
+import interpreter
+
+interpreter.system_message = "This is the instance imported by default."
+
+agent_1 = interpreter.Interpreter()
+agent_1.system_message = "This is a seperate instance."
+
+agent_2 = interpreter.Interpreter()
+agent_2.system_message = "This is yet another instance."
+```
+
+For fun, you could make these instances talk to eachother:
+
+```python
+def swap_roles(messages):
+    for message in messages:
+        if message['role'] == 'user':
+            message['role'] = 'assistant'
+        elif message['role'] == 'assistant':
+            message['role'] = 'user'
+    return messages
+
+agents = [agent_1, agent_2]
+
+# Kick off the conversation
+messages = [{"role": "user", "message": "Hello!"}]
+
+while True:
+    for agent in agents:
+        messages = agent.chat(messages)
+        messages = swap_roles(messages)
+```

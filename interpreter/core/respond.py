@@ -1,9 +1,15 @@
-from ..code_interpreters.create_code_interpreter import create_code_interpreter
-from ..utils.merge_deltas import merge_deltas
-from ..utils.display_markdown_message import display_markdown_message
-from ..utils.truncate_output import truncate_output
+import time
 import traceback
+
 import litellm
+
+from ..terminal_interface.utils.display_markdown_message import display_markdown_message
+from .code_interpreters.create_code_interpreter import create_code_interpreter
+from .code_interpreters.language_map import language_map
+from .utils.html_to_base64 import html_to_base64
+from .utils.merge_deltas import merge_deltas
+from .utils.truncate_output import truncate_output
+
 
 def respond(interpreter):
     """
@@ -11,8 +17,9 @@ def respond(interpreter):
     Responds until it decides not to run any more code or say anything else.
     """
 
-    while True:
+    last_unsupported_code = ""
 
+    while True:
         system_message = interpreter.generate_system_message()
 
         # Create message object
@@ -27,7 +34,6 @@ def respond(interpreter):
             if "output" in message and message["output"] == "":
                 message["output"] = "No output"
 
-
         ### RUN THE LLM ###
 
         # Add a new message from the assistant to interpreter's "messages" attribute
@@ -37,12 +43,10 @@ def respond(interpreter):
         # Start putting chunks into the new message
         # + yielding chunks to the user
         try:
-
             # Track the type of chunk that the coding LLM is emitting
             chunk_type = None
 
             for chunk in interpreter._llm(messages_for_llm):
-
                 # Add chunk to the last message
                 interpreter.messages[-1] = merge_deltas(interpreter.messages[-1], chunk)
 
@@ -51,53 +55,79 @@ def respond(interpreter):
 
                 # We also want to track which it's sending to we can send useful flags.
                 # (otherwise pretty much everyone needs to implement this)
-                if "message" in chunk and chunk_type != "message":
-                    chunk_type = "message"
-                    yield {"start_of_message": True}
-                elif "language" in chunk and chunk_type != "code":
-                    chunk_type = "code"
-                    yield {"start_of_code": True}
-                if "code" in chunk and chunk_type != "code":
-                    # (This shouldn't happen though — ^ "language" should be emitted first, but sometimes GPT-3.5 forgets this)
-                    # (But I'm pretty sure we handle that? If it forgets we emit Python anyway?)
-                    chunk_type = "code"
-                    yield {"start_of_code": True}
-                elif "message" not in chunk and chunk_type == "message":
-                    chunk_type = None
-                    yield {"end_of_message": True}
+                for new_chunk_type in ["message", "language", "code"]:
+                    if new_chunk_type in chunk and chunk_type != new_chunk_type:
+                        if chunk_type != None:
+                            yield {f"end_of_{chunk_type}": True}
+                        # Language is actually from a code block
+                        if new_chunk_type == "language":
+                            new_chunk_type = "code"
+                        chunk_type = new_chunk_type
+                        yield {f"start_of_{chunk_type}": True}
 
                 yield chunk
 
-            # We don't trigger the end_of_message or end_of_code flag if we actually end on either
-            if chunk_type == "message":
-                yield {"end_of_message": True}
-            elif chunk_type == "code":
-                yield {"end_of_code": True}
-            
+            # We don't trigger the end_of_message or end_of_code flag if we actually end on either (we just exit the loop above)
+            if chunk_type:
+                yield {f"end_of_{chunk_type}": True}
+
         except litellm.exceptions.BudgetExceededError:
-            display_markdown_message(f"""> Max budget exceeded
+            display_markdown_message(
+                f"""> Max budget exceeded
 
                 **Session spend:** ${litellm._current_cost}
                 **Max budget:** ${interpreter.max_budget}
 
                 Press CTRL-C then run `interpreter --max_budget [higher USD amount]` to proceed.
-            """)
+            """
+            )
             break
         # Provide extra information on how to change API keys, if we encounter that error
         # (Many people writing GitHub issues were struggling with this)
         except Exception as e:
-            if 'auth' in str(e).lower() or 'api key' in str(e).lower():
+            if (
+                interpreter.local == False
+                and "auth" in str(e).lower()
+                or "api key" in str(e).lower()
+            ):
                 output = traceback.format_exc()
-                raise Exception(f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n")
+                raise Exception(
+                    f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
+                )
+            elif (
+                interpreter.local == False
+                and "access" in str(e).lower()
+            ):
+                response = input(
+                    f"  You do not have access to {interpreter.model}. Would you like to try gpt-3.5-turbo instead? (y/n)\n\n  "
+                )
+                print("")  # <- Aesthetic choice
+
+                if response.strip().lower() == "y":
+                    interpreter.model = "gpt-3.5-turbo-1106"
+                    interpreter.context_window = 16000
+                    interpreter.max_tokens = 4096
+                    interpreter.function_calling_llm = True
+                    display_markdown_message(f"> Model set to `{interpreter.model}`")
+                else:
+                    raise Exception("\n\nYou will need to add a payment method and purchase credits for the OpenAI api billing page (different from ChatGPT) to use gpt-4\nLink: https://platform.openai.com/account/billing/overview")
+            elif interpreter.local:
+                raise Exception(
+                    str(e)
+                    + """
+
+Please make sure LM Studio's local server is running by following the steps above.
+
+If LM Studio's local server is running, please try a language model with a different architecture.
+
+                    """
+                )
             else:
                 raise
-        
-        
-        
+
         ### RUN CODE (if it's there) ###
 
         if "code" in interpreter.messages[-1]:
-            
             if interpreter.debug_mode:
                 print("Running code:", interpreter.messages[-1])
 
@@ -106,16 +136,39 @@ def respond(interpreter):
                 code = interpreter.messages[-1]["code"]
 
                 # Fix a common error where the LLM thinks it's in a Jupyter notebook
-                if interpreter.messages[-1]["language"] == "python" and code.startswith("!"):
+                if interpreter.messages[-1]["language"] == "python" and code.startswith(
+                    "!"
+                ):
                     code = code[1:]
                     interpreter.messages[-1]["code"] = code
                     interpreter.messages[-1]["language"] = "shell"
 
                 # Get a code interpreter to run it
-                language = interpreter.messages[-1]["language"]
-                if language not in interpreter._code_interpreters:
-                    interpreter._code_interpreters[language] = create_code_interpreter(language)
-                code_interpreter = interpreter._code_interpreters[language]
+                language = interpreter.messages[-1]["language"].lower().strip()
+                if language in language_map:
+                    if language not in interpreter._code_interpreters:
+                        # Create code interpreter
+                        config = {"language": language, "vision": interpreter.vision}
+                        interpreter._code_interpreters[
+                            language
+                        ] = create_code_interpreter(config)
+                    code_interpreter = interpreter._code_interpreters[language]
+                else:
+                    # This still prints the code but don't allow code to run. Let's Open-Interpreter know through output message
+
+                    output = (
+                        f"Open Interpreter does not currently support `{language}`."
+                    )
+
+                    yield {"output": output}
+                    interpreter.messages[-1]["output"] = output
+
+                    # Let the response continue so it can deal with the unsupported code in another way. Also prevent looping on the same piece of code.
+                    if code != last_unsupported_code:
+                        last_unsupported_code = code
+                        continue
+                    else:
+                        break
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
@@ -137,12 +190,26 @@ def respond(interpreter):
                         output = truncate_output(output, interpreter.max_output)
 
                         interpreter.messages[-1]["output"] = output.strip()
+                    # Vision
+                    if interpreter.vision:
+                        base64_image = None
+                        if "image" in line:
+                            base64_image = line["image"]
+                        if "html" in line:
+                            base64_image = html_to_base64(line["html"])
+
+                        if base64_image:
+                            yield {"output": "Sending image output to GPT-4V..."}
+                            interpreter.messages[-1][
+                                "image"
+                            ] = f"data:image/jpeg;base64,{base64_image}"
 
             except:
                 output = traceback.format_exc()
                 yield {"output": output.strip()}
                 interpreter.messages[-1]["output"] = output.strip()
 
+            yield {"active_line": None}
             yield {"end_of_execution": True}
 
         else:

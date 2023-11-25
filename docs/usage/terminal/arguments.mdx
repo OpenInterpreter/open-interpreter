@@ -1,0 +1,123 @@
+---
+title: Arguments
+---
+
+---
+
+#### `--model` or `-m`
+
+Specifies which language model to use.
+
+```bash
+interpreter --model "gpt-3.5-turbo"
+```
+
+---
+
+#### `--local` or `-l`
+
+Run the model locally.
+
+```bash
+interpreter --local
+```
+
+---
+
+#### `--auto_run` or `-y`
+
+Automatically run the interpreter without requiring user confirmation.
+
+```bash
+interpreter --auto_run
+```
+
+---
+
+#### `--debug_mode` or `-d`
+
+Run the interpreter in debug mode. Debug information will be printed at each step to help diagnose issues.
+
+```bash
+interpreter --debug_mode
+```
+
+---
+
+#### `--temperature` or `-t`
+
+Sets the randomness level of the model's output.
+
+```bash
+interpreter --temperature 0.7
+```
+
+---
+
+#### `--context_window` or `-c`
+
+Manually set the context window size in tokens for the model.
+
+```bash
+interpreter --context_window 16000
+```
+
+---
+
+#### `--max_tokens` or `-x`
+
+Sets the maximum number of tokens that the model can generate in a single response.
+
+```bash
+interpreter --max_tokens 100
+```
+
+---
+
+#### `--max_budget` or `-b`
+
+Sets the maximum budget limit for the session in USD.
+
+```bash
+interpreter --max_budget 0.01
+```
+
+---
+
+#### `--api_base` or `-ab`
+
+If you are using a custom API, specify its base URL with this argument.
+
+```bash
+interpreter --api_base "https://api.example.com"
+```
+
+---
+
+#### `--api_key` or `-ak`
+
+Set your API key for authentication when making API calls.
+
+```bash
+interpreter --api_key "your_api_key_here"
+```
+
+---
+
+#### `--safe_mode` or `-safe`
+
+Enable or disable experimental safety mechanisms like code scanning. Valid options are `off`, `ask`, and `auto`.
+
+```bash
+interpreter --safe_mode ask
+```
+
+---
+
+#### `--config_file`
+
+This new option allows users to specify a path or filename for a config file in their Open Interpreter config directory. It enables them to use a custom config file when invoking the interpreter.
+
+```bash
+interpreter --config_file config.yaml
+```

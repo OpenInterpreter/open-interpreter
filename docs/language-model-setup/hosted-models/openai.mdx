@@ -1,0 +1,73 @@
+---
+title: OpenAI
+---
+
+To use Open Interpreter with a model from OpenAI, simply run:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter
+```
+
+```python Python
+import interpreter
+
+interpreter.chat()
+```
+
+</CodeGroup>
+
+This will default to `gpt-4`, which is the most capable publicly available model for code interpretation (Open Interpreter was designed to be used with `gpt-4`).
+
+<Info>
+  Trouble accessing `gpt-4`? Read our [gpt-4 setup
+  article](/language-model-setup/hosted-models/gpt-4-setup).
+</Info>
+
+To run a specific model from OpenAI, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model gpt-3.5-turbo
+```
+
+```python Python
+import interpreter
+
+interpreter.model = "gpt-3.5-turbo"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support any model on [OpenAI's models page:](https://platform.openai.com/docs/models/)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model gpt-4
+interpreter --model gpt-4-32k
+interpreter --model gpt-3.5-turbo
+interpreter --model gpt-3.5-turbo-16k
+```
+
+```python Python
+interpreter.model = "gpt-4"
+interpreter.model = "gpt-4-32k"
+interpreter.model = "gpt-3.5-turbo"
+interpreter.model = "gpt-3.5-turbo-16k"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable | Description                                          | Where to Find                                                       |
+| -------------------- | ---------------------------------------------------- | ------------------------------------------------------------------- |
+| `OPENAI_API_KEY`     | The API key for authenticating to OpenAI's services. | [OpenAI Account Page](https://platform.openai.com/account/api-keys) |

@@ -1,0 +1,129 @@
+---
+title: Streaming Response
+---
+
+You can stream messages, code, and code outputs out of Open Interpreter by setting `stream=True` in an `interpreter.chat(message)` call.
+
+```python
+for chunk in interpreter.chat("What's 34/24?", stream=True, display=False):
+  print(chunk)
+```
+```
+{'language': 'python'}
+{'code': '34'}
+{'code': ' /'}
+{'code': ' '}
+{'code': '24'}
+{'executing': {'code': '34 / 24', 'language': 'python'}}
+{'active_line': 1}
+{'output': '1.4166666666666667\n'}
+{'active_line': None}
+{'end_of_execution': True}
+{'message': 'The'}
+{'message': ' result'}
+{'message': ' of'}
+{'message': ' the'}
+{'message': ' division'}
+{'message': ' '}
+{'message': '34'}
+{'message': '/'}
+{'message': '24'}
+{'message': ' is'}
+{'message': ' approximately'}
+{'message': ' '}
+{'message': '1'}
+{'message': '.'}
+{'message': '42'}
+{'message': '.'}
+```
+
+**Note:** Setting `display=True` won't change the behavior of the streaming response, it will just render a display in your terminal.
+
+# Anatomy
+
+Let's break down each part of the streamed response.
+
+## Code
+
+In this example, the LLM decided to start writing code first. It could have decided to write a message first, or to only write code, or to only write a message.
+
+Before writing any code, the LLM will always set the `language` for the code it's about to write. In this case it decided to write `python`.
+
+This can be any language defined in [our languages directory.](https://github.com/KillianLucas/open-interpreter/tree/main/interpreter/code_interpreters/languages)
+
+```
+{'language': 'python'}
+```
+
+Then, the LLM decided to write some code. The code is sent token-by-token:
+
+```
+{'code': '34'}
+{'code': ' /'}
+{'code': ' '}
+{'code': '24'}
+```
+
+## Code Output
+
+After the LLM finishes writing a code block, Open Interpreter will attempt to run it.
+
+**Before** it runs it, the following message is sent:
+
+```
+{'executing': {'code': '34 / 24', 'language': 'python'}}
+```
+
+If you check for this object, you can break (or get confirmation) **before** executing the code.
+
+```python
+# This example asks the user before running code
+
+for chunk in interpreter.chat("What's 34/24?", stream=True):
+    if "executing" in chunk:
+        if input("Press ENTER to run this code.") != "":
+            break
+```
+
+**While** the code is being executed, you'll recieve the line of code that's being run:
+
+```
+{'active_line': 1}
+```
+
+We use this to highlight the active line of code on our UI, which keeps the user aware of what Open Interpreter is doing.
+
+You'll then recieve its output, if it produces any:
+
+```
+{'output': '1.4166666666666667\n'}
+```
+
+When the code is **finished** executing, this flag will be sent:
+
+```
+{'end_of_execution': True}
+```
+
+## Message
+
+Finally, the LLM decided to write a message. This is streamed token-by-token as well:
+
+```
+{'message': 'The'}
+{'message': ' result'}
+{'message': ' of'}
+{'message': ' the'}
+{'message': ' division'}
+{'message': ' '}
+{'message': '34'}
+{'message': '/'}
+{'message': '24'}
+{'message': ' is'}
+{'message': ' approximately'}
+{'message': ' '}
+{'message': '1'}
+{'message': '.'}
+{'message': '42'}
+{'message': '.'}
+```

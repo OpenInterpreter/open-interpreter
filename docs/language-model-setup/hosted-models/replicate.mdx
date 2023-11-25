@@ -1,0 +1,50 @@
+---
+title: Replicate
+---
+
+To use Open Interpreter with a model from Replicate, set the `model` flag to begin with `replicate/`:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model replicate/llama-2-70b-chat:2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf
+```
+
+```python Python
+import interpreter
+
+interpreter.model = "replicate/llama-2-70b-chat:2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support any model on [Replicate's models page:](https://replicate.ai/explore)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model replicate/llama-2-70b-chat:2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf
+interpreter --model replicate/a16z-infra/llama-2-13b-chat:2a7f981751ec7fdf87b5b91ad4db53683a98082e9ff7bfd12c8cd5ea85980a52
+interpreter --model replicate/vicuna-13b:6282abe6a492de4145d7bb601023762212f9ddbbe78278bd6771c8b3b2f2a13b
+interpreter --model replicate/daanelson/flan-t5-large:ce962b3f6792a57074a601d3979db5839697add2e4e02696b3ced4c022d4767f
+```
+
+```python Python
+interpreter.model = "replicate/llama-2-70b-chat:2796ee9483c3fd7aa2e171d38f4ca12251a30609463dcfd4cd76703f22e96cdf"
+interpreter.model = "replicate/a16z-infra/llama-2-13b-chat:2a7f981751ec7fdf87b5b91ad4db53683a98082e9ff7bfd12c8cd5ea85980a52"
+interpreter.model = "replicate/vicuna-13b:6282abe6a492de4145d7bb601023762212f9ddbbe78278bd6771c8b3b2f2a13b"
+interpreter.model = "replicate/daanelson/flan-t5-large:ce962b3f6792a57074a601d3979db5839697add2e4e02696b3ced4c022d4767f"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable  | Description  | Where to Find  |
+| --------------------- | ------------ | -------------- |
+| `REPLICATE_API_KEY`       | The API key for authenticating to Replicate's services. | [Replicate Account Page](https://replicate.ai/login) |

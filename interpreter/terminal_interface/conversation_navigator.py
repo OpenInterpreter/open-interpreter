@@ -2,36 +2,50 @@
 This file handles conversations.
 """
 
-import inquirer
-import subprocess
-import platform
-import os
 import json
+import os
+import platform
+import subprocess
+
+import inquirer
+
 from .render_past_conversation import render_past_conversation
-from ..utils.display_markdown_message import display_markdown_message
-from ..utils.local_storage_path import get_storage_path
+from .utils.display_markdown_message import display_markdown_message
+from .utils.local_storage_path import get_storage_path
+
 
 def conversation_navigator(interpreter):
-
     conversations_dir = get_storage_path("conversations")
 
-    display_markdown_message(f"""> Conversations are stored in "`{conversations_dir}`".
+    display_markdown_message(
+        f"""> Conversations are stored in "`{conversations_dir}`".
     
     Select a conversation to resume.
-    """)
+    """
+    )
 
     # Check if conversations directory exists
     if not os.path.exists(conversations_dir):
         print(f"No conversations found in {conversations_dir}")
         return None
 
-    # Get list of all JSON files in the directory
-    json_files = [f for f in os.listdir(conversations_dir) if f.endswith('.json')]
+    # Get list of all JSON files in the directory and sort them by modification time, newest first
+    json_files = sorted(
+        [f for f in os.listdir(conversations_dir) if f.endswith(".json")],
+        key=lambda x: os.path.getmtime(os.path.join(conversations_dir, x)),
+        reverse=True,
+    )
 
     # Make a dict that maps reformatted "First few words... (September 23rd)" -> "First_few_words__September_23rd.json" (original file name)
     readable_names_and_filenames = {}
     for filename in json_files:
-        name = filename.replace(".json", "").replace(".JSON", "").replace("__", "... (").replace("_", " ") + ")"
+        name = (
+            filename.replace(".json", "")
+            .replace(".JSON", "")
+            .replace("__", "... (")
+            .replace("_", " ")
+            + ")"
+        )
         readable_names_and_filenames[name] = filename
 
     # Add the option to open the folder. This doesn't map to a filename, we'll catch it
@@ -39,22 +53,23 @@ def conversation_navigator(interpreter):
 
     # Use inquirer to let the user select a file
     questions = [
-        inquirer.List('name',
-                      message="",
-                      choices=readable_names_and_filenames.keys(),
-                      ),
+        inquirer.List(
+            "name",
+            message="",
+            choices=readable_names_and_filenames.keys(),
+        ),
     ]
     answers = inquirer.prompt(questions)
 
     # If the user selected to open the folder, do so and return
-    if answers['name'] == "> Open folder":
+    if answers["name"] == "> Open folder":
         open_folder(conversations_dir)
         return
 
-    selected_filename = readable_names_and_filenames[answers['name']]
+    selected_filename = readable_names_and_filenames[answers["name"]]
 
     # Open the selected file and load the JSON data
-    with open(os.path.join(conversations_dir, selected_filename), 'r') as f:
+    with open(os.path.join(conversations_dir, selected_filename), "r") as f:
         messages = json.load(f)
 
     # Pass the data into render_past_conversation
@@ -66,6 +81,7 @@ def conversation_navigator(interpreter):
 
     # Start the chat
     interpreter.chat()
+
 
 def open_folder(path):
     if platform.system() == "Windows":

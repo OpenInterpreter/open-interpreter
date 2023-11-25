@@ -1,12 +1,16 @@
-from rich.live import Live
 from rich.console import Console
+from rich.live import Live
+
 
 class BaseBlock:
     """
     a visual "block" on the terminal.
     """
+
     def __init__(self):
-        self.live = Live(auto_refresh=False, console=Console(), vertical_overflow="visible")
+        self.live = Live(
+            auto_refresh=False, console=Console(), vertical_overflow="visible"
+        )
         self.live.start()
 
     def update_from_message(self, message):

@@ -1,0 +1,109 @@
+{
+  "name": "Open Interpreter",
+  "logo": {
+    "dark": "/assets/logo/circle-inverted.png",
+    "light": "/assets/logo/circle.png"
+  },
+  "favicon": "/assets/favicon.png",
+  "colors": {
+    "primary": "#000000",
+    "light": "#FFFFFF",
+    "dark": "#000000",
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#000000"
+    },
+    "anchors": {
+      "from": "#000000",
+      "to": "#000000"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "33K ★ GitHub",
+      "url": "https://github.com/KillianLucas/open-interpreter"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Join Discord",
+    "url": "https://discord.com/invite/6p3fD6rBVm"
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "introduction",
+        "setup"
+      ]
+    },
+    {
+      "group": "Usage",
+      "pages": [
+        "usage/examples",
+        {
+          "group": "Terminal",
+          "pages": [
+            "usage/terminal/arguments",
+            "usage/terminal/settings",
+            "usage/terminal/conversation-history",
+            "usage/terminal/magic-commands",
+            "usage/terminal/budget-manager",
+            "usage/terminal/vision"
+          ]
+        },
+        {
+          "group": "Python",
+          "pages": [
+            "usage/python/arguments",
+            "usage/python/streaming-response",
+            "usage/python/multiple-instances",
+            "usage/python/settings",
+            "usage/python/conversation-history",
+            "usage/python/magic-commands",
+            "usage/python/budget-manager"
+          ]
+        },
+        {
+          "group": "Desktop",
+          "pages": [
+            "usage/desktop/install"
+          ]
+        }
+      ]
+    },
+    {
+      "group": "Language Models",
+      "pages": [
+        "language-model-setup/introduction",
+        {
+          "group": "Hosted Setup",
+          "pages": [
+            "language-model-setup/hosted-models/openai",
+            "language-model-setup/hosted-models/azure",
+            "language-model-setup/hosted-models/anthropic",
+            "language-model-setup/hosted-models/replicate",
+            "language-model-setup/hosted-models/ai21",
+            "language-model-setup/hosted-models/openrouter",
+            "language-model-setup/hosted-models/cohere",
+            "language-model-setup/hosted-models/petals"
+          ]
+        },
+        {
+          "group": "Local Setup",
+          "pages": [
+            "language-model-setup/local-models/overview",
+            "language-model-setup/local-models/getting-models",
+            "language-model-setup/local-models/install-on-mac",
+            "language-model-setup/local-models/install-on-windows"
+          ]
+        }
+      ]
+    }
+  ],
+  "feedback": {
+    "suggestEdit": true
+  },
+  "footerSocials": {
+    "twitter": "https://twitter.com/hellokillian"
+  }
+}
