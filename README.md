@@ -38,11 +38,12 @@ poetry install
 ```
 # Personalización del Intérprete
 Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos,actualízalos con la información relevante.
+Primero:
 Modifica este archivo  en el directorio de configuración con tus propios valores.
 ```bash
  config.yaml (o el nombre que corresponda)
 ```
-y
+y luego este otro
 ```bash
 get_user_info_string.py
 
