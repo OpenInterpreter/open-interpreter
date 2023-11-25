@@ -13,10 +13,11 @@ Bienvenido al **Ricky Interpreter**, una creación de Ricardo Ruiz, también con
 - **Conteo de Tokens y Costos**: [`count_tokens.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/count_tokens.py) ofrece una visión detallada del uso de tokens, crucial en un mundo dominado por la economía de la atención.
 - **Visualización de Salidas**: El arte también se encuentra en la presentación. [`display_output.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/display_output.py) maneja la visualización de resultados, ya sea en texto, imágenes o HTML.
 - **Configuración y Conversaciones**: Los scripts [`get_config.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/get_config.py) y [`get_conversations.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/get_conversations.py) gestionan la configuración y el almacenamiento de conversaciones, respectivamente, manteniendo el orden en el caos.
+  
 
  Instalación y Configuración
 
- **Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
+ Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
 
 # Clonar el Repositorio
 
@@ -27,15 +28,18 @@ Abre una terminal y ejecuta el siguiente comando:
 ```bash
 git clone https://github.com/RDvibe/Ricky-interpreter.git
 
+
 # Instalar Dependencias con Poetry
+```
 
 Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
-
-```bash
 cd Ricky-interpreter
 poetry install
+```bash
 
 # Personalización del Intérprete
+
+
 
 Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos:
 
