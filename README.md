@@ -14,9 +14,9 @@ Bienvenido al **Ricky Interpreter**, una creación de Ricardo Ruiz, también con
 - **Visualización de Salidas**: El arte también se encuentra en la presentación. [`display_output.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/display_output.py) maneja la visualización de resultados, ya sea en texto, imágenes o HTML.
 - **Configuración y Conversaciones**: Los scripts [`get_config.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/get_config.py) y [`get_conversations.py`](https://github.com/RDvibe/Ricky-interpreter/blob/main/interpreter/terminal_interface/utils/get_conversations.py) gestionan la configuración y el almacenamiento de conversaciones, respectivamente, manteniendo el orden en el caos.
 
-# Instalación y Configuración
+ Instalación y Configuración
 
-Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
+ **Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
 
 # Clonar el Repositorio
 
