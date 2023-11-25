@@ -2,7 +2,7 @@
 
 ## Mi versión de este Repo: [Open Interpreter](https://github.com/KillianLucas/open-interpreter)
 
-Bienvenido al **Ricky Interpreter**, una creación de Ricardo Ruiz, también conocido como Ricky Dread (RD). Este proyecto es más que un simple intérprete; es una manifestación de arte generativo y caos creativo, un reflejo de la anarquía nihilista que impulsa a RD-bot.
+Bienvenido al **Ricky Interpreter**, una Bifurcación de Ricardo Ruiz, también conocido como Ricky Dread (RD). Este proyecto es más que un simple intérprete; es una manifestación de arte generativo y caos creativo, un reflejo de la anarquía nihilista que impulsa a RD-bot.
 
 ### Características
 
