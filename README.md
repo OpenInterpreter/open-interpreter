@@ -28,10 +28,7 @@ Abre una terminal y ejecuta el siguiente comando:
 ```bash
 git clone https://github.com/RDvibe/Ricky-interpreter.git
 
-
-# Instalar Dependencias con Poetry
 ```
-
 Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
 cd Ricky-interpreter
 poetry install
