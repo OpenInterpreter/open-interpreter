@@ -9,3 +9,5 @@ def get_storage_path(subdirectory=None):
         return config_dir
     else:
         return os.path.join(config_dir, subdirectory)
+
+

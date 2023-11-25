@@ -5,7 +5,7 @@ import shutil
 import sys
 
 # Agregamos la ruta al directorio que contiene local_storage_path
-sys.path.append(r'C:\Users\Ricardo Ruiz\open-interpreter\interpreter\utils')
+sys.path.append(r'C:\Users\Ricardo Ruiz\Ricky-interpreter\interpreter\utils')
 
 
 # Asumiendo que 'local_storage_path' es un módulo en el mismo directorio

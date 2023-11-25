@@ -5,8 +5,14 @@ import platform
 import pkg_resources
 import ooba
 import appdirs
+import time
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+from rich.progress import Progress
 from ..utils.get_config import get_config_path
 from ..terminal_interface.conversation_navigator import conversation_navigator
+
 
 arguments = [
     {
@@ -92,8 +98,39 @@ arguments = [
 ]
 
 
+
+
+
+
+# Define el objeto console para rich
+console = Console()
+
+# Función para mostrar el mensaje de bienvenida
+def show_welcome_panel():
+    welcome_text = """
+    ## Ricky Interpreter
+    Desata el poder de los modelos de lenguaje en tu terminal.
+    La anarquía digital comienza con una línea de código.
+    """
+    welcome_markdown = Markdown(welcome_text)
+    console.print(Panel(welcome_markdown, title="[bold red]Bienvenido[/bold red]", subtitle="[italic yellow]Versión 0.1.10[/italic yellow]", border_style="bold blue"))
+
+# Función para mostrar la barra de progreso
+def show_progress_bar():
+    with Progress() as progress:
+        task1 = progress.add_task("[red]Cargando...", total=100)
+        for _ in range(100):
+            progress.update(task1, advance=1)
+            time.sleep(0.02)
+
+# Aquí comienza la función CLI
 def cli(interpreter):
+    # Muestra el mensaje de bienvenida y la barra de progreso
+    show_welcome_panel()
+    show_progress_bar()
+
     parser = argparse.ArgumentParser(description="Open Interpreter")
+
 
     # Add arguments
     for arg in arguments:
