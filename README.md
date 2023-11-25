@@ -33,11 +33,11 @@ git clone https://github.com/RDvibe/Ricky-interpreter.git
 
 Esto creará una copia local del proyecto en tu máquina.
 
-```
-Instalar Dependencias con Poetry
+
+#Instalar Dependencias con Poetry
 Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
 
-bash
+```bash
 cd Ricky-interpreter
 poetry install
 Este comando configurará un entorno virtual y instalará todas las dependencias definidas en tu archivo pyproject.toml.
