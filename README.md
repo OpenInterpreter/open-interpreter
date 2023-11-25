@@ -40,7 +40,7 @@ poetry install
 Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos,actualízalos con la información relevante.
 Modifica este archivo  en el directorio de configuración con tus propios valores.
 ```bash
- config.json (o el nombre que corresponda)
+ config.yaml (o el nombre que corresponda)
 ```
 y
 ```bash
