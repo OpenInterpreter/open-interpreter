@@ -33,7 +33,6 @@ Abre una terminal y ejecuta el siguiente comando:
 
 
 markdown
-Copy code
 # Instalación y Configuración
 
 Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
@@ -92,8 +91,7 @@ Scripts de Utilidad: Si hay scripts específicos que requieren información pers
 Ejecutar el Intérprete
 Una vez completada la instalación y configuración, puedes iniciar el intérprete ejecutando el script principal con Poetry:
 
-bash
-Copy code
+```bash
 poetry run python interpreter/main.py
 Reemplaza main.py con el nombre del script principal de tu proyecto si es diferente.
 cd Ricky-interpreter
@@ -119,8 +117,8 @@ Esto creará una copia local del proyecto en tu máquina.
 Instalar Dependencias con Poetry
 Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
 
-bash
 
+```bash
 cd Ricky-interpreter
 poetry install
 Este comando configurará un entorno virtual y instalará todas las dependencias definidas en tu archivo pyproject.toml.
@@ -133,6 +131,6 @@ Scripts de Utilidad: Si hay scripts específicos que requieren información pers
 Ejecutar el Intérprete
 Una vez completada la instalación y configuración, puedes iniciar el intérprete ejecutando el script principal con Poetry:
 
-bash
+```bash
 poetry run python interpreter/main.py
 Reemplaza main.py con el nombre del script principal de tu proyecto si es diferente.
