@@ -37,8 +37,8 @@ poetry install
 
 ```
 # Personalización del Intérprete
-```bash
 Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos:
+```bash
 - Archivo de Configuración: Modifica el archivo `config.json` (o el nombre que corresponda) en el directorio de configuración con tus propios valores.
 - Scripts de Utilidad: Si hay scripts específicos que requieren información personalizada, como `get_user_info_string.py`, actualízalos con la información relevante.
 
