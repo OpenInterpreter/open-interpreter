@@ -42,19 +42,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-<<<<<<< HEAD
 Ricky_interpreter = "interpreter:cli"
-=======
-interpreter = "interpreter:start_terminal_interface"
-
-[tool.poetry.extras]
-safe = ["semgrep"]
-
-[tool.black]
-target-version = ['py311']
-
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
->>>>>>> 459a140d19fde9e3630f3a9cf6001bb23d7603c5
