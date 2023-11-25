@@ -38,7 +38,6 @@ Esto creará una copia local del proyecto en tu máquina.
 
 Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
 
-```bash
 cd Ricky-interpreter
 poetry install
 
