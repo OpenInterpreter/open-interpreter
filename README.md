@@ -34,14 +34,12 @@ Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando p
 
 
 #Instalar Dependencias con Poetry
-
-
 cd Ricky-interpreter
 poetry install
 Este comando configurará un entorno virtual y instalará todas las dependencias definidas en tu archivo pyproject.toml.
 
 
-```
+```bash
 
 Personalización del Intérprete
 Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos:
