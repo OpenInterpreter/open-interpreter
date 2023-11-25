@@ -18,7 +18,6 @@ Bienvenido al **Ricky Interpreter**, una creación de Ricardo Ruiz, también con
 
 Para instalar y configurar el Ricky Interpreter en tu sistema, sigue estos pasos:
 
-
 # Clonar el Repositorio
 
 Primero, clona el repositorio en tu máquina local usando Git. Si no tienes Git instalado, puedes descargarlo desde [git-scm.com](https://git-scm.com/downloads).
@@ -27,22 +26,19 @@ Abre una terminal y ejecuta el siguiente comando:
 
 ```bash
 git clone https://github.com/RDvibe/Ricky-interpreter.git
-Esto creará una copia local del proyecto en tu máquina.
-ma
-Instalar Dependencias con Poetry
+
+# Instalar Dependencias con Poetry
+
 Navega hasta el directorio del proyecto clonado y ejecuta el siguiente comando para instalar las dependencias necesarias con Poetry:
 
-
-#Instalar Dependencias con Poetry
+```bash
 cd Ricky-interpreter
 poetry install
-Este comando configurará un entorno virtual y instalará todas las dependencias definidas en tu archivo pyproject.toml.
 
+# Personalización del Intérprete
 
-```bash
-
-Personalización del Intérprete
 Para personalizar el intérprete con tu propia información, debes modificar ciertos archivos:
 
-Archivo de Configuración: Modifica el archivo config.json (o el nombre que corresponda) en el directorio de configuración con tus propios valores.
-Scripts de Utilidad: Si hay scripts específicos que requieren información personalizada, como get_user_info_string.py, actualízalos con la información relevante.
+- **Archivo de Configuración**: Modifica el archivo `config.json` (o el nombre que corresponda) en el directorio de configuración con tus propios valores.
+- **Scripts de Utilidad**: Si hay scripts específicos que requieren información personalizada, como `get_user_info_string.py`, actualízalos con la información relevante.
+
