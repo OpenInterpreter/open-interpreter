@@ -14,9 +14,9 @@ def html_to_base64(code):
 
     # Generate a random filename for the temporary image
     temp_filename = "".join(random.choices(string.digits, k=10)) + ".png"
+    hti.output_path = get_storage_path()
     hti.screenshot(
         html_str=code,
-        output_path=get_storage_path(),
         save_as=temp_filename,
         size=(960, 540),
     )
