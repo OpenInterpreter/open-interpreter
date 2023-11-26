@@ -7,7 +7,8 @@
 - [ ] Make sure breaking from generator during execution stops the execution
 - [ ] Stateless core python package, config passed in by TUI
 - [ ] Expose tool (`interpreter.computer.run(language, code)`)
-- [ ] Add %% (shell) magic command
+- [x] Add %% (shell) magic command
+- [ ] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
 - [ ] Allow for limited functions (`interpreter.functions`)
 - [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
 - [ ] Switch core code interpreter to be Jupyter-powered
@@ -16,8 +17,11 @@
 - [ ] Connect benchmarks to multiple open-source LLMs
 - [ ] Further split TUI from core (some utils still reach across)
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
-- [ ] Allow for custom interfaces (`interpreter.computer.interfaces.append(class_that_conforms_to_base_interface)`)
-- [ ] Work with mintlfy to translate docs
+- [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed`) which will let us do semantic search
+- [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
+- [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstricts. Keep this minimal!
+- [ ] Allow for integrations
+- [ ] Work with Mintlify to translate docs
 - [ ] Expand "safe mode" to have proper, simple Docker support
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
 - [ ] Improve partnership with `languagetools`
@@ -56,7 +60,7 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
     /utils
     /computer
       core.py
-      /interfaces
+      /languages
         __init__.py
         python.py
         shell.py
@@ -67,50 +71,55 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 ### New streaming structure
 
 ```
-{ "start_of_text": true },
-{ "text": "Processing your request to generate a plot." }, # Sent token by token
-{ "python": "plot = create_plot_from_data('base64_image_of_data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)" }, # Sent token by token
-{ "executing": { "python": "plot = create_plot_from_data('base64_image_of_data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)" } },
-{ "start_of_output": true },
-{ "active_line": 1 },
-{ "active_line": 2 },
-{ "output": { "type": "image", "content": "base64_encoded_plot_image" } },
-{ "active_line": 3 },
-{ "output": { "type": "html", "content": "<html>Plot in HTML format</html>" } },
-{ "end_of_output": true }
+{"role": "assistant", "type": "text", "start": True}
+{"role": "assistant", "type": "text", "content": "Pro"}
+{"role": "assistant", "type": "text", "content": "cessing"}
+{"role": "assistant", "type": "text", "content": "your request"}
+{"role": "assistant", "type": "text", "content": "to generate a plot."}
+{"role": "assistant", "type": "text", "end": True}  
+
+{"role": "assistant", "type": "python", "start": True}
+{"role": "assistant", "type": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
+{"role": "assistant", "type": "python", "end": True}
+
+{"role": "computer", "type": "text", "start": True}
+{"role": "computer", "type": "text", "content": "1"}
+{"role": "computer", "type": "text", "content": "2"}
+{"role": "computer", "type": "text", "content": "3"}
+{"role": "computer", "type": "text", "end": True}
+
+{"role": "computer", "type": "image", "start": True}
+{"role": "computer", "type": "image", "content": "base64_encoded_plot_image"}
+{"role": "computer", "type": "image", "end": True}
+
+{"role": "computer", "type": "html", "start": True}
+{"role": "computer", "type": "html", "content": "<html>Plot in HTML format</html>"}
+{"role": "computer", "type": "html", "end": True}
+
+{"role": "computer", "type": "html", "start": True}
+{"role": "computer", "type": "html", "content": "<html>Another plot in HTML format</html>"}
+{"role": "computer", "type": "html", "end": True}
+
+{"role": "assistant", "type": "text", "start": True}
+{"role": "assistant", "type": "text", "content": "Plot"}
+{"role": "assistant", "type": "text", "content": "generated"}
+{"role": "assistant", "type": "text", "content": "successfully."}
+{"role": "assistant", "type": "text", "end": True}
 ```
 
 ### New static messages structure
 
 ```
 [
-  {
-    "role": "user",
-    "content": [
-      {"type": "text", "content": "Please create a plot from this data and display it as an image and then as HTML."},
-      {"type": "image", "content": "data"}
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text", 
-        "content": "Processing your request to generate a plot."
-      },
-      {
-        "type": "python",
-        "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"
-      },
-      {
-        "type": "output",
-        "content": [
-          {"type": "text", "content": "Plot generated successfully."},
-          {"type": "image", "content": "base64_encoded_plot_image"},
-          {"type": "html", "content": "<html>Plot in HTML format</html>"}
-        ]
-      }
-    ]
-  }
+
+  {"role": "user", "type": "text", "content": "Please create a plot from this data and display it as an image and then as HTML."},
+  {"role": "user", "type": "image", "content": "{base64}"}
+  {"role": "user", "type": "file", "content": "/path/to/file"}
+  {"role": "assistant", "type": "text", "content": "Processing your request to generate a plot."}
+  {"role": "assistant", "type": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
+  {"role": "computer", "type": "image", "content": "{base64}"}
+  {"role": "computer", "type": "html", "content": "<html>Plot in HTML format</html>"}
+  {"role": "assistant", "type": "text", "content": "Plot generated successfully."}
+
 ]
 ```
