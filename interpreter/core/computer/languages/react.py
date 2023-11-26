@@ -1,3 +1,7 @@
+"""
+Test this more— I don't think it understands the environment it's in. It tends to write "require" for example. Also make sure errors go back into it (console.log type stuff)
+"""
+
 from ..base_language import BaseLanguage
 
 template = """<!DOCTYPE html>
