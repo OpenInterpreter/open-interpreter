@@ -96,6 +96,8 @@ def setup_openai_coding_llm(interpreter):
             params["api_base"] = interpreter.api_base
         if interpreter.api_key:
             params["api_key"] = interpreter.api_key
+        if interpreter.api_version:
+            params["api_version"] = interpreter.api_version
         if interpreter.max_tokens:
             params["max_tokens"] = interpreter.max_tokens
         if interpreter.temperature is not None:
