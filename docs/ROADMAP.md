@@ -4,6 +4,10 @@
 - [x] Support multiple instances
 - [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
 - [ ] **Easy 🟢** Require documentation for PRs
+- [ ] Split ROADMAP into sections
+- [ ] Apply to [GAIA](https://huggingface.co/gaia-benchmark) and use them to optimize
+- [ ] Add more language models to tests (use Replicate, ask LiteLLM)
+- [ ] Add async interpreter command, pipes answer to output
 - [ ] Make sure breaking from generator during execution stops the execution
 - [ ] Stateless core python package, config passed in by TUI
 - [ ] Expose tool (`interpreter.computer.run(language, code)`)
