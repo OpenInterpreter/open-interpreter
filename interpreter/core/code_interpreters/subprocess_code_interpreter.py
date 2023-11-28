@@ -54,6 +54,8 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             bufsize=0,
             universal_newlines=True,
             env=my_env,
+            encoding="utf-8",
+            errors="replace",
         )
         threading.Thread(
             target=self.handle_stream_output,
