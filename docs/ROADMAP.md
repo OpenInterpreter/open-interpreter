@@ -1,37 +1,44 @@
 # Roadmap
 
-- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
-- [x] Support multiple instances
-- [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
-- [ ] **Easy 🟢** Require documentation for PRs
-- [ ] Split ROADMAP into sections
-- [ ] Apply to [GAIA](https://huggingface.co/gaia-benchmark) and use them to optimize
-- [ ] Add more language models to tests (use Replicate, ask LiteLLM)
-- [ ] Add async interpreter command, pipes answer to output
-- [ ] Make sure breaking from generator during execution stops the execution
-- [ ] Stateless core python package, config passed in by TUI
+## New features
+- [ ] Add `interpreter --async` command (that OI itself can use) — pipes answer to output
 - [ ] Expose tool (`interpreter.computer.run(language, code)`)
-- [x] Add %% (shell) magic command
-- [ ] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
 - [ ] Allow for limited functions (`interpreter.functions`)
-- [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
-- [ ] Switch core code interpreter to be Jupyter-powered
-- [ ] Local and vision should be reserved for TUI, more granular settings for Python
-- [ ] Create more intensive tests for benchmarks
-- [ ] Connect benchmarks to multiple open-source LLMs
-- [ ] Further split TUI from core (some utils still reach across)
+- [ ] Add anonymous, opt-in data collection → open-source dataset
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed`) which will let us do semantic search
 - [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
 - [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstricts. Keep this minimal!
 - [ ] Allow for integrations
-- [ ] Work with Mintlify to translate docs
 - [ ] Expand "safe mode" to have proper, simple Docker support
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
 - [ ] Improve partnership with `languagetools`
+
+## Future-proofing
+- [ ] Apply to [GAIA](https://huggingface.co/gaia-benchmark) and use them to optimize
+- [ ] Add more language models to tests (use Replicate, ask LiteLLM)
+- [ ] Make sure breaking from generator during execution stops the execution
+- [ ] Stateless core python package, config passed in by TUI
+- [ ] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
+- [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
+- [ ] Switch core code interpreter to be Jupyter-powered
+- [ ] Local and vision should be reserved for TUI, more granular settings for Python
+- [ ] Further split TUI from core (some utils still reach across)
 - [ ] Remove `procedures` (there must be a better way)
 - [ ] Better storage of different model keys in TUI / config file. All keys, to multiple providers, should be stored in there. Easy switching
+
+## Documentation
+- [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
+- [ ] **Easy 🟢** Require documentation for PRs
+- [ ] Work with Mintlify to translate docs
 - [ ] Better comments throughout the package (they're like docs for contributors)
+
+## Completed
+
+- [x] (Nov 23rd) **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
+- [x] (Nov 25th) Add %% (shell) magic command
+- [x] (Nov 26th) Support multiple instances
+- [x] (Nov 28th) Split ROADMAP into sections
 
 # What's in our scope?
 
@@ -49,28 +56,6 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 3. More complex interactions with the LLM in `terminal_interface` beyond text (but file paths to more complex inputs, like images or video, can be included in that text).
 
 # Upcoming structures
-
-### Post TUI/core split structure
-
-```
-/open_interpreter
-  /terminal_interface
-    tui.py
-    chat.py
-    /utils
-  /core
-    core.py
-    respond.py
-    /utils
-    /computer
-      core.py
-      /languages
-        __init__.py
-        python.py
-        shell.py
-        ...
-    ...
-```
 
 ### New streaming structure
 
