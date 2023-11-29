@@ -2,38 +2,32 @@
 
 **Open Interpreter is large, open-source initiative to build a standard interface between language models and computers.**
 
-Right now, this means creating a real-time code execution environment that language models can operate.
-
 There are many ways to contribute, from helping others on [Github](https://github.com/KillianLucas/open-interpreter/issues) or [Discord](https://discord.gg/6p3fD6rBVm), writing documentation, or improving code.
 
 We depend on contributors like you. Let's build this.
 
 ## What should I work on?
 
-First, please familiarize yourself with our [project scope](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md#whats-in-our-scope).
-
-**Then, pick up a task from our [roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) or work on solving an [issue](https://github.com/KillianLucas/open-interpreter/issues).**
+First, please familiarize yourself with our [project scope](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md#whats-in-our-scope). Then, pick up a task from our [roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) or work on solving an [issue](https://github.com/KillianLucas/open-interpreter/issues).
 
 If you encounter a bug or have a feature in mind, don't hesitate to [open a new issue](https://github.com/KillianLucas/open-interpreter/issues/new/choose).
 
 ## Philosophy
 
-This is a **tighly scoped** project that places a premium on simplicity, and a heavy degree of skeptisism on extensions, integrations, or extra features. 
-
-We would rather not extend the system if it adds a lot of complexity.
+This is a minimalist, **tighly scoped** project that places a premium on simplicity. We're skeptical of new extensions, integrations, and extra features. We would rather not extend the system if it adds nonessential complexity.
 
 # Contribution Guidelines
 
-1. Before taking on significant code changes, please discuss your ideas on [Discord](https://discord.gg/6p3fD6rBVm) to ensure they align with our project vision. We want to keep the codebase simple and unintimidating for new users.
+1. Before taking on significant code changes, please discuss your ideas on [Discord](https://discord.gg/6p3fD6rBVm) to ensure they align with our vision. We want to keep the codebase simple and unintimidating for new users.
 2. Fork the repository and create a new branch for your work.
-3. Follow the [Running Your Local Fork](https://github.com/KillianLucas/open-interpreter/blob/main/docs/CONTRIBUTING.md#roadmap) guide below.
+3. Follow the [Running Your Local Fork](https://github.com/KillianLucas/open-interpreter/blob/main/docs/CONTRIBUTING.md#running-your-local-fork) guide below.
 4. Make changes with clear code comments explaining your approach. Try to follow existing conventions in the code.
-5. Follow the [Code Formatting and Linting](https://github.com/KillianLucas/open-interpreter/blob/main/docs/CONTRIBUTING.md#roadmap) guide below.
+5. Follow the [Code Formatting and Linting](https://github.com/KillianLucas/open-interpreter/blob/main/docs/CONTRIBUTING.md#code-formatting-and-linting) guide below.
 6. Open a PR into `main` linking any related issues. Provide detailed context on your changes.
 
 We will review PRs when possible and work with you to integrate your contribution. Please be patient as reviews take time. Once approved, your code will be merged.
 
-## Guide: Running Your Local Fork
+## Running Your Local Fork
 
 Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
 
@@ -61,7 +55,7 @@ For some, `poetry install` might hang on some dependencies. As a first step, try
 
 Then run `poetry install` again. If this doesn't work, please join our [Discord community](https://discord.gg/6p3fD6rBVm) for help.
 
-## Guide: Code Formatting and Linting
+## Code Formatting and Linting
 
 Our project uses `black` for code formatting and `isort` for import sorting. To ensure consistency across contributions, please adhere to the following guidelines:
 
