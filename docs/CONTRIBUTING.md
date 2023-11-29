@@ -1,48 +1,74 @@
-# Contributing to Open Interpreter 
+# ●
 
-Thank you for your interest in contributing! As an open source project, we rely on developers like you to make conversational AI accessible.
+**Open Interpreter is large, open-source initiative to build a standard interface between language models and computers.**
 
-There are many ways to contribute, from reporting bugs and suggesting features to improving the code. We appreciate you taking the time to get involved.
+Right now, this means creating a real-time code execution environment that language models can operate.
 
-## Roadmap
+There are many ways to contribute, from helping others on [Github](https://github.com/KillianLucas/open-interpreter/issues) or [Discord](https://discord.gg/6p3fD6rBVm), writing documentation, or improving code.
 
-We are working on developing a public roadmap to provide visibility into our priorities and upcoming enhancements.
+We depend on contributors like you. Let's build this.
 
-For now, our focus is on resolving issues with CodeLlama integration and keeping the core interpreter logic simple and understandable. We want to empower non-coders by turning natural language into executable actions.
+## What should I work on?
 
-As such, we aim to keep the codebase simplified rather than overly complex. Our goal is to give the power of coding - turning words into actions - to people without coding knowledge. We welcome discussions on how to maintain this approach as we add new capabilities.
+First, please familiarize yourself with our [project scope](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md#whats-in-our-scope).
 
-## Reporting Issues
+**Then, pick up a task from our [roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) or work on solving an [issue](https://github.com/KillianLucas/open-interpreter/issues).**
 
-If you encounter a bug or have a brilliant feature in mind, don't hesitate to [open a new issue](https://github.com/KillianLucas/open-interpreter/issues/new/choose). To ensure a swift and effective response, please provide the following:
+If you encounter a bug or have a feature in mind, don't hesitate to [open a new issue](https://github.com/KillianLucas/open-interpreter/issues/new/choose).
 
-- **Bug Reports:** Include detailed steps to reproduce the issue, along with specifics about your operating system and Python version, with screenshots and code/error snippets if required.
-- **Feature Requests:** Provide a comprehensive explanation of how your idea benefits Open Interpreter and its community.
+## Philosophy
 
-## Contributing Code
+This is a **tighly scoped** project that places a premium on simplicity, and a heavy degree of skeptisism on extensions, integrations, or extra features. 
 
-We welcome code contributions through pull requests. Here are some guidelines:
+We would rather not extend the system if it adds a lot of complexity.
 
-- Before taking on significant code changes, please discuss your ideas on [Discord] to ensure they align with our project vision. We want to keep the codebase simple and unintimidating for new users.
+# Contribution Guidelines
 
-- Fork the repository and create a new branch for your work.
+1. Before taking on significant code changes, please discuss your ideas on [Discord](https://discord.gg/6p3fD6rBVm) to ensure they align with our project vision. We want to keep the codebase simple and unintimidating for new users.
+2. Fork the repository and create a new branch for your work.
+3. Follow the [Running Your Local Fork](https://github.com/KillianLucas/open-interpreter/blob/main/docs/CONTRIBUTING.md#roadmap) guide below.
+4. Make changes with clear code comments explaining your approach. Try to follow existing conventions in the code.
+5. Follow the [Code Formatting and Linting](https://github.com/KillianLucas/open-interpreter/blob/main/docs/CONTRIBUTING.md#roadmap) guide below.
+6. Open a PR into `main` linking any related issues. Provide detailed context on your changes.
 
-- Make changes with clear code comments explaining your approach. Try to follow existing conventions in the code.
+We will review PRs when possible and work with you to integrate your contribution. Please be patient as reviews take time. Once approved, your code will be merged.
 
-- Open a PR to `main` linking any related issues. Provide detailed context on your changes.
+## Guide: Running Your Local Fork
 
-- We will review PRs when possible and work with you to integrate your contribution. Please be patient as reviews take time. 
+Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
 
-- Once approved, your code will be merged - thank you for improving Open Interpreter!
+1. CD into the project folder `/open-interpreter`
+2. Install dependencies `poetry install`
+3. Run the program `poetry run interpreter`
 
-### Code Formatting and Linting
+After modifying the source code, you will need to do `poetry run interpreter` again.
+
+**Note**: This project uses [`black`](https://black.readthedocs.io/en/stable/index.html) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
+
+### Installing New Dependencies
+
+If you wish to install new dependencies into the project, please use `poetry add package-name`.
+
+### Installing Developer Dependencies
+
+If you need to install dependencies specific to development, like testing tools, formatting tools, etc. please use `poetry add package-name --group dev`.
+
+### Known Issues
+
+For some, `poetry install` might hang on some dependencies. As a first step, try to run the following command in your terminal:
+
+`export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring`
+
+Then run `poetry install` again. If this doesn't work, please join our [Discord community](https://discord.gg/6p3fD6rBVm) for help.
+
+## Guide: Code Formatting and Linting
 
 Our project uses `black` for code formatting and `isort` for import sorting. To ensure consistency across contributions, please adhere to the following guidelines:
 
 1. **Install Pre-commit Hooks**:
-   
+
    If you want to automatically format your code every time you make a commit, install the pre-commit hooks.
-   
+
    ```bash
    pip install pre-commit
    pre-commit install
@@ -59,42 +85,12 @@ Our project uses `black` for code formatting and `isort` for import sorting. To 
    isort .
    ```
 
-## Running Your Local Fork
+# Licensing
 
-Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
+Contributions to Open Interpreter would be under the MIT license before version 0.2.0, or under AGPL for subsequent contributions.
 
-1. CD into the project folder `/open-interpreter`
-2. Install dependencies `poetry install`
-3. Run the program `poetry run interpreter`
+# Questions?
 
-After modifying the source code, you will need to do `poetry run interpreter` again.
+Join our [Discord community](https://discord.gg/6p3fD6rBVm) and post in the #General channel to connect with contributors. We're happy to guide you through your first open source contribution to this project!
 
-**Note**: This project uses [`black`](https://black.readthedocs.io/en/stable/index.html) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
-
-### Installing New Packages
-
-If you wish to install new dependencies into the project, please use `poetry add package-name`.
-
-#### Installing Developer Dependencies
-
-If you need to install dependencies specific to development, like testing tools, formatting tools, etc. please use `poetry add package-name --group dev`.
-
-### Known Issues
-
-For some, `poetry install` might hang on some dependencies. As a first step, try to run the following command in your terminal:  
-  
-`export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring`  
-  
-Then run `poetry install` again. If this doesn't work, please join our [Discord community][discord] for help.
-
-## Questions?
-
-Join our [Discord community][discord] to connect with contributors. We're happy to guide you through your first open source contribution!
-
-## Licensing
-
-Contributions to open-interpreter would be under the MIT license. 
-
-Thank you for your dedication and understanding as we continue refining our processes. We sincerely appreciate your involvement!
-
-[discord]: https://discord.gg/6p3fD6rBVm
+**Thank you for your dedication and understanding as we continue refining our processes. As we explore this extraordinary new technology, we sincerely appreciate your involvement.**
