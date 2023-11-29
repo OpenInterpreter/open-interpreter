@@ -254,6 +254,10 @@ Once the server is running, you can begin your conversation below.
         return
 
     if args.version:
+        ### DELETE THIS
+        print("0.2.0")
+        return
+        ### DELETE THIS
         version = pkg_resources.get_distribution("open-interpreter").version
         print(f"Open Interpreter {version}")
         return

@@ -9,7 +9,7 @@ import time
 
 from jupyter_client import KernelManager
 
-from ..base_language import BaseLanguage
+from .base_language import BaseLanguage
 
 # Supresses a weird debugging error
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"

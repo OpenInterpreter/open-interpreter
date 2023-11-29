@@ -26,6 +26,13 @@ class Computer:
         self._active_languages = {}
 
     def run(self, language, code):
+        # To reduce footprint, I think Shell should use the same kernel as Python.
+        # There should be a way to share kernels in the future I think.
+        # Is this bad?
+        if language_map[language] == Shell:
+            code = "!" + code
+            language = "python"
+
         if language not in self._active_languages:
             self._active_languages[language] = language_map[language]()
         try:

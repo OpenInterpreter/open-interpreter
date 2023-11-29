@@ -1,6 +1,7 @@
 """
 The terminal interface is just a view. Just handles the very top layer.
-If you were to build a frontend this would be a way to do it
+If you were to build a frontend this would be a way to do it.
+Should be updated to use flags.
 """
 
 try:
@@ -84,7 +85,12 @@ def terminal_interface(interpreter, message):
 
         # Many users do this
         if message.strip() == "interpreter --local":
-            print("Please press CTRL-C then run `interpreter --local`.")
+            print("Please exit this conversation, then run `interpreter --local`.")
+            continue
+        if message.strip() == "pip install --upgrade open-interpreter":
+            print(
+                "Please exit this conversation, then run `pip install --upgrade open-interpreter`."
+            )
             continue
 
         if interpreter.vision:
