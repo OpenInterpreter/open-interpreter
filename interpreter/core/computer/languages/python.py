@@ -35,7 +35,16 @@ class Python(BaseLanguage):
             python_executable_path
         ), f"Python executable not found at {python_executable_path}"
 
-        self.km = KernelManager(kernel_name="python3")
+        self.km = KernelManager(
+            kernel_name="python3",
+            kernel_cmd=[
+                python_executable_path,
+                "-m",
+                "ipykernel_launcher",
+                "-f",
+                "{connection_file}",
+            ],
+        )
         self.km.start_kernel()
         self.kc = self.km.client()
         self.kc.start_channels()
