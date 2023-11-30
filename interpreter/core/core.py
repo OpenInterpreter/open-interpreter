@@ -48,6 +48,7 @@ class Interpreter:
         self.max_tokens = None
         self.api_base = None
         self.api_key = None
+        self.api_version = None
         self.max_budget = None
         self._llm = None
         self.function_calling_llm = None
