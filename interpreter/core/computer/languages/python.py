@@ -25,26 +25,6 @@ class Python(BaseLanguage):
     name = "Python"
 
     def __init__(self):
-        # assert (
-        #     "VIRTUAL_ENV" in os.environ
-        # ), "VIRTUAL_ENV environment variable is not set"
-        # python_executable_path = os.path.join(
-        #     os.environ["VIRTUAL_ENV"], "bin", "python"
-        # )
-        # assert os.path.exists(
-        #     python_executable_path
-        # ), f"Python executable not found at {python_executable_path}"
-
-        # self.km = KernelManager(
-        #     kernel_name="python3",
-        #     kernel_cmd=[
-        #         python_executable_path,
-        #         "-m",
-        #         "ipykernel_launcher",
-        #         "-f",
-        #         "{connection_file}",
-        #     ],
-        # )
         self.km = KernelManager(kernel_name="python3")
 
         self.km.start_kernel()
@@ -56,13 +36,6 @@ class Python(BaseLanguage):
 
         self.listener_thread = None
         self.finish_flag = False
-
-        code_to_check_virtual_env = """
-        assert 'VIRTUAL_ENV' in os.environ, "VIRTUAL_ENV environment variable is not set"
-        python_executable_path = os.path.join(os.environ['VIRTUAL_ENV'], 'bin', 'python')
-        assert os.path.exists(python_executable_path), f"Python executable not found at {python_executable_path}"
-        """
-        self.run(code_to_check_virtual_env)
 
     def terminate(self):
         self.kc.stop_channels()
