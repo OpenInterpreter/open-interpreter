@@ -1,25 +1,23 @@
 # Roadmap
 
 ## New features
-- [ ] Add `interpreter --async` command (that OI itself can use) — pipes answer to output
-- [ ] Expose tool (`interpreter.computer.run(language, code)`)
-- [ ] Allow for limited functions (`interpreter.functions`)
-- [ ] Add anonymous, opt-in data collection → open-source dataset
+- [ ] Add `interpreter --async` command (that OI itself can use) — simply prints the final resulting output — nothing intermediary.
+- [ ] Allow for limited functions (`interpreter.functions`) using regex
+- [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed`) which will let us do semantic search
 - [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
-- [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstricts. Keep this minimal!
+- [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstrings. Keep this minimal!
+- [ ] Improve partnership with `languagetools`
 - [ ] Allow for integrations
 - [ ] Expand "safe mode" to have proper, simple Docker support
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
-- [ ] Improve partnership with `languagetools`
 
 ## Future-proofing
 - [ ] Apply to [GAIA](https://huggingface.co/gaia-benchmark) and use them to optimize
 - [ ] Add more language models to tests (use Replicate, ask LiteLLM)
 - [ ] Make sure breaking from generator during execution stops the execution
 - [ ] Stateless core python package, config passed in by TUI
-- [ ] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
 - [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
 - [ ] Switch core code interpreter to be Jupyter-powered
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
@@ -35,10 +33,12 @@
 
 ## Completed
 
-- [x] (Nov 23rd) **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
-- [x] (Nov 25th) Add %% (shell) magic command
-- [x] (Nov 26th) Support multiple instances
-- [x] (Nov 28th) Split ROADMAP into sections
+- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
+- [x] Add %% (shell) magic command
+- [x] Support multiple instances
+- [x] Split ROADMAP into sections
+- [x] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
+- [x] Expose tool (`interpreter.computer.run(language, code)`)
 
 # What's in our scope?
 
