@@ -254,12 +254,9 @@ Once the server is running, you can begin your conversation below.
         return
 
     if args.version:
-        ### DELETE THIS
-        print("0.2.0")
-        return
-        ### DELETE THIS
         version = pkg_resources.get_distribution("open-interpreter").version
-        print(f"Open Interpreter {version}")
+        update_name = "New Computer"  # Change this with each major update
+        print(f'Open Interpreter {version} "{update_name}"')
         return
 
     if args.fast:
@@ -290,10 +287,10 @@ Once the server is running, you can begin your conversation below.
     # At some point in the future these model names redirects wont be necessary anymore, but legacy names will remain for a while
     if interpreter.model == "gpt-4" or interpreter.model == "gpt-4-32k":
         interpreter.model = "gpt-4-1106-preview"
-        
+
     if interpreter.model == "gpt-3.5-turbo" or interpreter.model == "gpt-3.5-turbo-16k":
         interpreter.model = "gpt-3.5-turbo-1106"
-    
+
     if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
         interpreter.context_window = 128000
         interpreter.max_tokens = 4096

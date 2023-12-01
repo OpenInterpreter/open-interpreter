@@ -9,7 +9,7 @@ class AppleScript(SubprocessLanguage):
 
     def __init__(self):
         super().__init__()
-        self.start_cmd = os.environ.get("SHELL", "/bin/zsh")
+        self.start_cmd = [os.environ.get("SHELL", "/bin/zsh")]
 
     def preprocess_code(self, code):
         """

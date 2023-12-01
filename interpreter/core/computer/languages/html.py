@@ -9,5 +9,5 @@ class HTML(BaseLanguage):
         super().__init__()
 
     def run(self, code):
-        # Lmao this is so thin. But HTML should be an accepted output! It's actually terminal interface that should figure out how to render it
+        # Lmao this is so thin. But HTML should be an accepted output!
         yield {"html": code}

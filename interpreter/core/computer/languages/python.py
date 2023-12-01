@@ -62,7 +62,7 @@ class Python(BaseLanguage):
                 except queue.Empty:
                     continue
 
-                if DEBUG_MODE and False:
+                if DEBUG_MODE:
                     print("-----------" * 10)
                     print("Message recieved:", msg["content"])
                     print("-----------" * 10)

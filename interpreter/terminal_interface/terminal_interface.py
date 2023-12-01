@@ -10,8 +10,6 @@ except ImportError:
     pass
 
 import base64
-import random
-import re
 
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
@@ -77,6 +75,8 @@ def terminal_interface(interpreter, message):
 
         except KeyboardInterrupt:
             # Exit gracefully
+            # Disconnect from the computer interface
+            interpreter.computer.terminate()
             break
 
         if message.startswith("%") and interactive:

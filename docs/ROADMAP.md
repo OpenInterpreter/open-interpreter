@@ -1,6 +1,7 @@
 # Roadmap
 
 ## New features
+
 - [ ] Add `interpreter --async` command (that OI itself can use) — simply prints the final resulting output — nothing intermediary.
 - [ ] Allow for limited functions (`interpreter.functions`) using regex
 - [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
@@ -14,6 +15,7 @@
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
 
 ## Future-proofing
+
 - [ ] Apply to [GAIA](https://huggingface.co/gaia-benchmark) and use them to optimize
 - [ ] Add more language models to tests (use Replicate, ask LiteLLM)
 - [ ] Make sure breaking from generator during execution stops the execution
@@ -26,6 +28,7 @@
 - [ ] Better storage of different model keys in TUI / config file. All keys, to multiple providers, should be stored in there. Easy switching
 
 ## Documentation
+
 - [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
 - [ ] **Easy 🟢** Require documentation for PRs
 - [ ] Work with Mintlify to translate docs
@@ -57,24 +60,26 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 
 # Upcoming structures
 
-### New streaming structure
+### New streaming structure (with delimiters=True)
 
 ```
-{"role": "assistant", "type": "text", "start": True}
+{"role": "assistant", "type": "text", "start": True} # <- Delimiter
 {"role": "assistant", "type": "text", "content": "Pro"}
 {"role": "assistant", "type": "text", "content": "cessing"}
 {"role": "assistant", "type": "text", "content": "your request"}
 {"role": "assistant", "type": "text", "content": "to generate a plot."}
-{"role": "assistant", "type": "text", "end": True}  
+{"role": "assistant", "type": "text", "end": True} # <- Delimiter
 
 {"role": "assistant", "type": "python", "start": True}
 {"role": "assistant", "type": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
 {"role": "assistant", "type": "python", "end": True}
 
 {"role": "computer", "type": "text", "start": True}
-{"role": "computer", "type": "text", "content": "1"}
-{"role": "computer", "type": "text", "content": "2"}
-{"role": "computer", "type": "text", "content": "3"}
+{"role": "computer", "type": "text", "content": "a printed statement"}
+{"role": "computer", "type": "active_line", "content": "1"}
+{"role": "computer", "type": "active_line", "content": "2"}
+{"role": "computer", "type": "active_line", "content": "3"}
+{"role": "computer", "type": "text", "content": "another printed statement"}
 {"role": "computer", "type": "text", "end": True}
 
 {"role": "computer", "type": "image", "start": True}
