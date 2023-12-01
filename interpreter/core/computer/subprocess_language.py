@@ -11,7 +11,7 @@ from .base_language import BaseLanguage
 
 class SubprocessLanguage(BaseLanguage):
     def __init__(self):
-        self.start_cmd = ""
+        self.start_cmd = []
         self.process = None
         self.debug_mode = False
         self.output_queue = queue.Queue()
@@ -47,7 +47,7 @@ class SubprocessLanguage(BaseLanguage):
         my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = "utf-8"
         self.process = subprocess.Popen(
-            self.start_cmd.split(),
+            self.start_cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

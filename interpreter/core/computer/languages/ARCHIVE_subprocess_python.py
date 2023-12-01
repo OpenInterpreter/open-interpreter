@@ -19,7 +19,7 @@ class Python(SubprocessLanguage):
         executable = sys.executable
         if os.name != "nt":  # not Windows
             executable = shlex.quote(executable)
-        self.start_cmd = executable + " -i -q -u"
+        self.start_cmd = [executable, "-i", "-q", "-u"]
 
     def preprocess_code(self, code):
         return preprocess_python(code)

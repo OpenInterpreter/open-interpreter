@@ -9,7 +9,7 @@ class R(SubprocessLanguage):
 
     def __init__(self):
         super().__init__()
-        self.start_cmd = "R -q --vanilla"  # Start R in quiet and vanilla mode
+        self.start_cmd = ["R", "-q", "--vanilla"]  # Start R in quiet and vanilla mode
 
     def preprocess_code(self, code):
         """

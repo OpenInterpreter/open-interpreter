@@ -16,9 +16,9 @@ class Shell(SubprocessLanguage):
 
         # Determine the start command based on the platform
         if platform.system() == "Windows":
-            self.start_cmd = "cmd.exe"
+            self.start_cmd = ["cmd.exe"]
         else:
-            self.start_cmd = os.environ.get("SHELL", "bash")
+            self.start_cmd = [os.environ.get("SHELL", "bash")]
 
     def preprocess_code(self, code):
         return preprocess_shell(code)
