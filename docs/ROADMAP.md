@@ -62,43 +62,89 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 
 ### New streaming structure (with delimiters=True)
 
-```
-{"role": "assistant", "type": "text", "start": True} # <- Delimiter
-{"role": "assistant", "type": "text", "content": "Pro"}
-{"role": "assistant", "type": "text", "content": "cessing"}
-{"role": "assistant", "type": "text", "content": "your request"}
-{"role": "assistant", "type": "text", "content": "to generate a plot."}
-{"role": "assistant", "type": "text", "end": True} # <- Delimiter
+```python
+{"role": "assistant", "type": "message", "start": True} # <- Delimiter
+{"role": "assistant", "type": "message", "content": "Pro"}
+{"role": "assistant", "type": "message", "content": "cessing"}
+{"role": "assistant", "type": "message", "content": "your request"}
+{"role": "assistant", "type": "message", "content": "to generate a plot."}
+{"role": "assistant", "type": "message", "end": True} # <- Delimiter
 
-{"role": "assistant", "type": "python", "start": True}
-{"role": "assistant", "type": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
-{"role": "assistant", "type": "python", "end": True}
+{"role": "assistant", "type": "code", "format": "python", "start": True}
+{"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data"}
+{"role": "assistant", "type": "code", "format": "python", "content": "('data')\ndisplay_as_image(plot)"}
+{"role": "assistant", "type": "code", "format": "python", "content": "\ndisplay_as_html(plot)"}
+{"role": "assistant", "type": "code", "format": "python", "end": True}
 
-{"role": "computer", "type": "text", "start": True}
-{"role": "computer", "type": "text", "content": "a printed statement"}
-{"role": "computer", "type": "active_line", "content": "1"}
-{"role": "computer", "type": "active_line", "content": "2"}
-{"role": "computer", "type": "active_line", "content": "3"}
-{"role": "computer", "type": "text", "content": "another printed statement"}
-{"role": "computer", "type": "text", "end": True}
+{"role": "computer", "type": "console", "start": True}
+{"role": "computer", "type": "console", "format": "output", "content": "a printed statement"}
+{"role": "computer", "type": "console", "format": "active_line", "content": "1"}
+{"role": "computer", "type": "console", "format": "active_line", "content": "2"}
+{"role": "computer", "type": "console", "format": "active_line", "content": "3"}
+{"role": "computer", "type": "console", "format": "output", "content": "another printed statement"}
+{"role": "computer", "type": "console", "end": True}
 
-{"role": "computer", "type": "image", "start": True}
-{"role": "computer", "type": "image", "content": "base64_encoded_plot_image"}
-{"role": "computer", "type": "image", "end": True}
+...
 
-{"role": "computer", "type": "html", "start": True}
-{"role": "computer", "type": "html", "content": "<html>Plot in HTML format</html>"}
-{"role": "computer", "type": "html", "end": True}
+# ASSISTANT GENERATED HTML
 
-{"role": "computer", "type": "html", "start": True}
-{"role": "computer", "type": "html", "content": "<html>Another plot in HTML format</html>"}
-{"role": "computer", "type": "html", "end": True}
+# The assistant writes some HTML.
+# Because recipient isn't explicitly set, it's being "rendered" to both the user and the computer in real-time.
+{"role": "assistant", "type": "code", "format": "html", "start": True}
+{"role": "assistant", "type": "code", "format": "html", "content": "<html>Some"}
+{"role": "assistant", "type": "code", "format": "html", "content": "thing</html>"}
+{"role": "assistant", "type": "code", "format": "html", "end": True}
 
-{"role": "assistant", "type": "text", "start": True}
-{"role": "assistant", "type": "text", "content": "Plot"}
-{"role": "assistant", "type": "text", "content": "generated"}
-{"role": "assistant", "type": "text", "content": "successfully."}
-{"role": "assistant", "type": "text", "end": True}
+# The computer runs the HTML.
+
+# The running HTML produces some console log / errors.
+{"role": "computer", "type": "console", "start": True}
+{"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
+{"role": "computer", "type": "console", "end": True}
+
+# The computer will make an image for the assistant to see.
+# The image's "recipient" is set to "assistant" because **the user has already seen this HTML** as interactive HTML, in block 1
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "start": True}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "content": "/path/to/html_block_render.png"}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "end": True}
+
+...
+
+# COMPUTER GENERATED HTML
+
+# The assistant writes some Python.
+{"role": "assistant", "type": "code", "format": "python", "start": True}
+{"role": "assistant", "type": "code", "format": "python", "content": "display_plot_as_html(plot)"}
+{"role": "assistant", "type": "code", "format": "python", "end": True}
+
+# The computer runs the Python.
+
+# The running Python produces some HTML.
+# The HTML's "recipient" is set to "user" so the user can interact with it, but the assistant's context won't get stuffed with tokens (instead, it will get an image in a moment)
+{"role": "computer", "type": "code", "format": "html", "recipient": "user", "start": True}
+{"role": "computer", "type": "code", "format": "html", "recipient": "user", "content": "<html>Something</html>"}
+{"role": "computer", "type": "code", "format": "html", "recipient": "user", "end": True}
+
+# The computer runs the HTML.
+
+# The running HTML produces some console log / errors.
+{"role": "computer", "type": "console", "start": True}
+{"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
+{"role": "computer", "type": "console", "end": True}
+
+# The computer will make an image for the assistant to see.
+# The image's "recipient" is set to "assistant" because **the user has already seen this HTML** as interactive HTML, in block 2
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "start": True}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "content": "/path/to/html_block_render.png"}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "end": True}
+
+...
+
+{"role": "assistant", "type": "message", "start": True}
+{"role": "assistant", "type": "message", "content": "Plot"}
+{"role": "assistant", "type": "message", "content": "generated"}
+{"role": "assistant", "type": "message", "content": "successfully."}
+{"role": "assistant", "type": "message", "end": True}
 ```
 
 ### New static messages structure
@@ -106,14 +152,15 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 ```
 [
 
-  {"role": "user", "type": "text", "content": "Please create a plot from this data and display it as an image and then as HTML."},
-  {"role": "user", "type": "image", "content": "{base64}"}
-  {"role": "user", "type": "file", "content": "/path/to/file"}
-  {"role": "assistant", "type": "text", "content": "Processing your request to generate a plot."}
-  {"role": "assistant", "type": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
-  {"role": "computer", "type": "image", "content": "{base64}"}
-  {"role": "computer", "type": "html", "content": "<html>Plot in HTML format</html>"}
-  {"role": "assistant", "type": "text", "content": "Plot generated successfully."}
+  {"role": "user", "type": "message", "content": "Please create a plot from this data and display it as an image and then as HTML."}, # implied format: text (only one format for type message)
+  {"role": "user", "type": "image", "format": "path", "content": "path/to/image.png"}
+  {"role": "user", "type": "file", "content": "/path/to/file.pdf"} # implied format: path (only one format for type file)
+  {"role": "assistant", "type": "message", "content": "Processing your request to generate a plot."} # implied format: text
+  {"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
+  {"role": "computer", "type": "image", "format": "base64", "content": "base64"}
+  {"role": "computer", "type": "code", "format": "html", "content": "<html>Plot in HTML format</html>"}
+  {"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
+  {"role": "assistant", "type": "message", "content": "Plot generated successfully."} # implied format: text
 
 ]
 ```
