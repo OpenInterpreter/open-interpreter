@@ -7,7 +7,7 @@ def count_tokens(text="", model="gpt-4"):
     Count the number of tokens in a string
     """
 
-    # Fix bug where models starting with openai/ for example can'git t find tokenizer
+    # Fix bug where models starting with openai/ for example can't find tokenizer
     if '/' in model:
         model = model.split('/')[-1]
 
