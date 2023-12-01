@@ -3,25 +3,27 @@
 import ast
 import os
 import queue
-import sys
+import re
 import threading
 import time
-import traceback
 
 from jupyter_client import KernelManager
+
+from .base_language import BaseLanguage
 
 # Supresses a weird debugging error
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
 # turn off colors in "terminal"
 os.environ["ANSI_COLORS_DISABLED"] = "1"
 
+DEBUG_MODE = False
 
-class PythonVision:
+
+class Python(BaseLanguage):
     file_extension = "py"
-    proper_name = "Python"
+    name = "Python"
 
-    def __init__(self, config):
-        self.config = config
+    def __init__(self):
         self.km = KernelManager(kernel_name="python3")
         self.km.start_kernel()
         self.kc = self.km.client()
@@ -30,102 +32,112 @@ class PythonVision:
             time.sleep(0.1)
         time.sleep(0.5)
 
+        self.listener_thread = None
+        self.finish_flag = False
+
     def terminate(self):
         self.kc.stop_channels()
         self.km.shutdown_kernel()
 
     def run(self, code):
+        self.finish_flag = False
         preprocessed_code = self.preprocess_code(code)
         message_queue = queue.Queue()
         self._execute_code(preprocessed_code, message_queue)
-        return self._capture_output(message_queue)
+        yield from self._capture_output(message_queue)
 
     def _execute_code(self, code, message_queue):
         def iopub_message_listener():
             while True:
+                # If self.finish_flag = True, and we didn't set it (we do below), we need to stop. That's our "stop"
+                if self.finish_flag == True:
+                    if DEBUG_MODE:
+                        print("interrupting kernel!!!!!")
+                    self.km.interrupt_kernel()
+                    return
                 try:
-                    msg = self.kc.iopub_channel.get_msg(timeout=0.1)
-                    content = msg["content"]
-
-                    if msg["msg_type"] == "stream":
-                        # Parse output for active lines first
-                        def detect_active_line(line):
-                            active_line = None
-                            while "##active_line" in line:
-                                active_line = int(
-                                    line.split("##active_line")[1].split("##")[0]
-                                )
-                                line = line.replace(
-                                    "##active_line" + str(active_line) + "##", ""
-                                )
-                            return line, active_line
-
-                        line, active_line = detect_active_line(content["text"])
-
-                        if active_line:
-                            message_queue.put({"active_line": active_line})
-
-                        message_queue.put({"output": line})
-                    elif msg["msg_type"] == "error":
-                        message_queue.put({"output": "\n".join(content["traceback"])})
-                    elif msg["msg_type"] in ["display_data", "execute_result"]:
-                        data = content["data"]
-                        if "image/png" in data:
-                            #### DISABLED PREFIX
-                            # image_base64 = "data:image/png;base64," + data['image/png']
-                            # message_queue.put({"image": image_base64})
-                            message_queue.put({"image": data["image/png"]})
-                        elif "image/jpeg" in data:
-                            #### DISABLED PREFIX
-                            # image_base64 = "data:image/jpeg;base64," + data['image/jpeg']
-                            # message_queue.put({"image": image_base64})
-                            message_queue.put({"image": data["image/jpeg"]})
-                        elif "text/html" in data:
-                            message_queue.put({"html": data["text/html"]})
-                        elif "text/plain" in data:
-                            message_queue.put({"output": data["text/plain"]})
-                        elif "application/javascript" in data:
-                            message_queue.put(
-                                {"javascript": data["application/javascript"]}
-                            )
-
+                    msg = self.kc.iopub_channel.get_msg(timeout=0.05)
                 except queue.Empty:
-                    if self.kc.shell_channel.msg_ready():
-                        break
+                    continue
 
-        listener_thread = threading.Thread(target=iopub_message_listener)
-        listener_thread.start()
+                if DEBUG_MODE and False:
+                    print("-----------" * 10)
+                    print("Message recieved:", msg["content"])
+                    print("-----------" * 10)
+
+                if (
+                    msg["header"]["msg_type"] == "status"
+                    and msg["content"]["execution_state"] == "idle"
+                ):
+                    # Set finish_flag and return when the kernel becomes idle
+                    if DEBUG_MODE:
+                        print("from thread: kernel is idle")
+                    self.finish_flag = True
+                    return
+
+                content = msg["content"]
+
+                if msg["msg_type"] == "stream":
+                    line, active_line = self.detect_active_line(content["text"])
+                    if active_line:
+                        message_queue.put({"active_line": active_line})
+                    message_queue.put({"output": line})
+                elif msg["msg_type"] == "error":
+                    message_queue.put({"output": "\n".join(content["traceback"])})
+                elif msg["msg_type"] in ["display_data", "execute_result"]:
+                    data = content["data"]
+                    if "image/png" in data:
+                        message_queue.put({"image": data["image/png"]})
+                    elif "image/jpeg" in data:
+                        message_queue.put({"image": data["image/jpeg"]})
+                    elif "text/html" in data:
+                        message_queue.put({"html": data["text/html"]})
+                    elif "text/plain" in data:
+                        message_queue.put({"output": data["text/plain"]})
+                    elif "application/javascript" in data:
+                        message_queue.put(
+                            {"javascript": data["application/javascript"]}
+                        )
+
+        self.listener_thread = threading.Thread(target=iopub_message_listener)
+        # self.listener_thread.daemon = True
+        self.listener_thread.start()
+
+        if DEBUG_MODE:
+            print(
+                "thread is on:", self.listener_thread.is_alive(), self.listener_thread
+            )
 
         self.kc.execute(code)
-        listener_thread.join()
+
+    def detect_active_line(self, line):
+        if "##active_line" in line:
+            # Split the line by "##active_line" and grab the last element
+            last_active_line = line.split("##active_line")[-1]
+            # Split the last active line by "##" and grab the first element
+            active_line = int(last_active_line.split("##")[0])
+            # Remove all ##active_line{number}##\n
+            line = re.sub(r"##active_line\d+##\n", "", line)
+            return line, active_line
+        return line, None
 
     def _capture_output(self, message_queue):
         while True:
-            if not message_queue.empty():
-                yield message_queue.get()
-            else:
-                time.sleep(0.1)
-            try:
-                output = message_queue.get(timeout=0.3)  # Waits for 0.3 seconds
-                yield output
-            except queue.Empty:
-                # Try to yank 3 more times from it... maybe there's something in there...
-                # (I don't know if this actually helps. Maybe we just need to yank 1 more time)
-                for _ in range(3):
-                    if not message_queue.empty():
-                        yield message_queue.get()
-                    time.sleep(0.2)
-                break
+            if self.listener_thread:
+                try:
+                    output = message_queue.get(timeout=0.1)
+                    if DEBUG_MODE:
+                        print(output)
+                    yield output
+                except queue.Empty:
+                    if self.finish_flag:
+                        if DEBUG_MODE:
+                            print("we're done")
+                        break
+            time.sleep(0.1)
 
-    def _old_capture_output(self, message_queue):
-        output = []
-        while True:
-            try:
-                line = message_queue.get_nowait()
-                output.append(line)
-            except queue.Empty:
-                break
-        return output
+    def stop(self):
+        self.finish_flag = True
 
     def preprocess_code(self, code):
         return preprocess_python(code)
@@ -138,9 +150,9 @@ def preprocess_python(code):
     """
 
     # Add print commands that tell us what the active line is
-    code = add_active_line_prints(code)
+    # code = add_active_line_prints(code)
 
-    # Wrap in a try except
+    # Wrap in a try except (DISABLED)
     # code = wrap_in_try_except(code)
 
     # Remove any whitespace lines, as this will break indented blocks
@@ -253,27 +265,3 @@ def wrap_in_try_except(code):
 
     # Convert the modified AST back to source code
     return ast.unparse(parsed_code)
-
-
-# Usage
-'''
-config = {}  # Your configuration here
-python_kernel = Python(config)
-
-code = """
-import pandas as pd
-import numpy as np
-df = pd.DataFrame(np.random.rand(10, 5))
-# For HTML output
-display(df)
-# For image output using matplotlib
-import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(df)
-plt.savefig('plot.png')  # Save the plot as a .png file
-plt.show()
-"""
-output = python_kernel.run(code)
-for line in output:
-    display_output(line)
-'''

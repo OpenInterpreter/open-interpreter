@@ -26,6 +26,58 @@ def teardown_function():
     time.sleep(5)
 
 
+def test_break_execution():
+    """
+    Breaking from the generator while it's executing should halt the operation.
+    """
+
+    code = r"""print("starting")
+import time                                                                                                                                
+import os                                                                                                                                  
+                                                                                                                                            
+# Always create a fresh file
+open('numbers.txt', 'w').close()
+                                                                                                                                            
+# Open the file in append mode                                                                                                             
+with open('numbers.txt', 'a+') as f:                                                                                                        
+    # Loop through the numbers 1 to 5                                                                                                      
+    for i in [1,2,3,4,5]:                                                                                                                  
+        # Print the number                                                                                                                 
+        print("adding", i, "to file")                                                                                                                           
+        # Append the number to the file                                                                                                    
+        f.write(str(i) + '\n')                                                                                                             
+        # Wait for 0.5 second
+        print("starting to sleep")
+        time.sleep(1)
+        # # Read the file to make sure the number is in there
+        # # Move the seek pointer to the start of the file
+        # f.seek(0)
+        # # Read the file content
+        # content = f.read()
+        # print("Current file content:", content)
+        # # Check if the current number is in the file content
+        # assert str(i) in content
+        # Move the seek pointer to the end of the file for the next append operation
+        f.seek(0, os.SEEK_END)
+        """
+    print("starting to code")
+    for chunk in interpreter.computer.run("python", code):
+        print(chunk)
+        if "output" in chunk:
+            if "adding 3 to file" in chunk["output"]:
+                break
+
+    time.sleep(3)
+
+    # Open the file and read its content
+    with open("numbers.txt", "r") as f:
+        content = f.read()
+
+    # Check if '1' and '5' are in the content
+    assert "1" in content
+    assert "5" not in content
+
+
 def test_config_loading():
     # because our test is running from the root directory, we need to do some
     # path manipulation to get the actual path to the config file or our config
@@ -61,95 +113,33 @@ def test_generator():
     """
     Sends two messages, makes sure all the flags are correct.
     """
-    start_of_message_emitted = False
-    end_of_message_emitted = False
-    start_of_code_emitted = False
-    end_of_code_emitted = False
-    executing_emitted = False
-    end_of_execution_emitted = False
+    flags = [
+        "message",
+        "language",
+        "code",
+        "output",
+        "active_line",
+        "start_of_message",
+        "end_of_message",
+        "start_of_code",
+        "end_of_code",
+        "executing",
+        "start_of_output",
+        "end_of_output",
+    ]
 
-    for chunk in interpreter.chat("What's 38023*40334?", stream=True, display=False):
-        print(chunk)
-        if "start_of_message" in chunk:
-            start_of_message_emitted = True
-        if "end_of_message" in chunk:
-            end_of_message_emitted = True
-        if "start_of_code" in chunk:
-            start_of_code_emitted = True
-        if "end_of_code" in chunk:
-            end_of_code_emitted = True
-        if "executing" in chunk:
-            executing_emitted = True
-        if "end_of_execution" in chunk:
-            end_of_execution_emitted = True
+    for query in ["What's 38023*40334?", "What's 2334*34335555?"]:
+        flags_emitted = {flag: False for flag in flags}
 
-        permitted_flags = [
-            "message",
-            "language",
-            "code",
-            "output",
-            "active_line",
-            "start_of_message",
-            "end_of_message",
-            "start_of_code",
-            "end_of_code",
-            "executing",
-            "end_of_execution",
-        ]
-        if list(chunk.keys())[0] not in permitted_flags:
-            assert False, f"{chunk} is invalid"
+        for chunk in interpreter.chat(query, stream=True, display=False):
+            print(chunk)
+            if list(chunk.keys())[0] not in flags:
+                assert False, f"{chunk} is invalid"
+            else:
+                flags_emitted[list(chunk.keys())[0]] = True
 
-    assert start_of_message_emitted
-    assert end_of_message_emitted
-    assert start_of_code_emitted
-    assert end_of_code_emitted
-    assert executing_emitted
-    assert end_of_execution_emitted
-
-    start_of_message_emitted = False
-    end_of_message_emitted = False
-    start_of_code_emitted = False
-    end_of_code_emitted = False
-    executing_emitted = False
-    end_of_execution_emitted = False
-
-    for chunk in interpreter.chat("What's 2334*34335555?", stream=True, display=False):
-        print(chunk)
-        if "start_of_message" in chunk:
-            start_of_message_emitted = True
-        if "end_of_message" in chunk:
-            end_of_message_emitted = True
-        if "start_of_code" in chunk:
-            start_of_code_emitted = True
-        if "end_of_code" in chunk:
-            end_of_code_emitted = True
-        if "executing" in chunk:
-            executing_emitted = True
-        if "end_of_execution" in chunk:
-            end_of_execution_emitted = True
-
-        permitted_flags = [
-            "message",
-            "language",
-            "code",
-            "output",
-            "active_line",
-            "start_of_message",
-            "end_of_message",
-            "start_of_code",
-            "end_of_code",
-            "executing",
-            "end_of_execution",
-        ]
-        if list(chunk.keys())[0] not in permitted_flags:
-            assert False, f"{chunk} is invalid"
-
-    assert start_of_message_emitted
-    assert end_of_message_emitted
-    assert start_of_code_emitted
-    assert end_of_code_emitted
-    assert executing_emitted
-    assert end_of_execution_emitted
+        for flag, emitted in flags_emitted.items():
+            assert emitted, f"{flag} not emitted"
 
 
 def test_hello_world():
