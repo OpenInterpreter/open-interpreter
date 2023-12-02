@@ -36,9 +36,10 @@ class SubprocessLanguage(BaseLanguage):
         return code
 
     def terminate(self):
-        self.process.terminate()
-        self.process.stdin.close()
-        self.process.stdout.close()
+        if self.process:
+            self.process.terminate()
+            self.process.stdin.close()
+            self.process.stdout.close()
 
     def start_process(self):
         if self.process:
