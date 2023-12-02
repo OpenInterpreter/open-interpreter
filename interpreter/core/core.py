@@ -12,6 +12,7 @@ from ..terminal_interface.start_terminal_interface import start_terminal_interfa
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.get_config import get_config, user_config_path
 from ..terminal_interface.utils.local_storage_path import get_storage_path
+from .computer.computer import Computer
 from .generate_system_message import generate_system_message
 from .llm.setup_llm import setup_llm
 from .respond import respond
@@ -24,7 +25,6 @@ class Interpreter:
     def __init__(self):
         # State
         self.messages = []
-        self._code_interpreters = {}
 
         self.config_file = user_config_path
 
@@ -36,8 +36,6 @@ class Interpreter:
         self.safe_mode = "off"
         self.disable_procedures = False
         self.launch_message = ""
-        # In the future, we'll use this to start with all languages
-        # self.languages = [i.name for i in self.computer.interfaces]
 
         # Conversation history
         self.conversation_history = True
@@ -57,6 +55,11 @@ class Interpreter:
         self._llm = None
         self.function_calling_llm = None
         self.vision = False  # LLM supports vision
+
+        # Computer settings
+        self.computer = Computer()
+        # (Permitted languages, all lowercase)
+        self.languages = [i.name.lower() for i in self.computer.languages]
 
         # Load config defaults
         self.load_config()
@@ -170,9 +173,7 @@ class Interpreter:
         yield from respond(self)
 
     def reset(self):
-        for code_interpreter in self._code_interpreters.values():
-            code_interpreter.terminate()
-        self._code_interpreters = {}
+        self.computer.terminate()  # Terminates all languages
 
         # Reset the function below, in case the user set it
         self.generate_system_message = lambda: generate_system_message(self)

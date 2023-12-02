@@ -7,7 +7,16 @@ def count_tokens(text="", model="gpt-4"):
     Count the number of tokens in a string
     """
 
-    encoder = tiktoken.encoding_for_model(model)
+    # Fix bug where models starting with openai/ for example can't find tokenizer
+    if '/' in model:
+        model = model.split('/')[-1]
+
+    # At least give an estimate if we can't find the tokenizer
+    try:
+        encoder = tiktoken.encoding_for_model(model)
+    except KeyError:
+        print(f"Could not find tokenizer for {model}. Defaulting to gpt-4 tokenizer.")
+        encoder = tiktoken.encoding_for_model("gpt-4")
 
     return len(encoder.encode(text))
 

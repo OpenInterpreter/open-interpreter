@@ -11,7 +11,7 @@
     <br>
     <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">Read our new docs</a></b><br>
+    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
 <br>
@@ -377,15 +377,11 @@ We then stream the model's messages, code, and your system's outputs to the term
 
 Thank you for your interest in contributing! We welcome involvement from the community.
 
-Please see our [Contributing Guidelines](docs/CONTRIBUTING.md) for more details on how to get involved.
+Please see our [contributing guidelines](docs/CONTRIBUTING.md) for more details on how to get involved.
 
 # Roadmap
 
 Visit [our roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) to preview the future of Open Interpreter.
-
-## License
-
-Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense, and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
 

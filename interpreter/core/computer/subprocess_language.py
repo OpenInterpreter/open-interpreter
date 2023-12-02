@@ -1,16 +1,17 @@
 import os
 import queue
+import re
 import subprocess
 import threading
 import time
 import traceback
 
-from .base_code_interpreter import BaseCodeInterpreter
+from .base_language import BaseLanguage
 
 
-class SubprocessCodeInterpreter(BaseCodeInterpreter):
+class SubprocessLanguage(BaseLanguage):
     def __init__(self):
-        self.start_cmd = ""
+        self.start_cmd = []
         self.process = None
         self.debug_mode = False
         self.output_queue = queue.Queue()
@@ -46,7 +47,7 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
         my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = "utf-8"
         self.process = subprocess.Popen(
-            self.start_cmd.split(),
+            self.start_cmd,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -54,6 +55,8 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             bufsize=0,
             universal_newlines=True,
             env=my_env,
+            encoding="utf-8",
+            errors="replace",
         )
         threading.Thread(
             target=self.handle_stream_output,
@@ -136,7 +139,15 @@ class SubprocessCodeInterpreter(BaseCodeInterpreter):
             if self.detect_active_line(line):
                 active_line = self.detect_active_line(line)
                 self.output_queue.put({"active_line": active_line})
+                # Sometimes there's a little extra on the same line, so be sure to send that out
+                line = re.sub(r"##active_line\d+##", "", line)
+                if line:
+                    self.output_queue.put({"output": line})
             elif self.detect_end_of_execution(line):
+                # Sometimes there's a little extra on the same line, so be sure to send that out
+                line = line.replace("##end_of_execution##", "").strip()
+                if line:
+                    self.output_queue.put({"output": line})
                 self.done.set()
             elif is_error_stream and "KeyboardInterrupt" in line:
                 self.output_queue.put({"output": "KeyboardInterrupt"})

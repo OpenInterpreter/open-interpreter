@@ -1,6 +1,7 @@
 """
 The terminal interface is just a view. Just handles the very top layer.
-If you were to build a frontend this would be a way to do it
+If you were to build a frontend this would be a way to do it.
+Should be updated to use flags.
 """
 
 try:
@@ -9,8 +10,6 @@ except ImportError:
     pass
 
 import base64
-import random
-import re
 
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
@@ -76,6 +75,8 @@ def terminal_interface(interpreter, message):
 
         except KeyboardInterrupt:
             # Exit gracefully
+            # Disconnect from the computer interface
+            interpreter.computer.terminate()
             break
 
         if message.startswith("%") and interactive:
@@ -84,7 +85,12 @@ def terminal_interface(interpreter, message):
 
         # Many users do this
         if message.strip() == "interpreter --local":
-            print("Please press CTRL-C then run `interpreter --local`.")
+            print("Please exit this conversation, then run `interpreter --local`.")
+            continue
+        if message.strip() == "pip install --upgrade open-interpreter":
+            print(
+                "Please exit this conversation, then run `pip install --upgrade open-interpreter`."
+            )
             continue
 
         if interpreter.vision:
@@ -218,7 +224,7 @@ def terminal_interface(interpreter, message):
                     active_block.output += "\n" + chunk["output"]
                     active_block.output = (
                         active_block.output.strip()
-                    )  # <- Aesthetic choice
+                    )  # ^ Aesthetic choice
 
                     # Truncate output
                     active_block.output = truncate_output(

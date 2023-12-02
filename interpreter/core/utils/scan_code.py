@@ -4,7 +4,7 @@ import subprocess
 from yaspin import yaspin
 from yaspin.spinners import Spinners
 
-from ..code_interpreters.language_map import language_map
+from ..computer.computer import language_map
 from .temporary_file import cleanup_temporary_file, create_temporary_file
 
 
@@ -20,14 +20,14 @@ def get_language_file_extension(language_name):
         return language
 
 
-def get_language_proper_name(language_name):
+def get_language_name(language_name):
     """
     Get the proper name for a given language
     """
     language = language_map[language_name.lower()]
 
-    if language.proper_name:
-        return language.proper_name
+    if language.name:
+        return language.name
     else:
         return language
 
@@ -62,7 +62,7 @@ def scan_code(code, language, interpreter):
             )
 
         if scan.returncode == 0:
-            language_name = get_language_proper_name(language)
+            language_name = get_language_name(language)
             print(
                 f"  {'Code Scaner: ' if interpreter.safe_mode == 'auto' else ''}No issues were found in this {language_name} code."
             )

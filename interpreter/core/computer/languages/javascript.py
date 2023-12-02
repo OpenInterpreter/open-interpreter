@@ -1,16 +1,15 @@
 import re
 
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+from ..subprocess_language import SubprocessLanguage
 
 
-class JavaScript(SubprocessCodeInterpreter):
+class JavaScript(SubprocessLanguage):
     file_extension = "js"
-    proper_name = "JavaScript"
+    name = "JavaScript"
 
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
-        self.config = config
-        self.start_cmd = "node -i"
+        self.start_cmd = ["node", "-i"]
 
     def preprocess_code(self, code):
         return preprocess_javascript(code)
