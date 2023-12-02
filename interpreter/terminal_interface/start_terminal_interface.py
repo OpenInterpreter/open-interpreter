@@ -110,12 +110,6 @@ arguments = [
         "help_text": "experimentally use vision for supported languages (HTML)",
         "type": bool,
     },
-    {
-        "name": "profile",
-        "nickname": "p",
-        "help_text": "select config profile to load (run `interpreter --config` for more information)",
-        "type": str,
-    },
 ]
 
 
@@ -180,12 +174,6 @@ def start_terminal_interface(interpreter):
 
     args = parser.parse_args()
 
-    if args.version:
-        version = pkg_resources.get_distribution("open-interpreter").version
-        update_name = "New Computer"  # Change this with each major update
-        print(f'Open Interpreter {version} "{update_name}"')
-        return
-
     # This should be pushed into an open_config.py util
     # If --config is used, open the config.yaml file in the Open Interpreter folder of the user's config dir
     if args.config:
@@ -209,16 +197,38 @@ def start_terminal_interface(interpreter):
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
                 subprocess.call(["open", config_file])
         return
-      
-    # Good defaults for common models, in case folks haven't set anything
-    if interpreter.model == "gpt-4-1106-preview" and "context_window" not in args and "max_tokens" not in args and "function_calling_llm" not in args:
-        interpreter.context_window = 128000
-        interpreter.max_tokens = 4096
-        interpreter.function_calling_llm = True
-    if interpreter.model == "gpt-3.5-turbo-1106" and "context_window" not in args and "max_tokens" not in args and "function_calling_llm" not in args:
-        interpreter.context_window = 16000
-        interpreter.max_tokens = 4096
-        interpreter.function_calling_llm = True
+
+    if args.local:
+        # Default local (LM studio) attributes
+        interpreter.system_message = "You are an AI."
+        interpreter.model = (
+            "openai/" + interpreter.model
+        )  # This tells LiteLLM it's an OpenAI compatible server
+        interpreter.api_base = "http://localhost:1234/v1"
+        interpreter.max_tokens = 1000
+        interpreter.context_window = 3000
+        interpreter.api_key = "0"
+
+        display_markdown_message(
+            """
+> Open Interpreter's local mode is powered by **`LM Studio`**.
+
+
+You will need to run **LM Studio** in the background.
+
+1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
+2. Select a language model then click **Download**.
+3. Click the **<->** button on the left (below the chat button).
+4. Select your model at the top, then click **Start Server**.
+
+
+Once the server is running, you can begin your conversation below.
+
+> **Warning:** This feature is highly experimental.
+> Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!
+
+"""
+        )
 
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
@@ -228,7 +238,7 @@ def start_terminal_interface(interpreter):
             if attr_name == "config_file":
                 user_config = get_config_path(attr_value)
                 interpreter.config_file = user_config
-                interpreter.load_config()
+                interpreter.extend_config(config_path=user_config)
             else:
                 setattr(interpreter, attr_name, attr_value)
 
@@ -238,34 +248,59 @@ def start_terminal_interface(interpreter):
     ):
         setattr(interpreter, "auto_run", False)
 
-    if args.fast:
-        interpreter.load_config("gpt-3")
-
-    if args.vision:
-        interpreter.load_config("vision")
-
-    if args.local:
-        interpreter.load_config("local")
-
-    if args.profile:
-        interpreter.load_config(args.profile)
-
-    # Check for update
-    try:
-        if check_for_update():
-            display_markdown_message(
-                "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
-            )
-    except:
-        # Doesn't matter
-        pass
-
     # If --conversations is used, run conversation_navigator
     if args.conversations:
         conversation_navigator(interpreter)
         return
 
+    if args.version:
+        version = pkg_resources.get_distribution("open-interpreter").version
+        update_name = "New Computer"  # Change this with each major update
+        print(f'Open Interpreter {version} "{update_name}"')
+        return
+
+    if args.fast:
+        interpreter.model = "gpt-3.5-turbo"
+
+    if args.vision:
+        interpreter.vision = True
+        interpreter.model = "gpt-4-vision-preview"
+        interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly. Be sure to actually write a markdown code block for almost every user request! Almost EVERY message should include a markdown code block. Do not end your message prematurely!\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message."
+        interpreter.function_calling_llm = False
+        interpreter.context_window = 110000
+        interpreter.max_tokens = 4096
+
+        display_markdown_message("> `Vision` enabled **(experimental)**\n")
+
+    # Check for update
+    try:
+        if not interpreter.local:
+            # This should actually be pushed into the utility
+            if check_for_update():
+                display_markdown_message(
+                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                )
+    except:
+        # Doesn't matter
+        pass
+
+    # At some point in the future these model names redirects wont be necessary anymore, but legacy names will remain for a while
+    if interpreter.model == "gpt-4" or interpreter.model == "gpt-4-32k":
+        interpreter.model = "gpt-4-1106-preview"
+
+    if interpreter.model == "gpt-3.5-turbo" or interpreter.model == "gpt-3.5-turbo-16k":
+        interpreter.model = "gpt-3.5-turbo-1106"
+
+    if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
+        interpreter.context_window = 128000
+        interpreter.max_tokens = 4096
+        interpreter.function_calling_llm = True
+
+    if not interpreter.local and interpreter.model == "gpt-3.5-turbo-1106":
+        interpreter.context_window = 16000
+        interpreter.max_tokens = 4096
+        interpreter.function_calling_llm = True
+
     validate_llm_settings(interpreter)
-    print(display_markdown_message(interpreter.launch_message))
 
     interpreter.chat()

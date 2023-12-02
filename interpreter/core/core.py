@@ -4,7 +4,6 @@ It's the main file. `import interpreter` will import an instance of this class.
 """
 
 import json
-import yaml
 import os
 from datetime import datetime
 
@@ -35,7 +34,6 @@ class Interpreter:
         self.max_output = 2000
         self.safe_mode = "off"
         self.disable_procedures = False
-        self.launch_message = ""
 
         # Conversation history
         self.conversation_history = True
@@ -62,37 +60,17 @@ class Interpreter:
         self.languages = [i.name.lower() for i in self.computer.languages]
 
         # Load config defaults
-        self.load_config()
+        self.extend_config(self.config_file)
 
         # Expose class so people can make new instances
         self.Interpreter = Interpreter
 
-    def load_config(self, profile=None):
-        with open(self.config_file, 'r') as file:
-            config = yaml.safe_load(file)
+    def extend_config(self, config_path):
+        if self.debug_mode:
+            print(f"Extending configuration from `{config_path}`")
 
-        # Use default_profile if no specific profile is provided
-        if profile is None:
-            profile = config.get('default_profile', None)
-
-        # Load profile-specific configuration
-        if profile in config:
-            #Load default values first
-            self.update_attributes(config['base'])
-            self.update_attributes(config[profile])
-        else:
-            print(f"Profile '{profile}' not found in the configuration file.")
-            raise
-    
-    def update_attributes(self, config):
-        for key, value in config.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-            elif key.startswith('self.'):
-                # Handle attributes prefixed with 'self.'
-                actual_key = key.split('self.', 1)[1]
-                if hasattr(self, actual_key):
-                    setattr(self, actual_key, value)
+        config = get_config(config_path)
+        self.__dict__.update(config)
 
     def chat(self, message=None, display=True, stream=False):
         if stream:
