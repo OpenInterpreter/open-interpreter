@@ -9,14 +9,6 @@ from interpreter.terminal_interface.utils.count_tokens import (
 )
 
 
-def test_html():
-    print(
-        "Make me some super simple HTML. No talk, just code, a basic ~4 line HTML page."
-    )
-    interpreter.chat()
-    time.sleep(100)
-
-
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():
