@@ -12,9 +12,13 @@ def display_output(output):
         if output["type"] == "console":
             print(output["content"])
         elif output["type"] == "image":
-            # Decode the base64 image data
-            image_data = base64.b64decode(output["content"])
-            display(Image(image_data, format="png"))
+            if output["format"] == "base64":
+                # Decode the base64 image data
+                image_data = base64.b64decode(output["content"])
+                display(Image(image_data))
+            elif output["format"] == "path":
+                # Display the image file on the system
+                display(Image(filename=output["content"]))
         elif output["type"] == "html":
             display(HTML(output["content"]))
         elif output["type"] == "javascript":
@@ -32,10 +36,13 @@ def display_output_cli(output):
     if output["type"] == "console":
         print(output["content"])
     elif output["type"] == "image":
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            image_data = base64.b64decode(output["content"])
-            tmp_file.write(image_data)
-            open_file(tmp_file.name)
+        if output["format"] == "base64":
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+                image_data = base64.b64decode(output["content"])
+                tmp_file.write(image_data)
+                open_file(tmp_file.name)
+        elif output["format"] == "path":
+            open_file(output["content"])
     elif output["type"] == "html":
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".html", mode="w"
