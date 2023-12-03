@@ -49,4 +49,7 @@ def get_config(path=user_config_path):
     path = get_config_path(path)
 
     with open(path, "r") as file:
-        return yaml.safe_load(file)
+        config = yaml.safe_load(file)
+        if config is None:
+            config = {}
+        return config
