@@ -18,13 +18,7 @@ function_schema = {
                 "type": "string",
                 "description": "The programming language (required parameter to the `execute` function)",
                 "enum": [
-                    "python",
-                    "R",
-                    "shell",
-                    "applescript",
-                    "javascript",
-                    "html",
-                    "powershell",
+                    # This will be filled dynamically with the languages OI has access to.
                 ],
             },
             "code": {"type": "string", "description": "The code to execute (required)"},
@@ -83,6 +77,11 @@ def setup_openai_coding_llm(interpreter):
         if interpreter.debug_mode:
             print("Sending this to the OpenAI LLM:", messages)
 
+        # Add languages OI has access to
+        function_schema["parameters"]["properties"]["language"][
+            "enum"
+        ] = interpreter.languages
+
         # Create LiteLLM generator
         params = {
             "model": interpreter.model,
@@ -117,6 +116,8 @@ def setup_openai_coding_llm(interpreter):
 
         response = litellm.completion(**params)
 
+        # Parse response
+
         accumulated_deltas = {}
         language = None
         code = ""
@@ -138,7 +139,7 @@ def setup_openai_coding_llm(interpreter):
                 print("Accumulated deltas", accumulated_deltas)
 
             if "content" in delta and delta["content"]:
-                yield {"message": delta["content"]}
+                yield {"type": "message", "content": delta["content"]}
 
             if (
                 "function_call" in accumulated_deltas
@@ -160,7 +161,6 @@ def setup_openai_coding_llm(interpreter):
                             and arguments["language"]
                         ):
                             language = arguments["language"]
-                            yield {"language": language}
 
                         if language is not None and "code" in arguments:
                             # Calculate the delta (new characters only)
@@ -169,22 +169,24 @@ def setup_openai_coding_llm(interpreter):
                             code = arguments["code"]
                             # Yield the delta
                             if code_delta:
-                                yield {"code": code_delta}
+                                yield {
+                                    "type": "code",
+                                    "format": language,
+                                    "content": code_delta,
+                                }
                     else:
                         if interpreter.debug_mode:
                             print("Arguments not a dict.")
 
-                # 3.5 REALLY likes to halucinate a function named `python` and you can't really fix that, it seems.
-                # We just need to deal with it.
-                elif (
-                    "name" in accumulated_deltas["function_call"]
-                    and accumulated_deltas["function_call"]["name"] == "python"
+                # Common hallucinations
+                elif "name" in accumulated_deltas["function_call"] and (
+                    accumulated_deltas["function_call"]["name"] == "python"
+                    or accumulated_deltas["function_call"]["name"] == "functions"
                 ):
                     if interpreter.debug_mode:
                         print("Got direct python call")
                     if language is None:
                         language = "python"
-                        yield {"language": language}
 
                     if language is not None:
                         # Pull the code string straight out of the "arguments" string
@@ -195,10 +197,14 @@ def setup_openai_coding_llm(interpreter):
                         code = accumulated_deltas["function_call"]["arguments"]
                         # Yield the delta
                         if code_delta:
-                            yield {"code": code_delta}
+                            yield {
+                                "type": "code",
+                                "format": language,
+                                "content": code_delta,
+                            }
 
                 else:
-                    # If name exists and it's not "execute" or "python", who knows what's going on.
+                    # If name exists and it's not "execute" or "python" or "functions", who knows what's going on.
                     if "name" in accumulated_deltas["function_call"]:
                         print(
                             "Encountered an unexpected function call: ",

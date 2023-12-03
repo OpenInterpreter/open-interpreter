@@ -38,12 +38,13 @@ class Computer:
             language.stop()
 
     def terminate(self):
-        for language in self._active_languages.values():
+        for language_name in list(self._active_languages.keys()):
+            language = self._active_languages[language_name]
             if (
                 language
             ):  # Not sure why this is None sometimes. We should look into this
                 language.terminate()
-        self._active_languages = {}
+            del self._active_languages[language_name]
 
 
 computer = Computer()

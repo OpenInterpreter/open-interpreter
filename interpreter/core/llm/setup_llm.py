@@ -1,5 +1,3 @@
-import os
-
 import litellm
 
 from .convert_to_coding_llm import convert_to_coding_llm

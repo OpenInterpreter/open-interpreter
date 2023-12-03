@@ -2,47 +2,52 @@ import json
 
 
 def convert_to_openai_messages(messages, function_calling=True):
+    """
+    Converts LMC messages into OpenAI messages
+    """
     new_messages = []
 
     for message in messages:
-        new_message = {"role": message["role"], "content": ""}
+        if "recipient" in message:
+            if message["recipient"] != "assistant":
+                continue
 
-        if "message" in message and "image" not in message:
-            new_message["content"] = message["message"]
+        new_message = {}
 
-        if "code" in message:
+        if message["type"] == "message":
+            new_message["role"] = message[
+                "role"
+            ]  # This should never be `computer`, right?
+            new_message["content"] = message["content"]
+
+        elif message["type"] == "code":
+            new_message["role"] = "assistant"
             if function_calling:
                 new_message["function_call"] = {
                     "name": "execute",
                     "arguments": json.dumps(
-                        {"language": message["language"], "code": message["code"]}
+                        {"language": message["format"], "code": message["content"]}
                     ),
                     # parsed_arguments isn't actually an OpenAI thing, it's an OI thing.
-                    # but it's soo useful! we use it to render messages to text_llms
+                    # but it's soo useful!
                     "parsed_arguments": {
-                        "language": message["language"],
-                        "code": message["code"],
+                        "language": message["format"],
+                        "code": message["content"],
                     },
                 }
             else:
                 new_message[
                     "content"
-                ] += f"""\n\n```{message["language"]}\n{message["code"]}\n```"""
-                new_message["content"] = new_message["content"].strip()
+                ] = f"""```{message["format"]}\n{message["content"]}\n```"""
 
-        new_messages.append(new_message)
-
-        if "output" in message:
+        elif message["type"] == "console" and message["format"] == "output":
             if function_calling:
-                new_messages.append(
-                    {
-                        "role": "function",
-                        "name": "execute",
-                        "content": message["output"],
-                    }
-                )
+                new_message["role"] = "function"
+                new_message["name"] = "execute"
+                new_message["content"] = message["content"]
+
             else:
-                if message["output"] == "No output":
+                if message["content"] == "No output":
                     content = "The code above was executed on my machine. It produced no output. Was that expected?"
                 else:
                     content = (
@@ -58,65 +63,59 @@ def convert_to_openai_messages(messages, function_calling=True):
                     }
                 )
 
-        if "image" in message:
+        elif message["type"] == "image":
             new_message = {
                 "role": "user",
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": {"url": message["image"], "detail": "high"},
+                        "image_url": {"url": message["content"], "detail": "high"},
                     }
                 ],
             }
 
-            if message["role"] == "user":
-                if "message" in message:
-                    new_message["content"].append(
-                        {
-                            "type": "text",
-                            "text": message["message"],
-                        }
-                    )
-                    new_message[
-                        "content"
-                    ].reverse()  # Text comes first in OpenAI's docs. IDK if this is important.
+        else:
+            raise Exception(f"Unable to convert this message type: {message}")
 
-                new_messages.append(new_message)
+        new_messages.append(new_message)
 
-            if message["role"] == "assistant":
-                if message == messages[-1]:
-                    # DISABLED self-improving image message (it loops forever)
-                    # Save some tokens and be less repetitive by only adding this to the last message
-                    """
-                    new_message["content"].append(
-                        {
-                            "type": "text",
-                            "text": "This is the result. Does that look right? Could it be closer to what we're aiming for, or is it done? Be detailed in exactly how we could improve it first, then write code to improve it. Unless you think it's done (I might agree)!",
-                        }
-                    )
-                    new_message[
-                        "content"
-                    ].reverse()  # Text comes first in OpenAI's docs. IDK if this is important.
-                    """
-                    pass
-
-                new_messages.append(new_message)
-
-                if "output" in message and message == messages[-1]:
-                    pass
-                    # This is hacky, but only display the message if it's the placeholder warning for now:
-                    # if (
-                    #     "placeholder" in message["output"].lower()
-                    #     or "traceback" in message["output"].lower()
-                    # ) and "text" in new_messages[-1]["content"][0]:
-                    #     new_messages[-1]["content"][0]["text"] += (
-                    #         "\n\nAlso, I recieved this output from the Open Interpreter code execution system we're using, which executes your markdown code blocks automatically: "
-                    #         + message["output"]
-                    #     )
+    """
+    # Combine adjacent user messages
+    combined_messages = []
+    i = 0
+    while i < len(new_messages):
+        message = new_messages[i]
+        if message["role"] == "user":
+            combined_content = []
+            while i < len(new_messages) and new_messages[i]["role"] == "user":
+                if isinstance(new_messages[i]["content"], str):
+                    combined_content.append({
+                        "type": "text",
+                        "text": new_messages[i]["content"]
+                    })
+                elif isinstance(new_messages[i]["content"], list):
+                    combined_content.extend(new_messages[i]["content"])
+                i += 1
+            message["content"] = combined_content
+        combined_messages.append(message)
+        i += 1
+    new_messages = combined_messages
 
     if not function_calling:
-        new_messages = [
-            msg for msg in new_messages if "content" in msg and len(msg["content"]) != 0
-        ]
+        # Combine adjacent assistant messages, as "function calls" will just be normal messages with content: markdown code blocks
+        combined_messages = []
+        i = 0
+        while i < len(new_messages):
+            message = new_messages[i]
+            if message["role"] == "assistant":
+                combined_content = ""
+                while i < len(new_messages) and new_messages[i]["role"] == "assistant":
+                    combined_content += new_messages[i]["content"] + "\n\n"
+                    i += 1
+                message["content"] = combined_content.strip()
+            combined_messages.append(message)
+            i += 1
+        new_messages = combined_messages
+    """
 
     return new_messages

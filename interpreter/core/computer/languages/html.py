@@ -10,4 +10,4 @@ class HTML(BaseLanguage):
 
     def run(self, code):
         # Lmao this is so thin. But HTML should be an accepted output!
-        yield {"html": code}
+        yield {"type": "code", "format": "html", "content": code}

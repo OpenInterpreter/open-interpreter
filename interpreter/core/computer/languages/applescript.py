@@ -51,12 +51,8 @@ class AppleScript(SubprocessLanguage):
         """
         Detects active line indicator in the output.
         """
-        prefix = "##active_line"
-        if prefix in line:
-            try:
-                return int(line.split(prefix)[1].split()[0])
-            except:
-                pass
+        if "##active_line" in line:
+            return int(line.split("##active_line")[1].split("##")[0])
         return None
 
     def detect_end_of_execution(self, line):

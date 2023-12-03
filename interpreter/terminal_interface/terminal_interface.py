@@ -1,7 +1,6 @@
 """
 The terminal interface is just a view. Just handles the very top layer.
 If you were to build a frontend this would be a way to do it.
-Should be updated to use flags.
 """
 
 try:
@@ -54,8 +53,6 @@ def terminal_interface(interpreter, message):
 
         display_markdown_message("\n\n".join(interpreter_intro_message) + "\n")
 
-    active_block = None
-
     if message:
         interactive = False
     else:
@@ -105,59 +102,64 @@ def terminal_interface(interpreter, message):
                 with open(image_path, "rb") as image_file:
                     encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
                 file_extension = image_path.split(".")[-1]
+
+                # Add the text interpreter's messsage history
+                interpreter.messages.append(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": message,
+                    }
+                )
+
+                # Pass in the image to interpreter in a moment
                 message = {
                     "role": "user",
-                    "message": message,
-                    "image": f"data:image/{file_extension};base64,{encoded_string}",
+                    "type": "image",
+                    "format": "base64",
+                    "content": f"data:image/{file_extension};base64,{encoded_string}",
                 }
-
-        # Track if we've ran a code block.
-        # We'll use this to determine if we should render a new code block,
-        # In the event we get code -> output -> code again
-        ran_code_block = False
-        render_cursor = True
 
         try:
             for chunk in interpreter.chat(message, display=False, stream=True):
+                yield chunk
+
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
 
-                # Message
-                if "message" in chunk:
-                    if active_block is None:
-                        active_block = MessageBlock()
-                    if active_block.type != "message":
-                        active_block.end()
-                        active_block = MessageBlock()
-                    active_block.message += chunk["message"]
-                    render_cursor = True
+                if "stop" in chunk:
+                    active_block.refresh(cursor=False)
+                    active_block.end()
+                    continue
 
-                # Code
-                if "code" in chunk or "language" in chunk:
-                    if active_block is None:
-                        active_block = CodeBlock()
-                    if active_block.type != "code" or ran_code_block:
-                        # If the last block wasn't a code block,
-                        # or it was, but we already ran it:
-                        active_block.end()
-                        active_block = CodeBlock()
-                    ran_code_block = False
-                    render_cursor = True
+                if chunk["type"] == "message":
+                    if "start" in chunk:
+                        active_block = MessageBlock()
+                        render_cursor = True
+                        continue
 
-                if "language" in chunk:
-                    active_block.language = chunk["language"]
-                if "code" in chunk:
-                    active_block.code += chunk["code"]
-                if "active_line" in chunk:
-                    active_block.active_line = chunk["active_line"]
+                    active_block.message += chunk["content"]
+
+                elif chunk["type"] == "code":
+                    if "start" in chunk:
+                        active_block = CodeBlock()
+                        active_block.language = chunk["format"]
+                        render_cursor = True
+                        continue
+
+                    active_block.code += chunk["content"]
 
                 # Execution notice
-                if "executing" in chunk:
+                if chunk["type"] == "confirmation":
                     if not interpreter.auto_run:
                         # OI is about to execute code. The user wants to approve this
 
                         # End the active block so you can run input() below it
                         active_block.end()
+
+                        code_to_run = chunk["content"]
+                        language = code_to_run["format"]
+                        code = code_to_run["content"]
 
                         should_scan_code = False
 
@@ -174,11 +176,6 @@ def terminal_interface(interpreter, message):
                                     should_scan_code = True
 
                         if should_scan_code:
-                            # Get code language and actual code from the chunk
-                            # We need to give these to semgrep when we start our scan
-                            language = chunk["executing"]["language"]
-                            code = chunk["executing"]["code"]
-
                             scan_code(code, language, interpreter)
 
                         response = input(
@@ -191,19 +188,24 @@ def terminal_interface(interpreter, message):
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock()
                             active_block.margin_top = False  # <- Aesthetic choice
-                            active_block.language = chunk["executing"]["language"]
-                            active_block.code = chunk["executing"]["code"]
+                            active_block.language = language
+                            active_block.code = code
                         else:
                             # User declined to run code.
                             interpreter.messages.append(
                                 {
                                     "role": "user",
-                                    "message": "I have declined to run this code.",
+                                    "type": "message",
+                                    "content": "I have declined to run this code.",
                                 }
                             )
                             break
 
-                if "image" in chunk or "html" in chunk or "javascript" in chunk:
+                if (
+                    chunk["type"] == "image"
+                    or chunk["type"] == "html"
+                    or chunk["type"] == "javascript"
+                ):
                     # Good to keep the LLM informed <3
                     message_for_llm = display_output(chunk)
                     if message_for_llm:
@@ -218,10 +220,9 @@ def terminal_interface(interpreter, message):
                         chunk = {"output": message_for_llm}
 
                 # Output
-                if "output" in chunk:
-                    ran_code_block = True
+                if "format" in chunk and chunk["format"] == "output":
                     render_cursor = False
-                    active_block.output += "\n" + chunk["output"]
+                    active_block.output += "\n" + chunk["content"]
                     active_block.output = (
                         active_block.output.strip()
                     )  # ^ Aesthetic choice
@@ -233,8 +234,6 @@ def terminal_interface(interpreter, message):
 
                 if active_block:
                     active_block.refresh(cursor=render_cursor)
-
-                yield chunk
 
             # (Sometimes -- like if they CTRL-C quickly -- active_block is still None here)
             if active_block:
