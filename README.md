@@ -82,6 +82,19 @@ interpreter.chat("Plot AAPL and META's normalized stock prices") # Executes a si
 interpreter.chat() # Starts an interactive chat
 ```
 
+#### Local models
+
+```python
+import interpreter
+
+interpreter.local = True #does nothing
+interpreter.model = "openai/model" #Use openai format, model doesn't matter
+interpreter.api_key = "fake_key" #Just needs to have something, doesn't matter
+interpreter.api_base = "http://localhost:1234/v1" #Change to whatever host and port you need. 
+
+interpreter.chat()
+```
+
 ## Comparison to ChatGPT's Code Interpreter
 
 OpenAI's release of [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) with GPT-4 presents a fantastic opportunity to accomplish real-world tasks with ChatGPT.
