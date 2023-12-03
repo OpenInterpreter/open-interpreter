@@ -11,7 +11,7 @@
     <br>
     <b>自然言語で指示するだけでコードを書いて実行までしてくれる。</b><br>
     ローカルに実装したOpenAI Code Interpreterのオープンソース版。<br>
-    <br><a href="https://openinterpreter.com">デスクトップアプリへの早期アクセス</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">ドキュメント</a></b><br>
+    <br><a href="https://openinterpreter.com">デスクトップアプリへの早期アクセス</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">ドキュメント</a><br>
 </p>
 
 <br>
@@ -20,7 +20,7 @@
 
 <br>
 
-**Update:** ● 0.1.12 supports `interpreter --vision` ([documentation](https://docs.openinterpreter.com/usage/terminal/vision))
+**Update:** ● 0.1.12 アップデートで `interpreter --vision` 機能が導入されました。([ドキュメント](https://docs.openinterpreter.com/usage/terminal/vision))
 
 <br>
 
@@ -34,7 +34,7 @@ interpreter
 
 <br>
 
-**Open Interpreter**は、言語モデルに指示し、コード（Python、Javascript、Shell など）をローカル環境で実行できるようにします。インストール後、`$ interpreter`を実行するとターミナル経由で ChatGPT のようなインターフェースを介し、Open Interpreter とチャットができます。
+**Open Interpreter**は、言語モデルに指示し、コード（Python、Javascript、Shell など）をローカル環境で実行できるようにします。インストール後、`$ interpreter` を実行するとターミナル経由で ChatGPT のようなインターフェースを介し、Open Interpreter とチャットができます。
 
 これにより、自然言語のインターフェースを通して、パソコンの一般的な機能が操作できます。
 
@@ -43,7 +43,7 @@ interpreter
 - 大規模なデータセットのプロット、クリーニング、分析
 - 等々
 
-**⚠️ 注意：実行する前にコードを承認するよう求められます。**
+**⚠️ 注意: 実行する前にコードを承認するよう求められます。**
 
 <br>
 
@@ -51,7 +51,7 @@ interpreter
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
-#### Google Colab でもインタラクティブなデモを利用できます：
+#### Google Colab でも対話形式のデモを利用できます:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
@@ -67,7 +67,7 @@ pip install open-interpreter
 
 ### ターミナル
 
-インストール後、`interpreter`を実行するだけです：
+インストール後、`interpreter` を実行するだけです:
 
 ```shell
 interpreter
@@ -79,14 +79,14 @@ interpreter
 import interpreter
 
 interpreter.chat("AAPLとMETAの株価グラフを描いてください") # コマンドを実行
-interpreter.chat() # インタラクティブなチャットを開始
+interpreter.chat() # 対話形式のチャットを開始
 ```
 
-## ChatGPT のコードインタープリタとの違い
+## ChatGPT の Code Interpreter との違い
 
-GPT-4 で実装された OpenAI の[Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) は、実世界のタスクを ChatGPT で操作できる素晴らしい機会を提供しています。
+GPT-4 で実装された OpenAI の [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) は、実世界のタスクを ChatGPT で操作できる素晴らしい機会を提供しています。
 
-しかし、OpenAI のサービスはホスティングされていて、クローズドソースで、かなり制限されています：
+しかし、OpenAI のサービスはホスティングされていてるクローズドな環境で、かなり制限がされています:
 
 - インターネットに接続できない。
 - [プリインストールされているパッケージが限られている](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
@@ -101,24 +101,24 @@ Open Interpter は、GPT-4 Code Interpreter のパワーとローカル開発環
 
 ## コマンド
 
-**更新:** アップデート(0.1.5)でストリーミング機能が導入されました：
+**更新:** アップデート(0.1.5)でストリーミング機能が導入されました:
 
 ```python
-message = "What operating system are we on?"
+message = "どのオペレーティングシステムを使用していますか？"
 
 for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
 ```
 
-### インタラクティブチャット
+### 対話型チャット
 
-ターミナルでインタラクティブなチャットを開始するには、コマンドラインから`interpreter`を実行します。
+ターミナルで対話形式のチャットを開始するには、コマンドラインから `interpreter` を実行します。
 
 ```shell
 interpreter
 ```
 
-または、.py ファイルから`interpreter.chat()`も利用できます。
+または、.py ファイルから `interpreter.chat()` も利用できます。
 
 ```python
 interpreter.chat()
@@ -138,7 +138,7 @@ for chunk in interpreter.chat(message, display=False, stream=True):
 より精確な制御のために、メッセージを直接`.chat(message)`に渡すことができます。
 
 ```python
-interpreter.chat("/videosフォルダにあるすべての動画に字幕を追加する。")
+interpreter.chat("/videos フォルダにあるすべての動画に字幕を追加する。")
 
 # ... ターミナルに出力をストリームし、タスクを完了 ...
 
@@ -149,7 +149,7 @@ interpreter.chat("ついでに、字幕を大きくできますか？")
 
 ### 新しいチャットを開始
 
-プログラム的チャットで Open Interpreter は、会話の履歴を記憶しています。新しくやり直したい場合は、リセットすることができます：
+プログラム的チャットで Open Interpreter は、会話の履歴を記憶しています。新しくやり直したい場合は、リセットすることができます:
 
 ```python
 interpreter.reset()
@@ -172,7 +172,7 @@ Open Interpreter のシステムメッセージを確認し、設定すること
 
 ```python
 interpreter.system_message += """
-シェルコマンドを「-y」フラグ付きで実行し、ユーザーが確認する必要がないようにする。
+シェルコマンドを '-y' フラグ付きで実行し、ユーザーが確認する必要がないようにする。
 """
 print(interpreter.system_message)
 ```
@@ -189,7 +189,7 @@ interpreter --model claude-2
 interpreter --model command-nightly
 ```
 
-Pythonでは、オブジェクト上でモデルを設定します：
+Pythonでは、オブジェクト上でモデルを設定します:
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
@@ -199,9 +199,9 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### ローカルのモデルを実行する
 
-Open Interpreter は、ローカルの言語モデルへの接続に[LM Studio](https://lmstudio.ai/)を実験的に使用しています。
+Open Interpreter は、ローカルの言語モデルへの接続に [LM Studio](https://lmstudio.ai/) を実験的に使用しています。
 
-コマンドラインから `interpreter` をローカルモードで実行するだけです：
+コマンドラインから `interpreter` をローカルモードで実行するだけです:
 
 ```shell
 interpreter --local
@@ -234,7 +234,7 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 コントリビューターが Open Interpreter を調査するのを助けるために、`--debug` モードは非常に便利です。
 
-デバッグモードは、フラグ（`interpreter --debug`）を使用するか、またはチャットの中から有効にできます：
+デバッグモードは、フラグ（`interpreter --debug`）を使用するか、またはチャットの中から有効にできます:
 
 ```shell
 $ interpreter
@@ -246,7 +246,7 @@ $ interpreter
 
 ### 対話モードのコマンド
 
-対話モードでは、以下のコマンドを使用して操作を便利にすることができます。利用可能なコマンドのリストは以下の通りです：
+対話モードでは、以下のコマンドを使用して操作を便利にすることができます。利用可能なコマンドのリストは以下の通りです:
 
 **利用可能なコマンド:**
 
@@ -264,7 +264,7 @@ Open Interpreterでは、`config.yaml` ファイルを使用してデフォル�
 
 これにより、毎回コマンドライン引数を変更することなく柔軟に設定することができます。
 
-以下のコマンドを実行して設定ファイルを開きます：
+以下のコマンドを実行して設定ファイルを開きます:
 
 ```
 interpreter --config
@@ -276,13 +276,13 @@ Open Interpreter は複数の `config.yaml` ファイルをサポートしてお
 
 **注意**: `--config_file` はファイル名またはファイルパスを受け入れます。ファイル名はデフォルトの設定ディレクトリを使用し、ファイルパスは指定されたパスを使用します。
 
-新しい設定を作成または編集するには、次のコマンドを実行します：
+新しい設定を作成または編集するには、次のコマンドを実行します:
 
 ```
 interpreter --config --config_file $config_path
 ```
 
-特定の設定ファイルをロードして Open Interpreter を実行するには、次のコマンドを実行します：
+特定の設定ファイルをロードして Open Interpreter を実行するには、次のコマンドを実行します:
 
 ```
 interpreter --config_file $config_path
@@ -304,7 +304,7 @@ interpreter --config_file $config_path
 
 ##### Pythonでの使用例
 
-Python のスクリプトから Open Interpreter を呼び出すときにも設定ファイルをロードできます：
+Python のスクリプトから Open Interpreter を呼び出すときにも設定ファイルをロードできます:
 
 ```python
 import os
@@ -323,7 +323,7 @@ for chunk in interpreter.chat(message, display=False, stream=True):
 
 ## FastAPIサーバーのサンプル
 
-アップデートにより Open Interpreter は、HTTP RESTエンドポイントを介して制御できるようになりました：
+アップデートにより Open Interpreter は、HTTP RESTエンドポイントを介して制御できるようになりました:
 
 ```python
 # server.py
@@ -358,7 +358,7 @@ uvicorn server:app --reload
 
 **⚠️ Open Interpreter はコードを実行する前にユーザーの確認を求めます。**
 
-この確認を回避するには、`interpreter -y` を実行するか、`interpreter.auto_run = True` を設定します。その場合：
+この確認を回避するには、`interpreter -y` を実行するか、`interpreter.auto_run = True` を設定します。その場合:
 
 - ファイルやシステム設定を変更するコマンドを要求するときは注意してください。
 - Open Interpreter を自動運転車のように監視し、ターミナルを閉じてプロセスを終了できるように準備しておいてください。
