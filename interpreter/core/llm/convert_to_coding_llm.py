@@ -48,7 +48,9 @@ def convert_to_coding_llm(text_llm, debug_mode=False):
             messages.append({"role": "assistant", "message": gaslight})
         '''
 
-        messages = convert_to_openai_messages(messages, function_calling=False)
+        messages = convert_to_openai_messages(
+            messages, function_calling=False, vision=False
+        )
 
         inside_code_block = False
         accumulated_block = ""

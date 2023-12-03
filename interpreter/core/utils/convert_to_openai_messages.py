@@ -1,7 +1,8 @@
+import base64
 import json
 
 
-def convert_to_openai_messages(messages, function_calling=True):
+def convert_to_openai_messages(messages, function_calling=True, vision=False):
     """
     Converts LMC messages into OpenAI messages
     """
@@ -64,12 +65,35 @@ def convert_to_openai_messages(messages, function_calling=True):
                 )
 
         elif message["type"] == "image":
+            if vision == False:
+                continue
+
+            if message["format"] == "base64":
+                content = message["content"]
+
+            elif message["format"] == "path":
+                # Convert to base64
+                image_path = message["content"]
+                file_extension = image_path.split(".")[-1]
+
+                with open(image_path, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+
+                content = f"data:image/{file_extension};base64,{encoded_string}"
+            else:
+                # Probably would be better to move this to a validation pass
+                # Near core, through the whole messages object
+                if "format" not in message:
+                    raise Exception("Format of the image is not specified.")
+                else:
+                    raise Exception(f"Unrecognized image format: {message['format']}")
+
             new_message = {
                 "role": "user",
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": {"url": message["content"], "detail": "high"},
+                        "image_url": {"url": content, "detail": "high"},
                     }
                 ],
             }

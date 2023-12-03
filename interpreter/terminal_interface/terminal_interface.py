@@ -96,13 +96,6 @@ def terminal_interface(interpreter, message):
 
             ## If we found an image, add it to the message
             if image_path:
-                if interpreter.debug_mode:
-                    print("Found image:", image_path)
-                # Turn it into base64
-                with open(image_path, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-                file_extension = image_path.split(".")[-1]
-
                 # Add the text interpreter's messsage history
                 interpreter.messages.append(
                     {
@@ -116,38 +109,45 @@ def terminal_interface(interpreter, message):
                 message = {
                     "role": "user",
                     "type": "image",
-                    "format": "base64",
-                    "content": f"data:image/{file_extension};base64,{encoded_string}",
+                    "format": "path",
+                    "content": image_path,
                 }
 
         try:
+            extra_computer_outputs = []
+
             for chunk in interpreter.chat(message, display=False, stream=True):
                 yield chunk
+
+                # Is this for thine eyes?
+                if "recipient" in chunk and chunk["recipient"] != "user":
+                    continue
 
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
 
-                if "stop" in chunk:
+                if "stop" in chunk and chunk["type"] != "code":
+                    # CodeBlocks requires we leave it open! ^ So we can add the output to it.
                     active_block.refresh(cursor=False)
                     active_block.end()
-                    continue
+                    active_block = None
 
                 if chunk["type"] == "message":
                     if "start" in chunk:
                         active_block = MessageBlock()
                         render_cursor = True
-                        continue
 
-                    active_block.message += chunk["content"]
+                    if "content" in chunk:
+                        active_block.message += chunk["content"]
 
                 elif chunk["type"] == "code":
                     if "start" in chunk:
                         active_block = CodeBlock()
                         active_block.language = chunk["format"]
                         render_cursor = True
-                        continue
 
-                    active_block.code += chunk["content"]
+                    if "content" in chunk:
+                        active_block.code += chunk["content"]
 
                 # Execution notice
                 if chunk["type"] == "confirmation":
@@ -155,7 +155,10 @@ def terminal_interface(interpreter, message):
                         # OI is about to execute code. The user wants to approve this
 
                         # End the active block so you can run input() below it
-                        active_block.end()
+                        if active_block:
+                            active_block.refresh(cursor=False)
+                            active_block.end()
+                            active_block = None
 
                         code_to_run = chunk["content"]
                         language = code_to_run["format"]
@@ -201,23 +204,16 @@ def terminal_interface(interpreter, message):
                             )
                             break
 
-                if (
+                # Display visual types to user,
+                # Which sometimes creates more computer output (e.g. HTML errors, eventually)
+                if "content" in chunk and (
                     chunk["type"] == "image"
                     or chunk["type"] == "html"
                     or chunk["type"] == "javascript"
                 ):
-                    # Good to keep the LLM informed <3
-                    message_for_llm = display_output(chunk)
-                    if message_for_llm:
-                        if "output" in interpreter.messages[-1]:
-                            interpreter.messages[-1]["output"] += "\n" + message_for_llm
-                        else:
-                            interpreter.messages[-1]["output"] = message_for_llm
-
-                        # I know this is insane, but the easiest way to now display this
-                        # is to set the chunk to an output chunk, which will trigger the next conditional!
-
-                        chunk = {"output": message_for_llm}
+                    print("DISPLAYING", chunk)
+                    computer_output = display_output(chunk)
+                    extra_computer_outputs.append(computer_output)
 
                 # Output
                 if "format" in chunk and chunk["format"] == "output":
@@ -232,6 +228,19 @@ def terminal_interface(interpreter, message):
                         active_block.output, interpreter.max_output
                     )
 
+                if chunk["type"] == "console" and "stop" in chunk:
+                    # If we just finished executing, and extra_computer_outputs isn't empty, flush it:
+                    if extra_computer_outputs != []:
+                        interpreter.messages.append(
+                            {
+                                "role": "computer",
+                                "type": "console",
+                                "format": "output",
+                                "content": "\n".join(extra_computer_outputs),
+                            }
+                        )
+                        extra_computer_outputs = []
+
                 if active_block:
                     active_block.refresh(cursor=render_cursor)
 
@@ -239,6 +248,18 @@ def terminal_interface(interpreter, message):
             if active_block:
                 active_block.end()
                 active_block = None
+
+            # Flush extra_computer_outputs
+            if extra_computer_outputs != []:
+                interpreter.messages.append(
+                    {
+                        "role": "computer",
+                        "type": "console",
+                        "format": "output",
+                        "content": "\n".join(extra_computer_outputs),
+                    }
+                )
+                extra_computer_outputs = []
 
             if not interactive:
                 # Don't loop

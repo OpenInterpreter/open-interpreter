@@ -9,16 +9,16 @@ def display_output(output):
     if is_running_in_jupyter():
         from IPython.display import HTML, Image, Javascript, display
 
-        if "output" in output:
-            print(output["output"])
-        elif "image" in output:
+        if output["type"] == "console":
+            print(output["content"])
+        elif output["type"] == "image":
             # Decode the base64 image data
-            image_data = base64.b64decode(output["image"])
+            image_data = base64.b64decode(output["content"])
             display(Image(image_data, format="png"))
-        elif "html" in output:
-            display(HTML(output["html"]))
-        elif "javascript" in output:
-            display(Javascript(output["javascript"]))
+        elif output["type"] == "html":
+            display(HTML(output["content"]))
+        elif output["type"] == "javascript":
+            display(Javascript(output["content"]))
     else:
         display_output_cli(output)
 
@@ -29,31 +29,28 @@ def display_output(output):
 
 
 def display_output_cli(output):
-    if "output" in output:
-        print(output["output"])
-    elif "image" in output:
+    if output["type"] == "console":
+        print(output["content"])
+    elif output["type"] == "image":
         with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
-            image_data = output["image"]
-            tmp_file.write(base64.b64decode(image_data))
+            image_data = base64.b64decode(output["content"])
+            tmp_file.write(image_data)
             open_file(tmp_file.name)
-            # print(f"Image saved and opened from {tmp_file.name}")
-    elif "html" in output:
+    elif output["type"] == "html":
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".html", mode="w"
         ) as tmp_file:
-            html = output["html"]
+            html = output["content"]
             if "<html>" not in html:
                 html = "<html>\n" + html + "\n</html>"
             tmp_file.write(html)
             open_file(tmp_file.name)
-            # print(f"HTML content saved and opened from {tmp_file.name}")
-    elif "javascript" in output:
+    elif output["type"] == "javascript":
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".js", mode="w"
         ) as tmp_file:
-            tmp_file.write(output["javascript"])
+            tmp_file.write(output["content"])
             open_file(tmp_file.name)
-            # print(f"JavaScript content saved and opened from {tmp_file.name}")
 
 
 def open_file(file_path):

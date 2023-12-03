@@ -8,7 +8,11 @@ def get_relevant_procedures_string(messages):
     # We can query it semantically and append relevant tutorials/procedures to our system message:
 
     # Convert to required OpenAI-compatible `messages` list
-    query = {"query": convert_to_openai_messages(messages)}
+    query = {
+        "query": convert_to_openai_messages(
+            messages, function_calling=False, vision=False
+        )
+    }
     url = "https://open-procedures.replit.app/search/"
 
     relevant_procedures = requests.post(url, json=query).json()["procedures"]
