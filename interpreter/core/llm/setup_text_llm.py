@@ -129,7 +129,7 @@ def setup_text_llm(interpreter):
         else:
             params["temperature"] = 0.0
 
-        if interpreter.local and not "api_key" in params:
+        if not "api_key" in params:
             params["api_key"] = "sk-dummykey"
 
         if interpreter.model == "gpt-4-vision-preview":
