@@ -8,8 +8,6 @@ try:
 except ImportError:
     pass
 
-import base64
-
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
 from ..core.utils.truncate_output import truncate_output
@@ -126,11 +124,15 @@ def terminal_interface(interpreter, message):
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
 
-                if "stop" in chunk and chunk["type"] != "code":
-                    # CodeBlocks requires we leave it open! ^ So we can add the output to it.
+                if "stop" in chunk:
                     active_block.refresh(cursor=False)
-                    active_block.end()
-                    active_block = None
+
+                    if chunk["type"] in [
+                        "message",
+                        "console",
+                    ]:  # We don't stop on code's end — code + console output are actually one block.
+                        active_block.end()
+                        active_block = None
 
                 if chunk["type"] == "message":
                     if "start" in chunk:
@@ -154,7 +156,7 @@ def terminal_interface(interpreter, message):
                     if not interpreter.auto_run:
                         # OI is about to execute code. The user wants to approve this
 
-                        # End the active block so you can run input() below it
+                        # End the active code block so you can run input() below it
                         if active_block:
                             active_block.refresh(cursor=False)
                             active_block.end()
@@ -211,22 +213,24 @@ def terminal_interface(interpreter, message):
                     or chunk["type"] == "html"
                     or chunk["type"] == "javascript"
                 ):
-                    print("DISPLAYING", chunk)
                     computer_output = display_output(chunk)
                     extra_computer_outputs.append(computer_output)
 
-                # Output
-                if "format" in chunk and chunk["format"] == "output":
+                # Console
+                if chunk["type"] == "console" and "format" in chunk:
                     render_cursor = False
-                    active_block.output += "\n" + chunk["content"]
-                    active_block.output = (
-                        active_block.output.strip()
-                    )  # ^ Aesthetic choice
+                    if chunk["format"] == "output":
+                        active_block.output += "\n" + chunk["content"]
+                        active_block.output = (
+                            active_block.output.strip()
+                        )  # ^ Aesthetic choice
 
-                    # Truncate output
-                    active_block.output = truncate_output(
-                        active_block.output, interpreter.max_output
-                    )
+                        # Truncate output
+                        active_block.output = truncate_output(
+                            active_block.output, interpreter.max_output
+                        )
+                    if chunk["format"] == "active_line":
+                        active_block.active_line = chunk["content"]
 
                 if chunk["type"] == "console" and "stop" in chunk:
                     # If we just finished executing, and extra_computer_outputs isn't empty, flush it:

@@ -70,7 +70,6 @@ def is_running_in_jupyter():
         from IPython import get_ipython
 
         if "IPKernelApp" in get_ipython().config:
-            print("You are in Jupyter.")
             return True
     except:
         return False
