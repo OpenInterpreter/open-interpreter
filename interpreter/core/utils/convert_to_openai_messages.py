@@ -53,7 +53,7 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
                 else:
                     content = (
                         "Code output: "
-                        + message["output"]
+                        + message["content"]
                         + "\n\nWhat does this output mean / what's next (if anything, or are we done)?"
                     )
 
