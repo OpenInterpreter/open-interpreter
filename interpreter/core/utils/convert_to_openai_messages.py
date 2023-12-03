@@ -45,10 +45,15 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
             if function_calling:
                 new_message["role"] = "function"
                 new_message["name"] = "execute"
-                new_message["content"] = message["content"]
+                if message["content"].strip() == "":
+                    new_message[
+                        "content"
+                    ] = "No output"  # I think it's best to be explicit, but we should test this.
+                else:
+                    new_message["content"] = message["content"]
 
             else:
-                if message["content"] == "No output":
+                if message["content"].strip() == "":
                     content = "The code above was executed on my machine. It produced no output. Was that expected?"
                 else:
                     content = (
@@ -57,19 +62,15 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
                         + "\n\nWhat does this output mean / what's next (if anything, or are we done)?"
                     )
 
-                new_messages.append(
-                    {
-                        "role": "user",
-                        "content": content,
-                    }
-                )
+                new_message["role"] = "user"
+                new_message["content"] = content
 
         elif message["type"] == "image":
             if vision == False:
                 continue
 
             if message["format"] == "base64":
-                content = message["content"]
+                content = f"data:image/png;base64,{message['content']}"
 
             elif message["format"] == "path":
                 # Convert to base64

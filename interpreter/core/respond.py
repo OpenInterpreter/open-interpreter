@@ -27,20 +27,6 @@ def respond(interpreter):
         messages_for_llm = interpreter.messages.copy()
         messages_for_llm = [system_message] + messages_for_llm
 
-        # It's best to explicitly tell these LLMs when they don't get an output
-        if (
-            messages_for_llm[-1]["role"] == "assistant"
-            and "code" in messages_for_llm[-1]
-        ):
-            messages_for_llm.append(
-                {
-                    "role": "computer",
-                    "type": "console",
-                    "format": "output",
-                    "content": "No output",
-                }
-            )
-
         ### RUN THE LLM ###
 
         try:

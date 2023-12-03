@@ -256,7 +256,7 @@ Once the server is running, you can begin your conversation below.
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
         update_name = "New Computer"  # Change this with each major update
-        print(f'Open Interpreter {version} "{update_name}"')
+        print(f"Open Interpreter {version} {update_name}")
         return
 
     if args.fast:
