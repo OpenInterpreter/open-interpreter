@@ -125,7 +125,8 @@ def terminal_interface(interpreter, message):
                     print("Chunk in `terminal_interface`:", chunk)
 
                 if "stop" in chunk:
-                    active_block.refresh(cursor=False)
+                    if active_block:
+                        active_block.refresh(cursor=False)
 
                     if chunk["type"] in [
                         "message",
