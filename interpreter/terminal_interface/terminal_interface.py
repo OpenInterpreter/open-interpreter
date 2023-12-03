@@ -8,6 +8,8 @@ try:
 except ImportError:
     pass
 
+import time
+
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
 from ..core.utils.truncate_output import truncate_output
@@ -124,9 +126,8 @@ def terminal_interface(interpreter, message):
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
 
-                if "stop" in chunk:
-                    if active_block:
-                        active_block.refresh(cursor=False)
+                if "stop" in chunk and active_block:
+                    active_block.refresh(cursor=False)
 
                     if chunk["type"] in [
                         "message",
@@ -135,6 +136,7 @@ def terminal_interface(interpreter, message):
                         active_block.end()
                         active_block = None
 
+                # Assistant message blocks
                 if chunk["type"] == "message":
                     if "start" in chunk:
                         active_block = MessageBlock()
@@ -143,7 +145,8 @@ def terminal_interface(interpreter, message):
                     if "content" in chunk:
                         active_block.message += chunk["content"]
 
-                elif chunk["type"] == "code":
+                # Assistant code blocks
+                elif chunk["role"] == "assistant" and chunk["type"] == "code":
                     if "start" in chunk:
                         active_block = CodeBlock()
                         active_block.language = chunk["format"]
@@ -207,12 +210,16 @@ def terminal_interface(interpreter, message):
                             )
                             break
 
-                # Display visual types to user,
+                # Computer can display visual types to user,
                 # Which sometimes creates more computer output (e.g. HTML errors, eventually)
-                if "content" in chunk and (
-                    chunk["type"] == "image"
-                    or chunk["type"] == "html"
-                    or chunk["type"] == "javascript"
+                if (
+                    chunk["role"] == "computer"
+                    and "content" in chunk
+                    and (
+                        chunk["type"] == "image"
+                        or ("format" in chunk and chunk["format"] == "html")
+                        or ("format" in chunk and chunk["format"] == "javascript")
+                    )
                 ):
                     computer_output = display_output(chunk)
                     extra_computer_outputs.append(computer_output)
@@ -253,6 +260,7 @@ def terminal_interface(interpreter, message):
             if active_block:
                 active_block.end()
                 active_block = None
+                time.sleep(0.1)
 
             # Flush extra_computer_outputs
             if extra_computer_outputs != []:

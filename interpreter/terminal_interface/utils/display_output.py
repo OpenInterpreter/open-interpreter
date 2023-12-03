@@ -19,9 +19,9 @@ def display_output(output):
             elif output["format"] == "path":
                 # Display the image file on the system
                 display(Image(filename=output["content"]))
-        elif output["type"] == "html":
+        elif "format" in output and output["format"] == "html":
             display(HTML(output["content"]))
-        elif output["type"] == "javascript":
+        elif "format" in output and output["format"] == "javascript":
             display(Javascript(output["content"]))
     else:
         display_output_cli(output)
@@ -43,7 +43,7 @@ def display_output_cli(output):
                 open_file(tmp_file.name)
         elif output["format"] == "path":
             open_file(output["content"])
-    elif output["type"] == "html":
+    elif "format" in output and output["format"] == "html":
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".html", mode="w"
         ) as tmp_file:
@@ -52,7 +52,7 @@ def display_output_cli(output):
                 html = "<html>\n" + html + "\n</html>"
             tmp_file.write(html)
             open_file(tmp_file.name)
-    elif output["type"] == "javascript":
+    elif "format" in output and output["format"] == "javascript":
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=".js", mode="w"
         ) as tmp_file:
