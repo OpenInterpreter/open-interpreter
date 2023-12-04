@@ -155,6 +155,19 @@ In Python, Open Interpreter remembers conversation history. If you want to start
 interpreter.reset()
 ```
 
+### Local chat
+
+```python
+import interpreter
+
+interpreter.local = True #does nothing
+interpreter.model = "openai/model" #Use openai format, model doesn't matter
+interpreter.api_key = "fake_key" #Just needs to have something, doesn't matter
+interpreter.api_base = "http://localhost:1234/v1" #Change to whatever host and port you need. 
+
+interpreter.chat()
+```
+
 ### Save and Restore Chats
 
 `interpreter.chat()` returns a List of messages, which can be used to resume a conversation with `interpreter.messages = messages`:
