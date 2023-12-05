@@ -1,16 +1,15 @@
 import os
 
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+from ..subprocess_language import SubprocessLanguage
 
 
-class AppleScript(SubprocessCodeInterpreter):
+class AppleScript(SubprocessLanguage):
     file_extension = "applescript"
-    proper_name = "AppleScript"
+    name = "AppleScript"
 
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
-        self.config = config
-        self.start_cmd = os.environ.get("SHELL", "/bin/zsh")
+        self.start_cmd = [os.environ.get("SHELL", "/bin/zsh")]
 
     def preprocess_code(self, code):
         """
@@ -52,12 +51,8 @@ class AppleScript(SubprocessCodeInterpreter):
         """
         Detects active line indicator in the output.
         """
-        prefix = "##active_line"
-        if prefix in line:
-            try:
-                return int(line.split(prefix)[1].split()[0])
-            except:
-                pass
+        if "##active_line" in line:
+            return int(line.split("##active_line")[1].split("##")[0])
         return None
 
     def detect_end_of_execution(self, line):

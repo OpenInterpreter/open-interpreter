@@ -1,5 +1,4 @@
 import os
-import re
 import time
 from random import randint
 
@@ -16,14 +15,14 @@ def setup_function():
     interpreter.reset()
     interpreter.temperature = 0
     interpreter.auto_run = True
-    interpreter.model = "gpt-4"
+    interpreter.model = "gpt-3.5-turbo"
     interpreter.debug_mode = False
 
 
 # this function will run after each test
 # we're introducing some sleep to help avoid timeout issues with the OpenAI API
 def teardown_function():
-    time.sleep(5)
+    time.sleep(4)
 
 
 def test_config_loading():
@@ -43,6 +42,87 @@ def test_config_loading():
     assert temperature_ok and model_ok and debug_mode_ok
 
 
+def test_generator():
+    """
+    Sends two messages, makes sure everything is correct with display both on and off.
+    """
+
+    for tests in [
+        {"query": "What's 38023*40334?", "display": True},
+        {"query": "What's 2334*34335555?", "display": True},
+        {"query": "What's 3545*22?", "display": False},
+        {"query": "What's 0.0021*3433335555?", "display": False},
+    ]:
+        assistant_message_found = False
+        console_output_found = False
+        active_line_found = False
+        flag_checker = []
+        for chunk in interpreter.chat(
+            tests["query"]
+            + "\nNo talk or plan, just immediatly code, then tell me the answer.",
+            stream=True,
+            display=tests["display"],
+        ):
+            print(chunk)
+            # Check if chunk has the right schema
+            assert "role" in chunk, "Chunk missing 'role'"
+            assert "type" in chunk, "Chunk missing 'type'"
+            if "start" not in chunk and "end" not in chunk:
+                assert "content" in chunk, "Chunk missing 'content'"
+            if "format" in chunk:
+                assert isinstance(chunk["format"], str), "'format' should be a string"
+
+            flag_checker.append(chunk)
+
+            # Check if assistant message, console output, and active line are found
+            if chunk["role"] == "assistant" and chunk["type"] == "message":
+                assistant_message_found = True
+            if chunk["role"] == "computer" and chunk["type"] == "console":
+                console_output_found = True
+            if "format" in chunk:
+                if (
+                    chunk["role"] == "computer"
+                    and chunk["type"] == "console"
+                    and chunk["format"] == "active_line"
+                ):
+                    active_line_found = True
+
+        # Ensure all flags are proper
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "start": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code start' flags"
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "end": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code end' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "start": True})
+            == 1
+        ), "Incorrect number of 'assistant message start' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "end": True})
+            == 1
+        ), "Incorrect number of 'assistant message end' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "start": True})
+            == 1
+        ), "Incorrect number of 'computer console output start' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "end": True})
+            == 1
+        ), "Incorrect number of 'computer console output end' flags"
+
+        # Assert that assistant message, console output, and active line were found
+        assert assistant_message_found, "No assistant message was found"
+        assert console_output_found, "No console output was found"
+        assert active_line_found, "No active line was found"
+
+
 def test_multiple_instances():
     import interpreter
 
@@ -57,101 +137,6 @@ def test_multiple_instances():
     assert agent_2.system_message == "u"
 
 
-def test_generator():
-    """
-    Sends two messages, makes sure all the flags are correct.
-    """
-    start_of_message_emitted = False
-    end_of_message_emitted = False
-    start_of_code_emitted = False
-    end_of_code_emitted = False
-    executing_emitted = False
-    end_of_execution_emitted = False
-
-    for chunk in interpreter.chat("What's 38023*40334?", stream=True, display=False):
-        print(chunk)
-        if "start_of_message" in chunk:
-            start_of_message_emitted = True
-        if "end_of_message" in chunk:
-            end_of_message_emitted = True
-        if "start_of_code" in chunk:
-            start_of_code_emitted = True
-        if "end_of_code" in chunk:
-            end_of_code_emitted = True
-        if "executing" in chunk:
-            executing_emitted = True
-        if "end_of_execution" in chunk:
-            end_of_execution_emitted = True
-
-        permitted_flags = [
-            "message",
-            "language",
-            "code",
-            "output",
-            "active_line",
-            "start_of_message",
-            "end_of_message",
-            "start_of_code",
-            "end_of_code",
-            "executing",
-            "end_of_execution",
-        ]
-        if list(chunk.keys())[0] not in permitted_flags:
-            assert False, f"{chunk} is invalid"
-
-    assert start_of_message_emitted
-    assert end_of_message_emitted
-    assert start_of_code_emitted
-    assert end_of_code_emitted
-    assert executing_emitted
-    assert end_of_execution_emitted
-
-    start_of_message_emitted = False
-    end_of_message_emitted = False
-    start_of_code_emitted = False
-    end_of_code_emitted = False
-    executing_emitted = False
-    end_of_execution_emitted = False
-
-    for chunk in interpreter.chat("What's 2334*34335555?", stream=True, display=False):
-        print(chunk)
-        if "start_of_message" in chunk:
-            start_of_message_emitted = True
-        if "end_of_message" in chunk:
-            end_of_message_emitted = True
-        if "start_of_code" in chunk:
-            start_of_code_emitted = True
-        if "end_of_code" in chunk:
-            end_of_code_emitted = True
-        if "executing" in chunk:
-            executing_emitted = True
-        if "end_of_execution" in chunk:
-            end_of_execution_emitted = True
-
-        permitted_flags = [
-            "message",
-            "language",
-            "code",
-            "output",
-            "active_line",
-            "start_of_message",
-            "end_of_message",
-            "start_of_code",
-            "end_of_code",
-            "executing",
-            "end_of_execution",
-        ]
-        if list(chunk.keys())[0] not in permitted_flags:
-            assert False, f"{chunk} is invalid"
-
-    assert start_of_message_emitted
-    assert end_of_message_emitted
-    assert start_of_code_emitted
-    assert end_of_code_emitted
-    assert executing_emitted
-    assert end_of_execution_emitted
-
-
 def test_hello_world():
     hello_world_response = "Hello, World!"
 
@@ -160,8 +145,8 @@ def test_hello_world():
     messages = interpreter.chat(hello_world_message)
 
     assert messages == [
-        {"role": "user", "message": hello_world_message},
-        {"role": "assistant", "message": hello_world_response},
+        {"role": "user", "type": "message", "content": hello_world_message},
+        {"role": "assistant", "type": "message", "content": hello_world_response},
     ]
 
 
@@ -181,9 +166,64 @@ def test_math():
     Round to 2 decimal places.
     """.strip()
 
+    print("loading")
     messages = interpreter.chat(order_of_operations_message)
+    print("done")
 
-    assert str(round(test_result, 2)) in messages[-1]["message"]
+    assert str(round(test_result, 2)) in messages[-1]["content"]
+
+
+def test_break_execution():
+    """
+    Breaking from the generator while it's executing should halt the operation.
+    """
+
+    code = r"""print("starting")
+import time                                                                                                                                
+import os                                                                                                                                  
+                                                                                                                                            
+# Always create a fresh file
+open('numbers.txt', 'w').close()
+                                                                                                                                            
+# Open the file in append mode                                                                                                             
+with open('numbers.txt', 'a+') as f:                                                                                                        
+    # Loop through the numbers 1 to 5                                                                                                      
+    for i in [1,2,3,4,5]:                                                                                                                  
+        # Print the number                                                                                                                 
+        print("adding", i, "to file")                                                                                                                           
+        # Append the number to the file                                                                                                    
+        f.write(str(i) + '\n')                                                                                                             
+        # Wait for 0.5 second
+        print("starting to sleep")
+        time.sleep(1)
+        # # Read the file to make sure the number is in there
+        # # Move the seek pointer to the start of the file
+        # f.seek(0)
+        # # Read the file content
+        # content = f.read()
+        # print("Current file content:", content)
+        # # Check if the current number is in the file content
+        # assert str(i) in content
+        # Move the seek pointer to the end of the file for the next append operation
+        f.seek(0, os.SEEK_END)
+        """
+    print("starting to code")
+    for chunk in interpreter.computer.run("python", code):
+        print(chunk)
+        if "format" in chunk and chunk["format"] == "output":
+            if "adding 3 to file" in chunk["content"]:
+                print("BREAKING")
+                break
+
+    time.sleep(3)
+
+    # Open the file and read its content
+    with open("numbers.txt", "r") as f:
+        content = f.read()
+
+    # Check if '1' and '5' are in the content
+    assert "1" in content
+    assert "5" not in content
 
 
 def test_delayed_exec():
@@ -205,7 +245,7 @@ def test_write_to_file():
     messages = interpreter.chat(
         """Read file.txt in the current directory and tell me what's in it."""
     )
-    assert "Washington" in messages[-1]["message"]
+    assert "Washington" in messages[-1]["content"]
 
 
 def test_markdown():
@@ -227,8 +267,8 @@ def test_system_message_appending():
     messages = interpreter.chat(ping_request)
 
     assert messages == [
-        {"role": "user", "message": ping_request},
-        {"role": "assistant", "message": pong_response},
+        {"role": "user", "type": "message", "content": ping_request},
+        {"role": "assistant", "type": "message", "content": pong_response},
     ]
 
 

@@ -255,7 +255,8 @@ Once the server is running, you can begin your conversation below.
 
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
-        print(f"Open Interpreter {version}")
+        update_name = "New Computer"  # Change this with each major update
+        print(f"Open Interpreter {version} {update_name}")
         return
 
     if args.fast:
@@ -283,22 +284,21 @@ Once the server is running, you can begin your conversation below.
         # Doesn't matter
         pass
 
-    # At some point in the future these model names redirects wont be necessary anymore, but legacy names will remain for a while
-    if interpreter.model == "gpt-4" or interpreter.model == "gpt-4-32k":
-        interpreter.model = "gpt-4-1106-preview"
-        
-    if interpreter.model == "gpt-3.5-turbo" or interpreter.model == "gpt-3.5-turbo-16k":
-        interpreter.model = "gpt-3.5-turbo-1106"
-    
     if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
-        interpreter.context_window = 128000
-        interpreter.max_tokens = 4096
-        interpreter.function_calling_llm = True
+        if interpreter.context_window is None:
+            interpreter.context_window = 128000
+        if interpreter.max_tokens is None:
+            interpreter.max_tokens = 4096
+        if interpreter.function_calling_llm is None:
+            interpreter.function_calling_llm = True
 
     if not interpreter.local and interpreter.model == "gpt-3.5-turbo-1106":
-        interpreter.context_window = 16000
-        interpreter.max_tokens = 4096
-        interpreter.function_calling_llm = True
+        if interpreter.context_window is None:
+            interpreter.context_window = 16000
+        if interpreter.max_tokens is None:
+            interpreter.max_tokens = 4096
+        if interpreter.function_calling_llm is None:
+            interpreter.function_calling_llm = True
 
     validate_llm_settings(interpreter)
 

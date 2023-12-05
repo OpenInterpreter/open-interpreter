@@ -1,5 +1,3 @@
-import os
-
 import litellm
 
 from .convert_to_coding_llm import convert_to_coding_llm
@@ -37,6 +35,8 @@ def setup_llm(interpreter):
 
         # Non-function-calling LLM
         text_llm = setup_text_llm(interpreter)
-        coding_llm = convert_to_coding_llm(text_llm, debug_mode=interpreter.debug_mode)
+        coding_llm = convert_to_coding_llm(
+            text_llm, debug_mode=interpreter.debug_mode, vision=interpreter.vision
+        )
 
     return coding_llm

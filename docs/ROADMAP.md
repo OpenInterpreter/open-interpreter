@@ -1,29 +1,47 @@
 # Roadmap
 
-- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
-- [x] Support multiple instances
-- [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
-- [ ] **Easy 🟢** Require documentation for PRs
-- [ ] Make sure breaking from generator during execution stops the execution
-- [ ] Stateless core python package, config passed in by TUI
-- [ ] Expose tool (`interpreter.computer.run(language, code)`)
-- [ ] Add %% (shell) magic command
-- [ ] Allow for limited functions (`interpreter.functions`)
-- [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
-- [ ] Switch core code interpreter to be Jupyter-powered
-- [ ] Local and vision should be reserved for TUI, more granular settings for Python
-- [ ] Create more intensive tests for benchmarks
-- [ ] Connect benchmarks to multiple open-source LLMs
-- [ ] Further split TUI from core (some utils still reach across)
+## New features
+
+- [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
+- [ ] Add `interpreter --async` command (that OI itself can use) — simply prints the final resulting output — nothing intermediary.
+- [ ] Allow for limited functions (`interpreter.functions`) using regex
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
-- [ ] Allow for custom interfaces (`interpreter.computer.interfaces.append(class_that_conforms_to_base_interface)`)
-- [ ] Work with mintlfy to translate docs
+- [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed`) which will let us do semantic search
+- [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
+- [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstrings. Keep this minimal!
+- [ ] Improve partnership with `languagetools`
+- [ ] Allow for integrations
 - [ ] Expand "safe mode" to have proper, simple Docker support
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
-- [ ] Improve partnership with `languagetools`
+
+## Future-proofing
+
+- [ ] Figure out how to run us on [GAIA](https://huggingface.co/gaia-benchmark) and use a subset of that as our tests / optimization framework
+- [ ] Add more language models to tests (use Replicate, ask LiteLLM how they made their "mega key" to many different LLM providers)
+- [ ] Stateless core python package (free of config settings) config passed in by TUI
+- [ ] Local and vision should be reserved for TUI, more granular settings for Python
+- [ ] Further split TUI from core (some utils still reach across)
 - [ ] Remove `procedures` (there must be a better way)
 - [ ] Better storage of different model keys in TUI / config file. All keys, to multiple providers, should be stored in there. Easy switching
+
+## Documentation
+
+- [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
+- [ ] **Easy 🟢** Require documentation for PRs
+- [ ] Work with Mintlify to translate docs
 - [ ] Better comments throughout the package (they're like docs for contributors)
+
+## Completed
+
+- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
+- [x] Add %% (shell) magic command
+- [x] Support multiple instances
+- [x] Split ROADMAP into sections
+- [x] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
+- [x] Expose tool (`interpreter.computer.run(language, code)`)
+- [x] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
+- [x] Switch core code interpreter to be Jupyter-powered
+- [x] Make sure breaking from generator during execution stops the execution
 
 # What's in our scope?
 
@@ -42,75 +60,107 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 
 # Upcoming structures
 
-### Post TUI/core split structure
-
-```
-/open_interpreter
-  /terminal_interface
-    tui.py
-    chat.py
-    /utils
-  /core
-    core.py
-    respond.py
-    /utils
-    /computer
-      core.py
-      /interfaces
-        __init__.py
-        python.py
-        shell.py
-        ...
-    ...
-```
-
 ### New streaming structure
 
-```
-{ "start_of_text": true },
-{ "text": "Processing your request to generate a plot." }, # Sent token by token
-{ "python": "plot = create_plot_from_data('base64_image_of_data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)" }, # Sent token by token
-{ "executing": { "python": "plot = create_plot_from_data('base64_image_of_data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)" } },
-{ "start_of_output": true },
-{ "active_line": 1 },
-{ "active_line": 2 },
-{ "output": { "type": "image", "content": "base64_encoded_plot_image" } },
-{ "active_line": 3 },
-{ "output": { "type": "html", "content": "<html>Plot in HTML format</html>" } },
-{ "end_of_output": true }
+```python
+{"role": "assistant", "type": "message", "start": True}
+{"role": "assistant", "type": "message", "content": "Pro"}
+{"role": "assistant", "type": "message", "content": "cessing"}
+{"role": "assistant", "type": "message", "content": "your request"}
+{"role": "assistant", "type": "message", "content": "to generate a plot."}
+{"role": "assistant", "type": "message", "end": True}
+
+{"role": "assistant", "type": "code", "format": "python", "start": True}
+{"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data"}
+{"role": "assistant", "type": "code", "format": "python", "content": "('data')\ndisplay_as_image(plot)"}
+{"role": "assistant", "type": "code", "format": "python", "content": "\ndisplay_as_html(plot)"}
+{"role": "assistant", "type": "code", "format": "python", "end": True}
+
+{"role": "computer", "type": "console", "start": True}
+{"role": "computer", "type": "console", "format": "output", "content": "a printed statement"}
+{"role": "computer", "type": "console", "format": "active_line", "content": "1"}
+{"role": "computer", "type": "console", "format": "active_line", "content": "2"}
+{"role": "computer", "type": "console", "format": "active_line", "content": "3"}
+{"role": "computer", "type": "console", "format": "output", "content": "another printed statement"}
+{"role": "computer", "type": "console", "end": True}
+
+...
+
+# ASSISTANT GENERATED HTML
+
+# The assistant writes some HTML.
+# Because recipient isn't explicitly set, it's being "rendered" to both the user and the computer in real-time.
+{"role": "assistant", "type": "code", "format": "html", "start": True}
+{"role": "assistant", "type": "code", "format": "html", "content": "<html>Some"}
+{"role": "assistant", "type": "code", "format": "html", "content": "thing</html>"}
+{"role": "assistant", "type": "code", "format": "html", "end": True}
+
+# The computer runs the HTML.
+
+# The running HTML produces some console log / errors.
+{"role": "computer", "type": "console", "start": True}
+{"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
+{"role": "computer", "type": "console", "end": True}
+
+# The computer will make an image for the assistant to see.
+# The image's "recipient" is set to "assistant" because **the user has already seen this HTML** as interactive HTML, in block 1
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "start": True}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "content": "/path/to/html_block_render.png"}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "end": True}
+
+...
+
+# COMPUTER GENERATED HTML
+
+# The assistant writes some Python.
+{"role": "assistant", "type": "code", "format": "python", "start": True}
+{"role": "assistant", "type": "code", "format": "python", "content": "display_plot_as_html(plot)"}
+{"role": "assistant", "type": "code", "format": "python", "end": True}
+
+# The computer runs the Python.
+
+# The running Python produces some HTML.
+# The HTML's "recipient" is set to "user" so the user can interact with it, but the assistant's context won't get stuffed with tokens (instead, it will get an image in a moment)
+{"role": "computer", "type": "code", "format": "html", "recipient": "user", "start": True}
+{"role": "computer", "type": "code", "format": "html", "recipient": "user", "content": "<html>Something</html>"}
+{"role": "computer", "type": "code", "format": "html", "recipient": "user", "end": True}
+
+# The computer runs the HTML.
+
+# The running HTML produces some console log / errors.
+{"role": "computer", "type": "console", "start": True}
+{"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
+{"role": "computer", "type": "console", "end": True}
+
+# The computer will make an image for the assistant to see.
+# The image's "recipient" is set to "assistant" because **the user has already seen this HTML** as interactive HTML, in block 2
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "start": True}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "content": "/path/to/html_block_render.png"}
+{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "end": True}
+
+...
+
+{"role": "assistant", "type": "message", "start": True}
+{"role": "assistant", "type": "message", "content": "Plot"}
+{"role": "assistant", "type": "message", "content": "generated"}
+{"role": "assistant", "type": "message", "content": "successfully."}
+{"role": "assistant", "type": "message", "end": True}
 ```
 
 ### New static messages structure
 
 ```
 [
-  {
-    "role": "user",
-    "content": [
-      {"type": "text", "content": "Please create a plot from this data and display it as an image and then as HTML."},
-      {"type": "image", "content": "data"}
-    ]
-  },
-  {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "text", 
-        "content": "Processing your request to generate a plot."
-      },
-      {
-        "type": "python",
-        "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"
-      },
-      {
-        "type": "output",
-        "content": [
-          {"type": "text", "content": "Plot generated successfully."},
-          {"type": "image", "content": "base64_encoded_plot_image"},
-          {"type": "html", "content": "<html>Plot in HTML format</html>"}
-        ]
-      }
-    ]
-  }
+
+  {"role": "user", "type": "message", "content": "Please create a plot from this data and display it as an image and then as HTML."}, # implied format: text (only one format for type message)
+  {"role": "user", "type": "image", "format": "path", "content": "path/to/image.png"}
+  {"role": "user", "type": "file", "content": "/path/to/file.pdf"} # implied format: path (only one format for type file)
+  {"role": "assistant", "type": "message", "content": "Processing your request to generate a plot."} # implied format: text
+  {"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
+  {"role": "computer", "type": "image", "format": "base64", "content": "base64"}
+  {"role": "computer", "type": "code", "format": "html", "content": "<html>Plot in HTML format</html>"}
+  {"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
+  {"role": "assistant", "type": "message", "content": "Plot generated successfully."} # implied format: text
+
 ]
 ```

@@ -6,12 +6,12 @@
     <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
     <a href="docs/README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
+    <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
     <b>Let language models run code on your computer.</b><br>
     An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">Read our new docs</a></b><br>
+    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
 <br>
@@ -199,6 +199,8 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### Running Open Interpreter locally
 
+#### Terminal
+
 Open Interpreter uses [LM Studio](https://lmstudio.ai/) to connect to local language models (experimental).
 
 Simply run `interpreter` in local mode from the command line:
@@ -219,6 +221,21 @@ Once the server is running, you can begin your conversation with Open Interprete
 (When you run the command `interpreter --local`, the steps above will be displayed.)
 
 > **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually (see below).
+
+#### Python
+
+Our Python package gives you more control over each setting. To replicate `--local` and connect to LM Studio, use these settings:
+
+```python
+import interpreter
+
+interpreter.local = True # Disables online features like Open Procedures
+interpreter.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
+interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+
+interpreter.chat()
+```
 
 #### Context Window, Max Tokens
 
@@ -377,15 +394,11 @@ We then stream the model's messages, code, and your system's outputs to the term
 
 Thank you for your interest in contributing! We welcome involvement from the community.
 
-Please see our [Contributing Guidelines](docs/CONTRIBUTING.md) for more details on how to get involved.
+Please see our [contributing guidelines](docs/CONTRIBUTING.md) for more details on how to get involved.
 
 # Roadmap
 
 Visit [our roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) to preview the future of Open Interpreter.
-
-## License
-
-Open Interpreter is licensed under the MIT License. You are permitted to use, copy, modify, distribute, sublicense, and sell copies of the software.
 
 **Note**: This software is not affiliated with OpenAI.
 
