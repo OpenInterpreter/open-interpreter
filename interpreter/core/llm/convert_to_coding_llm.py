@@ -65,6 +65,10 @@ def convert_to_coding_llm(text_llm, debug_mode=False, vision=False):
                 continue
 
             content = chunk["choices"][0]["delta"].get("content", "")
+            
+            if content == None:
+                #print(f"Content is None: {content}")
+                continue
 
             accumulated_block += content
 
