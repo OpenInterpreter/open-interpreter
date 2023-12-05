@@ -271,10 +271,11 @@ def terminal_interface(interpreter, message):
                     active_block.refresh(cursor=render_cursor)
 
             # (Sometimes -- like if they CTRL-C quickly -- active_block is still None here)
-            if active_block:
-                active_block.end()
-                active_block = None
-                time.sleep(0.1)
+            if "active_block" in locals():
+                if active_block:
+                    active_block.end()
+                    active_block = None
+                    time.sleep(0.1)
 
             if not interactive:
                 # Don't loop
@@ -282,9 +283,10 @@ def terminal_interface(interpreter, message):
 
         except KeyboardInterrupt:
             # Exit gracefully
-            if active_block:
-                active_block.end()
-                active_block = None
+            if "active_block" in locals():
+                if active_block:
+                    active_block.end()
+                    active_block = None
 
             if interactive:
                 # (this cancels LLM, returns to the interactive "> " input)
