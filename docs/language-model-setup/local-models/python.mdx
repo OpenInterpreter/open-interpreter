@@ -1,6 +1,10 @@
-Our Python package gives you control over each setting. You can point `interpreter.api_base` at any OpenAI compatible server (including one running locally).
+[← Back](/language-model-setup/local-models/overview)
 
-To replicate `--local` and connect to LM Studio, use these settings:
+Compared to the terminal interface, our Python package gives you more granular control over each setting.
+
+You can point `interpreter.api_base` at any OpenAI compatible server (including one running locally).
+
+For example, to replicate [`--local` mode](/language-model-setup/local-models/overview) and connect to [LM Studio](https://lmstudio.ai/), use these settings:
 
 ```python
 import interpreter
@@ -13,4 +17,4 @@ interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI com
 interpreter.chat()
 ```
 
-Ensure LM Studio, or any other OpenAI compatible server, is running.
+Simply ensure that **LM Studio**, or any other OpenAI compatible server, is running at `api_base`.
