@@ -221,13 +221,35 @@ def terminal_interface(interpreter, message):
                         or ("format" in chunk and chunk["format"] == "javascript")
                     )
                 ):
-                    computer_output = display_output(chunk)
-                    extra_computer_outputs.append(computer_output)
+                    # Display and give extra output back to the LLM
+                    extra_computer_output = display_output(chunk)
+                    if (
+                        interpreter.messages[-1].get("format") != "output"
+                        or interpreter.messages[-1]["role"] != "computer"
+                        or interpreter.messages[-1]["type"] != "console"
+                    ):
+                        # If the last message isn't a console output, make a new block
+                        interpreter.messages.append(
+                            {
+                                "role": "computer",
+                                "type": "console",
+                                "format": "output",
+                                "content": extra_computer_output,
+                            }
+                        )
+                    else:
+                        # If the last message is a console output, simply append the extra output to it
+                        interpreter.messages[-1]["content"] += (
+                            "\n" + extra_computer_output
+                        )
+                        interpreter.messages[-1]["content"] = interpreter.messages[-1][
+                            "content"
+                        ].strip()
 
                 # Console
-                if chunk["type"] == "console" and "format" in chunk:
+                if chunk["type"] == "console":
                     render_cursor = False
-                    if chunk["format"] == "output":
+                    if "format" in chunk and chunk["format"] == "output":
                         active_block.output += "\n" + chunk["content"]
                         active_block.output = (
                             active_block.output.strip()
@@ -240,18 +262,12 @@ def terminal_interface(interpreter, message):
                     if chunk["format"] == "active_line":
                         active_block.active_line = chunk["content"]
 
-                if chunk["type"] == "console" and "stop" in chunk:
-                    # If we just finished executing, and extra_computer_outputs isn't empty, flush it:
-                    if extra_computer_outputs != []:
-                        interpreter.messages.append(
-                            {
-                                "role": "computer",
-                                "type": "console",
-                                "format": "output",
-                                "content": "\n".join(extra_computer_outputs),
-                            }
-                        )
-                        extra_computer_outputs = []
+                    if "start" in chunk:
+                        # We need to make a code block if we pushed out an HTML block first, which would have closed our code block.
+                        if not isinstance(active_block, CodeBlock):
+                            active_block = CodeBlock()
+                            active_block.language = chunk["format"]
+                            active_block.code = ""
 
                 if active_block:
                     active_block.refresh(cursor=render_cursor)
@@ -262,17 +278,7 @@ def terminal_interface(interpreter, message):
                 active_block = None
                 time.sleep(0.1)
 
-            # Flush extra_computer_outputs
-            if extra_computer_outputs != []:
-                interpreter.messages.append(
-                    {
-                        "role": "computer",
-                        "type": "console",
-                        "format": "output",
-                        "content": "\n".join(extra_computer_outputs),
-                    }
-                )
-                extra_computer_outputs = []
+            flush_extra_computer_outputs()
 
             if not interactive:
                 # Don't loop

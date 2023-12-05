@@ -4,9 +4,11 @@ import platform
 import subprocess
 import tempfile
 
+from .in_jupyter_notebook import in_jupyter_notebook
+
 
 def display_output(output):
-    if is_running_in_jupyter():
+    if in_jupyter_notebook():
         from IPython.display import HTML, Image, Javascript, display
 
         if output["type"] == "console":
@@ -70,13 +72,3 @@ def open_file(file_path):
             subprocess.run(["xdg-open", file_path])
     except Exception as e:
         print(f"Error opening file: {e}")
-
-
-def is_running_in_jupyter():
-    try:
-        from IPython import get_ipython
-
-        if "IPKernelApp" in get_ipython().config:
-            return True
-    except:
-        return False

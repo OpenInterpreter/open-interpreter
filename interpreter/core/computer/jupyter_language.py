@@ -4,6 +4,7 @@ import re
 import threading
 import time
 
+import matplotlib
 from jupyter_client import KernelManager
 
 from .base_language import BaseLanguage
@@ -26,6 +27,14 @@ class JupyterLanguage(BaseLanguage):
 
         self.listener_thread = None
         self.finish_flag = False
+
+        # Give it our same matplotlib backend
+        backend = matplotlib.get_backend()
+        code_to_run = f"""
+        import matplotlib
+        matplotlib.use('{backend}')
+        """
+        self.run(code_to_run)
 
     def terminate(self):
         self.kc.stop_channels()
