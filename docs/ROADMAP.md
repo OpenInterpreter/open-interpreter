@@ -2,9 +2,9 @@
 
 ## New features
 
+- [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
 - [ ] Add `interpreter --async` command (that OI itself can use) — simply prints the final resulting output — nothing intermediary.
 - [ ] Allow for limited functions (`interpreter.functions`) using regex
-- [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
 - [ ] Allow for custom llms (`interpreter.llm`) which conform to some class, properties like `.supports_functions` and `.supports_vision`
 - [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed`) which will let us do semantic search
 - [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
@@ -16,12 +16,9 @@
 
 ## Future-proofing
 
-- [ ] Apply to [GAIA](https://huggingface.co/gaia-benchmark) and use them to optimize
-- [ ] Add more language models to tests (use Replicate, ask LiteLLM)
-- [ ] Make sure breaking from generator during execution stops the execution
-- [ ] Stateless core python package, config passed in by TUI
-- [ ] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
-- [ ] Switch core code interpreter to be Jupyter-powered
+- [ ] Figure out how to run us on [GAIA](https://huggingface.co/gaia-benchmark) and use a subset of that as our tests / optimization framework
+- [ ] Add more language models to tests (use Replicate, ask LiteLLM how they made their "mega key" to many different LLM providers)
+- [ ] Stateless core python package (free of config settings) config passed in by TUI
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
 - [ ] Further split TUI from core (some utils still reach across)
 - [ ] Remove `procedures` (there must be a better way)
@@ -42,6 +39,9 @@
 - [x] Split ROADMAP into sections
 - [x] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
 - [x] Expose tool (`interpreter.computer.run(language, code)`)
+- [x] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
+- [x] Switch core code interpreter to be Jupyter-powered
+- [x] Make sure breaking from generator during execution stops the execution
 
 # What's in our scope?
 
@@ -60,15 +60,15 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 
 # Upcoming structures
 
-### New streaming structure (with delimiters=True)
+### New streaming structure
 
 ```python
-{"role": "assistant", "type": "message", "start": True} # <- Delimiter
+{"role": "assistant", "type": "message", "start": True}
 {"role": "assistant", "type": "message", "content": "Pro"}
 {"role": "assistant", "type": "message", "content": "cessing"}
 {"role": "assistant", "type": "message", "content": "your request"}
 {"role": "assistant", "type": "message", "content": "to generate a plot."}
-{"role": "assistant", "type": "message", "end": True} # <- Delimiter
+{"role": "assistant", "type": "message", "end": True}
 
 {"role": "assistant", "type": "code", "format": "python", "start": True}
 {"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data"}

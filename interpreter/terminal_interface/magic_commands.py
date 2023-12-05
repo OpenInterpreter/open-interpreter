@@ -75,7 +75,10 @@ def handle_help(self, arguments):
 def handle_debug(self, arguments=None):
     if arguments == "" or arguments == "true":
         display_markdown_message("> Entered debug mode")
-        print(self.messages)
+        print("\n\nCurrent messages:\n")
+        for message in self.messages:
+            print(f"\n{message}\n")
+        print("\n")
         self.debug_mode = True
     elif arguments == "false":
         display_markdown_message("> Exited debug mode")

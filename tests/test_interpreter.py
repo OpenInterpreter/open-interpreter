@@ -1,5 +1,4 @@
 import os
-import re
 import time
 from random import randint
 
@@ -16,14 +15,162 @@ def setup_function():
     interpreter.reset()
     interpreter.temperature = 0
     interpreter.auto_run = True
-    interpreter.model = "gpt-4"
+    interpreter.model = "gpt-3.5-turbo"
     interpreter.debug_mode = False
 
 
 # this function will run after each test
 # we're introducing some sleep to help avoid timeout issues with the OpenAI API
 def teardown_function():
-    time.sleep(5)
+    time.sleep(4)
+
+
+def test_config_loading():
+    # because our test is running from the root directory, we need to do some
+    # path manipulation to get the actual path to the config file or our config
+    # loader will try to load from the wrong directory and fail
+    currentPath = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(currentPath, "./config.test.yaml")
+
+    interpreter.extend_config(config_path=config_path)
+
+    # check the settings we configured in our config.test.yaml file
+    temperature_ok = interpreter.temperature == 0.25
+    model_ok = interpreter.model == "gpt-3.5-turbo"
+    debug_mode_ok = interpreter.debug_mode == True
+
+    assert temperature_ok and model_ok and debug_mode_ok
+
+
+def test_generator():
+    """
+    Sends two messages, makes sure everything is correct with display both on and off.
+    """
+
+    for tests in [
+        {"query": "What's 38023*40334?", "display": True},
+        {"query": "What's 2334*34335555?", "display": True},
+        {"query": "What's 3545*22?", "display": False},
+        {"query": "What's 0.0021*3433335555?", "display": False},
+    ]:
+        assistant_message_found = False
+        console_output_found = False
+        active_line_found = False
+        flag_checker = []
+        for chunk in interpreter.chat(
+            tests["query"]
+            + "\nNo talk or plan, just immediatly code, then tell me the answer.",
+            stream=True,
+            display=tests["display"],
+        ):
+            print(chunk)
+            # Check if chunk has the right schema
+            assert "role" in chunk, "Chunk missing 'role'"
+            assert "type" in chunk, "Chunk missing 'type'"
+            if "start" not in chunk and "end" not in chunk:
+                assert "content" in chunk, "Chunk missing 'content'"
+            if "format" in chunk:
+                assert isinstance(chunk["format"], str), "'format' should be a string"
+
+            flag_checker.append(chunk)
+
+            # Check if assistant message, console output, and active line are found
+            if chunk["role"] == "assistant" and chunk["type"] == "message":
+                assistant_message_found = True
+            if chunk["role"] == "computer" and chunk["type"] == "console":
+                console_output_found = True
+            if "format" in chunk:
+                if (
+                    chunk["role"] == "computer"
+                    and chunk["type"] == "console"
+                    and chunk["format"] == "active_line"
+                ):
+                    active_line_found = True
+
+        # Ensure all flags are proper
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "start": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code start' flags"
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "end": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code end' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "start": True})
+            == 1
+        ), "Incorrect number of 'assistant message start' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "end": True})
+            == 1
+        ), "Incorrect number of 'assistant message end' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "start": True})
+            == 1
+        ), "Incorrect number of 'computer console output start' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "end": True})
+            == 1
+        ), "Incorrect number of 'computer console output end' flags"
+
+        # Assert that assistant message, console output, and active line were found
+        assert assistant_message_found, "No assistant message was found"
+        assert console_output_found, "No console output was found"
+        assert active_line_found, "No active line was found"
+
+
+def test_multiple_instances():
+    import interpreter
+
+    interpreter.system_message = "i"
+    agent_1 = interpreter.Interpreter()
+    agent_1.system_message = "<3"
+    agent_2 = interpreter.Interpreter()
+    agent_2.system_message = "u"
+
+    assert interpreter.system_message == "i"
+    assert agent_1.system_message == "<3"
+    assert agent_2.system_message == "u"
+
+
+def test_hello_world():
+    hello_world_response = "Hello, World!"
+
+    hello_world_message = f"Please reply with just the words {hello_world_response} and nothing else. Do not run code. No confirmation just the text."
+
+    messages = interpreter.chat(hello_world_message)
+
+    assert messages == [
+        {"role": "user", "type": "message", "content": hello_world_message},
+        {"role": "assistant", "type": "message", "content": hello_world_response},
+    ]
+
+
+def test_math():
+    # we'll generate random integers between this min and max in our math tests
+    min_number = randint(1, 99)
+    max_number = randint(1001, 9999)
+
+    n1 = randint(min_number, max_number)
+    n2 = randint(min_number, max_number)
+
+    test_result = n1 + n2 * (n1 - n2) / (n2 + n1)
+
+    order_of_operations_message = f"""
+    Please perform the calculation `{n1} + {n2} * ({n1} - {n2}) / ({n2} + {n1})` then reply with just the answer, nothing else. No confirmation. No explanation. No words. Do not use commas. Do not show your work. Just return the result of the calculation. Do not introduce the results with a phrase like \"The result of the calculation is...\" or \"The answer is...\"
+    
+    Round to 2 decimal places.
+    """.strip()
+
+    print("loading")
+    messages = interpreter.chat(order_of_operations_message)
+    print("done")
+
+    assert str(round(test_result, 2)) in messages[-1]["content"]
 
 
 def test_break_execution():
@@ -63,8 +210,9 @@ with open('numbers.txt', 'a+') as f:
     print("starting to code")
     for chunk in interpreter.computer.run("python", code):
         print(chunk)
-        if "output" in chunk:
-            if "adding 3 to file" in chunk["output"]:
+        if "format" in chunk and chunk["format"] == "output":
+            if "adding 3 to file" in chunk["content"]:
+                print("BREAKING")
                 break
 
     time.sleep(3)
@@ -76,104 +224,6 @@ with open('numbers.txt', 'a+') as f:
     # Check if '1' and '5' are in the content
     assert "1" in content
     assert "5" not in content
-
-
-def test_config_loading():
-    # because our test is running from the root directory, we need to do some
-    # path manipulation to get the actual path to the config file or our config
-    # loader will try to load from the wrong directory and fail
-    currentPath = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(currentPath, "./config.test.yaml")
-
-    interpreter.extend_config(config_path=config_path)
-
-    # check the settings we configured in our config.test.yaml file
-    temperature_ok = interpreter.temperature == 0.25
-    model_ok = interpreter.model == "gpt-3.5-turbo"
-    debug_mode_ok = interpreter.debug_mode == True
-
-    assert temperature_ok and model_ok and debug_mode_ok
-
-
-def test_multiple_instances():
-    import interpreter
-
-    interpreter.system_message = "i"
-    agent_1 = interpreter.Interpreter()
-    agent_1.system_message = "<3"
-    agent_2 = interpreter.Interpreter()
-    agent_2.system_message = "u"
-
-    assert interpreter.system_message == "i"
-    assert agent_1.system_message == "<3"
-    assert agent_2.system_message == "u"
-
-
-def test_generator():
-    """
-    Sends two messages, makes sure all the flags are correct.
-    """
-    flags = [
-        "message",
-        "language",
-        "code",
-        "output",
-        "active_line",
-        "start_of_message",
-        "end_of_message",
-        "start_of_code",
-        "end_of_code",
-        "executing",
-        "start_of_output",
-        "end_of_output",
-    ]
-
-    for query in ["What's 38023*40334?", "What's 2334*34335555?"]:
-        flags_emitted = {flag: False for flag in flags}
-
-        for chunk in interpreter.chat(query, stream=True, display=False):
-            print(chunk)
-            if list(chunk.keys())[0] not in flags:
-                assert False, f"{chunk} is invalid"
-            else:
-                flags_emitted[list(chunk.keys())[0]] = True
-
-        for flag, emitted in flags_emitted.items():
-            assert emitted, f"{flag} not emitted"
-
-
-def test_hello_world():
-    hello_world_response = "Hello, World!"
-
-    hello_world_message = f"Please reply with just the words {hello_world_response} and nothing else. Do not run code. No confirmation just the text."
-
-    messages = interpreter.chat(hello_world_message)
-
-    assert messages == [
-        {"role": "user", "message": hello_world_message},
-        {"role": "assistant", "message": hello_world_response},
-    ]
-
-
-def test_math():
-    # we'll generate random integers between this min and max in our math tests
-    min_number = randint(1, 99)
-    max_number = randint(1001, 9999)
-
-    n1 = randint(min_number, max_number)
-    n2 = randint(min_number, max_number)
-
-    test_result = n1 + n2 * (n1 - n2) / (n2 + n1)
-
-    order_of_operations_message = f"""
-    Please perform the calculation `{n1} + {n2} * ({n1} - {n2}) / ({n2} + {n1})` then reply with just the answer, nothing else. No confirmation. No explanation. No words. Do not use commas. Do not show your work. Just return the result of the calculation. Do not introduce the results with a phrase like \"The result of the calculation is...\" or \"The answer is...\"
-    
-    Round to 2 decimal places.
-    """.strip()
-
-    messages = interpreter.chat(order_of_operations_message)
-
-    assert str(round(test_result, 2)) in messages[-1]["message"]
 
 
 def test_delayed_exec():
@@ -195,7 +245,7 @@ def test_write_to_file():
     messages = interpreter.chat(
         """Read file.txt in the current directory and tell me what's in it."""
     )
-    assert "Washington" in messages[-1]["message"]
+    assert "Washington" in messages[-1]["content"]
 
 
 def test_markdown():
@@ -217,8 +267,8 @@ def test_system_message_appending():
     messages = interpreter.chat(ping_request)
 
     assert messages == [
-        {"role": "user", "message": ping_request},
-        {"role": "assistant", "message": pong_response},
+        {"role": "user", "type": "message", "content": ping_request},
+        {"role": "assistant", "type": "message", "content": pong_response},
     ]
 
 

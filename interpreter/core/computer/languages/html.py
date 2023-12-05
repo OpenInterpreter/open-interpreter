@@ -1,3 +1,4 @@
+from ...utils.html_to_base64 import html_to_base64
 from ..base_language import BaseLanguage
 
 
@@ -9,5 +10,22 @@ class HTML(BaseLanguage):
         super().__init__()
 
     def run(self, code):
-        # Lmao this is so thin. But HTML should be an accepted output!
-        yield {"html": code}
+        # Assistant should know what's going on
+        yield {
+            "type": "console",
+            "format": "output",
+            "content": "HTML being displayed on the user's machine...",
+            "recipient": "assistant",
+        }
+
+        # User sees interactive HTML
+        yield {"type": "code", "format": "html", "content": code, "recipient": "user"}
+
+        # Assistant sees image
+        base64 = html_to_base64(code)
+        yield {
+            "type": "image",
+            "format": "base64",
+            "content": base64,
+            "recipient": "assistant",
+        }

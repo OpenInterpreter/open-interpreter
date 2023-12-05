@@ -1,25 +1,18 @@
-# Jupyter Python
-
 import ast
-import os
 import queue
 import re
 import threading
 import time
 
+import matplotlib
 from jupyter_client import KernelManager
 
 from .base_language import BaseLanguage
 
-# Supresses a weird debugging error
-os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"
-# turn off colors in "terminal"
-os.environ["ANSI_COLORS_DISABLED"] = "1"
-
 DEBUG_MODE = False
 
 
-class Python(BaseLanguage):
+class JupyterLanguage(BaseLanguage):
     file_extension = "py"
     name = "Python"
 
@@ -34,6 +27,14 @@ class Python(BaseLanguage):
 
         self.listener_thread = None
         self.finish_flag = False
+
+        # Give it our same matplotlib backend
+        backend = matplotlib.get_backend()
+        code_to_run = f"""
+        import matplotlib
+        matplotlib.use('{backend}')
+        """
+        self.run(code_to_run)
 
     def terminate(self):
         self.kc.stop_channels()
@@ -60,7 +61,7 @@ class Python(BaseLanguage):
                 except queue.Empty:
                     continue
 
-                if DEBUG_MODE and False:
+                if DEBUG_MODE:
                     print("-----------" * 10)
                     print("Message recieved:", msg["content"])
                     print("-----------" * 10)
@@ -80,23 +81,65 @@ class Python(BaseLanguage):
                 if msg["msg_type"] == "stream":
                     line, active_line = self.detect_active_line(content["text"])
                     if active_line:
-                        message_queue.put({"active_line": active_line})
-                    message_queue.put({"output": line})
+                        message_queue.put(
+                            {
+                                "type": "console",
+                                "format": "active_line",
+                                "content": active_line,
+                            }
+                        )
+                    message_queue.put(
+                        {"type": "console", "format": "output", "content": line}
+                    )
                 elif msg["msg_type"] == "error":
-                    message_queue.put({"output": "\n".join(content["traceback"])})
+                    message_queue.put(
+                        {
+                            "type": "console",
+                            "format": "output",
+                            "content": "\n".join(content["traceback"]),
+                        }
+                    )
                 elif msg["msg_type"] in ["display_data", "execute_result"]:
                     data = content["data"]
                     if "image/png" in data:
-                        message_queue.put({"image": data["image/png"]})
+                        message_queue.put(
+                            {
+                                "type": "image",
+                                "format": "base64",
+                                "content": data["image/png"],
+                            }
+                        )
                     elif "image/jpeg" in data:
-                        message_queue.put({"image": data["image/jpeg"]})
+                        message_queue.put(
+                            {
+                                "type": "image",
+                                "format": "base64",
+                                "content": data["image/jpeg"],
+                            }
+                        )
                     elif "text/html" in data:
-                        message_queue.put({"html": data["text/html"]})
+                        message_queue.put(
+                            {
+                                "type": "code",
+                                "format": "html",
+                                "content": data["text/html"],
+                            }
+                        )
                     elif "text/plain" in data:
-                        message_queue.put({"output": data["text/plain"]})
+                        message_queue.put(
+                            {
+                                "type": "console",
+                                "format": "output",
+                                "content": data["text/plain"],
+                            }
+                        )
                     elif "application/javascript" in data:
                         message_queue.put(
-                            {"javascript": data["application/javascript"]}
+                            {
+                                "type": "code",
+                                "format": "javascript",
+                                "content": data["application/javascript"],
+                            }
                         )
 
         self.listener_thread = threading.Thread(target=iopub_message_listener)
@@ -150,7 +193,7 @@ def preprocess_python(code):
     """
 
     # Add print commands that tell us what the active line is
-    # code = add_active_line_prints(code)
+    code = add_active_line_prints(code)
 
     # Wrap in a try except (DISABLED)
     # code = wrap_in_try_except(code)

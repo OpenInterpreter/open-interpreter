@@ -80,7 +80,11 @@ class SubprocessLanguage(BaseLanguage):
             if not self.process:
                 self.start_process()
         except:
-            yield {"output": traceback.format_exc()}
+            yield {
+                "type": "console",
+                "format": "output",
+                "content": traceback.format_exc(),
+            }
             return
 
         while retry_count <= max_retries:
@@ -98,15 +102,21 @@ class SubprocessLanguage(BaseLanguage):
                     # For UX, I like to hide this if it happens once. Obviously feels better to not see errors
                     # Most of the time it doesn't matter, but we should figure out why it happens frequently with:
                     # applescript
-                    yield {"output": traceback.format_exc()}
-                    yield {"output": f"Retrying... ({retry_count}/{max_retries})"}
-                    yield {"output": "Restarting process."}
+                    yield {
+                        "type": "console",
+                        "format": "output",
+                        "content": f"{traceback.format_exc()}\nRetrying... ({retry_count}/{max_retries})\nRestarting process.",
+                    }
 
                 self.start_process()
 
                 retry_count += 1
                 if retry_count > max_retries:
-                    yield {"output": "Maximum retries reached. Could not execute code."}
+                    yield {
+                        "type": "console",
+                        "format": "output",
+                        "content": "Maximum retries reached. Could not execute code.",
+                    }
                     return
 
         while True:
@@ -139,20 +149,34 @@ class SubprocessLanguage(BaseLanguage):
 
             if self.detect_active_line(line):
                 active_line = self.detect_active_line(line)
-                self.output_queue.put({"active_line": active_line})
+                self.output_queue.put(
+                    {"type": "console", "format": "active_line", "content": active_line}
+                )
                 # Sometimes there's a little extra on the same line, so be sure to send that out
                 line = re.sub(r"##active_line\d+##", "", line)
                 if line:
-                    self.output_queue.put({"output": line})
+                    self.output_queue.put(
+                        {"type": "console", "format": "output", "content": line}
+                    )
             elif self.detect_end_of_execution(line):
                 # Sometimes there's a little extra on the same line, so be sure to send that out
                 line = line.replace("##end_of_execution##", "").strip()
                 if line:
-                    self.output_queue.put({"output": line})
+                    self.output_queue.put(
+                        {"type": "console", "format": "output", "content": line}
+                    )
                 self.done.set()
             elif is_error_stream and "KeyboardInterrupt" in line:
-                self.output_queue.put({"output": "KeyboardInterrupt"})
+                self.output_queue.put(
+                    {
+                        "type": "console",
+                        "format": "output",
+                        "content": "KeyboardInterrupt",
+                    }
+                )
                 time.sleep(0.1)
                 self.done.set()
             else:
-                self.output_queue.put({"output": line})
+                self.output_queue.put(
+                    {"type": "console", "format": "output", "content": line}
+                )
