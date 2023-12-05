@@ -173,9 +173,9 @@ class Interpreter:
 
             # Handle the special "confirmation" chunk, which neither triggers a flag or creates a message
             if chunk["type"] == "confirmation":
-                # Emit a stop flag for the last message type, and reset last_flag_base
+                # Emit a end flag for the last message type, and reset last_flag_base
                 if last_flag_base:
-                    yield {**last_flag_base, "stop": True}
+                    yield {**last_flag_base, "end": True}
                     last_flag_base = None
                 yield chunk
                 # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
@@ -209,9 +209,9 @@ class Interpreter:
                 if not is_active_line_chunk(chunk):
                     self.messages[-1]["content"] += chunk["content"]
             else:
-                # If they don't match, yield a stop message for the last message type and a start message for the new one
+                # If they don't match, yield a end message for the last message type and a start message for the new one
                 if last_flag_base:
-                    yield {**last_flag_base, "stop": True}
+                    yield {**last_flag_base, "end": True}
 
                 last_flag_base = {"role": chunk["role"], "type": chunk["type"]}
 
@@ -234,9 +234,9 @@ class Interpreter:
                     self.messages[-1]["content"], self.max_output
                 )
 
-        # Yield a final stop flag
+        # Yield a final end flag
         if last_flag_base:
-            yield {**last_flag_base, "stop": True}
+            yield {**last_flag_base, "end": True}
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages

@@ -126,7 +126,7 @@ def terminal_interface(interpreter, message):
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
 
-                if "stop" in chunk and active_block:
+                if "end" in chunk and active_block:
                     active_block.refresh(cursor=False)
 
                     if chunk["type"] in [
@@ -259,7 +259,7 @@ def terminal_interface(interpreter, message):
                         active_block.output = truncate_output(
                             active_block.output, interpreter.max_output
                         )
-                    if chunk["format"] == "active_line":
+                    if "format" in chunk and chunk["format"] == "active_line":
                         active_block.active_line = chunk["content"]
 
                     if "start" in chunk:
@@ -277,8 +277,6 @@ def terminal_interface(interpreter, message):
                 active_block.end()
                 active_block = None
                 time.sleep(0.1)
-
-            flush_extra_computer_outputs()
 
             if not interactive:
                 # Don't loop
