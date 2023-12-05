@@ -199,6 +199,8 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### Running Open Interpreter locally
 
+#### Terminal
+
 Open Interpreter uses [LM Studio](https://lmstudio.ai/) to connect to local language models (experimental).
 
 Simply run `interpreter` in local mode from the command line:
@@ -219,6 +221,21 @@ Once the server is running, you can begin your conversation with Open Interprete
 (When you run the command `interpreter --local`, the steps above will be displayed.)
 
 > **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually (see below).
+
+#### Python
+
+Our Python package gives you more control over each setting. To replicate `--local` and connect to LM Studio, use these settings:
+
+```python
+import interpreter
+
+interpreter.local = True # Disables online features like Open Procedures
+interpreter.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
+interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+
+interpreter.chat()
+```
 
 #### Context Window, Max Tokens
 
