@@ -283,9 +283,10 @@ def terminal_interface(interpreter, message):
 
         except KeyboardInterrupt:
             # Exit gracefully
-            if active_block:
-                active_block.end()
-                active_block = None
+            if "active_block" in locals():
+                if active_block:
+                    active_block.end()
+                    active_block = None
 
             if interactive:
                 # (this cancels LLM, returns to the interactive "> " input)
