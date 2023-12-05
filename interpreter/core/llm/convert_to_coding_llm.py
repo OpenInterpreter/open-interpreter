@@ -70,6 +70,10 @@ def convert_to_coding_llm(text_llm, debug_mode=False, vision=False):
                 #print(f"Content is None: {content}")
                 continue
 
+            if content == None:
+                #print(f"Content is None: {content}")
+                continue
+
             accumulated_block += content
 
             if accumulated_block.endswith("`"):
