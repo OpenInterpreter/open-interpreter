@@ -271,10 +271,11 @@ def terminal_interface(interpreter, message):
                     active_block.refresh(cursor=render_cursor)
 
             # (Sometimes -- like if they CTRL-C quickly -- active_block is still None here)
-            if active_block:
-                active_block.end()
-                active_block = None
-                time.sleep(0.1)
+            if "active_block" in locals():
+                if active_block:
+                    active_block.end()
+                    active_block = None
+                    time.sleep(0.1)
 
             if not interactive:
                 # Don't loop
