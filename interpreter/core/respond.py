@@ -136,6 +136,15 @@ If LM Studio's local server is running, please try a language model with a diffe
                 for line in interpreter.computer.run(language, code):
                     yield {"role": "computer", **line}
 
+                # yield final "active_line" message, as if to say, no more code is running. unlightlight active lines
+                # (is this a good idea? is this our responsibility? i think so — we're saying what line of code is running! ...?)
+                yield {
+                    "role": "computer",
+                    "type": "console",
+                    "format": "active_line",
+                    "content": None,
+                }
+
             except:
                 yield {
                     "role": "computer",

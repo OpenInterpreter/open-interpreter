@@ -114,8 +114,6 @@ def terminal_interface(interpreter, message):
                 }
 
         try:
-            extra_computer_outputs = []
-
             for chunk in interpreter.chat(message, display=False, stream=True):
                 yield chunk
 
