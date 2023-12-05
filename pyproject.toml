@@ -29,6 +29,7 @@ pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
 html2image = "^2.0.4.3"
 ipykernel = "^6.26.0"
 jupyter-client = "^8.6.0"
+matplotlib = "^3.8.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
