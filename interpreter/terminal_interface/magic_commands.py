@@ -2,9 +2,9 @@ import json
 import os
 import subprocess
 
+from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
 from .utils.display_markdown_message import display_markdown_message
-from ..core.utils.system_debug_info import system_info
 
 
 def handle_undo(self, arguments):
@@ -75,13 +75,17 @@ def handle_help(self, arguments):
 def handle_debug(self, arguments=None):
     if arguments == "" or arguments == "true":
         display_markdown_message("> Entered debug mode")
-        print(self.messages)
+        print("\n\nCurrent messages:\n")
+        for message in self.messages:
+            print(f"\n{message}\n")
+        print("\n")
         self.debug_mode = True
     elif arguments == "false":
         display_markdown_message("> Exited debug mode")
         self.debug_mode = False
     else:
         display_markdown_message("> Unknown argument to debug command.")
+
 
 def handle_info(self, arguments):
     system_info(self)
@@ -162,19 +166,15 @@ def handle_count_tokens(self, prompt):
 
     display_markdown_message("\n".join(outputs))
 
-def handle_shell(self, code):
-    result = subprocess.run(code, shell=True, capture_output=True)
-
-    if result.stdout:
-        print(result.stdout.decode())
-
-    if result.stderr:
-        print(result.stderr.decode())
 
 def handle_magic_command(self, user_input):
     # Handle shell
     if user_input.startswith("%%"):
-        handle_shell(self,user_input[2:])
+        code = user_input[2:].strip()
+        for chunk in self.computer.run("shell", code):
+            if "output" in chunk:
+                print(chunk["output"], flush=True, end="")
+        print("")
         return
 
     # split the command into the command and the arguments, by the first whitespace

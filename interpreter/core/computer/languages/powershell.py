@@ -2,24 +2,23 @@ import os
 import platform
 import shutil
 
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+from ..subprocess_language import SubprocessLanguage
 
 
-class PowerShell(SubprocessCodeInterpreter):
+class PowerShell(SubprocessLanguage):
     file_extension = "ps1"
-    proper_name = "PowerShell"
+    name = "PowerShell"
 
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
-        self.config = config
 
         # Determine the start command based on the platform (use "powershell" for Windows)
         if platform.system() == "Windows":
-            self.start_cmd = "powershell.exe"
+            self.start_cmd = ["powershell.exe"]
             # self.start_cmd = os.environ.get('SHELL', 'powershell.exe')
         else:
             # On non-Windows platforms, prefer pwsh (PowerShell Core) if available, or fall back to bash
-            self.start_cmd = "pwsh" if shutil.which("pwsh") else "bash"
+            self.start_cmd = ["pwsh"] if shutil.which("pwsh") else ["bash"]
 
     def preprocess_code(self, code):
         return preprocess_powershell(code)

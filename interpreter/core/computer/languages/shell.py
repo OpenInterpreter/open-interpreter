@@ -2,22 +2,23 @@ import os
 import platform
 import re
 
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+from ..subprocess_language import SubprocessLanguage
 
 
-class Shell(SubprocessCodeInterpreter):
+class Shell(SubprocessLanguage):
     file_extension = "sh"
-    proper_name = "Shell"
+    name = "Shell"
 
-    def __init__(self, config):
+    def __init__(
+        self,
+    ):
         super().__init__()
-        self.config = config
 
         # Determine the start command based on the platform
         if platform.system() == "Windows":
-            self.start_cmd = "cmd.exe"
+            self.start_cmd = ["cmd.exe"]
         else:
-            self.start_cmd = os.environ.get("SHELL", "bash")
+            self.start_cmd = [os.environ.get("SHELL", "bash")]
 
     def preprocess_code(self, code):
         return preprocess_shell(code)

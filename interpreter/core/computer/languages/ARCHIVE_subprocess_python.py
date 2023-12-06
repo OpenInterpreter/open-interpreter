@@ -6,26 +6,20 @@ import re
 import shlex
 import sys
 
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
-from .python_vision import PythonVision
+from ..subprocess_language import SubprocessLanguage
 
 
-class Python(SubprocessCodeInterpreter):
+class Python(SubprocessLanguage):
     file_extension = "py"
-    proper_name = "Python"
+    name = "Python"
 
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
-        self.config = config
 
-        if config["vision"]:
-            self.__class__ = PythonVision
-            self.__init__(config)
-        else:
-            executable = sys.executable
-            if os.name != "nt":  # not Windows
-                executable = shlex.quote(executable)
-            self.start_cmd = executable + " -i -q -u"
+        executable = sys.executable
+        if os.name != "nt":  # not Windows
+            executable = shlex.quote(executable)
+        self.start_cmd = [executable, "-i", "-q", "-u"]
 
     def preprocess_code(self, code):
         return preprocess_python(code)
@@ -37,7 +31,10 @@ class Python(SubprocessCodeInterpreter):
 
     def detect_active_line(self, line):
         if "##active_line" in line:
-            return int(line.split("##active_line")[1].split("##")[0])
+            # Split the line by "##active_line" and grab the last element
+            last_active_line = line.split("##active_line")[-1]
+            # Split the last active line by "##" and grab the first element
+            return int(last_active_line.split("##")[0])
         return None
 
     def detect_end_of_execution(self, line):

@@ -1,16 +1,15 @@
 import re
 
-from ..subprocess_code_interpreter import SubprocessCodeInterpreter
+from ..subprocess_language import SubprocessLanguage
 
 
-class R(SubprocessCodeInterpreter):
+class R(SubprocessLanguage):
     file_extension = "r"
-    proper_name = "R"
+    name = "R"
 
-    def __init__(self, config):
+    def __init__(self):
         super().__init__()
-        self.config = config
-        self.start_cmd = "R -q --vanilla"  # Start R in quiet and vanilla mode
+        self.start_cmd = ["R", "-q", "--vanilla"]  # Start R in quiet and vanilla mode
 
     def preprocess_code(self, code):
         """

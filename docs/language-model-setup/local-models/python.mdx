@@ -1,0 +1,20 @@
+[← Back](/language-model-setup/local-models/overview)
+
+Compared to the terminal interface, our Python package gives you more granular control over each setting.
+
+You can point `interpreter.api_base` at any OpenAI compatible server (including one running locally).
+
+For example, to replicate [`--local` mode](/language-model-setup/local-models/overview) and connect to [LM Studio](https://lmstudio.ai/), use these settings:
+
+```python
+import interpreter
+
+interpreter.local = True # Disables online features like Open Procedures
+interpreter.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
+interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+
+interpreter.chat()
+```
+
+Simply ensure that **LM Studio**, or any other OpenAI compatible server, is running at `api_base`.
