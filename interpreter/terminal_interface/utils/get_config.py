@@ -52,7 +52,7 @@ def get_config(path=user_config_path):
 
     with open(path, "r") as file:
         config = yaml.safe_load(file)
-        if not config is None:
+        if config is not None:
             return config
 
     if config is None:
