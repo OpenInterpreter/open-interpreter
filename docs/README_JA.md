@@ -55,6 +55,10 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
+#### 音声インターフェース実装例の紹介 (inspired by _Her_):
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
+
 ## クイックスタート
 
 ```shell
@@ -88,6 +92,8 @@ GPT-4 で実装された OpenAI の[Code Interpreter](https://openai.com/blog/ch
 - [プリインストールされているパッケージが限られている](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
 - 最大アップロードは 100MB で、120 秒という実行時間の制限も。
 - 生成されたファイルやリンクとともに状態がリセットされる。
+
+---
 
 Open Interpreter は、ローカル環境で操作することで、これらの制限を克服しています。インターネットにフルアクセスでき、時間やファイルサイズの制限を受けず、どんなパッケージやライブラリも利用できます。
 
@@ -183,7 +189,7 @@ interpreter --model claude-2
 interpreter --model command-nightly
 ```
 
-プログラム的チャットでは、モデルを手動で設定する必要がある：
+Python で、オブジェクトにモデルを設定します。
 
 ```python
 interpreter.model = "gpt-3.5-turbo"
@@ -194,15 +200,17 @@ interpreter.model = "gpt-3.5-turbo"
 
 ### ローカルのモデルを実行する
 
+#### Terminal
+
 Open Interpreter は[LM Studio](https://lmstudio.ai/) を使用してローカル言語モデルに接続します(実験的)。
 
-コマンドラインからローカルモードで 'interpreter' を実行するだけです。
+コマンドラインからローカルモードで `interpreter` を実行するだけです:
 
 ```shell
 interpreter --local
 ```
 
-**LMStudio をバックグラウンドで実行する必要があります。**
+**LM Studio をバックグラウンドで実行する必要があります。**
 
 1. ダウンロード [https://lmstudio.ai/](https://lmstudio.ai/)
 2. model を選択し **↓ Download** をクリック
@@ -213,17 +221,28 @@ interpreter --local
 
 (コマンド `interpreter --local` を実行すると、上記の手順が表示されます。)
 
-> **Note:** ローカルモードの `context_window` は 3000 で設定されます, そして `max_tokens` は 1000 です。 
-モデルの要件が異なる場合は、これらのパラメーターを手動で設定します (以下を参照)
+> **Note:** ローカルモードの `context_window` は 3000 で設定されます, そして `max_tokens` は 1000 です。モデルの要件が異なる場合は、これらのパラメーターを手動で設定します (以下を参照)
 
+#### Python
+
+Python パッケージを使用すると、各設定をより詳細に制御できます。 `--local` と同様に LM Studio に接続するには、次の設定を使用します:
+
+```python
+import interpreter
+
+interpreter.local = True # Disables online features like Open Procedures
+interpreter.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
+interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+
+interpreter.chat()
+```
 
 #### Context Window, Max Tokens
 
-ローカルで実行するモデルの max_tokens と context_window (トークン単位) を簡単に変更できます。
+ローカルで実行するモデルの `max_tokens` と `context_window` (トークン単位) を簡単に変更できます。
 
-context_window を小さくすると RAM の使用量が減るので、GPU が失敗している場合はサイズを短くしてみることをお勧めします。
-
-ローカルモードでは、 context_window が小さいほど RAM の使用量が少なくなります。失敗している場合、短いウィンドウ (~1000) を試すことをお勧めします。 / 遅い場合は `max_tokens` が `context_window` より小さいことを確認してください。
+ローカルモードでは、 `context_window` が小さいほど RAM の使用量が少なくなります。失敗する場合、短いウィンドウ (~1000) を試すことをお勧めします。 / 遅い場合は `max_tokens` が `context_window` より小さいことを確認してください。
 
 ```shell
 interpreter --local --max_tokens 1000 --context_window 3000
@@ -231,7 +250,7 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 ### デバッグモード
 
-コントリビューターが Open Interpreter を調査するのを助けるために、`--debug`モードは非常に便利です。
+コントリビューターが Open Interpreter を調査するのを助けるために、`--debug` モードは非常に便利です。
 
 デバッグモードは、フラグ（`interpreter --debug`）を使用するか、またはチャットの中から有効にできます：
 
@@ -242,7 +261,6 @@ $ interpreter
 
 > %debug false # <- デバッグモードを有効にする
 ```
-
 
 ### インタラクティブ モード コマンド
 
@@ -369,9 +387,12 @@ uvicorn server:app --reload
 - Open Interpreter を自動運転車のように監視し、ターミナルを閉じてプロセスを終了できるように準備しておいてください。
 - Google Colab や Replit のような制限された環境で Open Interpreter を実行することを検討してください。これらの環境はより隔離されており、任意のコードの実行に関連するリスクを軽減します。
 
+一部のリスクを軽減するために、[セーフ モード](SAFE_MODE.md) の **実験的** サポートがあります。
+
+
 ## Open Interpreter はどのように機能するのか？
 
-Open Interpreter は、[関数が呼び出せる言語モデル](https://platform.openai.com/docs/guides/gpt/function-calling)に`exec()`関数を装備し、実行する言語（"python"や"javascript"など）とコードが渡せるようになっています。
+Open Interpreter は、[関数が呼び出せる言語モデル](https://platform.openai.com/docs/guides/gpt/function-calling)に `exec()` 関数を装備し、実行する `language`（"python"や"javascript"など）と `code` が渡せるようになっています。
 
 そして、モデルからのメッセージ、コード、システムの出力を Markdown としてターミナルにストリーミングします。
 
@@ -385,19 +406,12 @@ Open Interpreter は、[関数が呼び出せる言語モデル](https://platfor
 
 Open Interpreter の将来をプレビューするには、[ロードマップ](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) にアクセスしてください。
 
-
-## ライセンス
-
-Open Interpreter のライセンスは MIT ライセンスです。本ソフトウェアの使用、複製、変更、配布、サブライセンス、およびコピーの販売を許可します。
-
 **注意**: このソフトウェアは OpenAI とは関係ありません。
 
 > あなたの指先のスピードで作業するジュニアプログラマーにアクセスすることで、… 新しいワークフローを楽で効率的なものにし、プログラミングの利点を新しいオーディエンスに開放することができます。
 >
 > — _OpenAI のコードインタープリタリリースから_
 
-<br>
-<br>
 <br>
 
 **注意**: この翻訳は人工知能によって作成されました。誤りが含まれていることが確実です。
