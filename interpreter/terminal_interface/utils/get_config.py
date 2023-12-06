@@ -42,6 +42,8 @@ def get_config_path(path=user_config_path):
                 # Copying the file using shutil.copy
                 new_file = shutil.copy(default_config_path, path)
 
+                print("Copied the default config file to the user's directory because the user's config file was not found.")
+
     return path
 
 
