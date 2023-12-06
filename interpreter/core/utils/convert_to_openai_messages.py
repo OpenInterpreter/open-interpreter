@@ -54,7 +54,7 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
 
             else:
                 if message["content"].strip() == "":
-                    content = "The code above was executed on my machine. It produced no output. Was that expected?"
+                    content = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
                 else:
                     content = (
                         "Code output: "

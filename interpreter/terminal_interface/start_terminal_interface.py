@@ -2,6 +2,7 @@ import argparse
 import os
 import platform
 import subprocess
+import sys
 
 import pkg_resources
 
@@ -108,6 +109,12 @@ arguments = [
         "name": "vision",
         "nickname": "v",
         "help_text": "experimentally use vision for supported languages (HTML)",
+        "type": bool,
+    },
+    {
+        "name": "os",
+        "nickname": "o",
+        "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
         "type": bool,
     },
 ]
@@ -242,6 +249,18 @@ Once the server is running, you can begin your conversation below.
             else:
                 setattr(interpreter, attr_name, attr_value)
 
+    # Check for update
+    try:
+        if not interpreter.local:
+            # This should actually be pushed into the utility
+            if check_for_update():
+                display_markdown_message(
+                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                )
+    except:
+        # Doesn't matter
+        pass
+
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
     if interpreter.auto_run and (
         interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
@@ -272,17 +291,51 @@ Once the server is running, you can begin your conversation below.
 
         display_markdown_message("> `Vision` enabled **(experimental)**\n")
 
-    # Check for update
-    try:
-        if not interpreter.local:
-            # This should actually be pushed into the utility
-            if check_for_update():
-                display_markdown_message(
-                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
-                )
-    except:
-        # Doesn't matter
-        pass
+    if args.os:
+        interpreter.os = True
+        interpreter.vision = True
+        interpreter.model = "gpt-4-vision-preview"
+        interpreter.function_calling_llm = False
+        interpreter.context_window = 110000
+        interpreter.max_tokens = 4096
+        interpreter.auto_run = True
+
+        # Download required packages
+        try:
+            import cv2
+            import IPython
+            import languagetools
+            import matplotlib
+            import pyautogui
+            import pytesseract
+        except ImportError:
+            display_markdown_message(
+                "**Missing packages.** Several packages (e.g. `pyautogui`, `matplotlib`) are required for OS Control. Can we install them?"
+            )
+            user_input = input("(y/n) > ")
+            if user_input.lower() != "y":
+                return
+            packages = [
+                "matplotlib",
+                "pytesseract",
+                "pyautogui",
+                "languagetools",
+                "opencv-python",
+                "ipython",
+            ]
+            for package in packages:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+        display_markdown_message(
+            "> `OS Control` enabled (experimental)\n\n**Warning:** In this mode, Open Interpreter will **not** require approval before performing actions. Be ready to close your terminal."
+        )
+        print("")
+
+        # Run imports so it doesnt have to
+        interpreter.computer.run(
+            "python",
+            "import pyautogui\nimport matplotlib\nimport languagetools as lt\nimport pytesseract\nimport cv2",
+        )
 
     if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
         if interpreter.context_window is None:
