@@ -47,9 +47,18 @@ def get_config_path(path=user_config_path):
 
 def get_config(path=user_config_path):
     path = get_config_path(path)
+    
+    config = None
 
     with open(path, "r") as file:
         config = yaml.safe_load(file)
-        if config is None:
-            config = {}
-        return config
+        if not config is None:
+            return config
+
+    if config is None:
+        # Deleting empty file because get_config_path copies the default if file is missing
+        os.remove(path)
+        path = get_config_path(path)
+        with open(path, "r") as file:
+            config = yaml.safe_load(file)
+            return config
