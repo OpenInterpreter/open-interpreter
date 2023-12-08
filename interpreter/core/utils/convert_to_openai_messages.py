@@ -103,7 +103,7 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
             content_size_mb = content_size_bytes / (1024 * 1024)
 
             # Print the size of the content in MB
-            print(f"File size: {content_size_mb} MB")
+            # print(f"File size: {content_size_mb} MB")
 
             # Assert that the content size is under 20 MB
             assert content_size_mb < 20, "Content size exceeds 20 MB"
