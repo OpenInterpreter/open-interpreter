@@ -36,6 +36,7 @@ class Interpreter:
         self.max_output = 2000
         self.safe_mode = "off"
         self.disable_procedures = False
+        self.force_task_completion = False
 
         # Conversation history
         self.conversation_history = True
@@ -121,6 +122,14 @@ class Interpreter:
             # List (this is like the OpenAI API)
             elif isinstance(message, list):
                 self.messages = message
+
+            # Make sure we're using a model that can handle this
+            if not self.vision:
+                for message in self.messages:
+                    if message["type"] == "image":
+                        raise Exception(
+                            "Use a multimodal model and set `interpreter.vision` to True to handle image messages."
+                        )
 
             # This is where it all happens!
             yield from self._respond_and_store()

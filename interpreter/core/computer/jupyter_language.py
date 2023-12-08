@@ -110,7 +110,7 @@ class JupyterLanguage(BaseLanguage):
                         message_queue.put(
                             {
                                 "type": "image",
-                                "format": "base64",
+                                "format": "base64.png",
                                 "content": data["image/png"],
                             }
                         )
@@ -118,7 +118,7 @@ class JupyterLanguage(BaseLanguage):
                         message_queue.put(
                             {
                                 "type": "image",
-                                "format": "base64",
+                                "format": "base64.jpeg",
                                 "content": data["image/jpeg"],
                             }
                         )

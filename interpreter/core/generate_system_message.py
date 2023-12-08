@@ -25,9 +25,7 @@ def generate_system_message(interpreter):
 
     if not interpreter.local and not interpreter.disable_procedures:
         try:
-            system_message += "\n" + get_relevant_procedures_string(
-                interpreter.messages
-            )
+            system_message += "\n" + get_relevant_procedures_string(interpreter)
         except:
             if interpreter.debug_mode:
                 print(traceback.format_exc())

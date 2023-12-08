@@ -3,17 +3,17 @@ import requests
 from ..utils.convert_to_openai_messages import convert_to_openai_messages
 
 
-def get_relevant_procedures_string(messages):
+def get_relevant_procedures_string(interpreter):
     # Open Procedures is an open-source database of tiny, up-to-date coding tutorials.
-    # We can query it semantically and append relevant tutorials/procedures to our system message:
+    # We can query it semantically with the last two messages and append relevant tutorials/procedures to our system message:
 
-    # Convert to required OpenAI-compatible `messages` list
-    query = {
-        "query": convert_to_openai_messages(
-            messages, function_calling=False, vision=False
-        )
-    }
-    url = "https://open-procedures.replit.app/search/"
+    # Convert last two messages to required OpenAI-compatible `messages` list
+    messages = convert_to_openai_messages(
+        interpreter.messages[-2:], function_calling=False, vision=False
+    )
+    messages = [{"role": "system", "content": interpreter.system_message}] + messages
+    query = {"query": messages}
+    url = "https://open-procedures.killianlucas1.repl.co/search/"
 
     relevant_procedures = requests.post(url, json=query).json()["procedures"]
     relevant_procedures = (

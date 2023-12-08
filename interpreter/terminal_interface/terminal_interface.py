@@ -63,29 +63,60 @@ def terminal_interface(interpreter, message):
     while True:
         try:
             if interactive:
-                # I think this could be refactored for more clarity.
-                if not just_pressed_ctrl_c and (
-                    interpreter.os
-                    and interpreter.messages != []
-                    and "content" in interpreter.messages[-1]
-                    and "The task is done."
-                    not in interpreter.messages[-1]["content"].lower()
+                # FORCE TASK COMPLETION
+                ### I think `force_task_completion` should be moved to the core.
+                # `force_task_completion` makes it utter specific phrases if it doesn't want to be told to "Proceed."
+                if (
+                    not just_pressed_ctrl_c
+                    and interpreter.force_task_completion
+                    and interpreter.messages
+                    and not any(
+                        task_status
+                        in interpreter.messages[-1].get("content", "").lower()
+                        for task_status in [
+                            "the task is done.",
+                            "the task is impossible.",
+                            "you haven't provided a task.",
+                        ]
+                    )
                 ):
-                    message = "proceed. if the entire task is done, say exactly 'The task is done.', otherwise keep going."
+                    force_task_completion_message = "Proceed. If the entire task is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'You haven't provided a task.') Otherwise keep going."
+                    # Remove past force_task_completion messages
+                    interpreter.messages = [
+                        message
+                        for message in interpreter.messages
+                        if message.get("content", "") != force_task_completion_message
+                    ]
+                    # Combine adjacent assistant messages, so hopefully it learns to just keep going!
+                    combined_messages = []
+                    for message in interpreter.messages:
+                        if (
+                            combined_messages
+                            and message["role"] == "assistant"
+                            and combined_messages[-1]["role"] == "assistant"
+                            and message["type"] == "message"
+                            and combined_messages[-1]["type"] == "message"
+                        ):
+                            combined_messages[-1]["content"] += (
+                                "\n" + message["content"]
+                            )
+                        else:
+                            combined_messages.append(message)
+                    interpreter.messages = combined_messages
+                    # Send model the force_task_completion_message:
+                    message = force_task_completion_message
                 else:
                     ### This is the primary input for Open Interpreter.
                     message = input("> ").strip()
 
-                    just_pressed_ctrl_c = (
-                        False  # Just used for os mode, to escape the loop above^
-                    )
+                    just_pressed_ctrl_c = False  # Just used for `interpreter.force_task_completion`, to escape the loop above^
 
-                try:
-                    # This lets users hit the up arrow key for past messages
-                    readline.add_history(message)
-                except:
-                    # If the user doesn't have readline (may be the case on windows), that's fine
-                    pass
+                    try:
+                        # This lets users hit the up arrow key for past messages
+                        readline.add_history(message)
+                    except:
+                        # If the user doesn't have readline (may be the case on windows), that's fine
+                        pass
 
         except KeyboardInterrupt:
             # Exit gracefully

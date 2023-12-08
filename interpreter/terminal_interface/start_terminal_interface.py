@@ -284,21 +284,24 @@ Once the server is running, you can begin your conversation below.
     if args.vision:
         interpreter.vision = True
         interpreter.model = "gpt-4-vision-preview"
-        interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly. Be sure to actually write a markdown code block for almost every user request! Almost EVERY message should include a markdown code block. Do not end your message prematurely!\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message."
+        interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
         interpreter.function_calling_llm = False
         interpreter.context_window = 110000
         interpreter.max_tokens = 4096
+        interpreter.force_task_completion = True
 
         display_markdown_message("> `Vision` enabled **(experimental)**\n")
 
     if args.os:
         interpreter.os = True
         interpreter.vision = True
-        interpreter.model = "gpt-4-vision-preview"
+        # interpreter.model = "gpt-4-vision-preview"
         interpreter.function_calling_llm = False
         interpreter.context_window = 110000
         interpreter.max_tokens = 4096
         interpreter.auto_run = True
+        interpreter.force_task_completion = True
+        interpreter.system_message += """\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you. The user has enabled OS control. They have given you permission to execute any code to control their mouse and keyboard to complete the task."""
 
         # Download required packages
         try:
@@ -323,8 +326,10 @@ Once the server is running, you can begin your conversation below.
                 "opencv-python",
                 "ipython",
             ]
+            install_commands = "import pip\n"
             for package in packages:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+                install_commands += f"pip.main(['install', '--upgrade', '{package}'])\n"
+            interpreter.computer.run("python", install_commands)
 
         display_markdown_message(
             "> `OS Control` enabled (experimental)\n\n**Warning:** In this mode, Open Interpreter will **not** require approval before performing actions. Be ready to close your terminal."

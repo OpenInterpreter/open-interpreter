@@ -69,8 +69,15 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
             if vision == False:
                 continue
 
-            if message["format"] == "base64":
-                content = f"data:image/png;base64,{message['content']}"
+            if "base64" in message["format"]:
+                # Extract the extension from the format, default to 'png' if not specified
+                if "." in message["format"]:
+                    extension = message["format"].split(".")[-1]
+                else:
+                    extension = "png"
+
+                # Construct the content string
+                content = f"data:image/{extension};base64,{message['content']}"
 
             elif message["format"] == "path":
                 # Convert to base64
@@ -89,6 +96,18 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
                 else:
                     raise Exception(f"Unrecognized image format: {message['format']}")
 
+            # Calculate the size of the original binary data in bytes
+            content_size_bytes = len(content) * 3 / 4
+
+            # Convert the size to MB
+            content_size_mb = content_size_bytes / (1024 * 1024)
+
+            # Print the size of the content in MB
+            print(f"File size: {content_size_mb} MB")
+
+            # Assert that the content size is under 20 MB
+            assert content_size_mb < 20, "Content size exceeds 20 MB"
+
             new_message = {
                 "role": "user",
                 "content": [
@@ -98,6 +117,9 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
                     }
                 ],
             }
+
+        elif message["type"] == "file":
+            new_message = {"role": "user", "content": message["content"]}
 
         else:
             raise Exception(f"Unable to convert this message type: {message}")
