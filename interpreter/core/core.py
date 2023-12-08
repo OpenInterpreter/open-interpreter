@@ -60,6 +60,8 @@ class Interpreter:
         self.computer = Computer()
         # (Permitted languages, all lowercase)
         self.languages = [i.name.lower() for i in self.computer.languages]
+        # OS control mode
+        self.os = False
 
         # Load config defaults
         self.extend_config(self.config_file)

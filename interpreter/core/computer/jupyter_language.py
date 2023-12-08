@@ -28,8 +28,13 @@ class JupyterLanguage(BaseLanguage):
         self.listener_thread = None
         self.finish_flag = False
 
+        # DISABLED because sometimes this bypasses sending it up to us for some reason!
         # Give it our same matplotlib backend
-        backend = matplotlib.get_backend()
+        # backend = matplotlib.get_backend()
+
+        # Get backend which bubbles everything up as images
+        backend = "Agg"
+
         code_to_run = f"""
         import matplotlib
         matplotlib.use('{backend}')

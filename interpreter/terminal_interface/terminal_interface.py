@@ -58,10 +58,27 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
+    just_pressed_ctrl_c = False
+
     while True:
         try:
             if interactive:
-                message = input("> ").strip()
+                # I think this could be refactored for more clarity.
+                if not just_pressed_ctrl_c and (
+                    interpreter.os
+                    and interpreter.messages != []
+                    and "content" in interpreter.messages[-1]
+                    and "The task is done."
+                    not in interpreter.messages[-1]["content"].lower()
+                ):
+                    message = "proceed. if the entire task is done, say exactly 'The task is done.', otherwise keep going."
+                else:
+                    ### This is the primary input for Open Interpreter.
+                    message = input("> ").strip()
+
+                    just_pressed_ctrl_c = (
+                        False  # Just used for os mode, to escape the loop above^
+                    )
 
                 try:
                     # This lets users hit the up arrow key for past messages
@@ -138,6 +155,9 @@ def terminal_interface(interpreter, message):
                 if chunk["type"] == "message":
                     if "start" in chunk:
                         active_block = MessageBlock()
+                        if interpreter.os:
+                            # OS mode uses voice — otherwise you can't tell what it's doing!
+                            active_block.voice = True
                         render_cursor = True
 
                     if "content" in chunk:
@@ -219,6 +239,9 @@ def terminal_interface(interpreter, message):
                         or ("format" in chunk and chunk["format"] == "javascript")
                     )
                 ):
+                    if interpreter.os:
+                        # We don't display things to the user in OS control mode, since we use vision to communicate the screen to the LLM so much.
+                        continue
                     # Display and give extra output back to the LLM
                     extra_computer_output = display_output(chunk)
                     if (
@@ -263,9 +286,9 @@ def terminal_interface(interpreter, message):
                     if "start" in chunk:
                         # We need to make a code block if we pushed out an HTML block first, which would have closed our code block.
                         if not isinstance(active_block, CodeBlock):
+                            if active_block:
+                                active_block.end()
                             active_block = CodeBlock()
-                            active_block.language = chunk["format"]
-                            active_block.code = ""
 
                 if active_block:
                     active_block.refresh(cursor=render_cursor)
@@ -282,6 +305,8 @@ def terminal_interface(interpreter, message):
                 break
 
         except KeyboardInterrupt:
+            just_pressed_ctrl_c = True
+
             # Exit gracefully
             if "active_block" in locals():
                 if active_block:
