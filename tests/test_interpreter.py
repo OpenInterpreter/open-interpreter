@@ -42,6 +42,19 @@ def test_config_loading():
     assert temperature_ok and model_ok and debug_mode_ok
 
 
+def test_files():
+    messages = [
+        {"role": "user", "type": "message", "content": "Does this file exist?"},
+        {
+            "role": "user",
+            "type": "file",
+            "format": "path",
+            "content": "/Users/Killian/image.png",
+        },
+    ]
+    interpreter.chat(messages)
+
+
 def test_generator():
     """
     Sends two messages, makes sure everything is correct with display both on and off.

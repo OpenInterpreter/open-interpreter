@@ -13,7 +13,7 @@ def get_relevant_procedures_string(interpreter):
     )
     messages = [{"role": "system", "content": interpreter.system_message}] + messages
     query = {"query": messages}
-    url = "https://open-procedures.killianlucas1.repl.co/search/"
+    url = "https://open-procedures.replit.app/"
 
     relevant_procedures = requests.post(url, json=query).json()["procedures"]
     relevant_procedures = (

@@ -124,42 +124,46 @@ def terminal_interface(interpreter, message):
             interpreter.computer.terminate()
             break
 
-        if message.startswith("%") and interactive:
-            handle_magic_command(interpreter, message)
-            continue
+        if isinstance(message, str):
+            # This is for the terminal interface being used as a CLI — messages are strings.
+            # This won't fire if they're in the python package, display=True, and they passed in an array of messages (for example).
 
-        # Many users do this
-        if message.strip() == "interpreter --local":
-            print("Please exit this conversation, then run `interpreter --local`.")
-            continue
-        if message.strip() == "pip install --upgrade open-interpreter":
-            print(
-                "Please exit this conversation, then run `pip install --upgrade open-interpreter`."
-            )
-            continue
+            if message.startswith("%") and interactive:
+                handle_magic_command(interpreter, message)
+                continue
 
-        if interpreter.vision:
-            # Is the input a path to an image? Like they just dragged it into the terminal?
-            image_path = find_image_path(message)
-
-            ## If we found an image, add it to the message
-            if image_path:
-                # Add the text interpreter's messsage history
-                interpreter.messages.append(
-                    {
-                        "role": "user",
-                        "type": "message",
-                        "content": message,
-                    }
+            # Many users do this
+            if message.strip() == "interpreter --local":
+                print("Please exit this conversation, then run `interpreter --local`.")
+                continue
+            if message.strip() == "pip install --upgrade open-interpreter":
+                print(
+                    "Please exit this conversation, then run `pip install --upgrade open-interpreter`."
                 )
+                continue
 
-                # Pass in the image to interpreter in a moment
-                message = {
-                    "role": "user",
-                    "type": "image",
-                    "format": "path",
-                    "content": image_path,
-                }
+            if interpreter.vision:
+                # Is the input a path to an image? Like they just dragged it into the terminal?
+                image_path = find_image_path(message)
+
+                ## If we found an image, add it to the message
+                if image_path:
+                    # Add the text interpreter's messsage history
+                    interpreter.messages.append(
+                        {
+                            "role": "user",
+                            "type": "message",
+                            "content": message,
+                        }
+                    )
+
+                    # Pass in the image to interpreter in a moment
+                    message = {
+                        "role": "user",
+                        "type": "image",
+                        "format": "path",
+                        "content": image_path,
+                    }
 
         try:
             for chunk in interpreter.chat(message, display=False, stream=True):
