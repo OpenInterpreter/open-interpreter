@@ -1,6 +1,7 @@
 import argparse
 import os
 import platform
+import re
 import subprocess
 import sys
 
@@ -294,53 +295,89 @@ Once the server is running, you can begin your conversation below.
 
     if args.os:
         interpreter.os = True
+        interpreter.disable_procedures = True
         interpreter.vision = True
-        # interpreter.model = "gpt-4-vision-preview"
+        interpreter.model = "gpt-4-vision-preview"
         interpreter.function_calling_llm = False
         interpreter.context_window = 110000
         interpreter.max_tokens = 4096
         interpreter.auto_run = True
         interpreter.force_task_completion = True
-        interpreter.system_message += """\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you. The user has enabled OS control. They have given you permission to execute any code to control their mouse and keyboard to complete the task."""
+        interpreter.system_message += (
+            "\n\n"
+            + """
+
+Execute code using `computer` (already imported) to control the user's computer:
+
+```python
+computer.screenshot() # Automatically runs plt.show() to show you what's on the screen, returns a PIL image in case you need it (rarely). **You almost always want to do this first! You don't know what's on the user's screen.**
+computer.screenshot(quadrant=1) # Get a detailed view of the upper left quadrant
+
+computer.keyboard(" ", modifiers=['command']) # Opens spotlight
+
+computer.mouse.move("Text in a button") # This finds the button with that text
+computer.mouse.move(x=0, y=0) # Not as accurate as click("Text")!
+computer.mouse.move(icon="gear") # Attempts to find the gear icon. Very slow
+computer.mouse.click() # Don't forget this! Include in the same code block
+
+# Dragging
+computer.mouse.down()
+computer.mouse.move(x=100, y=100)
+computer.mouse.up()
+
+computer.clipboard.copy()
+print(computer.clipboard.read()) # Returns contents of clipboard
+```
+
+For rare and complex mouse actions, consider using computer vision libraries on `pil_image` to produce a list of coordinates for the mouse to move/drag to.
+
+**Use keyboard navigation as much as possible.** The mouse is less reliable.
+        
+If you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you.
+
+The user has enabled OS control. They have given you permission to execute any code to control their mouse and keyboard to complete the task.
+
+        """.strip()
+        )
 
         # Download required packages
         try:
             import cv2
             import IPython
-            import languagetools
             import matplotlib
             import pyautogui
             import pytesseract
         except ImportError:
             display_markdown_message(
-                "**Missing packages.** Several packages (e.g. `pyautogui`, `matplotlib`) are required for OS Control. Can we install them?"
+                "> **Missing Packages**\n\nSeveral packages are required for OS Control (`matplotlib`, `pytesseract`, `pyautogui`, `opencv-python`, `ipython`).\n\nInstall them?\n"
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
+                print("Exiting...")
                 return
-            packages = [
-                "matplotlib",
-                "pytesseract",
-                "pyautogui",
-                "languagetools",
-                "opencv-python",
-                "ipython",
+            install_commands = [
+                "pip install matplotlib",
+                "pip install pytesseract",
+                "pip install pyautogui",
+                "pip install opencv-python",
+                "pip install ipython",
             ]
-            install_commands = "import pip\n"
-            for package in packages:
-                install_commands += f"pip.main(['install', '--upgrade', '{package}'])\n"
-            interpreter.computer.run("python", install_commands)
+            command = "\n".join(install_commands)
+            for chunk in interpreter.computer.run("shell", command):
+                if chunk.get("format") != "active_line":
+                    print(chunk.get("content"))
 
         display_markdown_message(
             "> `OS Control` enabled (experimental)\n\n**Warning:** In this mode, Open Interpreter will **not** require approval before performing actions. Be ready to close your terminal."
         )
         print("")
 
-        # Run imports so it doesnt have to
-        interpreter.computer.run(
+        # Give it access to the computer via Python
+        for _ in interpreter.computer.run(
             "python",
-            "import pyautogui\nimport matplotlib\nimport languagetools as lt\nimport pytesseract\nimport cv2",
-        )
+            "import interpreter\ncomputer = interpreter.computer",
+        ):
+            pass
 
     if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
         if interpreter.context_window is None:

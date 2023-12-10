@@ -13,13 +13,18 @@ def get_relevant_procedures_string(interpreter):
     )
     messages = [{"role": "system", "content": interpreter.system_message}] + messages
     query = {"query": messages}
-    url = "https://open-procedures.replit.app/"
+    url = "https://open-procedures.replit.app/search/"
 
-    relevant_procedures = requests.post(url, json=query).json()["procedures"]
-    relevant_procedures = (
-        "[Recommended Procedures]\n"
-        + "\n---\n".join(relevant_procedures)
-        + "\nIn your plan, include steps and, for relevant deprecation notices, **EXACT CODE SNIPPETS** -- these notices will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them."
+    response = requests.post(url, json=query).json()
+
+    if interpreter.debug_mode:
+        print(response)
+
+    relevant_procedures = response["procedures"]
+    relevant_procedures = "[Recommended Procedures]\n" + "\n---\n".join(
+        relevant_procedures
     )
+    if not interpreter.os and not interpreter.vision:
+        relevant_procedures += "\nIn your plan, include steps and, for relevant deprecation notices, **EXACT CODE SNIPPETS** -- these notices will VANISH once you execute your first line of code, so WRITE THEM DOWN NOW if you need them."
 
     return relevant_procedures

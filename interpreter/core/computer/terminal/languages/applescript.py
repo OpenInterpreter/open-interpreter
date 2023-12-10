@@ -1,6 +1,6 @@
 import os
 
-from ..subprocess_language import SubprocessLanguage
+from .subprocess_language import SubprocessLanguage
 
 
 class AppleScript(SubprocessLanguage):

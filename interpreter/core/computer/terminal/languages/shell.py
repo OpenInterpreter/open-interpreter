@@ -2,7 +2,7 @@ import os
 import platform
 import re
 
-from ..subprocess_language import SubprocessLanguage
+from .subprocess_language import SubprocessLanguage
 
 
 class Shell(SubprocessLanguage):

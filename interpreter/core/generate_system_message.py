@@ -27,6 +27,7 @@ def generate_system_message(interpreter):
         try:
             system_message += "\n" + get_relevant_procedures_string(interpreter)
         except:
+            raise
             if interpreter.debug_mode:
                 print(traceback.format_exc())
             # It's okay if they can't. This just fixes some common mistakes it makes.

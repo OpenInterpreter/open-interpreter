@@ -24,11 +24,17 @@ class CodeBlock(BaseBlock):
         self.active_line = None
         self.margin_top = True
 
+    def end(self):
+        self.active_line = None
+        self.refresh(cursor=False)
+        super().end()
+
     def refresh(self, cursor=True):
-        # Get code, return if there is none
-        code = self.code
-        if not code:
+        if not self.code and not self.output:
             return
+
+        # Get code
+        code = self.code
 
         # Create a table for the code
         code_table = Table(

@@ -8,6 +8,9 @@ try:
 except ImportError:
     pass
 
+import platform
+import re
+import subprocess
 import time
 
 from ..core.utils.scan_code import scan_code
@@ -58,7 +61,14 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
-    just_pressed_ctrl_c = False
+    pause_force_task_completion_loop = False
+    force_task_completion_message = "Proceed. If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."
+    force_task_completion_responses = [
+        "the task is done.",
+        "the task is impossible.",
+        "let me know what you'd like to do next.",
+    ]
+    voice_subprocess = None
 
     while True:
         try:
@@ -67,20 +77,15 @@ def terminal_interface(interpreter, message):
                 ### I think `force_task_completion` should be moved to the core.
                 # `force_task_completion` makes it utter specific phrases if it doesn't want to be told to "Proceed."
                 if (
-                    not just_pressed_ctrl_c
+                    not pause_force_task_completion_loop
                     and interpreter.force_task_completion
                     and interpreter.messages
                     and not any(
                         task_status
                         in interpreter.messages[-1].get("content", "").lower()
-                        for task_status in [
-                            "the task is done.",
-                            "the task is impossible.",
-                            "you haven't provided a task.",
-                        ]
+                        for task_status in force_task_completion_responses
                     )
                 ):
-                    force_task_completion_message = "Proceed. If the entire task is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'You haven't provided a task.') Otherwise keep going."
                     # Remove past force_task_completion messages
                     interpreter.messages = [
                         message
@@ -109,7 +114,7 @@ def terminal_interface(interpreter, message):
                     ### This is the primary input for Open Interpreter.
                     message = input("> ").strip()
 
-                    just_pressed_ctrl_c = False  # Just used for `interpreter.force_task_completion`, to escape the loop above^
+                    pause_force_task_completion_loop = False  # Just used for `interpreter.force_task_completion`, to escape the loop above^
 
                     try:
                         # This lets users hit the up arrow key for past messages
@@ -130,6 +135,7 @@ def terminal_interface(interpreter, message):
 
             if message.startswith("%") and interactive:
                 handle_magic_command(interpreter, message)
+                pause_force_task_completion_loop = True
                 continue
 
             # Many users do this
@@ -190,13 +196,45 @@ def terminal_interface(interpreter, message):
                 if chunk["type"] == "message":
                     if "start" in chunk:
                         active_block = MessageBlock()
-                        if interpreter.os:
-                            # OS mode uses voice — otherwise you can't tell what it's doing!
-                            active_block.voice = True
                         render_cursor = True
 
                     if "content" in chunk:
                         active_block.message += chunk["content"]
+
+                    if "end" in chunk and interpreter.os:
+                        last_message = interpreter.messages[-1]["content"]
+                        if (
+                            platform.system() == "Darwin"
+                            and last_message not in force_task_completion_responses
+                        ):
+                            # Remove markdown lists and the line above markdown lists
+                            lines = last_message.split("\n")
+                            i = 0
+                            while i < len(lines):
+                                # Match markdown lists starting with hyphen, asterisk or number
+                                if re.match(r"^\s*([-*]|\d+\.)\s", lines[i]):
+                                    del lines[i]
+                                    if i > 0:
+                                        del lines[i - 1]
+                                        i -= 1
+                                else:
+                                    i += 1
+                            message = "\n".join(lines)
+                            # Replace newlines with spaces, escape double quotes and backslashes
+                            sanitized_message = (
+                                message.replace("\\", "\\\\")
+                                .replace("\n", " ")
+                                .replace('"', '\\"')
+                            )
+                            if voice_subprocess:
+                                voice_subprocess.terminate()
+                            voice_subprocess = subprocess.Popen(
+                                [
+                                    "osascript",
+                                    "-e",
+                                    f'say "{sanitized_message}" using "Fred"',
+                                ]
+                            )
 
                 # Assistant code blocks
                 elif chunk["role"] == "assistant" and chunk["type"] == "code":

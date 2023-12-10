@@ -3,11 +3,12 @@ import queue
 import re
 import threading
 import time
+import traceback
 
 import matplotlib
 from jupyter_client import KernelManager
 
-from .base_language import BaseLanguage
+from ..base_language import BaseLanguage
 
 DEBUG_MODE = False
 
@@ -47,10 +48,16 @@ class JupyterLanguage(BaseLanguage):
 
     def run(self, code):
         self.finish_flag = False
-        preprocessed_code = self.preprocess_code(code)
-        message_queue = queue.Queue()
-        self._execute_code(preprocessed_code, message_queue)
-        yield from self._capture_output(message_queue)
+        try:
+            preprocessed_code = self.preprocess_code(code)
+            message_queue = queue.Queue()
+            self._execute_code(preprocessed_code, message_queue)
+            yield from self._capture_output(message_queue)
+        except GeneratorExit:
+            raise  # gotta pass this up!
+        except:
+            content = traceback.format_exc()
+            yield {"type": "console", "format": "output", "content": content}
 
     def _execute_code(self, code, message_queue):
         def iopub_message_listener():
@@ -197,6 +204,8 @@ def preprocess_python(code):
     Wrap in a try except
     """
 
+    code = code.strip()
+
     # Add print commands that tell us what the active line is
     code = add_active_line_prints(code)
 
@@ -216,6 +225,13 @@ def add_active_line_prints(code):
     """
     Add print statements indicating line numbers to a python string.
     """
+    # Replace newlines and comments with pass statements, so the line numbers are accurate (ast will remove them otherwise)
+    code_lines = code.split("\n")
+    for i in range(len(code_lines)):
+        if code_lines[i].strip().startswith("#") or code_lines[i] == "":
+            whitespace = len(code_lines[i]) - len(code_lines[i].lstrip())
+            code_lines[i] = " " * whitespace + "pass"
+    code = "\n".join(code_lines)
     tree = ast.parse(code)
     transformer = AddLinePrints()
     new_tree = transformer.visit(tree)

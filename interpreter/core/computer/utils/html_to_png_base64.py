@@ -5,7 +5,7 @@ import string
 
 from html2image import Html2Image
 
-from ...terminal_interface.utils.local_storage_path import get_storage_path
+from ....terminal_interface.utils.local_storage_path import get_storage_path
 
 
 def html_to_png_base64(code):

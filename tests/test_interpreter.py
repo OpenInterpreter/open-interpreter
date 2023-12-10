@@ -1,4 +1,5 @@
 import os
+import platform
 import time
 from random import randint
 
@@ -25,6 +26,11 @@ def setup_function():
 # we're introducing some sleep to help avoid timeout issues with the OpenAI API
 def teardown_function():
     time.sleep(4)
+
+
+@pytest.mark.skip(reason="Mac only + no way to fail test")
+def test_spotlight():
+    interpreter.computer.keyboard.hotkey("command", "space")
 
 
 def test_config_loading():

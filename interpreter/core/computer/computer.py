@@ -1,50 +1,47 @@
-from .languages.applescript import AppleScript
-from .languages.html import HTML
-from .languages.javascript import JavaScript
-from .languages.powershell import PowerShell
-from .languages.python import Python
-from .languages.r import R
-from .languages.shell import Shell
+from .terminal.terminal import Terminal
 
-language_map = {
-    "python": Python,
-    "bash": Shell,
-    "shell": Shell,
-    "sh": Shell,
-    "zsh": Shell,
-    "javascript": JavaScript,
-    "html": HTML,
-    "applescript": AppleScript,
-    "r": R,
-    "powershell": PowerShell,
-}
+try:
+    from .display.display import Display
+    from .keyboard.keyboard import Keyboard
+    from .mouse.mouse import Mouse
+except ImportError or ModuleNotFoundError:
+    raise
+    pass
 
 
 class Computer:
     def __init__(self):
-        self.languages = [Python, Shell, JavaScript, HTML, AppleScript, R, PowerShell]
-        self._active_languages = {}
-
-    def run(self, language, code):
-        if language not in self._active_languages:
-            self._active_languages[language] = language_map[language]()
+        self.terminal = Terminal()
         try:
-            yield from self._active_languages[language].run(code)
-        except GeneratorExit:
-            self.stop()
+            self.mouse = Mouse(
+                self
+            )  # Mouse will use the computer's display, so we give it a reference to ourselves
+            self.keyboard = Keyboard()
+            self.display = Display()
+        except:
+            raise
+            pass
+
+    def run(self, *args, **kwargs):
+        """
+        Shortcut for computer.terminal.run
+        """
+        return self.terminal.run(*args, **kwargs)
 
     def stop(self):
-        for language in self._active_languages.values():
-            language.stop()
+        """
+        Shortcut for computer.terminal.stop
+        """
+        return self.terminal.stop()
 
     def terminate(self):
-        for language_name in list(self._active_languages.keys()):
-            language = self._active_languages[language_name]
-            if (
-                language
-            ):  # Not sure why this is None sometimes. We should look into this
-                language.terminate()
-            del self._active_languages[language_name]
+        """
+        Shortcut for computer.terminal.terminate
+        """
+        return self.terminal.terminate()
 
-
-computer = Computer()
+    def screenshot(self, *args, **kwargs):
+        """
+        Shortcut for computer.display.screenshot
+        """
+        return self.display.screenshot(*args, **kwargs)

@@ -1,11 +1,14 @@
 import os
 import subprocess
 
-from yaspin import yaspin
-from yaspin.spinners import Spinners
-
-from ..computer.computer import language_map
+from ..computer.terminal.terminal import language_map
 from .temporary_file import cleanup_temporary_file, create_temporary_file
+
+try:
+    from yaspin import yaspin
+    from yaspin.spinners import Spinners
+except ImportError:
+    pass
 
 
 def get_language_file_extension(language_name):
@@ -64,7 +67,7 @@ def scan_code(code, language, interpreter):
         if scan.returncode == 0:
             language_name = get_language_name(language)
             print(
-                f"  {'Code Scaner: ' if interpreter.safe_mode == 'auto' else ''}No issues were found in this {language_name} code."
+                f"  {'Code Scanner: ' if interpreter.safe_mode == 'auto' else ''}No issues were found in this {language_name} code."
             )
             print("")
 
@@ -72,7 +75,7 @@ def scan_code(code, language, interpreter):
         # and add them to the conversation history
 
     except Exception as e:
-        print(f"Could not scan {language} code.")
+        print(f"Could not scan {language} code. Have you installed 'semgrep'?")
         print(e)
         print("")  # <- Aesthetic choice
 

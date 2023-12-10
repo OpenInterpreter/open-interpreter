@@ -113,7 +113,7 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
                 "content": [
                     {
                         "type": "image_url",
-                        "image_url": {"url": content, "detail": "high"},
+                        "image_url": {"url": content, "detail": "low"},
                     }
                 ],
             }
