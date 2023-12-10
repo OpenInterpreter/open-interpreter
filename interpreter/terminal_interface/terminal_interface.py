@@ -62,7 +62,7 @@ def terminal_interface(interpreter, message):
         interactive = True
 
     pause_force_task_completion_loop = False
-    force_task_completion_message = "Proceed. If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."
+    force_task_completion_message = """Proceed. If you want to write code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
     force_task_completion_responses = [
         "the task is done.",
         "the task is impossible.",

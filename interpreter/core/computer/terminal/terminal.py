@@ -4,30 +4,35 @@ from .languages.javascript import JavaScript
 from .languages.powershell import PowerShell
 from .languages.python import Python
 from .languages.r import R
+from .languages.react import React
 from .languages.shell import Shell
-
-language_map = {
-    "python": Python,
-    "bash": Shell,
-    "shell": Shell,
-    "sh": Shell,
-    "zsh": Shell,
-    "javascript": JavaScript,
-    "html": HTML,
-    "applescript": AppleScript,
-    "r": R,
-    "powershell": PowerShell,
-}
 
 
 class Terminal:
     def __init__(self):
-        self.languages = [Python, Shell, JavaScript, HTML, AppleScript, R, PowerShell]
+        self.languages = [
+            Python,
+            Shell,
+            JavaScript,
+            HTML,
+            AppleScript,
+            R,
+            PowerShell,
+            React,
+        ]
         self._active_languages = {}
+
+    def get_language(self, language):
+        for lang in self.languages:
+            if language.lower() == lang.name.lower() or (
+                hasattr(lang, "aliases") and language in lang.aliases
+            ):
+                return lang
+        return None
 
     def run(self, language, code):
         if language not in self._active_languages:
-            self._active_languages[language] = language_map[language]()
+            self._active_languages[language] = self.get_language(language)()
         try:
             yield from self._active_languages[language].run(code)
         except GeneratorExit:

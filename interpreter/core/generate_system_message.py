@@ -27,9 +27,12 @@ def generate_system_message(interpreter):
         try:
             system_message += "\n" + get_relevant_procedures_string(interpreter)
         except:
-            raise
             if interpreter.debug_mode:
                 print(traceback.format_exc())
             # It's okay if they can't. This just fixes some common mistakes it makes.
 
-    return system_message
+    for language in interpreter.computer.terminal.languages:
+        if hasattr(language, "system_message"):
+            system_message += "\n\n" + language.system_message
+
+    return system_message.strip()

@@ -5,36 +5,43 @@ import time
 
 import pyautogui
 
-pyautogui.FAILSAFE = False
-
 
 class Keyboard:
     def write(self, text):
         # Split the text into words
         words = text.split(" ")
 
-        # Type each word
-        for word in words:
+        # Type each word with a space after it, unless it's the last word
+        for i, word in enumerate(words):
             # Type the word
             pyautogui.write(word)
-            # Add a delay after each word
+            # Add a space after the word if it's not the last word
+            if i != len(words) - 1:
+                pyautogui.write(" ")
+            # Add a delay after each word to simulate ChatGPT
             time.sleep(random.uniform(0.1, 0.3))
 
     def press(self, keys):
         pyautogui.press(keys)
 
     def hotkey(self, *args):
-        if "darwin" in platform.system().lower():
-            # For some reason, application focus or something, we need to do this for spotlight
-            # only if they passed in "command", "space" or "command", " ", or those in another order
-            if set(args) == {"command", " "} or set(args) == {"command", "space"}:
-                os.system(
-                    """
-                osascript -e 'tell application "System Events" to keystroke " " using {command down}'
-                """
-                )
-            else:
-                pyautogui.hotkey(*args)
+        modifiers = {"command", "control", "option", "shift"}
+        if "darwin" in platform.system().lower() and len(args) == 2:
+            # pyautogui.hotkey seems to not work, so we use applescript
+            # Determine which argument is the keystroke and which is the modifier
+            keystroke, modifier = args if args[0] not in modifiers else args[::-1]
+
+            # Create the AppleScript
+            script = f"""
+            tell application "System Events"
+                keystroke "{keystroke}" using {modifier}
+            end tell
+            """
+
+            # Execute the AppleScript
+            os.system("osascript -e '{}'".format(script))
+        else:
+            pyautogui.hotkey(*args)
 
     def down(self, key):
         pyautogui.keyDown(key)

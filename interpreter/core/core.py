@@ -124,13 +124,16 @@ class Interpreter:
             elif isinstance(message, list):
                 self.messages = message
 
+            # DISABLED because I think we should just not transmit images to non-multimodal models?
+            # REENABLE this when multimodal becomes more common:
+
             # Make sure we're using a model that can handle this
-            if not self.vision:
-                for message in self.messages:
-                    if message["type"] == "image":
-                        raise Exception(
-                            "Use a multimodal model and set `interpreter.vision` to True to handle image messages."
-                        )
+            # if not self.vision:
+            #     for message in self.messages:
+            #         if message["type"] == "image":
+            #             raise Exception(
+            #                 "Use a multimodal model and set `interpreter.vision` to True to handle image messages."
+            #             )
 
             # This is where it all happens!
             yield from self._respond_and_store()

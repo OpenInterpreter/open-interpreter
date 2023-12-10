@@ -27,6 +27,26 @@ def respond(interpreter):
         messages_for_llm = interpreter.messages.copy()
         messages_for_llm = [system_message] + messages_for_llm
 
+        # Trim image messages if they're there
+        if interpreter.vision:
+            image_messages = [msg for msg in messages_for_llm if msg["type"] == "image"]
+
+            if interpreter.os:
+                # Keep only the last image if the interpreter is running in OS mode
+                if len(image_messages) > 1:
+                    for img_msg in image_messages[:-1]:
+                        messages_for_llm.remove(img_msg)
+                        if interpreter.debug_mode:
+                            print("Removing image message!")
+            else:
+                # Delete all the middle ones (leave only the first and last 2 images) from messages_for_llm
+                if len(image_messages) > 3:
+                    for img_msg in image_messages[1:-2]:
+                        messages_for_llm.remove(img_msg)
+                        if interpreter.debug_mode:
+                            print("Removing image message!")
+                # Idea: we could set detail: low for the middle messages, instead of deleting them
+
         ### RUN THE LLM ###
 
         try:
@@ -74,7 +94,8 @@ def respond(interpreter):
                     )
             elif interpreter.local:
                 raise Exception(
-                    str(e)
+                    "Error occurred. "
+                    + str(e)
                     + """
 
 Please make sure LM Studio's local server is running by following the steps above, if you're using LM Studio (recommended).
@@ -133,7 +154,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                     break
 
                 # don't let it import computer on os mode — we handle that!
-                if interpreter.os:
+                if interpreter.os and language == "python":
                     code = code.replace("import computer", "")
 
                 # yield each line

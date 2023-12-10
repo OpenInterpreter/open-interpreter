@@ -7,8 +7,6 @@ from PIL import Image
 
 from ..utils.computer_vision import find_text_in_image
 
-pyautogui.FAILSAFE = False
-
 
 class Mouse:
     def __init__(self, computer):
@@ -33,7 +31,7 @@ class Mouse:
                 if len(centers) > 1:
                     if index == None:
                         print(
-                            f"This text ('{text}') was found multiple times on screen. Please try 'click()' again, but pass in an `index` int to identify which one you want to click. The indices have been drawn on the attached image."
+                            f"(Message for language model) This text ('{text}') was found multiple times on screen. Please try 'click()' again, but pass in an `index` int to identify which one you want to click. The indices have been drawn on the image."
                         )
                         # Show the image using matplotlib
                         plt.imshow(np.array(bounding_box_image))

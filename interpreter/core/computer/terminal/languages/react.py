@@ -1,7 +1,6 @@
-"""
-Test this more— I don't think it understands the environment it's in. It tends to write "require" for example. Also make sure errors go back into it (console.log type stuff)
-"""
+import re
 
+from ...utils.html_to_png_base64 import html_to_png_base64
 from ..base_language import BaseLanguage
 
 template = """<!DOCTYPE html>
@@ -27,18 +26,52 @@ template = """<!DOCTYPE html>
 </html>"""
 
 
-class HTML(BaseLanguage):
-    file_extension = "html"
-    proper_name = "React"
+def is_incompatible(code):
+    lines = code.split("\n")
 
-    def __init__(self, config):
-        super().__init__()
-        self.config = config
+    # Check for require statements at the start of any of the first few lines
+    # Check for ES6 import/export statements
+    for line in lines[:5]:
+        if re.match(r"\s*require\(", line):
+            return True
+        if re.match(r"\s*import\s", line) or re.match(r"\s*export\s", line):
+            return True
+
+    return False
+
+
+class React(BaseLanguage):
+    name = "React"
+    file_extension = "html"
+    system_message = "When you execute code with `react`, your react code will be run in a script tag after being inserted into the HTML template, following the installation of React, ReactDOM, and Babel for JSX parsing. **We will handle this! Don't make an HTML file to run React, just execute `react`.**"
 
     def run(self, code):
-        # Everything happens in the terminal interface re: how you render HTML.
-        # In the future though, we should let the TUI do this but then also capture stuff like console.log errors here.
+        if is_incompatible(code):
+            yield {
+                "type": "console",
+                "format": "output",
+                "content": f"Error: React format not supported. {self.system_message} Therefore some things like `require` and 'import' aren't supported.",
+                "recipient": "assistant",
+            }
+            return
 
         code = template.replace("{insert_react_code}", code)
 
-        yield {"html": code}
+        yield {
+            "type": "console",
+            "format": "output",
+            "content": "React is being displayed on the user's machine...",
+            "recipient": "assistant",
+        }
+
+        # User sees interactive HTML
+        yield {"type": "code", "format": "html", "content": code, "recipient": "user"}
+
+        # Assistant sees image
+        base64 = html_to_png_base64(code)
+        yield {
+            "type": "image",
+            "format": "base64.png",
+            "content": base64,
+            "recipient": "assistant",
+        }

@@ -64,8 +64,10 @@ def setup_text_llm(interpreter):
         except TypeError as e:
             if interpreter.vision and str(e) == "expected string or buffer":
                 # There's just no way to use tokentrim on vision-enabled models yet.
+                # We instead handle this outside setup_text_llm!
+
                 if interpreter.debug_mode:
-                    print("Couldn't token trim image messages. Error:", e)
+                    print("Won't token trim image messages. ", e)
 
                 ### DISABLED image trimming
                 # To maintain the order of messages while simulating trimming, we will iterate through the messages
