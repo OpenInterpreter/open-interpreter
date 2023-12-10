@@ -1,3 +1,4 @@
+import os
 import platform
 import random
 import time
@@ -27,9 +28,13 @@ class Keyboard:
             # For some reason, application focus or something, we need to do this for spotlight
             # only if they passed in "command", "space" or "command", " ", or those in another order
             if set(args) == {"command", " "} or set(args) == {"command", "space"}:
-                pyautogui.click(0, 0)
-                time.sleep(0.5)
-        pyautogui.hotkey(*args)
+                os.system(
+                    """
+                osascript -e 'tell application "System Events" to keystroke " " using {command down}'
+                """
+                )
+            else:
+                pyautogui.hotkey(*args)
 
     def down(self, key):
         pyautogui.keyDown(key)

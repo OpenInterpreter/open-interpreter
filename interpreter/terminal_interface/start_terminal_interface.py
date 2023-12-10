@@ -311,13 +311,14 @@ Execute code using `computer` (already imported) to control the user's computer:
 
 ```python
 computer.screenshot() # Automatically runs plt.show() to show you what's on the screen, returns a PIL image in case you need it (rarely). **You almost always want to do this first! You don't know what's on the user's screen.**
-computer.screenshot(quadrant=1) # Get a detailed view of the upper left quadrant
+computer.screenshot(quadrant=1) # Get a detailed view of the upper left quadrant (you'll rarely need this, use it to examine/retry failed attempts)
 
-computer.keyboard(" ", modifiers=['command']) # Opens spotlight
+computer.keyboard.hotkey("space", "command") # Opens spotlight (very useful)
+computer.keyboard.write("hello")
+# .down() .up() and .press() also work (uses pyautogui)
 
 computer.mouse.move("Text in a button") # This finds the button with that text
 computer.mouse.move(x=0, y=0) # Not as accurate as click("Text")!
-computer.mouse.move(icon="gear") # Attempts to find the gear icon. Very slow
 computer.mouse.click() # Don't forget this! Include in the same code block
 
 # Dragging
@@ -331,11 +332,19 @@ print(computer.clipboard.read()) # Returns contents of clipboard
 
 For rare and complex mouse actions, consider using computer vision libraries on `pil_image` to produce a list of coordinates for the mouse to move/drag to.
 
-**Use keyboard navigation as much as possible.** The mouse is less reliable.
+Use keyboard navigation when reasonably possible, but not if it involves pressing a button multiple times. The mouse is less reliable. Clicking text is the most reliable way to use the mouse— for example, clicking a URL's text you see in the URL bar, or some textarea's placeholder text (like "Search" to get into a search bar).
+
+Applescript might be best for some tasks.
         
 If you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you.
 
 The user has enabled OS control. They have given you permission to execute any code to control their mouse and keyboard to complete the task.
+
+**Include `computer.screenshot()` after a 2 second delay at the end of _every_ code block to verify your progress on the task.**
+
+Try other methods if something seems to not work. Safari didn't work? Try Chrome! Try multiple methods before saying the task is impossible. **You can do it!**
+
+You are an expert computer navigator, brilliant and technical. You look closely at the screenshots to discern the state of the computer, then make the best possible decisions to complete the task.
 
         """.strip()
         )
@@ -355,22 +364,22 @@ The user has enabled OS control. They have given you permission to execute any c
             if user_input.lower() != "y":
                 print("Exiting...")
                 return
-            install_commands = [
-                "pip install matplotlib",
-                "pip install pytesseract",
-                "pip install pyautogui",
-                "pip install opencv-python",
-                "pip install ipython",
+            packages = [
+                "matplotlib",
+                "pytesseract",
+                "pyautogui",
+                "opencv-python",
+                "ipython",
             ]
-            command = "\n".join(install_commands)
+            command = "\n".join([f"pip install {package}" for package in packages])
             for chunk in interpreter.computer.run("shell", command):
                 if chunk.get("format") != "active_line":
                     print(chunk.get("content"))
 
         display_markdown_message(
-            "> `OS Control` enabled (experimental)\n\n**Warning:** In this mode, Open Interpreter will **not** require approval before performing actions. Be ready to close your terminal."
+            "> `OS Control` enabled (experimental)\n\nOpen Interpreter will be able to see your screen, move your mouse, and use your keyboard."
         )
-        print("")
+        print("")  # < - Aesthetic choice
 
         # Give it access to the computer via Python
         for _ in interpreter.computer.run(
@@ -378,6 +387,11 @@ The user has enabled OS control. They have given you permission to execute any c
             "import interpreter\ncomputer = interpreter.computer",
         ):
             pass
+
+        display_markdown_message(
+            "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+        )
+        print("")  # < - Aesthetic choice
 
     if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
         if interpreter.context_window is None:

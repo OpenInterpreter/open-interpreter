@@ -132,6 +132,10 @@ If LM Studio's local server is running, please try a language model with a diffe
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
+                # don't let it import computer on os mode — we handle that!
+                if interpreter.os:
+                    code = code.replace("import computer", "")
+
                 # yield each line
                 for line in interpreter.computer.run(language, code):
                     yield {"role": "computer", **line}

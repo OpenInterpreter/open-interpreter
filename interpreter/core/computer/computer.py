@@ -4,8 +4,7 @@ try:
     from .display.display import Display
     from .keyboard.keyboard import Keyboard
     from .mouse.mouse import Mouse
-except ImportError or ModuleNotFoundError:
-    raise
+except:
     pass
 
 
@@ -19,7 +18,6 @@ class Computer:
             self.keyboard = Keyboard()
             self.display = Display()
         except:
-            raise
             pass
 
     def run(self, *args, **kwargs):
