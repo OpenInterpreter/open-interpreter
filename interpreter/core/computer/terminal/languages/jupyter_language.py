@@ -227,9 +227,13 @@ def add_active_line_prints(code):
     """
     # Replace newlines and comments with pass statements, so the line numbers are accurate (ast will remove them otherwise)
     code_lines = code.split("\n")
+    in_multiline_string = False
     for i in range(len(code_lines)):
-        if code_lines[i].strip().startswith("#") or code_lines[i] == "":
-            whitespace = len(code_lines[i]) - len(code_lines[i].lstrip())
+        line = code_lines[i]
+        if '"""' in line or "'''" in line:
+            in_multiline_string = not in_multiline_string
+        if not in_multiline_string and (line.strip().startswith("#") or line == ""):
+            whitespace = len(line) - len(line.lstrip())
             code_lines[i] = " " * whitespace + "pass"
     code = "\n".join(code_lines)
     tree = ast.parse(code)

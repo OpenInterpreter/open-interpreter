@@ -8,18 +8,7 @@ import pyautogui
 
 class Keyboard:
     def write(self, text):
-        # Split the text into words
-        words = text.split(" ")
-
-        # Type each word with a space after it, unless it's the last word
-        for i, word in enumerate(words):
-            # Type the word
-            pyautogui.write(word)
-            # Add a space after the word if it's not the last word
-            if i != len(words) - 1:
-                pyautogui.write(" ")
-            # Add a delay after each word to simulate ChatGPT
-            time.sleep(random.uniform(0.1, 0.3))
+        pyautogui.write(text)
 
     def press(self, keys):
         pyautogui.press(keys)
@@ -41,7 +30,7 @@ class Keyboard:
             # Execute the AppleScript
             os.system("osascript -e '{}'".format(script))
         else:
-            pyautogui.hotkey(*args)
+            pyautogui.hotkey(*args, interval=0.15)
 
     def down(self, key):
         pyautogui.keyDown(key)

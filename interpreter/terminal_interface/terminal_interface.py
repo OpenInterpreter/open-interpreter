@@ -182,6 +182,16 @@ def terminal_interface(interpreter, message):
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
 
+                # Comply with PyAutoGUI fail-safe for OS mode
+                # so people can turn it off by moving their mouse to a corner
+                if interpreter.os:
+                    if (
+                        chunk.get("format") == "output"
+                        and "FailSafeException" in chunk["content"]
+                    ):
+                        pause_force_task_completion_loop = True
+                        break
+
                 if "end" in chunk and active_block:
                     active_block.refresh(cursor=False)
 

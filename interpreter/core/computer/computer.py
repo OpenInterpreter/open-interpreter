@@ -1,6 +1,7 @@
 from .terminal.terminal import Terminal
 
 try:
+    from .clipboard.clipboard import Clipboard
     from .display.display import Display
     from .keyboard.keyboard import Keyboard
     from .mouse.mouse import Mouse
@@ -17,6 +18,7 @@ class Computer:
             )  # Mouse will use the computer's display, so we give it a reference to ourselves
             self.keyboard = Keyboard()
             self.display = Display()
+            self.clipboard = Clipboard()
         except:
             pass
 
