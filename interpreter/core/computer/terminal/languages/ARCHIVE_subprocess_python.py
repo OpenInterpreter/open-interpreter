@@ -6,7 +6,7 @@ import re
 import shlex
 import sys
 
-from ..subprocess_language import SubprocessLanguage
+from .subprocess_language import SubprocessLanguage
 
 
 class Python(SubprocessLanguage):

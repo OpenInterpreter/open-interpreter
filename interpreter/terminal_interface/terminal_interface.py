@@ -8,6 +8,9 @@ try:
 except ImportError:
     pass
 
+import platform
+import re
+import subprocess
 import time
 
 from ..core.utils.scan_code import scan_code
@@ -58,34 +61,67 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
-    just_pressed_ctrl_c = False
+    pause_force_task_completion_loop = False
+    force_task_completion_message = """Proceed. If you want to write code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
+    force_task_completion_responses = [
+        "the task is done.",
+        "the task is impossible.",
+        "let me know what you'd like to do next.",
+    ]
+    voice_subprocess = None
 
     while True:
         try:
             if interactive:
-                # I think this could be refactored for more clarity.
-                if not just_pressed_ctrl_c and (
-                    interpreter.os
-                    and interpreter.messages != []
-                    and "content" in interpreter.messages[-1]
-                    and "The task is done."
-                    not in interpreter.messages[-1]["content"].lower()
+                # FORCE TASK COMPLETION
+                ### I think `force_task_completion` should be moved to the core.
+                # `force_task_completion` makes it utter specific phrases if it doesn't want to be told to "Proceed."
+                if (
+                    not pause_force_task_completion_loop
+                    and interpreter.force_task_completion
+                    and interpreter.messages
+                    and not any(
+                        task_status
+                        in interpreter.messages[-1].get("content", "").lower()
+                        for task_status in force_task_completion_responses
+                    )
                 ):
-                    message = "proceed. if the entire task is done, say exactly 'The task is done.', otherwise keep going."
+                    # Remove past force_task_completion messages
+                    interpreter.messages = [
+                        message
+                        for message in interpreter.messages
+                        if message.get("content", "") != force_task_completion_message
+                    ]
+                    # Combine adjacent assistant messages, so hopefully it learns to just keep going!
+                    combined_messages = []
+                    for message in interpreter.messages:
+                        if (
+                            combined_messages
+                            and message["role"] == "assistant"
+                            and combined_messages[-1]["role"] == "assistant"
+                            and message["type"] == "message"
+                            and combined_messages[-1]["type"] == "message"
+                        ):
+                            combined_messages[-1]["content"] += (
+                                "\n" + message["content"]
+                            )
+                        else:
+                            combined_messages.append(message)
+                    interpreter.messages = combined_messages
+                    # Send model the force_task_completion_message:
+                    message = force_task_completion_message
                 else:
                     ### This is the primary input for Open Interpreter.
                     message = input("> ").strip()
 
-                    just_pressed_ctrl_c = (
-                        False  # Just used for os mode, to escape the loop above^
-                    )
+                    pause_force_task_completion_loop = False  # Just used for `interpreter.force_task_completion`, to escape the loop above^
 
-                try:
-                    # This lets users hit the up arrow key for past messages
-                    readline.add_history(message)
-                except:
-                    # If the user doesn't have readline (may be the case on windows), that's fine
-                    pass
+                    try:
+                        # This lets users hit the up arrow key for past messages
+                        readline.add_history(message)
+                    except:
+                        # If the user doesn't have readline (may be the case on windows), that's fine
+                        pass
 
         except KeyboardInterrupt:
             # Exit gracefully
@@ -93,42 +129,47 @@ def terminal_interface(interpreter, message):
             interpreter.computer.terminate()
             break
 
-        if message.startswith("%") and interactive:
-            handle_magic_command(interpreter, message)
-            continue
+        if isinstance(message, str):
+            # This is for the terminal interface being used as a CLI — messages are strings.
+            # This won't fire if they're in the python package, display=True, and they passed in an array of messages (for example).
 
-        # Many users do this
-        if message.strip() == "interpreter --local":
-            print("Please exit this conversation, then run `interpreter --local`.")
-            continue
-        if message.strip() == "pip install --upgrade open-interpreter":
-            print(
-                "Please exit this conversation, then run `pip install --upgrade open-interpreter`."
-            )
-            continue
+            if message.startswith("%") and interactive:
+                handle_magic_command(interpreter, message)
+                pause_force_task_completion_loop = True
+                continue
 
-        if interpreter.vision:
-            # Is the input a path to an image? Like they just dragged it into the terminal?
-            image_path = find_image_path(message)
-
-            ## If we found an image, add it to the message
-            if image_path:
-                # Add the text interpreter's messsage history
-                interpreter.messages.append(
-                    {
-                        "role": "user",
-                        "type": "message",
-                        "content": message,
-                    }
+            # Many users do this
+            if message.strip() == "interpreter --local":
+                print("Please exit this conversation, then run `interpreter --local`.")
+                continue
+            if message.strip() == "pip install --upgrade open-interpreter":
+                print(
+                    "Please exit this conversation, then run `pip install --upgrade open-interpreter`."
                 )
+                continue
 
-                # Pass in the image to interpreter in a moment
-                message = {
-                    "role": "user",
-                    "type": "image",
-                    "format": "path",
-                    "content": image_path,
-                }
+            if interpreter.vision:
+                # Is the input a path to an image? Like they just dragged it into the terminal?
+                image_path = find_image_path(message)
+
+                ## If we found an image, add it to the message
+                if image_path:
+                    # Add the text interpreter's messsage history
+                    interpreter.messages.append(
+                        {
+                            "role": "user",
+                            "type": "message",
+                            "content": message,
+                        }
+                    )
+
+                    # Pass in the image to interpreter in a moment
+                    message = {
+                        "role": "user",
+                        "type": "image",
+                        "format": "path",
+                        "content": image_path,
+                    }
 
         try:
             for chunk in interpreter.chat(message, display=False, stream=True):
@@ -140,6 +181,16 @@ def terminal_interface(interpreter, message):
 
                 if interpreter.debug_mode:
                     print("Chunk in `terminal_interface`:", chunk)
+
+                # Comply with PyAutoGUI fail-safe for OS mode
+                # so people can turn it off by moving their mouse to a corner
+                if interpreter.os:
+                    if (
+                        chunk.get("format") == "output"
+                        and "FailSafeException" in chunk["content"]
+                    ):
+                        pause_force_task_completion_loop = True
+                        break
 
                 if "end" in chunk and active_block:
                     active_block.refresh(cursor=False)
@@ -155,13 +206,45 @@ def terminal_interface(interpreter, message):
                 if chunk["type"] == "message":
                     if "start" in chunk:
                         active_block = MessageBlock()
-                        if interpreter.os:
-                            # OS mode uses voice — otherwise you can't tell what it's doing!
-                            active_block.voice = True
                         render_cursor = True
 
                     if "content" in chunk:
                         active_block.message += chunk["content"]
+
+                    if "end" in chunk and interpreter.os:
+                        last_message = interpreter.messages[-1]["content"]
+                        if (
+                            platform.system() == "Darwin"
+                            and last_message not in force_task_completion_responses
+                        ):
+                            # Remove markdown lists and the line above markdown lists
+                            lines = last_message.split("\n")
+                            i = 0
+                            while i < len(lines):
+                                # Match markdown lists starting with hyphen, asterisk or number
+                                if re.match(r"^\s*([-*]|\d+\.)\s", lines[i]):
+                                    del lines[i]
+                                    if i > 0:
+                                        del lines[i - 1]
+                                        i -= 1
+                                else:
+                                    i += 1
+                            message = "\n".join(lines)
+                            # Replace newlines with spaces, escape double quotes and backslashes
+                            sanitized_message = (
+                                message.replace("\\", "\\\\")
+                                .replace("\n", " ")
+                                .replace('"', '\\"')
+                            )
+                            if voice_subprocess:
+                                voice_subprocess.terminate()
+                            voice_subprocess = subprocess.Popen(
+                                [
+                                    "osascript",
+                                    "-e",
+                                    f'say "{sanitized_message}" using "Fred"',
+                                ]
+                            )
 
                 # Assistant code blocks
                 elif chunk["role"] == "assistant" and chunk["type"] == "code":

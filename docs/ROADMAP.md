@@ -18,6 +18,7 @@
 
 - [ ] Figure out how to run us on [GAIA](https://huggingface.co/gaia-benchmark) and use a subset of that as our tests / optimization framework
 - [ ] Add more language models to tests (use Replicate, ask LiteLLM how they made their "mega key" to many different LLM providers)
+- [ ] Use Anthropic function calling
 - [ ] Stateless core python package (free of config settings) config passed in by TUI
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
 - [ ] Further split TUI from core (some utils still reach across)

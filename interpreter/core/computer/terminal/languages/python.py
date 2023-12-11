@@ -1,6 +1,6 @@
 import os
 
-from ..jupyter_language import JupyterLanguage
+from .jupyter_language import JupyterLanguage
 
 # Supresses a weird debugging error
 os.environ["PYDEVD_DISABLE_FILE_VALIDATION"] = "1"

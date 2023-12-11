@@ -2,12 +2,13 @@ import os
 import platform
 import re
 
-from ..subprocess_language import SubprocessLanguage
+from .subprocess_language import SubprocessLanguage
 
 
 class Shell(SubprocessLanguage):
     file_extension = "sh"
     name = "Shell"
+    aliases = ["bash", "sh", "zsh"]
 
     def __init__(
         self,

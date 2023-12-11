@@ -1,44 +1,23 @@
 import os
 import subprocess
 
-from yaspin import yaspin
-from yaspin.spinners import Spinners
-
-from ..computer.computer import language_map
 from .temporary_file import cleanup_temporary_file, create_temporary_file
 
-
-def get_language_file_extension(language_name):
-    """
-    Get the file extension for a given language
-    """
-    language = language_map[language_name.lower()]
-
-    if language.file_extension:
-        return language.file_extension
-    else:
-        return language
-
-
-def get_language_name(language_name):
-    """
-    Get the proper name for a given language
-    """
-    language = language_map[language_name.lower()]
-
-    if language.name:
-        return language.name
-    else:
-        return language
+try:
+    from yaspin import yaspin
+    from yaspin.spinners import Spinners
+except ImportError:
+    pass
 
 
 def scan_code(code, language, interpreter):
     """
     Scan code with semgrep
     """
+    language_class = interpreter.computer.terminal.get_language(language)
 
     temp_file = create_temporary_file(
-        code, get_language_file_extension(language), verbose=interpreter.debug_mode
+        code, language_class.file_extension, verbose=interpreter.debug_mode
     )
 
     temp_path = os.path.dirname(temp_file)
@@ -62,9 +41,9 @@ def scan_code(code, language, interpreter):
             )
 
         if scan.returncode == 0:
-            language_name = get_language_name(language)
+            language_name = language_class.name
             print(
-                f"  {'Code Scaner: ' if interpreter.safe_mode == 'auto' else ''}No issues were found in this {language_name} code."
+                f"  {'Code Scanner: ' if interpreter.safe_mode == 'auto' else ''}No issues were found in this {language_name} code."
             )
             print("")
 
@@ -72,7 +51,7 @@ def scan_code(code, language, interpreter):
         # and add them to the conversation history
 
     except Exception as e:
-        print(f"Could not scan {language} code.")
+        print(f"Could not scan {language} code. Have you installed 'semgrep'?")
         print(e)
         print("")  # <- Aesthetic choice
 

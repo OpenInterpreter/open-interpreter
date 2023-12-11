@@ -10,7 +10,6 @@ from datetime import datetime
 from ..terminal_interface.start_terminal_interface import start_terminal_interface
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.get_config import get_config, user_config_path
-from ..terminal_interface.utils.in_jupyter_notebook import in_jupyter_notebook
 from ..terminal_interface.utils.local_storage_path import get_storage_path
 from .computer.computer import Computer
 from .generate_system_message import generate_system_message
@@ -36,6 +35,7 @@ class Interpreter:
         self.max_output = 2000
         self.safe_mode = "off"
         self.disable_procedures = False
+        self.force_task_completion = False
 
         # Conversation history
         self.conversation_history = True
@@ -58,8 +58,10 @@ class Interpreter:
 
         # Computer settings
         self.computer = Computer()
-        # (Permitted languages, all lowercase)
-        self.languages = [i.name.lower() for i in self.computer.languages]
+        # Permitted languages, all lowercase
+        self.languages = [i.name.lower() for i in self.computer.terminal.languages]
+        # (Not implemented) Permitted functions
+        # self.functions = [globals]
         # OS control mode
         self.os = False
 
@@ -121,6 +123,17 @@ class Interpreter:
             # List (this is like the OpenAI API)
             elif isinstance(message, list):
                 self.messages = message
+
+            # DISABLED because I think we should just not transmit images to non-multimodal models?
+            # REENABLE this when multimodal becomes more common:
+
+            # Make sure we're using a model that can handle this
+            # if not self.vision:
+            #     for message in self.messages:
+            #         if message["type"] == "image":
+            #             raise Exception(
+            #                 "Use a multimodal model and set `interpreter.vision` to True to handle image messages."
+            #             )
 
             # This is where it all happens!
             yield from self._respond_and_store()

@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 
-from .base_language import BaseLanguage
+from ..base_language import BaseLanguage
 
 
 class SubprocessLanguage(BaseLanguage):

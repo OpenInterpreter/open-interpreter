@@ -23,13 +23,25 @@ six = "^1.16.0"
 tiktoken = "^0.4.0"
 tokentrim = "^0.1.13"
 wget = "^3.2"
-yaspin = "^3.0.1"
 psutil = "^5.9.6"
 pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
 html2image = "^2.0.4.3"
 ipykernel = "^6.26.0"
 jupyter-client = "^8.6.0"
 matplotlib = "^3.8.2"
+
+#Optional dependencies
+pytesseract = { version = "^0.3.10", optional = true }
+pyautogui = { version = "^0.9.54", optional = true }
+opencv-python = { version = "^4.8.1.78", optional = true }
+ipython = { version = "^8.18.1", optional = true }
+cairosvg = { version = "^2.7.1", optional = true }
+semgrep = { version = "^1.52.0", optional = true }
+yaspin = { version = "^3.0.1", optional = true }
+
+[tool.poetry.extras]
+os = ["matplotlib", "pytesseract", "pyautogui", "opencv-python", "ipython"]
+safe = ["semgrep"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
@@ -44,9 +56,6 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 interpreter = "interpreter:start_terminal_interface"
-
-[tool.poetry.extras]
-safe = ["semgrep"]
 
 [tool.black]
 target-version = ['py311']

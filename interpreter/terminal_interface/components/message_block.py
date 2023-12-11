@@ -1,6 +1,4 @@
-import platform
 import re
-import subprocess
 
 from rich.box import MINIMAL
 from rich.markdown import Markdown
@@ -15,8 +13,6 @@ class MessageBlock(BaseBlock):
 
         self.type = "message"
         self.message = ""
-        self.has_run = False
-        self.voice = False
 
     def refresh(self, cursor=True):
         # De-stylize any code blocks in markdown,
@@ -30,25 +26,6 @@ class MessageBlock(BaseBlock):
         panel = Panel(markdown, box=MINIMAL)
         self.live.update(panel)
         self.live.refresh()
-
-    def end(self):
-        super().end()
-        if self.voice and platform.system() == "Darwin":
-            # Just the first and last sentence is read aloud.
-            message_sentences = re.split(r"(?<=[.!?]) +", self.message)
-            message = (
-                message_sentences[0] + " " + message_sentences[-1]
-                if len(message_sentences) > 1
-                else message_sentences[0]
-            )
-            # Replace newlines with spaces, escape double quotes and backslashes
-            sanitized_message = (
-                message.replace("\\", "\\\\").replace("\n", " ").replace('"', '\\"')
-            )
-            # Use subprocess to make the call non-blocking
-            subprocess.Popen(
-                ["osascript", "-e", f'say "{sanitized_message}" using "Fred"']
-            )
 
 
 def textify_markdown_code_blocks(text):

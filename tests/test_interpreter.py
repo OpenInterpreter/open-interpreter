@@ -1,6 +1,9 @@
 import os
+import platform
 import time
 from random import randint
+
+import pytest
 
 import interpreter
 from interpreter.terminal_interface.utils.count_tokens import (
@@ -25,6 +28,11 @@ def teardown_function():
     time.sleep(4)
 
 
+@pytest.mark.skip(reason="Mac only + no way to fail test")
+def test_spotlight():
+    interpreter.computer.keyboard.hotkey("command", "space")
+
+
 def test_config_loading():
     # because our test is running from the root directory, we need to do some
     # path manipulation to get the actual path to the config file or our config
@@ -40,6 +48,43 @@ def test_config_loading():
     debug_mode_ok = interpreter.debug_mode == True
 
     assert temperature_ok and model_ok and debug_mode_ok
+
+
+def test_files():
+    messages = [
+        {"role": "user", "type": "message", "content": "Does this file exist?"},
+        {
+            "role": "user",
+            "type": "file",
+            "format": "path",
+            "content": "/Users/Killian/image.png",
+        },
+    ]
+    interpreter.chat(messages)
+
+
+@pytest.mark.skip(reason="Only 100 vision calls allowed / day!")
+def test_vision():
+    base64png = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC"
+    messages = [
+        {"role": "user", "type": "message", "content": "describe this image"},
+        {
+            "role": "user",
+            "type": "image",
+            "format": "base64.png",
+            "content": base64png,
+        },
+    ]
+
+    interpreter.vision = True
+    interpreter.model = "gpt-4-vision-preview"
+    interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
+    interpreter.function_calling_llm = False
+    interpreter.context_window = 110000
+    interpreter.max_tokens = 4096
+    interpreter.force_task_completion = True
+
+    interpreter.chat(messages)
 
 
 def test_generator():
