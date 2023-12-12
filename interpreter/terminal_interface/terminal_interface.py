@@ -93,77 +93,96 @@ def terminal_interface(interpreter, message):
                     active_block.active_line = chunk["active_line"]
 
                 # Execution notice
+          
+                ## break_outer_loop var is used to signal another break
+                ## once we exit the following while-loop
+                break_outer_loop = False
                 if "executing" in chunk:
-                    if not interpreter.auto_run:
-                        # OI is about to execute code. The user wants to approve this
+                    while True:
+                        if not interpreter.auto_run:
+                            # OI is about to execute code. The user wants to approve this
 
-                        # End the active block so you can run input() below it
-                        active_block.end()
-
-                        should_scan_code = False
-
-                        if not interpreter.safe_mode == "off":
-                            if interpreter.safe_mode == "auto":
-                                should_scan_code = True
-                            elif interpreter.safe_mode == 'ask':
-                                response = input("  Would you like to scan this code? (y/n)\n\n  ")
-                                print("")  # <- Aesthetic choice
-
-                                if response.strip().lower() == "y":
-                                    should_scan_code = True
-
-                        if should_scan_code:
-                            # Get code language and actual code from the chunk
-                            # We need to give these to semgrep when we start our scan
-                            language = chunk["executing"]["language"]
-                            code = chunk["executing"]["code"]
-
-                            scan_code(code, language, interpreter)
-
-                        response = input("  Would you like to run this code? (y/n/%edit)\n\n  ")
-                        print("")  # <- Aesthetic choice
-
-                        if response.strip().lower() == "%edit":
-                            # open a code editor with this code in a temporary file
-                            # when the user saves and exits, run the code
-                            # Get code language and actual code from the chunk
-                            # We need to give these to our editor to open the file
-                            language = chunk["executing"]["language"]
-                            code = chunk["executing"]["code"]
-
-                            edited_code = edit_code(code, language, interpreter)
-
-                            # Get the last message, so we can extend it with the edited code
-                            old_message = interpreter.messages[-1]
-
-                            # Remove the last message, which is the code we're about to edit
-                            interpreter.messages = interpreter.messages[:-1]
-
-                            ran_code_block = True
-                            render_cursor = False
-
+                            # End the active block so you can run input() below it
                             active_block.end()
 
-                            # Add the edited code to the messages
-                            interpreter.messages.append({
-                                **old_message,
-                                "code": edited_code,
-                            })
+                            should_scan_code = False
 
-                        elif response.strip().lower() == "y":
-                            # Create a new, identical block where the code will actually be run
-                            # Conveniently, the chunk includes everything we need to do this:
-                            active_block = CodeBlock()
-                            active_block.margin_top = False # <- Aesthetic choice
-                            active_block.language = chunk["executing"]["language"]
-                            active_block.code = chunk["executing"]["code"]
-                        else:
-                            # User declined to run code.
-                            interpreter.messages.append({
-                                "role": "user",
-                                "message": "I have declined to run this code."
-                            })
-                            break
+                            if not interpreter.safe_mode == "off":
+                                if interpreter.safe_mode == "auto":
+                                    should_scan_code = True
+                                elif interpreter.safe_mode == 'ask':
+                                    response = input("  Would you like to scan this code? (y/n)\n\n  ")
+                                    print("")  # <- Aesthetic choice
+
+                                    if response.strip().lower() == "y":
+                                        should_scan_code = True
+
+                            if should_scan_code:
+                                # Get code language and actual code from the chunk
+                                # We need to give these to semgrep when we start our scan
+                                language = chunk["executing"]["language"]
+                                code = chunk["executing"]["code"]
+
+                                scan_code(code, language, interpreter)
+
+                            response = input("  Would you like to run this code? (y/n/%edit)\n\n  ")
+                            print("")  # <- Aesthetic choice
+
+                            if response.strip().lower() == "%edit":
+                                # open a code editor with this code in a temporary file
+                                # when the user saves and exits, run the code
+                                # Get code language and actual code from the chunk
+                                # We need to give these to our editor to open the file
+                                language = chunk["executing"]["language"]
+                                code = chunk["executing"]["code"]
+
+                                edited_code = edit_code(code, language, interpreter)
+
+                                # Get the last message, so we can extend it with the edited code
+                                old_message = interpreter.messages[-1]
+
+                                # Remove the last message, which is the code we're about to edit
+                                interpreter.messages = interpreter.messages[:-1]
+
+                                ran_code_block = False
+                                render_cursor = False
+
+                                chunk["executing"]["code"] = edited_code
+
+                                active_block.end()
+                                active_block = CodeBlock()
+                                active_block.language = chunk["executing"]["language"]
+                                active_block.code = edited_code
+                                active_block.end()
+
+                                interpreter.messages.append({
+                                    **old_message,
+                                    "code": edited_code
+                                })
+                                
+
+                                continue
+
+                            elif response.strip().lower() == "y":
+                                # Create a new, identical block where the code will actually be run
+                                # Conveniently, the chunk includes everything we need to do this:
+                                active_block = CodeBlock()
+                                active_block.margin_top = False # <- Aesthetic choice
+                                active_block.language = chunk["executing"]["language"]
+                                active_block.code = chunk["executing"]["code"]
+                                break
+                            else:
+                                # User declined to run code.
+                                interpreter.messages.append({
+                                    "role": "user",
+                                    "message": "I have declined to run this code."
+                                })
+                                ## need to break twice since goal is to exit nested while-loop
+                                ## and parent for-loop and return to interactive input. 
+                                break_outer_loop = True
+                                break
+                if break_outer_loop:
+                    break
 
                 # Output
                 if "output" in chunk:
