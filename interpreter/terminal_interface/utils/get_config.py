@@ -42,11 +42,25 @@ def get_config_path(path=user_config_path):
                 # Copying the file using shutil.copy
                 new_file = shutil.copy(default_config_path, path)
 
+                print("Copied the default config file to the user's directory because the user's config file was not found.")
+
     return path
 
 
 def get_config(path=user_config_path):
     path = get_config_path(path)
+    
+    config = None
 
     with open(path, "r") as file:
-        return yaml.safe_load(file)
+        config = yaml.safe_load(file)
+        if config is not None:
+            return config
+
+    if config is None:
+        # Deleting empty file because get_config_path copies the default if file is missing
+        os.remove(path)
+        path = get_config_path(path)
+        with open(path, "r") as file:
+            config = yaml.safe_load(file)
+            return config
