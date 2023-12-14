@@ -62,8 +62,10 @@ class Interpreter:
         self.languages = [i.name.lower() for i in self.computer.terminal.languages]
         # (Not implemented) Permitted functions
         # self.functions = [globals]
+
         # OS control mode
         self.os = False
+        self.speak_messages = False
 
         # Load config defaults
         self.extend_config(self.config_file)

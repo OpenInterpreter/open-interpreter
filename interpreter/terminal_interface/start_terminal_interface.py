@@ -297,6 +297,7 @@ Once the server is running, you can begin your conversation below.
         interpreter.os = True
         interpreter.disable_procedures = True
         interpreter.vision = True
+        interpreter.speak_messages = True
         interpreter.model = "gpt-4-vision-preview"
         interpreter.function_calling_llm = False
         interpreter.context_window = 110000
