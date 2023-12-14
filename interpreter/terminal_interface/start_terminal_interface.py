@@ -303,15 +303,20 @@ Once the server is running, you can begin your conversation below.
         interpreter.max_tokens = 4096
         interpreter.auto_run = True
         interpreter.force_task_completion = True
+
         # This line made it use files too much
         interpreter.system_message = interpreter.system_message.replace(
             "If you want to send data between programming languages, save the data to a txt or json.\n",
             "",
         )
+        ambiguous_requests_message = "If there's not enough context, if the user's request is ambiguous, they're likely referring to something on their screen. Take a screenshot! Don't ask questions."
         interpreter.system_message = interpreter.system_message.replace(
             "When a user refers to a filename, they're likely referring to an existing file in the directory you're currently executing code in.",
-            "The user is likely referring to something on their screen.",
+            ambiguous_requests_message,
         )
+        if ambiguous_requests_message not in interpreter.system_message:
+            interpreter.system_message += "n" + ambiguous_requests_message
+
         interpreter.system_message += (
             "\n\n"
             + """

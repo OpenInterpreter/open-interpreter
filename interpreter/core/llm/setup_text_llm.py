@@ -131,8 +131,11 @@ def setup_text_llm(interpreter):
         else:
             params["temperature"] = 0.0
 
-        if not "api_key" in params:
-            params["api_key"] = "sk-dummykey"
+        # DISABLED:
+        # if the user has their api_key in a environment variable, it will be overwritten here.
+        # We should just ask LiteLLM to not require an API key!
+        # if not "api_key" in params:
+        #     params["api_key"] = "sk-dummykey"
 
         if interpreter.model == "gpt-4-vision-preview":
             # We need to go straight to OpenAI for this, LiteLLM doesn't work
