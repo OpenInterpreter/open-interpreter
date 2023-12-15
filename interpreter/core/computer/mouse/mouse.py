@@ -30,13 +30,13 @@ class Mouse:
                 # This could be refactored to be more readable
                 if len(centers) > 1:
                     if index == None:
-                        print(
-                            f"(Message for language model) This text ('{text}') was found multiple times on screen. Please try 'click()' again, but pass in an `index` int to identify which one you want to click. The indices have been drawn on the image."
-                        )
                         # Show the image using matplotlib
                         plt.imshow(np.array(bounding_box_image))
                         plt.show()
-                        return
+                        # Error so subsequent code is not executed
+                        raise IndexError(
+                            f"This text ('{text}') was found multiple times on screen. Please try 'click()' again, but pass in an `index` int to identify which one you want to click. The indices have been drawn on the image."
+                        )
                     else:
                         center = centers[index]
                 else:

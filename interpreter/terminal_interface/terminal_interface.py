@@ -376,10 +376,12 @@ def terminal_interface(interpreter, message):
 
                         # Display action notifications if we're in OS mode
                         if interpreter.os and active_block.active_line != None:
-                            action = active_block.code.split("\n")[
-                                active_block.active_line - 1
-                            ].strip()
-                            print(action)
+                            action = ""
+
+                            code_lines = active_block.code.split("\n")
+                            if active_block.active_line < len(code_lines):
+                                action = code_lines[active_block.active_line].strip()
+
                             if action.startswith("computer"):
                                 description = None
 
