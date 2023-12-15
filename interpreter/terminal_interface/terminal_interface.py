@@ -8,6 +8,7 @@ try:
 except ImportError:
     pass
 
+import os
 import platform
 import re
 import subprocess
@@ -373,6 +374,50 @@ def terminal_interface(interpreter, message):
                     if "format" in chunk and chunk["format"] == "active_line":
                         active_block.active_line = chunk["content"]
 
+                        # Display action notifications if we're in OS mode
+                        if interpreter.os and active_block.active_line != None:
+                            action = active_block.code.split("\n")[
+                                active_block.active_line
+                            ].strip()
+                            if action.startswith("computer"):
+                                description = None
+
+                                # Extract arguments from the action
+                                start_index = action.find("(")
+                                end_index = action.rfind(")")
+                                if start_index != -1 and end_index != -1:
+                                    # (If we found both)
+                                    arguments = action[start_index + 1 : end_index]
+                                else:
+                                    arguments = None
+
+                                if action == "computer.screenshot()":
+                                    description = "Viewing the screen..."
+                                elif action.startswith("computer.mouse.move("):
+                                    if (
+                                        "click" in active_block.code
+                                    ):  # This could be better
+                                        description = f"Clicking {arguments}."
+                                    else:
+                                        description = f"Mousing over {arguments}."
+                                elif action.startswith("computer.keyboard.write("):
+                                    description = f"Typing {arguments}."
+                                elif action.startswith("computer.keyboard.hotkey("):
+                                    description = f"Pressing {arguments}."
+                                elif action.startswith("computer.keyboard.press("):
+                                    description = f"Pressing {arguments}."
+
+                                if description:
+                                    # Use applescript to notify the user of this text
+                                    title = "Open Interpreter"
+                                    subprocess.call(
+                                        [
+                                            "osascript",
+                                            "-e",
+                                            f'display notification "{description}" with title "{title}"',
+                                        ]
+                                    )
+
                     if "start" in chunk:
                         # We need to make a code block if we pushed out an HTML block first, which would have closed our code block.
                         if not isinstance(active_block, CodeBlock):
@@ -395,13 +440,12 @@ def terminal_interface(interpreter, message):
                 break
 
         except KeyboardInterrupt:
-            just_pressed_ctrl_c = True
+            pause_force_task_completion_loop = True
 
             # Exit gracefully
-            if "active_block" in locals():
-                if active_block:
-                    active_block.end()
-                    active_block = None
+            if "active_block" in locals() and active_block:
+                active_block.end()
+                active_block = None
 
             if interactive:
                 # (this cancels LLM, returns to the interactive "> " input)

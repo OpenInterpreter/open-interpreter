@@ -396,6 +396,16 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
         )
         print("")  # < - Aesthetic choice
 
+        # FOR TESTING ONLY
+        # Install Open Interpreter from GitHub
+        print("INSTALLING OI FROM GITHUB")
+        for chunk in interpreter.computer.run(
+            "shell",
+            "pip install git+https://github.com/KillianLucas/open-interpreter.git",
+        ):
+            if chunk.get("format") != "active_line":
+                print(chunk.get("content"))
+
         # Give it access to the computer via Python
         for _ in interpreter.computer.run(
             "python",

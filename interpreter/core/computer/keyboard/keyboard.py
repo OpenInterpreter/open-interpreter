@@ -14,11 +14,19 @@ class Keyboard:
         pyautogui.press(keys)
 
     def hotkey(self, *args):
-        modifiers = {"command", "control", "option", "shift"}
+        modifiers = {
+            "command": "command down",
+            "control": "control down",
+            "option": "option down",
+            "shift": "shift down",
+        }
         if "darwin" in platform.system().lower() and len(args) == 2:
             # pyautogui.hotkey seems to not work, so we use applescript
             # Determine which argument is the keystroke and which is the modifier
             keystroke, modifier = args if args[0] not in modifiers else args[::-1]
+
+            # Map the modifier to the one that AppleScript expects
+            modifier = modifiers[modifier]
 
             # Create the AppleScript
             script = f"""
@@ -26,6 +34,8 @@ class Keyboard:
                 keystroke "{keystroke}" using {modifier}
             end tell
             """
+
+            print(script)
 
             # Execute the AppleScript
             os.system("osascript -e '{}'".format(script))
