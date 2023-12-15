@@ -42,7 +42,7 @@ class Display:
         if screenshot_width > 1024:
             ratio = 1024.0 / screenshot_width
             new_height = int(screenshot_height * ratio)
-            screenshot = screenshot.resize((1024, new_height), Image.ANTIALIAS)
+            screenshot = screenshot.resize((1024, new_height))
 
         screenshot.save(temp_file.name)
 
