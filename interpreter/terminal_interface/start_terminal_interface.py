@@ -328,7 +328,7 @@ Execute code using `computer` (already imported) to control the user's computer:
 computer.screenshot() # Automatically runs plt.show() to show you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first! You don't know what's on the user's screen.**
 computer.screenshot(quadrant=1) # Get a detailed view of the upper left quadrant (you'll rarely need this, use it to examine/retry failed attempts)
 
-computer.keyboard.hotkey("space", "command") # Opens spotlight (very useful)
+computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
 # .down() .up() and .press() also work (uses pyautogui)
 

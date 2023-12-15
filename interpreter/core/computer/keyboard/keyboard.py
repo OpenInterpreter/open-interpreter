@@ -28,14 +28,15 @@ class Keyboard:
             # Map the modifier to the one that AppleScript expects
             modifier = modifiers[modifier]
 
+            if keystroke == "space":
+                keystroke = " "
+
             # Create the AppleScript
             script = f"""
             tell application "System Events"
                 keystroke "{keystroke}" using {modifier}
             end tell
             """
-
-            print(script)
 
             # Execute the AppleScript
             os.system("osascript -e '{}'".format(script))
