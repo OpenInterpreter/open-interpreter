@@ -37,13 +37,6 @@ class Display:
             else:
                 raise ValueError("Invalid quadrant. Choose between 1 and 4.")
 
-        # Shrink screenshot so it's no more than 1024 wide
-        screenshot_width, screenshot_height = screenshot.size
-        if screenshot_width > 1024:
-            ratio = 1024.0 / screenshot_width
-            new_height = int(screenshot_height * ratio)
-            screenshot = screenshot.resize((1024, new_height))
-
         screenshot.save(temp_file.name)
 
         # Open the image file with PIL

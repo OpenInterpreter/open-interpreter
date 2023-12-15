@@ -1,8 +1,13 @@
 import base64
+import io
 import json
 
+from PIL import Image
 
-def convert_to_openai_messages(messages, function_calling=True, vision=False):
+
+def convert_to_openai_messages(
+    messages, function_calling=True, vision=False, shrink_images=True
+):
     """
     Converts LMC messages into OpenAI messages
     """
@@ -78,6 +83,22 @@ def convert_to_openai_messages(messages, function_calling=True, vision=False):
 
                 # Construct the content string
                 content = f"data:image/{extension};base64,{message['content']}"
+
+                if shrink_images:
+                    # Decode the base64 image
+                    img_data = base64.b64decode(message["content"])
+                    img = Image.open(io.BytesIO(img_data))
+
+                    # Resize the image if it's width is more than 1024
+                    if img.width > 1024:
+                        new_height = int(img.height * 1024 / img.width)
+                        img = img.resize((1024, new_height))
+
+                    # Convert the image back to base64
+                    buffered = io.BytesIO()
+                    img.save(buffered, format=extension)
+                    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                    content = f"data:image/{extension};base64,{img_str}"
 
             elif message["format"] == "path":
                 # Convert to base64

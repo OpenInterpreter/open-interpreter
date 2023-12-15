@@ -36,7 +36,10 @@ def setup_llm(interpreter):
         # Non-function-calling LLM
         text_llm = setup_text_llm(interpreter)
         coding_llm = convert_to_coding_llm(
-            text_llm, debug_mode=interpreter.debug_mode, vision=interpreter.vision
+            text_llm,
+            debug_mode=interpreter.debug_mode,
+            vision=interpreter.vision,
+            shrink_images=interpreter.os,
         )
 
     return coding_llm

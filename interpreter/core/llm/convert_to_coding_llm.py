@@ -2,7 +2,9 @@ from ..utils.convert_to_openai_messages import convert_to_openai_messages
 from .setup_text_llm import setup_text_llm
 
 
-def convert_to_coding_llm(text_llm, debug_mode=False, vision=False):
+def convert_to_coding_llm(
+    text_llm, debug_mode=False, vision=False, shrink_images=False
+):
     """
     Takes a text_llm
     returns an OI Coding LLM.
@@ -49,7 +51,7 @@ def convert_to_coding_llm(text_llm, debug_mode=False, vision=False):
         '''
 
         messages = convert_to_openai_messages(
-            messages, function_calling=False, vision=vision
+            messages, function_calling=False, vision=vision, shrink_images=shrink_images
         )
 
         inside_code_block = False
