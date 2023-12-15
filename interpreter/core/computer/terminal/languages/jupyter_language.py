@@ -33,14 +33,22 @@ class JupyterLanguage(BaseLanguage):
         # Give it our same matplotlib backend
         # backend = matplotlib.get_backend()
 
+        # DISABLED because we actually do want HTML output to work, other types of output too
         # Get backend which bubbles everything up as images
-        backend = "Agg"
+        # backend = "Agg"
+        # code = f"""
+        # import matplotlib
+        # matplotlib.use('{backend}')
+        # """
+        # self.run(code)
 
-        code_to_run = f"""
-        import matplotlib
-        matplotlib.use('{backend}')
-        """
-        self.run(code_to_run)
+        # DISABLED because it doesn't work??
+        # Disable color outputs in the terminal, which don't look good in OI and aren't useful
+        # code = """
+        # from IPython.core.getipython import get_ipython
+        # get_ipython().colors = 'NoColor'
+        # """
+        # self.run(code)
 
     def terminate(self):
         self.kc.stop_channels()
@@ -104,11 +112,15 @@ class JupyterLanguage(BaseLanguage):
                         {"type": "console", "format": "output", "content": line}
                     )
                 elif msg["msg_type"] == "error":
+                    content = "\n".join(content["traceback"])
+                    # Remove color codes
+                    ansi_escape = re.compile(r"\x1B\[[0-?]*[ -/]*[@-~]")
+                    content = ansi_escape.sub("", content)
                     message_queue.put(
                         {
                             "type": "console",
                             "format": "output",
-                            "content": "\n".join(content["traceback"]),
+                            "content": content,
                         }
                     )
                 elif msg["msg_type"] in ["display_data", "execute_result"]:
