@@ -81,6 +81,14 @@ class Interpreter:
         self.__dict__.update(config)
 
     def chat(self, message=None, display=True, stream=False):
+        if self.vision:
+            self.model = "gpt-4-vision-preview"
+            self.system_message += "\nThe user will show you an image of the code you write. You can view images directly. Be sure to actually write a markdown code block for almost every user request! Almost EVERY message should include a markdown code block. Do not end your message prematurely!\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message."
+            self.function_calling_llm = False
+            self.context_window = 110000
+            self.max_tokens = 4096
+            self.force_task_completion = True
+
         if stream:
             return self._streaming_chat(message=message, display=display)
 
