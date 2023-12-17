@@ -49,7 +49,7 @@ def interpreter_info(interpreter):
     try:
         if interpreter.local:
             try:
-                curl = subprocess.check_output(f"curl {interpreter.api_base}")
+                curl = subprocess.check_output(f"curl {interpreter.llm.api_base}")
             except Exception as e:
                 curl = str(e)
         else:
@@ -66,7 +66,7 @@ def interpreter_info(interpreter):
         Max tokens: {interpreter.llm.max_tokens}
 
         Auto run: {interpreter.auto_run}
-        API base: {interpreter.api_base}
+        API base: {interpreter.llm.api_base}
         Local: {interpreter.local}
 
         Curl output: {curl}

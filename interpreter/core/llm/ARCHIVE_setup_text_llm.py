@@ -120,10 +120,10 @@ def setup_text_llm(interpreter):
         }
 
         # Optional inputs
-        if interpreter.api_base:
-            params["api_base"] = interpreter.api_base
-        if interpreter.api_key:
-            params["api_key"] = interpreter.api_key
+        if interpreter.llm.api_base:
+            params["api_base"] = interpreter.llm.api_base
+        if interpreter.llm.api_key:
+            params["api_key"] = interpreter.llm.api_key
         if interpreter.api_version:
             params["api_version"] = interpreter.api_version
         if interpreter.llm.max_tokens:
@@ -141,10 +141,10 @@ def setup_text_llm(interpreter):
 
         if interpreter.llm.model == "gpt-4-vision-preview":
             # We need to go straight to OpenAI for this, LiteLLM doesn't work
-            if interpreter.api_base:
-                openai.api_base = interpreter.api_base
-            if interpreter.api_key:
-                openai.api_key = interpreter.api_key
+            if interpreter.llm.api_base:
+                openai.api_base = interpreter.llm.api_base
+            if interpreter.llm.api_key:
+                openai.api_key = interpreter.llm.api_key
             if interpreter.api_version:
                 openai.api_version = interpreter.api_version
             return openai.ChatCompletion.create(**params)

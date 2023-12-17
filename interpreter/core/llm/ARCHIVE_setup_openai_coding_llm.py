@@ -93,10 +93,10 @@ def setup_openai_coding_llm(interpreter):
         }
 
         # Optional inputs
-        if interpreter.api_base:
-            params["api_base"] = interpreter.api_base
-        if interpreter.api_key:
-            params["api_key"] = interpreter.api_key
+        if interpreter.llm.api_base:
+            params["api_base"] = interpreter.llm.api_base
+        if interpreter.llm.api_key:
+            params["api_key"] = interpreter.llm.api_key
         if interpreter.api_version:
             params["api_version"] = interpreter.api_version
         if interpreter.llm.max_tokens:

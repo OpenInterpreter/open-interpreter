@@ -145,6 +145,8 @@ class Llm:
             params["api_version"] = self.api_version
         if self.max_tokens:
             params["max_tokens"] = self.max_tokens
+        if self.temperature:
+            params["temperature"] = self.temperature
 
         # Set some params directly on LiteLLM
         if self.max_budget:
@@ -173,6 +175,11 @@ def fixed_litellm_completions(**params):
         first_error = e
         # LiteLLM can fail if there's no API key,
         # even though some models (like local ones) don't require it.
+
+        if "api key" in str(first_error).lower() and "api_key" not in params:
+            print(
+                "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `interpreter.llm.api_key = 'x'`)"
+            )
 
         # So, let's try one more time with a dummy API key:
         params["api_key"] = "x"

@@ -13,172 +13,240 @@ from .utils.display_markdown_message import display_markdown_message
 from .utils.get_config import get_config_path
 from .validate_llm_settings import validate_llm_settings
 
-arguments = [
-    {
-        "name": "system_message",
-        "nickname": "s",
-        "help_text": "prompt / custom instructions for the language model",
-        "type": str,
-    },
-    {
-        "name": "local",
-        "nickname": "l",
-        "help_text": "experimentally run the language model locally (via LM Studio)",
-        "type": bool,
-    },
-    {
-        "name": "auto_run",
-        "nickname": "y",
-        "help_text": "automatically run generated code",
-        "type": bool,
-    },
-    {
-        "name": "debug_mode",
-        "nickname": "d",
-        "help_text": "run in debug mode",
-        "type": bool,
-    },
-    {
-        "name": "disable_procedures",
-        "nickname": "dp",
-        "help_text": "disables procedures (RAG of some common OI use-cases). disable to shrink system message. auto-disabled for non-OpenAI models",
-        "type": bool,
-    },
-    {
-        "name": "model",
-        "nickname": "m",
-        "help_text": "language model to use",
-        "type": str,
-    },
-    {
-        "name": "temperature",
-        "nickname": "t",
-        "help_text": "optional temperature setting for the language model",
-        "type": float,
-    },
-    {
-        "name": "context_window",
-        "nickname": "c",
-        "help_text": "optional context window size for the language model",
-        "type": int,
-    },
-    {
-        "name": "max_tokens",
-        "nickname": "x",
-        "help_text": "optional maximum number of tokens for the language model",
-        "type": int,
-    },
-    {
-        "name": "max_output",
-        "nickname": "xo",
-        "help_text": "optional maximum number of characters for code outputs",
-        "type": int,
-    },
-    {
-        "name": "max_budget",
-        "nickname": "b",
-        "help_text": "optionally set the max budget (in USD) for your llm calls",
-        "type": float,
-    },
-    {
-        "name": "api_base",
-        "nickname": "ab",
-        "help_text": "optionally set the API base URL for your llm calls (this will override environment variables)",
-        "type": str,
-    },
-    {
-        "name": "api_key",
-        "nickname": "ak",
-        "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
-        "type": str,
-    },
-    {
-        "name": "safe_mode",
-        "nickname": "safe",
-        "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
-        "type": str,
-        "choices": ["off", "ask", "auto"],
-        "default": "off",
-    },
-    {
-        "name": "config_file",
-        "nickname": "cf",
-        "help_text": "optionally set a custom config file to use",
-        "type": str,
-    },
-    {
-        "name": "vision",
-        "nickname": "v",
-        "help_text": "experimentally use vision for supported languages (HTML)",
-        "type": bool,
-    },
-    {
-        "name": "os",
-        "nickname": "o",
-        "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
-        "type": bool,
-    },
-]
-
 
 def start_terminal_interface(interpreter):
     """
     Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
     """
 
+    arguments = [
+        # Profiles coming soon— after we seperate core from TUI
+        # {
+        #     "name": "profile",
+        #     "nickname": "p",
+        #     "help_text": "profile (from your config file) to use. sets multiple settings at once",
+        #     "type": str,
+        #     "default": "default",
+        # },
+        {
+            "name": "custom_instructions",
+            "nickname": "ci",
+            "help_text": "custom instructions for the language model, will be appended to the system_message",
+            "type": str,
+            "attribute": {"object": interpreter, "attr_name": "custom_instructions"},
+        },
+        {
+            "name": "system_message",
+            "nickname": "s",
+            "help_text": "(we don't recommend changing this) base prompt for the language model",
+            "type": str,
+            "attribute": {"object": interpreter, "attr_name": "system_message"},
+        },
+        {
+            "name": "auto_run",
+            "nickname": "y",
+            "help_text": "automatically run generated code",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "auto_run"},
+        },
+        {
+            "name": "debug_mode",
+            "nickname": "d",
+            "help_text": "run in debug mode",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "debug_mode"},
+        },
+        {
+            "name": "model",
+            "nickname": "m",
+            "help_text": "language model to use",
+            "type": str,
+            "attribute": {"object": interpreter.llm, "attr_name": "model"},
+        },
+        {
+            "name": "temperature",
+            "nickname": "t",
+            "help_text": "optional temperature setting for the language model",
+            "type": float,
+            "attribute": {"object": interpreter.llm, "attr_name": "temperature"},
+        },
+        {
+            "name": "context_window",
+            "nickname": "c",
+            "help_text": "optional context window size for the language model",
+            "type": int,
+            "attribute": {"object": interpreter.llm, "attr_name": "context_window"},
+        },
+        {
+            "name": "max_tokens",
+            "nickname": "x",
+            "help_text": "optional maximum number of tokens for the language model",
+            "type": int,
+            "attribute": {"object": interpreter.llm, "attr_name": "max_tokens"},
+        },
+        {
+            "name": "max_budget",
+            "nickname": "b",
+            "help_text": "optionally set the max budget (in USD) for your llm calls",
+            "type": float,
+            "attribute": {"object": interpreter.llm, "attr_name": "max_budget"},
+        },
+        {
+            "name": "api_base",
+            "nickname": "ab",
+            "help_text": "optionally set the API base URL for your llm calls (this will override environment variables)",
+            "type": str,
+            "attribute": {"object": interpreter.llm, "attr_name": "api_base"},
+        },
+        {
+            "name": "api_key",
+            "nickname": "ak",
+            "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
+            "type": str,
+            "attribute": {"object": interpreter.llm, "attr_name": "api_key"},
+        },
+        {
+            "name": "max_output",
+            "nickname": "xo",
+            "help_text": "optional maximum number of characters for code outputs",
+            "type": int,
+            "attribute": {"object": interpreter, "attr_name": "max_output"},
+        },
+        {
+            "name": "force_task_completion",
+            "nickname": "fc",
+            "help_text": "runs OI in a loop, requiring it to admit to completing/failing task",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "force_task_completion"},
+        },
+        {
+            "name": "speak_messages",
+            "nickname": "sm",
+            "help_text": "(Mac only) use the applescript `say` command to read messages aloud",
+            "type": bool,
+            "action": "store_true",
+            "attribute": {"object": interpreter, "attr_name": "speak_messages"},
+        },
+        {
+            "name": "disable_speak_messages",
+            "nickname": "dsm",
+            "help_text": "explicitly disables using the applescript `say` command to read messages aloud",
+            "type": bool,
+            "action": "store_false",
+            "attribute": {"object": interpreter, "attr_name": "speak_messages"},
+        },
+        {
+            "name": "disable_procedures",
+            "nickname": "dp",
+            "help_text": "disables procedures (RAG of some common OI use-cases). disable to shrink system message",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "disable_procedures"},
+        },
+        {
+            "name": "safe_mode",
+            "nickname": "safe",
+            "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
+            "type": str,
+            "choices": ["off", "ask", "auto"],
+            "default": "off",
+            "attribute": {"object": interpreter, "attr_name": "safe_mode"},
+        },
+        {
+            "name": "config_file",
+            "nickname": "cf",
+            "help_text": "optionally set a custom config file to use",
+            "type": str,
+            "attribute": {"object": interpreter, "attr_name": "config_file"},
+        },
+        {
+            "name": "fast",
+            "nickname": "f",
+            "help_text": "run `interpreter --model gpt-3.5-turbo`",
+            "type": bool,
+        },
+        {
+            "name": "local",
+            "nickname": "l",
+            "help_text": "experimentally run the LLM locally via LM Studio (this just sets api_base, model, system_message, and offline = True)",
+            "type": bool,
+        },
+        {
+            "name": "vision",
+            "nickname": "v",
+            "help_text": "experimentally use vision for supported languages (HTML, Python)",
+            "type": bool,
+        },
+        {
+            "name": "os",
+            "nickname": "o",
+            "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
+            "type": bool,
+        },
+        {
+            "name": "config",
+            "help_text": "open config.yaml file in text editor",
+            "type": bool,
+        },
+        {
+            "name": "conversations",
+            "help_text": "list conversations to resume",
+            "type": bool,
+        },
+        {
+            "name": "version",
+            "help_text": "get Open Interpreter's version number",
+            "type": bool,
+        },
+    ]
+
     parser = argparse.ArgumentParser(description="Open Interpreter")
 
     # Add arguments
     for arg in arguments:
+        action = arg.get("action", "store_true")
+        nickname = arg.get("nickname")
+
         if arg["type"] == bool:
-            parser.add_argument(
-                f'-{arg["nickname"]}',
-                f'--{arg["name"]}',
-                dest=arg["name"],
-                help=arg["help_text"],
-                action="store_true",
-                default=None,
-            )
+            if nickname:
+                parser.add_argument(
+                    f"-{nickname}",
+                    f'--{arg["name"]}',
+                    dest=arg["name"],
+                    help=arg["help_text"],
+                    action=action,
+                    default=None,
+                )
+            else:
+                parser.add_argument(
+                    f'--{arg["name"]}',
+                    dest=arg["name"],
+                    help=arg["help_text"],
+                    action=action,
+                    default=None,
+                )
         else:
-            choices = arg["choices"] if "choices" in arg else None
-            default = arg["default"] if "default" in arg else None
+            choices = arg.get("choices")
+            default = arg.get("default")
 
-            parser.add_argument(
-                f'-{arg["nickname"]}',
-                f'--{arg["name"]}',
-                dest=arg["name"],
-                help=arg["help_text"],
-                type=arg["type"],
-                choices=choices,
-                default=default,
-            )
-
-    # Add special arguments
-    parser.add_argument(
-        "--config",
-        dest="config",
-        action="store_true",
-        help="open config.yaml file in text editor",
-    )
-    parser.add_argument(
-        "--conversations",
-        dest="conversations",
-        action="store_true",
-        help="list conversations to resume",
-    )
-    parser.add_argument(
-        "-f",
-        "--fast",
-        dest="fast",
-        action="store_true",
-        help="run `interpreter --model gpt-3.5-turbo`",
-    )
-    parser.add_argument(
-        "--version",
-        dest="version",
-        action="store_true",
-        help="get Open Interpreter's version number",
-    )
+            if nickname:
+                parser.add_argument(
+                    f"-{nickname}",
+                    f'--{arg["name"]}',
+                    dest=arg["name"],
+                    help=arg["help_text"],
+                    type=arg["type"],
+                    choices=choices,
+                    default=default,
+                )
+            else:
+                parser.add_argument(
+                    f'--{arg["name"]}',
+                    dest=arg["name"],
+                    help=arg["help_text"],
+                    type=arg["type"],
+                    choices=choices,
+                    default=default,
+                )
 
     args = parser.parse_args()
 
@@ -208,14 +276,15 @@ def start_terminal_interface(interpreter):
 
     if args.local:
         # Default local (LM studio) attributes
-        interpreter.system_message = "You are an AI."
+        interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
+        interpreter.disable_procedures = True
         interpreter.llm.model = (
             "openai/" + interpreter.llm.model
-        )  # This tells LiteLLM it's an OpenAI compatible server
-        interpreter.api_base = "http://localhost:1234/v1"
+        )  # "openai/" tells LiteLLM it's an OpenAI compatible server, the interpreter.llm.model part doesn't matter
+        interpreter.llm.api_base = "http://localhost:1234/v1"
         interpreter.llm.max_tokens = 1000
         interpreter.llm.context_window = 3000
-        interpreter.api_key = "0"
+        interpreter.llm.api_key = "x"
 
         display_markdown_message(
             """
@@ -238,22 +307,10 @@ Once the server is running, you can begin your conversation below.
 """
         )
 
-    # Set attributes on interpreter
-    for attr_name, attr_value in vars(args).items():
-        # Ignore things that aren't possible attributes on interpreter
-        if attr_value is not None and hasattr(interpreter, attr_name):
-            # If the user has provided a config file, load it and extend interpreter's configuration
-            if attr_name == "config_file":
-                user_config = get_config_path(attr_value)
-                interpreter.config_file = user_config
-                interpreter.extend_config(config_path=user_config)
-            else:
-                setattr(interpreter, attr_name, attr_value)
-
     # Check for update
     try:
         if not interpreter.local:
-            # This should actually be pushed into the utility
+            # This message should actually be pushed into the utility
             if check_for_update():
                 display_markdown_message(
                     "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
@@ -267,11 +324,6 @@ Once the server is running, you can begin your conversation below.
         interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
     ):
         setattr(interpreter, "auto_run", False)
-
-    # If --conversations is used, run conversation_navigator
-    if args.conversations:
-        conversation_navigator(interpreter)
-        return
 
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
@@ -418,6 +470,27 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
         )
         print("")  # < - Aesthetic choice
 
+    # Set attributes on interpreter
+    for attr_name, attr_value in vars(args).items():
+        if attr_value != None:
+            # If the user has provided a config file, load it and extend interpreter's configuration
+            if attr_name == "config_file":
+                user_config = get_config_path(attr_value)
+                interpreter.config_file = user_config
+                interpreter.extend_config(config_path=user_config)
+            else:
+                argument_dictionary = [a for a in arguments if a["name"] == attr_name]
+                if len(argument_dictionary) > 0:
+                    argument_dictionary = argument_dictionary[0]
+                    if "attribute" in argument_dictionary:
+                        attr_dict = argument_dictionary["attribute"]
+                        setattr(attr_dict["object"], attr_dict["attr_name"], attr_value)
+
+                        if args.debug_mode:
+                            print(
+                                f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
+                            )
+
     if not interpreter.local and interpreter.llm.model == "gpt-4-1106-preview":
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 128000
@@ -435,5 +508,10 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
             interpreter.llm.supports_functions = True
 
     validate_llm_settings(interpreter)
+
+    # If --conversations is used, run conversation_navigator
+    if args.conversations:
+        conversation_navigator(interpreter)
+        return
 
     interpreter.chat()
