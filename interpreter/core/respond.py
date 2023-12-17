@@ -50,7 +50,7 @@ def respond(interpreter):
         # (Many people writing GitHub issues were struggling with this)
         except Exception as e:
             if (
-                interpreter.local == False
+                interpreter.offline == False
                 and "auth" in str(e).lower()
                 or "api key" in str(e).lower()
             ):
@@ -58,7 +58,7 @@ def respond(interpreter):
                 raise Exception(
                     f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
                 )
-            elif interpreter.local == False and "not have access" in str(e).lower():
+            elif interpreter.offline == False and "not have access" in str(e).lower():
                 response = input(
                     f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
                 )
@@ -76,13 +76,14 @@ def respond(interpreter):
                     raise Exception(
                         "\n\nYou will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use GPT-4.\n\nhttps://platform.openai.com/account/billing/overview"
                     )
-            elif interpreter.local:
+            elif interpreter.offline and not interpreter.os:
+                print(traceback.format_exc())
                 raise Exception(
                     "Error occurred. "
                     + str(e)
                     + """
 
-Please make sure LM Studio's local server is running by following the steps above, if you're using LM Studio (recommended).
+If you're running `interpreter --local`, please make sure LM Studio's local server is running.
 
 If LM Studio's local server is running, please try a language model with a different architecture.
 

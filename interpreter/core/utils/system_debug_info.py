@@ -47,7 +47,7 @@ def get_ram_info():
 
 def interpreter_info(interpreter):
     try:
-        if interpreter.local:
+        if interpreter.offline:
             try:
                 curl = subprocess.check_output(f"curl {interpreter.llm.api_base}")
             except Exception as e:
@@ -67,7 +67,7 @@ def interpreter_info(interpreter):
 
         Auto run: {interpreter.auto_run}
         API base: {interpreter.llm.api_base}
-        Local: {interpreter.local}
+        Offline: {interpreter.offline}
 
         Curl output: {curl}
     """

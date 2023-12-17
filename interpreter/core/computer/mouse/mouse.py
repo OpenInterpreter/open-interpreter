@@ -15,7 +15,7 @@ class Mouse:
     def move(self, *args, x=None, y=None, index=None):
         if len(args) > 1:
             raise ValueError(
-                "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)"
+                "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)\n\nPlease take a computer.screenshot() to find text to click, then use computer.mouse.click(text) if at all possible. This is significantly more accurate."
             )
         elif len(args) == 1:
             text = args[0]
@@ -48,7 +48,9 @@ class Mouse:
             else:
                 plt.imshow(np.array(bounding_box_image))
                 plt.show()
-                print("Your text was not found on the screen. Please try again.")
+                raise Exception(
+                    f"Your text ('{text}') was not found on the screen. Please try again."
+                )
         elif x is not None and y is not None:
             # Move to the specified coordinates and click
             pyautogui.moveTo(x, y, duration=0.5)

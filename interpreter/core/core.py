@@ -38,7 +38,6 @@ class Interpreter:
         self.shrink_images = (
             False  # Shrinks all images passed into model to less than 1024 in width
         )
-        self.disable_procedures = False
         self.force_task_completion = False
 
         # Conversation history (this should not be here)

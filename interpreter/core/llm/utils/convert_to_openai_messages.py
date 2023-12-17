@@ -85,20 +85,25 @@ def convert_to_openai_messages(
                 content = f"data:image/{extension};base64,{message['content']}"
 
                 if shrink_images:
-                    # Decode the base64 image
-                    img_data = base64.b64decode(message["content"])
-                    img = Image.open(io.BytesIO(img_data))
+                    try:
+                        # Decode the base64 image
+                        img_data = base64.b64decode(message["content"])
+                        img = Image.open(io.BytesIO(img_data))
 
-                    # Resize the image if it's width is more than 1024
-                    if img.width > 1024:
-                        new_height = int(img.height * 1024 / img.width)
-                        img = img.resize((1024, new_height))
+                        # Resize the image if it's width is more than 1024
+                        if img.width > 1024:
+                            new_height = int(img.height * 1024 / img.width)
+                            img = img.resize((1024, new_height))
 
-                    # Convert the image back to base64
-                    buffered = io.BytesIO()
-                    img.save(buffered, format=extension)
-                    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
-                    content = f"data:image/{extension};base64,{img_str}"
+                        # Convert the image back to base64
+                        buffered = io.BytesIO()
+                        img.save(buffered, format=extension)
+                        img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                        content = f"data:image/{extension};base64,{img_str}"
+                    except:
+                        # This should be non blocking. It's not required
+                        # print("Failed to shrink image. Proceeding with original image size.")
+                        pass
 
             elif message["format"] == "path":
                 # Convert to base64

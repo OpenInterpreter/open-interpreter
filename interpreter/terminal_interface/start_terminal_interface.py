@@ -71,6 +71,20 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter.llm, "attr_name": "temperature"},
         },
         {
+            "name": "llm_supports_vision",
+            "nickname": "lsv",
+            "help_text": "inform OI that your model supports vision, and can recieve vision inputs",
+            "type": bool,
+            "attribute": {"object": interpreter.llm, "attr_name": "supports_vision"},
+        },
+        {
+            "name": "llm_supports_functions",
+            "nickname": "lsf",
+            "help_text": "inform OI that your model supports OpenAI-style functions, and can make function calls",
+            "type": bool,
+            "attribute": {"object": interpreter.llm, "attr_name": "supports_functions"},
+        },
+        {
             "name": "context_window",
             "nickname": "c",
             "help_text": "optional context window size for the language model",
@@ -136,13 +150,6 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
         },
         {
-            "name": "disable_procedures",
-            "nickname": "dp",
-            "help_text": "disables procedures (RAG of some common OI use-cases). disable to shrink system message",
-            "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "disable_procedures"},
-        },
-        {
             "name": "safe_mode",
             "nickname": "safe",
             "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
@@ -158,6 +165,7 @@ def start_terminal_interface(interpreter):
             "type": str,
             "attribute": {"object": interpreter, "attr_name": "config_file"},
         },
+        # Profiles
         {
             "name": "fast",
             "nickname": "f",
@@ -182,6 +190,7 @@ def start_terminal_interface(interpreter):
             "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
             "type": bool,
         },
+        # Special commands
         {
             "name": "config",
             "help_text": "open config.yaml file in text editor",
@@ -277,7 +286,7 @@ def start_terminal_interface(interpreter):
     if args.local:
         # Default local (LM studio) attributes
         interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
-        interpreter.disable_procedures = True
+        interpreter.offline = True
         interpreter.llm.model = (
             "openai/" + interpreter.llm.model
         )  # "openai/" tells LiteLLM it's an OpenAI compatible server, the interpreter.llm.model part doesn't matter
@@ -309,7 +318,7 @@ Once the server is running, you can begin your conversation below.
 
     # Check for update
     try:
-        if not interpreter.local:
+        if not args.offline:
             # This message should actually be pushed into the utility
             if check_for_update():
                 display_markdown_message(
@@ -347,7 +356,7 @@ Once the server is running, you can begin your conversation below.
 
     if args.os:
         interpreter.os = True
-        interpreter.disable_procedures = True
+        interpreter.offline = True  # Disables open procedures, which is best for pure code mode / normal mode
         interpreter.llm.supports_vision = True
         interpreter.speak_messages = True
         interpreter.shrink_images = True
@@ -394,7 +403,11 @@ computer.mouse.move("So I was")
 computer.mouse.down()
 computer.mouse.move("and that's it!")
 computer.mouse.up()
+
+computer.clipboard.view() # Prints contents of clipboard for you to review.
 ```
+
+If you want to scroll, **ensure the correct window is active**, then consider using the arrow keys.
 
 For rare and complex mouse actions, consider using computer vision libraries on `pil_image` to produce a list of coordinates for the mouse to move/drag to.
 
@@ -412,7 +425,10 @@ If you use `plt.show()`, the resulting image will be sent to you. However, if yo
 
 Try multiple methods before saying the task is impossible. **You can do it!**
 
-You are an expert computer navigator, brilliant and technical. **At each step, describe the user's screen with a lot of detail, including 1. the active app, 2. what text areas appear to be active, 3. what text is selected, if any, 4. what options you could take next.** Think carefully.
+You are an expert computer navigator, brilliant and technical. **At each step, describe the user's screen with a lot of detail, including 1. the active app, 2. what text areas appear to be active, 3. what text is selected, if any, 4. what options you could take next.** Think carefully, and break the task down into short code blocks. DO NOT TRY TO WRITE CODE THAT DOES THE ENTIRE TASK ALL AT ONCE. Take multiple steps. Verify at each step whether or not you're on track.
+
+# Verifying web based tasks (required)
+In order to verify if a web-based task is complete, use a hotkey that will go to the URL bar, then select all, then copy the contents of the URL bar. Then use clipboard to review the contents of the URL bar, which may be different from the visual appearance.
 
         """.strip()
         )
@@ -491,7 +507,7 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
                                 f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
                             )
 
-    if not interpreter.local and interpreter.llm.model == "gpt-4-1106-preview":
+    if interpreter.llm.model == "gpt-4-1106-preview":
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 128000
         if interpreter.llm.max_tokens is None:
@@ -499,7 +515,7 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
         if interpreter.llm.supports_functions is None:
             interpreter.llm.supports_functions = True
 
-    if not interpreter.local and interpreter.llm.model == "gpt-3.5-turbo-1106":
+    if interpreter.llm.model == "gpt-3.5-turbo-1106":
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 16000
         if interpreter.llm.max_tokens is None:

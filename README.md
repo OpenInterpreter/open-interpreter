@@ -229,7 +229,7 @@ Our Python package gives you more control over each setting. To replicate `--loc
 ```python
 import interpreter
 
-interpreter.local = True # Disables online features like Open Procedures
+interpreter.offline = True # Disables online features like Open Procedures
 interpreter.llm.model = "openai/x" # Tells OI to send messages in OpenAI's format
 interpreter.llm.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
 interpreter.llm.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server

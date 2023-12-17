@@ -56,7 +56,7 @@ class Llm:
             supports_functions = self.supports_functions
         else:
             # Guess whether or not it's a function calling LLM
-            if not self.interpreter.local and (
+            if not self.interpreter.offline and (
                 self.interpreter.llm.model != "gpt-4-vision-preview"
                 and self.model in litellm.open_ai_chat_completion_models
                 or self.model.startswith("azure/")

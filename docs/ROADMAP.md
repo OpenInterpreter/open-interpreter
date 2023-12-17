@@ -54,7 +54,7 @@
   - [ ] `interpreter.__dict__` = a dict derived from config is how the python package should be set, and this should be from the TUI. `interpreter` should not know about the config
   - [ ] Move conversation storage out of the core and into the TUI. When we exit or error, save messages same as core currently does
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
-  - [ ] Rename `interpreter.local` → `interpreter.offline`
+  - [x] Rename `interpreter.local` → `interpreter.offline`
   - [x] Implement custom LLMs with a `.supports_vision` attribute instead of `interpreter.vision`
 - [ ] Further split TUI from core (some utils still reach across)
 - [ ] Remove `procedures` (there must be a better way)

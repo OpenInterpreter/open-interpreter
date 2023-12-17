@@ -15,7 +15,7 @@ def validate_llm_settings(interpreter):
     # This runs in a while loop so `continue` lets us start from the top
     # after changing settings (like switching to/from local)
     while True:
-        if interpreter.local:
+        if interpreter.offline:
             # We have already displayed a message.
             # (This strange behavior makes me think validate_llm_settings needs to be rethought / refactored)
             break
