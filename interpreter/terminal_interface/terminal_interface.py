@@ -149,7 +149,7 @@ def terminal_interface(interpreter, message):
                 )
                 continue
 
-            if interpreter.vision:
+            if interpreter.llm.supports_vision:
                 # Is the input a path to an image? Like they just dragged it into the terminal?
                 image_path = find_image_path(message)
 

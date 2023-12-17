@@ -59,11 +59,11 @@ def interpreter_info(interpreter):
         return f"""
 
         Interpreter Info
-        Vision: {interpreter.vision}
-        Model: {interpreter.model}
-        Function calling: {interpreter.function_calling_llm}
-        Context window: {interpreter.context_window}
-        Max tokens: {interpreter.max_tokens}
+        Vision: {interpreter.llm.supports_vision}
+        Model: {interpreter.llm.model}
+        Function calling: {interpreter.llm.supports_functions}
+        Context window: {interpreter.llm.context_window}
+        Max tokens: {interpreter.llm.max_tokens}
 
         Auto run: {interpreter.auto_run}
         API base: {interpreter.api_base}

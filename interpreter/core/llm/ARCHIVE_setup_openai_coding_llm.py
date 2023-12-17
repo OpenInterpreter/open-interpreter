@@ -4,9 +4,9 @@ import tokentrim as tt
 from ...terminal_interface.utils.display_markdown_message import (
     display_markdown_message,
 )
-from ..utils.convert_to_openai_messages import convert_to_openai_messages
-from ..utils.merge_deltas import merge_deltas
-from ..utils.parse_partial_json import parse_partial_json
+from .utils.convert_to_openai_messages import convert_to_openai_messages
+from .utils.merge_deltas import merge_deltas
+from .utils.parse_partial_json import parse_partial_json
 
 function_schema = {
     "name": "execute",
@@ -55,21 +55,21 @@ def setup_openai_coding_llm(interpreter):
             messages = tt.trim(
                 messages=messages,
                 system_message=system_message,
-                model=interpreter.model,
+                model=interpreter.llm.model,
             )
         except:
-            if interpreter.context_window:
+            if interpreter.llm.context_window:
                 messages = tt.trim(
                     messages=messages,
                     system_message=system_message,
-                    max_tokens=interpreter.context_window,
+                    max_tokens=interpreter.llm.context_window,
                 )
             else:
                 if len(messages) == 1:
                     display_markdown_message(
                         """
                     **We were unable to determine the context window of this model.** Defaulting to 3000.
-                    If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
+                    If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.llm.context_window = {token limit}`.
                     """
                     )
                 messages = tt.trim(
@@ -80,13 +80,13 @@ def setup_openai_coding_llm(interpreter):
             print("Sending this to the OpenAI LLM:", messages)
 
         # Add languages OI has access to
-        function_schema["parameters"]["properties"]["language"][
-            "enum"
-        ] = interpreter.languages
+        function_schema["parameters"]["properties"]["language"]["enum"] = [
+            i.name.lower() for i in interpreter.computer.terminal.languages
+        ]
 
         # Create LiteLLM generator
         params = {
-            "model": interpreter.model,
+            "model": interpreter.llm.model,
             "messages": messages,
             "stream": True,
             "functions": [function_schema],
@@ -99,8 +99,8 @@ def setup_openai_coding_llm(interpreter):
             params["api_key"] = interpreter.api_key
         if interpreter.api_version:
             params["api_version"] = interpreter.api_version
-        if interpreter.max_tokens:
-            params["max_tokens"] = interpreter.max_tokens
+        if interpreter.llm.max_tokens:
+            params["max_tokens"] = interpreter.llm.max_tokens
         if interpreter.temperature is not None:
             params["temperature"] = interpreter.temperature
         else:

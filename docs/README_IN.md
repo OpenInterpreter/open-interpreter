@@ -173,7 +173,7 @@ interpreter --fast
 Python में, आपको मॉडल को मैन्युअली सेट करने की आवश्यकता होगी:
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 ### ओपन इंटरप्रेटर को स्थानीय रूप से चलाना

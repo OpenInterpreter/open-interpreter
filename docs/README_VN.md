@@ -75,7 +75,7 @@ interpreter
 import interpreter
 
 interpreter.chat("Vẽ giá cổ phiếu đã bình hoá của AAPL và META ") # Chạy trên 1 dòng lệnh
-interpreter.chat() # Khởi động chat có khả năng tương tác  
+interpreter.chat() # Khởi động chat có khả năng tương tác
 ```
 
 ## So sánh Code Interpreter của ChatGPT
@@ -90,10 +90,10 @@ Tuy nhiên, dịch vụ của OpenAI được lưu trữ, mã nguồn đóng, v�
 - Trạng thái tin nhắn bị xoá kèm với các tệp và liên kết được tạo trước đó khi đóng môi trường lại.
 
 ---
+
 Open Interpreter khắc phục những hạn chế này bằng cách chạy cục bộ trobộ môi trường máy tính của bạn. Nó có toàn quyền truy cập vào Internet, không bị hạn chế về thời gian hoặc kích thước tệp và có thể sử dụng bất kỳ gói hoặc thư viện nào.
 
 Đây là sự kết hợp sức mạnh của mã nguồn của GPT-4 với tính linh hoạt của môi trường phát triển cục bộ của bạn.
-
 
 ## Dòng lệnh
 
@@ -178,6 +178,7 @@ print(interpreter.system_message)
 Open Interpreter sử dụng mô hình [LiteLLM](https://docs.litellm.ai/docs/providers/) để kết nối tới các mô hình ngôn ngữ được lưu trữ trước đó.
 
 Bạn có thể thay đổi mô hình ngôn ngữ bằng cách thay đổi tham số mô hình:
+
 ```shell
 interpreter --model gpt-3.5-turbo
 interpreter --model claude-2
@@ -187,7 +188,7 @@ interpreter --model command-nightly
 Ở trong Python, đổi model bằng cách thay đổi đối tượng:
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 [Tìm tên chuỗi "mô hình" phù hợp cho mô hình ngôn ngữ của bạn ở đây.](https://docs.litellm.ai/docs/providers/)
@@ -259,7 +260,6 @@ Open Interpreter cho phép bạn thiết lập các tác vụ mặc định bằ
 
 Điều này cung cấp một cách linh hoạt để định cấu hình trình thông dịch mà không cần thay đổi đối số dòng lệnh mỗi lần
 
-
 Chạy lệnh sau để mở tệp cấu hình:
 
 ```
@@ -286,7 +286,7 @@ interpreter --config_file $config_path
 
 **Chú ý**: Thay đổi `$config_path` với tên hoặc đường dẫn đến tệp cấu hình của bạn.
 
-##### Ví dụ CLI 
+##### Ví dụ CLI
 
 1. Tạo mới một file `config.turbo.yaml`
    ```

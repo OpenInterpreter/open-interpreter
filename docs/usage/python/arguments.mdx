@@ -12,7 +12,7 @@ title: Arguments
 
 #### `messages`
 
-This property holds a list of `messages` between the user and the interpreter. 
+This property holds a list of `messages` between the user and the interpreter.
 
 You can use it to restore a conversation:
 
@@ -51,7 +51,7 @@ interpreter.messages = messages # A list that resembles the one above
 
 #### `local`
 
-This boolean flag determines whether the model [runs locally](/language-model-setup/local-models/overview) (`True`) or in the cloud (`False`). 
+This boolean flag determines whether the model [runs locally](/language-model-setup/local-models/overview) (`True`) or in the cloud (`False`).
 
 ```python
 interpreter.local = True  # Run locally
@@ -133,7 +133,7 @@ Specifies the language model to be used.
 If `interpreter.local` is set to `True`, [the language model will be run locally.](/language-model-setup/local-models/overview)
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 ---
@@ -165,7 +165,7 @@ This manually sets the context window size in tokens.
 We try to guess the right context window size for you model, but you can override it with this parameter.
 
 ```python
-interpreter.context_window = 16000
+interpreter.llm.context_window = 16000
 ```
 
 ---
@@ -175,7 +175,7 @@ interpreter.context_window = 16000
 Sets the maximum number of tokens the model can generate in a single response.
 
 ```python
-interpreter.max_tokens = 100
+interpreter.llm.max_tokens = 100
 ```
 
 ---

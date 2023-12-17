@@ -13,7 +13,7 @@ interpreter --model j2-light
 ```python Python
 import interpreter
 
-interpreter.model = "j2-light"
+interpreter.llm.model = "j2-light"
 interpreter.chat()
 ```
 
@@ -32,9 +32,9 @@ interpreter --model j2-ultra
 ```
 
 ```python Python
-interpreter.model = "j2-light"
-interpreter.model = "j2-mid"
-interpreter.model = "j2-ultra"
+interpreter.llm.model = "j2-light"
+interpreter.llm.model = "j2-mid"
+interpreter.llm.model = "j2-ultra"
 ```
 
 </CodeGroup>

@@ -13,7 +13,7 @@ interpreter --model claude-instant-1
 ```python Python
 import interpreter
 
-interpreter.model = "claude-instant-1"
+interpreter.llm.model = "claude-instant-1"
 interpreter.chat()
 ```
 
@@ -32,9 +32,9 @@ interpreter --model claude-2
 ```
 
 ```python Python
-interpreter.model = "claude-instant-1"
-interpreter.model = "claude-instant-1.2"
-interpreter.model = "claude-2"
+interpreter.llm.model = "claude-instant-1"
+interpreter.llm.model = "claude-instant-1.2"
+interpreter.llm.model = "claude-2"
 ```
 
 </CodeGroup>

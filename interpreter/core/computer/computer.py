@@ -12,6 +12,8 @@ except:
 class Computer:
     def __init__(self):
         self.terminal = Terminal()
+
+        # OS mode
         try:
             self.mouse = Mouse(
                 self
@@ -21,6 +23,15 @@ class Computer:
             self.clipboard = Clipboard()
         except:
             pass
+
+    # Shortcut for computer.terminal.languages
+    @property
+    def languages(self):
+        return self.terminal.languages
+
+    @languages.setter
+    def languages(self, value):
+        self.terminal.languages = value
 
     def run(self, *args, **kwargs):
         """

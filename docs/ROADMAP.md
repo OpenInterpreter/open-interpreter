@@ -11,8 +11,8 @@
   - [ ] Also add `interpreter.get_last_assistant_messages()` to return the last assistant messages.
 - [ ] Allow for limited functions (`interpreter.functions`) using regex
   - [ ] If `interpreter.functions != []`:
-      - [ ] set `interpreter.languages` to only use Python
-      - [ ] Use regex to ensure the output of code blocks conforms to just using those functions + other python basics
+    - [ ] set `interpreter.computer.languages` to only use Python
+    - [ ] Use regex to ensure the output of code blocks conforms to just using those functions + other python basics
 - [ ] Allow for custom llms (to be stored in `interpreter.llm`) which conform to some class
   - [ ] Should be a generator that can be treated exactly like the OpenAI streaming API
   - [ ] Has attributes `.supports_function_calling`, `.supports_vision`, and `.context_window`
@@ -20,18 +20,19 @@
 - [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
   - [x] Make it so function calling dynamically uses the languages in interpreter.computer.languages
 - [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstrings. Keep this minimal!
-  - [ ] 
+  - [ ]
   - [ ] If `interpreter.skill_library == True`, we should add a decorator above all functions, then show OI how to search its skill library
-- [ ] Allow for integrations somehow
+- [x] Allow for integrations somehow (you can replace interpreter.llm.completions with a wrapped completions endpoint for any kind of logging. need to document this tho)
+  - [ ] Document this^
 - [ ] Expand "safe mode" to have proper, simple Docker support, or maybe Cosmopolitan LibC
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
 
 ## Future-proofing
 
 - [ ] Really good tests / optimization framework, to be run less frequently than Github actions tests
-  - [ ] Figure out how to run us on [GAIA](https://huggingface.co/gaia-benchmark) and use a subset of that as our tests / optimization framework
-    - [ ] How do we just get the questions out of this thing?
-    - [ ] How do we assess whether or not OI has solved the task?
+  - [x] Figure out how to run us on [GAIA](https://huggingface.co/gaia-benchmark)
+    - [x] How do we just get the questions out of this thing?
+    - [x] How do we assess whether or not OI has solved the task?
   - [ ] Loop over GAIA, use a different language model every time (use Replicate, then ask LiteLLM how they made their "mega key" to many different LLM providers)
   - [ ] Loop over that ↑ using a different prompt each time. Which prompt is best across all LLMs?
   - [ ] (Future future) Use GPT-4 to assess each result, explaining each failure. Summarize. Send it all to GPT-4 + our prompt. Let it redesign the prompt, given the failures, rinse and repeat
@@ -40,7 +41,8 @@
   - [ ] `interpreter.__dict__` = a dict derived from config is how the python package should be set, and this should be from the TUI. `interpreter` should not know about the config
   - [ ] Move conversation storage out of the core and into the TUI. When we exit or error, save messages same as core currently does
 - [ ] Local and vision should be reserved for TUI, more granular settings for Python
-  - [ ] Rename `interpreter.local` → `interpreter.offline`, implement ↑ custom LLMs with a `.supports_vision` attribute instead of `interpreter.vision`
+  - [ ] Rename `interpreter.local` → `interpreter.offline`
+  - [x] Implement custom LLMs with a `.supports_vision` attribute instead of `interpreter.vision`
 - [ ] Further split TUI from core (some utils still reach across)
 - [ ] Remove `procedures` (there must be a better way)
 - [ ] Better storage of different model keys in TUI / config file. All keys, to multiple providers, should be stored in there. Easy switching

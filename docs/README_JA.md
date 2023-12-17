@@ -124,7 +124,7 @@ interpreter
 interpreter.chat()
 ```
 
-**ストリーミングすることでchunk毎に処理することも可能です:**
+**ストリーミングすることで chunk 毎に処理することも可能です:**
 
 ```python
 message = "What operating system are we on?"
@@ -189,10 +189,10 @@ interpreter --model claude-2
 interpreter --model command-nightly
 ```
 
-Pythonでは、オブジェクト上でモデルを設定します:
+Python では、オブジェクト上でモデルを設定します:
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 [適切な "model" の値はこちらから検索してください。](https://docs.litellm.ai/docs/providers/)
@@ -207,24 +207,24 @@ Open Interpreter は、ローカルの言語モデルへの接続に [LM Studio]
 interpreter --local
 ```
 
-**バックグラウンドでLM Studioを実行する必要があります。**
+**バックグラウンドで LM Studio を実行する必要があります。**
 
 1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
 2. モデルを選択し、**↓ ダウンロード** をクリックします。
-3. 左側の **↔️** ボタン（💬の下）をクリックします。
+3. 左側の **↔️** ボタン（💬 の下）をクリックします。
 4. 上部でモデルを選択し、**サーバーを起動** をクリックします。
 
 サーバーが稼働を開始したら、Open Interpreter との会話を開始できます。
 
 （`interpreter --local` コマンドを実行した際にも、上記の手順が表示されます。）
 
-> **注意:** ローカルモードでは、`context_window` を3000に、`max_tokens` を1000に設定します。モデルによって異なる要件がある場合、これらのパラメータを手動で設定してください（下記参照）。
+> **注意:** ローカルモードでは、`context_window` を 3000 に、`max_tokens` を 1000 に設定します。モデルによって異なる要件がある場合、これらのパラメータを手動で設定してください（下記参照）。
 
 #### コンテキストウィンドウ、最大トークン数
 
 ローカルで実行しているモデルの `max_tokens` と `context_window`（トークン単位）を変更することができます。
 
-ローカルモードでは、小さいコンテキストウィンドウはRAMを少なく使用するので、失敗する場合や遅い場合は、より短いウィンドウ（〜1000）を試すことをお勧めします。`max_tokens` が `context_window` より小さいことを確認してください。
+ローカルモードでは、小さいコンテキストウィンドウは RAM を少なく使用するので、失敗する場合や遅い場合は、より短いウィンドウ（〜1000）を試すことをお勧めします。`max_tokens` が `context_window` より小さいことを確認してください。
 
 ```shell
 interpreter --local --max_tokens 1000 --context_window 3000
@@ -252,15 +252,15 @@ $ interpreter
 
 - `%debug [true/false]`: デバッグモードを切り替えます。引数なしまたは `true` でデバッグモードに入ります。`false` でデバッグモードを終了します。
 - `%reset`: 現在のセッションの会話をリセットします。
-- `%undo`: メッセージ履歴から前のユーザーメッセージとAIの応答を削除します。
-- `%save_message [path]`: メッセージを指定したJSONパスに保存します。パスが指定されていない場合、デフォルトは `messages.json` になります。
-- `%load_message [path]`: 指定したJSONパスからメッセージを読み込みます。パスが指定されていない場合、デフォルトは `messages.json` になります。
-- `%tokens [prompt]`: (_実験的_) 次のプロンプトのコンテキストとして送信されるトークンを計算し、そのコストを見積もります。オプションで、`prompt` が提供された場合のトークンと見積もりコストを計算します。見積もりコストは [LiteLLMの `cost_per_token()` メソッド](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token)に依存します。
+- `%undo`: メッセージ履歴から前のユーザーメッセージと AI の応答を削除します。
+- `%save_message [path]`: メッセージを指定した JSON パスに保存します。パスが指定されていない場合、デフォルトは `messages.json` になります。
+- `%load_message [path]`: 指定した JSON パスからメッセージを読み込みます。パスが指定されていない場合、デフォルトは `messages.json` になります。
+- `%tokens [prompt]`: (_実験的_) 次のプロンプトのコンテキストとして送信されるトークンを計算し、そのコストを見積もります。オプションで、`prompt` が提供された場合のトークンと見積もりコストを計算します。見積もりコストは [LiteLLM の `cost_per_token()` メソッド](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token)に依存します。
 - `%help`: ヘルプメッセージを表示します。
 
 ### 設定
 
-Open Interpreterでは、`config.yaml` ファイルを使用してデフォルトの動作を設定することができます。
+Open Interpreter では、`config.yaml` ファイルを使用してデフォルトの動作を設定することができます。
 
 これにより、毎回コマンドライン引数を変更することなく柔軟に設定することができます。
 
@@ -302,7 +302,7 @@ interpreter --config_file $config_path
    interpreter --config_file config.turbo.yaml
    ```
 
-##### Pythonでの使用例
+##### Python での使用例
 
 Python のスクリプトから Open Interpreter を呼び出すときにも設定ファイルをロードできます:
 
@@ -321,9 +321,9 @@ for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
 ```
 
-## FastAPIサーバーのサンプル
+## FastAPI サーバーのサンプル
 
-アップデートにより Open Interpreter は、HTTP RESTエンドポイントを介して制御できるようになりました:
+アップデートにより Open Interpreter は、HTTP REST エンドポイントを介して制御できるようになりました:
 
 ```python
 # server.py

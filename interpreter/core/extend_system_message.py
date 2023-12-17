@@ -4,15 +4,15 @@ from .rag.get_relevant_procedures_string import get_relevant_procedures_string
 from .utils.get_user_info_string import get_user_info_string
 
 
-def generate_system_message(interpreter):
+def extend_system_message(interpreter):
     """
-    Dynamically generate a system message.
+    Dynamically extend system message with stuff like the user's OS, username, etc.
 
     Takes an interpreter instance,
     returns a string.
 
     This is easy to replace!
-    Just swap out `interpreter.generate_system_message` with another function.
+    Just swap out `interpreter.extend_system_message` with another function.
     """
 
     #### Start with the static system message
@@ -45,5 +45,8 @@ def generate_system_message(interpreter):
     for language in interpreter.computer.terminal.languages:
         if hasattr(language, "system_message"):
             system_message += "\n\n" + language.system_message
+
+    if interpreter.custom_instructions:
+        system_message += "\n\n" + interpreter.custom_instructions
 
     return system_message.strip()

@@ -162,7 +162,7 @@ interpreter --model command-nightly
 在 Python 环境下，您需要手动设置模型：
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 ### 在本地运行 Open Interpreter（开放解释器）

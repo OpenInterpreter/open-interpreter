@@ -18,7 +18,7 @@ def setup_function():
     interpreter.reset()
     interpreter.temperature = 0
     interpreter.auto_run = True
-    interpreter.model = "gpt-3.5-turbo"
+    interpreter.llm.model = "gpt-3.5-turbo"
     interpreter.debug_mode = False
 
 
@@ -44,7 +44,7 @@ def test_config_loading():
 
     # check the settings we configured in our config.test.yaml file
     temperature_ok = interpreter.temperature == 0.25
-    model_ok = interpreter.model == "gpt-3.5-turbo"
+    model_ok = interpreter.llm.model == "gpt-3.5-turbo"
     debug_mode_ok = interpreter.debug_mode == True
 
     assert temperature_ok and model_ok and debug_mode_ok
@@ -76,12 +76,12 @@ def test_vision():
         },
     ]
 
-    interpreter.vision = True
-    interpreter.model = "gpt-4-vision-preview"
+    interpreter.llm.supports_vision = True
+    interpreter.llm.model = "gpt-4-vision-preview"
     interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
-    interpreter.function_calling_llm = False
-    interpreter.context_window = 110000
-    interpreter.max_tokens = 4096
+    interpreter.llm.supports_functions = False
+    interpreter.llm.context_window = 110000
+    interpreter.llm.max_tokens = 4096
     interpreter.force_task_completion = True
 
     interpreter.chat(messages)
@@ -324,19 +324,19 @@ def test_reset():
 
 def test_token_counter():
     system_tokens = count_tokens(
-        text=interpreter.system_message, model=interpreter.model
+        text=interpreter.system_message, model=interpreter.llm.model
     )
 
     prompt = "How many tokens is this?"
 
-    prompt_tokens = count_tokens(text=prompt, model=interpreter.model)
+    prompt_tokens = count_tokens(text=prompt, model=interpreter.llm.model)
 
     messages = [
         {"role": "system", "message": interpreter.system_message}
     ] + interpreter.messages
 
     system_token_test = count_messages_tokens(
-        messages=messages, model=interpreter.model
+        messages=messages, model=interpreter.llm.model
     )
 
     system_tokens_ok = system_tokens == system_token_test[0]
@@ -344,7 +344,7 @@ def test_token_counter():
     messages.append({"role": "user", "message": prompt})
 
     prompt_token_test = count_messages_tokens(
-        messages=messages, model=interpreter.model
+        messages=messages, model=interpreter.llm.model
     )
 
     prompt_tokens_ok = system_tokens + prompt_tokens == prompt_token_test[0]

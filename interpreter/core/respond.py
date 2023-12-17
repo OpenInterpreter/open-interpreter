@@ -14,43 +14,25 @@ def respond(interpreter):
     last_unsupported_code = ""
 
     while True:
-        system_message = interpreter.generate_system_message()
+        ## EXTEND SYSTEM MESSAGE ##
+
+        extended_system_message = interpreter.extend_system_message()
 
         # Create message object
-        system_message = {
+        extended_system_message = {
             "role": "system",
             "type": "message",
-            "content": system_message,
+            "content": extended_system_message,
         }
 
         # Create the version of messages that we'll send to the LLM
         messages_for_llm = interpreter.messages.copy()
-        messages_for_llm = [system_message] + messages_for_llm
-
-        # Trim image messages if they're there
-        if interpreter.vision:
-            image_messages = [msg for msg in messages_for_llm if msg["type"] == "image"]
-
-            if interpreter.os:
-                # Keep only the last image if the interpreter is running in OS mode
-                if len(image_messages) > 1:
-                    for img_msg in image_messages[:-1]:
-                        messages_for_llm.remove(img_msg)
-                        if interpreter.debug_mode:
-                            print("Removing image message!")
-            else:
-                # Delete all the middle ones (leave only the first and last 2 images) from messages_for_llm
-                if len(image_messages) > 3:
-                    for img_msg in image_messages[1:-2]:
-                        messages_for_llm.remove(img_msg)
-                        if interpreter.debug_mode:
-                            print("Removing image message!")
-                # Idea: we could set detail: low for the middle messages, instead of deleting them
+        messages_for_llm = [extended_system_message] + messages_for_llm
 
         ### RUN THE LLM ###
 
         try:
-            for chunk in interpreter._llm(messages_for_llm):
+            for chunk in interpreter.llm.run(messages_for_llm):
                 yield {"role": "assistant", **chunk}
 
         except litellm.exceptions.BudgetExceededError:
@@ -78,16 +60,18 @@ def respond(interpreter):
                 )
             elif interpreter.local == False and "not have access" in str(e).lower():
                 response = input(
-                    f"  You do not have access to {interpreter.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
+                    f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
                 )
                 print("")  # <- Aesthetic choice
 
                 if response.strip().lower() == "y":
-                    interpreter.model = "gpt-3.5-turbo-1106"
-                    interpreter.context_window = 16000
-                    interpreter.max_tokens = 4096
-                    interpreter.function_calling_llm = True
-                    display_markdown_message(f"> Model set to `{interpreter.model}`")
+                    interpreter.llm.model = "gpt-3.5-turbo-1106"
+                    interpreter.llm.context_window = 16000
+                    interpreter.llm.max_tokens = 4096
+                    interpreter.llm.supports_functions = True
+                    display_markdown_message(
+                        f"> Model set to `{interpreter.llm.model}`"
+                    )
                 else:
                     raise Exception(
                         "\n\nYou will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use GPT-4.\n\nhttps://platform.openai.com/account/billing/overview"
@@ -118,8 +102,15 @@ If LM Studio's local server is running, please try a language model with a diffe
                 language = interpreter.messages[-1]["format"].lower().strip()
                 code = interpreter.messages[-1]["content"]
 
+                if interpreter.os and language == "text":
+                    # It does this sometimes just to take notes. Let it, it's useful.
+                    # In the future we should probably not detect this behavior as code at all.
+                    continue
+
                 # Is this language enabled/supported?
-                if language not in interpreter.languages:
+                if language not in [
+                    i.name.lower() for i in interpreter.computer.terminal.languages
+                ]:
                     output = f"`{language}` disabled or not supported."
 
                     yield {

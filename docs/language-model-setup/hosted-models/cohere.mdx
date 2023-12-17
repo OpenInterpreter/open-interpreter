@@ -13,7 +13,7 @@ interpreter --model command-nightly
 ```python Python
 import interpreter
 
-interpreter.model = "command-nightly"
+interpreter.llm.model = "command-nightly"
 interpreter.chat()
 ```
 
@@ -35,12 +35,12 @@ interpreter --model command-nightly
 ```
 
 ```python Python
-interpreter.model = "command"
-interpreter.model = "command-light"
-interpreter.model = "command-medium"
-interpreter.model = "command-medium-beta"
-interpreter.model = "command-xlarge-beta"
-interpreter.model = "command-nightly"
+interpreter.llm.model = "command"
+interpreter.llm.model = "command-light"
+interpreter.llm.model = "command-medium"
+interpreter.llm.model = "command-medium-beta"
+interpreter.llm.model = "command-xlarge-beta"
+interpreter.llm.model = "command-nightly"
 ```
 
 </CodeGroup>

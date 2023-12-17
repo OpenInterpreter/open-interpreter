@@ -192,7 +192,7 @@ interpreter --model command-nightly
 In Python, set the model on the object:
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 [Find the appropriate "model" string for your language model here.](https://docs.litellm.ai/docs/providers/)
@@ -230,7 +230,7 @@ Our Python package gives you more control over each setting. To replicate `--loc
 import interpreter
 
 interpreter.local = True # Disables online features like Open Procedures
-interpreter.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.llm.model = "openai/x" # Tells OI to send messages in OpenAI's format
 interpreter.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
 interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
 

@@ -33,14 +33,16 @@ class JupyterLanguage(BaseLanguage):
         # Give it our same matplotlib backend
         # backend = matplotlib.get_backend()
 
-        # DISABLED because we actually do want HTML output to work, other types of output too
-        # Get backend which bubbles everything up as images
-        # backend = "Agg"
-        # code = f"""
-        # import matplotlib
-        # matplotlib.use('{backend}')
-        # """
-        # self.run(code)
+        # Use Agg, which bubbles everything up as an image.
+        # Not perfect (I want interactive!) but it works.
+        backend = "Agg"
+
+        code = f"""
+        import matplotlib
+        matplotlib.use('{backend}')
+        """
+        for _ in self.run(code):
+            pass
 
         # DISABLED because it doesn't work??
         # Disable color outputs in the terminal, which don't look good in OI and aren't useful
@@ -55,6 +57,8 @@ class JupyterLanguage(BaseLanguage):
         self.km.shutdown_kernel()
 
     def run(self, code):
+        # exec(code)
+        # return
         self.finish_flag = False
         try:
             preprocessed_code = self.preprocess_code(code)
@@ -219,7 +223,9 @@ def preprocess_python(code):
     code = code.strip()
 
     # Add print commands that tell us what the active line is
-    code = add_active_line_prints(code)
+    # but don't do this if any line starts with ! or %
+    if not any(line.strip().startswith(("!", "%")) for line in code.split("\n")):
+        code = add_active_line_prints(code)
 
     # Wrap in a try except (DISABLED)
     # code = wrap_in_try_except(code)

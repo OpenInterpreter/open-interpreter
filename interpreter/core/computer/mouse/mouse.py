@@ -12,7 +12,7 @@ class Mouse:
     def __init__(self, computer):
         self.computer = computer
 
-    def move(self, *args, x=None, y=None, index=None, svg=None):
+    def move(self, *args, x=None, y=None, index=None):
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)"
@@ -52,16 +52,6 @@ class Mouse:
         elif x is not None and y is not None:
             # Move to the specified coordinates and click
             pyautogui.moveTo(x, y, duration=0.5)
-        elif svg is not None:
-            raise NotImplementedError("SVG handling not implemented yet.")
-            # img = self.computer.screenshot(show=False)
-            # # Move to the specified coordinates and click
-            # coordinates = find_svg_in_image(svg, img)
-            # if coordinates == None:
-            #     print("Not found.")
-            #     return
-            # pyautogui.moveTo(coordinates[0], coordinates[1], duration=0.5)
-            # pyautogui.click(coordinates[0], coordinates[1])
         else:
             raise ValueError("Either text or both x and y must be provided")
 

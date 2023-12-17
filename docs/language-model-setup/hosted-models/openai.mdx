@@ -36,7 +36,7 @@ interpreter --model gpt-3.5-turbo
 ```python Python
 import interpreter
 
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 interpreter.chat()
 ```
 
@@ -56,10 +56,10 @@ interpreter --model gpt-3.5-turbo-16k
 ```
 
 ```python Python
-interpreter.model = "gpt-4"
-interpreter.model = "gpt-4-32k"
-interpreter.model = "gpt-3.5-turbo"
-interpreter.model = "gpt-3.5-turbo-16k"
+interpreter.llm.model = "gpt-4"
+interpreter.llm.model = "gpt-4-32k"
+interpreter.llm.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo-16k"
 ```
 
 </CodeGroup>

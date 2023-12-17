@@ -209,12 +209,12 @@ def start_terminal_interface(interpreter):
     if args.local:
         # Default local (LM studio) attributes
         interpreter.system_message = "You are an AI."
-        interpreter.model = (
-            "openai/" + interpreter.model
+        interpreter.llm.model = (
+            "openai/" + interpreter.llm.model
         )  # This tells LiteLLM it's an OpenAI compatible server
         interpreter.api_base = "http://localhost:1234/v1"
-        interpreter.max_tokens = 1000
-        interpreter.context_window = 3000
+        interpreter.llm.max_tokens = 1000
+        interpreter.llm.context_window = 3000
         interpreter.api_key = "0"
 
         display_markdown_message(
@@ -280,15 +280,15 @@ Once the server is running, you can begin your conversation below.
         return
 
     if args.fast:
-        interpreter.model = "gpt-3.5-turbo"
+        interpreter.llm.model = "gpt-3.5-turbo"
 
     if args.vision:
-        interpreter.vision = True
-        interpreter.model = "gpt-4-vision-preview"
+        interpreter.llm.supports_vision = True
+        interpreter.llm.model = "gpt-4-vision-preview"
         interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
-        interpreter.function_calling_llm = False
-        interpreter.context_window = 110000
-        interpreter.max_tokens = 4096
+        interpreter.llm.supports_functions = False
+        interpreter.llm.context_window = 110000
+        interpreter.llm.max_tokens = 4096
         interpreter.force_task_completion = True
 
         display_markdown_message("> `Vision` enabled **(experimental)**\n")
@@ -296,12 +296,13 @@ Once the server is running, you can begin your conversation below.
     if args.os:
         interpreter.os = True
         interpreter.disable_procedures = True
-        interpreter.vision = True
+        interpreter.llm.supports_vision = True
         interpreter.speak_messages = True
-        interpreter.model = "gpt-4-vision-preview"
-        interpreter.function_calling_llm = False
-        interpreter.context_window = 110000
-        interpreter.max_tokens = 4096
+        interpreter.shrink_images = True
+        interpreter.llm.model = "gpt-4-vision-preview"
+        interpreter.llm.supports_functions = False
+        interpreter.llm.context_window = 110000
+        interpreter.llm.max_tokens = 4096
         interpreter.auto_run = True
         interpreter.force_task_completion = True
 
@@ -398,12 +399,12 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
 
         # FOR TESTING ONLY
         # Install Open Interpreter from GitHub
-        for chunk in interpreter.computer.run(
-            "shell",
-            "pip install git+https://github.com/KillianLucas/open-interpreter.git",
-        ):
-            if chunk.get("format") != "active_line":
-                print(chunk.get("content"))
+        # for chunk in interpreter.computer.run(
+        #     "shell",
+        #     "pip install git+https://github.com/KillianLucas/open-interpreter.git",
+        # ):
+        #     if chunk.get("format") != "active_line":
+        #         print(chunk.get("content"))
 
         # Give it access to the computer via Python
         for _ in interpreter.computer.run(
@@ -417,21 +418,21 @@ You are an expert computer navigator, brilliant and technical. **At each step, d
         )
         print("")  # < - Aesthetic choice
 
-    if not interpreter.local and interpreter.model == "gpt-4-1106-preview":
-        if interpreter.context_window is None:
-            interpreter.context_window = 128000
-        if interpreter.max_tokens is None:
-            interpreter.max_tokens = 4096
-        if interpreter.function_calling_llm is None:
-            interpreter.function_calling_llm = True
+    if not interpreter.local and interpreter.llm.model == "gpt-4-1106-preview":
+        if interpreter.llm.context_window is None:
+            interpreter.llm.context_window = 128000
+        if interpreter.llm.max_tokens is None:
+            interpreter.llm.max_tokens = 4096
+        if interpreter.llm.supports_functions is None:
+            interpreter.llm.supports_functions = True
 
-    if not interpreter.local and interpreter.model == "gpt-3.5-turbo-1106":
-        if interpreter.context_window is None:
-            interpreter.context_window = 16000
-        if interpreter.max_tokens is None:
-            interpreter.max_tokens = 4096
-        if interpreter.function_calling_llm is None:
-            interpreter.function_calling_llm = True
+    if not interpreter.local and interpreter.llm.model == "gpt-3.5-turbo-1106":
+        if interpreter.llm.context_window is None:
+            interpreter.llm.context_window = 16000
+        if interpreter.llm.max_tokens is None:
+            interpreter.llm.max_tokens = 4096
+        if interpreter.llm.supports_functions is None:
+            interpreter.llm.supports_functions = True
 
     validate_llm_settings(interpreter)
 

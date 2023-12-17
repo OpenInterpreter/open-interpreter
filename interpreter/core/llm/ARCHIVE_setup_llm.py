@@ -12,17 +12,17 @@ def setup_llm(interpreter):
     """
 
     # Detect whether or not it's a function calling LLM
-    if interpreter.function_calling_llm == None:
+    if interpreter.llm.supports_functions == None:
         if not interpreter.local and (
-            interpreter.model != "gpt-4-vision-preview"
-            and interpreter.model in litellm.open_ai_chat_completion_models
-            or interpreter.model.startswith("azure/")
+            interpreter.llm.model != "gpt-4-vision-preview"
+            and interpreter.llm.model in litellm.open_ai_chat_completion_models
+            or interpreter.llm.model.startswith("azure/")
         ):
-            interpreter.function_calling_llm = True
+            interpreter.llm.supports_functions = True
         else:
-            interpreter.function_calling_llm = False
+            interpreter.llm.supports_functions = False
 
-    if interpreter.function_calling_llm:
+    if interpreter.llm.supports_functions:
         # Function-calling LLM
         coding_llm = setup_openai_coding_llm(interpreter)
     else:
@@ -30,7 +30,7 @@ def setup_llm(interpreter):
         if interpreter.disable_procedures == None:
             # Disable procedures, which confuses most of these models (except GPT-4V)
 
-            if interpreter.model != "gpt-4-vision-preview":
+            if interpreter.llm.model != "gpt-4-vision-preview":
                 interpreter.disable_procedures = True
 
         # Non-function-calling LLM

@@ -27,34 +27,36 @@ def setup_text_llm(interpreter):
         messages = messages[1:]
 
         try:
-            if interpreter.context_window and interpreter.max_tokens:
+            if interpreter.llm.context_window and interpreter.llm.max_tokens:
                 trim_to_be_this_many_tokens = (
-                    interpreter.context_window - interpreter.max_tokens - 25
+                    interpreter.llm.context_window - interpreter.llm.max_tokens - 25
                 )  # arbitrary buffer
                 messages = tt.trim(
                     messages,
                     system_message=system_message,
                     max_tokens=trim_to_be_this_many_tokens,
                 )
-            elif interpreter.context_window and not interpreter.max_tokens:
+            elif interpreter.llm.context_window and not interpreter.llm.max_tokens:
                 # Just trim to the context window if max_tokens not set
                 messages = tt.trim(
                     messages,
                     system_message=system_message,
-                    max_tokens=interpreter.context_window,
+                    max_tokens=interpreter.llm.context_window,
                 )
             else:
                 try:
                     messages = tt.trim(
-                        messages, system_message=system_message, model=interpreter.model
+                        messages,
+                        system_message=system_message,
+                        model=interpreter.llm.model,
                     )
                 except:
                     if len(messages) == 1:
                         display_markdown_message(
                             """
                         **We were unable to determine the context window of this model.** Defaulting to 3000.
-                        If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.context_window = {token limit}`.
-                        Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.max_tokens = {max tokens per response}`
+                        If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.llm.context_window = {token limit}`.
+                        Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.llm.max_tokens = {max tokens per response}`
                         """
                         )
                     messages = tt.trim(
@@ -112,7 +114,7 @@ def setup_text_llm(interpreter):
 
         # Create LiteLLM generator
         params = {
-            "model": interpreter.model,
+            "model": interpreter.llm.model,
             "messages": messages,
             "stream": True,
         }
@@ -124,8 +126,8 @@ def setup_text_llm(interpreter):
             params["api_key"] = interpreter.api_key
         if interpreter.api_version:
             params["api_version"] = interpreter.api_version
-        if interpreter.max_tokens:
-            params["max_tokens"] = interpreter.max_tokens
+        if interpreter.llm.max_tokens:
+            params["max_tokens"] = interpreter.llm.max_tokens
         if interpreter.temperature is not None:
             params["temperature"] = interpreter.temperature
         else:
@@ -137,7 +139,7 @@ def setup_text_llm(interpreter):
         # if not "api_key" in params:
         #     params["api_key"] = "sk-dummykey"
 
-        if interpreter.model == "gpt-4-vision-preview":
+        if interpreter.llm.model == "gpt-4-vision-preview":
             # We need to go straight to OpenAI for this, LiteLLM doesn't work
             if interpreter.api_base:
                 openai.api_base = interpreter.api_base
