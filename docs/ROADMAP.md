@@ -1,5 +1,18 @@
 # Roadmap
 
+## Documentation
+
+- [ ] **Easy 🟢** Add more hosted model instructions from from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
+  - [ ] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.openinterpreter.com/language-model-setup/hosted-models/openai)
+  - [ ] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
+  - [ ] Swap out the information with information from LiteLLM
+  - [ ] Repeat with other models
+- [ ] **Easy 🟢** Require documentation for PRs
+- [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
+- [ ] Better comments throughout the package (they're like docs for contributors)
+- [ ] Document the New Computer Update
+- [ ] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response))
+
 ## New features
 
 - [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
@@ -49,15 +62,6 @@
   - [ ] Automatically migrate users from old config to new config, display a message of this
 - [ ] On update, check for new system message and ask user to overwrite theirs, or only let users pass in "custom instructions" which adds to our system message
   - [ ] I think we could have a config that's like... system_message_version. If system_message_version is below the current version, ask the user if we can overwrite it with the default config system message of that version
-
-## Documentation
-
-- [ ] **Easy 🟢** Add more hosted models to [docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models) from [litellm docs](https://docs.litellm.ai/docs/)
-- [ ] **Easy 🟢** Require documentation for PRs
-- [ ] Work with Mintlify to translate docs
-- [ ] Better comments throughout the package (they're like docs for contributors)
-- [ ] Document the New Computer Update
-- [ ] Make a migration guide for the New Computer Update
 
 ## Completed
 
