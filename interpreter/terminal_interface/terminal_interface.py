@@ -62,72 +62,22 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
-    pause_force_task_completion_loop = False
-    force_task_completion_message = """Proceed. If you want to write code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
-    if interpreter.os:
-        force_task_completion_message.replace(
-            "If the entire task I asked for is done,",
-            "If the entire task I asked for is done, take a screenshot to verify it's complete, or if you've already taken a screenshot and verified it's complete,",
-        )
-    force_task_completion_responses = [
-        "the task is done.",
-        "the task is impossible.",
-        "let me know what you'd like to do next.",
-    ]
     voice_subprocess = None
 
     while True:
+        spoken_messages = []
+
         try:
             if interactive:
-                # FORCE TASK COMPLETION
-                ### I think `force_task_completion` should be moved to the core.
-                # `force_task_completion` makes it utter specific phrases if it doesn't want to be told to "Proceed."
-                if (
-                    not pause_force_task_completion_loop
-                    and interpreter.force_task_completion
-                    and interpreter.messages
-                    and not any(
-                        task_status
-                        in interpreter.messages[-1].get("content", "").lower()
-                        for task_status in force_task_completion_responses
-                    )
-                ):
-                    # Remove past force_task_completion messages
-                    interpreter.messages = [
-                        message
-                        for message in interpreter.messages
-                        if message.get("content", "") != force_task_completion_message
-                    ]
-                    # Combine adjacent assistant messages, so hopefully it learns to just keep going!
-                    combined_messages = []
-                    for message in interpreter.messages:
-                        if (
-                            combined_messages
-                            and message["role"] == "assistant"
-                            and combined_messages[-1]["role"] == "assistant"
-                            and message["type"] == "message"
-                            and combined_messages[-1]["type"] == "message"
-                        ):
-                            combined_messages[-1]["content"] += (
-                                "\n" + message["content"]
-                            )
-                        else:
-                            combined_messages.append(message)
-                    interpreter.messages = combined_messages
-                    # Send model the force_task_completion_message:
-                    message = force_task_completion_message
-                else:
-                    ### This is the primary input for Open Interpreter.
-                    message = input("> ").strip()
+                ### This is the primary input for Open Interpreter.
+                message = input("> ").strip()
 
-                    pause_force_task_completion_loop = False  # Just used for `interpreter.force_task_completion`, to escape the loop above^
-
-                    try:
-                        # This lets users hit the up arrow key for past messages
-                        readline.add_history(message)
-                    except:
-                        # If the user doesn't have readline (may be the case on windows), that's fine
-                        pass
+                try:
+                    # This lets users hit the up arrow key for past messages
+                    readline.add_history(message)
+                except:
+                    # If the user doesn't have readline (may be the case on windows), that's fine
+                    pass
 
         except KeyboardInterrupt:
             # Exit gracefully
@@ -141,7 +91,6 @@ def terminal_interface(interpreter, message):
 
             if message.startswith("%") and interactive:
                 handle_magic_command(interpreter, message)
-                pause_force_task_completion_loop = True
                 continue
 
             # Many users do this
@@ -193,9 +142,8 @@ def terminal_interface(interpreter, message):
                 if interpreter.os:
                     if (
                         chunk.get("format") == "output"
-                        and "FailSafeException" in chunk["content"]
+                        and "failsafeexception" in chunk["content"].lower()
                     ):
-                        pause_force_task_completion_loop = True
                         break
 
                 if "end" in chunk and active_block:
@@ -219,13 +167,10 @@ def terminal_interface(interpreter, message):
 
                     if "end" in chunk and interpreter.os:
                         last_message = interpreter.messages[-1]["content"]
-                        # Useful for OS mode— how do we display messages without the terminal being displayed?
-                        # IN THE FUTURE I think this should be notifications, not voice.
+
+                        # Speak the last message. Useful for OS mode— how do we display messages without the terminal being displayed?
                         if interpreter.speak_messages:
-                            if (
-                                platform.system() == "Darwin"
-                                and last_message not in force_task_completion_responses
-                            ):
+                            if platform.system() == "Darwin":
                                 # Remove markdown lists and the line above markdown lists
                                 lines = last_message.split("\n")
                                 i = 0
@@ -448,8 +393,6 @@ def terminal_interface(interpreter, message):
                 break
 
         except KeyboardInterrupt:
-            pause_force_task_completion_loop = True
-
             # Exit gracefully
             if "active_block" in locals() and active_block:
                 active_block.end()
