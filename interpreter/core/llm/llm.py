@@ -85,6 +85,14 @@ class Llm:
                             print("Removing image message!")
                 # Idea: we could set detail: low for the middle messages, instead of deleting them
 
+        # Convert to OpenAI messages format
+        messages = convert_to_openai_messages(
+            messages,
+            function_calling=supports_functions,
+            vision=self.supports_vision,
+            shrink_images=self.interpreter.shrink_images,
+        )
+
         # Trim messages
         try:
             if self.context_window and self.max_tokens:
@@ -119,14 +127,6 @@ class Llm:
             # If we're trimming from a model we don't know, this won't work.
             # Better not to fail until `messages` is too big, just for frustrations sake, I suppose.
             pass
-
-        # Convert to OpenAI messages format
-        messages = convert_to_openai_messages(
-            messages,
-            function_calling=supports_functions,
-            vision=self.supports_vision,
-            shrink_images=self.interpreter.shrink_images,
-        )
 
         ## Start forming the request
 

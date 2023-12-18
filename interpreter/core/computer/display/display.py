@@ -125,6 +125,7 @@ class Display:
         screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
 
         api_base = "https://api.openinterpreter.com"
+        api_base = "https://computer-tools.killianlucas1.repl.co/"
 
         try:
             response = requests.post(

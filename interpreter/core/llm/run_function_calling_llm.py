@@ -33,7 +33,7 @@ def run_function_calling_llm(llm, request_params):
     # Add OpenAI's recommended function message
     request_params["messages"][0][
         "content"
-    ] += "\nOnly use the function you have been provided with."
+    ] += "\nUse ONLY the function you have been provided with — 'execute(language, code)'."
 
     ## Convert output to LMC format
 
