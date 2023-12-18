@@ -22,7 +22,7 @@ def test_display_api():
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():
     interpreter.reset()
-    interpreter.temperature = 0
+    interpreter.llm.temperature = 0
     interpreter.auto_run = True
     interpreter.llm.model = "gpt-3.5-turbo"
     interpreter.debug_mode = False
@@ -49,7 +49,7 @@ def test_config_loading():
     interpreter.extend_config(config_path=config_path)
 
     # check the settings we configured in our config.test.yaml file
-    temperature_ok = interpreter.temperature == 0.25
+    temperature_ok = interpreter.llm.temperature == 0.25
     model_ok = interpreter.llm.model == "gpt-3.5-turbo"
     debug_mode_ok = interpreter.debug_mode == True
 

@@ -49,9 +49,6 @@ class Interpreter:
         self.os = False
         self.speak_messages = False
 
-        # Load config defaults
-        self.extend_config(self.config_file)
-
         # Expose class so people can make new instances
         self.Interpreter = Interpreter
 
@@ -66,12 +63,21 @@ class Interpreter:
         # Computer
         self.computer = Computer()
 
+        # Load config defaults
+        self.extend_config(self.config_file)
+
     def extend_config(self, config_path):
         if self.debug_mode:
             print(f"Extending configuration from `{config_path}`")
 
         config = get_config(config_path)
-        self.__dict__.update(config)
+        for key, value in config.items():
+            if key.startswith("llm."):
+                setattr(self.llm, key[4:], value)
+            elif key.startswith("computer."):
+                setattr(self.computer, key[9:], value)
+            else:
+                setattr(self, key, value)
 
     def chat(self, message=None, display=True, stream=False):
         if stream:
