@@ -12,6 +12,12 @@ from interpreter.terminal_interface.utils.count_tokens import (
 )
 
 
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_api():
+    interpreter.computer.mouse.move(icon="gear")
+    assert False
+
+
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():

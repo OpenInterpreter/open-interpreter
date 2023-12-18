@@ -394,7 +394,8 @@ computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
 # .down() .up() and .press() also work (uses pyautogui)
 
-computer.mouse.move("Text Onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** — and get creative! To mouse over a video thumbnail, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
+computer.mouse.move("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** — and get creative! To mouse over a video thumbnail, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
+computer.mouse.move(icon="magnifying glass") # Moves mouse to the icon with that description
 computer.mouse.move(x=500, y=500) # Use this very rarely. It's only 1% as accurate as move("Text")!
 computer.mouse.click() # Don't forget this! Include in the same code block
 
