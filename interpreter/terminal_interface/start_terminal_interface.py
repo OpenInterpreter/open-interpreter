@@ -120,6 +120,13 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter.llm, "attr_name": "api_key"},
         },
         {
+            "name": "api_version",
+            "nickname": "av",
+            "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
+            "type": str,
+            "attribute": {"object": interpreter.llm, "attr_name": "api_version"},
+        },
+        {
             "name": "max_output",
             "nickname": "xo",
             "help_text": "optional maximum number of characters for code outputs",
