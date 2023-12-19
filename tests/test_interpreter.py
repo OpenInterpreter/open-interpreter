@@ -12,6 +12,20 @@ from interpreter.terminal_interface.utils.count_tokens import (
 )
 
 
+def test_long_message():
+    messages = [
+        {
+            "role": "user",
+            "type": "message",
+            "content": "ABCD" * 20000 + "\ndescribe to me what i just said",
+        }
+    ]
+    interpreter.llm.context_window = 300
+    interpreter.chat(messages)
+    assert len(interpreter.messages) > 1
+    assert "ABCD" in interpreter.messages[-1]["content"]
+
+
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_api():
     interpreter.computer.mouse.move(icon="gear")
