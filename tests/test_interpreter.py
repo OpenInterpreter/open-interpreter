@@ -12,6 +12,16 @@ from interpreter.terminal_interface.utils.count_tokens import (
 )
 
 
+# this function will run before each test
+# we're clearing out the messages Array so we can start fresh and reduce token usage
+def setup_function():
+    interpreter.reset()
+    interpreter.llm.temperature = 0
+    interpreter.auto_run = True
+    interpreter.llm.model = "gpt-4"
+    interpreter.debug_mode = False
+
+
 def test_long_message():
     messages = [
         {
@@ -30,16 +40,6 @@ def test_long_message():
 def test_display_api():
     interpreter.computer.mouse.move(icon="gear")
     assert False
-
-
-# this function will run before each test
-# we're clearing out the messages Array so we can start fresh and reduce token usage
-def setup_function():
-    interpreter.reset()
-    interpreter.llm.temperature = 0
-    interpreter.auto_run = True
-    interpreter.llm.model = "gpt-3.5-turbo"
-    interpreter.debug_mode = False
 
 
 # this function will run after each test
