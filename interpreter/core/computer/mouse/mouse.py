@@ -34,10 +34,25 @@ class Mouse:
 
         pyautogui.moveTo(x, y, duration=0.5)
 
-    def click(self, *args, **kwargs):
+    def click(self, *args, button="left", clicks=1, interval=0.1, **kwargs):
         if args or kwargs:
             self.move(*args, **kwargs)
-        pyautogui.click()
+        pyautogui.click(button=button, clicks=clicks, interval=interval)
+
+    def double_click(self, *args, button="left", interval=0.1, **kwargs):
+        if args or kwargs:
+            self.move(*args, **kwargs)
+        pyautogui.doubleClick(button=button, interval=interval)
+
+    def triple_click(self, *args, button="left", interval=0.1, **kwargs):
+        if args or kwargs:
+            self.move(*args, **kwargs)
+        pyautogui.tripleClick(button=button, interval=interval)
+
+    def right_click(self, *args, **kwargs):
+        if args or kwargs:
+            self.move(*args, **kwargs)
+        pyautogui.rightClick()
 
     def down(self):
         pyautogui.mouseDown()
