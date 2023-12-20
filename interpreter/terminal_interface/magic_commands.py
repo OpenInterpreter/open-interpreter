@@ -77,7 +77,12 @@ def handle_debug(self, arguments=None):
         display_markdown_message("> Entered debug mode")
         print("\n\nCurrent messages:\n")
         for message in self.messages:
-            print(f"\n{message}\n")
+            message = message.copy()
+            if message["type"] == "image" and message.get("format") != "path":
+                message["content"] = (
+                    message["content"][30:] + "..." + message["content"][:-30]
+                )
+            print(message, "\n")
         print("\n")
         self.debug_mode = True
     elif arguments == "false":

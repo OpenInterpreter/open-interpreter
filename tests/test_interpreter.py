@@ -12,6 +12,14 @@ from interpreter.terminal_interface.utils.count_tokens import (
 )
 
 
+# @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_api():
+    interpreter.computer.mouse.move(icon="cell tower")
+    interpreter.computer.mouse.move("hello there my friend")
+    interpreter.computer.mouse.move(icon="caution")
+    assert False
+
+
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():
@@ -115,12 +123,6 @@ def test_long_message():
     interpreter.chat(messages)
     assert len(interpreter.messages) > 1
     assert "ABCD" in interpreter.messages[-1]["content"]
-
-
-@pytest.mark.skip(reason="Computer with display only + no way to fail test")
-def test_display_api():
-    interpreter.computer.mouse.move(icon="gear")
-    assert False
 
 
 # this function will run after each test

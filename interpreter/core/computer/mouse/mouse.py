@@ -26,9 +26,7 @@ class Mouse:
             except ValueError:
                 raise ValueError(f"This text ('{text}') was not found on screen.")
         elif x is not None and y is not None:
-            if self.computer.display.is_retina:
-                x /= 2
-                y /= 2
+            pass
         elif icon is not None:
             x, y = self.computer.display.find_icon(icon)
         else:

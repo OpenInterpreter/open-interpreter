@@ -168,41 +168,46 @@ def terminal_interface(interpreter, message):
                     if "end" in chunk and interpreter.os:
                         last_message = interpreter.messages[-1]["content"]
 
-                        # Speak the last message. Useful for OS mode— how do we display messages without the terminal being displayed?
-                        if interpreter.speak_messages:
-                            if platform.system() == "Darwin":
-                                # Remove markdown lists and the line above markdown lists
-                                lines = last_message.split("\n")
-                                i = 0
-                                while i < len(lines):
-                                    # Match markdown lists starting with hyphen, asterisk or number
-                                    if re.match(r"^\s*([-*]|\d+\.)\s", lines[i]):
-                                        del lines[i]
-                                        if i > 0:
-                                            del lines[i - 1]
-                                            i -= 1
-                                    else:
-                                        i += 1
-                                message = "\n".join(lines)
-                                # Replace newlines with spaces, escape double quotes and backslashes
-                                sanitized_message = (
-                                    message.replace("\\", "\\\\")
-                                    .replace("\n", " ")
-                                    .replace('"', '\\"')
-                                )
-                                if voice_subprocess:
-                                    voice_subprocess.terminate()
-                                voice_subprocess = subprocess.Popen(
-                                    [
-                                        "osascript",
-                                        "-e",
-                                        f'say "{sanitized_message}" using "Fred"',
-                                    ]
-                                )
+                        # Remove markdown lists and the line above markdown lists
+                        lines = last_message.split("\n")
+                        i = 0
+                        while i < len(lines):
+                            # Match markdown lists starting with hyphen, asterisk or number
+                            if re.match(r"^\s*([-*]|\d+\.)\s", lines[i]):
+                                del lines[i]
+                                if i > 0:
+                                    del lines[i - 1]
+                                    i -= 1
                             else:
-                                pass
-                                # User isn't on a Mac, so we can't do this. You should tell them something about that when they first set this up.
-                                # Or use a universal TTS library.
+                                i += 1
+                        message = "\n".join(lines)
+                        # Replace newlines with spaces, escape double quotes and backslashes
+                        sanitized_message = (
+                            message.replace("\\", "\\\\")
+                            .replace("\n", " ")
+                            .replace('"', '\\"')
+                        )
+
+                        # Display notification in OS mode
+                        if interpreter.os:
+                            print("!!!!!" * 10, sanitized_message)
+                            interpreter.computer.os.notify(sanitized_message)
+
+                        # Speak message aloud
+                        if platform.system() == "Darwin" and interpreter.speak_messages:
+                            if voice_subprocess:
+                                voice_subprocess.terminate()
+                            voice_subprocess = subprocess.Popen(
+                                [
+                                    "osascript",
+                                    "-e",
+                                    f'say "{sanitized_message}" using "Fred"',
+                                ]
+                            )
+                        else:
+                            pass
+                            # User isn't on a Mac, so we can't do this. You should tell them something about that when they first set this up.
+                            # Or use a universal TTS library.
 
                 # Assistant code blocks
                 elif chunk["role"] == "assistant" and chunk["type"] == "code":
@@ -360,16 +365,10 @@ def terminal_interface(interpreter, message):
                                 elif action.startswith("computer.keyboard.press("):
                                     description = f"Pressing {arguments}."
 
+                                print("!!!!" * 10, description)
+
                                 if description:
-                                    # Use applescript to notify the user of this text
-                                    title = "Open Interpreter"
-                                    subprocess.call(
-                                        [
-                                            "osascript",
-                                            "-e",
-                                            f'display notification "{description}" with title "{title}"',
-                                        ]
-                                    )
+                                    interpreter.computer.os.notify(description)
 
                     if "start" in chunk:
                         # We need to make a code block if we pushed out an HTML block first, which would have closed our code block.

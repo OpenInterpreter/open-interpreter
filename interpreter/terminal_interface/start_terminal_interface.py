@@ -4,6 +4,7 @@ import platform
 import re
 import subprocess
 import sys
+import time
 
 import pkg_resources
 
@@ -142,14 +143,6 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
         },
         {
-            "name": "disable_speak_messages",
-            "nickname": "dsm",
-            "help_text": "explicitly disables using the applescript `say` command to read messages aloud",
-            "type": bool,
-            "action": "store_false",
-            "attribute": {"object": interpreter, "attr_name": "speak_messages"},
-        },
-        {
             "name": "safe_mode",
             "nickname": "safe",
             "help_text": "optionally enable safety mechanisms like code scanning; valid options are off, ask, and auto",
@@ -283,51 +276,6 @@ def start_terminal_interface(interpreter):
                 subprocess.call(["open", config_file])
         return
 
-    if args.local:
-        # Default local (LM studio) attributes
-        interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
-        interpreter.offline = True
-        interpreter.llm.model = (
-            "openai/" + interpreter.llm.model
-        )  # "openai/" tells LiteLLM it's an OpenAI compatible server, the interpreter.llm.model part doesn't matter
-        interpreter.llm.api_base = "http://localhost:1234/v1"
-        interpreter.llm.max_tokens = 1000
-        interpreter.llm.context_window = 3000
-        interpreter.llm.api_key = "x"
-
-        display_markdown_message(
-            """
-> Open Interpreter's local mode is powered by **`LM Studio`**.
-
-
-You will need to run **LM Studio** in the background.
-
-1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
-2. Select a language model then click **Download**.
-3. Click the **<->** button on the left (below the chat button).
-4. Select your model at the top, then click **Start Server**.
-
-
-Once the server is running, you can begin your conversation below.
-
-> **Warning:** This feature is highly experimental.
-> Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!
-
-"""
-        )
-
-    # Check for update
-    try:
-        if not args.offline:
-            # This message should actually be pushed into the utility
-            if check_for_update():
-                display_markdown_message(
-                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
-                )
-    except:
-        # Doesn't matter
-        pass
-
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
     if interpreter.auto_run and (
         interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
@@ -341,7 +289,13 @@ Once the server is running, you can begin your conversation below.
         return
 
     if args.fast:
-        interpreter.llm.model = "gpt-3.5-turbo"
+        if args.local or args.vision or args.os:
+            print(
+                "Fast mode (`gpt-3.5`) is not supported with --vision, --os, or --local (`gpt-3.5` is not a vision or a local model)."
+            )
+            time.sleep(1.5)
+        else:
+            interpreter.llm.model = "gpt-3.5-turbo"
 
     if args.vision:
         interpreter.llm.supports_vision = True
@@ -352,13 +306,15 @@ Once the server is running, you can begin your conversation below.
         interpreter.llm.max_tokens = 4096
         interpreter.force_task_completion = True
 
-        display_markdown_message("> `Vision` enabled **(experimental)**\n")
+        if (
+            not args.local
+        ):  # We'll display this in a moment— after local's message prints
+            display_markdown_message("> `Vision` enabled (experimental)\n")
 
     if args.os:
         interpreter.os = True
         interpreter.offline = True  # Disables open procedures, which is best for pure code mode / normal mode
         interpreter.llm.supports_vision = True
-        interpreter.speak_messages = True
         interpreter.shrink_images = True
         interpreter.llm.model = "gpt-4-vision-preview"
         interpreter.llm.supports_functions = False
@@ -388,7 +344,7 @@ Execute code using `computer` (already imported) to control the user's computer:
 
 ```python
 computer.screenshot() # Automatically runs plt.show() to show you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first! You don't know what's on the user's screen.**
-computer.screenshot(quadrant=1) # Get a detailed view of the upper left quadrant (you'll rarely need this, use it to examine/retry failed attempts)
+x, y = computer.display.size()
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
@@ -406,6 +362,7 @@ computer.mouse.move("and that's it!")
 computer.mouse.up()
 
 computer.clipboard.view() # Prints contents of clipboard for you to review.
+computer.os.get_selected_text() # If editing text, the user often wants this.
 ```
 
 If you want to scroll, **ensure the correct window is active**, then consider using the arrow keys.
@@ -478,7 +435,7 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
         # Give it access to the computer via Python
         for _ in interpreter.computer.run(
             "python",
-            "import interpreter\ncomputer = interpreter.computer",
+            "import time\nimport interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
         ):
             pass
 
@@ -486,6 +443,73 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
             "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
         )
         print("")  # < - Aesthetic choice
+
+    if args.local:
+        # Default local (LM studio) attributes
+
+        if not (args.os or args.vision):
+            interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
+
+        interpreter.offline = True
+        interpreter.llm.model = "openai/x"  # "openai/" tells LiteLLM it's an OpenAI compatible server, the "x" part doesn't matter
+        interpreter.llm.api_base = "http://localhost:1234/v1"
+        interpreter.llm.max_tokens = 1000
+        interpreter.llm.context_window = 3000
+        interpreter.llm.api_key = "x"
+
+        if not (args.os or args.vision):
+            display_markdown_message(
+                """
+> Open Interpreter's local mode is powered by **`LM Studio`**.
+
+
+You will need to run **LM Studio** in the background.
+
+1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
+2. Select a language model then click **Download**.
+3. Click the **<->** button on the left (below the chat button).
+4. Select your model at the top, then click **Start Server**.
+
+
+Once the server is running, you can begin your conversation below.
+
+> **Warning:** This feature is highly experimental.
+> Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!
+
+"""
+            )
+        else:
+            if args.vision:
+                display_markdown_message(
+                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                )
+                time.sleep(1)
+                display_markdown_message("---\n")
+            elif args.os:
+                time.sleep(1)
+                display_markdown_message("*Setting up local OS control...*\n")
+                time.sleep(2.5)
+                display_markdown_message("---")
+                display_markdown_message(
+                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                )
+            else:
+                time.sleep(1)
+                display_markdown_message(
+                    f"> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                )
+
+    # Check for update
+    try:
+        if not args.offline:
+            # This message should actually be pushed into the utility
+            if check_for_update():
+                display_markdown_message(
+                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                )
+    except:
+        # Doesn't matter
+        pass
 
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
@@ -525,6 +549,12 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
             interpreter.llm.supports_functions = True
 
     validate_llm_settings(interpreter)
+
+    # If we've set a custom api base, we want it to be sent in an openai compatible way.
+    # So we need to tell LiteLLM to do this by changing the model name:
+    if interpreter.llm.api_base:
+        if not interpreter.llm.model.lower().startswith("openai/"):
+            interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator
     if args.conversations:

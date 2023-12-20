@@ -47,7 +47,7 @@ def get_ram_info():
 
 def interpreter_info(interpreter):
     try:
-        if interpreter.offline:
+        if interpreter.offline and interpreter.llm.api_base:
             try:
                 curl = subprocess.check_output(f"curl {interpreter.llm.api_base}")
             except Exception as e:
@@ -55,10 +55,21 @@ def interpreter_info(interpreter):
         else:
             curl = "Not local"
 
-        # System message:{interpreter.system_message}
+        messages_to_display = []
+        for message in interpreter.messages:
+            message = message.copy()
+            try:
+                message["content"] = (
+                    message["content"][30:] + "..." + message["content"][:-30]
+                )
+            except Exception as e:
+                print(str(e), "for message:", message)
+            messages_to_display.append(message)
+
         return f"""
 
-        Interpreter Info
+        # Interpreter Info
+        
         Vision: {interpreter.llm.supports_vision}
         Model: {interpreter.llm.model}
         Function calling: {interpreter.llm.supports_functions}
@@ -70,7 +81,14 @@ def interpreter_info(interpreter):
         Offline: {interpreter.offline}
 
         Curl output: {curl}
-    """
+
+        # Messages
+
+        System Message: {interpreter.system_message}
+
+        """ + "\n\n".join(
+            [str(m) for m in messages_to_display]
+        )
     except:
         return "Error, couldn't get interpreter info"
 

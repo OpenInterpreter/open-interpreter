@@ -61,8 +61,8 @@ def validate_llm_settings(interpreter):
     # If we're here, we passed all the checks.
 
     # Auto-run is for fast, light useage -- no messages.
-    # If local, we've already displayed a message.
-    if not interpreter.auto_run and not interpreter.local:
+    # If offline, it's usually a bogus model name for LiteLLM since LM Studio doesn't require one.
+    if not interpreter.auto_run and not interpreter.offline:
         display_markdown_message(f"> Model set to `{interpreter.llm.model}`")
     return
 

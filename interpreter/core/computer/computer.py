@@ -5,6 +5,7 @@ try:
     from .display.display import Display
     from .keyboard.keyboard import Keyboard
     from .mouse.mouse import Mouse
+    from .os.os import Os
 except:
     pass
 
@@ -21,6 +22,7 @@ class Computer:
             self.keyboard = Keyboard()
             self.display = Display()
             self.clipboard = Clipboard()
+            self.os = Os(self)
         except:
             pass
 

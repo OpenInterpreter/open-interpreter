@@ -1,3 +1,4 @@
+import re
 import traceback
 
 import litellm
@@ -159,15 +160,12 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # don't let it import computer on os mode — we handle that!
                 if interpreter.os and language == "python":
-                    code = code.replace("import computer", "")
-                    code = code.replace(
-                        "from computer import keyboard", "keyboard = computer.keyboard"
+                    code = code.replace("import computer\n", "")
+                    code = re.sub(
+                        r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
                     )
-                    code = code.replace(
-                        "from computer import mouse", "mouse = computer.mouse"
-                    )
-                    code = code.replace(
-                        "from computer import display", "mouse = computer.display"
+                    code = re.sub(
+                        r"from computer import (\w+)", r"\1 = computer.\1", code
                     )
 
                 # yield each line
