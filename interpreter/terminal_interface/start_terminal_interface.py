@@ -340,7 +340,7 @@ def start_terminal_interface(interpreter):
             "\n\n"
             + """
 
-Execute code using `computer` (already imported) to control the user's computer:
+Execute code using `computer` (already imported— DO NOT TRY TO IMPORT COMPUTER OR ITS SUBMODULES— simply reference them as below) to control the user's computer:
 
 ```python
 computer.screenshot() # Automatically runs plt.show() to show you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first! You don't know what's on the user's screen.**
@@ -423,8 +423,8 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
         )
         print("")  # < - Aesthetic choice
 
-        # FOR TESTING ONLY
-        # Install Open Interpreter from GitHub
+        # # FOR TESTING ONLY
+        # # Install Open Interpreter from GitHub
         # for chunk in interpreter.computer.run(
         #     "shell",
         #     "pip install git+https://github.com/KillianLucas/open-interpreter.git",

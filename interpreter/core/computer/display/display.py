@@ -14,8 +14,15 @@ from ..utils.computer_vision import find_text_in_image
 
 
 class Display:
+    # It hallucinates these:
     def __init__(self):
         self.width, self.height = pyautogui.size()
+
+    def size(self):
+        return pyautogui.size()
+
+    def center(self):
+        return self.width // 2, self.height // 2
 
     def screenshot(self, show=True, quadrant=None):
         temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
@@ -90,13 +97,6 @@ class Display:
 
             x_ratio = screen_width / img_width
             y_ratio = screen_height / img_height
-
-            print("Screen Width: ", screen_width)
-            print("Screen Height: ", screen_height)
-            print("Image Width: ", img_width)
-            print("Image Height: ", img_height)
-            print("X Ratio: ", x_ratio)
-            print("Y Ratio: ", y_ratio)
 
             # x *= x_ratio
             # y *= y_ratio

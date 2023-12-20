@@ -144,6 +144,7 @@ def terminal_interface(interpreter, message):
                         chunk.get("format") == "output"
                         and "failsafeexception" in chunk["content"].lower()
                     ):
+                        print("Fail-safe triggered (mouse in one of the four corners).")
                         break
 
                 if "end" in chunk and active_block:
@@ -190,7 +191,6 @@ def terminal_interface(interpreter, message):
 
                         # Display notification in OS mode
                         if interpreter.os:
-                            print("!!!!!" * 10, sanitized_message)
                             interpreter.computer.os.notify(sanitized_message)
 
                         # Speak message aloud
@@ -364,8 +364,6 @@ def terminal_interface(interpreter, message):
                                     description = f"Pressing {arguments}."
                                 elif action.startswith("computer.keyboard.press("):
                                     description = f"Pressing {arguments}."
-
-                                print("!!!!" * 10, description)
 
                                 if description:
                                     interpreter.computer.os.notify(description)

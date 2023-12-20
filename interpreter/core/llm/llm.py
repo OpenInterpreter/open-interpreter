@@ -138,7 +138,7 @@ class Llm:
             # Better not to fail until `messages` is too big, just for frustrations sake, I suppose.
 
             # Reunite system message with messages
-            messages = [system_message] + messages
+            messages = [{"role": "system", "content": system_message}] + messages
 
             pass
 

@@ -80,7 +80,7 @@ def handle_debug(self, arguments=None):
             message = message.copy()
             if message["type"] == "image" and message.get("format") != "path":
                 message["content"] = (
-                    message["content"][30:] + "..." + message["content"][:-30]
+                    message["content"][:30] + "..." + message["content"][-30:]
                 )
             print(message, "\n")
         print("\n")
