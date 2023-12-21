@@ -62,6 +62,8 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
+    active_block = None
+
     voice_subprocess = None
 
     while True:
