@@ -123,7 +123,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "api_version",
             "nickname": "av",
-            "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
+            "help_text": "optionally set the API version for your llm calls (this will override environment variables)",
             "type": str,
             "attribute": {"object": interpreter.llm, "attr_name": "api_version"},
         },
