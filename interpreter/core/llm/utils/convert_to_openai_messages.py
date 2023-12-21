@@ -41,6 +41,9 @@ def convert_to_openai_messages(
                         "code": message["content"],
                     },
                 }
+                # Add empty content to avoid error "openai.error.InvalidRequestError: 'content' is a required property - 'messages.*'"
+                # especially for the OpenAI service hosted on Azure
+                new_message["content"] = "" 
             else:
                 new_message[
                     "content"
