@@ -11,10 +11,11 @@
 - [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
 - [ ] Better comments throughout the package (they're like docs for contributors)
 - [ ] Document the New Computer Update
-- [ ] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response))
+- [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response)) thanks ty!
 
 ## New features
 
+- [ ] Add new `computer` modules like `browser`* and `files`*
 - [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
   - [ ] Make that flag send each message to server
   - [ ] Set up receiving replit server
@@ -90,109 +91,111 @@ Our guiding philosphy is minimalism, so we have also decided to explicitly consi
 2. Advanced memory or planning. We consider these to be the LLM's responsibility, and as such OI will remain single-threaded.
 3. More complex interactions with the LLM in `terminal_interface` beyond text (but file paths to more complex inputs, like images or video, can be included in that text).
 
-# Upcoming structures
+---
 
-### New streaming structure
+This roadmap gets pretty rough from here. More like working notes.
+
+# Working Notes
+
+## * Roughly, how to build `computer.browser`:
+
+First I think we should have a part, like `computer.browser.ask(query)` which just hits up [perplexity](https://www.perplexity.ai/) for fast answers to questions.
+
+Then we want these sorts of things:
+- `browser.open(url)`
+- `browser.screenshot()`
+- `browser.click()`
+
+It should actually be based closely on Selenium. Copy their API so the LLM knows it.
+
+Other than that, basically should be = to the computer module itself, at least the IO / keyboard and mouse parts.
+
+However, for non vision models, `browser.screenshot()` can return the accessibility tree, not an image. And for `browser.click(some text)` we can use the HTML to find that text.
+
+**Here's how GPT suggests we implement the first steps of this:**
+
+Creating a Python script that automates the opening of Chrome with the necessary flags and then interacts with it to navigate to a URL and retrieve the accessibility tree involves a few steps. Here's a comprehensive approach:
+
+1. **Script to Launch Chrome with Remote Debugging**:
+   - This script will start Chrome with the `--remote-debugging-port=9222` flag.
+   - It will handle different platforms (Windows, macOS, Linux).
+
+2. **Python Script for Automation**:
+   - This script uses `pychrome` to connect to the Chrome instance, navigate to a URL, and retrieve the accessibility tree.
+
+### Step 1: Launching Chrome with Remote Debugging
+
+You'll need a script to launch Chrome. This script varies based on the operating system. Below is an example for Windows. You can adapt it for macOS or Linux by changing the path and command to start Chrome.
 
 ```python
-{"role": "assistant", "type": "message", "start": True}
-{"role": "assistant", "type": "message", "content": "Pro"}
-{"role": "assistant", "type": "message", "content": "cessing"}
-{"role": "assistant", "type": "message", "content": "your request"}
-{"role": "assistant", "type": "message", "content": "to generate a plot."}
-{"role": "assistant", "type": "message", "end": True}
+import subprocess
+import sys
+import os
 
-{"role": "assistant", "type": "code", "format": "python", "start": True}
-{"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data"}
-{"role": "assistant", "type": "code", "format": "python", "content": "('data')\ndisplay_as_image(plot)"}
-{"role": "assistant", "type": "code", "format": "python", "content": "\ndisplay_as_html(plot)"}
-{"role": "assistant", "type": "code", "format": "python", "end": True}
+def launch_chrome():
+    chrome_path = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"  # Update this path for your system
+    url = "http://localhost:9222/json/version"
+    subprocess.Popen([chrome_path, '--remote-debugging-port=9222'], shell=True)
+    print("Chrome launched with remote debugging on port 9222.")
 
-{"role": "computer", "type": "console", "start": True}
-{"role": "computer", "type": "console", "format": "output", "content": "a printed statement"}
-{"role": "computer", "type": "console", "format": "active_line", "content": "1"}
-{"role": "computer", "type": "console", "format": "active_line", "content": "2"}
-{"role": "computer", "type": "console", "format": "active_line", "content": "3"}
-{"role": "computer", "type": "console", "format": "output", "content": "another printed statement"}
-{"role": "computer", "type": "console", "end": True}
-
-...
-
-# ASSISTANT GENERATED HTML
-
-# The assistant writes some HTML.
-# Because recipient isn't explicitly set, it's being "rendered" to both the user and the computer in real-time.
-{"role": "assistant", "type": "code", "format": "html", "start": True}
-{"role": "assistant", "type": "code", "format": "html", "content": "<html>Some"}
-{"role": "assistant", "type": "code", "format": "html", "content": "thing</html>"}
-{"role": "assistant", "type": "code", "format": "html", "end": True}
-
-# The computer runs the HTML.
-
-# The running HTML produces some console log / errors.
-{"role": "computer", "type": "console", "start": True}
-{"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
-{"role": "computer", "type": "console", "end": True}
-
-# The computer will make an image for the assistant to see.
-# The image's "recipient" is set to "assistant" because **the user has already seen this HTML** as interactive HTML, in block 1
-{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "start": True}
-{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "content": "/path/to/html_block_render.png"}
-{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "end": True}
-
-...
-
-# COMPUTER GENERATED HTML
-
-# The assistant writes some Python.
-{"role": "assistant", "type": "code", "format": "python", "start": True}
-{"role": "assistant", "type": "code", "format": "python", "content": "display_plot_as_html(plot)"}
-{"role": "assistant", "type": "code", "format": "python", "end": True}
-
-# The computer runs the Python.
-
-# The running Python produces some HTML.
-# The HTML's "recipient" is set to "user" so the user can interact with it, but the assistant's context won't get stuffed with tokens (instead, it will get an image in a moment)
-{"role": "computer", "type": "code", "format": "html", "recipient": "user", "start": True}
-{"role": "computer", "type": "code", "format": "html", "recipient": "user", "content": "<html>Something</html>"}
-{"role": "computer", "type": "code", "format": "html", "recipient": "user", "end": True}
-
-# The computer runs the HTML.
-
-# The running HTML produces some console log / errors.
-{"role": "computer", "type": "console", "start": True}
-{"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
-{"role": "computer", "type": "console", "end": True}
-
-# The computer will make an image for the assistant to see.
-# The image's "recipient" is set to "assistant" because **the user has already seen this HTML** as interactive HTML, in block 2
-{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "start": True}
-{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "content": "/path/to/html_block_render.png"}
-{"role": "computer", "type": "image", "format": "path", "recipient": "assistant", "end": True}
-
-...
-
-{"role": "assistant", "type": "message", "start": True}
-{"role": "assistant", "type": "message", "content": "Plot"}
-{"role": "assistant", "type": "message", "content": "generated"}
-{"role": "assistant", "type": "message", "content": "successfully."}
-{"role": "assistant", "type": "message", "end": True}
+if __name__ == "__main__":
+    launch_chrome()
 ```
 
-### New static messages structure
+### Step 2: Python Script to Navigate and Retrieve Accessibility Tree
 
+Next, you'll use `pychrome` to connect to this Chrome instance. Ensure you've installed `pychrome`:
+
+```bash
+pip install pychrome
 ```
-[
 
-  {"role": "user", "type": "message", "content": "Please create a plot from this data and display it as an image and then as HTML."}, # implied format: text (only one format for type message)
-  {"role": "user", "type": "image", "format": "path", "content": "path/to/image.png"}
-  {"role": "user", "type": "file", "content": "/path/to/file.pdf"} # implied format: path (only one format for type file)
-  {"role": "assistant", "type": "message", "content": "Processing your request to generate a plot."} # implied format: text
-  {"role": "assistant", "type": "code", "format": "python", "content": "plot = create_plot_from_data('data')\ndisplay_as_image(plot)\ndisplay_as_html(plot)"}
-  {"role": "computer", "type": "image", "format": "base64", "content": "base64"}
-  {"role": "computer", "type": "code", "format": "html", "content": "<html>Plot in HTML format</html>"}
-  {"role": "computer", "type": "console", "format": "output", "content": "{HTML errors}"}
-  {"role": "assistant", "type": "message", "content": "Plot generated successfully."} # implied format: text
+Here's the Python script:
 
-]
+```python
+import pychrome
+import time
+
+def get_accessibility_tree(tab):
+    # Enable the Accessibility domain
+    tab.call_method("Accessibility.enable")
+
+    # Get the accessibility tree
+    tree = tab.call_method("Accessibility.getFullAXTree")
+    return tree
+
+def main():
+    # Create a browser instance
+    browser = pychrome.Browser(url="http://127.0.0.1:9222")
+
+    # Create a new tab
+    tab = browser.new_tab()
+
+    # Start the tab
+    tab.start()
+
+    # Navigate to a URL
+    tab.set_url("https://www.example.com")
+    time.sleep(3)  # Wait for page to load
+
+    # Retrieve the accessibility tree
+    accessibility_tree = get_accessibility_tree(tab)
+    print(accessibility_tree)
+
+    # Stop the tab (closes it)
+    tab.stop()
+
+    # Close the browser
+    browser.close()
+
+if __name__ == "__main__":
+    main()
 ```
+
+This script will launch Chrome, connect to it, navigate to "https://www.example.com", and then print the accessibility tree to the console.
+
+**Note**: The script to launch Chrome assumes a typical installation path on Windows. You will need to modify this path according to your Chrome installation location and operating system. Additionally, handling different operating systems requires conditional checks and respective commands for each OS.
+
+## * Roughly, how to build `computer.files`:
+
+Okay I'm thinking like, semantic filesystem or something. We make a new package that does really simple semantic search over a filesystem, then expose it via `computer.files.search("query")`.
