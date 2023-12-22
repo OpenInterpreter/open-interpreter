@@ -58,9 +58,8 @@ class Mouse:
                         cv2.LINE_AA,
                     )
 
-                bounding_box_image = Image.fromarray(img_draw)
-                bounding_box_image.format = screenshot.format
-                bounding_box_image.show()
+                plt.imshow(img_draw)
+                plt.show()
 
                 coordinates = [
                     f"{i}: {int(item[0]*self.computer.display.width)}, {int(item[1]*self.computer.display.height)}"
