@@ -86,7 +86,7 @@ def interpreter_info(interpreter):
         for message in interpreter.messages:
             message = message.copy()
             try:
-                if len(message["content"] > 600):
+                if len(message["content"]) > 600:
                     message["content"] = (
                         message["content"][:300] + "..." + message["content"][-300:]
                     )

@@ -408,7 +408,7 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
             import pytesseract
         except ImportError:
             display_markdown_message(
-                "> **Missing Packages**\n\nSeveral packages are required for OS Control (`matplotlib`, `pytesseract`, `pyautogui`, `opencv-python`, `ipython`, `pyobjus`, `plyer`).\n\nInstall them?\n"
+                "> **Missing Packages**\n\nSeveral packages are required for OS Control (`matplotlib`, `pytesseract`, `pyautogui`, `opencv-python`, `ipython`, `pyobjus`, `plyer`, `pyobjc`).\n\nInstall them?\n"
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
@@ -421,6 +421,7 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
                 "opencv-python",
                 "ipython",
                 "plyer",
+                "pyobjc",
             ]
             for pip_name in ["pip", "pip3"]:
                 command = "\n".join(
@@ -439,6 +440,53 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
                 except:
                     continue
                 break
+
+        try:
+            # Check if we have permission to view the screen
+            from AppKit import NSWorkspace
+            from Quartz import (
+                CGWindowListCopyWindowInfo,
+                kCGNullWindowID,
+                kCGWindowListOptionOnScreenOnly,
+            )
+
+            def has_screen_recording_permission():
+                window_list = CGWindowListCopyWindowInfo(
+                    kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+                )
+                if len(window_list) > 0:
+                    return True
+                else:
+                    return False
+
+            def ask_for_screen_recording_permission():
+                script = """
+                tell application "System Preferences"
+                    activate
+                    set current pane to pane id "com.apple.preference.security"
+                    reveal anchor "Privacy_ScreenRecording" of pane id "com.apple.preference.security"
+                end tell
+                """
+                subprocess.run(["osascript", "-e", script])
+
+            if not has_screen_recording_permission():
+                display_markdown_message(
+                    "> `OS Control` requires screen recording permission.\n\nFor MacOS, please follow the steps below to enable it:\n\n"
+                    "1. Open System Preferences.\n"
+                    "2. Navigate to Security & Privacy > Privacy > Screen Recording.\n"
+                    "3. Check the box next to Terminal or your Python environment to grant screen recording permission.\n"
+                    "4. You may need to restart your Terminal or Python environment for the changes to take effect.\n"
+                )
+                if platform.system() == "Darwin":
+                    time.sleep(2)
+                    ask_for_screen_recording_permission()
+                    print("")
+                    input(
+                        "Please confirm that screen recording permission has been granted. (y/n): "
+                    )
+        except:
+            # if they aren't on a mac this wont work anyway.
+            pass
 
         display_markdown_message(
             "> `OS Control` enabled (experimental)\n\nOpen Interpreter will be able to see your screen, move your mouse, and use your keyboard."
