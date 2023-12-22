@@ -14,7 +14,7 @@ class Computer:
     def __init__(self):
         self.terminal = Terminal()
 
-        self.offline = False  # Soon, inherit this, and many other settings on import
+        self.offline = False
         self.debug_mode = False
 
         # OS mode

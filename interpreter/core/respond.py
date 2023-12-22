@@ -1,3 +1,4 @@
+import json
 import re
 import traceback
 
@@ -171,9 +172,37 @@ If LM Studio's local server is running, please try a language model with a diffe
                 # sync up debug mode (is this how we want to do this?)
                 interpreter.computer.debug_mode = interpreter.debug_mode
 
-                # yield each line
+                # sync up the interpreter's computer with your computer
+                try:
+                    if interpreter.os and language == "python":
+                        computer_json = json.dumps(interpreter.computer.__dict__)
+                        sync_code = f"""import json\ncomputer.__dict__ = json.loads('''{computer_json}''')"""
+                        for _ in interpreter.computer.run("python", sync_code):
+                            pass
+                except Exception as e:
+                    print(str(e))
+                    print("Continuing.")
+
+                ## ↓ CODE IS RUN HERE
+
                 for line in interpreter.computer.run(language, code):
                     yield {"role": "computer", **line}
+
+                ## ↑ CODE IS RUN HERE
+
+                # sync up your computer with the interpreter's computer
+                try:
+                    if interpreter.os and language == "python":
+                        # sync up the interpreter's computer with your computer
+                        for line in interpreter.computer.run(
+                            "python",
+                            "import json\nprint(json.dumps(computer.__dict__))",
+                        ):
+                            pass
+                        interpreter.computer.__dict__ = json.loads(line["content"])
+                except Exception as e:
+                    print(str(e))
+                    print("Continuing.")
 
                 # yield final "active_line" message, as if to say, no more code is running. unlightlight active lines
                 # (is this a good idea? is this our responsibility? i think so — we're saying what line of code is running! ...?)
