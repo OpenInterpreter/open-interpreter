@@ -176,7 +176,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                 try:
                     if interpreter.os and language == "python":
                         computer_json = json.dumps(interpreter.computer.to_dict())
-                        sync_code = f"""import json\ncomputer.__dict__ = json.loads('''{computer_json}''')"""
+                        sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
                         for _ in interpreter.computer.run("python", sync_code):
                             pass
                 except Exception as e:
@@ -199,7 +199,9 @@ If LM Studio's local server is running, please try a language model with a diffe
                             "import json\nprint(json.dumps(computer.to_dict()))",
                         ):
                             pass
-                        interpreter.computer.__dict__ = json.loads(line["content"])
+                        interpreter.computer.load_dict(
+                            json.loads(line["content"].strip('"').strip("'"))
+                        )
                 except Exception as e:
                     print(str(e))
                     print("Continuing.")

@@ -69,7 +69,12 @@ class Computer:
             try:
                 json.dumps(obj)
                 return True
-            except (TypeError, OverflowError):
+            except:
                 return False
 
         return {k: v for k, v in self.__dict__.items() if json_serializable(v)}
+
+    def load_dict(self, data_dict):
+        for key, value in data_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
