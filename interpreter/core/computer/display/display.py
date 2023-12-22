@@ -126,14 +126,8 @@ class Display:
 
         # In the future, if there's multiple, we should let the LLM pick by image, like how local text does
 
-        # Find the x and y ratios for the pyautogui screen size vs the screenshot image size
-        screen_width, screen_height = pyautogui.size()
-        img_width, img_height = screenshot.size
-
-        x_ratio = screen_width / img_width
-        y_ratio = screen_height / img_height
-
-        x *= x_ratio
-        y *= y_ratio
+        # Convert x and y to fractions of the screenshot width and height
+        x = x / screenshot.width
+        y = y / screenshot.height
 
         return x, y

@@ -80,10 +80,12 @@ class Mouse:
             pass
         elif icon is not None:
             x, y = self.computer.display.find_icon(icon)
+            x *= self.computer.display.width
+            y *= self.computer.display.height
         else:
             raise ValueError("Either text, icon, or both x and y must be provided")
 
-        if self.computer.debug_mode:
+        if True:
             if not screenshot:
                 screenshot = self.computer.display.screenshot(show=False)
             # Convert the screenshot to a numpy array for drawing
@@ -91,18 +93,17 @@ class Mouse:
             gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
             img_draw = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
 
+            # Scale drawing_x and drawing_y from screen size to screenshot size for drawing purposes
+            drawing_x = x * int(screenshot.width / self.computer.display.width)
+            drawing_y = y * int(screenshot.height / self.computer.display.height)
+
             # Draw a solid blue circle around the place we're clicking
-            cv2.circle(img_draw, (x, y), 20, (0, 0, 255), -1)
+            cv2.circle(img_draw, (drawing_x, drawing_y), 20, (0, 0, 255), -1)
 
-            # Convert the drawn image back to a PIL image
-            img_pil = Image.fromarray(img_draw)
-            # Show the image
-            img_pil.show()
+            plt.imshow(img_draw)
+            plt.show()
 
-            time.sleep(4)
-
-            # ^ This should ideally show it on the users computer but not show it to the LLM
-            # because we're in debug mode, trying to do debug
+            time.sleep(5)
 
         pyautogui.moveTo(x, y, duration=0.5)
 

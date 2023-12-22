@@ -287,8 +287,9 @@ def terminal_interface(interpreter, message):
                         or ("format" in chunk and chunk["format"] == "javascript")
                     )
                 ):
-                    if interpreter.os:
+                    if interpreter.os and interpreter.debug_mode == False:
                         # We don't display things to the user in OS control mode, since we use vision to communicate the screen to the LLM so much.
+                        # But if debug is true, we do display it!
                         continue
                     # Display and give extra output back to the LLM
                     extra_computer_output = display_output(chunk)

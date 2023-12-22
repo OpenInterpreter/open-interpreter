@@ -13,6 +13,14 @@ from interpreter.terminal_interface.utils.count_tokens import (
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_debug():
+    interpreter.computer.debug_mode = True
+    interpreter.debug_mode = True
+    interpreter.computer.mouse.move(x=500, y=500)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_api():
     interpreter.computer.mouse.move(icon="cell tower")
     interpreter.computer.mouse.move("debug console")
