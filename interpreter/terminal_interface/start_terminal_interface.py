@@ -403,11 +403,12 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
             import cv2
             import IPython
             import matplotlib
+            import plyer
             import pyautogui
             import pytesseract
         except ImportError:
             display_markdown_message(
-                "> **Missing Packages**\n\nSeveral packages are required for OS Control (`matplotlib`, `pytesseract`, `pyautogui`, `opencv-python`, `ipython`).\n\nInstall them?\n"
+                "> **Missing Packages**\n\nSeveral packages are required for OS Control (`matplotlib`, `pytesseract`, `pyautogui`, `opencv-python`, `ipython`, `pyobjus`, `plyer`).\n\nInstall them?\n"
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
@@ -419,11 +420,25 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
                 "pyautogui",
                 "opencv-python",
                 "ipython",
+                "plyer",
             ]
-            command = "\n".join([f"pip install {package}" for package in packages])
-            for chunk in interpreter.computer.run("shell", command):
-                if chunk.get("format") != "active_line":
-                    print(chunk.get("content"))
+            for pip_name in ["pip", "pip3"]:
+                command = "\n".join(
+                    [f"{pip_name} install {package}" for package in packages]
+                )
+                for chunk in interpreter.computer.run("shell", command):
+                    if chunk.get("format") != "active_line":
+                        print(chunk.get("content"))
+                try:
+                    import cv2
+                    import IPython
+                    import matplotlib
+                    import plyer
+                    import pyautogui
+                    import pytesseract
+                except:
+                    continue
+                break
 
         display_markdown_message(
             "> `OS Control` enabled (experimental)\n\nOpen Interpreter will be able to see your screen, move your mouse, and use your keyboard."
