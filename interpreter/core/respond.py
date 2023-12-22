@@ -175,7 +175,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                 # sync up the interpreter's computer with your computer
                 try:
                     if interpreter.os and language == "python":
-                        computer_json = json.dumps(interpreter.computer.__dict__)
+                        computer_json = json.dumps(interpreter.computer.to_dict())
                         sync_code = f"""import json\ncomputer.__dict__ = json.loads('''{computer_json}''')"""
                         for _ in interpreter.computer.run("python", sync_code):
                             pass
@@ -196,7 +196,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                         # sync up the interpreter's computer with your computer
                         for line in interpreter.computer.run(
                             "python",
-                            "import json\nprint(json.dumps(computer.__dict__))",
+                            "import json\nprint(json.dumps(computer.to_dict()))",
                         ):
                             pass
                         interpreter.computer.__dict__ = json.loads(line["content"])

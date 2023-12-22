@@ -1,3 +1,5 @@
+import json
+
 from .terminal.terminal import Terminal
 
 try:
@@ -61,3 +63,13 @@ class Computer:
         Shortcut for computer.display.screenshot
         """
         return self.display.screenshot(*args, **kwargs)
+
+    def to_dict(self):
+        def json_serializable(obj):
+            try:
+                json.dumps(obj)
+                return True
+            except (TypeError, OverflowError):
+                return False
+
+        return {k: v for k, v in self.__dict__.items() if json_serializable(v)}
