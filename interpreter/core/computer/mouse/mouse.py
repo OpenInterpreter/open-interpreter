@@ -12,6 +12,7 @@ class Mouse:
         self.computer = computer
 
     def move(self, *args, x=None, y=None, icon=None):
+        screenshot = None
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)\n\nPlease take a computer.screenshot() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is significantly more accurate."
@@ -81,6 +82,27 @@ class Mouse:
             x, y = self.computer.display.find_icon(icon)
         else:
             raise ValueError("Either text, icon, or both x and y must be provided")
+
+        if self.computer.debug_mode:
+            if not screenshot:
+                screenshot = self.computer.display.screenshot(show=False)
+            # Convert the screenshot to a numpy array for drawing
+            img_array = np.array(screenshot)
+            gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+            img_draw = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
+
+            # Draw a solid blue circle around the place we're clicking
+            cv2.circle(img_draw, (x, y), 20, (0, 0, 255), -1)
+
+            # Convert the drawn image back to a PIL image
+            img_pil = Image.fromarray(img_draw)
+            # Show the image
+            img_pil.show()
+
+            time.sleep(4)
+
+            # ^ This should ideally show it on the users computer but not show it to the LLM
+            # because we're in debug mode, trying to do debug
 
         pyautogui.moveTo(x, y, duration=0.5)
 

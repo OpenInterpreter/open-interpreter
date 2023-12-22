@@ -15,6 +15,7 @@ class Computer:
         self.terminal = Terminal()
 
         self.offline = False  # Soon, inherit this, and many other settings on import
+        self.debug_mode = False
 
         # OS mode
         try:

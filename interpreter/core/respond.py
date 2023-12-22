@@ -168,6 +168,9 @@ If LM Studio's local server is running, please try a language model with a diffe
                         r"from computer import (\w+)", r"\1 = computer.\1", code
                     )
 
+                # sync up debug mode (is this how we want to do this?)
+                interpreter.computer.debug_mode = interpreter.debug_mode
+
                 # yield each line
                 for line in interpreter.computer.run(language, code):
                     yield {"role": "computer", **line}
