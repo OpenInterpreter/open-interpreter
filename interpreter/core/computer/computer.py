@@ -14,13 +14,15 @@ class Computer:
     def __init__(self):
         self.terminal = Terminal()
 
+        self.offline = False  # Soon, inherit this, and many other settings on import
+
         # OS mode
         try:
             self.mouse = Mouse(
                 self
             )  # Mouse will use the computer's display, so we give it a reference to ourselves
             self.keyboard = Keyboard()
-            self.display = Display()
+            self.display = Display(self)
             self.clipboard = Clipboard()
             self.os = Os(self)
         except:

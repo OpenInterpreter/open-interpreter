@@ -53,19 +53,6 @@ def find_text_in_image(img, text):
                 d["top"][i] + d["height"][i] / 2,
             )
 
-            """bounding
-
-            bounding
-
-            bounding
-
-            bounding
-
-            bounding    bounding   bounding"""
-
-            # Half both coordinates
-            center = (center[0] / 2, center[1] / 2)
-
             # Add the center to the list
             centers.append(center)
 
@@ -149,4 +136,4 @@ def find_text_in_image(img, text):
     # Debug by showing bounding boxes:
     # bounding_box_image.show()
 
-    return centers, bounding_box_image
+    return centers

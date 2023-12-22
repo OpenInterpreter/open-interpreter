@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 from io import BytesIO
 
+import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pyautogui
@@ -15,8 +16,10 @@ from ..utils.computer_vision import find_text_in_image
 
 class Display:
     # It hallucinates these:
-    def __init__(self):
+    def __init__(self, computer):
+        self.computer = computer
         self.width, self.height = pyautogui.size()
+        self.api_base = "https://api.openinterpreter.com"
 
     def size(self):
         return pyautogui.size()
@@ -65,55 +68,38 @@ class Display:
 
         return img
 
-    def find_text(self, text, index=None):
+    def find_text(self, text, screenshot=None):
         # Take a screenshot
-        screenshot = self.screenshot(show=False)
+        if screenshot == None:
+            screenshot = self.screenshot(show=False)
+
+        if not self.computer.offline:
+            # Convert the screenshot to base64
+            buffered = BytesIO()
+            screenshot.save(buffered, format="PNG")
+            screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+            try:
+                response = requests.post(
+                    f'{self.api_base.strip("/")}/computer/display/text/',
+                    json={"query": text, "base64": screenshot_base64},
+                )
+                response = response.json()
+                return response
+            except:
+                print("Attempting to find the text locally.")
+
+        # We'll only get here if 1) self.computer.offline = True, or the API failed
 
         # Find the text in the screenshot
-        centers, bounding_box_image = find_text_in_image(screenshot, text)
+        centers = find_text_in_image(screenshot, text)
 
-        # If the text was found
-        if centers:
-            # This could be refactored to be more readable
-            if len(centers) > 1:
-                if index == None:
-                    # Show the image using matplotlib
-                    plt.imshow(np.array(bounding_box_image))
-                    plt.show()
-                    # Error so subsequent code is not executed
-                    raise IndexError(
-                        f"This text ('{text}') was found multiple times on screen."
-                    )
-                else:
-                    center = centers[index]
-            else:
-                center = centers[0]
-
-            x, y = center[0], center[1]
-
-            # Find the x and y ratios for the pyautogui screen size vs the screenshot image size
-            screen_width, screen_height = pyautogui.size()
-            img_width, img_height = screenshot.size
-
-            x_ratio = screen_width / img_width
-            y_ratio = screen_height / img_height
-
-            # x *= x_ratio
-            # y *= y_ratio
-
-            return x, y
-
-        else:
-            plt.imshow(np.array(bounding_box_image))
-            plt.show()
-            raise ValueError(
-                f"Your text ('{text}') was not found on the screen. Please try again."
-            )
+        return centers
 
     # locate text should be moved here as well!
     def find_icon(self, query):
         print(
-            "Message for user: Locating this icon will take ~20 seconds. We're working on speeding this up."
+            "Message for user: Locating this icon will take ~30 seconds. We're working on speeding this up."
         )
 
         # Take a screenshot
@@ -124,25 +110,21 @@ class Display:
         screenshot.save(buffered, format="PNG")
         screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
 
-        api_base = "https://api.openinterpreter.com"
-
         try:
             response = requests.post(
-                f'{api_base.strip("/")}/computer/display/',
+                f'{self.api_base.strip("/")}/computer/display/icon/',
                 json={"query": query, "base64": screenshot_base64},
             )
             response = response.json()
-
-            if "x" not in response:
-                raise Exception(f"Failed to find '{query}' on the screen.")
         except Exception as e:
-            raise
             if "SSLError" in str(e):
                 print(
-                    "Icon locating API not avaliable. Please try another method to click this icon."
+                    "Icon locating API not avaliable, or we were unable to find the icon. Please try another method to find this icon."
                 )
 
-        x, y = response["x"], response["y"]
+        x, y = response[0]
+
+        # In the future, if there's multiple, we should let the LLM pick by image, like how local text does
 
         # Find the x and y ratios for the pyautogui screen size vs the screenshot image size
         screen_width, screen_height = pyautogui.size()
