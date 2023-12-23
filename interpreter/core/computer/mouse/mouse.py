@@ -4,12 +4,25 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import pyautogui
-from PIL import Image
 
 
 class Mouse:
     def __init__(self, computer):
         self.computer = computer
+
+    def position(self):
+        """
+        Get the current mouse position.
+
+        Returns:
+            tuple: A tuple (x, y) representing the mouse's current position on the screen.
+        """
+        try:
+            return pyautogui.position()
+        except Exception as e:
+            raise RuntimeError(
+                f"An error occurred while retrieving the mouse position: {e}. "
+            )
 
     def move(self, *args, x=None, y=None, icon=None):
         screenshot = None
