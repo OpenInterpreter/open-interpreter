@@ -123,7 +123,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "api_version",
             "nickname": "av",
-            "help_text": "optionally set the API key for your llm calls (this will override environment variables)",
+            "help_text": "optionally set the API version for your llm calls (this will override environment variables)",
             "type": str,
             "attribute": {"object": interpreter.llm, "attr_name": "api_version"},
         },
@@ -584,7 +584,8 @@ Once the server is running, you can begin your conversation below.
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
     if interpreter.llm.api_base:
-        if not interpreter.llm.model.lower().startswith("openai/"):
+        if not interpreter.llm.model.lower().startswith("openai/") and \
+           not interpreter.llm.model.lower().startswith("azure/"):
             interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator
