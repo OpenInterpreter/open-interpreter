@@ -197,6 +197,11 @@ def start_terminal_interface(interpreter):
             "type": bool,
         },
         {
+            "name": "reset_config",
+            "help_text": "reset config.yaml to default",
+            "type": bool,
+        },
+        {
             "name": "conversations",
             "help_text": "list conversations to resume",
             "type": bool,
@@ -281,6 +286,16 @@ def start_terminal_interface(interpreter):
             except FileNotFoundError:
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
                 subprocess.call(["open", config_file])
+        return
+
+    if args.reset_config:
+        config_file = get_config_path()
+        if os.path.exists(config_file):
+            os.remove(config_file)
+            config_file = get_config_path()
+            print("`config.yaml` has been reset.")
+        else:
+            print("`config.yaml` does not exist.")
         return
 
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
@@ -584,8 +599,9 @@ Once the server is running, you can begin your conversation below.
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
     if interpreter.llm.api_base:
-        if not interpreter.llm.model.lower().startswith("openai/") and \
-           not interpreter.llm.model.lower().startswith("azure/"):
+        if not interpreter.llm.model.lower().startswith(
+            "openai/"
+        ) and not interpreter.llm.model.lower().startswith("azure/"):
             interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator

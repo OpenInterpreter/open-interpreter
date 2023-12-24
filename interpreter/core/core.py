@@ -35,6 +35,7 @@ class Interpreter:
         self.debug_mode = False
         self.max_output = 2000  # Max code block output visible to the LLM
         self.safe_mode = "off"
+        # this isn't right... this should be in the llm, and have a better name, and more customization:
         self.shrink_images = (
             False  # Shrinks all images passed into model to less than 1024 in width
         )
