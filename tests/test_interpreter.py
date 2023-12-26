@@ -13,6 +13,15 @@ from interpreter.terminal_interface.utils.count_tokens import (
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_get_selected_text():
+    print("Getting selected text")
+    time.sleep(1)
+    text = interpreter.computer.os.get_selected_text()
+    print(text)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_debug():
     interpreter.computer.debug_mode = True
     interpreter.debug_mode = True

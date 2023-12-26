@@ -34,7 +34,7 @@ def extend_system_message(interpreter):
     #     except:
     #         pass
 
-    if not interpreter.offline:
+    if not interpreter.offline and not interpreter.os:
         try:
             system_message += "\n" + get_relevant_procedures_string(interpreter)
         except:

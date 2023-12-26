@@ -335,7 +335,6 @@ def start_terminal_interface(interpreter):
 
     if args.os:
         interpreter.os = True
-        interpreter.offline = True  # Disables open procedures, which is best for pure code mode / normal mode
         interpreter.llm.supports_vision = True
         interpreter.shrink_images = True
         interpreter.llm.model = "gpt-4-vision-preview"
@@ -387,6 +386,8 @@ computer.clipboard.view() # Prints contents of clipboard for you to review.
 computer.os.get_selected_text() # If editing text, the user often wants this.
 ```
 
+YOU NEED TO MANUALLY SUMMARIZE TEXT. You are the best text summarization AI on the planet.
+
 If you want to scroll, **ensure the correct window is active**, then consider using the arrow keys.
 
 For rare and complex mouse actions, consider using computer vision libraries on `pil_image` to produce a list of coordinates for the mouse to move/drag to.
@@ -413,47 +414,41 @@ In order to verify if a web-based task is complete, use a hotkey that will go to
         """.strip()
         )
 
-        # Download required packages
-        try:
-            import cv2
-            import IPython
-            import matplotlib
-            import plyer
-            import pyautogui
-            import pytesseract
-        except ImportError:
+        # Check if required packages are installed
+        packages = ["cv2", "plyer", "pyautogui", "pyperclip"]
+        missing_packages = []
+        for package in packages:
+            try:
+                __import__(package)
+            except ImportError:
+                missing_packages.append(package)
+
+        if missing_packages:
             display_markdown_message(
-                "> **Missing Packages**\n\nSeveral packages are required for OS Control (`matplotlib`, `pytesseract`, `pyautogui`, `opencv-python`, `ipython`, `pyobjus`, `plyer`, `pyobjc`).\n\nInstall them?\n"
+                f"> **Missing Package(s): {', '.join(missing_packages)}**\n\n{', '.join(['`' + p + '`' for p in missing_packages])} are required for OS Control.\n\nInstall them?\n"
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
                 print("Exiting...")
                 return
-            packages = [
-                "matplotlib",
-                "pytesseract",
-                "pyautogui",
-                "opencv-python",
-                "ipython",
-                "plyer",
-            ]
-            for pip_name in ["pip", "pip3"]:
-                command = "\n".join(
-                    [f"{pip_name} install {package}" for package in packages]
-                )
-                for chunk in interpreter.computer.run("shell", command):
-                    if chunk.get("format") != "active_line":
-                        print(chunk.get("content"))
-                try:
-                    import cv2
-                    import IPython
-                    import matplotlib
-                    import plyer
-                    import pyautogui
-                    import pytesseract
-                except:
-                    continue
-                break
+
+            # ON PIP RELEASE THIS SHOULD BE CHANGED! To run pip install open-interpreter[os]
+            # so we have more control over the versioning
+
+            for package in missing_packages:
+                for pip_name in ["pip", "pip3"]:
+                    if package == "cv2":
+                        command = f"{pip_name} install --upgrade opencv-python"
+                    else:
+                        command = f"{pip_name} install --upgrade {package}"
+                    for chunk in interpreter.computer.run("shell", command):
+                        if chunk.get("format") != "active_line":
+                            print(chunk.get("content"))
+                    try:
+                        __import__(package)
+                    except ImportError:
+                        continue
+                    break
 
         display_markdown_message(
             "> `OS Control` enabled (experimental)\n\nOpen Interpreter will be able to see your screen, move your mouse, and use your keyboard."

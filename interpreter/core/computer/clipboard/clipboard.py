@@ -1,11 +1,16 @@
 import os
 
-import pyautogui
-import pyperclip
+try:
+    import pyperclip
+except:
+    # Optional package
+    pass
 
 
 class Clipboard:
-    def __init__(self):
+    def __init__(self, computer):
+        self.computer = computer
+
         if os.name == "nt":
             self.modifier_key = "ctrl"
         else:
@@ -18,7 +23,7 @@ class Clipboard:
         if text is not None:
             pyperclip.copy(text)
         else:
-            pyautogui.hotkey(self.modifier_key, "c", interval=0.15)
+            self.computer.keyboard.hotkey(self.modifier_key, "c")
 
     def paste(self):
-        pyautogui.hotkey(self.modifier_key, "v", interval=0.15)
+        self.computer.keyboard.hotkey(self.modifier_key, "v")

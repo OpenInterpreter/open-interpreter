@@ -4,12 +4,17 @@ import subprocess
 import tempfile
 from io import BytesIO
 
-import cv2
 import matplotlib.pyplot as plt
-import numpy as np
-import pyautogui
 import requests
 from PIL import Image
+
+try:
+    import cv2
+    import numpy as np
+    import pyautogui
+except:
+    # Optional packages
+    pass
 
 from ..utils.computer_vision import find_text_in_image
 
@@ -18,7 +23,13 @@ class Display:
     # It hallucinates these:
     def __init__(self, computer):
         self.computer = computer
-        self.width, self.height = pyautogui.size()
+
+        try:
+            self.width, self.height = pyautogui.size()
+        except:
+            # pyautogui is an optional package, so it's okay if this fails
+            pass
+
         self.api_base = "https://api.openinterpreter.com"
 
     def size(self):
@@ -125,9 +136,5 @@ class Display:
         x, y = response[0]
 
         # In the future, if there's multiple, we should let the LLM pick by image, like how local text does
-
-        # Convert x and y to fractions of the screenshot width and height
-        x = x / screenshot.width
-        y = y / screenshot.height
 
         return x, y

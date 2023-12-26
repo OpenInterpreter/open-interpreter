@@ -33,7 +33,7 @@ class Interpreter:
         self.offline = False
         self.auto_run = False
         self.debug_mode = False
-        self.max_output = 2000  # Max code block output visible to the LLM
+        self.max_output = 2800  # Max code block output visible to the LLM
         self.safe_mode = "off"
         # this isn't right... this should be in the llm, and have a better name, and more customization:
         self.shrink_images = (

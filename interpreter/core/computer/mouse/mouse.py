@@ -1,9 +1,14 @@
 import time
 
-import cv2
 import matplotlib.pyplot as plt
-import numpy as np
-import pyautogui
+
+try:
+    import cv2
+    import numpy as np
+    import pyautogui
+except:
+    # Optional packages
+    pass
 
 
 class Mouse:
@@ -34,6 +39,15 @@ class Mouse:
             text = args[0]
 
             screenshot = self.computer.display.screenshot(show=False)
+
+            if self.computer.offline == True:
+                try:
+                    import pytesseract
+                except:
+                    raise Exception(
+                        "To find text in order to use the mouse, please install `pytesseract` along with the Tesseract executable."
+                    )
+
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
 
             if len(coordinates) == 0:

@@ -1,9 +1,19 @@
 import io
 
-import cv2
-import numpy as np
 from PIL import Image
-from pytesseract import Output, pytesseract
+
+try:
+    import cv2
+    import numpy as np
+except:
+    # Optional packages
+    pass
+
+try:
+    from pytesseract import Output, pytesseract
+except:
+    # this is very very optional, we don't even reccomend it unless the api has failed
+    pass
 
 
 def find_text_in_image(img, text):

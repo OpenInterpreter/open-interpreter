@@ -367,6 +367,8 @@ def terminal_interface(interpreter, message):
                                     description = f"Pressing {arguments}."
                                 elif action.startswith("computer.keyboard.press("):
                                     description = f"Pressing {arguments}."
+                                elif action == "computer.os.get_selected_text()":
+                                    description = f"Getting selected text."
 
                                 if description:
                                     interpreter.computer.os.notify(description)

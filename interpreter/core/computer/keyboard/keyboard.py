@@ -2,11 +2,18 @@ import os
 import platform
 import time
 
-import pyautogui
+try:
+    import pyautogui
+except:
+    # Optional packages
+    pass
 
 
 class Keyboard:
     """A class to simulate keyboard inputs"""
+
+    def __init__(self, computer):
+        self.computer = computer
 
     def write(self, text, interval=0.1, **kwargs):
         """

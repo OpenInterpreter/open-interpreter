@@ -1,4 +1,5 @@
 import platform
+import subprocess
 
 
 class Os:
@@ -17,15 +18,18 @@ class Os:
         return selected_text
 
     def notify(self, text):
-        # Notification title
         title = "Open Interpreter"
 
         if "darwin" in platform.system().lower():  # Check if the OS is macOS
             script = f'display notification "{text}" with title "{title}"'
-            self.computer.terminal.run("applescript", script)
+            subprocess.run(["osascript", "-e", script])
         else:  # For other OS, use a general notification API
-            import plyer
+            try:
+                import plyer
 
-            plyer.notification.notify(title=title, message=text)
+                plyer.notification.notify(title=title, message=text)
+            except:
+                # Optional package
+                pass
 
     # Maybe run code should be here...?

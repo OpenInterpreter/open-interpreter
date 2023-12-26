@@ -1,15 +1,11 @@
 import json
 
+from .clipboard.clipboard import Clipboard
+from .display.display import Display
+from .keyboard.keyboard import Keyboard
+from .mouse.mouse import Mouse
+from .os.os import Os
 from .terminal.terminal import Terminal
-
-try:
-    from .clipboard.clipboard import Clipboard
-    from .display.display import Display
-    from .keyboard.keyboard import Keyboard
-    from .mouse.mouse import Mouse
-    from .os.os import Os
-except:
-    pass
 
 
 class Computer:
@@ -19,17 +15,11 @@ class Computer:
         self.offline = False
         self.debug_mode = False
 
-        # OS mode
-        try:
-            self.mouse = Mouse(
-                self
-            )  # Mouse will use the computer's display, so we give it a reference to ourselves
-            self.keyboard = Keyboard()
-            self.display = Display(self)
-            self.clipboard = Clipboard()
-            self.os = Os(self)
-        except:
-            pass
+        self.mouse = Mouse(self)
+        self.keyboard = Keyboard(self)
+        self.display = Display(self)
+        self.clipboard = Clipboard(self)
+        self.os = Os(self)
 
     # Shortcut for computer.terminal.languages
     @property
@@ -45,6 +35,13 @@ class Computer:
         Shortcut for computer.terminal.run
         """
         return self.terminal.run(*args, **kwargs)
+
+    def exec(self, code):
+        """
+        It has hallucinated this.
+        Shortcut for computer.terminal.run("shell", code)
+        """
+        return self.terminal.run("shell", code)
 
     def stop(self):
         """
