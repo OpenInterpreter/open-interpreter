@@ -95,9 +95,11 @@ version: 0.2.0 # Configuration file version (do not modify)
                 file.write(comment_wrapper)
 
             print("Migration complete.")
+            print("")
         else:
             print("Skipping loading config...")
-            return
+            print("")
+            return self
 
     if "system_message" in config:
         display_markdown_message(

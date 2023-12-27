@@ -592,8 +592,6 @@ Once the server is running, you can begin your conversation below.
         if interpreter.llm.supports_functions is None:
             interpreter.llm.supports_functions = True
 
-    validate_llm_settings(interpreter)
-
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
     if interpreter.llm.api_base:
@@ -613,5 +611,7 @@ Once the server is running, you can begin your conversation below.
     else:
         # Apply default config file
         interpreter = apply_config(interpreter)
+
+    validate_llm_settings(interpreter)
 
     interpreter.chat()
