@@ -5,12 +5,16 @@ from random import randint
 
 import pytest
 
-import interpreter
+#####
+from interpreter import OpenInterpreter
 from interpreter.terminal_interface.utils.apply_config import apply_config
 from interpreter.terminal_interface.utils.count_tokens import (
     count_messages_tokens,
     count_tokens,
 )
+
+interpreter = OpenInterpreter()
+#####
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")

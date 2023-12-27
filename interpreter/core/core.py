@@ -21,7 +21,7 @@ from .respond import respond
 from .utils.truncate_output import truncate_output
 
 
-class Interpreter:
+class OpenInterpreter:
     def start_terminal_interface(self):
         start_terminal_interface(self)
 
@@ -49,9 +49,6 @@ class Interpreter:
         # OS control mode related attributes
         self.os = False
         self.speak_messages = False
-
-        # Expose class so people can make new instances
-        self.Interpreter = Interpreter
 
         # LLM
         self.llm = Llm(self)
