@@ -20,22 +20,25 @@
   - [ ] Make that flag send each message to server
   - [ ] Set up receiving replit server
   - [ ] Add option to send previous conversations
+  - [ ] There should be a function that just renders messages to the terminal, so we can revive conversation navigator, and let people look at their conversations
+    - [ ] This should also render their convos once input() is about to be run, so we don't get those weird stuttering `rich` artifacts
   - [ ] Make the messaging really strong re: "We will be saving this, we will redact PII, we will open source the dataset so we (and others) can train code interpreting models"
 - [ ] Let OI use OI. Add `interpreter.chat(async=True)` bool. OI can use this to open OI on a new thread
-  - [ ] Also add `interpreter.get_last_assistant_messages()` to return the last assistant messages.
+  - [ ] Also add `interpreter.await()` which waits for `interpreter.running` (?) to = False, and `interpreter.result()` which returns the last assistant messages content.
 - [ ] Allow for limited functions (`interpreter.functions`) using regex
   - [ ] If `interpreter.functions != []`:
     - [ ] set `interpreter.computer.languages` to only use Python
     - [ ] Use regex to ensure the output of code blocks conforms to just using those functions + other python basics
-- [ ] Allow for custom llms (to be stored in `interpreter.llm`) which conform to some class
-  - [ ] Should be a generator that can be treated exactly like the OpenAI streaming API
-  - [ ] Has attributes `.supports_function_calling`, `.supports_vision`, and `.context_window`
-- [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed`) which will let us do semantic search
-- [ ] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
+- [x] Allow for custom llms (to be stored in `interpreter.llm`) which conform to some class
+  - [x] Has attributes `.supports_functions`, `.supports_vision`, and `.context_window`
+- [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed` or `computer.ai.embed`) which will let us do semantic search
+- [ ] (Maybe) if a git is detected, switch to a mode that's good for developers, like showing nested file structure in dynamic system message, searching for relevant functions (use computer.files.search)
+- [x] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
   - [x] Make it so function calling dynamically uses the languages in interpreter.computer.languages
 - [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstrings. Keep this minimal!
-  - [ ]
   - [ ] If `interpreter.skill_library == True`, we should add a decorator above all functions, then show OI how to search its skill library
+  - [ ] Use computer.files.search over a folder that decorator saves functions (and import statements to)
+  - [ ] Then use dynamic system message to show relevant functions
 - [x] Allow for integrations somehow (you can replace interpreter.llm.completions with a wrapped completions endpoint for any kind of logging. need to document this tho)
   - [ ] Document this^
 - [ ] Expand "safe mode" to have proper, simple Docker support, or maybe Cosmopolitan LibC
@@ -49,6 +52,7 @@
     - [x] How do we assess whether or not OI has solved the task?
   - [ ] Loop over GAIA, use a different language model every time (use Replicate, then ask LiteLLM how they made their "mega key" to many different LLM providers)
   - [ ] Loop over that ↑ using a different prompt each time. Which prompt is best across all LLMs?
+  - [ ] (For the NCU) might be good to use a Google VM with a display
   - [ ] (Future future) Use GPT-4 to assess each result, explaining each failure. Summarize. Send it all to GPT-4 + our prompt. Let it redesign the prompt, given the failures, rinse and repeat
 - [ ] Use Anthropic function calling
 - [ ] Stateless (as in, doesn't use the application directory) core python package. All `appdir` stuff should be only for the TUI
