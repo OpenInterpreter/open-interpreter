@@ -55,6 +55,7 @@
   - [ ] (For the NCU) might be good to use a Google VM with a display
   - [ ] (Future future) Use GPT-4 to assess each result, explaining each failure. Summarize. Send it all to GPT-4 + our prompt. Let it redesign the prompt, given the failures, rinse and repeat
 - [ ] Use Anthropic function calling
+- [ ] Implement Plausible*
 - [ ] Stateless (as in, doesn't use the application directory) core python package. All `appdir` stuff should be only for the TUI
   - [ ] `interpreter.__dict__` = a dict derived from config is how the python package should be set, and this should be from the TUI. `interpreter` should not know about the config
   - [ ] Move conversation storage out of the core and into the TUI. When we exit or error, save messages same as core currently does
@@ -203,3 +204,26 @@ This script will launch Chrome, connect to it, navigate to "https://www.example.
 ## * Roughly, how to build `computer.files`:
 
 Okay I'm thinking like, semantic filesystem or something. We make a new package that does really simple semantic search over a filesystem, then expose it via `computer.files.search("query")`.
+
+## * Plausible
+
+```python
+import requests
+import json
+
+def send_event_to_plausible(domain, event_name):
+    url = f'https://plausible.io/api/event'
+    headers = {'Content-Type': 'application/json', 'User-Agent': 'YourAppName/Version'}
+    payload = {
+        'domain': domain,
+        'name': event_name,
+        'url': 'https://yourapp.com/path',  # URL where the event occurred
+        'referrer': '',
+        'props': {'prop1': 'value1', 'prop2': 'value2'}
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    return response.status_code, response.text
+
+# Usage example
+send_event_to_plausible('yourdomain.com', 'event_name')
+```
