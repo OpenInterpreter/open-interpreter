@@ -5,11 +5,13 @@ It's the main file. `import interpreter` will import an instance of this class.
 
 import json
 import os
+import time
 from datetime import datetime
+
+import yaml
 
 from ..terminal_interface.start_terminal_interface import start_terminal_interface
 from ..terminal_interface.terminal_interface import terminal_interface
-from ..terminal_interface.utils.get_config import get_config, user_config_path
 from ..terminal_interface.utils.local_storage_path import get_storage_path
 from .computer.computer import Computer
 from .default_system_message import default_system_message
@@ -26,8 +28,6 @@ class Interpreter:
     def __init__(self):
         # State
         self.messages = []
-
-        self.config_file = user_config_path
 
         # Settings
         self.offline = False
@@ -63,22 +63,6 @@ class Interpreter:
 
         # Computer
         self.computer = Computer()
-
-        # Load config defaults
-        self.extend_config(self.config_file)
-
-    def extend_config(self, config_path):
-        if self.debug_mode:
-            print(f"Extending configuration from `{config_path}`")
-
-        config = get_config(config_path)
-        for key, value in config.items():
-            if key.startswith("llm."):
-                setattr(self.llm, key[4:], value)
-            elif key.startswith("computer."):
-                setattr(self.computer, key[9:], value)
-            else:
-                setattr(self, key, value)
 
     def chat(self, message=None, display=True, stream=False):
         if stream:

@@ -9,6 +9,7 @@ import time
 import pkg_resources
 
 from .conversation_navigator import conversation_navigator
+from .utils.apply_config import apply_config
 from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .utils.get_config import get_config_path
@@ -289,7 +290,10 @@ def start_terminal_interface(interpreter):
         return
 
     if args.reset_config:
-        config_file = get_config_path()
+        if args.config_file:
+            config_file = get_config_path(args.config_file)
+        else:
+            config_file = get_config_path()
         if os.path.exists(config_file):
             os.remove(config_file)
             config_file = get_config_path()
@@ -560,23 +564,17 @@ Once the server is running, you can begin your conversation below.
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
         if attr_value != None:
-            # If the user has provided a config file, load it and extend interpreter's configuration
-            if attr_name == "config_file":
-                user_config = get_config_path(attr_value)
-                interpreter.config_file = user_config
-                interpreter.extend_config(config_path=user_config)
-            else:
-                argument_dictionary = [a for a in arguments if a["name"] == attr_name]
-                if len(argument_dictionary) > 0:
-                    argument_dictionary = argument_dictionary[0]
-                    if "attribute" in argument_dictionary:
-                        attr_dict = argument_dictionary["attribute"]
-                        setattr(attr_dict["object"], attr_dict["attr_name"], attr_value)
+            argument_dictionary = [a for a in arguments if a["name"] == attr_name]
+            if len(argument_dictionary) > 0:
+                argument_dictionary = argument_dictionary[0]
+                if "attribute" in argument_dictionary:
+                    attr_dict = argument_dictionary["attribute"]
+                    setattr(attr_dict["object"], attr_dict["attr_name"], attr_value)
 
-                        if args.debug_mode:
-                            print(
-                                f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
-                            )
+                    if args.debug_mode:
+                        print(
+                            f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
+                        )
 
     if interpreter.llm.model == "gpt-4-1106-preview":
         if interpreter.llm.context_window is None:
@@ -608,5 +606,12 @@ Once the server is running, you can begin your conversation below.
     if args.conversations:
         conversation_navigator(interpreter)
         return
+
+    if args.config_file:
+        user_config = get_config_path(attr_value)
+        interpreter = apply_config(interpreter, config_path=user_config)
+    else:
+        # Apply default config file
+        interpreter = apply_config(interpreter)
 
     interpreter.chat()
