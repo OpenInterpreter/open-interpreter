@@ -2,7 +2,7 @@ import sys
 
 if sys.version_info < (3, 10) or sys.version_info >= (3, 12):
     print(
-        "\nWARNING: You are running Open Interpreter on an unsupported version of Python, so you may encounter unexpected errors. Please install Python 3.10 or 3.11 at https://www.python.org/downloads/\n"
+        "\nYou are running Open Interpreter on an unsupported version of Python, so you may encounter unexpected errors. Please install Python 3.10 or 3.11 at https://www.python.org/downloads/\n"
     )
 
 from .core.core import OpenInterpreter

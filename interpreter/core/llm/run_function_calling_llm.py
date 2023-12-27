@@ -55,7 +55,7 @@ def run_function_calling_llm(llm, request_params):
             yield {"type": "message", "content": delta["content"]}
 
         if (
-            "function_call" in accumulated_deltas
+            accumulated_deltas.get("function_call")
             and "arguments" in accumulated_deltas["function_call"]
         ):
             if (

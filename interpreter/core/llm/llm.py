@@ -61,6 +61,7 @@ class Llm:
                 self.interpreter.llm.model != "gpt-4-vision-preview"
                 and self.model in litellm.open_ai_chat_completion_models
                 or self.model.startswith("azure/")
+                # Once Litellm supports it, add Anthropic models here
             ):
                 supports_functions = True
             else:

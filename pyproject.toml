@@ -9,14 +9,13 @@ authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.9,<4.0"
 
 appdirs = "^1.4.4"
 astor = "^0.8.1"
 git-python = "^1.0.3"
 inquirer = "^3.1.3"
-litellm = "0.13.2"
-openai = "^0.28.0"
+litellm = "^1.15.10"
 pyyaml = "^6.0.1"
 rich = "^13.4.2"
 six = "^1.16.0"
