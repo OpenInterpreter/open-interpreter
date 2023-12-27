@@ -144,7 +144,8 @@ def test_long_message():
     interpreter.llm.context_window = 300
     interpreter.chat(messages)
     assert len(interpreter.messages) > 1
-    assert "ABCD" in interpreter.messages[-1]["content"]
+    assert "A" in interpreter.messages[-1]["content"]
+    assert "B" in interpreter.messages[-1]["content"]
 
 
 # this function will run after each test

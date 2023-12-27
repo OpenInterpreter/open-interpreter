@@ -33,8 +33,12 @@ examples = [
     "Open Chrome and go to YouTube.",
 ]
 # random.shuffle(examples)
-for example in examples:
-    readline.add_history(example)
+try:
+    for example in examples:
+        readline.add_history(example)
+except:
+    # If they don't have readline, that's fine
+    pass
 
 
 def terminal_interface(interpreter, message):
