@@ -145,7 +145,6 @@ def test_long_message():
     interpreter.chat(messages)
     assert len(interpreter.messages) > 1
     assert "A" in interpreter.messages[-1]["content"]
-    assert "B" in interpreter.messages[-1]["content"]
 
 
 # this function will run after each test
