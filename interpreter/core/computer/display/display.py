@@ -126,15 +126,11 @@ class Display:
                 f'{self.api_base.strip("/")}/computer/display/icon/',
                 json={"query": query, "base64": screenshot_base64},
             )
-            response = response.json()
+            coordinates = response.json()
         except Exception as e:
             if "SSLError" in str(e):
                 print(
                     "Icon locating API not avaliable, or we were unable to find the icon. Please try another method to find this icon."
                 )
 
-        x, y = response[0]
-
-        # In the future, if there's multiple, we should let the LLM pick by image, like how local text does
-
-        return x, y
+        return coordinates

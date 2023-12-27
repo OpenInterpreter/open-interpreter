@@ -31,10 +31,14 @@ def test_display_debug():
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_api():
-    interpreter.computer.mouse.move(icon="cell tower")
-    interpreter.computer.mouse.move("debug console")
-    interpreter.computer.mouse.move(icon="caution")
-    interpreter.computer.mouse.move("Ask follow-up")
+    start = time.time()
+    interpreter.computer.mouse.move(icon="left arrow")
+    # interpreter.computer.mouse.move(icon="caution")
+    # interpreter.computer.mouse.move(icon="bluetooth")
+    # interpreter.computer.mouse.move(icon="gear")
+    # interpreter.computer.mouse.move(icon="play button")
+    # interpreter.computer.mouse.move(icon="code icon with '>_' in it")
+    print(time.time() - start)
     assert False
 
 
@@ -326,7 +330,9 @@ def test_nested_loops_and_multiple_newlines():
 
 
 def test_write_to_file():
-    interpreter.chat("""Write the word 'Washington' to a .txt file called file.txt""")
+    interpreter.chat(
+        """Write the word 'Washington' to a .txt file called file.txt. Instantly run the code! Save the file!"""
+    )
     assert os.path.exists("file.txt")
     interpreter.messages = []  # Just reset message history, nothing else for this test
     messages = interpreter.chat(
