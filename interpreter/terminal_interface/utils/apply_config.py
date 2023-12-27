@@ -48,12 +48,19 @@ def apply_config(self, config_path=None):
                     del config[old_attribute]
 
             old_system_messages = [""]
-            if (
-                "system_message" in config
-                and config["system_message"] in old_system_messages
-            ):
-                # Deleting this will use the default message
-                del config["system_message"]
+            if "system_message" in config:
+                # If the whole thing is system message, just delete it
+                if config["system_message"] in old_system_messages:
+                    del config["system_message"]
+                else:
+                    for old_message in old_system_messages:
+                        if config["system_message"].startswith(old_message):
+                            # Extract the ending part and make it into custom_instructions
+                            config["custom_instructions"] = config["system_message"][
+                                len(old_message) :
+                            ].strip()
+                            del config["system_message"]
+                            break
 
             # Save config file
             with open(config_path, "w") as file:
@@ -103,10 +110,10 @@ version: 0.2.0 # Configuration file version (do not modify)
 
     if "system_message" in config:
         display_markdown_message(
-            "\n\n> FYI: A `system_message` was found in your configuration file.\n\nBecause we frequently improve our default system message, we highly reccommend removing this parameter (which manually overrides our default system message).\n\nInstead, run `interpreter --config` to edit your configuration file, then un-comment out the optional 'custom_instructions: "
-            "' parameter (by removing the `#` that preceeds it) and use it to append unique instructions to the base system message.\n\n"
+            "\n**FYI:** A `system_message` was found in your configuration file.\n\nBecause we frequently improve our default system message, we highly recommend removing this parameter (which manually overrides the default system message) in favor of `custom_instructions`, which is appended to the default system message.\n"
         )
-        time.sleep(4)
+        time.sleep(2)
+        display_markdown_message("---")
 
     if "computer.languages" in config:
         # this is handled specially
