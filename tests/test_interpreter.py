@@ -221,12 +221,10 @@ def test_vision():
 
 
 def test_multiple_instances():
-    import interpreter
-
     interpreter.system_message = "i"
-    agent_1 = interpreter.Interpreter()
+    agent_1 = OpenInterpreter()
     agent_1.system_message = "<3"
-    agent_2 = interpreter.Interpreter()
+    agent_2 = OpenInterpreter()
     agent_2.system_message = "u"
 
     assert interpreter.system_message == "i"
