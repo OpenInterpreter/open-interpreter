@@ -20,7 +20,7 @@
 
 <br>
 
-**Update:** ● 0.1.12 supports `interpreter --vision` ([documentation](https://docs.openinterpreter.com/usage/terminal/vision))
+**Important:** ● `v0.1.18` includes breaking changes. Please read our [migration guide](https://github.com/KillianLucas/open-interpreter/blob/main/docs/NCU_MIGRATION_GUIDE.md) if you use Open Interpreter in Python.
 
 <br>
 
