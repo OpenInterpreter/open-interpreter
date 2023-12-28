@@ -214,6 +214,13 @@ def start_terminal_interface(interpreter):
         },
     ]
 
+    # Check for deprecated flags before parsing arguments
+    if "--debug_mode" in sys.argv or "-d" in sys.argv:
+        print("\n`--debug_mode` has been renamed to `--verbose`.\n")
+        time.sleep(1.5)
+        sys.argv.remove("--debug_mode")
+        sys.argv.append("--verbose")
+
     parser = argparse.ArgumentParser(description="Open Interpreter")
 
     # Add arguments

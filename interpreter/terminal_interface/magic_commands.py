@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import time
 
 from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
@@ -197,6 +198,14 @@ def handle_magic_command(self, user_input):
     user_input = user_input[1:].strip()  # Capture the part after the `%`
     command = user_input.split(" ")[0]
     arguments = user_input[len(command) :].strip()
+
+    if command == "debug":
+        print(
+            "\n`%debug` / `--debug_mode` has been renamed to `%verbose` / `--verbose`.\n"
+        )
+        time.sleep(1.5)
+        command = "verbose"
+
     action = switch.get(
         command, default_handle
     )  # Get the function from the dictionary, or default_handle if not found
