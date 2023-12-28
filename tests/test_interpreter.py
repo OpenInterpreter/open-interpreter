@@ -17,7 +17,7 @@ interpreter = OpenInterpreter()
 #####
 
 
-# @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_keyboard():
     time.sleep(2)
     interpreter.computer.keyboard.write("Hello " * 50 + "\n" + "hi" * 50)
