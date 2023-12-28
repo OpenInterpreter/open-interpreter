@@ -17,7 +17,7 @@ interpreter = OpenInterpreter()
 #####
 
 
-# @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_get_selected_text():
     print("Getting selected text")
     time.sleep(1)

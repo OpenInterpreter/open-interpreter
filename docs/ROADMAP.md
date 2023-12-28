@@ -7,7 +7,7 @@
   - [ ] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
   - [ ] Swap out the information with information from LiteLLM
   - [ ] Repeat with other models
-- [ ] **Easy 🟢** Require documentation for PRs
+- [x] Require documentation for PRs
 - [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
 - [ ] Better comments throughout the package (they're like docs for contributors)
 - [ ] Document the New Computer Update
