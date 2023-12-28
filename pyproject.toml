@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.1.19"
+version = "0.1.18"
 description = "Let language models run code."
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
