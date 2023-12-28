@@ -70,7 +70,13 @@ class Display:
         img = Image.open(temp_file.name)
 
         # Delete the temporary file
-        os.remove(temp_file.name)
+        try:
+            os.remove(temp_file.name)
+        except Exception as e:
+            # On windows, this can fail due to permissions stuff??
+            # (PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\killi\\AppData\\Local\\Temp\\tmpgc2wscpi.png')
+            if self.computer.verbose:
+                print(str(e))
 
         if show:
             # Show the image using matplotlib

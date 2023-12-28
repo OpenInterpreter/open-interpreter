@@ -20,6 +20,9 @@ class Os:
     def notify(self, text):
         title = "Open Interpreter"
 
+        if len(text) > 200:
+            text = text[:200] + "..."
+
         if "darwin" in platform.system().lower():  # Check if the OS is macOS
             script = f'display notification "{text}" with title "{title}"'
             subprocess.run(["osascript", "-e", script])

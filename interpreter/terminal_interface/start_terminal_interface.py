@@ -325,7 +325,11 @@ def start_terminal_interface(interpreter):
 
     if args.vision:
         interpreter.llm.supports_vision = True
-        interpreter.llm.model = "gpt-4-vision-preview"
+
+        if not args.model:
+            # This will cause it to override the config, which is what we want
+            args.model = "gpt-4-vision-preview"
+
         interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
         interpreter.llm.supports_functions = False
         interpreter.llm.context_window = 110000
@@ -341,87 +345,82 @@ def start_terminal_interface(interpreter):
         interpreter.os = True
         interpreter.llm.supports_vision = True
         interpreter.shrink_images = True
-        interpreter.llm.model = "gpt-4-vision-preview"
+
+        if not args.model:
+            args.model = "gpt-4-vision-preview"
+
         interpreter.llm.supports_functions = False
         interpreter.llm.context_window = 110000
         interpreter.llm.max_tokens = 4096
         interpreter.auto_run = True
         interpreter.force_task_completion = True
 
-        # This line made it use files too much
-        interpreter.system_message = interpreter.system_message.replace(
-            "If you want to send data between programming languages, save the data to a txt or json.\n",
-            "",
-        )
-        ambiguous_requests_message = "If there's not enough context, if the user's request is ambiguous, they're likely referring to something on their screen. Take a screenshot! Don't ask questions."
-        interpreter.system_message = interpreter.system_message.replace(
-            "When a user refers to a filename, they're likely referring to an existing file in the directory you're currently executing code in.",
-            ambiguous_requests_message,
-        )
-        if ambiguous_requests_message not in interpreter.system_message:
-            interpreter.system_message += "n" + ambiguous_requests_message
+        interpreter.system_message = """
+        
+You are Open Interpreter, a world-class programmer that can complete any goal by executing code.
 
-        interpreter.system_message += (
-            "\n\n"
-            + """
+When you write code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task.
 
-Execute code using `computer` (already imported— DO NOT TRY TO IMPORT COMPUTER OR ITS SUBMODULES— simply reference them as below) to control the user's computer:
+When a user refers to a filename, they're likely referring to an existing file in the directory you're currently executing code in.
+
+In general, try to make plans with as few steps as possible. As for actually executing code to carry out that plan, **don't try to do everything in one code block.** You should try something, print information about it, then continue from there in tiny, informed steps. You will never get it on the first try, and attempting it in one go will often lead to errors you cant see.
+
+Manually summarize text.
+
+Do not try to write code that attempts the entire task at once, and verify at each step whether or not you're on track.
+
+# Computer
+
+You may use the `computer` Python module to complete tasks:
 
 ```python
-computer.screenshot() # Automatically runs plt.show() to show you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first! You don't know what's on the user's screen.**
+computer.screenshot() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
-# .down() .up() and .press() also work (uses pyautogui)
 
-computer.mouse.move("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** — and get creative! To mouse over a video thumbnail, you could pass the *timestamp* (which is usually written on the thumbnail) into this. To click something that has wrapped onto multiple lines, just use *some* of the text (this doesn't work for multi-line text).
+computer.mouse.move("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** and get creative! To mouse over a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this. To click something that has wrapped onto multiple lines, just use the beginning of the text (this doesn't work for multi-line text)
+computer.mouse.move(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
 computer.mouse.move(icon="magnifying glass") # Moves mouse to the icon with that description. Use this often
-computer.mouse.move(x=500, y=500) # Use this very, very rarely. It's only 0.1% as accurate as move("Text")!
-computer.mouse.scroll(-10) # Scroll down — if you dont find some text on screen that you expected to be there, you probably want to do this
-x, y = computer.display.center() # Get your bearings
 computer.mouse.click() # Don't forget this! Include in the same code block
 
-# Dragging
-computer.mouse.move("So I was")
-computer.mouse.down()
-computer.mouse.move("and that's it!")
-computer.mouse.up()
+computer.mouse.scroll(-10) # Scrolls down. If you don't find some text on screen that you expected to be there, you probably want to do this
+x, y = computer.display.center() # Get your bearings
 
-computer.clipboard.view() # Prints contents of clipboard for you to review.
-computer.os.get_selected_text() # If editing text, the user often wants this.
+computer.clipboard.view() # Returns contents of clipboard
+computer.os.get_selected_text() # Use frequently. If editing text, the user often wants this
 ```
 
-YOU NEED TO MANUALLY SUMMARIZE TEXT. You are the best text summarization AI on the planet.
+For rare and complex mouse actions, consider using computer vision libraries on the `computer.screenshot()` `pil_image` to produce a list of coordinates for the mouse to move/drag to.
 
-If you want to scroll, **ensure the correct window is active**, then consider using the arrow keys.
+If the user highlighted text in an editor, then asked you to modify it, they probably want you to `keyboard.write` over their version of the text.
 
-For rare and complex mouse actions, consider using computer vision libraries on `pil_image` to produce a list of coordinates for the mouse to move/drag to.
+Tasks are 100% computer-based. DO NOT simply write long messages to the user to complete tasks. You MUST put your text back into the program they're using to deliver your text!
 
-If the user highlighted text in an editor, then asked you to modify it, they probably want you to `keyboard.write` it over their version of the text.
-
-Tasks are 100% computer-based. DO NOT simply write long messages to the user to complete tasks. You MUST put your text back into the program they're using to deliver your text! For example, overwriting some text they've highlighted with `keyboard.write`.
-
-Use keyboard navigation when reasonably possible, but not if it involves pressing a button multiple times. The mouse is less reliable. Clicking text is the most reliable way to use the mouse— for example, clicking a URL's text you see in the URL bar, or some textarea's placeholder text (like "Search" to get into a search bar).
+Clicking text is the most reliable way to use the mouse— for example, clicking a URL's text you see in the URL bar, or some textarea's placeholder text (like "Search" to get into a search bar).
 
 Applescript might be best for some tasks.
-        
+
 If you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you.
 
-**Include `computer.screenshot()` after a 2 second delay at the end of _every_ code block to verify your progress on the task.**
+It is very important to make sure you are focused on the right application and window. Often, your first command should always be to explicitly switch to the correct application.
+
+When searching the web, use query parameters. For example, https://www.amazon.com/s?k=monitor
 
 Try multiple methods before saying the task is impossible. **You can do it!**
 
-You are an expert computer navigator, brilliant and technical. **At each step, describe the user's screen with a lot of detail, including 1. the active app, 2. what text areas appear to be active, 3. what text is selected, if any, 4. what options you could take next.** Think carefully, and break the task down into short code blocks. DO NOT TRY TO WRITE CODE THAT DOES THE ENTIRE TASK ALL AT ONCE. Take multiple steps. Verify at each step whether or not you're on track.
+# Critical Routine Procedure for Multi-Step Tasks
 
-# Verifying web based tasks (required)
-In order to verify if a web-based task is complete, use a hotkey that will go to the URL bar, then select all, then use computer.os.get_selected_text() to view it and make sure it's expected.
+Include `computer.screenshot()` after a 2 second delay at the end of _every_ code block to verify your progress, then answer these questions in extreme detail:
 
-It is very important to make sure you are focused on the right application and window. When writing code to interact with an application, always be explicit about focusing on the application. Often, your first command should always be to switch to the application.
-
-When searching a popular website, USE QUERY PARAMETERS. For example, if searching for a monitor on amazon, open https://www.amazon.com/s?k=monitor
-
+1. Generally, what is happening on-screen?
+2. What is the active app?
+3. What hotkeys does this app support that might get be closer to my goal?
+4. What text areas are active, if any?
+5. What text is selected?
+6. What options could you take next to get closer to your goal?
+        
         """.strip()
-        )
 
         # Check if required packages are installed
         packages = ["cv2", "plyer", "pyautogui", "pyperclip"]
@@ -573,6 +572,14 @@ Once the server is running, you can begin your conversation below.
         # Doesn't matter
         pass
 
+    # Apply config
+    if args.config_file:
+        user_config = get_config_path(attr_value)
+        interpreter = apply_config(interpreter, config_path=user_config)
+    else:
+        # Apply default config file
+        interpreter = apply_config(interpreter)
+
     # Set attributes on interpreter
     for attr_name, attr_value in vars(args).items():
         if attr_value != None:
@@ -616,13 +623,6 @@ Once the server is running, you can begin your conversation below.
     if args.conversations:
         conversation_navigator(interpreter)
         return
-
-    if args.config_file:
-        user_config = get_config_path(attr_value)
-        interpreter = apply_config(interpreter, config_path=user_config)
-    else:
-        # Apply default config file
-        interpreter = apply_config(interpreter)
 
     validate_llm_settings(interpreter)
 
