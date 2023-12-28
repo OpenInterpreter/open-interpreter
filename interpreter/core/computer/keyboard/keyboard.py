@@ -15,7 +15,7 @@ class Keyboard:
     def __init__(self, computer):
         self.computer = computer
 
-    def write(self, text, interval=0.1, **kwargs):
+    def write(self, text, interval=None, **kwargs):
         """
         Type out a string of characters.
 
@@ -24,7 +24,32 @@ class Keyboard:
             interval (int or float, optional): The delay between pressing each character key. Defaults to 0.1.
         """
         time.sleep(0.15)
-        pyautogui.write(text, interval=interval)
+
+        if interval:
+            pyautogui.write(text, interval=interval)
+        else:
+            try:
+                clipboard_history = self.computer.clipboard.view()
+            except:
+                pass
+
+            lines = text.split("\n")
+
+            if len(lines) < 5:
+                for i, line in enumerate(lines):
+                    line = line + "\n" if i != len(lines) - 1 else line
+                    self.computer.clipboard.copy(line)
+                    self.computer.clipboard.paste()
+            else:
+                # just do it all at once
+                self.computer.clipboard.copy(text)
+                self.computer.clipboard.paste()
+
+            try:
+                self.computer.clipboard.copy(clipboard_history)
+            except:
+                pass
+
         time.sleep(0.15)
 
     def press(self, keys, presses=1, interval=0.1, **kwargs):
