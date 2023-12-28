@@ -15,4 +15,4 @@ system_message: |
 offline: false
 llm.model: "gpt-3.5-turbo"
 llm.temperature: 0.25
-debug_mode: true
+verbose: true

@@ -43,7 +43,7 @@ except:
 
 def terminal_interface(interpreter, message):
     # Auto run and offline (this.. this isnt right) don't display messages.
-    # Probably worth abstracting this to something like "verbose_cli" at some point.
+    # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
         interpreter_intro_message = [
             "**Open Interpreter** will require approval before running code."
@@ -140,7 +140,7 @@ def terminal_interface(interpreter, message):
                 if "recipient" in chunk and chunk["recipient"] != "user":
                     continue
 
-                if interpreter.debug_mode:
+                if interpreter.verbose:
                     print("Chunk in `terminal_interface`:", chunk)
 
                 # Comply with PyAutoGUI fail-safe for OS mode
@@ -291,9 +291,9 @@ def terminal_interface(interpreter, message):
                         or ("format" in chunk and chunk["format"] == "javascript")
                     )
                 ):
-                    if interpreter.os and interpreter.debug_mode == False:
+                    if interpreter.os and interpreter.verbose == False:
                         # We don't display things to the user in OS control mode, since we use vision to communicate the screen to the LLM so much.
-                        # But if debug is true, we do display it!
+                        # But if verbose is true, we do display it!
                         continue
                     # Display and give extra output back to the LLM
                     extra_computer_output = display_output(chunk)

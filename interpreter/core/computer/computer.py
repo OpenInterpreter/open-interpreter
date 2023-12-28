@@ -13,7 +13,7 @@ class Computer:
         self.terminal = Terminal()
 
         self.offline = False
-        self.debug_mode = False
+        self.verbose = False
 
         self.mouse = Mouse(self)
         self.keyboard = Keyboard(self)

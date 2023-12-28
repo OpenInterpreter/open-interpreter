@@ -88,7 +88,7 @@ def run_function_calling_llm(llm, request_params):
                                 "content": code_delta,
                             }
                 else:
-                    if llm.interpreter.debug_mode:
+                    if llm.interpreter.verbose:
                         print("Arguments not a dict.")
 
             # Common hallucinations
@@ -96,7 +96,7 @@ def run_function_calling_llm(llm, request_params):
                 accumulated_deltas["function_call"]["name"] == "python"
                 or accumulated_deltas["function_call"]["name"] == "functions"
             ):
-                if llm.interpreter.debug_mode:
+                if llm.interpreter.verbose:
                     print("Got direct python call")
                 if language is None:
                     language = "python"

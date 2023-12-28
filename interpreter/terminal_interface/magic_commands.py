@@ -46,7 +46,7 @@ def handle_undo(self, arguments):
 def handle_help(self, arguments):
     commands_description = {
         "%% [commands]": "Run commands in system shell",
-        "%debug [true/false]": "Toggle debug mode. Without arguments or with 'true', it enters debug mode. With 'false', it exits debug mode.",
+        "%verbose [true/false]": "Toggle verbose mode. Without arguments or with 'true', it enters verbose mode. With 'false', it exits verbose mode.",
         "%reset": "Resets the current session.",
         "%undo": "Remove previous messages and its response from the message history.",
         "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
@@ -72,9 +72,9 @@ def handle_help(self, arguments):
     display_markdown_message("".join(full_message))
 
 
-def handle_debug(self, arguments=None):
+def handle_verbose(self, arguments=None):
     if arguments == "" or arguments == "true":
-        display_markdown_message("> Entered debug mode")
+        display_markdown_message("> Entered verbose mode")
         print("\n\nCurrent messages:\n")
         for message in self.messages:
             message = message.copy()
@@ -84,12 +84,12 @@ def handle_debug(self, arguments=None):
                 )
             print(message, "\n")
         print("\n")
-        self.debug_mode = True
+        self.verbose = True
     elif arguments == "false":
-        display_markdown_message("> Exited debug mode")
-        self.debug_mode = False
+        display_markdown_message("> Exited verbose mode")
+        self.verbose = False
     else:
-        display_markdown_message("> Unknown argument to debug command.")
+        display_markdown_message("> Unknown argument to verbose command.")
 
 
 def handle_info(self, arguments):
@@ -185,7 +185,7 @@ def handle_magic_command(self, user_input):
     # split the command into the command and the arguments, by the first whitespace
     switch = {
         "help": handle_help,
-        "debug": handle_debug,
+        "verbose": handle_verbose,
         "reset": handle_reset,
         "save_message": handle_save_message,
         "load_message": handle_load_message,

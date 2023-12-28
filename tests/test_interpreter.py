@@ -17,7 +17,7 @@ interpreter = OpenInterpreter()
 #####
 
 
-@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+# @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_get_selected_text():
     print("Getting selected text")
     time.sleep(1)
@@ -27,9 +27,9 @@ def test_get_selected_text():
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
-def test_display_debug():
-    interpreter.computer.debug_mode = True
-    interpreter.debug_mode = True
+def test_display_verbose():
+    interpreter.computer.verbose = True
+    interpreter.verbose = True
     interpreter.computer.mouse.move(x=500, y=500)
     assert False
 
@@ -54,7 +54,7 @@ def setup_function():
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
     interpreter.llm.model = "gpt-3.5-turbo"
-    interpreter.debug_mode = False
+    interpreter.verbose = False
 
 
 def test_generator():
@@ -176,9 +176,9 @@ def test_config_loading():
     # check the settings we configured in our config.test.yaml file
     temperature_ok = interpreter.llm.temperature == 0.25
     model_ok = interpreter.llm.model == "gpt-3.5-turbo"
-    debug_mode_ok = interpreter.debug_mode == True
+    verbose_ok = interpreter.verbose == True
 
-    assert temperature_ok and model_ok and debug_mode_ok
+    assert temperature_ok and model_ok and verbose_ok
 
 
 def test_files():

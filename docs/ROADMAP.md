@@ -15,7 +15,7 @@
 
 ## New features
 
-- [ ] Add new `computer` modules like `browser`* and `files`*
+- [ ] Add new `computer` modules like `browser`_ and `files`_
 - [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
   - [ ] Make that flag send each message to server
   - [ ] Set up receiving replit server
@@ -55,7 +55,7 @@
   - [ ] (For the NCU) might be good to use a Google VM with a display
   - [ ] (Future future) Use GPT-4 to assess each result, explaining each failure. Summarize. Send it all to GPT-4 + our prompt. Let it redesign the prompt, given the failures, rinse and repeat
 - [ ] Use Anthropic function calling
-- [ ] Implement Plausible*
+- [ ] Implement Plausible\*
 - [ ] Stateless (as in, doesn't use the application directory) core python package. All `appdir` stuff should be only for the TUI
   - [ ] `interpreter.__dict__` = a dict derived from config is how the python package should be set, and this should be from the TUI. `interpreter` should not know about the config
   - [ ] Move conversation storage out of the core and into the TUI. When we exit or error, save messages same as core currently does
@@ -102,11 +102,12 @@ This roadmap gets pretty rough from here. More like working notes.
 
 # Working Notes
 
-## * Roughly, how to build `computer.browser`:
+## \* Roughly, how to build `computer.browser`:
 
 First I think we should have a part, like `computer.browser.ask(query)` which just hits up [perplexity](https://www.perplexity.ai/) for fast answers to questions.
 
 Then we want these sorts of things:
+
 - `browser.open(url)`
 - `browser.screenshot()`
 - `browser.click()`
@@ -122,6 +123,7 @@ However, for non vision models, `browser.screenshot()` can return the accessibil
 Creating a Python script that automates the opening of Chrome with the necessary flags and then interacts with it to navigate to a URL and retrieve the accessibility tree involves a few steps. Here's a comprehensive approach:
 
 1. **Script to Launch Chrome with Remote Debugging**:
+
    - This script will start Chrome with the `--remote-debugging-port=9222` flag.
    - It will handle different platforms (Windows, macOS, Linux).
 
@@ -201,11 +203,11 @@ This script will launch Chrome, connect to it, navigate to "https://www.example.
 
 **Note**: The script to launch Chrome assumes a typical installation path on Windows. You will need to modify this path according to your Chrome installation location and operating system. Additionally, handling different operating systems requires conditional checks and respective commands for each OS.
 
-## * Roughly, how to build `computer.files`:
+## \* Roughly, how to build `computer.files`:
 
 Okay I'm thinking like, semantic filesystem or something. We make a new package that does really simple semantic search over a filesystem, then expose it via `computer.files.search("query")`.
 
-## * Plausible
+## \* Plausible
 
 ```python
 import requests

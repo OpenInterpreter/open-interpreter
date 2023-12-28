@@ -9,7 +9,7 @@ llm.temperature: 0
 # auto_run: False  # If True, code will run without asking for confirmation
 # safe_mode: "off"  # The safety mode for the LLM — one of "off", "ask", "auto"
 # offline: False  # If True, will disable some online features like checking for updates
-# debug_mode: False  # If True, will print detailed logs
+# verbose: False  # If True, will print detailed logs
 
 # llm.api_key: ...  # Your API key, if the API requires it
 # llm.api_base: ...  # The URL where an OpenAI-compatible server is running to handle LLM API requests

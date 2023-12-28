@@ -38,7 +38,7 @@ def extend_system_message(interpreter):
         try:
             system_message += "\n" + get_relevant_procedures_string(interpreter)
         except:
-            if interpreter.debug_mode:
+            if interpreter.verbose:
                 print(traceback.format_exc())
             # It's okay if they can't. This just fixes some common mistakes it makes.
 

@@ -1,13 +1,13 @@
 # `0.2.0` Migration Guide
 
-Open Interpreter is changing! This guide will help you migrate your application to `0.2.0`, also called the *New Computer Update* (NCU), the latest major version of Open Interpreter.
+Open Interpreter is changing! This guide will help you migrate your application to `0.2.0`, also called the _New Computer Update_ (NCU), the latest major version of Open Interpreter.
 
 ## A New Start
 
 To start using Open Interpreter in Python, we now use a standard **class instantiation** format:
 
 ```python
- # From the module `interpreter`, import the class `OpenInterpreter`
+# From the module `interpreter`, import the class `OpenInterpreter`
 from interpreter import OpenInterpreter
 
 # Create an instance of `OpenInterpreter` to use it

@@ -13,7 +13,7 @@ class SubprocessLanguage(BaseLanguage):
     def __init__(self):
         self.start_cmd = []
         self.process = None
-        self.debug_mode = False
+        self.verbose = False
         self.output_queue = queue.Queue()
         self.done = threading.Event()
 
@@ -88,7 +88,7 @@ class SubprocessLanguage(BaseLanguage):
             return
 
         while retry_count <= max_retries:
-            if self.debug_mode:
+            if self.verbose:
                 print(f"(after processing) Running processed code:\n{code}\n---")
 
             self.done.clear()
@@ -140,7 +140,7 @@ class SubprocessLanguage(BaseLanguage):
     def handle_stream_output(self, stream, is_error_stream):
         try:
             for line in iter(stream.readline, ""):
-                if self.debug_mode:
+                if self.verbose:
                     print(f"Received output line:\n{line}\n---")
 
                 line = self.line_postprocessor(line)
@@ -187,7 +187,7 @@ class SubprocessLanguage(BaseLanguage):
                     )
         except ValueError as e:
             if "operation on closed file" in str(e):
-                if self.debug_mode:
+                if self.verbose:
                     print("Stream closed while reading.")
             else:
                 raise e

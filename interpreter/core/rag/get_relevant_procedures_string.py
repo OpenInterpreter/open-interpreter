@@ -17,7 +17,7 @@ def get_relevant_procedures_string(interpreter):
 
     response = requests.post(url, json=query).json()
 
-    if interpreter.debug_mode:
+    if interpreter.verbose:
         print(response)
 
     relevant_procedures = response["procedures"]

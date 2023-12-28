@@ -109,7 +109,7 @@ If LM Studio's local server is running, please try a language model with a diffe
         ### RUN CODE (if it's there) ###
 
         if interpreter.messages[-1]["type"] == "code":
-            if interpreter.debug_mode:
+            if interpreter.verbose:
                 print("Running code:", interpreter.messages[-1])
 
             try:
@@ -169,8 +169,8 @@ If LM Studio's local server is running, please try a language model with a diffe
                         r"from computer import (\w+)", r"\1 = computer.\1", code
                     )
 
-                # sync up debug mode (is this how we want to do this?)
-                interpreter.computer.debug_mode = interpreter.debug_mode
+                # sync up verbose mode (is this how we want to do this?)
+                interpreter.computer.verbose = interpreter.verbose
 
                 # sync up the interpreter's computer with your computer
                 try:

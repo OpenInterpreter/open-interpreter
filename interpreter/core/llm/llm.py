@@ -76,14 +76,14 @@ class Llm:
                 if len(image_messages) > 1:
                     for img_msg in image_messages[:-1]:
                         messages.remove(img_msg)
-                        if self.interpreter.debug_mode:
+                        if self.interpreter.verbose:
                             print("Removing image message!")
             else:
                 # Delete all the middle ones (leave only the first and last 2 images) from messages_for_llm
                 if len(image_messages) > 3:
                     for img_msg in image_messages[1:-2]:
                         messages.remove(img_msg)
-                        if self.interpreter.debug_mode:
+                        if self.interpreter.verbose:
                             print("Removing image message!")
                 # Idea: we could set detail: low for the middle messages, instead of deleting them
 
@@ -166,7 +166,7 @@ class Llm:
         # Set some params directly on LiteLLM
         if self.max_budget:
             litellm.max_budget = self.max_budget
-        if self.interpreter.debug_mode:
+        if self.interpreter.verbose:
             litellm.set_verbose = True
 
         if supports_functions:

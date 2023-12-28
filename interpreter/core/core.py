@@ -1,6 +1,6 @@
 """
 This file defines the Interpreter class.
-It's the main file. `import interpreter` will import an instance of this class.
+It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
 
 import json
@@ -29,7 +29,7 @@ class OpenInterpreter:
         # Settings
         self.offline = False
         self.auto_run = False
-        self.debug_mode = False
+        self.verbose = False
         self.max_output = 2800  # Max code block output visible to the LLM
         self.safe_mode = "off"
         # this isn't right... this should be in the llm, and have a better name, and more customization:

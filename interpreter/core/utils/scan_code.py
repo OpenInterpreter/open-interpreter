@@ -17,13 +17,13 @@ def scan_code(code, language, interpreter):
     language_class = interpreter.computer.terminal.get_language(language)
 
     temp_file = create_temporary_file(
-        code, language_class.file_extension, verbose=interpreter.debug_mode
+        code, language_class.file_extension, verbose=interpreter.verbose
     )
 
     temp_path = os.path.dirname(temp_file)
     file_name = os.path.basename(temp_file)
 
-    if interpreter.debug_mode:
+    if interpreter.verbose:
         print(f"Scanning {language} code in {file_name}")
         print("---")
 
@@ -55,4 +55,4 @@ def scan_code(code, language, interpreter):
         print(e)
         print("")  # <- Aesthetic choice
 
-    cleanup_temporary_file(temp_file, verbose=interpreter.debug_mode)
+    cleanup_temporary_file(temp_file, verbose=interpreter.verbose)

@@ -17,7 +17,7 @@ def run_text_llm(llm, params):
     language = None
 
     for chunk in llm.completions(**params):
-        if llm.interpreter.debug_mode:
+        if llm.interpreter.verbose:
             print("Chunk in coding_llm", chunk)
 
         if "choices" not in chunk or len(chunk["choices"]) == 0:
@@ -25,6 +25,9 @@ def run_text_llm(llm, params):
             continue
 
         content = chunk["choices"][0]["delta"].get("content", "")
+
+        if content == None:
+            continue
 
         accumulated_block += content
 

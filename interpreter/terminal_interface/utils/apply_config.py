@@ -11,7 +11,7 @@ def apply_config(self, config_path=None):
     if config_path == None:
         config_path = user_config_path
 
-    if self.debug_mode:
+    if self.verbose:
         print(f"Extending configuration from `{config_path}`")
 
     config = get_config(config_path)
@@ -283,7 +283,7 @@ You are capable of **any** task.""",
 # max_output: 2800  # The maximum characters of code output visible to the LLM
 # safe_mode: "off"  # The safety mode (see https://docs.openinterpreter.com/usage/safe-mode)
 # offline: False  # If True, will disable some online features like checking for updates
-# debug_mode: False  # If True, will print detailed logs
+# verbose: False  # If True, will print detailed logs
 
 # computer.languages: ["javascript", "shell"]  # Restrict to certain languages
 

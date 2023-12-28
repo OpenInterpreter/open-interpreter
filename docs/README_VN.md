@@ -72,7 +72,7 @@ interpreter
 ### Python
 
 ```python
-import interpreter
+from interpreter import interpreter
 
 interpreter.chat("Vẽ giá cổ phiếu đã bình hoá của AAPL và META ") # Chạy trên 1 dòng lệnh
 interpreter.chat() # Khởi động chat có khả năng tương tác
@@ -228,16 +228,16 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 ### Chế độ sửa lỗi
 
-Để giúp đóng góp kiểm tra Open Interpreter, thì chế độ `--debug` hơi dài dòng.
+Để giúp đóng góp kiểm tra Open Interpreter, thì chế độ `--verbose` hơi dài dòng.
 
-Bạn có thể khởi động chế độ sửa lỗi bằng cách sử dụng cờ (`interpreter --debug`), hoặc mid-chat:
+Bạn có thể khởi động chế độ sửa lỗi bằng cách sử dụng cờ (`interpreter --verbose`), hoặc mid-chat:
 
 ```shell
 $ interpreter
 ...
-> %debug true <- Khởi động chế độ gỡ lỗi
+> %verbose true <- Khởi động chế độ gỡ lỗi
 
-> %debug false <- Tắt chế độ gỡ lỗi
+> %verbose false <- Tắt chế độ gỡ lỗi
 ```
 
 ### Lệnh chế độ tương tác
@@ -246,7 +246,7 @@ Trong chế độ tương tác, bạn có thể sử dụng những dòng lệnh
 
 **Các lệnh có sẵn:**
 
-- `%debug [true/false]`: Bật chế độ gỡ lỗi. Có hay không có `true` đều khởi động chế độ gỡ lỗi. Với `false` thì nó tắt chế độ gỡ lỗi.
+- `%verbose [true/false]`: Bật chế độ gỡ lỗi. Có hay không có `true` đều khởi động chế độ gỡ lỗi. Với `false` thì nó tắt chế độ gỡ lỗi.
 - `%reset`: Khởi động lại toàn bộ phiên trò chuyện hiện tại.
 - `%undo`: Xóa tin nhắn của người dùng trước đó và phản hồi của AI khỏi lịch sử tin nhắn.
 - `%save_message [path]`: Lưu tin nhắn vào một đường dẫn JSON được xác định từ trước. Nếu không có đường dẫn nào được cung cấp, nó sẽ mặc định là `messages.json`.
@@ -304,7 +304,7 @@ Bạn cũng có thể tải các tệp cấu hình khi gọi Open Interpreter t�
 
 ```python
 import os
-import interpreter
+from interpreter import interpreter
 
 currentPath = os.path.dirname(os.path.abspath(__file__))
 config_path=os.path.join(currentPath, './config.test.yaml')
@@ -326,7 +326,7 @@ Bản cập nhật trình tạo cho phép điều khiển Trình thông dịch m
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import interpreter
+from interpreter import interpreter
 
 app = FastAPI()
 

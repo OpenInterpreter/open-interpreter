@@ -161,7 +161,7 @@ class Mouse:
         else:
             raise ValueError("Either text, icon, or both x and y must be provided")
 
-        if self.computer.debug_mode:
+        if self.computer.verbose:
             if not screenshot:
                 screenshot = self.computer.display.screenshot(show=False)
             # Convert the screenshot to a numpy array for drawing

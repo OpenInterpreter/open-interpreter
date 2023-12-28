@@ -52,11 +52,11 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "auto_run"},
         },
         {
-            "name": "debug_mode",
-            "nickname": "d",
-            "help_text": "run in debug mode",
+            "name": "verbose",
+            "nickname": "v",
+            "help_text": "print detailed logs",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "debug_mode"},
+            "attribute": {"object": interpreter, "attr_name": "verbose"},
         },
         {
             "name": "model",
@@ -181,7 +181,7 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "vision",
-            "nickname": "v",
+            "nickname": "vi",
             "help_text": "experimentally use vision for supported languages (HTML, Python)",
             "type": bool,
         },
@@ -459,6 +459,20 @@ When searching a popular website, USE QUERY PARAMETERS. For example, if searchin
                         continue
                     break
 
+            missing_packages = []
+            for package in packages:
+                try:
+                    __import__(package)
+                except ImportError:
+                    missing_packages.append(package)
+
+            if missing_packages != []:
+                print(
+                    "Error: The following packages could not be installed: ",
+                    ", ".join(missing_packages),
+                )
+                print("Please try to install them manually.")
+
         display_markdown_message(
             "> `OS Control` enabled (experimental)\n\nOpen Interpreter will be able to see your screen, move your mouse, and use your keyboard."
         )
@@ -466,10 +480,6 @@ When searching a popular website, USE QUERY PARAMETERS. For example, if searchin
 
         if not args.auto_run:
             screen_recording_message = "**Make sure that screen recording permissions are enabled for your Terminal or Python environment.**"
-            if (
-                False and platform.system() == "Darwin"
-            ):  # Disabled, too easy and too clunky of a message
-                screen_recording_message += "\n>You can enable screen recording permissions in System Preferences > Security & Privacy > Privacy > Screen Recording."
             display_markdown_message(screen_recording_message)
             print("")
 
@@ -485,8 +495,10 @@ When searching a popular website, USE QUERY PARAMETERS. For example, if searchin
         # Give it access to the computer via Python
         for _ in interpreter.computer.run(
             "python",
-            "import time\nimport interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
+            "import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
         ):
+            if args.verbose:
+                print(_.get("content"))
             pass
 
         display_markdown_message(
@@ -571,7 +583,7 @@ Once the server is running, you can begin your conversation below.
                     attr_dict = argument_dictionary["attribute"]
                     setattr(attr_dict["object"], attr_dict["attr_name"], attr_value)
 
-                    if args.debug_mode:
+                    if args.verbose:
                         print(
                             f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
                         )

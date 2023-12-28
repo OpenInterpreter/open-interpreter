@@ -68,7 +68,7 @@ interpreter
 ### Python
 
 ```python
-import interpreter
+from interpreter import interpreter
 
 interpreter.chat("Stellen Sie AAPL und METAs normalisierte Aktienpreise dar") # Führt einen einzelnen Befehl aus
 interpreter.chat() # Startet einen interaktiven Chat

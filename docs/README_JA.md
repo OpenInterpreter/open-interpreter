@@ -76,7 +76,7 @@ interpreter
 ### Python
 
 ```python
-import interpreter
+from interpreter import interpreter
 
 interpreter.chat("AAPLとMETAの株価グラフを描いてください") # コマンドを実行
 interpreter.chat() # 対話形式のチャットを開始
@@ -232,16 +232,16 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 ### デバッグモード
 
-コントリビューターが Open Interpreter を調査するのを助けるために、`--debug` モードは非常に便利です。
+コントリビューターが Open Interpreter を調査するのを助けるために、`--verbose` モードは非常に便利です。
 
-デバッグモードは、フラグ（`interpreter --debug`）を使用するか、またはチャットの中から有効にできます:
+デバッグモードは、フラグ（`interpreter --verbose`）を使用するか、またはチャットの中から有効にできます:
 
 ```shell
 $ interpreter
 ...
-> %debug true # <- デバッグモードを有効にする
+> %verbose true # <- デバッグモードを有効にする
 
-> %debug false # <- デバッグモードを無効にする
+> %verbose false # <- デバッグモードを無効にする
 ```
 
 ### 対話モードのコマンド
@@ -250,7 +250,7 @@ $ interpreter
 
 **利用可能なコマンド:**
 
-- `%debug [true/false]`: デバッグモードを切り替えます。引数なしまたは `true` でデバッグモードに入ります。`false` でデバッグモードを終了します。
+- `%verbose [true/false]`: デバッグモードを切り替えます。引数なしまたは `true` でデバッグモードに入ります。`false` でデバッグモードを終了します。
 - `%reset`: 現在のセッションの会話をリセットします。
 - `%undo`: メッセージ履歴から前のユーザーメッセージと AI の応答を削除します。
 - `%save_message [path]`: メッセージを指定した JSON パスに保存します。パスが指定されていない場合、デフォルトは `messages.json` になります。
@@ -308,7 +308,7 @@ Python のスクリプトから Open Interpreter を呼び出すときにも設�
 
 ```python
 import os
-import interpreter
+from interpreter import interpreter
 
 currentPath = os.path.dirname(os.path.abspath(__file__))
 config_path=os.path.join(currentPath, './config.test.yaml')
@@ -330,7 +330,7 @@ for chunk in interpreter.chat(message, display=False, stream=True):
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import interpreter
+from interpreter import interpreter
 
 app = FastAPI()
 
