@@ -5,10 +5,7 @@ It's the main file. `import interpreter` will import an instance of this class.
 
 import json
 import os
-import time
 from datetime import datetime
-
-import yaml
 
 from ..terminal_interface.start_terminal_interface import start_terminal_interface
 from ..terminal_interface.terminal_interface import terminal_interface
