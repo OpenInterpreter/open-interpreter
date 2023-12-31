@@ -1,0 +1,80 @@
+---
+title: Perplexity
+---
+
+To use Open Interpreter with the Perplexity API, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model perplexity/<perplexity-model>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "perplexity/<perplexity-model>"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support the following completion models from the Perplexity API:
+
+- pplx-7b-chat
+- pplx-70b-chat
+- pplx-7b-online
+- pplx-70b-online
+- codellama-34b-instruct
+- llama-2-13b-chat
+- llama-2-70b-chat
+- mistral-7b-instruct
+- openhermes-2-mistral-7b
+- openhermes-2.5-mistral-7b
+- pplx-7b-chat-alpha
+- pplx-70b-chat-alpha
+
+<CodeGroup>
+
+```bash Terminal
+
+interpreter --model perplexity/pplx-7b-chat
+interpreter --model perplexity/pplx-70b-chat
+interpreter --model perplexity/pplx-7b-online
+interpreter --model perplexity/pplx-70b-online
+interpreter --model perplexity/codellama-34b-instruct
+interpreter --model perplexity/llama-2-13b-chat
+interpreter --model perplexity/llama-2-70b-chat
+interpreter --model perplexity/mistral-7b-instruct
+interpreter --model perplexity/openhermes-2-mistral-7b
+interpreter --model perplexity/openhermes-2.5-mistral-7b
+interpreter --model perplexity/pplx-7b-chat-alpha
+interpreter --model perplexity/pplx-70b-chat-alpha
+```
+
+```python Python
+interpreter.llm.model = "perplexity/pplx-7b-chat"
+interpreter.llm.model = "perplexity/pplx-70b-chat"
+interpreter.llm.model = "perplexity/pplx-7b-online"
+interpreter.llm.model = "perplexity/pplx-70b-online"
+interpreter.llm.model = "perplexity/codellama-34b-instruct"
+interpreter.llm.model = "perplexity/llama-2-13b-chat"
+interpreter.llm.model = "perplexity/llama-2-70b-chat"
+interpreter.llm.model = "perplexity/mistral-7b-instruct"
+interpreter.llm.model = "perplexity/openhermes-2-mistral-7b"
+interpreter.llm.model = "perplexity/openhermes-2.5-mistral-7b"
+interpreter.llm.model = "perplexity/pplx-7b-chat-alpha"
+interpreter.llm.model = "perplexity/pplx-70b-chat-alpha"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable    | Description                          | Where to Find                                                     |
+| ----------------------- | ------------------------------------ | ----------------------------------------------------------------- |
+| `PERPLEXITYAI_API_KEY'` | The Perplexity API key from pplx-api | [Perplexity API Settings](https://www.perplexity.ai/settings/api) |
