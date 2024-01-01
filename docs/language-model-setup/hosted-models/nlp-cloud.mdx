@@ -1,0 +1,28 @@
+---
+title: NLP Cloud
+---
+
+To use Open Interpreter with NLP Cloud, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model dolphin
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "dolphin"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable | Description       | Where to Find                                                     |
+| -------------------- | ----------------- | ----------------------------------------------------------------- |
+| `NLP_CLOUD_API_KEY'` | NLP Cloud API key | [NLP Cloud Dashboard -> API KEY](https://nlpcloud.com/home/token) |
