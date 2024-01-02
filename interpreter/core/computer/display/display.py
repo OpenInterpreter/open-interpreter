@@ -2,6 +2,7 @@ import base64
 import os
 import subprocess
 import tempfile
+import time
 from io import BytesIO
 
 import matplotlib.pyplot as plt
@@ -16,11 +17,10 @@ except:
     # Optional packages
     pass
 
-from ..utils.computer_vision import find_text_in_image
+from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 
 
 class Display:
-    # It hallucinates these:
     def __init__(self, computer):
         self.computer = computer
 
@@ -38,7 +38,17 @@ class Display:
     def center(self):
         return self.width // 2, self.height // 2
 
+    def view(self, show=True, quadrant=None):
+        """
+        Redirects to self.screenshot
+        """
+        return self.screenshot(show, quadrant)
+
     def screenshot(self, show=True, quadrant=None):
+        time.sleep(2)
+        if not self.computer.emit_images:
+            return self.get_text()
+
         temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
 
         if quadrant == None:
@@ -113,11 +123,38 @@ class Display:
 
         return centers
 
+    def get_text(self, screenshot=None):
+        # Take a screenshot
+        if screenshot == None:
+            screenshot = self.screenshot(show=False)
+
+        if not self.computer.offline:
+            # Convert the screenshot to base64
+            buffered = BytesIO()
+            screenshot.save(buffered, format="PNG")
+            screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+            try:
+                response = requests.post(
+                    f'{self.api_base.strip("/")}/computer/display/text/all/',
+                    json={"base64": screenshot_base64},
+                )
+                response = response.json()
+                return response
+            except:
+                print("Attempting to get the text locally.")
+
+        # We'll only get here if 1) self.computer.offline = True, or the API failed
+
+        return pytesseract_get_text(screenshot)
+
     # locate text should be moved here as well!
     def find_icon(self, query):
-        print(
-            "Message for user: Locating this icon will take ~30 seconds. We're working on speeding this up."
+        message = self.computer.terminal.format_to_recipient(
+            "Locating this icon will take ~30 seconds. We're working on speeding this up.",
+            recipient="user",
         )
+        print(message)
 
         # Take a screenshot
         screenshot = self.screenshot(show=False)
@@ -132,11 +169,9 @@ class Display:
                 f'{self.api_base.strip("/")}/computer/display/icon/',
                 json={"query": query, "base64": screenshot_base64},
             )
-            coordinates = response.json()
+            return response.json()
         except Exception as e:
-            if "SSLError" in str(e):
-                print(
-                    "Icon locating API not avaliable, or we were unable to find the icon. Please try another method to find this icon."
-                )
-
-        return coordinates
+            raise Exception(
+                str(e)
+                + "\n\nIcon locating API not avaliable, or we were unable to find the icon. Please try another method to find this icon."
+            )

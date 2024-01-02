@@ -14,9 +14,9 @@ def convert_to_openai_messages(
     new_messages = []
 
     for message in messages:
-        if "recipient" in message:
-            if message["recipient"] != "assistant":
-                continue
+        # Is this for thine eyes?
+        if "recipient" in message and message["recipient"] != "assistant":
+            continue
 
         new_message = {}
 
@@ -43,7 +43,7 @@ def convert_to_openai_messages(
                 }
                 # Add empty content to avoid error "openai.error.InvalidRequestError: 'content' is a required property - 'messages.*'"
                 # especially for the OpenAI service hosted on Azure
-                new_message["content"] = "" 
+                new_message["content"] = ""
             else:
                 new_message[
                     "content"

@@ -16,6 +16,19 @@ except:
     pass
 
 
+def pytesseract_get_text(img):
+    # Convert PIL Image to NumPy array
+    img_array = np.array(img)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+
+    # Use pytesseract to get the text from the image
+    text = pytesseract.image_to_string(gray)
+
+    return text
+
+
 def find_text_in_image(img, text):
     # Convert PIL Image to NumPy array
     img_array = np.array(img)
@@ -142,6 +155,10 @@ def find_text_in_image(img, text):
 
     bounding_box_image = Image.fromarray(img_draw)
     bounding_box_image.format = img.format
+
+    # Convert centers to relative
+    img_width, img_height = img.size
+    centers = [(x / img_width, y / img_height) for x, y in centers]
 
     # Debug by showing bounding boxes:
     # bounding_box_image.show()

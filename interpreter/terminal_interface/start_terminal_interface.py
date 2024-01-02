@@ -381,15 +381,14 @@ Do not try to write code that attempts the entire task at once, and verify at ea
 You may use the `computer` Python module to complete tasks:
 
 ```python
-computer.screenshot() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
+computer.display.view() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
 
-computer.mouse.move("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** and get creative! To mouse over a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this. To click something that has wrapped onto multiple lines, just use the beginning of the text (this doesn't work for multi-line text)
-computer.mouse.move(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
-computer.mouse.move(icon="magnifying glass") # Moves mouse to the icon with that description. Use this often
-computer.mouse.click() # Don't forget this! Include in the same code block
+computer.mouse.click("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** and get creative! To mouse over a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this. To click something that has wrapped onto multiple lines, just use the beginning of the text (this doesn't work for multi-line text)
+computer.mouse.click(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
+computer.mouse.click(icon="magnifying glass") # Moves mouse to the icon with that description. Use this often
 
 computer.mouse.scroll(-10) # Scrolls down. If you don't find some text on screen that you expected to be there, you probably want to do this
 x, y = computer.display.center() # Get your bearings
@@ -398,7 +397,7 @@ computer.clipboard.view() # Returns contents of clipboard
 computer.os.get_selected_text() # Use frequently. If editing text, the user often wants this
 ```
 
-For rare and complex mouse actions, consider using computer vision libraries on the `computer.screenshot()` `pil_image` to produce a list of coordinates for the mouse to move/drag to.
+For rare and complex mouse actions, consider using computer vision libraries on the `computer.display.view()` `pil_image` to produce a list of coordinates for the mouse to move/drag to.
 
 If the user highlighted text in an editor, then asked you to modify it, they probably want you to `keyboard.write` over their version of the text.
 
@@ -479,10 +478,23 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
                 )
                 print("Please try to install them manually.")
 
-        display_markdown_message(
-            "> `OS Control` enabled (experimental)\n\nOpen Interpreter will be able to see your screen, move your mouse, and use your keyboard."
-        )
-        print("")
+        display_markdown_message("> `OS Control` enabled")
+
+        # Should we explore other options for ^ these kinds of tags?
+        # Like:
+
+        # from rich import box
+        # from rich.console import Console
+        # from rich.panel import Panel
+        # console = Console()
+        # print(">\n\n")
+        # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
+        # print(">\n\n")
+        # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.HEAVY, expand=False), style="white on black")
+        # print(">\n\n")
+        # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.DOUBLE, expand=False), style="white on black")
+        # print(">\n\n")
+        # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
 
         if not args.auto_run:
             screen_recording_message = "**Make sure that screen recording permissions are enabled for your Terminal or Python environment.**"

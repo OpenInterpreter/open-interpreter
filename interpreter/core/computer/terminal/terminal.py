@@ -1,3 +1,4 @@
+from ..utils.recipient_utils import parse_for_recipient
 from .languages.applescript import AppleScript
 from .languages.html import HTML
 from .languages.javascript import JavaScript
@@ -36,7 +37,17 @@ class Terminal:
         if language not in self._active_languages:
             self._active_languages[language] = self.get_language(language)()
         try:
-            yield from self._active_languages[language].run(code)
+            for chunk in self._active_languages[language].run(code):
+                # self.format_to_recipient can format some messages as having a certain recipient.
+                # Here we add that to the LMC messages:
+                if chunk["type"] == "console" and chunk.get("format") == "output":
+                    recipient, content = parse_for_recipient(chunk["content"])
+                    if recipient:
+                        chunk["recipient"] = recipient
+                        chunk["content"] = content
+
+                yield chunk
+
         except GeneratorExit:
             self.stop()
 

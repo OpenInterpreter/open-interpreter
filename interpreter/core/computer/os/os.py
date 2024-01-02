@@ -24,8 +24,29 @@ class Os:
             text = text[:200] + "..."
 
         if "darwin" in platform.system().lower():  # Check if the OS is macOS
+            text = text.replace('"', "'").replace("\n", " ")
+
+            ## Run directly
             script = f'display notification "{text}" with title "{title}"'
             subprocess.run(["osascript", "-e", script])
+
+            # ## DISABLED OI-notifier.app
+            # (This does not work. It makes `pip uninstall`` break for some reason!)
+
+            # ## Use OI-notifier.app, which lets us use a custom icon
+
+            # # Get the path of the current script
+            # script_path = os.path.dirname(os.path.realpath(__file__))
+
+            # # Write the notification text into notification_text.txt
+            # with open(os.path.join(script_path, "notification_text.txt"), "w") as file:
+            #     file.write(text)
+
+            # # Construct the path to the OI-notifier.app
+            # notifier_path = os.path.join(script_path, "OI-notifier.app")
+
+            # # Call the OI-notifier
+            # subprocess.run(["open", notifier_path])
         else:  # For other OS, use a general notification API
             try:
                 import plyer

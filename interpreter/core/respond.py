@@ -125,6 +125,10 @@ If LM Studio's local server is running, please try a language model with a diffe
                 # Is this language enabled/supported?
                 if language not in [
                     i.name.lower() for i in interpreter.computer.terminal.languages
+                ] and language not in [
+                    alias
+                    for i in interpreter.computer.terminal.languages
+                    for alias in getattr(i, "aliases", [])
                 ]:
                     output = f"`{language}` disabled or not supported."
 
@@ -161,16 +165,25 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # don't let it import computer on os mode — we handle that!
                 if interpreter.os and language == "python":
-                    code = code.replace("import computer\n", "")
+                    code = code.replace("import computer\n", "pass\n")
                     code = re.sub(
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
                     )
                     code = re.sub(
                         r"from computer import (\w+)", r"\1 = computer.\1", code
                     )
+                    # If it does this it sees the screenshot twice (which is expected jupyter behavior)
+                    if code.split("\n")[-1] in [
+                        "computer.display.view()",
+                        "computer.display.screenshot()",
+                        "computer.view()",
+                        "computer.screenshot()",
+                    ]:
+                        code = code + "\npass"
 
-                # sync up verbose mode (is this how we want to do this?)
+                # sync up some things (is this how we want to do this?)
                 interpreter.computer.verbose = interpreter.verbose
+                interpreter.computer.emit_images = interpreter.llm.supports_vision
 
                 # sync up the interpreter's computer with your computer
                 try:

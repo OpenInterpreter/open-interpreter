@@ -63,7 +63,11 @@ def run_text_llm(llm, params):
 
             # If we do have a `language`, send it out
             if language:
-                yield {"type": "code", "format": language, "content": content}
+                yield {
+                    "type": "code",
+                    "format": language,
+                    "content": content.replace(language, ""),
+                }
 
         # If we're not in a code block, send the output as a message
         if not inside_code_block:

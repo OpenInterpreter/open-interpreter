@@ -10,6 +10,7 @@ except ImportError:
 
 import os
 import platform
+import random
 import re
 import subprocess
 import time
@@ -31,8 +32,9 @@ examples = [
     "What time is it in Seattle?",
     "Make me a simple Pomodoro app.",
     "Open Chrome and go to YouTube.",
+    "Can you set my system to light mode?",
 ]
-# random.shuffle(examples)
+random.shuffle(examples)
 try:
     for example in examples:
         readline.add_history(example)
@@ -295,8 +297,16 @@ def terminal_interface(interpreter, message):
                         # We don't display things to the user in OS control mode, since we use vision to communicate the screen to the LLM so much.
                         # But if verbose is true, we do display it!
                         continue
+
                     # Display and give extra output back to the LLM
                     extra_computer_output = display_output(chunk)
+
+                    # We're going to just add it to the messages directly, not changing `recipient` here.
+                    # Mind you, the way we're doing this, this would make it appear to the user if they look at their conversation history,
+                    # because we're not adding "recipient: assistant" to this block. But this is a good simple solution IMO.
+                    # we just might want to change it in the future, once we're sure that a bunch of adjacent type:console blocks will be rendered normally to text-only LLMs
+                    # and that if we made a new block here with "recipient: assistant" it wouldn't add new console outputs to that block (thus hiding them from the user)
+
                     if (
                         interpreter.messages[-1].get("format") != "output"
                         or interpreter.messages[-1]["role"] != "computer"
@@ -356,15 +366,36 @@ def terminal_interface(interpreter, message):
                                 else:
                                     arguments = None
 
-                                if action == "computer.screenshot()":
-                                    description = "Viewing the screen..."
+                                # NOTE: Do not put the text you're clicking on screen
+                                # (unless we figure out how to do this AFTER taking the screenshot)
+                                # otherwise it will try to click this notification!
+
+                                if action in [
+                                    "computer.screenshot()",
+                                    "computer.display.screenshot()",
+                                    "computer.display.view()",
+                                    "computer.view()",
+                                ]:
+                                    description = "Viewing screen..."
+                                elif action == "computer.mouse.click()":
+                                    description = "Clicking..."
+                                elif action.startswith("computer.mouse.click("):
+                                    if "icon=" in arguments:
+                                        text_or_icon = "icon"
+                                    else:
+                                        text_or_icon = "text"
+                                    description = f"Clicking {text_or_icon}..."
                                 elif action.startswith("computer.mouse.move("):
+                                    if "icon=" in arguments:
+                                        text_or_icon = "icon"
+                                    else:
+                                        text_or_icon = "text"
                                     if (
                                         "click" in active_block.code
                                     ):  # This could be better
-                                        description = f"Clicking {arguments}."
+                                        description = f"Clicking {text_or_icon}..."
                                     else:
-                                        description = f"Mousing over {arguments}."
+                                        description = f"Mousing over {text_or_icon}..."
                                 elif action.startswith("computer.keyboard.write("):
                                     description = f"Typing {arguments}."
                                 elif action.startswith("computer.keyboard.hotkey("):

@@ -21,6 +21,8 @@ class Computer:
         self.clipboard = Clipboard(self)
         self.os = Os(self)
 
+        self.emit_images = True
+
     # Shortcut for computer.terminal.languages
     @property
     def languages(self):

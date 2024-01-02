@@ -1,3 +1,8 @@
+"""
+This is NOT jupyter language, this is just python. 
+Gotta split this out, generalize it, and move all the python additions to python.py, which imports this
+"""
+
 import ast
 import queue
 import re
@@ -5,7 +10,6 @@ import threading
 import time
 import traceback
 
-import matplotlib
 from jupyter_client import KernelManager
 
 from ..base_language import BaseLanguage
@@ -57,11 +61,17 @@ class JupyterLanguage(BaseLanguage):
         self.km.shutdown_kernel()
 
     def run(self, code):
+        # lel
         # exec(code)
         # return
         self.finish_flag = False
         try:
-            preprocessed_code = self.preprocess_code(code)
+            try:
+                preprocessed_code = self.preprocess_code(code)
+            except:
+                # Any errors produced here are our fault.
+                # Also, for python, you don't need them! It's just for active_line and stuff. Just looks pretty.
+                preprocessed_code = code
             message_queue = queue.Queue()
             self._execute_code(preprocessed_code, message_queue)
             yield from self._capture_output(message_queue)
