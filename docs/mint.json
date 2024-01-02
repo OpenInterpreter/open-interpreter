@@ -20,7 +20,7 @@
   },
   "topbarLinks": [
     {
-      "name": "33K ★ GitHub",
+      "name": "35K ★ GitHub",
       "url": "https://github.com/KillianLucas/open-interpreter"
     }
   ],
@@ -78,14 +78,26 @@
         {
           "group": "Hosted Setup",
           "pages": [
-            "language-model-setup/hosted-models/openai",
-            "language-model-setup/hosted-models/azure",
-            "language-model-setup/hosted-models/anthropic",
-            "language-model-setup/hosted-models/replicate",
             "language-model-setup/hosted-models/ai21",
-            "language-model-setup/hosted-models/openrouter",
+            "language-model-setup/hosted-models/anthropic",
+            "language-model-setup/hosted-models/anyscale",
+            "language-model-setup/hosted-models/aws-sagemaker",
+            "language-model-setup/hosted-models/azure",
+            "language-model-setup/hosted-models/baseten",
+            "language-model-setup/hosted-models/cloudflare",
             "language-model-setup/hosted-models/cohere",
-            "language-model-setup/hosted-models/petals"
+            "language-model-setup/hosted-models/deepinfra",
+            "language-model-setup/hosted-models/huggingface",
+            "language-model-setup/hosted-models/mistral-api",
+            "language-model-setup/hosted-models/nlp-cloud",
+            "language-model-setup/hosted-models/openai",
+            "language-model-setup/hosted-models/openrouter",
+            "language-model-setup/hosted-models/palm",
+            "language-model-setup/hosted-models/perplexity",
+            "language-model-setup/hosted-models/petals",
+            "language-model-setup/hosted-models/replicate",
+            "language-model-setup/hosted-models/togetherai",
+            "language-model-setup/hosted-models/vllm"
           ]
         },
         {
