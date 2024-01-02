@@ -1,3 +1,7 @@
+"""
+surely this can be simpler??
+"""
+
 import os
 import shutil
 from importlib import resources
@@ -50,10 +54,18 @@ def get_config(path=user_config_path):
 
     config = None
 
-    with open(path, "r") as file:
-        config = yaml.safe_load(file)
-        if config is not None:
-            return config
+    try:
+        with open(path, "r") as file:
+            config = yaml.safe_load(file)
+            if config is not None:
+                return config
+    except:
+        print("")
+        print(
+            "WARNING: Config file can't be read. Ensure it adheres to YAML format. Run `interpreter --reset_config` to reset it."
+        )
+        print("")
+        return {}
 
     if config is None:
         # Deleting empty file because get_config_path copies the default if file is missing

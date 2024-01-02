@@ -296,6 +296,7 @@ def start_terminal_interface(interpreter):
                 subprocess.call(["open", config_file])
         return
 
+    # This should be pushed into a utility:
     if args.reset_config:
         if args.config_file:
             config_file = get_config_path(args.config_file)
@@ -593,7 +594,7 @@ Once the server is running, you can begin your conversation below.
 
     # Apply config
     if args.config_file:
-        user_config = get_config_path(attr_value)
+        user_config = get_config_path(args.config_file)
         interpreter = apply_config(interpreter, config_path=user_config)
     else:
         # Apply default config file
