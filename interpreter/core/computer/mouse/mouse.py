@@ -102,7 +102,7 @@ class Mouse:
                     for i, item in enumerate(coordinates)
                 ]
                 error_message = (
-                    f"Your text ('{text}') was found multiple times on the screen. Please click one of the following coordinates with computer.mouse.move(x=x, y=y):\n"
+                    f"Your text ('{text}') was found multiple times on the screen. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
                     + "\n".join(coordinates)
                 )
                 raise ValueError(error_message)
@@ -115,6 +115,8 @@ class Mouse:
 
             # TESTING
             print(x, y)
+            print("Width:", self.computer.display.width)
+            print("Height:", self.computer.display.height)
 
         elif x is not None and y is not None:
             pass
