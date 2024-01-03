@@ -36,7 +36,7 @@ class Mouse:
         screenshot = None
         if len(args) > 1:
             raise ValueError(
-                "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is significantly more accurate."
+                "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
             )
         elif len(args) == 1:
             text = args[0]
@@ -52,6 +52,9 @@ class Mouse:
                     )
 
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
+
+            # TESTING
+            print(coordinates)
 
             if len(coordinates) == 0:
                 if self.computer.emit_images:
@@ -107,6 +110,11 @@ class Mouse:
                 x, y = coordinates[0]
                 x *= self.computer.display.width
                 y *= self.computer.display.height
+                x = int(x)
+                y = int(y)
+
+            # TESTING
+            print(x, y)
 
         elif x is not None and y is not None:
             pass
@@ -160,6 +168,8 @@ class Mouse:
                 x, y = coordinates[0]
                 x *= self.computer.display.width
                 y *= self.computer.display.height
+                x = int(x)
+                y = int(y)
 
         else:
             raise ValueError("Either text, icon, or both x and y must be provided")

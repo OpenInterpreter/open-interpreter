@@ -536,10 +536,11 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
                 print(_.get("content"))
             pass
 
-        display_markdown_message(
-            "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
-        )
-        print("")  # < - Aesthetic choice
+        if not args.auto_run:
+            display_markdown_message(
+                "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+            )
+            print("")  # < - Aesthetic choice
 
     if args.local:
         # Default local (LM studio) attributes
