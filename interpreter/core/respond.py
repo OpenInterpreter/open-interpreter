@@ -172,6 +172,14 @@ If LM Studio's local server is running, please try a language model with a diffe
                     code = re.sub(
                         r"from computer import (\w+)", r"\1 = computer.\1", code
                     )
+                    code = re.sub(
+                        r"from computer import (.+)",
+                        lambda m: "\n".join(
+                            f"{x.strip()} = computer.{x.strip()}"
+                            for x in m.group(1).split(",")
+                        ),
+                        code,
+                    )
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
                     if code.split("\n")[-1] in [
                         "computer.display.view()",

@@ -1,5 +1,5 @@
 """
-surely this can be simpler??
+surely this can be simpler?? i feel like the responsibilities of these functions is unclear
 """
 
 import os
@@ -55,11 +55,12 @@ def get_config(path=user_config_path):
     config = None
 
     try:
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
             if config is not None:
                 return config
-    except:
+    except Exception as e:
+        print(str(e))
         print("")
         print(
             "WARNING: Config file can't be read. Ensure it adheres to YAML format. Run `interpreter --reset_config` to reset it."
@@ -71,6 +72,6 @@ def get_config(path=user_config_path):
         # Deleting empty file because get_config_path copies the default if file is missing
         os.remove(path)
         path = get_config_path(path)
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
             return config

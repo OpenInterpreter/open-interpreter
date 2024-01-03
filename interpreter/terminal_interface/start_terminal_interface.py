@@ -143,11 +143,19 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "force_task_completion"},
         },
         {
+            "name": "disable_telemetry",
+            "nickname": "dt",
+            "help_text": "disables sending of basic anonymous usage stats",
+            "type": bool,
+            "default": True,
+            "action": "store_false",
+            "attribute": {"object": interpreter, "attr_name": "anonymous_telemetry"},
+        },
+        {
             "name": "speak_messages",
             "nickname": "sm",
             "help_text": "(Mac only) use the applescript `say` command to read messages aloud",
             "type": bool,
-            "action": "store_true",
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
         },
         {
@@ -216,9 +224,12 @@ def start_terminal_interface(interpreter):
 
     # Check for deprecated flags before parsing arguments
     if "--debug_mode" in sys.argv or "-d" in sys.argv:
-        print("\n`--debug_mode` has been renamed to `--verbose`.\n")
+        print("\n`--debug_mode` / `-d` has been renamed to `--verbose` / `-v`.\n")
         time.sleep(1.5)
-        sys.argv.remove("--debug_mode")
+        if "--debug_mode" in sys.argv:
+            sys.argv.remove("--debug_mode")
+        if "-d" in sys.argv:
+            sys.argv.remove("-d")
         sys.argv.append("--verbose")
 
     parser = argparse.ArgumentParser(description="Open Interpreter")
@@ -227,6 +238,7 @@ def start_terminal_interface(interpreter):
     for arg in arguments:
         action = arg.get("action", "store_true")
         nickname = arg.get("nickname")
+        default = arg.get("default")
 
         if arg["type"] == bool:
             if nickname:
@@ -236,7 +248,7 @@ def start_terminal_interface(interpreter):
                     dest=arg["name"],
                     help=arg["help_text"],
                     action=action,
-                    default=None,
+                    default=default,
                 )
             else:
                 parser.add_argument(
@@ -244,11 +256,10 @@ def start_terminal_interface(interpreter):
                     dest=arg["name"],
                     help=arg["help_text"],
                     action=action,
-                    default=None,
+                    default=default,
                 )
         else:
             choices = arg.get("choices")
-            default = arg.get("default")
 
             if nickname:
                 parser.add_argument(
@@ -352,7 +363,7 @@ def start_terminal_interface(interpreter):
     if args.os:
         interpreter.os = True
         interpreter.llm.supports_vision = True
-        interpreter.shrink_images = True
+        # interpreter.shrink_images = True # Faster but less accurate
 
         if not args.model:
             args.model = "gpt-4-vision-preview"
@@ -387,9 +398,10 @@ computer.display.view() # Shows you what's on the screen, returns a `pil_image` 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
 
-computer.mouse.click("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** and get creative! To mouse over a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this. To click something that has wrapped onto multiple lines, just use the beginning of the text (this doesn't work for multi-line text)
+computer.mouse.click("text onscreen") # This clicks on the UI element with that text. Use this **frequently** and get creative! To click a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
+computer.mouse.move("open recent >") # This moves the mouse over the UI element with that text. Many dropdowns will disappear if you click them. You have to hover over items to reveal more.
 computer.mouse.click(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
-computer.mouse.click(icon="magnifying glass") # Moves mouse to the icon with that description. Use this often
+computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often
 
 computer.mouse.scroll(-10) # Scrolls down. If you don't find some text on screen that you expected to be there, you probably want to do this
 x, y = computer.display.center() # Get your bearings
@@ -418,7 +430,7 @@ Try multiple methods before saying the task is impossible. **You can do it!**
 
 # Critical Routine Procedure for Multi-Step Tasks
 
-Include `computer.screenshot()` after a 2 second delay at the end of _every_ code block to verify your progress, then answer these questions in extreme detail:
+Include `computer.display.view()` after a 2 second delay at the end of _every_ code block to verify your progress, then answer these questions in extreme detail:
 
 1. Generally, what is happening on-screen?
 2. What is the active app?
@@ -430,7 +442,11 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
         """.strip()
 
         # Check if required packages are installed
-        packages = ["cv2", "plyer", "pyautogui", "pyperclip"]
+
+        # THERE IS AN INCONSISTENCY HERE.
+        # We should be testing if they import WITHIN OI's computer, not here.
+
+        packages = ["cv2", "plyer", "pyautogui", "pyperclip", "pywinctl"]
         missing_packages = []
         for package in packages:
             try:
@@ -440,29 +456,27 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
 
         if missing_packages:
             display_markdown_message(
-                f"> **Missing Package(s): {', '.join(missing_packages)}**\n\n{', '.join(['`' + p + '`' for p in missing_packages])} are required for OS Control.\n\nInstall them?\n"
+                f"> **Missing Package(s): {', '.join(['`' + p + '`' for p in missing_packages])}**\n\nThese packages are required for OS Control.\n\nInstall them?\n"
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
                 print("Exiting...")
                 return
 
-            # ON PIP RELEASE THIS SHOULD BE CHANGED! To run pip install open-interpreter[os]
-            # so we have more control over the versioning
+            for pip_name in ["pip", "pip3"]:
+                command = f"{pip_name} install 'open-interpreter[os]'"
 
-            for package in missing_packages:
-                for pip_name in ["pip", "pip3"]:
-                    if package == "cv2":
-                        command = f"{pip_name} install --upgrade opencv-python"
-                    else:
-                        command = f"{pip_name} install --upgrade {package}"
-                    for chunk in interpreter.computer.run("shell", command):
-                        if chunk.get("format") != "active_line":
-                            print(chunk.get("content"))
+                for chunk in interpreter.computer.run("shell", command):
+                    if chunk.get("format") != "active_line":
+                        print(chunk.get("content"))
+
+                got_em = True
+                for package in missing_packages:
                     try:
                         __import__(package)
                     except ImportError:
-                        continue
+                        got_em = False
+                if got_em:
                     break
 
             missing_packages = []
@@ -474,10 +488,12 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
 
             if missing_packages != []:
                 print(
-                    "Error: The following packages could not be installed: ",
+                    "\n\nWarning: The following packages could not be installed:",
                     ", ".join(missing_packages),
                 )
-                print("Please try to install them manually.")
+                print("\nPlease try to install them manually.\n\n")
+                time.sleep(2)
+                print("Attempting to start OS control anyway...\n\n")
 
         display_markdown_message("> `OS Control` enabled")
 
@@ -601,18 +617,18 @@ Once the server is running, you can begin your conversation below.
         interpreter = apply_config(interpreter)
 
     # Set attributes on interpreter
-    for attr_name, attr_value in vars(args).items():
-        if attr_value != None:
-            argument_dictionary = [a for a in arguments if a["name"] == attr_name]
+    for argument_name, argument_value in vars(args).items():
+        if argument_value != None:
+            argument_dictionary = [a for a in arguments if a["name"] == argument_name]
             if len(argument_dictionary) > 0:
                 argument_dictionary = argument_dictionary[0]
                 if "attribute" in argument_dictionary:
                     attr_dict = argument_dictionary["attribute"]
-                    setattr(attr_dict["object"], attr_dict["attr_name"], attr_value)
+                    setattr(attr_dict["object"], attr_dict["attr_name"], argument_value)
 
                     if args.verbose:
                         print(
-                            f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
+                            f"Setting attribute {attr_dict['attr_name']} on {attr_dict['object'].__class__.__name__.lower()} to '{argument_value}'..."
                         )
 
     if interpreter.llm.model == "gpt-4-1106-preview":
@@ -645,5 +661,7 @@ Once the server is running, you can begin your conversation below.
         return
 
     validate_llm_settings(interpreter)
+
+    interpreter.in_terminal_interface = True
 
     interpreter.chat()

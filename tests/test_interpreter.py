@@ -18,6 +18,14 @@ interpreter = OpenInterpreter()
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_getActiveWindow():
+    import pywinctl
+
+    print(pywinctl.getActiveWindow())
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_notify():
     interpreter.computer.os.notify("Hello")
     assert False

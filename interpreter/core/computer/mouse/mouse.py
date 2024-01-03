@@ -36,7 +36,7 @@ class Mouse:
         screenshot = None
         if len(args) > 1:
             raise ValueError(
-                "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)\n\nPlease take a computer.screenshot() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is significantly more accurate."
+                "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is significantly more accurate."
             )
         elif len(args) == 1:
             text = args[0]
