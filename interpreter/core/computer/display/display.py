@@ -57,14 +57,14 @@ class Display:
     def screenshot(self, show=True, quadrant=None, active_app_only=False):
         time.sleep(2)
         if not self.computer.emit_images:
-            text = self.get_text()
+            text = self.get_text_as_list_of_lists()
             pp = pprint.PrettyPrinter(indent=4)
             pretty_text = pp.pformat(text)  # language models like it pretty!
             pretty_text = format_to_recipient(pretty_text, "assistant")
             print(pretty_text)
             print(
                 format_to_recipient(
-                    "To recieve the text above as a Python object, run computer.display.get_text()",
+                    "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
                     "assistant",
                 )
             )
@@ -158,7 +158,7 @@ class Display:
             {"coordinates": centers, "text": "", "similarity": 1}
         ]  # Have it deliver the text properly soon.
 
-    def get_text(self, screenshot=None):
+    def get_text_as_list_of_lists(self, screenshot=None):
         # Take a screenshot
         if screenshot == None:
             screenshot = self.screenshot(show=False)

@@ -49,9 +49,10 @@ class Terminal:
                     # Sometimes, we want to hide the traceback to preserve tokens.
                     # (is this a good idea?)
                     if "@@@HIDE_TRACEBACK@@@" in content:
-                        chunk["content"] = content.split("@@@HIDE_TRACEBACK@@@")[
-                            -1
-                        ].split()
+                        chunk["content"] = (
+                            "Stopping execution.\n\n"
+                            + content.split("@@@HIDE_TRACEBACK@@@")[-1].strip()
+                        )
 
                 yield chunk
 

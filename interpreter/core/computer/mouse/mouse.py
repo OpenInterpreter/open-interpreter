@@ -1,4 +1,5 @@
 import time
+import warnings
 
 import matplotlib.pyplot as plt
 
@@ -53,17 +54,16 @@ class Mouse:
 
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
 
-            # TESTING
-            print(coordinates)
-
             is_fuzzy = any([c["similarity"] != 1 for c in coordinates])
 
             if len(coordinates) == 0:
                 if self.computer.emit_images:
                     plt.imshow(np.array(screenshot))
-                    plt.show()
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        plt.show()
                 raise ValueError(
-                    f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was not found on the screen. Please try again. If you're 100% sure the text should be there, consider using `computer.mouse.scroll(-10)` to scroll down.\n\nYou can use `computer.display.get_text()` to see all the text on the screen."
+                    f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was not found on the screen. Please try again. If you're 100% sure the text should be there, consider using `computer.mouse.scroll(-10)` to scroll down.\n\nYou can use `computer.display.get_text_as_list_of_lists()` to see all the text on the screen."
                 )
             elif len(coordinates) > 1 or is_fuzzy:
                 if self.computer.emit_images:
@@ -97,7 +97,9 @@ class Mouse:
                         )
 
                     plt.imshow(img_draw)
-                    plt.show()
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        plt.show()
 
                 coordinates = [
                     f"{i}: ({int(item['coordinates'][0]*self.computer.display.width)}, {int(item['coordinates'][1]*self.computer.display.height)}) "
@@ -123,11 +125,6 @@ class Mouse:
                 y *= self.computer.display.height
                 x = int(x)
                 y = int(y)
-
-            # TESTING
-            print(x, y)
-            print("Width:", self.computer.display.width)
-            print("Height:", self.computer.display.height)
 
         elif x is not None and y is not None:
             pass
@@ -166,7 +163,9 @@ class Mouse:
                         )
 
                     plt.imshow(img_draw)
-                    plt.show()
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        plt.show()
 
                 coordinates = [
                     f"{i}: {int(item[0]*self.computer.display.width)}, {int(item[1]*self.computer.display.height)}"
@@ -204,7 +203,9 @@ class Mouse:
             cv2.circle(img_draw, (drawing_x, drawing_y), 20, (0, 0, 255), -1)
 
             plt.imshow(img_draw)
-            plt.show()
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                plt.show()
 
             time.sleep(5)
 

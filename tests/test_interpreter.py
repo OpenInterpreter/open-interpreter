@@ -21,7 +21,7 @@ interpreter = OpenInterpreter()
 def test_find_text_api():
     start = time.time()
     interpreter.computer.mouse.move(
-        "Seft Arrow Seft Arrow lel and a bunch of hallucainated text"
+        "Left Arrow Left Arrow and a bunch of hallucinated text? or was it..."
     )
     # Left Arrow Left Arrow
     # and a bunch of hallucinated text? or was it...
@@ -45,7 +45,7 @@ def test_notify():
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_get_text():
-    print(interpreter.computer.display.get_text())
+    print(interpreter.computer.display.get_text_as_list_of_lists())
     assert False
 
 
