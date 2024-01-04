@@ -39,10 +39,10 @@ plyer = { version = "^2.1.0", optional = true }
 pywinctl = { version = "^0.3", optional = true }
 semgrep = { version = "^1.52.0", optional = true }
 yaspin = { version = "^3.0.1", optional = true }
-
+pytesseract = { version = "^0.3.10", optional = true }
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
 safe = ["semgrep", "yaspin"]
 
 [tool.poetry.group.dev.dependencies]

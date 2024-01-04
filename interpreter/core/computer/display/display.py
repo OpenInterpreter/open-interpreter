@@ -154,7 +154,9 @@ class Display:
         # Find the text in the screenshot
         centers = find_text_in_image(screenshot, text)
 
-        return centers
+        return [
+            {"coordinates": centers, "text": "", "similarity": 1}
+        ]  # Have it deliver the text properly soon.
 
     def get_text(self, screenshot=None):
         # Take a screenshot
