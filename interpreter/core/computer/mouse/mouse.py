@@ -36,7 +36,7 @@ class Mouse:
         screenshot = None
         if len(args) > 1:
             raise ValueError(
-                "Too many positional arguments provided: click(*args, x=None, y=None, show=True, index=None)\n\nPlease take a computer.screenshot() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is significantly more accurate."
+                "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
             )
         elif len(args) == 1:
             text = args[0]
@@ -53,14 +53,19 @@ class Mouse:
 
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
 
+            # TESTING
+            print(coordinates)
+
+            is_fuzzy = any([c["similarity"] != 1 for c in coordinates])
+
             if len(coordinates) == 0:
                 if self.computer.emit_images:
                     plt.imshow(np.array(screenshot))
                     plt.show()
                 raise ValueError(
-                    f"Your text ('{text}') was not found on the screen. Please try again. If you're 100% sure the text should be there, consider using `computer.mouse.scroll(-10)` to scroll down.\n\nYou can use `computer.display.get_text()` to see all the text on the screen."
+                    f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was not found on the screen. Please try again. If you're 100% sure the text should be there, consider using `computer.mouse.scroll(-10)` to scroll down.\n\nYou can use `computer.display.get_text()` to see all the text on the screen."
                 )
-            elif len(coordinates) > 1:
+            elif len(coordinates) > 1 or is_fuzzy:
                 if self.computer.emit_images:
                     # Convert the screenshot to a numpy array for drawing
                     img_array = np.array(screenshot)
@@ -70,7 +75,7 @@ class Mouse:
                     # Iterate over the response items
                     for i, item in enumerate(coordinates):
                         width, height = screenshot.size
-                        x, y = item
+                        x, y = item["coordinates"]
                         x *= width
                         y *= height
 
@@ -95,18 +100,34 @@ class Mouse:
                     plt.show()
 
                 coordinates = [
-                    f"{i}: {int(item[0]*self.computer.display.width)}, {int(item[1]*self.computer.display.height)}"
+                    f"{i}: ({int(item['coordinates'][0]*self.computer.display.width)}, {int(item['coordinates'][1]*self.computer.display.height)}) "
+                    + '"'
+                    + item["text"]
+                    + '"'
                     for i, item in enumerate(coordinates)
                 ]
-                error_message = (
-                    f"Your text ('{text}') was found multiple times on the screen. Please click one of the following coordinates with computer.mouse.move(x=x, y=y):\n"
-                    + "\n".join(coordinates)
-                )
+                if is_fuzzy:
+                    error_message = (
+                        f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was not found exactly, but some similar text was found. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
+                        + "\n".join(coordinates)
+                    )
+                else:
+                    error_message = (
+                        f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was found multiple times on the screen. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
+                        + "\n".join(coordinates)
+                    )
                 raise ValueError(error_message)
             else:
-                x, y = coordinates[0]
+                x, y = coordinates[0]["coordinates"]
                 x *= self.computer.display.width
                 y *= self.computer.display.height
+                x = int(x)
+                y = int(y)
+
+            # TESTING
+            print(x, y)
+            print("Width:", self.computer.display.width)
+            print("Height:", self.computer.display.height)
 
         elif x is not None and y is not None:
             pass
@@ -160,6 +181,8 @@ class Mouse:
                 x, y = coordinates[0]
                 x *= self.computer.display.width
                 y *= self.computer.display.height
+                x = int(x)
+                y = int(y)
 
         else:
             raise ValueError("Either text, icon, or both x and y must be provided")

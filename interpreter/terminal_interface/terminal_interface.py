@@ -69,12 +69,9 @@ def terminal_interface(interpreter, message):
         interactive = True
 
     active_block = None
-
     voice_subprocess = None
 
     while True:
-        spoken_messages = []
-
         try:
             if interactive:
                 ### This is the primary input for Open Interpreter.

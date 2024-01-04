@@ -2,28 +2,30 @@
 
 ## Documentation
 
-- [ ] **Easy 🟢** Add more hosted model instructions from from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
-  - [ ] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.openinterpreter.com/language-model-setup/hosted-models/openai)
-  - [ ] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
-  - [ ] Swap out the information with information from LiteLLM
-  - [ ] Repeat with other models
 - [x] Require documentation for PRs
 - [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
 - [ ] Better comments throughout the package (they're like docs for contributors)
 - [ ] Document the New Computer Update
 - [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response)) thanks ty!
+- [ ] Show how to replace interpreter.llm so you can use a custom llm
+- [ ] Show how to replace interpreter.computer or add to interpreter.computer.languages for like, e2b execution, remote execution, new programming languages, etc.
 
 ## New features
 
-- [ ] Add new `computer` modules like `browser`_ and `files`_
+- [ ] Figure out how to get OI to answer to user input requests like python's `input()`. Do we somehow detect a delay in the output..? Is there some universal flag that TUIs emit when they expect user input? Should we do this semantically with embeddings, then ask OI to review it and respond..?
+- [ ] Multi-line input. Probably use `textual`
+- [ ] Placeholder text that gives a compelling example OI request. Probably use `textual`
+- [ ] Everything else `textual` offers, like could we make it easier to select text? Copy paste in and out? Code editing interface?
+- [ ] Let people edit the code OI writes. Could just open it in the user's preferred editor. Simple. [Full description of how to implement this here.](https://github.com/KillianLucas/open-interpreter/pull/830#issuecomment-1854989795)
+- [ ] Display images in the terminal interface
 - [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
   - [ ] Make that flag send each message to server
   - [ ] Set up receiving replit server
-  - [ ] Add option to send previous conversations
-  - [ ] There should be a function that just renders messages to the terminal, so we can revive conversation navigator, and let people look at their conversations
-    - [ ] This should also render their convos once input() is about to be run, so we don't get those weird stuttering `rich` artifacts
+  - [ ] Add option to review and send previous conversations, use some PII redaction package then too
   - [ ] Make the messaging really strong re: "We will be saving this, we will redact PII, we will open source the dataset so we (and others) can train code interpreting models"
-- [ ] Let OI use OI. Add `interpreter.chat(async=True)` bool. OI can use this to open OI on a new thread
+- [ ] There should be a function that just renders messages to the terminal, so we can revive conversation navigator, and let people look at their conversations
+- [ ] ^ This function should also render the last like 5 messages once input() is about to be run, so we don't get those weird stuttering `rich` artifacts
+- [ ] Let OI use OI, add `interpreter.chat(async=True)` bool. OI can use this to open OI on a new thread
   - [ ] Also add `interpreter.await()` which waits for `interpreter.running` (?) to = False, and `interpreter.result()` which returns the last assistant messages content.
 - [ ] Allow for limited functions (`interpreter.functions`) using regex
   - [ ] If `interpreter.functions != []`:
@@ -43,6 +45,7 @@
   - [ ] Document this^
 - [ ] Expand "safe mode" to have proper, simple Docker support, or maybe Cosmopolitan LibC
 - [ ] Make it so core can be run elsewhere from terminal package — perhaps split over HTTP (this would make docker easier too)
+- [ ] For OS mode, experiment with screenshot just returning active window, experiment with it just showing the changes, or showing changes in addition to the whole thing, etc. GAIA should be your guide
 
 ## Future-proofing
 
@@ -80,6 +83,11 @@
 - [x] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
 - [x] Switch core code interpreter to be Jupyter-powered
 - [x] Make sure breaking from generator during execution stops the execution
+- [x] (thanks ty!) Add more hosted model instructions from from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
+  - [x] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.openinterpreter.com/language-model-setup/hosted-models/openai)
+  - [x] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
+  - [x] Swap out the information with information from LiteLLM
+  - [x] Repeat with other models
 
 # What's in our scope?
 

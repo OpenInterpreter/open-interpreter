@@ -172,6 +172,14 @@ If LM Studio's local server is running, please try a language model with a diffe
                     code = re.sub(
                         r"from computer import (\w+)", r"\1 = computer.\1", code
                     )
+                    code = re.sub(
+                        r"from computer import (.+)",
+                        lambda m: "\n".join(
+                            f"{x.strip()} = computer.{x.strip()}"
+                            for x in m.group(1).split(",")
+                        ),
+                        code,
+                    )
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
                     if code.split("\n")[-1] in [
                         "computer.display.view()",
@@ -188,13 +196,15 @@ If LM Studio's local server is running, please try a language model with a diffe
                 # sync up the interpreter's computer with your computer
                 try:
                     if interpreter.os and language == "python":
-                        computer_json = json.dumps(interpreter.computer.to_dict())
-                        sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
-                        for _ in interpreter.computer.run("python", sync_code):
-                            pass
+                        computer_dict = interpreter.computer.to_dict()
+                        if computer_dict:
+                            computer_json = json.dumps(computer_dict)
+                            sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
+                            for _ in interpreter.computer.run("python", sync_code):
+                                pass
                 except Exception as e:
                     print(str(e))
-                    print("Continuing.")
+                    print("Continuing...")
 
                 ## ↓ CODE IS RUN HERE
 
@@ -207,13 +217,18 @@ If LM Studio's local server is running, please try a language model with a diffe
                 try:
                     if interpreter.os and language == "python":
                         # sync up the interpreter's computer with your computer
+                        content = ""
                         for line in interpreter.computer.run(
                             "python",
-                            "import json\nprint(json.dumps(computer.to_dict()))",
+                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  print(json.dumps(computer_dict))",
                         ):
-                            pass
+                            if (
+                                line["type"] == "console"
+                                and line.get("format") == "output"
+                            ):
+                                content += line["content"]
                         interpreter.computer.load_dict(
-                            json.loads(line["content"].strip('"').strip("'"))
+                            json.loads(content.strip('"').strip("'"))
                         )
                 except Exception as e:
                     print(str(e))

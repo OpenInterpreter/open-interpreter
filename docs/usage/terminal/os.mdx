@@ -1,0 +1,17 @@
+---
+title: OS Mode
+---
+
+OS mode is a highly experimental mode that allows Open Interpreter to control the operating system visually through the mouse and keyboard. It provides a multimodal LLM like GPT-4V with the necessary tools to capture screenshots of the display and interact with on-screen elements such as text and icons. It will try to use the most direct method to achieve the goal, like using spotlight on Mac to open applications, and using query parameters in the URL to open websites with additional information.
+
+OS mode is a work in progress, if you have any suggestions or experience issues, please reach out on our [Discord](https://discord.com/invite/6p3fD6rBVm).
+
+To enable OS Mode, run the interpreter with the `--os` flag:
+
+```bash
+interpreter --os
+```
+
+Please note that screen recording permissions must be enabled for your terminal application for OS mode to work properly to work.
+
+OS mode does not currently support multiple displays.

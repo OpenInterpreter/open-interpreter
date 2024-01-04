@@ -5,6 +5,7 @@ It's the main file. `from interpreter import interpreter` will import an instanc
 
 import json
 import os
+import traceback
 from datetime import datetime
 
 from ..terminal_interface.start_terminal_interface import start_terminal_interface
@@ -15,6 +16,7 @@ from .default_system_message import default_system_message
 from .extend_system_message import extend_system_message
 from .llm.llm import Llm
 from .respond import respond
+from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
 
 
@@ -37,6 +39,8 @@ class OpenInterpreter:
             False  # Shrinks all images passed into model to less than 1024 in width
         )
         self.force_task_completion = False
+        self.anonymous_telemetry = os.getenv("ANONYMIZED_TELEMETRY", "True") == "True"
+        self.in_terminal_interface = False
 
         # Conversation history (this should not be here)
         self.conversation_history = True
@@ -59,17 +63,46 @@ class OpenInterpreter:
         self.computer = Computer()
 
     def chat(self, message=None, display=True, stream=False):
-        if stream:
-            return self._streaming_chat(message=message, display=display)
+        try:
+            if self.anonymous_telemetry and not self.offline:
+                message_type = type(
+                    message
+                ).__name__  # Only send message type, no content
+                send_telemetry(
+                    "started_chat",
+                    properties={
+                        "in_terminal_interface": self.in_terminal_interface,
+                        "message_type": message_type,
+                        "os_mode": self.os,
+                    },
+                )
 
-        initial_message_count = len(self.messages)
+            if stream:
+                return self._streaming_chat(message=message, display=display)
 
-        # If stream=False, *pull* from the stream.
-        for _ in self._streaming_chat(message=message, display=display):
-            pass
+            initial_message_count = len(self.messages)
 
-        # Return new messages
-        return self.messages[initial_message_count:]
+            # If stream=False, *pull* from the stream.
+            for _ in self._streaming_chat(message=message, display=display):
+                pass
+
+            # Return new messages
+            return self.messages[initial_message_count:]
+
+        except Exception as e:
+            if self.anonymous_telemetry and not self.offline:
+                message_type = type(message).__name__
+                send_telemetry(
+                    "errored",
+                    properties={
+                        "error": str(e),
+                        "in_terminal_interface": self.in_terminal_interface,
+                        "message_type": message_type,
+                        "os_mode": self.os,
+                    },
+                )
+
+            raise
 
     def _streaming_chat(self, message=None, display=True):
         # Sometimes a little more code -> a much better experience!
@@ -170,6 +203,7 @@ class OpenInterpreter:
                     last_flag_base = None
                 yield chunk
                 # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
+                # ... rethink this though.
                 self.messages.append(
                     {
                         "role": "computer",
