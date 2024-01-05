@@ -123,13 +123,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                     continue
 
                 # Is this language enabled/supported?
-                if language not in [
-                    i.name.lower() for i in interpreter.computer.terminal.languages
-                ] and language not in [
-                    alias
-                    for i in interpreter.computer.terminal.languages
-                    for alias in getattr(i, "aliases", [])
-                ]:
+                if interpreter.computer.terminal.get_language(language) == None:
                     output = f"`{language}` disabled or not supported."
 
                     yield {
