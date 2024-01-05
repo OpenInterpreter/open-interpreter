@@ -56,10 +56,6 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
-#### Along with an example implementation of a voice interface (inspired by _Her_):
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
-
 ## Quick Start
 
 ```shell
@@ -250,7 +246,7 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 ### Verbose mode
 
-To help contributors inspect Open Interpreter, `--verbose` mode is highly verbose.
+To help you inspect Open Interpreter we have a `--verbose` mode for debugging.
 
 You can activate verbose mode by using it's flag (`interpreter --verbose`), or mid-chat:
 
