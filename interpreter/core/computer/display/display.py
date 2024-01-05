@@ -185,7 +185,7 @@ class Display:
 
     # locate text should be moved here as well!
     def find_icon(self, query):
-        message = self.computer.terminal.format_to_recipient(
+        message = format_to_recipient(
             "Locating this icon will take ~30 seconds. We're working on speeding this up.",
             recipient="user",
         )
