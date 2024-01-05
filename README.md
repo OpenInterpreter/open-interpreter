@@ -19,7 +19,7 @@
 
 <br>
 <p align="center">
-<strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://github.com/KillianLucas/open-interpreter/releases/tag/v0.2.0">Read On →</a>
+<strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
 </p>
 <br>
 
