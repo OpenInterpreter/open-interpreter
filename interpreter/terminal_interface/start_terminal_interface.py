@@ -185,7 +185,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "fast",
             "nickname": "f",
-            "help_text": "run `interpreter --model gpt-3.5-turbo`",
+            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
             "type": bool,
         },
         {
@@ -341,13 +341,9 @@ def start_terminal_interface(interpreter):
         return
 
     if args.fast:
-        if args.local or args.vision or args.os:
-            print(
-                "Fast mode (`gpt-3.5`) is not supported with --vision, --os, or --local (`gpt-3.5` is not a vision or a local model)."
-            )
-            time.sleep(1.5)
-        else:
-            interpreter.llm.model = "gpt-3.5-turbo"
+        if not (args.local or args.vision or args.os):
+            args.model = "gpt-3.5-turbo"
+        interpreter.system_message += "\n\nThe user has set you to FAST mode. **No talk, just code.** Be as brief as possible. No comments, no unnecessary messages. Assume as much as possible, rarely ask the user for clarification. Once the task has been completed, say 'The task is done.'"
 
     if args.vision:
         interpreter.llm.supports_vision = True
