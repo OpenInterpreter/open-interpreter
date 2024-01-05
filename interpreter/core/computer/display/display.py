@@ -181,7 +181,13 @@ class Display:
 
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
-        return pytesseract_get_text(screenshot)
+        if self.computer.offline == True:
+            try:
+                return pytesseract_get_text(screenshot)
+            except:
+                raise Exception(
+                    "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
+                )
 
     # locate text should be moved here as well!
     def find_icon(self, query):

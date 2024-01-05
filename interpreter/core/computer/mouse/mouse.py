@@ -3,6 +3,8 @@ import warnings
 
 import matplotlib.pyplot as plt
 
+from ..utils.recipient_utils import format_to_recipient
+
 try:
     import cv2
     import numpy as np
@@ -33,24 +35,17 @@ class Mouse:
                 f"An error occurred while retrieving the mouse position: {e}. "
             )
 
-    def move(self, *args, x=None, y=None, icon=None):
+    def move(self, *args, x=None, y=None, icon=None, text=None):
         screenshot = None
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
             )
-        elif len(args) == 1:
-            text = args[0]
+        elif len(args) == 1 or text != None:
+            if len(args) == 1:
+                text = args[0]
 
             screenshot = self.computer.display.screenshot(show=False)
-
-            if self.computer.offline == True:
-                try:
-                    import pytesseract
-                except:
-                    raise Exception(
-                        "To find text in order to use the mouse, please install `pytesseract` along with the Tesseract executable."
-                    )
 
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
 
@@ -127,7 +122,12 @@ class Mouse:
                 y = int(y)
 
         elif x is not None and y is not None:
-            pass
+            print(
+                format_to_recipient(
+                    "Unless you have just recieved these EXACT coordinates from a computer.mouse.move or computer.mouse.click command, PLEASE take a screenshot with computer.display.view() to find TEXT OR ICONS to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed.",
+                    "assistant",
+                )
+            )
         elif icon is not None:
             coordinates = self.computer.display.find_icon(icon)
 

@@ -470,8 +470,9 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
-                print("Exiting...")
-                return
+                print("\nPlease try to install them manually.\n\n")
+                time.sleep(2)
+                print("Attempting to start OS control anyway...\n\n")
 
             for pip_name in ["pip", "pip3"]:
                 command = f"{pip_name} install 'open-interpreter[os]'"
