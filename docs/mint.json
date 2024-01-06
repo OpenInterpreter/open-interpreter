@@ -51,10 +51,10 @@
           "pages": [
             "usage/terminal/arguments",
             "usage/terminal/settings",
+            "usage/terminal/conversation-history",
             "usage/terminal/magic-commands",
             "usage/terminal/budget-manager",
-            "usage/terminal/vision",
-            "usage/terminal/os"
+            "usage/terminal/vision"
           ]
         },
         {
@@ -131,23 +131,23 @@
               ]
             }
           ]
-        },
-        {
-          "group": "Integrations",
-          "pages": ["integrations/e2b"]
-        },
-        {
-          "group": "Telemetry",
-          "pages": ["telemetry/telemetry"]
-        },
-        {
-          "group": "Legal",
-          "pages": [
-            "legal/license",
-            "legal/privacy-policy",
-            "legal/terms and conditions"
-          ]
         }
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": ["integrations/e2b"]
+    },
+    {
+      "group": "Telemetry",
+      "pages": ["telemetry/telemetry"]
+    },
+    {
+      "group": "Legal",
+      "pages": [
+        "legal/license",
+        "legal/privacy-policy",
+        "legal/terms and conditions"
       ]
     }
   ],
