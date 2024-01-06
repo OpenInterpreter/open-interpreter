@@ -4,25 +4,22 @@ title: LlamaFile
 
 <CodeGroup>
 ```bash Terminal
-# download mixtral
+# Download Mixtral
 
 wget https://huggingface.co/jartine/Mixtral-8x7B-v0.1.llamafile/resolve/main/mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
 
-# make it an executable
+# Make it an executable
 
 chmod +x mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
 
-# fire it up
+# Start the server
 
 ./mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
 
-# install the new OI update
+# Run OI, point it at the llamafile server
 
-pip install git+https://github.com/KillianLucas/open-interpreter.git
-
+interpreter --api_base https://localhost:8080
 ```
 </CodeGroup>
 
 More coming soon...
-
-```
