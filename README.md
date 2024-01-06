@@ -15,7 +15,7 @@
 
 <br>
 
-![NCU_sketchy](https://github.com/KillianLucas/open-interpreter/assets/63927363/b546dcad-f104-417f-9bec-4e048d308096)
+![thumbnail](https://github.com/KillianLucas/open-interpreter/assets/63927363/9c9b45e2-a8a0-4a97-91c3-cb7c2eabaa7c)
 
 <br>
 <p align="center">
