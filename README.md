@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
-    Let language models run code.<br>
+    <strong>Let language models run code.</strong><br>
     <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
@@ -27,7 +27,7 @@
 pip install open-interpreter
 ```
 
-> Not working? Read our [setup guide](https://docs.openinterpreter.com/setup).
+> Not working? Read our [setup guide](https://docs.openinterpreter.com/getting-started/setup).
 
 ```shell
 interpreter
