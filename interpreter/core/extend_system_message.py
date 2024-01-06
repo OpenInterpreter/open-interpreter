@@ -80,7 +80,6 @@ def extend_system_message(interpreter):
                     )
 
         except:
-            raise
             # Non blocking
             pass
 

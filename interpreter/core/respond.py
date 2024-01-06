@@ -123,13 +123,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                     continue
 
                 # Is this language enabled/supported?
-                if language not in [
-                    i.name.lower() for i in interpreter.computer.terminal.languages
-                ] and language not in [
-                    alias
-                    for i in interpreter.computer.terminal.languages
-                    for alias in getattr(i, "aliases", [])
-                ]:
+                if interpreter.computer.terminal.get_language(language) == None:
                     output = f"`{language}` disabled or not supported."
 
                     yield {
@@ -196,13 +190,15 @@ If LM Studio's local server is running, please try a language model with a diffe
                 # sync up the interpreter's computer with your computer
                 try:
                     if interpreter.os and language == "python":
-                        computer_json = json.dumps(interpreter.computer.to_dict())
-                        sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
-                        for _ in interpreter.computer.run("python", sync_code):
-                            pass
+                        computer_dict = interpreter.computer.to_dict()
+                        if computer_dict:
+                            computer_json = json.dumps(computer_dict)
+                            sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
+                            for _ in interpreter.computer.run("python", sync_code):
+                                pass
                 except Exception as e:
                     print(str(e))
-                    print("Continuing.")
+                    print("Continuing...")
 
                 ## ↓ CODE IS RUN HERE
 
@@ -215,13 +211,18 @@ If LM Studio's local server is running, please try a language model with a diffe
                 try:
                     if interpreter.os and language == "python":
                         # sync up the interpreter's computer with your computer
+                        content = ""
                         for line in interpreter.computer.run(
                             "python",
-                            "import json\nprint(json.dumps(computer.to_dict()))",
+                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  print(json.dumps(computer_dict))",
                         ):
-                            pass
+                            if (
+                                line["type"] == "console"
+                                and line.get("format") == "output"
+                            ):
+                                content += line["content"]
                         interpreter.computer.load_dict(
-                            json.loads(line["content"].strip('"').strip("'"))
+                            json.loads(content.strip('"').strip("'"))
                         )
                 except Exception as e:
                     print(str(e))
@@ -248,7 +249,7 @@ If LM Studio's local server is running, please try a language model with a diffe
             ## FORCE TASK COMLETION
             # This makes it utter specific phrases if it doesn't want to be told to "Proceed."
 
-            force_task_completion_message = """Proceed. If you want to write code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
+            force_task_completion_message = """Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
             if interpreter.os:
                 force_task_completion_message.replace(
                     "If the entire task I asked for is done,",

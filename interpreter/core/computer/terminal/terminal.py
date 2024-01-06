@@ -46,6 +46,14 @@ class Terminal:
                         chunk["recipient"] = recipient
                         chunk["content"] = content
 
+                    # Sometimes, we want to hide the traceback to preserve tokens.
+                    # (is this a good idea?)
+                    if "@@@HIDE_TRACEBACK@@@" in content:
+                        chunk["content"] = (
+                            "Stopping execution.\n\n"
+                            + content.split("@@@HIDE_TRACEBACK@@@")[-1].strip()
+                        )
+
                 yield chunk
 
         except GeneratorExit:

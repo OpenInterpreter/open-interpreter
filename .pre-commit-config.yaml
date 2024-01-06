@@ -1,5 +1,5 @@
 repos:
-  # Using this mirror lets us use mypyc-compiled black, which is about 2x faster
+  # Using this mirror lets us use mypyc-compiled black, which is 2x faster
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: 23.10.1
     hooks:

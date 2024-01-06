@@ -55,15 +55,21 @@ def get_config(path=user_config_path):
     config = None
 
     try:
-        with open(path, "r", encoding="utf-8") as file:
+        with open(path, "r", encoding='utf-8') as file:
             config = yaml.safe_load(file)
             if config is not None:
                 return config
-    except Exception as e:
-        print(str(e))
+    except UnicodeDecodeError:
         print("")
         print(
-            "WARNING: Config file can't be read. Ensure it adheres to YAML format. Run `interpreter --reset_config` to reset it."
+            "WARNING: Config file can't be read due to a Unicode decoding error. Ensure it is saved in UTF-8 format. Run `interpreter --reset_config` to reset it."
+        )
+        print("")
+        return {}
+    except Exception as e:
+        print("")
+        print(
+            f"WARNING: An error occurred while reading the config file: {e}. Run `interpreter --reset_config` to reset it."
         )
         print("")
         return {}

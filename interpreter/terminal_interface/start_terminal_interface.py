@@ -152,6 +152,13 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "anonymous_telemetry"},
         },
         {
+            "name": "offline",
+            "nickname": "o",
+            "help_text": "turns off all online features (except the language model, if it's hosted)",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "offline"},
+        },
+        {
             "name": "speak_messages",
             "nickname": "sm",
             "help_text": "(Mac only) use the applescript `say` command to read messages aloud",
@@ -178,24 +185,24 @@ def start_terminal_interface(interpreter):
         {
             "name": "fast",
             "nickname": "f",
-            "help_text": "run `interpreter --model gpt-3.5-turbo`",
+            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
             "type": bool,
         },
         {
             "name": "local",
             "nickname": "l",
-            "help_text": "experimentally run the LLM locally via LM Studio (this just sets api_base, model, system_message, and offline = True)",
+            "help_text": "experimentally run the LLM locally via LM Studio (this changes many more settings than `--offline`)",
             "type": bool,
         },
         {
             "name": "vision",
             "nickname": "vi",
-            "help_text": "experimentally use vision for supported languages (HTML, Python)",
+            "help_text": "experimentally use vision for supported languages",
             "type": bool,
         },
         {
             "name": "os",
-            "nickname": "o",
+            "nickname": "os",
             "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
             "type": bool,
         },
@@ -334,13 +341,9 @@ def start_terminal_interface(interpreter):
         return
 
     if args.fast:
-        if args.local or args.vision or args.os:
-            print(
-                "Fast mode (`gpt-3.5`) is not supported with --vision, --os, or --local (`gpt-3.5` is not a vision or a local model)."
-            )
-            time.sleep(1.5)
-        else:
-            interpreter.llm.model = "gpt-3.5-turbo"
+        if not (args.local or args.vision or args.os):
+            args.model = "gpt-3.5-turbo"
+        interpreter.system_message += "\n\nThe user has set you to FAST mode. **No talk, just code.** Be as brief as possible. No comments, no unnecessary messages. Assume as much as possible, rarely ask the user for clarification. Once the task has been completed, say 'The task is done.'"
 
     if args.vision:
         interpreter.llm.supports_vision = True
@@ -441,6 +444,13 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
         
         """.strip()
 
+        if args.offline:
+            # Icon finding does not work offline
+            interpreter.system_message = interpreter.system_message.replace(
+                'computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often\n',
+                "",
+            )
+
         # Check if required packages are installed
 
         # THERE IS AN INCONSISTENCY HERE.
@@ -460,8 +470,9 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
-                print("Exiting...")
-                return
+                print("\nPlease try to install them manually.\n\n")
+                time.sleep(2)
+                print("Attempting to start OS control anyway...\n\n")
 
             for pip_name in ["pip", "pip3"]:
                 command = f"{pip_name} install 'open-interpreter[os]'"
@@ -512,6 +523,11 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
         # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.DOUBLE, expand=False), style="white on black")
         # print(">\n\n")
         # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
+
+        if not args.offline and not args.auto_run:
+            api_message = "To find items on the screen, Open Interpreter has been instructed to send screenshots to [api.openinterpreter.com](https://api.openinterpreter.com/) (we do not store them). Add `--offline` to attempt this locally."
+            display_markdown_message(api_message)
+            print("")
 
         if not args.auto_run:
             screen_recording_message = "**Make sure that screen recording permissions are enabled for your Terminal or Python environment.**"

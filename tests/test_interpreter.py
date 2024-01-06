@@ -18,6 +18,18 @@ interpreter = OpenInterpreter()
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_find_text_api():
+    start = time.time()
+    interpreter.computer.mouse.move(
+        "Left Arrow Left Arrow and a bunch of hallucinated text? or was it..."
+    )
+    # Left Arrow Left Arrow
+    # and a bunch of hallucinated text? or was it...
+    print(time.time() - start)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_getActiveWindow():
     import pywinctl
 
@@ -33,7 +45,7 @@ def test_notify():
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_get_text():
-    print(interpreter.computer.display.get_text())
+    print(interpreter.computer.display.get_text_as_list_of_lists())
     assert False
 
 

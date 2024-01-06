@@ -57,14 +57,14 @@ class Display:
     def screenshot(self, show=True, quadrant=None, active_app_only=False):
         time.sleep(2)
         if not self.computer.emit_images:
-            text = self.get_text()
+            text = self.get_text_as_list_of_lists()
             pp = pprint.PrettyPrinter(indent=4)
             pretty_text = pp.pformat(text)  # language models like it pretty!
             pretty_text = format_to_recipient(pretty_text, "assistant")
             print(pretty_text)
             print(
                 format_to_recipient(
-                    "To recieve the text above as a Python object, run computer.display.get_text()",
+                    "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
                     "assistant",
                 )
             )
@@ -154,9 +154,11 @@ class Display:
         # Find the text in the screenshot
         centers = find_text_in_image(screenshot, text)
 
-        return centers
+        return [
+            {"coordinates": centers, "text": "", "similarity": 1}
+        ]  # Have it deliver the text properly soon.
 
-    def get_text(self, screenshot=None):
+    def get_text_as_list_of_lists(self, screenshot=None):
         # Take a screenshot
         if screenshot == None:
             screenshot = self.screenshot(show=False)
@@ -179,11 +181,17 @@ class Display:
 
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
-        return pytesseract_get_text(screenshot)
+        if self.computer.offline == True:
+            try:
+                return pytesseract_get_text(screenshot)
+            except:
+                raise Exception(
+                    "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
+                )
 
     # locate text should be moved here as well!
     def find_icon(self, query):
-        message = self.computer.terminal.format_to_recipient(
+        message = format_to_recipient(
             "Locating this icon will take ~30 seconds. We're working on speeding this up.",
             recipient="user",
         )
