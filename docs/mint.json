@@ -31,7 +31,16 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "setup"]
+      "pages": ["getting-started/introduction", "getting-started/setup"]
+    },
+    {
+      "group": "Components",
+      "pages": [
+        "components/introduction",
+        "components/core",
+        "components/language-model",
+        "components/computer"
+      ]
     },
     {
       "group": "Usage",
@@ -64,6 +73,15 @@
           "group": "Desktop",
           "pages": ["usage/desktop/install"]
         }
+      ]
+    },
+    {
+      "group": "Safety",
+      "pages": [
+        "safety/introduction",
+        "safety/isolation",
+        "safety/safe-mode",
+        "safety/best-practices"
       ]
     },
     {
@@ -101,7 +119,33 @@
             "language-model-setup/local-models/overview",
             "language-model-setup/local-models/getting-models",
             "language-model-setup/local-models/install-on-mac",
-            "language-model-setup/local-models/install-on-windows"
+            "language-model-setup/local-models/install-on-windows",
+            {
+              "group": "Models",
+              "pages": [
+                "language-model-setup/local-models/models/lm-studio",
+                "language-model-setup/local-models/models/llamafile",
+                "language-model-setup/local-models/models/janai",
+                "language-model-setup/local-models/models/ollama",
+                "language-model-setup/local-models/models/custom-endpoint"
+              ]
+            }
+          ]
+        },
+        {
+          "group": "Integrations",
+          "pages": ["integrations/e2b"]
+        },
+        {
+          "group": "Telemetry",
+          "pages": ["telemetry/telemetry"]
+        },
+        {
+          "group": "Legal",
+          "pages": [
+            "legal/license",
+            "legal/privacy-policy",
+            "legal/terms and conditions"
           ]
         }
       ]
