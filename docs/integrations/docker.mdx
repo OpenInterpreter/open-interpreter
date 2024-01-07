@@ -20,7 +20,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 ```
 
-3. Create a file named docker-compose.yml in the same directory with the following contents:
+3. Create a file named `requirements.txt` in the same directory with the following contents:
+
+```text
+open-interpreter
+```
+
+4. Create a file named docker-compose.yml in the same directory with the following contents:
 
 ```yaml
 version: "3"
@@ -34,7 +40,7 @@ services:
       - OPENAI_API_KEY=<your-openai-api-key>
 ```
 
-4. Run the following command in the same directory to start Open Interpreter. The `-rm` flag ensures that the container is removed after the command is executed.
+5. Run the following command in the same directory to start Open Interpreter. The `-rm` flag ensures that the container is removed after the command is executed.
 
 ```bash
 
