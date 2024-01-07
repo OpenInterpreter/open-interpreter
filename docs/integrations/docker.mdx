@@ -2,4 +2,62 @@
 title: Docker
 ---
 
-Coming soon...
+Docker support is currently experimental. Running Open Interpreter inside of a Docker container can cause issues, and it may not function as you expect. Let us know on [Discord](https://discord.com/invite/6p3fD6rBVm) if you encounter errors or have suggestions to improve Docker support. We are working on an official integration for Docker in the coming weeks. For now, you can use Open Interpreter in a sandboxed Docker container environment using the following steps:
+
+1. If you do not have Docker Desktop installed, [install it](https://www.docker.com/products/docker-desktop) before proceeding.
+
+2. Create a new directory and add a file named `Dockerfile` in it with the following contents:
+
+```dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.11
+# Set the working directory in the container to /app
+WORKDIR /app
+# Copy the current directory contents into the container at /app
+COPY . /app
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+```
+
+3. Create a file named docker-compose.yml in the same directory with the following contents:
+
+```yaml
+version: "3"
+services:
+  oi:
+    build: .
+    volumes:
+      - .:/app
+    tty: true
+    environment:
+      - OPENAI_API_KEY=<your-openai-api-key>
+```
+
+4. Run the following command in the same directory to start Open Interpreter. The `-rm` flag ensures that the container is removed after the command is executed.
+
+```bash
+
+docker-compose run --rm oi interpreter
+
+```
+
+To add flags to the command, just append them after `interpreter`. For example, to run the interpreter with custom instructions, run the following command:
+
+```bash
+
+docker-compose run --rm oi interpreter --custom_instructions "Be as concise as possible"
+
+```
+
+Please note that some flags will not work. For example, `--config` will not work, because it cannot open the config file in the container. If you want to use a config file other than the default, you can create a `config.yml` file inside of the same directory, add your custom config, and then run the following command:
+
+```bash
+
+docker-compose run --rm oi interpreter --config_file config.yml
+
+```
+
+Also keep in mind that when it runs inside a docker container, it is sandboxed from your machine. That means it does NOT have access to any of your files, nor will it know what operating system you are using, as it will be running a Linux OS inside the container. You can add files directly to the directory that contains the `Dockerfile` and `docker-compose.yml` files if you need to.
+
+Again, we are working on an official integration for Docker in the coming weeks. Please let us know if you have any ideas on how to make it better!
