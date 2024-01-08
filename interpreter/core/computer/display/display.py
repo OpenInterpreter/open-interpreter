@@ -1,7 +1,6 @@
 import base64
 import os
 import pprint
-import subprocess
 import tempfile
 import time
 import warnings
@@ -17,7 +16,6 @@ from ..utils.recipient_utils import format_to_recipient
 # from utils.get_active_window import get_active_window
 
 try:
-    import cv2
     import numpy as np
     import pyautogui
 except:
@@ -106,7 +104,8 @@ class Display:
         screenshot.save(temp_file.name)
 
         # Open the image file with PIL
-        img = Image.open(temp_file.name)
+        # IPython interactive mode auto-displays plots, causing RGBA handling issues, possibly MacOS-specific.
+        img = Image.open(temp_file.name).convert("RGB")
 
         # Delete the temporary file
         try:
