@@ -15,7 +15,7 @@
 
 <br>
 
-![thumbnail](https://github.com/KillianLucas/open-interpreter/assets/63927363/9c9b45e2-a8a0-4a97-91c3-cb7c2eabaa7c)
+![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
 
 <br>
 <p align="center">
