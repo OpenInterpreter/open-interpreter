@@ -115,12 +115,32 @@
             "language-model-setup/local-models/custom-endpoint",
             "language-model-setup/local-models/best-practices"
           ]
-        }
+        },
+        "language-model-setup/custom-models"
+=
       ]
     },
     {
       "group": "Integrations",
-      "pages": ["integrations/e2b"]
+      "pages": [
+        "integrations/e2b",
+        "integrations/docker"
+      ]
+    },
+    {
+      "group": "Safety",
+      "pages": [
+        "safety/introduction",
+        "safety/isolation",
+        "safety/safe-mode",
+        "safety/best-practices"
+      ]
+    },
+    {
+      "group": "Protocols",
+      "pages": [
+        "protocols/lmc-messages"
+      ]
     },
     {
       "group": "Telemetry",

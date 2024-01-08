@@ -21,7 +21,26 @@ from .utils.truncate_output import truncate_output
 
 
 class OpenInterpreter:
+    """
+    This class (one instance is called an `interpreter`) is the "grand central station" of this project.
+
+    Its responsibilities are to:
+
+    1. Given some user input, prompt the language model.
+    2. Parse the language models responses, converting them into LMC Messages.
+    3. Send code to the computer.
+    4. Parse the computer's response (which will already be LMC Messages).
+    5. Send the computer's response back to the language model.
+    ...
+
+    The above process should repeat—going back and forth between the language model and the computer— until:
+
+    6. Decide when the process is finished based on the language model's response.
+    """
+
     def start_terminal_interface(self):
+        # This shouldn't really be my responsibility but it made poetry scripts easier to set up.
+        # Can we put this function elsewhere and get poetry scripts to run it?
         start_terminal_interface(self)
 
     def __init__(self):

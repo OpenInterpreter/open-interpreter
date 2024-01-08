@@ -1,0 +1,33 @@
+---
+LMC Messages
+---
+
+To support the incoming `L`anguage `M`odel `C`omputer architecture, we extend OpenAI's messages format to include additional information, and a new role called `computer`.
+
+## Roles
+
+Role|Description|
+---|---|
+`user`|The individual interacting with the system.|
+`assistant`|The language model.|
+`computer`|The system that executes the language model's commands.|
+
+## Possible Message Types / Formats
+
+Any role can produce any of the following formats, but we've included a `Common Roles` column to give you a sense of the message type's usage.
+
+Type|Format|Content Description|Common Roles
+---|---|---|---|
+message|None|A text-only message.|`user`, `assistant`|
+console|active_line|The active line of code (from the most recent code block) that's executing.|`computer`|
+console|output|Text output resulting from `print()` statements in Python, `console.log()` statements in Javascript, etc. **This includes errors.**|`computer`|
+image|base64|A `base64` image in PNG format (default)|`user`, `computer`|
+image|base64.png|A `base64` image in PNG format|`user`, `computer`|
+image|base64.jpeg|A `base64` image in JPEG format|`user`, `computer`|
+image|path|A path to an image.|`user`, `computer`|
+code|html|HTML code that should be executed.|`assistant`, `computer`|
+code|javascript|JavaScript code that should be executed.|`assistant`, `computer`|
+code|python|Python code that should be executed.|`assistant`|
+code|r|R code that should be executed.|`assistant`|
+code|applescript|AppleScript code that should be executed.|`assistant`|
+code|shell|Shell code that should be executed.|`assistant`|
