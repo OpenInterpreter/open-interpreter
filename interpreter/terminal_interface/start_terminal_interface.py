@@ -669,7 +669,7 @@ Once the server is running, you can begin your conversation below.
     if interpreter.llm.api_base:
         if not interpreter.llm.model.lower().startswith(
             "openai/"
-        ) and not interpreter.llm.model.lower().startswith("azure/"):
+        ) and not interpreter.llm.model.lower().startswith("azure/") and not interpreter.llm.model.lower().startswith("ollama"):
             interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator
