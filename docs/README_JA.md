@@ -152,7 +152,7 @@ interpreter.chat("ついでに、字幕を大きくできますか？")
 プログラム的チャットで Open Interpreter は、会話の履歴を記憶しています。新しくやり直したい場合は、リセットすることができます:
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### チャットの保存と復元
@@ -161,7 +161,7 @@ interpreter.reset()
 
 ```python
 messages = interpreter.chat("私の名前は田中です。") # 'messages'にメッセージを保存
-interpreter.reset() # インタープリタをリセット（"田中"は忘れられる）
+interpreter.messages = [] # インタープリタをリセット（"田中"は忘れられる）
 
 interpreter.messages = messages # 'messages'からチャットを再開（"田中"は記憶される）
 ```

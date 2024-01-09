@@ -124,14 +124,14 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 在 Python 中，Open Interpreter 会记录历史对话。如果你想从头开始，可以进行重置：
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### 保存和恢复聊天
 
 ```python
 messages = interpreter.chat("My name is Killian.") # 保存消息到 'messages'
-interpreter.reset() # 重置解释器 ("Killian" 将被遗忘)
+interpreter.messages = [] # 重置解释器 ("Killian" 将被遗忘)
 
 interpreter.messages = messages # 从 'messages' 恢复聊天 ("Killian" 将被记住)
 ```
