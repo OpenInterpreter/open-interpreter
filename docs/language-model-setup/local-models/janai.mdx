@@ -30,14 +30,11 @@ interpreter.llm.model = "<model-name>"
 interpreter.llm.api_base = "http://localhost:1337/v1 "
 
 interpreter.chat()
-
 ```
 
 </CodeGroup>
 
-**Boom!** You are now running Open Interpreter with your local model using Jan.ai.
-
-If you want a longer context window than 3000, you can set the context window manually by running:
+If your model can handle a longer context window than the default 3000, you can set the context window manually by running:
 
 <CodeGroup>
 
@@ -49,7 +46,6 @@ interpreter --api_base http://localhost:1337/v1  --model <model_name> --context_
 from interpreter import interpreter
 
 interpreter.context_window = 5000
-
 ```
 
 </CodeGroup>
