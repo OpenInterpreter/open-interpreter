@@ -2,6 +2,8 @@
 title: LlamaFile
 ---
 
+To use LlamaFile with Open Interpreter, you'll need to download the model and start the server by running the file in the terminal. You can do this with the following commands:
+
 <CodeGroup>
 ```bash Terminal
 # Download Mixtral
@@ -16,10 +18,13 @@ chmod +x mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
 
 ./mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
 
-# Run OI, point it at the llamafile server
+# In a separate terminal window, run OI and point it at the llamafile server
 
 interpreter --api_base https://localhost:8080
+
 ```
 </CodeGroup>
 
-More coming soon...
+
+Please note that Llamafile does not work on Windows, and if you are using a Mac with Apple Silicon, you'll need to have Xcode installed.
+```
