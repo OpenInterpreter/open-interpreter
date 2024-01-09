@@ -1,15 +1,11 @@
 import base64
-import os
 import pprint
-import subprocess
-import tempfile
 import time
 import warnings
 from io import BytesIO
 
 import matplotlib.pyplot as plt
 import requests
-from PIL import Image
 
 from ..utils.recipient_utils import format_to_recipient
 
@@ -17,7 +13,6 @@ from ..utils.recipient_utils import format_to_recipient
 # from utils.get_active_window import get_active_window
 
 try:
-    import cv2
     import numpy as np
     import pyautogui
 except:
@@ -70,8 +65,6 @@ class Display:
             )
             return
 
-        temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
-
         if quadrant == None:
             # Implement active_app_only!
             if active_app_only:
@@ -103,30 +96,20 @@ class Display:
             else:
                 raise ValueError("Invalid quadrant. Choose between 1 and 4.")
 
-        screenshot.save(temp_file.name)
-
         # Open the image file with PIL
-        img = Image.open(temp_file.name)
-
-        # Delete the temporary file
-        try:
-            os.remove(temp_file.name)
-        except Exception as e:
-            # On windows, this can fail due to permissions stuff??
-            # (PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\killi\\AppData\\Local\\Temp\\tmpgc2wscpi.png')
-            if self.computer.verbose:
-                print(str(e))
+        # IPython interactive mode auto-displays plots, causing RGBA handling issues, possibly MacOS-specific.
+        screenshot = screenshot.convert("RGB")
 
         if show:
             # Show the image using matplotlib
-            plt.imshow(np.array(img))
+            plt.imshow(np.array(screenshot))
 
             with warnings.catch_warnings():
                 # It displays an annoying message about Agg not being able to display something or WHATEVER
                 warnings.simplefilter("ignore")
                 plt.show()
 
-        return img
+        return screenshot
 
     def find_text(self, text, screenshot=None):
         # Take a screenshot
