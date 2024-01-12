@@ -350,6 +350,10 @@ pip install fastapi uvicorn
 uvicorn server:app --reload
 ```
 
+## Android
+
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
