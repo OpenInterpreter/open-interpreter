@@ -55,6 +55,13 @@ For some, `poetry install` might hang on some dependencies. As a first step, try
 
 Then run `poetry install` again. If this doesn't work, please join our [Discord community](https://discord.gg/6p3fD6rBVm) for help.
 
+If during `poetry install` installing `tiktoken` fails due to `error: can't find Rust compiler` 
+install rust (on mac):
+```
+brew install rust
+```
+then run `poetry install` again
+
 ## Code Formatting and Linting
 
 Our project uses `black` for code formatting and `isort` for import sorting. To ensure consistency across contributions, please adhere to the following guidelines:
