@@ -223,6 +223,22 @@ Once the server is running, you can begin your conversation with Open Interprete
 
 > **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually (see below).
 
+#### Terminal on `ollama`
+
+[`ollama` ](https://github.com/jmorganca/ollama)is a great way for _Get up and running with large language models locally._
+
+To use local `ollama` models, just pick a local (eventuallu custom) model:
+
+```sh
+ollama list
+```
+
+Then call it from `interpreter`:
+
+```sh
+interpreter --model ollama/tinyllama
+```
+
 #### Python
 
 Our Python package gives you more control over each setting. To replicate `--local` and connect to LM Studio, use these settings:
