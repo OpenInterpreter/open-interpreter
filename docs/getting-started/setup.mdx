@@ -2,13 +2,9 @@
 title: Setup
 ---
 
-## One-line Installers
+## Experimental one-line installers
 
-<Info>**New:** These installers are experimental. Please report any issues you have to our [Github](https://github.com/KillianLucas/open-interpreter/issues/new/choose).</Info>
-
-If you're struggling to install Open Interpreter, these scripts attempt to set up a Python environment and install the package for you.
-
-Simply open your terminal and run:
+These one-liners will attempt to download Python, set up an environment, and install Open Interpreter for you. **If you already use Python, we recommend trying to install via `pip` first (see below).**
 
 <CodeGroup>
 
@@ -26,6 +22,16 @@ curl -o oi-linux-installer.sh https://raw.githubusercontent.com/KillianLucas/ope
 
 </CodeGroup>
 
+## Terminal usage
+
+After installation, you can start an interactive chat in your terminal by running:
+
+```bash
+interpreter
+```
+
+# For Python Developers
+
 ## Installation from `pip`
 
 <Info>To install Open Interpreter, you'll need Python [3.10](https://www.python.org/downloads/release/python-3100/) or [3.11](https://www.python.org/downloads/release/python-3110/).</Info>
@@ -34,14 +40,6 @@ Run the following command in your terminal to install Open Interpreter.
 
 ```bash
 pip install open-interpreter
-```
-
-## Terminal usage
-
-After installation, you can start an interactive chat in your terminal by running:
-
-```bash
-interpreter
 ```
 
 ## Python usage
