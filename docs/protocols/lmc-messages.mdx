@@ -2,7 +2,41 @@
 title: LMC Messages
 ---
 
-To support the incoming `L`anguage `M`odel `C`omputer architecture, we extend OpenAI's messages format to include additional information, and a new role called `computer`.
+To support the incoming `L`anguage `M`odel `C`omputer architecture, we extend OpenAI's messages format to include additional information, and a new role called `computer`:
+
+```python
+# The user sends a message.
+{"role": "user", "type": "message": "content": "What's 2380*3875?"}
+
+# The assistant runs some code.
+{"role": "assistant", "type": "code", "format": "python", "content", "2380*3875"}
+
+# The computer responds with the result of the code.
+{"role": "computer", "type": "console", "format": "output", "content", "9222500"}
+
+# The assistant sends a message.
+{"role": "assistant", "type": "message", "content", "The result of multiplying 2380 by 3875 is 9222500."}
+```
+
+## Anatomy
+
+Each message in the LMC architecture has the following parameters (`format` is only present for some types):
+
+```
+{
+  "role": "<role>",       # Who is sending the message.
+  "type": "<type>",       # What kind of message is being sent.
+  "format": "<format>"    # Some types need to be further specified, so they optionally use this parameter.
+  "content": "<content>", # What the message says.
+}
+```
+
+Parameter|Description|
+---|---|
+`role`|The sender of the message.|
+`type`|The kind of message being sent.|
+`content`|The actual content of the message.|
+`format`|The format of the content (optional).|
 
 ## Roles
 
