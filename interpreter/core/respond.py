@@ -194,15 +194,14 @@ If LM Studio's local server is running, please try a language model with a diffe
                         if computer_dict:
                             computer_json = json.dumps(computer_dict)
                             sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
-                            for _ in interpreter.computer.run("python", sync_code):
-                                pass
+                            interpreter.computer.run("python", sync_code)
                 except Exception as e:
                     print(str(e))
                     print("Continuing...")
 
                 ## ↓ CODE IS RUN HERE
 
-                for line in interpreter.computer.run(language, code):
+                for line in interpreter.computer.run(language, code, stream=True):
                     yield {"role": "computer", **line}
 
                 ## ↑ CODE IS RUN HERE
@@ -211,18 +210,13 @@ If LM Studio's local server is running, please try a language model with a diffe
                 try:
                     if interpreter.os and language == "python":
                         # sync up the interpreter's computer with your computer
-                        content = ""
-                        for line in interpreter.computer.run(
+                        result = interpreter.computer.run(
                             "python",
                             "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  print(json.dumps(computer_dict))",
-                        ):
-                            if (
-                                line["type"] == "console"
-                                and line.get("format") == "output"
-                            ):
-                                content += line["content"]
+                        )
+                        result = result[-1]["content"]
                         interpreter.computer.load_dict(
-                            json.loads(content.strip('"').strip("'"))
+                            json.loads(result.strip('"').strip("'"))
                         )
                 except Exception as e:
                     print(str(e))

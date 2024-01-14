@@ -393,7 +393,7 @@ with open('numbers.txt', 'a+') as f:
         f.seek(0, os.SEEK_END)
         """
     print("starting to code")
-    for chunk in interpreter.computer.run("python", code):
+    for chunk in interpreter.computer.run("python", code, stream=True, display=True):
         print(chunk)
         if "format" in chunk and chunk["format"] == "output":
             if "adding 3 to file" in chunk["content"]:

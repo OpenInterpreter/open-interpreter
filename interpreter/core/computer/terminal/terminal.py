@@ -33,7 +33,25 @@ class Terminal:
                 return lang
         return None
 
-    def run(self, language, code):
+    def run(self, language, code, stream=False, display=False):
+        # If stream == False, *pull* from the stream.
+        if stream == False:
+            output_messages = []
+            for chunk in self._streaming_chat(language, code, stream=True):
+                if chunk.get("format") != "active_line":
+                    # Should we append this to the last message, or make a new one?
+                    if (
+                        output_messages != []
+                        and output_messages[-1].get("type") == chunk["type"]
+                        and output_messages[-1].get("format") == chunk["format"]
+                    ):
+                        output_messages[-1]["content"] += chunk["content"]
+                    else:
+                        output_messages.append(chunk)
+            return output_messages
+
+        # This actually streams it:
+
         if language not in self._active_languages:
             self._active_languages[language] = self.get_language(language)()
         try:
@@ -55,6 +73,14 @@ class Terminal:
                         )
 
                 yield chunk
+
+                # Print it also if display = True
+                if (
+                    display
+                    and chunk.get("format") != "active_line"
+                    and chunk.get("content")
+                ):
+                    print(chunk["content"])
 
         except GeneratorExit:
             self.stop()
