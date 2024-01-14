@@ -4,7 +4,9 @@ title: Setup
 
 ## Experimental one-line installers
 
-These one-liners will attempt to download Python, set up an environment, and install Open Interpreter for you. **If you already use Python, we recommend trying to install via `pip` first (see below).**
+This command will attempt to download Python, set up an environment, and install Open Interpreter for you.
+
+**If you already use Python, we recommend trying to install via `pip` first (see below).**
 
 <CodeGroup>
 
@@ -12,8 +14,8 @@ These one-liners will attempt to download Python, set up an environment, and ins
 curl -o oi-mac-installer.sh https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-mac-installer.sh && chmod +x oi-mac-installer.sh && ./oi-mac-installer.sh && rm oi-mac-installer.sh
 ```
 
-```powershell Windows
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 -OutFile oi-windows-installer.ps1; .\oi-windows-installer.ps1; Remove-Item oi-windows-installer.ps1
+```bash Windows
+(curl -o oi-windows-installer.ps1 https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 || bitsadmin /transfer "DownloadScript" https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 %CD%\oi-windows-installer.ps1) && powershell -ExecutionPolicy Bypass -File oi-windows-installer.ps1 && del oi-windows-installer.ps1
 ```
 
 ```bash Linux
@@ -29,6 +31,7 @@ After installation, you can start an interactive chat in your terminal by runnin
 ```bash
 interpreter
 ```
+
 
 # For Python Developers
 
