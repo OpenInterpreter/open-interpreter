@@ -310,7 +310,7 @@ def start_terminal_interface(interpreter):
                 subprocess.call(["xdg-open", config_directory])
             except FileNotFoundError:
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
-                subprocess.call(["open", config_directory])
+                subprocess.call(["open", config_file])
         return
 
     # This should be pushed into a utility:
