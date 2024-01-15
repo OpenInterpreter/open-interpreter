@@ -41,7 +41,11 @@ class OpenInterpreter:
     def start_terminal_interface(self):
         # This shouldn't really be my responsibility but it made poetry scripts easier to set up.
         # Can we put this function elsewhere and get poetry scripts to run it?
-        start_terminal_interface(self)
+
+        try:
+            start_terminal_interface(self)
+        except KeyboardInterrupt:
+            print("Exited.")
 
     def __init__(self):
         # State
