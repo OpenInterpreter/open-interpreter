@@ -305,17 +305,9 @@ def start_terminal_interface(interpreter):
         if platform.system() == "Windows":
             os.startfile(config_directory)
         else:
-            subprocess.call(["xdg-open", config_directory])
-
-        # Use the default system editor to open the file
-        if platform.system() == "Windows":
-            os.startfile(
-                config_file
-            )  # This will open the file with the default application, e.g., Notepad
-        else:
             try:
                 # Try using xdg-open on non-Windows platforms
-                subprocess.call(["xdg-open", config_file])
+                subprocess.call(["xdg-open", config_directory])
             except FileNotFoundError:
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
                 subprocess.call(["open", config_file])
