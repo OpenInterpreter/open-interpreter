@@ -40,3 +40,8 @@ $env:PYENV_VERSION="3.11.7"
 
 # Get us out of this vers of Python (which was just used to setup OI, which should stay in that vers of Python...?)
 Remove-Item Env:\PYENV_VERSION
+
+Write-Output ""
+Write-Output "Open Interpreter has been installed. Run the following command to use it: "
+Write-Output ""
+Write-Output "interpreter"

@@ -33,3 +33,8 @@ pipx install open-interpreter
 
 # Unset the Python version
 $pyenv_root shell --unset
+
+echo ""
+echo "Open Interpreter has been installed. Run the following command to use it: "
+echo ""
+echo "interpreter"
