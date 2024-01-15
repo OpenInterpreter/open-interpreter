@@ -287,7 +287,7 @@ def start_terminal_interface(interpreter):
                     choices=choices,
                     default=default,
                 )
-
+    im_python_dev = false
     args = parser.parse_args()
 
     # This should be pushed into an open_config.py util
