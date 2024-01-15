@@ -150,7 +150,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 
 ### Start a New Chat
 
-In Python, Open Interpreter remembers conversation history. If you want to start afresh, you can reset it:
+In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
 interpreter.messages = []
