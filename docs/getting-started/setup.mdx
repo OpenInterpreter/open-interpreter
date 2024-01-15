@@ -15,7 +15,7 @@ curl -o oi-mac-installer.sh https://raw.githubusercontent.com/KillianLucas/open-
 ```
 
 ```bash Windows
-(curl -o oi-windows-installer.ps1 https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 || bitsadmin /transfer "DownloadScript" https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 %CD%\oi-windows-installer.ps1) && powershell -ExecutionPolicy Bypass -File oi-windows-installer.ps1 && del oi-windows-installer.ps1
+(curl -o install-pyenv-win.ps1 https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1 || bitsadmin /transfer "DownloadPyenvScript" https://raw.githubusercontent.com/pyenv-win/pyenv-win/master/pyenv-win/install-pyenv-win.ps1 %CD%\install-pyenv-win.ps1) && powershell -ExecutionPolicy Bypass -File install-pyenv-win.ps1 && del install-pyenv-win.ps1 && (curl -o oi-windows-installer.ps1 https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 || bitsadmin /transfer "DownloadScript" https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 %CD%\oi-windows-installer.ps1) && powershell -ExecutionPolicy Bypass -File oi-windows-installer.ps1 && del oi-windows-installer.ps1
 ```
 
 ```bash Linux
