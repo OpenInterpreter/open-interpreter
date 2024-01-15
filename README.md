@@ -150,7 +150,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 
 ### Start a New Chat
 
-In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
+In Python, Open Interpreter remembers conversation history. If you want to start afresh, you can reset it:
 
 ```python
 interpreter.messages = []
@@ -252,7 +252,7 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 To help you inspect Open Interpreter we have a `--verbose` mode for debugging.
 
-You can activate verbose mode by using it's flag (`interpreter --verbose`), or mid-chat:
+You can activate verbose mode by using its flag (`interpreter --verbose`), or mid-chat:
 
 ```shell
 $ interpreter
