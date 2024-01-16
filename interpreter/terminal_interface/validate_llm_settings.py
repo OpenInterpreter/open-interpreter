@@ -1,8 +1,8 @@
-import getpass
 import os
 import time
 
 import litellm
+from prompt_toolkit import prompt
 
 from .utils.display_markdown_message import display_markdown_message
 
@@ -25,7 +25,9 @@ def validate_llm_settings(interpreter):
 
             # OpenAI
             if interpreter.llm.model in litellm.open_ai_chat_completion_models:
-                if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key:
+                if (
+                    True
+                ):  # not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key:
                     display_welcome_message_once()
 
                     display_markdown_message(
@@ -40,8 +42,7 @@ def validate_llm_settings(interpreter):
                     """
                     )
 
-                    response = getpass.getpass("OpenAI API key: ")
-                    print(f"OpenAI API key: {response[:4]}...{response[-4:]}")
+                    response = prompt("OpenAI API key: ", is_password=True)
 
                     display_markdown_message(
                         """
