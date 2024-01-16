@@ -1,8 +1,8 @@
-import getpass
 import os
 import time
 
 import litellm
+from prompt_toolkit import prompt
 
 from .utils.display_markdown_message import display_markdown_message
 
@@ -40,8 +40,7 @@ def validate_llm_settings(interpreter):
                     """
                     )
 
-                    response = getpass.getpass("OpenAI API key: ")
-                    print(f"OpenAI API key: {response[:4]}...{response[-4:]}")
+                    response = prompt("OpenAI API key: ", is_password=True)
 
                     display_markdown_message(
                         """
