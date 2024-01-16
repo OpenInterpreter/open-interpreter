@@ -14,6 +14,7 @@ from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .utils.get_config import get_config_path
 from .validate_llm_settings import validate_llm_settings
+from .utils.profiles import apply_profile, get_profile_path
 
 
 def start_terminal_interface(interpreter):
@@ -624,12 +625,14 @@ Once the server is running, you can begin your conversation below.
     if args.config_file:
         user_config = get_config_path(args.config_file)
         interpreter = apply_config(interpreter, config_path=user_config)
-    elif args.profile:
-        print(f"Profile: {args.profile}")
-        pass
     else:
         # Apply default config file
         interpreter = apply_config(interpreter)
+    
+    if args.profile:
+        #We can add custom profile path, I'll leave it out for first PR
+        user_profile = get_profile_path() 
+        interpreter = apply_profile(interpreter, user_profile)
 
     # Set attributes on interpreter
     for argument_name, argument_value in vars(args).items():
