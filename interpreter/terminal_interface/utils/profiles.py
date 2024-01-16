@@ -36,7 +36,7 @@ def get_profile_path(path=USER_PROFILE_PATH):
                 path = os.path.join(profile_dir, path)
 
             # Copy default profile
-            default_profile_path = os.path.join(os.path.dirname(__file__), PROFILE_FILENAME)
+            default_profile_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), PROFILE_FILENAME)
             shutil.copy(default_profile_path, path)
 
     return path
@@ -77,5 +77,13 @@ def apply_profile(self, profile_path=None):
     selected_profile = profile.get(self.profile, {})
 
     # Apply settings from the selected profile
-    for param, value in selected_profile.items():
-        setattr(self, param, value)
+    for key, value in selected_profile.items():
+        if key.startswith("llm."):
+            setattr(self.llm, key[4:], value)  # For 'llm.' prefixed keys
+        elif key.startswith("computer."):
+            setattr(self.computer, key[9:], value)  # For 'computer.' prefixed keys
+        else:
+            setattr(self, key, value)  # For other keys
+    
+    return self
+

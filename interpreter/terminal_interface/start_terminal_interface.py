@@ -631,6 +631,8 @@ Once the server is running, you can begin your conversation below.
     
     if args.profile:
         #We can add custom profile path, I'll leave it out for first PR
+        print(vars(args).get("profile"))
+        interpreter.profile = vars(args).get("profile")
         user_profile = get_profile_path() 
         interpreter = apply_profile(interpreter, user_profile)
 
