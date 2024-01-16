@@ -22,14 +22,15 @@ def start_terminal_interface(interpreter):
     """
 
     arguments = [
-        # Profiles coming soon— after we seperate core from TUI
-        # {
-        #     "name": "profile",
-        #     "nickname": "p",
-        #     "help_text": "profile (from your config file) to use. sets multiple settings at once",
-        #     "type": str,
-        #     "default": "default",
-        # },
+        #Profiles coming soon— after we seperate core from TUI
+        {
+            "name": "profile",
+            "nickname": "p",
+            "help_text": "profile (from your config file) to use. sets multiple settings at once",
+            "type": str,
+            "default": "default",
+            "attribute": {"object": interpreter, "attr_name": "profile"},
+        },
         {
             "name": "custom_instructions",
             "nickname": "ci",
@@ -181,7 +182,6 @@ def start_terminal_interface(interpreter):
             "type": str,
             "attribute": {"object": interpreter, "attr_name": "config_file"},
         },
-        # Profiles
         {
             "name": "fast",
             "nickname": "f",
@@ -624,6 +624,9 @@ Once the server is running, you can begin your conversation below.
     if args.config_file:
         user_config = get_config_path(args.config_file)
         interpreter = apply_config(interpreter, config_path=user_config)
+    elif args.profile:
+        print(f"Profile: {args.profile}")
+        pass
     else:
         # Apply default config file
         interpreter = apply_config(interpreter)
