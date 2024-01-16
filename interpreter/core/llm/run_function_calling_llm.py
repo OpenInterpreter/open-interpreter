@@ -1,6 +1,5 @@
 from .utils.merge_deltas import merge_deltas
 from .utils.parse_partial_json import parse_partial_json
-import json
 
 function_schema = {
     "name": "execute",
