@@ -9,7 +9,7 @@ def merge_deltas(original, delta):
         if value != None:
             if isinstance(value, str):
                 if key in original:
-                    original[key] += value
+                    original[key] = (original[key] or "") + (value or "")
                 else:
                     original[key] = value
             else:

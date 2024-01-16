@@ -1,5 +1,6 @@
 from .utils.merge_deltas import merge_deltas
 from .utils.parse_partial_json import parse_partial_json
+import json
 
 function_schema = {
     "name": "execute",
@@ -47,7 +48,7 @@ def run_function_calling_llm(llm, request_params):
             continue
 
         delta = chunk["choices"][0]["delta"]
-
+      
         # Accumulate deltas
         accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
@@ -57,12 +58,15 @@ def run_function_calling_llm(llm, request_params):
         if (
             accumulated_deltas.get("function_call")
             and "arguments" in accumulated_deltas["function_call"]
+            and accumulated_deltas["function_call"]["arguments"]
         ):
+            
             if (
                 "name" in accumulated_deltas["function_call"]
                 and accumulated_deltas["function_call"]["name"] == "execute"
             ):
                 arguments = accumulated_deltas["function_call"]["arguments"]
+                
                 arguments = parse_partial_json(arguments)
 
                 if arguments:
