@@ -15,7 +15,7 @@
 
 <br>
 
-![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
+![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 <p align="center">
@@ -350,6 +350,10 @@ pip install fastapi uvicorn
 uvicorn server:app --reload
 ```
 
+## Android
+
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
@@ -382,7 +386,7 @@ Visit [our roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/d
 
 **Note**: This software is not affiliated with OpenAI.
 
-![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
+![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
 
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >

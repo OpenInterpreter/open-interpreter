@@ -177,9 +177,7 @@ def handle_magic_command(self, user_input):
     # Handle shell
     if user_input.startswith("%%"):
         code = user_input[2:].strip()
-        for chunk in self.computer.run("shell", code):
-            if "output" in chunk:
-                print(chunk["output"], flush=True, end="")
+        self.computer.run("shell", code, stream=True, display=True)
         print("")
         return
 

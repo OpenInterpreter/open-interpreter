@@ -62,8 +62,6 @@ def display_output_cli(output):
             delete=False, suffix=".html", mode="w"
         ) as tmp_file:
             html = output["content"]
-            if "<html>" not in html:
-                html = "<html>\n" + html + "\n</html>"
             tmp_file.write(html)
             open_file(tmp_file.name)
     elif "format" in output and output["format"] == "javascript":

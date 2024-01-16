@@ -2,15 +2,27 @@
 title: Setup
 ---
 
-<Info>To install Open Interpreter, you'll need Python [3.10](https://www.python.org/downloads/release/python-3100/) or [3.11](https://www.python.org/downloads/release/python-3110/). Run `python --version` to check your version.</Info>
+## Experimental one-line installers
 
-## Installation
+To try our experimental installers, open your Terminal with admin priviledges [(click here to learn how)](https://chat.openai.com/share/66672c0f-0935-4c16-ac96-75c1afe14fe3), then paste the following commands:
 
-Run the following command in your terminal to install Open Interpreter.
+<CodeGroup>
 
-```bash
-pip install open-interpreter
+```bash Mac
+curl -o oi-mac-installer.sh https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-mac-installer.sh && chmod +x oi-mac-installer.sh && ./oi-mac-installer.sh && rm oi-mac-installer.sh
 ```
+
+```bash Windows
+curl -o oi-windows-installer.ps1 https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 || bitsadmin /transfer "DownloadScript" https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 %CD%\oi-windows-installer.ps1 && powershell -ExecutionPolicy Bypass -File oi-windows-installer.ps1 && del oi-windows-installer.ps1
+```
+
+```bash Linux
+curl -o oi-linux-installer.sh https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-linux-installer.sh && chmod +x oi-linux-installer.sh && ./oi-linux-installer.sh && rm oi-linux-installer.sh
+```
+
+</CodeGroup>
+
+These installers will attempt to download Python, set up an environment, and install Open Interpreter for you.
 
 ## Terminal usage
 
@@ -19,6 +31,16 @@ After installation, you can start an interactive chat in your terminal by runnin
 ```bash
 interpreter
 ```
+
+## Installation from `pip`
+
+If you already use Python, we recommend installing Open Interpreter via `pip`:
+
+```bash
+pip install open-interpreter
+```
+
+<Info>**Note:** You'll need Python [3.10](https://www.python.org/downloads/release/python-3100/) or [3.11](https://www.python.org/downloads/release/python-3110/). Run `python --version` to check yours.</Info>
 
 ## Python usage
 

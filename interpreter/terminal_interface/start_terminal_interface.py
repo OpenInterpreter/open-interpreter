@@ -298,17 +298,16 @@ def start_terminal_interface(interpreter):
         else:
             config_file = get_config_path()
 
-        print(f"Opening `{config_file}`...")
+        config_directory = os.path.dirname(config_file)
 
-        # Use the default system editor to open the file
+        print(f"Opening config directory...")
+
         if platform.system() == "Windows":
-            os.startfile(
-                config_file
-            )  # This will open the file with the default application, e.g., Notepad
+            os.startfile(config_directory)
         else:
             try:
                 # Try using xdg-open on non-Windows platforms
-                subprocess.call(["xdg-open", config_file])
+                subprocess.call(["xdg-open", config_directory])
             except FileNotFoundError:
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
                 subprocess.call(["open", config_file])
@@ -477,9 +476,7 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
             for pip_name in ["pip", "pip3"]:
                 command = f"{pip_name} install 'open-interpreter[os]'"
 
-                for chunk in interpreter.computer.run("shell", command):
-                    if chunk.get("format") != "active_line":
-                        print(chunk.get("content"))
+                interpreter.computer.run("shell", command, display=True)
 
                 got_em = True
                 for package in missing_packages:
@@ -544,13 +541,11 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
         #         print(chunk.get("content"))
 
         # Give it access to the computer via Python
-        for _ in interpreter.computer.run(
+        interpreter.computer.run(
             "python",
             "import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
-        ):
-            if args.verbose:
-                print(_.get("content"))
-            pass
+            display=args.verbose,
+        )
 
         if not args.auto_run:
             display_markdown_message(
@@ -667,9 +662,11 @@ Once the server is running, you can begin your conversation below.
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
     if interpreter.llm.api_base:
-        if not interpreter.llm.model.lower().startswith(
-            "openai/"
-        ) and not interpreter.llm.model.lower().startswith("azure/") and not interpreter.llm.model.lower().startswith("ollama"):
+        if (
+            not interpreter.llm.model.lower().startswith("openai/")
+            and not interpreter.llm.model.lower().startswith("azure/")
+            and not interpreter.llm.model.lower().startswith("ollama")
+        ):
             interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator
