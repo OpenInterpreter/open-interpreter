@@ -13,8 +13,8 @@ from .utils.apply_config import apply_config
 from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .utils.get_config import get_config_path
-from .validate_llm_settings import validate_llm_settings
 from .utils.profiles import apply_profile, get_profile_path
+from .validate_llm_settings import validate_llm_settings
 
 
 def start_terminal_interface(interpreter):
@@ -23,7 +23,7 @@ def start_terminal_interface(interpreter):
     """
 
     arguments = [
-        #Profiles coming soon— after we seperate core from TUI
+        # Profiles coming soon— after we seperate core from TUI
         {
             "name": "profile",
             "nickname": "p",
@@ -628,12 +628,12 @@ Once the server is running, you can begin your conversation below.
     else:
         # Apply default config file
         interpreter = apply_config(interpreter)
-    
+
     if args.profile:
-        #We can add custom profile path, I'll leave it out for first PR
+        # We can add custom profile path, I'll leave it out for first PR
         print(vars(args).get("profile"))
         interpreter.profile = vars(args).get("profile")
-        user_profile = get_profile_path() 
+        user_profile = get_profile_path()
         interpreter = apply_profile(interpreter, user_profile)
 
     # Set attributes on interpreter

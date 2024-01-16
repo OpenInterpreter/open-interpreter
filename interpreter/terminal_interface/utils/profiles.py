@@ -1,7 +1,7 @@
-
+import logging
 import os
 import shutil
-import logging
+
 import yaml
 
 from .local_storage_path import get_storage_path
@@ -9,6 +9,7 @@ from .local_storage_path import get_storage_path
 # Constants for file paths
 PROFILE_FILENAME = "profiles.yaml"
 USER_PROFILE_PATH = os.path.join(get_storage_path(), PROFILE_FILENAME)
+
 
 def get_profile_path(path=USER_PROFILE_PATH):
     """
@@ -36,10 +37,13 @@ def get_profile_path(path=USER_PROFILE_PATH):
                 path = os.path.join(profile_dir, path)
 
             # Copy default profile
-            default_profile_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), PROFILE_FILENAME)
+            default_profile_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), PROFILE_FILENAME
+            )
             shutil.copy(default_profile_path, path)
 
     return path
+
 
 def get_profile(path=USER_PROFILE_PATH):
     """
@@ -49,7 +53,7 @@ def get_profile(path=USER_PROFILE_PATH):
     """
     path = get_profile_path(path)
     try:
-        with open(path, "r", encoding='utf-8') as file:
+        with open(path, "r", encoding="utf-8") as file:
             profile = yaml.safe_load(file)
             return profile if profile else {}
     except UnicodeDecodeError:
@@ -60,6 +64,7 @@ def get_profile(path=USER_PROFILE_PATH):
     except Exception as e:
         logging.warning(f"An error occurred while reading the profile file: {e}.")
     return {}
+
 
 def apply_profile(self, profile_path=None):
     """
@@ -84,6 +89,5 @@ def apply_profile(self, profile_path=None):
             setattr(self.computer, key[9:], value)  # For 'computer.' prefixed keys
         else:
             setattr(self, key, value)  # For other keys
-    
-    return self
 
+    return self

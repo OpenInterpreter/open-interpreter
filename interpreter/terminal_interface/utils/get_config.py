@@ -55,7 +55,7 @@ def get_config(path=user_config_path):
     config = None
 
     try:
-        with open(path, "r", encoding='utf-8') as file:
+        with open(path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
             if config is not None:
                 return config
