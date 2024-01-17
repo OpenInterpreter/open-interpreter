@@ -10,6 +10,7 @@ except ImportError:
 
 import os
 import platform
+import tempfile
 import random
 import re
 import subprocess
@@ -41,6 +42,22 @@ try:
 except:
     # If they don't have readline, that's fine
     pass
+
+def edit_code(code):
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".py") as temp_file:
+        temp_file.write(code)
+        temp_filename = temp_file.name
+
+    subprocess.run(['code', temp_filename], check=True)
+
+    input("Press Enter when you have finished editing...")
+
+    with open(temp_filename, 'r') as modified_file:
+        modified_code = modified_file.read()
+
+    os.remove(temp_filename)
+
+    return modified_code
 
 
 def terminal_interface(interpreter, message):
@@ -255,29 +272,33 @@ def terminal_interface(interpreter, message):
 
                         if should_scan_code:
                             scan_code(code, language, interpreter)
-
-                        response = input(
-                            "  Would you like to run this code? (y/n)\n\n  "
-                        )
-                        print("")  # <- Aesthetic choice
-
-                        if response.strip().lower() == "y":
-                            # Create a new, identical block where the code will actually be run
-                            # Conveniently, the chunk includes everything we need to do this:
-                            active_block = CodeBlock()
-                            active_block.margin_top = False  # <- Aesthetic choice
-                            active_block.language = language
-                            active_block.code = code
-                        else:
-                            # User declined to run code.
-                            interpreter.messages.append(
-                                {
-                                    "role": "user",
-                                    "type": "message",
-                                    "content": "I have declined to run this code.",
-                                }
+                        while True:
+                            response = input(
+                                "  Would you like to run this code or edit it? (y/n/e)\n\n  "
                             )
-                            break
+                            print("")  # <- Aesthetic choice
+
+                            if response.strip().lower() == "y":
+                                # Create a new, identical block where the code will actually be run
+                                # Conveniently, the chunk includes everything we need to do this:
+                                active_block = CodeBlock()
+                                active_block.margin_top = False  # <- Aesthetic choice
+                                active_block.language = language
+                                active_block.code = code
+                                break
+                            elif response.strip().lower() == "e":
+                                #Update the code to the new modified one
+                                code = edit_code(code)
+                            else:
+                                # User declined to run code.
+                                interpreter.messages.append(
+                                    {
+                                        "role": "user",
+                                        "type": "message",
+                                        "content": "I have declined to run this code.",
+                                    }
+                                )
+                                break
 
                 # Computer can display visual types to user,
                 # Which sometimes creates more computer output (e.g. HTML errors, eventually)
