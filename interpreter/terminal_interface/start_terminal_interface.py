@@ -299,7 +299,7 @@ def start_terminal_interface(interpreter):
 
         config_directory = os.path.dirname(config_file)
 
-        print(f"Opening config directory...")
+        print("Opening config directory...")
 
         if platform.system() == "Windows":
             os.startfile(config_directory)
@@ -590,7 +590,7 @@ Once the server is running, you can begin your conversation below.
         else:
             if args.vision:
                 display_markdown_message(
-                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
                 time.sleep(1)
                 display_markdown_message("---\n")
@@ -600,12 +600,12 @@ Once the server is running, you can begin your conversation below.
                 time.sleep(2.5)
                 display_markdown_message("---")
                 display_markdown_message(
-                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
             else:
                 time.sleep(1)
                 display_markdown_message(
-                    f"> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
 
     # Check for update
@@ -630,7 +630,7 @@ Once the server is running, you can begin your conversation below.
 
     # Set attributes on interpreter
     for argument_name, argument_value in vars(args).items():
-        if argument_value != None:
+        if argument_value is not None:
             argument_dictionary = [a for a in arguments if a["name"] == argument_name]
             if len(argument_dictionary) > 0:
                 argument_dictionary = argument_dictionary[0]
