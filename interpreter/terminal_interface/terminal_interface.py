@@ -43,12 +43,65 @@ except:
     # If they don't have readline, that's fine
     pass
 
-def edit_code(code):
-    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".py") as temp_file:
+programming_languages = {
+    "python": ".py",
+    "javascript": ".js",
+    "java": ".java",
+    "c": ".c",
+    "c++": ".cpp",
+    "c#": ".cs",
+    "swift": ".swift",
+    "kotlin": ".kt",
+    "ruby": ".rb",
+    "php": ".php",
+    "html": ".html",
+    "css": ".css",
+    "typescript": ".ts",
+    "go": ".go",
+    "rust": ".rs",
+    "perl": ".pl",
+    "shell": ".sh",
+    "objective-c": ".m",
+    "r": ".r",
+    "scala": ".scala",
+    "haskell": ".hs",
+    "lua": ".lua",
+    "dart": ".dart",
+    "groovy": ".groovy",
+    "matlab": ".m",
+    "sql": ".sql",
+    "assembly": ".asm",
+    "fortran": ".f",
+    "vbscript": ".vbs",
+    "powershell": ".ps1",
+    "racket": ".rkt",
+    "clojure": ".clj"
+}
+
+
+
+def open_file_default_editor(code, lang):
+    suffix = programming_languages.get(lang.lower())
+    if suffix is None:
+        print(f"Unsupported language: {lang}")
+        return
+
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=suffix) as temp_file:
         temp_file.write(code)
+        temp_file.seek(0)  # Move the file cursor to the beginning to allow editing
         temp_filename = temp_file.name
 
-    subprocess.run(['code', temp_filename], check=True)
+    try:
+        if platform.system() == 'Windows':
+            os.system(f'start notepad {temp_filename}')
+        elif platform.system() == 'Darwin':
+            subprocess.call(('open', temp_filename))
+        elif platform.system() == 'Linux':
+            subprocess.call(('xdg-open', temp_filename))
+        else:
+            print(f"Unsupported OS: {platform.system()}")
+    except Exception as e:
+        print(f"Error opening file: {e}")
 
     input("Press Enter when you have finished editing...")
 
@@ -288,7 +341,7 @@ def terminal_interface(interpreter, message):
                                 break
                             elif response.strip().lower() == "e":
                                 #Update the code to the new modified one
-                                code = edit_code(code)
+                                code = open_file_default_editor(code, language)
                             else:
                                 # User declined to run code.
                                 interpreter.messages.append(
@@ -299,6 +352,7 @@ def terminal_interface(interpreter, message):
                                     }
                                 )
                                 break
+                        break
 
                 # Computer can display visual types to user,
                 # Which sometimes creates more computer output (e.g. HTML errors, eventually)
