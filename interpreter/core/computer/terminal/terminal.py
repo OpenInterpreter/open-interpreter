@@ -37,7 +37,7 @@ class Terminal:
         # If stream == False, *pull* from the stream.
         if stream == False:
             output_messages = []
-            for chunk in self._streaming_chat(language, code, stream=True):
+            for chunk in self.run(language, code, stream=True):
                 if chunk.get("format") != "active_line":
                     # Should we append this to the last message, or make a new one?
                     if (

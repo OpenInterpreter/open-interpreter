@@ -83,7 +83,7 @@
 - [x] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
 - [x] Switch core code interpreter to be Jupyter-powered
 - [x] Make sure breaking from generator during execution stops the execution
-- [x] (thanks ty!) Add more hosted model instructions from from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
+- [x] (thanks ty!) Add more hosted model instructions from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
   - [x] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.openinterpreter.com/language-model-setup/hosted-models/openai)
   - [x] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
   - [x] Swap out the information with information from LiteLLM

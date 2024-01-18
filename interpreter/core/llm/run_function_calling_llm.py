@@ -57,6 +57,7 @@ def run_function_calling_llm(llm, request_params):
         if (
             accumulated_deltas.get("function_call")
             and "arguments" in accumulated_deltas["function_call"]
+            and accumulated_deltas["function_call"]["arguments"]
         ):
             if (
                 "name" in accumulated_deltas["function_call"]
