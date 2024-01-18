@@ -43,77 +43,9 @@ except:
     # If they don't have readline, that's fine
     pass
 
-programming_languages = {
-    "python": ".py",
-    "javascript": ".js",
-    "java": ".java",
-    "c": ".c",
-    "c++": ".cpp",
-    "c#": ".cs",
-    "swift": ".swift",
-    "kotlin": ".kt",
-    "ruby": ".rb",
-    "php": ".php",
-    "html": ".html",
-    "css": ".css",
-    "typescript": ".ts",
-    "go": ".go",
-    "rust": ".rs",
-    "perl": ".pl",
-    "shell": ".sh",
-    "objective-c": ".m",
-    "r": ".r",
-    "scala": ".scala",
-    "haskell": ".hs",
-    "lua": ".lua",
-    "dart": ".dart",
-    "groovy": ".groovy",
-    "matlab": ".m",
-    "sql": ".sql",
-    "assembly": ".asm",
-    "fortran": ".f",
-    "vbscript": ".vbs",
-    "powershell": ".ps1",
-    "racket": ".rkt",
-    "clojure": ".clj"
-}
-
-
-
-def open_file_default_editor(code, lang):
-    suffix = programming_languages.get(lang.lower())
-    if suffix is None:
-        print(f"Unsupported language: {lang}")
-        return
-
-    with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=suffix) as temp_file:
-        temp_file.write(code)
-        temp_file.seek(0)  # Move the file cursor to the beginning to allow editing
-        temp_filename = temp_file.name
-
-    try:
-        if platform.system() == 'Windows':
-            os.system(f'start notepad {temp_filename}')
-        elif platform.system() == 'Darwin':
-            subprocess.call(('open', temp_filename))
-        elif platform.system() == 'Linux':
-            subprocess.call(('xdg-open', temp_filename))
-        else:
-            print(f"Unsupported OS: {platform.system()}")
-    except Exception as e:
-        print(f"Error opening file: {e}")
-
-    input("Press Enter when you have finished editing...")
-
-    with open(temp_filename, 'r') as modified_file:
-        modified_code = modified_file.read()
-
-    os.remove(temp_filename)
-
-    return modified_code
-
 
 def terminal_interface(interpreter, message):
+    global language
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -327,7 +259,7 @@ def terminal_interface(interpreter, message):
                             scan_code(code, language, interpreter)
                         while True:
                             response = input(
-                                "  Would you like to run this code or edit it? (y/n/e)\n\n  "
+                                "  Would you like to run this code? (y/n)\n\n  "
                             )
                             print("")  # <- Aesthetic choice
 
@@ -339,9 +271,6 @@ def terminal_interface(interpreter, message):
                                 active_block.language = language
                                 active_block.code = code
                                 break
-                            elif response.strip().lower() == "e":
-                                #Update the code to the new modified one
-                                code = open_file_default_editor(code, language)
                             else:
                                 # User declined to run code.
                                 interpreter.messages.append(

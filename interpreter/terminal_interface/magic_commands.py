@@ -2,10 +2,47 @@ import json
 import os
 import subprocess
 import time
+import platform
+import tempfile
 
 from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
 from .utils.display_markdown_message import display_markdown_message
+
+programming_languages = {
+    "python": ".py",
+    "javascript": ".js",
+    "java": ".java",
+    "c": ".c",
+    "c++": ".cpp",
+    "c#": ".cs",
+    "swift": ".swift",
+    "kotlin": ".kt",
+    "ruby": ".rb",
+    "php": ".php",
+    "html": ".html",
+    "css": ".css",
+    "typescript": ".ts",
+    "go": ".go",
+    "rust": ".rs",
+    "perl": ".pl",
+    "shell": ".sh",
+    "objective-c": ".m",
+    "r": ".r",
+    "scala": ".scala",
+    "haskell": ".hs",
+    "lua": ".lua",
+    "dart": ".dart",
+    "groovy": ".groovy",
+    "matlab": ".m",
+    "sql": ".sql",
+    "assembly": ".asm",
+    "fortran": ".f",
+    "vbscript": ".vbs",
+    "powershell": ".ps1",
+    "racket": ".rkt",
+    "clojure": ".clj"
+}
 
 
 def handle_undo(self, arguments):
@@ -55,6 +92,7 @@ def handle_help(self, arguments):
         "%tokens [prompt]": "EXPERIMENTAL: Calculate the tokens used by the next request based on the current conversation's messages and estimate the cost of that request; optionally provide a prompt to also calulate the tokens used by that prompt and the total amount of tokens that will be sent with the next request",
         "%help": "Show this help message.",
         "%info": "Show system and interpreter information",
+        "%edit": "Edit the last code"
     }
 
     base_message = ["> **Available Commands:**\n\n"]
@@ -172,6 +210,40 @@ def handle_count_tokens(self, prompt):
 
     display_markdown_message("\n".join(outputs))
 
+def handle_edit(self, arguments):
+    lang = 'python'
+    code = ''
+    for i in self.messages[::-1]:
+        if i["type"] == 'code':
+            lang = i['format']
+            code = i['content']
+
+    with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix=programming_languages[lang.lower()]) as temp_file:
+        temp_file.write(code)
+        temp_file.seek(0)  
+        temp_filename = temp_file.name
+
+    try:
+        if platform.system() == 'Windows':
+            os.system(f'start notepad {temp_filename}')
+        elif platform.system() == 'Darwin':
+            subprocess.call(('open', temp_filename))
+        elif platform.system() == 'Linux':
+            subprocess.call(('xdg-open', temp_filename))
+        else:
+            print(f"Unsupported OS: {platform.system()}")
+    except Exception as e:
+        print(f"Error opening file: {e}")
+
+    input("Press Enter when you have finished editing...")
+
+    with open(temp_filename, 'r') as modified_file:
+        modified_code = modified_file.read()
+
+    os.remove(temp_filename)
+
+    self.messages.append({'role': 'assistant', 'type': 'code', 'format': lang, 'content': modified_code})
+
 
 def handle_magic_command(self, user_input):
     # Handle shell
@@ -191,6 +263,7 @@ def handle_magic_command(self, user_input):
         "undo": handle_undo,
         "tokens": handle_count_tokens,
         "info": handle_info,
+        "edit": handle_edit
     }
 
     user_input = user_input[1:].strip()  # Capture the part after the `%`
