@@ -1,7 +1,6 @@
 import argparse
 import os
 import platform
-import re
 import subprocess
 import sys
 import time
@@ -84,6 +83,7 @@ def start_terminal_interface(interpreter):
             "nickname": "lsf",
             "help_text": "inform OI that your model supports OpenAI-style functions, and can make function calls",
             "type": bool,
+            "action": argparse.BooleanOptionalAction,
             "attribute": {"object": interpreter.llm, "attr_name": "supports_functions"},
         },
         {
@@ -143,11 +143,26 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "force_task_completion"},
         },
         {
+            "name": "disable_telemetry",
+            "nickname": "dt",
+            "help_text": "disables sending of basic anonymous usage stats",
+            "type": bool,
+            "default": True,
+            "action": "store_false",
+            "attribute": {"object": interpreter, "attr_name": "anonymous_telemetry"},
+        },
+        {
+            "name": "offline",
+            "nickname": "o",
+            "help_text": "turns off all online features (except the language model, if it's hosted)",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "offline"},
+        },
+        {
             "name": "speak_messages",
             "nickname": "sm",
             "help_text": "(Mac only) use the applescript `say` command to read messages aloud",
             "type": bool,
-            "action": "store_true",
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
         },
         {
@@ -170,24 +185,24 @@ def start_terminal_interface(interpreter):
         {
             "name": "fast",
             "nickname": "f",
-            "help_text": "run `interpreter --model gpt-3.5-turbo`",
+            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
             "type": bool,
         },
         {
             "name": "local",
             "nickname": "l",
-            "help_text": "experimentally run the LLM locally via LM Studio (this just sets api_base, model, system_message, and offline = True)",
+            "help_text": "experimentally run the LLM locally via LM Studio (this changes many more settings than `--offline`)",
             "type": bool,
         },
         {
             "name": "vision",
             "nickname": "vi",
-            "help_text": "experimentally use vision for supported languages (HTML, Python)",
+            "help_text": "experimentally use vision for supported languages",
             "type": bool,
         },
         {
             "name": "os",
-            "nickname": "o",
+            "nickname": "os",
             "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
             "type": bool,
         },
@@ -216,9 +231,12 @@ def start_terminal_interface(interpreter):
 
     # Check for deprecated flags before parsing arguments
     if "--debug_mode" in sys.argv or "-d" in sys.argv:
-        print("\n`--debug_mode` has been renamed to `--verbose`.\n")
+        print("\n`--debug_mode` / `-d` has been renamed to `--verbose` / `-v`.\n")
         time.sleep(1.5)
-        sys.argv.remove("--debug_mode")
+        if "--debug_mode" in sys.argv:
+            sys.argv.remove("--debug_mode")
+        if "-d" in sys.argv:
+            sys.argv.remove("-d")
         sys.argv.append("--verbose")
 
     parser = argparse.ArgumentParser(description="Open Interpreter")
@@ -227,6 +245,7 @@ def start_terminal_interface(interpreter):
     for arg in arguments:
         action = arg.get("action", "store_true")
         nickname = arg.get("nickname")
+        default = arg.get("default")
 
         if arg["type"] == bool:
             if nickname:
@@ -236,7 +255,7 @@ def start_terminal_interface(interpreter):
                     dest=arg["name"],
                     help=arg["help_text"],
                     action=action,
-                    default=None,
+                    default=default,
                 )
             else:
                 parser.add_argument(
@@ -244,11 +263,10 @@ def start_terminal_interface(interpreter):
                     dest=arg["name"],
                     help=arg["help_text"],
                     action=action,
-                    default=None,
+                    default=default,
                 )
         else:
             choices = arg.get("choices")
-            default = arg.get("default")
 
             if nickname:
                 parser.add_argument(
@@ -280,17 +298,16 @@ def start_terminal_interface(interpreter):
         else:
             config_file = get_config_path()
 
-        print(f"Opening `{config_file}`...")
+        config_directory = os.path.dirname(config_file)
 
-        # Use the default system editor to open the file
+        print("Opening config directory...")
+
         if platform.system() == "Windows":
-            os.startfile(
-                config_file
-            )  # This will open the file with the default application, e.g., Notepad
+            os.startfile(config_directory)
         else:
             try:
                 # Try using xdg-open on non-Windows platforms
-                subprocess.call(["xdg-open", config_file])
+                subprocess.call(["xdg-open", config_directory])
             except FileNotFoundError:
                 # Fallback to using 'open' on macOS if 'xdg-open' is not available
                 subprocess.call(["open", config_file])
@@ -323,13 +340,9 @@ def start_terminal_interface(interpreter):
         return
 
     if args.fast:
-        if args.local or args.vision or args.os:
-            print(
-                "Fast mode (`gpt-3.5`) is not supported with --vision, --os, or --local (`gpt-3.5` is not a vision or a local model)."
-            )
-            time.sleep(1.5)
-        else:
-            interpreter.llm.model = "gpt-3.5-turbo"
+        if not (args.local or args.vision or args.os):
+            args.model = "gpt-3.5-turbo"
+        interpreter.system_message += "\n\nThe user has set you to FAST mode. **No talk, just code.** Be as brief as possible. No comments, no unnecessary messages. Assume as much as possible, rarely ask the user for clarification. Once the task has been completed, say 'The task is done.'"
 
     if args.vision:
         interpreter.llm.supports_vision = True
@@ -352,7 +365,7 @@ def start_terminal_interface(interpreter):
     if args.os:
         interpreter.os = True
         interpreter.llm.supports_vision = True
-        interpreter.shrink_images = True
+        # interpreter.shrink_images = True # Faster but less accurate
 
         if not args.model:
             args.model = "gpt-4-vision-preview"
@@ -387,9 +400,10 @@ computer.display.view() # Shows you what's on the screen, returns a `pil_image` 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
 
-computer.mouse.click("text onscreen") # This moves the mouse to the UI element with that text. Use this **frequently** and get creative! To mouse over a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this. To click something that has wrapped onto multiple lines, just use the beginning of the text (this doesn't work for multi-line text)
+computer.mouse.click("text onscreen") # This clicks on the UI element with that text. Use this **frequently** and get creative! To click a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
+computer.mouse.move("open recent >") # This moves the mouse over the UI element with that text. Many dropdowns will disappear if you click them. You have to hover over items to reveal more.
 computer.mouse.click(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
-computer.mouse.click(icon="magnifying glass") # Moves mouse to the icon with that description. Use this often
+computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often
 
 computer.mouse.scroll(-10) # Scrolls down. If you don't find some text on screen that you expected to be there, you probably want to do this
 x, y = computer.display.center() # Get your bearings
@@ -418,7 +432,7 @@ Try multiple methods before saying the task is impossible. **You can do it!**
 
 # Critical Routine Procedure for Multi-Step Tasks
 
-Include `computer.screenshot()` after a 2 second delay at the end of _every_ code block to verify your progress, then answer these questions in extreme detail:
+Include `computer.display.view()` after a 2 second delay at the end of _every_ code block to verify your progress, then answer these questions in extreme detail:
 
 1. Generally, what is happening on-screen?
 2. What is the active app?
@@ -429,8 +443,19 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
         
         """.strip()
 
+        if args.offline:
+            # Icon finding does not work offline
+            interpreter.system_message = interpreter.system_message.replace(
+                'computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often\n',
+                "",
+            )
+
         # Check if required packages are installed
-        packages = ["cv2", "plyer", "pyautogui", "pyperclip"]
+
+        # THERE IS AN INCONSISTENCY HERE.
+        # We should be testing if they import WITHIN OI's computer, not here.
+
+        packages = ["cv2", "plyer", "pyautogui", "pyperclip", "pywinctl"]
         missing_packages = []
         for package in packages:
             try:
@@ -440,29 +465,26 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
 
         if missing_packages:
             display_markdown_message(
-                f"> **Missing Package(s): {', '.join(missing_packages)}**\n\n{', '.join(['`' + p + '`' for p in missing_packages])} are required for OS Control.\n\nInstall them?\n"
+                f"> **Missing Package(s): {', '.join(['`' + p + '`' for p in missing_packages])}**\n\nThese packages are required for OS Control.\n\nInstall them?\n"
             )
             user_input = input("(y/n) > ")
             if user_input.lower() != "y":
-                print("Exiting...")
-                return
+                print("\nPlease try to install them manually.\n\n")
+                time.sleep(2)
+                print("Attempting to start OS control anyway...\n\n")
 
-            # ON PIP RELEASE THIS SHOULD BE CHANGED! To run pip install open-interpreter[os]
-            # so we have more control over the versioning
+            for pip_name in ["pip", "pip3"]:
+                command = f"{pip_name} install 'open-interpreter[os]'"
 
-            for package in missing_packages:
-                for pip_name in ["pip", "pip3"]:
-                    if package == "cv2":
-                        command = f"{pip_name} install --upgrade opencv-python"
-                    else:
-                        command = f"{pip_name} install --upgrade {package}"
-                    for chunk in interpreter.computer.run("shell", command):
-                        if chunk.get("format") != "active_line":
-                            print(chunk.get("content"))
+                interpreter.computer.run("shell", command, display=True)
+
+                got_em = True
+                for package in missing_packages:
                     try:
                         __import__(package)
                     except ImportError:
-                        continue
+                        got_em = False
+                if got_em:
                     break
 
             missing_packages = []
@@ -474,10 +496,12 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
 
             if missing_packages != []:
                 print(
-                    "Error: The following packages could not be installed: ",
+                    "\n\nWarning: The following packages could not be installed:",
                     ", ".join(missing_packages),
                 )
-                print("Please try to install them manually.")
+                print("\nPlease try to install them manually.\n\n")
+                time.sleep(2)
+                print("Attempting to start OS control anyway...\n\n")
 
         display_markdown_message("> `OS Control` enabled")
 
@@ -497,6 +521,11 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
         # print(">\n\n")
         # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
 
+        if not args.offline and not args.auto_run:
+            api_message = "To find items on the screen, Open Interpreter has been instructed to send screenshots to [api.openinterpreter.com](https://api.openinterpreter.com/) (we do not store them). Add `--offline` to attempt this locally."
+            display_markdown_message(api_message)
+            print("")
+
         if not args.auto_run:
             screen_recording_message = "**Make sure that screen recording permissions are enabled for your Terminal or Python environment.**"
             display_markdown_message(screen_recording_message)
@@ -512,18 +541,17 @@ Include `computer.screenshot()` after a 2 second delay at the end of _every_ cod
         #         print(chunk.get("content"))
 
         # Give it access to the computer via Python
-        for _ in interpreter.computer.run(
-            "python",
-            "import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
-        ):
-            if args.verbose:
-                print(_.get("content"))
-            pass
-
-        display_markdown_message(
-            "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+        interpreter.computer.run(
+            language="python",
+            code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
+            display=args.verbose,
         )
-        print("")  # < - Aesthetic choice
+
+        if not args.auto_run:
+            display_markdown_message(
+                "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+            )
+            print("")  # < - Aesthetic choice
 
     if args.local:
         # Default local (LM studio) attributes
@@ -562,7 +590,7 @@ Once the server is running, you can begin your conversation below.
         else:
             if args.vision:
                 display_markdown_message(
-                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
                 time.sleep(1)
                 display_markdown_message("---\n")
@@ -572,12 +600,12 @@ Once the server is running, you can begin your conversation below.
                 time.sleep(2.5)
                 display_markdown_message("---")
                 display_markdown_message(
-                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
             else:
                 time.sleep(1)
                 display_markdown_message(
-                    f"> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
 
     # Check for update
@@ -601,18 +629,18 @@ Once the server is running, you can begin your conversation below.
         interpreter = apply_config(interpreter)
 
     # Set attributes on interpreter
-    for attr_name, attr_value in vars(args).items():
-        if attr_value != None:
-            argument_dictionary = [a for a in arguments if a["name"] == attr_name]
+    for argument_name, argument_value in vars(args).items():
+        if argument_value is not None:
+            argument_dictionary = [a for a in arguments if a["name"] == argument_name]
             if len(argument_dictionary) > 0:
                 argument_dictionary = argument_dictionary[0]
                 if "attribute" in argument_dictionary:
                     attr_dict = argument_dictionary["attribute"]
-                    setattr(attr_dict["object"], attr_dict["attr_name"], attr_value)
+                    setattr(attr_dict["object"], attr_dict["attr_name"], argument_value)
 
                     if args.verbose:
                         print(
-                            f"Setting attribute {attr_name} on {attr_dict['object'].__class__.__name__.lower()} to '{attr_value}'..."
+                            f"Setting attribute {attr_dict['attr_name']} on {attr_dict['object'].__class__.__name__.lower()} to '{argument_value}'..."
                         )
 
     if interpreter.llm.model == "gpt-4-1106-preview":
@@ -634,9 +662,11 @@ Once the server is running, you can begin your conversation below.
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
     if interpreter.llm.api_base:
-        if not interpreter.llm.model.lower().startswith(
-            "openai/"
-        ) and not interpreter.llm.model.lower().startswith("azure/"):
+        if (
+            not interpreter.llm.model.lower().startswith("openai/")
+            and not interpreter.llm.model.lower().startswith("azure/")
+            and not interpreter.llm.model.lower().startswith("ollama")
+        ):
             interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator
@@ -645,5 +675,7 @@ Once the server is running, you can begin your conversation below.
         return
 
     validate_llm_settings(interpreter)
+
+    interpreter.in_terminal_interface = True
 
     interpreter.chat()

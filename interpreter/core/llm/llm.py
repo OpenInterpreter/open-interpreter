@@ -1,9 +1,14 @@
 import litellm
 import tokentrim as tt
 
+from ...terminal_interface.utils.display_markdown_message import (
+    display_markdown_message,
+)
 from .run_function_calling_llm import run_function_calling_llm
 from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
+
+litellm.suppress_debug_info = True
 
 
 class Llm:
@@ -123,13 +128,28 @@ class Llm:
                     )
                 except:
                     if len(messages) == 1:
-                        print(
+                        if self.interpreter.in_terminal_interface:
+                            display_markdown_message(
+                                """
+**We were unable to determine the context window of this model.** Defaulting to 3000.
+
+If your model can handle more, run `interpreter --context_window {token limit} --max_tokens {max tokens per response}`.
+
+Continuing...
                             """
-                        **We were unable to determine the context window of this model.** Defaulting to 3000.
-                        If your model can handle more, run `interpreter --context_window {token limit}` or `interpreter.llm.context_window = {token limit}`.
-                        Also, please set max_tokens: `interpreter --max_tokens {max tokens per response}` or `interpreter.llm.max_tokens = {max tokens per response}`
-                        """
-                        )
+                            )
+                        else:
+                            display_markdown_message(
+                                """
+**We were unable to determine the context window of this model.** Defaulting to 3000.
+
+If your model can handle more, run `interpreter.llm.context_window = {token limit}`.
+
+Also please set `interpreter.llm.max_tokens = {max tokens per response}`.
+
+Continuing...
+                            """
+                            )
                     messages = tt.trim(
                         messages, system_message=system_message, max_tokens=3000
                     )

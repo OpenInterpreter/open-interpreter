@@ -1,16 +1,18 @@
 import base64
-import os
-import subprocess
-import tempfile
+import pprint
 import time
+import warnings
 from io import BytesIO
 
 import matplotlib.pyplot as plt
 import requests
-from PIL import Image
+
+from ..utils.recipient_utils import format_to_recipient
+
+# Still experimenting with this
+# from utils.get_active_window import get_active_window
 
 try:
-    import cv2
     import numpy as np
     import pyautogui
 except:
@@ -44,15 +46,35 @@ class Display:
         """
         return self.screenshot(show, quadrant)
 
-    def screenshot(self, show=True, quadrant=None):
+    # def get_active_window(self):
+    #     return get_active_window()
+
+    def screenshot(self, show=True, quadrant=None, active_app_only=False):
         time.sleep(2)
         if not self.computer.emit_images:
-            return self.get_text()
-
-        temp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+            text = self.get_text_as_list_of_lists()
+            pp = pprint.PrettyPrinter(indent=4)
+            pretty_text = pp.pformat(text)  # language models like it pretty!
+            pretty_text = format_to_recipient(pretty_text, "assistant")
+            print(pretty_text)
+            print(
+                format_to_recipient(
+                    "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
+                    "assistant",
+                )
+            )
+            return
 
         if quadrant == None:
-            screenshot = pyautogui.screenshot()
+            # Implement active_app_only!
+            if active_app_only:
+                region = self.get_active_window()["region"]
+                screenshot = pyautogui.screenshot(region=region)
+            else:
+                screenshot = pyautogui.screenshot()
+                # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
+                # print(message)
+
         else:
             screen_width, screen_height = pyautogui.size()
 
@@ -74,26 +96,20 @@ class Display:
             else:
                 raise ValueError("Invalid quadrant. Choose between 1 and 4.")
 
-        screenshot.save(temp_file.name)
-
         # Open the image file with PIL
-        img = Image.open(temp_file.name)
-
-        # Delete the temporary file
-        try:
-            os.remove(temp_file.name)
-        except Exception as e:
-            # On windows, this can fail due to permissions stuff??
-            # (PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\killi\\AppData\\Local\\Temp\\tmpgc2wscpi.png')
-            if self.computer.verbose:
-                print(str(e))
+        # IPython interactive mode auto-displays plots, causing RGBA handling issues, possibly MacOS-specific.
+        screenshot = screenshot.convert("RGB")
 
         if show:
             # Show the image using matplotlib
-            plt.imshow(np.array(img))
-            plt.show()
+            plt.imshow(np.array(screenshot))
 
-        return img
+            with warnings.catch_warnings():
+                # It displays an annoying message about Agg not being able to display something or WHATEVER
+                warnings.simplefilter("ignore")
+                plt.show()
+
+        return screenshot
 
     def find_text(self, text, screenshot=None):
         # Take a screenshot
@@ -108,7 +124,7 @@ class Display:
 
             try:
                 response = requests.post(
-                    f'{self.api_base.strip("/")}/computer/display/text/',
+                    f'{self.api_base.strip("/")}/v0/point/text/',
                     json={"query": text, "base64": screenshot_base64},
                 )
                 response = response.json()
@@ -121,9 +137,11 @@ class Display:
         # Find the text in the screenshot
         centers = find_text_in_image(screenshot, text)
 
-        return centers
+        return [
+            {"coordinates": centers, "text": "", "similarity": 1}
+        ]  # Have it deliver the text properly soon.
 
-    def get_text(self, screenshot=None):
+    def get_text_as_list_of_lists(self, screenshot=None):
         # Take a screenshot
         if screenshot == None:
             screenshot = self.screenshot(show=False)
@@ -136,7 +154,7 @@ class Display:
 
             try:
                 response = requests.post(
-                    f'{self.api_base.strip("/")}/computer/display/text/all/',
+                    f'{self.api_base.strip("/")}/v0/text/',
                     json={"base64": screenshot_base64},
                 )
                 response = response.json()
@@ -146,11 +164,17 @@ class Display:
 
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
-        return pytesseract_get_text(screenshot)
+        if self.computer.offline == True:
+            try:
+                return pytesseract_get_text(screenshot)
+            except:
+                raise Exception(
+                    "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
+                )
 
     # locate text should be moved here as well!
     def find_icon(self, query):
-        message = self.computer.terminal.format_to_recipient(
+        message = format_to_recipient(
             "Locating this icon will take ~30 seconds. We're working on speeding this up.",
             recipient="user",
         )
@@ -166,7 +190,7 @@ class Display:
 
         try:
             response = requests.post(
-                f'{self.api_base.strip("/")}/computer/display/icon/',
+                f'{self.api_base.strip("/")}/v0/point/',
                 json={"query": query, "base64": screenshot_base64},
             )
             return response.json()

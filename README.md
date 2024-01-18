@@ -9,8 +9,7 @@
     <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
-    <b>Let language models run code on your computer.</b><br>
-    An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
+    <strong>Let language models run code.</strong><br>
     <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
@@ -19,14 +18,16 @@
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
-
-**Important:** ● `v0.1.18` includes breaking changes. Please read our [migration guide](https://github.com/KillianLucas/open-interpreter/blob/main/docs/NCU_MIGRATION_GUIDE.md) if you use Open Interpreter in Python.
-
+<p align="center">
+<strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
+</p>
 <br>
 
 ```shell
 pip install open-interpreter
 ```
+
+> Not working? Read our [setup guide](https://docs.openinterpreter.com/getting-started/setup).
 
 ```shell
 interpreter
@@ -55,7 +56,7 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
-#### Along with an example implementation of a voice interface (inspired by _Her_):
+#### Along with an example voice interface, inspired by _Her_:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
 
@@ -152,7 +153,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### Save and Restore Chats
@@ -161,7 +162,7 @@ interpreter.reset()
 
 ```python
 messages = interpreter.chat("My name is Killian.") # Save messages to 'messages'
-interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
+interpreter.messages = [] # Reset interpreter ("Killian" will be forgotten)
 
 interpreter.messages = messages # Resume chat from 'messages' ("Killian" will be remembered)
 ```
@@ -249,7 +250,7 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 ### Verbose mode
 
-To help contributors inspect Open Interpreter, `--verbose` mode is highly verbose.
+To help you inspect Open Interpreter we have a `--verbose` mode for debugging.
 
 You can activate verbose mode by using it's flag (`interpreter --verbose`), or mid-chat:
 
@@ -349,6 +350,10 @@ pip install fastapi uvicorn
 uvicorn server:app --reload
 ```
 
+## Android
+
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
+
 ## Safety Notice
 
 Since generated code is executed in your local environment, it can interact with your files and system settings, potentially leading to unexpected outcomes like data loss or security risks.
@@ -380,6 +385,8 @@ Please see our [contributing guidelines](docs/CONTRIBUTING.md) for more details 
 Visit [our roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) to preview the future of Open Interpreter.
 
 **Note**: This software is not affiliated with OpenAI.
+
+![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
 
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >

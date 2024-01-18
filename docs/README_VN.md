@@ -148,7 +148,7 @@ interpreter.chat("Nhìn đẹp đấy nhưng bạn có thể làm cho phụ đ�
 Trong Python, Open Interpreter ghi nhớ lịch sử hội thoại, nếu muốn bắt đầu lại từ đầu, bạn có thể cài thứ:
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### Lưu và khôi phục cuộc trò chuyện
@@ -157,7 +157,7 @@ interpreter.reset()
 
 ```python
 messages = interpreter.chat("Tên của tôi là Killian.") # Lưu tin nhắn tới 'messages'
-interpreter.reset() # Khởi động lại trình phiên dịch ("Killian" sẽ bị lãng quên)
+interpreter.messages = [] # Khởi động lại trình phiên dịch ("Killian" sẽ bị lãng quên)
 
 interpreter.messages = messages # Tiếp tục cuộc trò chuyện từ 'messages' ("Killian" sẽ được ghi nhớ)
 ```

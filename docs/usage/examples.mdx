@@ -70,7 +70,7 @@ interpreter
 In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ---
@@ -92,7 +92,7 @@ In Python, `interpreter.chat()` returns a List of messages, which can be used to
 messages = interpreter.chat("My name is Killian.")
 
 # Reset interpreter ("Killian" will be forgotten)
-interpreter.reset()
+interpreter.messages = []
 
 # Resume chat from 'messages' ("Killian" will be remembered)
 interpreter.messages = messages

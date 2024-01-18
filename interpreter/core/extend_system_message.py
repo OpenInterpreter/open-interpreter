@@ -49,4 +49,38 @@ def extend_system_message(interpreter):
     if interpreter.custom_instructions:
         system_message += "\n\n" + interpreter.custom_instructions
 
+    if interpreter.os:
+        try:
+            import pywinctl
+
+            active_window = pywinctl.getActiveWindow()
+
+            if active_window:
+                app_info = ""
+
+                if "_appName" in active_window.__dict__:
+                    app_info += (
+                        "Active Application: " + active_window.__dict__["_appName"]
+                    )
+
+                if hasattr(active_window, "title"):
+                    app_info += "\n" + "Active Window Title: " + active_window.title
+                elif "_winTitle" in active_window.__dict__:
+                    app_info += (
+                        "\n"
+                        + "Active Window Title:"
+                        + active_window.__dict__["_winTitle"]
+                    )
+
+                if app_info != "":
+                    system_message += (
+                        "\n\n# Important Information:\n"
+                        + app_info
+                        + "\n(If you need to be in another active application to help the user, you need to switch to it.)"
+                    )
+
+        except:
+            # Non blocking
+            pass
+
     return system_message.strip()

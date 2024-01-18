@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.1.18"
+version = "0.2.0"
 description = "Let language models run code."
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -19,7 +19,6 @@ litellm = "^1.15.10"
 pyyaml = "^6.0.1"
 rich = "^13.4.2"
 six = "^1.16.0"
-tiktoken = "^0.4.0"
 tokentrim = "^0.1.13"
 wget = "^3.2"
 psutil = "^5.9.6"
@@ -28,18 +27,22 @@ html2image = "^2.0.4.3"
 ipykernel = "^6.26.0"
 jupyter-client = "^8.6.0"
 matplotlib = "^3.8.2"
+toml = "^0.10.2"
+posthog = "^3.1.0"
+tiktoken = "^0.5.2"
 
 #Optional dependencies
 opencv-python = { version = "^4.8.1.78", optional = true }
 pyautogui = { version = "^0.9.54", optional = true }
 plyer = { version = "^2.1.0", optional = true }
-
+pywinctl = { version = "^0.3", optional = true }
 semgrep = { version = "^1.52.0", optional = true }
 yaspin = { version = "^3.0.1", optional = true }
-toml = "^0.10.2"
+pytesseract = { version = "^0.3.10", optional = true }
+prompt-toolkit = "^3.0.43"
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
 safe = ["semgrep", "yaspin"]
 
 [tool.poetry.group.dev.dependencies]

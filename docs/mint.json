@@ -20,7 +20,7 @@
   },
   "topbarLinks": [
     {
-      "name": "33K ★ GitHub",
+      "name": "35K ★ GitHub",
       "url": "https://github.com/KillianLucas/open-interpreter"
     }
   ],
@@ -31,9 +31,15 @@
   "navigation": [
     {
       "group": "Getting Started",
+      "pages": ["getting-started/introduction", "getting-started/setup"]
+    },
+    {
+      "group": "Components",
       "pages": [
-        "introduction",
-        "setup"
+        "components/introduction",
+        "components/core",
+        "components/language-model",
+        "components/computer"
       ]
     },
     {
@@ -65,9 +71,7 @@
         },
         {
           "group": "Desktop",
-          "pages": [
-            "usage/desktop/install"
-          ]
+          "pages": ["usage/desktop/install"]
         }
       ]
     },
@@ -80,24 +84,66 @@
           "pages": [
             "language-model-setup/hosted-models/openai",
             "language-model-setup/hosted-models/azure",
-            "language-model-setup/hosted-models/anthropic",
+            "language-model-setup/hosted-models/vertex-ai",
             "language-model-setup/hosted-models/replicate",
-            "language-model-setup/hosted-models/ai21",
-            "language-model-setup/hosted-models/openrouter",
+            "language-model-setup/hosted-models/togetherai",
+            "language-model-setup/hosted-models/mistral-api",
+            "language-model-setup/hosted-models/anthropic",
+            "language-model-setup/hosted-models/anyscale",
+            "language-model-setup/hosted-models/aws-sagemaker",
+            "language-model-setup/hosted-models/baseten",
+            "language-model-setup/hosted-models/cloudflare",
             "language-model-setup/hosted-models/cohere",
-            "language-model-setup/hosted-models/petals"
+            "language-model-setup/hosted-models/ai21",
+            "language-model-setup/hosted-models/deepinfra",
+            "language-model-setup/hosted-models/huggingface",
+            "language-model-setup/hosted-models/nlp-cloud",
+            "language-model-setup/hosted-models/openrouter",
+            "language-model-setup/hosted-models/palm",
+            "language-model-setup/hosted-models/perplexity",
+            "language-model-setup/hosted-models/petals",
+            "language-model-setup/hosted-models/vllm"
           ]
         },
         {
           "group": "Local Setup",
           "pages": [
-            "language-model-setup/local-models/overview",
-            "language-model-setup/local-models/getting-models",
-            "language-model-setup/local-models/install-on-mac",
-            "language-model-setup/local-models/install-on-windows"
+            "language-model-setup/local-models/lm-studio",
+            "language-model-setup/local-models/llamafile",
+            "language-model-setup/local-models/janai",
+            "language-model-setup/local-models/ollama",
+            "language-model-setup/local-models/custom-endpoint",
+            "language-model-setup/local-models/best-practices"
           ]
-        }
+        },
+        "language-model-setup/custom-models"
       ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/e2b",
+        "integrations/docker"
+      ]
+    },
+    {
+      "group": "Safety",
+      "pages": [
+        "safety/introduction",
+        "safety/isolation",
+        "safety/safe-mode",
+        "safety/best-practices"
+      ]
+    },
+    {
+      "group": "Protocols",
+      "pages": [
+        "protocols/lmc-messages"
+      ]
+    },
+    {
+      "group": "Telemetry",
+      "pages": ["telemetry/telemetry"]
     }
   ],
   "feedback": {

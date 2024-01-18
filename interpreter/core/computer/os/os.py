@@ -18,42 +18,60 @@ class Os:
         return selected_text
 
     def notify(self, text):
-        title = "Open Interpreter"
+        try:
+            title = "Open Interpreter"
 
-        if len(text) > 200:
-            text = text[:200] + "..."
+            if len(text) > 200:
+                text = text[:200] + "..."
 
-        if "darwin" in platform.system().lower():  # Check if the OS is macOS
-            text = text.replace('"', "'").replace("\n", " ")
+            if "darwin" in platform.system().lower():  # Check if the OS is macOS
+                text = text.replace('"', "'").replace("\n", " ")
+                text = (
+                    text.replace('"', "")
+                    .replace("'", "")
+                    .replace("“", "")
+                    .replace("”", "")
+                    .replace("<", "")
+                    .replace(">", "")
+                    .replace("&", "")
+                )
 
-            ## Run directly
-            script = f'display notification "{text}" with title "{title}"'
-            subprocess.run(["osascript", "-e", script])
+                # Further sanitize the text to avoid errors
+                text = text.encode("unicode_escape").decode("utf-8")
 
-            # ## DISABLED OI-notifier.app
-            # (This does not work. It makes `pip uninstall`` break for some reason!)
+                ## Run directly
+                script = f'display notification "{text}" with title "{title}"'
+                subprocess.run(["osascript", "-e", script])
 
-            # ## Use OI-notifier.app, which lets us use a custom icon
+                # ## DISABLED OI-notifier.app
+                # (This does not work. It makes `pip uninstall`` break for some reason!)
 
-            # # Get the path of the current script
-            # script_path = os.path.dirname(os.path.realpath(__file__))
+                # ## Use OI-notifier.app, which lets us use a custom icon
 
-            # # Write the notification text into notification_text.txt
-            # with open(os.path.join(script_path, "notification_text.txt"), "w") as file:
-            #     file.write(text)
+                # # Get the path of the current script
+                # script_path = os.path.dirname(os.path.realpath(__file__))
 
-            # # Construct the path to the OI-notifier.app
-            # notifier_path = os.path.join(script_path, "OI-notifier.app")
+                # # Write the notification text into notification_text.txt
+                # with open(os.path.join(script_path, "notification_text.txt"), "w") as file:
+                #     file.write(text)
 
-            # # Call the OI-notifier
-            # subprocess.run(["open", notifier_path])
-        else:  # For other OS, use a general notification API
-            try:
-                import plyer
+                # # Construct the path to the OI-notifier.app
+                # notifier_path = os.path.join(script_path, "OI-notifier.app")
 
-                plyer.notification.notify(title=title, message=text)
-            except:
-                # Optional package
-                pass
+                # # Call the OI-notifier
+                # subprocess.run(["open", notifier_path])
+            else:  # For other OS, use a general notification API
+                try:
+                    import plyer
+
+                    plyer.notification.notify(title=title, message=text)
+                except:
+                    # Optional package
+                    pass
+        except Exception as e:
+            # Notifications should be non-blocking
+            if self.computer.verbose:
+                print("Notification error:")
+                print(str(e))
 
     # Maybe run code should be here...?

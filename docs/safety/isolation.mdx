@@ -1,0 +1,19 @@
+---
+title: Isolation
+---
+
+Isolating Open Interpreter from your system is helpful to prevent security mishaps. By running it in a separate process, you can ensure that actions taken by Open Interpreter will not directly affect your system. This is by far the safest way to run Open Interpreter, although it can be limiting based on your use case.
+
+If you wish to sandbox Open Interpreter, we have two primary methods of doing so: Docker and E2B.
+
+## Docker
+
+Docker is a containerization technology that allows you to run an isolated Linux environment on your system. This allows you to run Open Interpreter in a container, which **completely** isolates it from your system. All code execution is done in the container, and the container is not able to access your system. Docker support is currently experimental, and we are working on integrating it as a core feature of Open Interpreter.
+
+Follow [these instructions](/integrations/docker) to get it running.
+
+## E2B
+
+[E2B](https://e2b.dev/) is a cloud-based platform for running sandboxed code environments, designed for use by AI agents. You can override the default `python` language in Open Interpreter to use E2B, and it will automatically run the code in a cloud-sandboxed environment. You will need an E2B account to use this feature. It's worth noting that this will only sandbox python code, other languages like shell and JavaScript will still be run on your system.
+
+Follow [these instructions](/integrations/e2b) to get it running.

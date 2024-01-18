@@ -18,6 +18,26 @@ interpreter = OpenInterpreter()
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_find_text_api():
+    start = time.time()
+    interpreter.computer.mouse.move(
+        "Left Arrow Left Arrow and a bunch of hallucinated text? or was it..."
+    )
+    # Left Arrow Left Arrow
+    # and a bunch of hallucinated text? or was it...
+    print(time.time() - start)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_getActiveWindow():
+    import pywinctl
+
+    print(pywinctl.getActiveWindow())
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_notify():
     interpreter.computer.os.notify("Hello")
     assert False
@@ -25,7 +45,7 @@ def test_notify():
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_get_text():
-    print(interpreter.computer.display.get_text())
+    print(interpreter.computer.display.get_text_as_list_of_lists())
     assert False
 
 
@@ -56,7 +76,58 @@ def test_display_verbose():
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_api():
     start = time.time()
-    interpreter.computer.mouse.move(icon="left arrow")
+    time.sleep(5)
+
+    def say(icon_name):
+        import subprocess
+
+        subprocess.run(["say", "-v", "Fred", icon_name])
+
+    say("walk")
+    interpreter.computer.mouse.move(icon="walk")
+    say("run")
+    interpreter.computer.mouse.move(icon="run")
+    say("martini")
+    interpreter.computer.mouse.move(icon="martini")
+    say("walk icon")
+    interpreter.computer.mouse.move(icon="walk icon")
+    say("run icon")
+    interpreter.computer.mouse.move(icon="run icon")
+    say("martini icon")
+    interpreter.computer.mouse.move(icon="martini icon")
+
+    say("compass")
+    interpreter.computer.mouse.move(icon="compass")
+    say("photo")
+    interpreter.computer.mouse.move(icon="photo")
+    say("mountain")
+    interpreter.computer.mouse.move(icon="mountain")
+    say("boat")
+    interpreter.computer.mouse.move(icon="boat")
+    say("coffee")
+    interpreter.computer.mouse.move(icon="coffee")
+    say("pizza")
+    interpreter.computer.mouse.move(icon="pizza")
+    say("printer")
+    interpreter.computer.mouse.move(icon="printer")
+    say("home")
+    interpreter.computer.mouse.move(icon="home")
+    say("compass icon")
+    interpreter.computer.mouse.move(icon="compass icon")
+    say("photo icon")
+    interpreter.computer.mouse.move(icon="photo icon")
+    say("mountain icon")
+    interpreter.computer.mouse.move(icon="mountain icon")
+    say("boat icon")
+    interpreter.computer.mouse.move(icon="boat icon")
+    say("coffee icon")
+    interpreter.computer.mouse.move(icon="coffee icon")
+    say("pizza icon")
+    interpreter.computer.mouse.move(icon="pizza icon")
+    say("printer icon")
+    interpreter.computer.mouse.move(icon="printer icon")
+    say("home icon")
+    interpreter.computer.mouse.move(icon="home icon")
     # interpreter.computer.mouse.move(icon="caution")
     # interpreter.computer.mouse.move(icon="bluetooth")
     # interpreter.computer.mouse.move(icon="gear")
@@ -322,7 +393,7 @@ with open('numbers.txt', 'a+') as f:
         f.seek(0, os.SEEK_END)
         """
     print("starting to code")
-    for chunk in interpreter.computer.run("python", code):
+    for chunk in interpreter.computer.run("python", code, stream=True, display=True):
         print(chunk)
         if "format" in chunk and chunk["format"] == "output":
             if "adding 3 to file" in chunk["content"]:

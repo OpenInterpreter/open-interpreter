@@ -20,8 +20,8 @@ def get_pip_version():
 
 def get_oi_version():
     try:
-        oi_version_cmd = (
-            subprocess.check_output(["interpreter", "--version"]).decode().split()[1]
+        oi_version_cmd = subprocess.check_output(
+            ["interpreter", "--version"], text=True
         )
     except Exception as e:
         oi_version_cmd = str(e)
@@ -127,7 +127,7 @@ def system_info(interpreter):
         f"""
         Python Version: {get_python_version()}
         Pip Version: {get_pip_version()}
-        Open-interpreter Version: cmd:{oi_version[0]}, pkg: {oi_version[1]}
+        Open-interpreter Version: cmd: {oi_version[0]}, pkg: {oi_version[1]}
         OS Version and Architecture: {get_os_version()}
         CPU Info: {get_cpu_info()}
         RAM Info: {get_ram_info()}
