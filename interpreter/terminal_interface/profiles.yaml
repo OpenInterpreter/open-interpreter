@@ -1,0 +1,13 @@
+default:
+  llm.model: "gpt-4-1106-preview"
+  llm.context_window: 128000
+  llm.max_tokens: 4096
+  llm.supports_functions: True
+
+local:
+  offline: True
+  llm.model: "openai/x"  # "openai/" tells Lit
+  llm.api_base: "http://localhost:1234/v1"
+  llm.max_tokens: 1000
+  llm.context_window: 3000
+  llm.api_key: "x"

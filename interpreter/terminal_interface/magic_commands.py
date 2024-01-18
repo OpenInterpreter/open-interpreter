@@ -176,11 +176,11 @@ def handle_count_tokens(self, prompt):
 
     if len(self.messages) == 0:
         (conversation_tokens, conversation_cost) = count_messages_tokens(
-            messages=messages, model=self.model
+            messages=messages, model=self.llm.model
         )
     else:
         (conversation_tokens, conversation_cost) = count_messages_tokens(
-            messages=messages, model=self.model
+            messages=messages, model=self.llm.model
         )
 
     outputs.append(
@@ -191,7 +191,7 @@ def handle_count_tokens(self, prompt):
 
     if prompt:
         (prompt_tokens, prompt_cost) = count_messages_tokens(
-            messages=[prompt], model=self.model
+            messages=[prompt], model=self.llm.model
         )
         outputs.append(
             f"> Tokens used by this prompt: {prompt_tokens} (Estimated Cost: ${prompt_cost})"

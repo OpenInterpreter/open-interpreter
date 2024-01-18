@@ -1,7 +1,6 @@
 import argparse
 import os
 import platform
-import re
 import subprocess
 import sys
 import time
@@ -13,6 +12,7 @@ from .utils.apply_config import apply_config
 from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .utils.get_config import get_config_path
+from .utils.profiles import apply_profile, get_profile_path
 from .validate_llm_settings import validate_llm_settings
 
 
@@ -23,13 +23,14 @@ def start_terminal_interface(interpreter):
 
     arguments = [
         # Profiles coming soon— after we seperate core from TUI
-        # {
-        #     "name": "profile",
-        #     "nickname": "p",
-        #     "help_text": "profile (from your config file) to use. sets multiple settings at once",
-        #     "type": str,
-        #     "default": "default",
-        # },
+        {
+            "name": "profile",
+            "nickname": "p",
+            "help_text": "profile (from your config file) to use. sets multiple settings at once",
+            "type": str,
+            "default": "default",
+            "attribute": {"object": interpreter, "attr_name": "profile"},
+        },
         {
             "name": "custom_instructions",
             "nickname": "ci",
@@ -84,6 +85,7 @@ def start_terminal_interface(interpreter):
             "nickname": "lsf",
             "help_text": "inform OI that your model supports OpenAI-style functions, and can make function calls",
             "type": bool,
+            "action": argparse.BooleanOptionalAction,
             "attribute": {"object": interpreter.llm, "attr_name": "supports_functions"},
         },
         {
@@ -181,7 +183,6 @@ def start_terminal_interface(interpreter):
             "type": str,
             "attribute": {"object": interpreter, "attr_name": "config_file"},
         },
-        # Profiles
         {
             "name": "fast",
             "nickname": "f",
@@ -300,7 +301,7 @@ def start_terminal_interface(interpreter):
 
         config_directory = os.path.dirname(config_file)
 
-        print(f"Opening config directory...")
+        print("Opening config directory...")
 
         if platform.system() == "Windows":
             os.startfile(config_directory)
@@ -542,8 +543,8 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
 
         # Give it access to the computer via Python
         interpreter.computer.run(
-            "python",
-            "import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
+            language="python",
+            code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
             display=args.verbose,
         )
 
@@ -590,7 +591,7 @@ Once the server is running, you can begin your conversation below.
         else:
             if args.vision:
                 display_markdown_message(
-                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
                 time.sleep(1)
                 display_markdown_message("---\n")
@@ -600,12 +601,12 @@ Once the server is running, you can begin your conversation below.
                 time.sleep(2.5)
                 display_markdown_message("---")
                 display_markdown_message(
-                    f"> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
             else:
                 time.sleep(1)
                 display_markdown_message(
-                    f"> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
+                    "> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
                 )
 
     # Check for update
@@ -628,9 +629,16 @@ Once the server is running, you can begin your conversation below.
         # Apply default config file
         interpreter = apply_config(interpreter)
 
+    if args.profile:
+        # We can add custom profile path, I'll leave it out for first PR
+        print(vars(args).get("profile"))
+        interpreter.profile = vars(args).get("profile")
+        user_profile = get_profile_path()
+        interpreter = apply_profile(interpreter, user_profile)
+
     # Set attributes on interpreter
     for argument_name, argument_value in vars(args).items():
-        if argument_value != None:
+        if argument_value is not None:
             argument_dictionary = [a for a in arguments if a["name"] == argument_name]
             if len(argument_dictionary) > 0:
                 argument_dictionary = argument_dictionary[0]
