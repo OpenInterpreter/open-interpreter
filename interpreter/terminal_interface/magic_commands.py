@@ -225,7 +225,7 @@ def handle_edit(self, arguments):
 
     try:
         if platform.system() == 'Windows':
-            os.system(f'start notepad {temp_filename}')
+            os.system(f'start {temp_filename}')
         elif platform.system() == 'Darwin':
             subprocess.call(('open', temp_filename))
         elif platform.system() == 'Linux':
