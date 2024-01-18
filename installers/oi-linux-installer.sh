@@ -1,5 +1,10 @@
 #!/bin/bash
 
+echo "Starting Open Interpreter installation..."
+sleep 2
+echo "This will take approximately 5 minutes..."
+sleep 2
+
 # Check if Rust is installed
 if ! command -v rustc &> /dev/null
 then
@@ -16,20 +21,10 @@ curl https://pyenv.run | bash
 pyenv_root="$HOME/.pyenv/bin/pyenv"
 
 # Install specific Python version using pyenv
-$pyenv_root install 3.11.7
+$pyenv_root install 3.11.7 --skip-existing
 $pyenv_root shell 3.11.7
 
-version=$(lsb_release -rs)
-
-if (( $(echo "$version 23.04" | awk '{print ($1 >= $2)}') )); then
-    sudo apt update
-    sudo apt install pipx
-else
-    python -m pip install --user pipx
-fi
-
-pipx ensurepath
-pipx install open-interpreter
+pip install open-interpreter
 
 # Unset the Python version
 $pyenv_root shell --unset

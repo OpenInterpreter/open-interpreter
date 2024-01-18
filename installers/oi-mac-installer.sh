@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo "Starting Open Interpreter installation..."
+sleep 2
+echo "This will take approximately 5 minutes..."
+sleep 2
+
+
 # Check if Rust is installed
 if ! command -v rustc &> /dev/null
 then
@@ -28,17 +34,12 @@ else
     echo "pyenv is already installed."
 fi
 
-# Check if Python 3.11.7 is installed
-if ! $pyenv_root versions | grep 3.11.7 &> /dev/null
-then
-    echo "Python 3.11.7 is not installed. Installing now..."
-    $pyenv_root install 3.11.7
-fi
+$pyenv_root install 3.11.7 --skip-existing
 
 $pyenv_root shell 3.11.7
-brew install pipx
-pipx ensurepath
-pipx install open-interpreter
+
+pip install open-interpreter
+
 $pyenv_root shell --unset
 
 echo ""

@@ -1,3 +1,8 @@
+Write-Output "Starting Open Interpreter installation..."
+Start-Sleep -Seconds 2
+Write-Output "This will take approximately 5 minutes..."
+Start-Sleep -Seconds 2
+
 # Check if pyenv is installed
 $pyenvRoot = "${env:USERPROFILE}\.pyenv\pyenv-win"
 $pyenvBin = "$pyenvRoot\bin\pyenv.bat"
@@ -20,23 +25,12 @@ if (!(Get-Command rustc -ErrorAction SilentlyContinue)) {
     Remove-Item -Path .\$rustupFile
 }
 
-# Check if Scoop is installed
-if (!(Get-Command scoop -ErrorAction SilentlyContinue)) {
-    Write-Output "Scoop is not installed. Installing now..."
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-    Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://get.scoop.sh')
-}
-
-# Install pipx using Scoop
-scoop install pipx
-& pipx ensurepath
-
 # Use the full path to pyenv to install Python
-& "$pyenvBin" install 3.11.7
+& "$pyenvBin" install 3.11.7 --skip-existing
 
 # Turn on this Python and install OI
 $env:PYENV_VERSION="3.11.7"
-& pipx install open-interpreter
+& pip install open-interpreter
 
 # Get us out of this vers of Python (which was just used to setup OI, which should stay in that vers of Python...?)
 Remove-Item Env:\PYENV_VERSION
