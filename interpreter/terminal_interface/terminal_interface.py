@@ -10,6 +10,7 @@ except ImportError:
 
 import os
 import platform
+import tempfile
 import random
 import re
 import subprocess
@@ -44,6 +45,7 @@ except:
 
 
 def terminal_interface(interpreter, message):
+    global language
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -255,29 +257,31 @@ def terminal_interface(interpreter, message):
 
                         if should_scan_code:
                             scan_code(code, language, interpreter)
-
-                        response = input(
-                            "  Would you like to run this code? (y/n)\n\n  "
-                        )
-                        print("")  # <- Aesthetic choice
-
-                        if response.strip().lower() == "y":
-                            # Create a new, identical block where the code will actually be run
-                            # Conveniently, the chunk includes everything we need to do this:
-                            active_block = CodeBlock()
-                            active_block.margin_top = False  # <- Aesthetic choice
-                            active_block.language = language
-                            active_block.code = code
-                        else:
-                            # User declined to run code.
-                            interpreter.messages.append(
-                                {
-                                    "role": "user",
-                                    "type": "message",
-                                    "content": "I have declined to run this code.",
-                                }
+                        while True:
+                            response = input(
+                                "  Would you like to run this code? (y/n)\n\n  "
                             )
-                            break
+                            print("")  # <- Aesthetic choice
+
+                            if response.strip().lower() == "y":
+                                # Create a new, identical block where the code will actually be run
+                                # Conveniently, the chunk includes everything we need to do this:
+                                active_block = CodeBlock()
+                                active_block.margin_top = False  # <- Aesthetic choice
+                                active_block.language = language
+                                active_block.code = code
+                                break
+                            else:
+                                # User declined to run code.
+                                interpreter.messages.append(
+                                    {
+                                        "role": "user",
+                                        "type": "message",
+                                        "content": "I have declined to run this code.",
+                                    }
+                                )
+                                break
+                        break
 
                 # Computer can display visual types to user,
                 # Which sometimes creates more computer output (e.g. HTML errors, eventually)
