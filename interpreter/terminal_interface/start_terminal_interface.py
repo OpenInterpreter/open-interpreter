@@ -84,6 +84,7 @@ def start_terminal_interface(interpreter):
             "nickname": "lsf",
             "help_text": "inform OI that your model supports OpenAI-style functions, and can make function calls",
             "type": bool,
+            "action": argparse.BooleanOptionalAction,
             "attribute": {"object": interpreter.llm, "attr_name": "supports_functions"},
         },
         {
