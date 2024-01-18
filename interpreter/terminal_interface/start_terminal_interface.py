@@ -541,13 +541,11 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
         #         print(chunk.get("content"))
 
         # Give it access to the computer via Python
-        for _ in interpreter.computer.run(
+        interpreter.computer.run(
             language="python",
             code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
-            stream=True,
             display=args.verbose,
-        ):
-            pass
+        )
 
         if not args.auto_run:
             display_markdown_message(
