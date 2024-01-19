@@ -32,8 +32,6 @@ class Display:
             # pyautogui is an optional package, so it's okay if this fails
             pass
 
-        self.api_base = "https://api.openinterpreter.com"
-
     def size(self):
         return pyautogui.size()
 
@@ -124,7 +122,7 @@ class Display:
 
             try:
                 response = requests.post(
-                    f'{self.api_base.strip("/")}/v0/point/text/',
+                    f'{self.computer.api_base.strip("/")}/point/text/',
                     json={"query": text, "base64": screenshot_base64},
                 )
                 response = response.json()
@@ -154,7 +152,7 @@ class Display:
 
             try:
                 response = requests.post(
-                    f'{self.api_base.strip("/")}/v0/text/',
+                    f'{self.computer.api_base.strip("/")}/text/',
                     json={"base64": screenshot_base64},
                 )
                 response = response.json()
@@ -190,7 +188,7 @@ class Display:
 
         try:
             response = requests.post(
-                f'{self.api_base.strip("/")}/v0/point/',
+                f'{self.computer.api_base.strip("/")}/point/',
                 json={"query": query, "base64": screenshot_base64},
             )
             return response.json()

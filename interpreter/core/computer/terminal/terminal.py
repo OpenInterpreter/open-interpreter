@@ -34,10 +34,10 @@ class Terminal:
         return None
 
     def run(self, language, code, stream=False, display=False):
-        # If stream == False, *pull* from the stream.
         if stream == False:
+            # If stream == False, *pull* from _streaming_run.
             output_messages = []
-            for chunk in self.run(language, code, stream=True):
+            for chunk in self._streaming_run(language, code, display=display):
                 if chunk.get("format") != "active_line":
                     # Should we append this to the last message, or make a new one?
                     if (
@@ -50,8 +50,11 @@ class Terminal:
                         output_messages.append(chunk)
             return output_messages
 
-        # This actually streams it:
+        elif stream == True:
+            # If stream == True, replace this with _streaming_run.
+            return self._streaming_run(language, code, display=display)
 
+    def _streaming_run(self, language, code, display=False):
         if language not in self._active_languages:
             self._active_languages[language] = self.get_language(language)()
         try:

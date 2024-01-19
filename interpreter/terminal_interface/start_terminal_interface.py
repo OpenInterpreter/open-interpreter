@@ -23,14 +23,14 @@ def start_terminal_interface(interpreter):
 
     arguments = [
         # Profiles coming soon— after we seperate core from TUI
-        {
-            "name": "profile",
-            "nickname": "p",
-            "help_text": "profile (from your config file) to use. sets multiple settings at once",
-            "type": str,
-            "default": "default",
-            "attribute": {"object": interpreter, "attr_name": "profile"},
-        },
+        # {
+        #     "name": "profile",
+        #     "nickname": "p",
+        #     "help_text": "profile (from your config file) to use. sets multiple settings at once",
+        #     "type": str,
+        #     "default": "default",
+        #     "attribute": {"object": interpreter, "attr_name": "profile"},
+        # },
         {
             "name": "custom_instructions",
             "nickname": "ci",
@@ -396,6 +396,8 @@ Do not try to write code that attempts the entire task at once, and verify at ea
 You may use the `computer` Python module to complete tasks:
 
 ```python
+computer.browser.search(query)
+
 computer.display.view() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
@@ -629,12 +631,12 @@ Once the server is running, you can begin your conversation below.
         # Apply default config file
         interpreter = apply_config(interpreter)
 
-    if args.profile:
-        # We can add custom profile path, I'll leave it out for first PR
-        print(vars(args).get("profile"))
-        interpreter.profile = vars(args).get("profile")
-        user_profile = get_profile_path()
-        interpreter = apply_profile(interpreter, user_profile)
+    # if args.profile:
+    #     # We can add custom profile path, I'll leave it out for first PR
+    #     print(vars(args).get("profile"))
+    #     interpreter.profile = vars(args).get("profile")
+    #     user_profile = get_profile_path()
+    #     interpreter = apply_profile(interpreter, user_profile)
 
     # Set attributes on interpreter
     for argument_name, argument_value in vars(args).items():
