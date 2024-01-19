@@ -5,10 +5,8 @@ It's the main file. `from interpreter import interpreter` will import an instanc
 
 import json
 import os
-import traceback
 from datetime import datetime
 
-from ..terminal_interface.start_terminal_interface import start_terminal_interface
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.local_storage_path import get_storage_path
 from .computer.computer import Computer
