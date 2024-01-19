@@ -1,6 +1,6 @@
 # cli.py
-from .core.core import OpenInterpreter
-from .terminal_interface.start_terminal_interface import start_terminal_interface
+from ..core.core import OpenInterpreter
+from .start_terminal_interface import start_terminal_interface
 
 
 def main():
