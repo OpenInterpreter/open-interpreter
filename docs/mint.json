@@ -34,97 +34,76 @@
       "pages": ["getting-started/introduction", "getting-started/setup"]
     },
     {
-      "group": "Components",
+      "group": "Guides",
       "pages": [
-        "components/introduction",
-        "components/core",
-        "components/language-model",
-        "components/computer"
+        "guides/basic-usage.mdx",
+        "guides/demos",
+        "guides/running-locally",
+        "guides/advanced-terminal-usage",
+        "guides/multiple-instances"
       ]
     },
     {
-      "group": "Usage",
+      "group": "Settings",
       "pages": [
-        "usage/examples",
-        {
-          "group": "Terminal",
-          "pages": [
-            "usage/terminal/arguments",
-            "usage/terminal/settings",
-            "usage/terminal/conversation-history",
-            "usage/terminal/magic-commands",
-            "usage/terminal/budget-manager",
-            "usage/terminal/vision"
-          ]
-        },
-        {
-          "group": "Python",
-          "pages": [
-            "usage/python/arguments",
-            "usage/python/streaming-response",
-            "usage/python/multiple-instances",
-            "usage/python/settings",
-            "usage/python/conversation-history",
-            "usage/python/magic-commands",
-            "usage/python/budget-manager"
-          ]
-        },
-        {
-          "group": "Desktop",
-          "pages": ["usage/desktop/install"]
-        }
+        "settings/all-settings",
+        "settings/profiles",
+        "settings/example-profiles"
       ]
     },
     {
       "group": "Language Models",
       "pages": [
-        "language-model-setup/introduction",
+        "language-models/introduction",
         {
-          "group": "Hosted Setup",
+          "group": "Hosted Providers",
           "pages": [
-            "language-model-setup/hosted-models/openai",
-            "language-model-setup/hosted-models/azure",
-            "language-model-setup/hosted-models/vertex-ai",
-            "language-model-setup/hosted-models/replicate",
-            "language-model-setup/hosted-models/togetherai",
-            "language-model-setup/hosted-models/mistral-api",
-            "language-model-setup/hosted-models/anthropic",
-            "language-model-setup/hosted-models/anyscale",
-            "language-model-setup/hosted-models/aws-sagemaker",
-            "language-model-setup/hosted-models/baseten",
-            "language-model-setup/hosted-models/cloudflare",
-            "language-model-setup/hosted-models/cohere",
-            "language-model-setup/hosted-models/ai21",
-            "language-model-setup/hosted-models/deepinfra",
-            "language-model-setup/hosted-models/huggingface",
-            "language-model-setup/hosted-models/nlp-cloud",
-            "language-model-setup/hosted-models/openrouter",
-            "language-model-setup/hosted-models/palm",
-            "language-model-setup/hosted-models/perplexity",
-            "language-model-setup/hosted-models/petals",
-            "language-model-setup/hosted-models/vllm"
+            "language-models/hosted-models/openai",
+            "language-models/hosted-models/azure",
+            "language-models/hosted-models/vertex-ai",
+            "language-models/hosted-models/replicate",
+            "language-models/hosted-models/togetherai",
+            "language-models/hosted-models/mistral-api",
+            "language-models/hosted-models/anthropic",
+            "language-models/hosted-models/anyscale",
+            "language-models/hosted-models/aws-sagemaker",
+            "language-models/hosted-models/baseten",
+            "language-models/hosted-models/cloudflare",
+            "language-models/hosted-models/cohere",
+            "language-models/hosted-models/ai21",
+            "language-models/hosted-models/deepinfra",
+            "language-models/hosted-models/huggingface",
+            "language-models/hosted-models/nlp-cloud",
+            "language-models/hosted-models/openrouter",
+            "language-models/hosted-models/palm",
+            "language-models/hosted-models/perplexity",
+            "language-models/hosted-models/petals",
+            "language-models/hosted-models/vllm"
           ]
         },
         {
-          "group": "Local Setup",
+          "group": "Local Providers",
           "pages": [
-            "language-model-setup/local-models/lm-studio",
-            "language-model-setup/local-models/llamafile",
-            "language-model-setup/local-models/janai",
-            "language-model-setup/local-models/ollama",
-            "language-model-setup/local-models/custom-endpoint",
-            "language-model-setup/local-models/best-practices"
+            "language-models/local-models/lm-studio",
+            "language-models/local-models/llamafile",
+            "language-models/local-models/janai",
+            "language-models/local-models/ollama",
+            "language-models/local-models/custom-endpoint",
+            "language-models/local-models/best-practices"
           ]
         },
-        "language-model-setup/custom-models"
+        "language-models/custom-models",
+        "language-models/settings",
+        "language-models/usage"
       ]
     },
     {
+      "group": "Protocols",
+      "pages": ["protocols/lmc-messages"]
+    },
+    {
       "group": "Integrations",
-      "pages": [
-        "integrations/e2b",
-        "integrations/docker"
-      ]
+      "pages": ["integrations/e2b", "integrations/docker"]
     },
     {
       "group": "Safety",
@@ -137,9 +116,7 @@
     },
     {
       "group": "Protocols",
-      "pages": [
-        "protocols/lmc-messages"
-      ]
+      "pages": ["protocols/lmc-messages"]
     },
     {
       "group": "Telemetry",
