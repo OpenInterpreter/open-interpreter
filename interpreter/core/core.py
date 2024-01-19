@@ -38,43 +38,60 @@ class OpenInterpreter:
     6. Decide when the process is finished based on the language model's response.
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        messages=None,
+        offline=False,
+        auto_run=False,
+        verbose=False,
+        max_output=2800,
+        safe_mode="off",
+        shrink_images=False,
+        force_task_completion=False,
+        anonymous_telemetry=os.getenv("ANONYMIZED_TELEMETRY", "True") == "True",
+        in_terminal_interface=False,
+        conversation_history=True,
+        conversation_filename=None,
+        conversation_history_path=get_storage_path("conversations"),
+        os=False,
+        speak_messages=False,
+        llm=None,
+        system_message=default_system_message,
+        custom_instructions="",
+        computer=None,
+    ):
         # State
-        self.messages = []
+        self.messages = [] if messages is None else messages
 
         # Settings
-        self.offline = False
-        self.auto_run = False
-        self.verbose = False
-        self.max_output = 2800  # Max code block output visible to the LLM
-        self.safe_mode = "off"
-        # this isn't right... this should be in the llm, and have a better name, and more customization:
-        self.shrink_images = (
-            False  # Shrinks all images passed into model to less than 1024 in width
-        )
-        self.force_task_completion = False
-        self.anonymous_telemetry = os.getenv("ANONYMIZED_TELEMETRY", "True") == "True"
-        self.in_terminal_interface = False
+        self.offline = offline
+        self.auto_run = auto_run
+        self.verbose = verbose
+        self.max_output = max_output
+        self.safe_mode = safe_mode
+        self.shrink_images = shrink_images
+        self.force_task_completion = force_task_completion
+        self.anonymous_telemetry = anonymous_telemetry
+        self.in_terminal_interface = in_terminal_interface
 
-        # Conversation history (this should not be here)
-        self.conversation_history = True
-        self.conversation_filename = None
-        self.conversation_history_path = get_storage_path("conversations")
+        # Conversation history
+        self.conversation_history = conversation_history
+        self.conversation_filename = conversation_filename
+        self.conversation_history_path = conversation_history_path
 
         # OS control mode related attributes
-        self.os = False
-        self.speak_messages = False
+        self.os = os
+        self.speak_messages = speak_messages
 
         # LLM
-        self.llm = Llm(self)
+        self.llm = Llm(self) if llm is None else llm
 
-        # These are LLM related, but they're actually not
-        # the responsibility of the stateless LLM to manage / remember!
-        self.system_message = default_system_message
-        self.custom_instructions = ""
+        # These are LLM related
+        self.system_message = system_message
+        self.custom_instructions = custom_instructions
 
         # Computer
-        self.computer = Computer()
+        self.computer = Computer() if computer is None else computer
 
     def chat(self, message=None, display=True, stream=False):
         try:

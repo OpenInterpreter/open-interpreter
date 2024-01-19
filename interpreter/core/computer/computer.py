@@ -1,5 +1,6 @@
 import json
 
+from .browser.browser import Browser
 from .clipboard.clipboard import Clipboard
 from .display.display import Display
 from .keyboard.keyboard import Keyboard
@@ -19,9 +20,11 @@ class Computer:
         self.keyboard = Keyboard(self)
         self.display = Display(self)
         self.clipboard = Clipboard(self)
+        self.browser = Browser(self)
         self.os = Os(self)
 
         self.emit_images = True
+        self.api_base = "https://api.openinterpreter.com/v0"
 
     # Shortcut for computer.terminal.languages
     @property
