@@ -36,7 +36,7 @@
     {
       "group": "Guides",
       "pages": [
-        "guides/basic-usage.mdx",
+        "guides/basic-usage",
         "guides/demos",
         "guides/running-locally",
         "guides/advanced-terminal-usage",
