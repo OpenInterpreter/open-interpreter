@@ -116,10 +116,6 @@
       ]
     },
     {
-      "group": "Protocols",
-      "pages": ["protocols/lmc-messages"]
-    },
-    {
       "group": "Telemetry",
       "pages": ["telemetry/telemetry"]
     }
