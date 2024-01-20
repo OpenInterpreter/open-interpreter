@@ -1,0 +1,215 @@
+### Model Selection
+
+Specifies which language model to use. Check out the [models](https://docs.openinterpreter.com/language-model-setup/introduction) section for a list of available models.
+
+<CodeGroup>
+    
+```bash Terminal
+interpreter --model "gpt-3.5-turbo"
+```
+
+```python Python
+interpreter.llm.model = "gpt-3.5-turbo"
+```
+
+```yaml Profile
+model: gpt-3.5-turbo
+```
+
+</CodeGroup>
+
+### Temperature
+
+Sets the randomness level of the model's output.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --temperature 0.7
+```
+
+```python Python
+interpreter.llm.temperature = 0.7
+```
+
+```yaml Profile
+temperature: 0.7
+```
+
+</CodeGroup>
+
+### Context Window
+
+Manually set the context window size in tokens for the model.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --context_window 16000
+```
+
+```python Python
+interpreter.llm.context_window = 16000
+```
+
+```yaml Profile
+context_window: 16000
+```
+
+</CodeGroup>
+
+### Max Tokens
+
+Sets the maximum number of tokens that the model can generate in a single response.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_tokens 100
+```
+
+```python Python
+interpreter.llm.max_tokens = 100
+```
+
+```yaml Profile
+max_tokens: 100
+```
+
+</CodeGroup>
+
+### Max Output
+
+Set the maximum number of characters for code outputs.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_output 1000
+```
+
+```python Python
+interpreter.llm.max_output = 1000
+```
+
+```yaml Profile
+max_output: 1000
+```
+
+</CodeGroup>
+
+### API Base
+
+If you are using a custom API, specify its base URL with this argument.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_base "https://api.example.com"
+```
+
+```python Python
+interpreter.llm.api_base = "https://api.example.com"
+```
+
+```yaml Profile
+api_base: https://api.example.com
+```
+
+</CodeGroup>
+
+### API Key
+
+Set your API key for authentication when making API calls.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_key "your_api_key_here"
+```
+
+```python Python
+interpreter.llm.api_key = "your_api_key_here"
+```
+
+```yaml Profile
+api_key: your_api_key_here
+```
+
+</CodeGroup>
+
+### API Version
+
+Optionally set the API version to use with your selected model. (This will override environment variables)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_version 2.0.2
+```
+
+```python Python
+interpreter.llm.api_version = '2.0.2'
+```
+
+```yaml Profile
+api_version: 2.0.2
+```
+
+</CodeGroup>
+
+### LLM Supports Functions
+
+Inform Open Interpreter that the language model you're using supports function calling.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --llm_supports_functions
+```
+
+```python Python
+interpreter.llm.llm_supports_functions = True
+```
+
+```yaml Profile
+llm_supports_functions: true
+```
+
+</CodeGroup>
+
+### LLM Does Not Support Functions
+
+Inform Open Interpreter that the language model you're using does not support function calling.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --no-llm_supports_functions
+```
+
+```python Python
+interpreter.llm.llm_supports_functions = False
+```
+
+</CodeGroup>
+
+### LLM Supports Vision
+
+Inform Open Interpreter that the language model you're using supports vision.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --llm_supports_vision
+```
+
+```python Python
+interpreter.llm.llm_supports_vision = True
+```
+
+```yaml Profile
+llm_supports_vision: true
+```
+
+</CodeGroup>

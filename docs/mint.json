@@ -40,7 +40,8 @@
         "guides/demos",
         "guides/running-locally",
         "guides/advanced-terminal-usage",
-        "guides/multiple-instances"
+        "guides/multiple-instances",
+        "guides/streaming-response"
       ]
     },
     {
