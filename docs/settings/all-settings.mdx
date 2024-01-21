@@ -2,359 +2,6 @@
 title: All Settings
 ---
 
-# Interpreter
-
-### Vision Mode
-
-Enables vision mode for multimodal models. Defaults to GPT-4-turbo.
-
-<CodeGroup>
-```bash Terminal
-interpreter --vision
-```
-
-```python Python
-interpreter.vision = True
-```
-
-```yaml Profile
-vision: true
-```
-
-</CodeGroup>
-
-### OS Mode
-
-Enables OS mode for multimodal models. Defaults to GPT-4-turbo.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --os
-# or interpreter -o
-```
-
-```python Python
-interpreter.os = True
-```
-
-```yaml Profile
-os: true
-```
-
-</CodeGroup>
-
-### Version
-
-Get the current installed version number of Open Interpreter.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --version
-```
-
-</CodeGroup>
-
-### Open Profiles Directory
-
-Opens the profiles directory.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --profile
-```
-
-</CodeGroup>
-
-### Select Profile
-
-Select a profile to use.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --profile "profile.yaml"
-```
-
-</CodeGroup>
-
-### Help
-
-Display all available terminal arguments.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --help
-```
-
-</CodeGroup>
-
-### Force Task Completion
-
-Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --force_task_completion
-```
-
-```python Python
-interpreter.force_task_completion = True
-```
-
-```yaml Profile
-force_task_completion: true
-```
-
-</CodeGroup>
-
-### Verbose
-
-Run the interpreter in verbose mode. Debug information will be printed at each step to help diagnose issues.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --verbose
-```
-
-```python Python
-interpreter.verbose = True
-```
-
-```yaml Profile
-verbose: true
-```
-
-</CodeGroup>
-
-### Safe Mode
-
-Enable or disable experimental safety mechanisms like code scanning. Valid options are `off`, `ask`, and `auto`.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --safe_mode ask
-```
-
-```python Python
-interpreter.safe_mode = 'ask'
-```
-
-```yaml Profile
-safe_mode: ask
-```
-
-</CodeGroup>
-
-### Auto Run
-
-Automatically run the interpreter without requiring user confirmation.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --auto_run
-```
-
-```python Python
-interpreter.auto_run = True
-```
-
-```yaml Profile
-auto_run: true
-```
-
-</CodeGroup>
-
-### Speak Messages (Mac Only)
-
-Speak messages out loud using the system's text-to-speech engine.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --speak_messages
-```
-
-```python Python
-interpreter.speak_messages = True
-```
-
-```yaml Profile
-speak_messages: true
-```
-
-</CodeGroup>
-
-### Max Budget
-
-Sets the maximum budget limit for the session in USD.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --max_budget 0.01
-```
-
-```python Python
-interpreter.max_budget = 0.01
-```
-
-```yaml Profile
-max_budget: 0.01
-```
-
-</CodeGroup>
-
-### Local Mode
-
-Run the model locally. Check the [models page](/language-model-setup/lm-studio) for more information.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --local
-```
-
-```yaml Profile
-local: true
-```
-
-</CodeGroup>
-
-### Fast Mode
-
-Sets the model to gpt-3.5-turbo.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --fast
-```
-
-```yaml Profile
-fast: true
-```
-
-</CodeGroup>
-
-### Custom Instructions
-
-Appends custom instructions to the system message. This is useful for adding information about your system, preferred languages, etc.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --custom_instructions "This is a custom instruction."
-```
-
-```python Python
-interpreter.custom_instructions = "This is a custom instruction."
-```
-
-```yaml Profile
-custom_instructions: "This is a custom instruction."
-```
-
-</CodeGroup>
-
-### System Message
-
-We don't recommend modifying the system message, as doing so opts you out of future updates to the core system message. Use `--custom_instructions` instead, to add relevant information to the system message. If you must modify the system message, you can do so by using this argument, or by changing a profile file.
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --system_message "You are Open Interpreter..."
-```
-
-```python Python
-interpreter.system_message = "You are Open Interpreter..."
-```
-
-```yaml Profile
-system_message: "You are Open Interpreter..."
-```
-
-</CodeGroup>
-
-### Disable Telemetry
-
-Opt out of [telemetry](telemetry/telemetry).
-
-<CodeGroup>
-
-```bash Terminal
-interpreter --disable_telemetry
-```
-
-```python Python
-interpreter.anonymized_telemetry = False
-```
-
-```yaml Profile
-disable_telemetry: true
-```
-
-</CodeGroup>
-
-### Offline
-
-This boolean flag determines whether to enable or disable some offline features like [open procedures](https://open-procedures.replit.app/). Use this in conjunction with the `model` parameter to set your language model.
-
-<CodeGroup>
-
-```python Python
-interpreter.offline = True  # Check for updates, use procedures
-interpreter.offline = False  # Don't check for updates, don't use procedures
-```
-
-</CodeGroup>
-
-### Messages
-
-This property holds a list of `messages` between the user and the interpreter.
-
-You can use it to restore a conversation:
-
-<CodeGroup>
-
-```python
-interpreter.chat("Hi! Can you print hello world?")
-
-print(interpreter.messages)
-
-# This would output:
-
-# [
-#    {
-#       "role": "user",
-#       "message": "Hi! Can you print hello world?"
-#    },
-#    {
-#       "role": "assistant",
-#       "message": "Sure!"
-#    }
-#    {
-#       "role": "assistant",
-#       "language": "python",
-#       "code": "print('Hello, World!')",
-#       "output": "Hello, World!"
-#    }
-# ]
-
-#You can use this to restore `interpreter` to a previous conversation.
-interpreter.messages = messages # A list that resembles the one above
-```
-
-</CodeGroup>
-
 # Language Model
 
 ### Model Selection
@@ -573,7 +220,350 @@ llm_supports_vision: true
 
 </CodeGroup>
 
+# Interpreter
+
+### Vision Mode
+
+Enables vision mode for multimodal models. Defaults to GPT-4-turbo.
+
+<CodeGroup>
+```bash Terminal
+interpreter --vision
+```
+
+```python Python
+interpreter.vision = True
+interpreter.llm.model = "gpt-4-vision-preview" # Any vision supporting model
+```
+
+```yaml Profile
+vision: true
+llm.model: "gpt-4-vision-preview" # Any vision supporting model
+```
+
+</CodeGroup>
+
+### OS Mode
+
+Enables OS mode for multimodal models. Defaults to GPT-4-turbo. Currently not available in Python.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --os
+```
+
+```yaml Profile
+os: true
+```
+
+</CodeGroup>
+
+### Version
+
+Get the current installed version number of Open Interpreter.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --version
+```
+
+</CodeGroup>
+
+### Open Profiles Directory
+
+Opens the profiles directory.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --profile
+```
+
+</CodeGroup>
+
+### Select Profile
+
+Select a profile to use.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --profile "profile.yaml"
+```
+
+</CodeGroup>
+
+### Help
+
+Display all available terminal arguments.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --help
+```
+
+</CodeGroup>
+
+### Force Task Completion
+
+Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --force_task_completion
+```
+
+```python Python
+interpreter.force_task_completion = True
+```
+
+```yaml Profile
+force_task_completion: true
+```
+
+</CodeGroup>
+
+### Verbose
+
+Run the interpreter in verbose mode. Debug information will be printed at each step to help diagnose issues.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --verbose
+```
+
+```python Python
+interpreter.verbose = True
+```
+
+```yaml Profile
+verbose: true
+```
+
+</CodeGroup>
+
+### Safe Mode
+
+Enable or disable experimental safety mechanisms like code scanning. Valid options are `off`, `ask`, and `auto`.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --safe_mode ask
+```
+
+```python Python
+interpreter.safe_mode = 'ask'
+```
+
+```yaml Profile
+safe_mode: ask
+```
+
+</CodeGroup>
+
+### Auto Run
+
+Automatically run the interpreter without requiring user confirmation.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --auto_run
+```
+
+```python Python
+interpreter.auto_run = True
+```
+
+```yaml Profile
+auto_run: true
+```
+
+</CodeGroup>
+
+### Max Budget
+
+Sets the maximum budget limit for the session in USD.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_budget 0.01
+```
+
+```python Python
+interpreter.max_budget = 0.01
+```
+
+```yaml Profile
+max_budget: 0.01
+```
+
+</CodeGroup>
+
+### Local Mode
+
+Run the model locally. Check the [models page](/language-models/local-models/lm-studio) for more information.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --local
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.offline = True # Disables online features like Open Procedures
+interpreter.llm.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.llm.api_key = "fake_key" # LiteLLM, which we use to talk to local models, requires this
+interpreter.llm.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+
+interpreter.chat()
+```
+
+```yaml Profile
+local: true
+```
+
+</CodeGroup>
+
+### Fast Mode
+
+Sets the model to gpt-3.5-turbo and encourages it to only write code without confirmation.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --fast
+```
+
+```yaml Profile
+fast: true
+```
+
+</CodeGroup>
+
+### Custom Instructions
+
+Appends custom instructions to the system message. This is useful for adding information about your system, preferred languages, etc.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --custom_instructions "This is a custom instruction."
+```
+
+```python Python
+interpreter.custom_instructions = "This is a custom instruction."
+```
+
+```yaml Profile
+custom_instructions: "This is a custom instruction."
+```
+
+</CodeGroup>
+
+### System Message
+
+We don't recommend modifying the system message, as doing so opts you out of future updates to the core system message. Use `--custom_instructions` instead, to add relevant information to the system message. If you must modify the system message, you can do so by using this argument, or by changing a profile file.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --system_message "You are Open Interpreter..."
+```
+
+```python Python
+interpreter.system_message = "You are Open Interpreter..."
+```
+
+```yaml Profile
+system_message: "You are Open Interpreter..."
+```
+
+</CodeGroup>
+
+### Disable Telemetry
+
+Opt out of [telemetry](telemetry/telemetry).
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --disable_telemetry
+```
+
+```python Python
+interpreter.anonymized_telemetry = False
+```
+
+```yaml Profile
+disable_telemetry: true
+```
+
+</CodeGroup>
+
+### Offline
+
+This boolean flag determines whether to enable or disable some offline features like [open procedures](https://open-procedures.replit.app/). Use this in conjunction with the `model` parameter to set your language model.
+
+<CodeGroup>
+
+```python Python
+interpreter.offline = True  # Check for updates, use procedures
+interpreter.offline = False  # Don't check for updates, don't use procedures
+```
+
+</CodeGroup>
+
+### Messages
+
+This property holds a list of `messages` between the user and the interpreter.
+
+You can use it to restore a conversation:
+
+<CodeGroup>
+
+```python
+interpreter.chat("Hi! Can you print hello world?")
+
+print(interpreter.messages)
+
+# This would output:
+
+# [
+#    {
+#       "role": "user",
+#       "message": "Hi! Can you print hello world?"
+#    },
+#    {
+#       "role": "assistant",
+#       "message": "Sure!"
+#    }
+#    {
+#       "role": "assistant",
+#       "language": "python",
+#       "code": "print('Hello, World!')",
+#       "output": "Hello, World!"
+#    }
+# ]
+
+#You can use this to restore `interpreter` to a previous conversation.
+interpreter.messages = messages # A list that resembles the one above
+```
+
+</CodeGroup>
+
 # Computer
+
+The following settings and functions are primarily for the language model to use, not for users to use.
 
 ### Display - View
 
@@ -582,7 +572,7 @@ Takes a screenshot of the primary display.
 <CodeGroup>
 
 ```python Python
-computer.display.view()
+interpreter.computer.display.view()
 ```
 
 </CodeGroup>
@@ -594,7 +584,7 @@ Gets the x, y value of the center of the screen.
 <CodeGroup>
 
 ```python Python
-x, y = computer.display.center()
+x, y = interpreter.computer.display.center()
 ```
 
 </CodeGroup>
@@ -606,7 +596,7 @@ Performs a hotkey on the computer
 <CodeGroup>
 
 ```python Python
-computer.keboard.hotkey(" ", "command")
+interpreter.computer.keboard.hotkey(" ", "command")
 ```
 
 </CodeGroup>
@@ -618,7 +608,7 @@ Writes the text into the currently focused window.
 <CodeGroup>
 
 ```python Python
-computer.keyboard.write("hello")
+interpreter.computer.keyboard.write("hello")
 ```
 
 </CodeGroup>
@@ -631,13 +621,13 @@ Clicks on the specified coordinates, or an icon, or text. If text is specified, 
 
 ```python Python
 # Click on coordinates
-computer.mouse.click(x=100, y=100)
+interpreter.computer.mouse.click(x=100, y=100)
 
 # Click on text on the screen
-computer.mouse.click("Onscreen Text")
+interpreter.computer.mouse.click("Onscreen Text")
 
 # Click on a gear icon
-computer.mouse.click(icon="gear icon")
+interpreter.computer.mouse.click(icon="gear icon")
 ```
 
 </CodeGroup>
@@ -650,13 +640,13 @@ Moves to the specified coordinates, or an icon, or text. If text is specified, O
 
 ```python Python
 # Click on coordinates
-computer.mouse.move(x=100, y=100)
+interpreter.computer.mouse.move(x=100, y=100)
 
 # Click on text on the screen
-computer.mouse.move("Onscreen Text")
+interpreter.computer.mouse.move("Onscreen Text")
 
 # Click on a gear icon
-computer.mouse.move(icon="gear icon")
+interpreter.computer.mouse.move(icon="gear icon")
 ```
 
 </CodeGroup>
@@ -669,10 +659,10 @@ Scrolls the mouse a specified number of pixels.
 
 ```python Python
 # Scroll Down
-computer.mouse.scroll(-10)
+interpreter.computer.mouse.scroll(-10)
 
 # Scroll Up
-computer.mouse.scroll(10)
+interpreter.computer.mouse.scroll(10)
 ```
 
 </CodeGroup>
@@ -684,7 +674,7 @@ Returns the contents of the clipboard.
 <CodeGroup>
 
 ```python Python
-computer.clipboard.view()
+interpreter.computer.clipboard.view()
 ```
 
 </CodeGroup>
@@ -696,7 +686,7 @@ Get the selected text on the screen.
 <CodeGroup>
 
 ```python Python
-computer.os.get_selected_text()
+interpreter.computer.os.get_selected_text()
 ```
 
 </CodeGroup>
