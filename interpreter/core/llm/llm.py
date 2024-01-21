@@ -1,7 +1,7 @@
+from typing import Optional
+
 import litellm
 import tokentrim as tt
-
-from typing import Optional
 
 from ...terminal_interface.utils.display_markdown_message import (
     display_markdown_message,
@@ -186,7 +186,7 @@ Continuing...
             params["max_tokens"] = self.max_tokens
         if self.temperature:
             params["temperature"] = self.temperature
-        #Set api_key last so we can add dummy keys to other params first and overwrite it if there is one
+        # Set api_key last so we can add dummy keys to other params first and overwrite it if there is one
         if self.api_key:
             params["api_key"] = self.api_key
 
