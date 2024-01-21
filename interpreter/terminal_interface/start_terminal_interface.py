@@ -563,11 +563,12 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
             interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
 
         interpreter.offline = True
-        interpreter.llm.model = "openai/x"  # "openai/" tells LiteLLM it's an OpenAI compatible server, the "x" part doesn't matter
+        #interpreter.llm.model = "local"  # "openai/" tells LiteLLM it's an OpenAI compatible server, the "x" part doesn't matter
         interpreter.llm.api_base = "http://localhost:1234/v1"
         interpreter.llm.max_tokens = 1000
         interpreter.llm.context_window = 3000
-        interpreter.llm.api_key = "x"
+        #interpreter.llm.api_key = "x"
+        interpreter.llm.custom_llm_provider = "openai"
 
         if not (args.os or args.vision):
             display_markdown_message(

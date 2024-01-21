@@ -1,6 +1,8 @@
 import litellm
 import tokentrim as tt
 
+from typing import Optional
+
 from ...terminal_interface.utils.display_markdown_message import (
     display_markdown_message,
 )
@@ -24,20 +26,21 @@ class Llm:
         self.completions = fixed_litellm_completions
 
         # Settings
-        self.model = "gpt-4"
-        self.temperature = 0
-        self.supports_vision = False
-        self.supports_functions = None  # Will try to auto-detect
+        self.model: str = "gpt-4"
+        self.temperature: float = 0
+        self.supports_vision: bool = False
+        self.supports_functions: Optional[bool] = None  # Will try to auto-detect
 
         # Optional settings
-        self.context_window = None
-        self.max_tokens = None
-        self.api_base = None
-        self.api_key = None
-        self.api_version = None
+        self.context_window: Optional[int] = None
+        self.max_tokens: Optional[int] = None
+        self.api_base: Optional[str] = None
+        self.api_key: Optional[str] = None
+        self.api_version: Optional[str] = None
+        self.custom_llm_provider: Optional[str] = None
 
         # Budget manager powered by LiteLLM
-        self.max_budget = None
+        self.max_budget: Optional[float] = None
 
     def run(self, messages):
         """
@@ -174,14 +177,18 @@ Continuing...
         # Optional inputs
         if self.api_base:
             params["api_base"] = self.api_base
-        if self.api_key:
-            params["api_key"] = self.api_key
+        if self.custom_llm_provider:
+            params["custom_llm_provider"] = self.custom_llm_provider
+            params["api_key"] = "dummy_key"
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:
             params["max_tokens"] = self.max_tokens
         if self.temperature:
             params["temperature"] = self.temperature
+        #Set api_key last so we can add dummy keys to other params first and overwrite it if there is one
+        if self.api_key:
+            params["api_key"] = self.api_key
 
         # Set some params directly on LiteLLM
         if self.max_budget:
