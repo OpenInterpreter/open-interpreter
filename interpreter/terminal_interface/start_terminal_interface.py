@@ -678,7 +678,7 @@ Once the server is running, you can begin your conversation below.
             and not interpreter.llm.model.lower().startswith("azure/")
             and not interpreter.llm.model.lower().startswith("ollama")
         ):
-            interpreter.llm.model = "openai/" + interpreter.llm.model
+            interpreter.llm.custom_llm_provider = "openai"
 
     # If --conversations is used, run conversation_navigator
     if args.conversations:

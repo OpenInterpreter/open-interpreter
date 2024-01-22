@@ -35,7 +35,7 @@ class Llm:
         self.context_window: Optional[int] = None
         self.max_tokens: Optional[int] = None
         self.api_base: Optional[str] = None
-        self.api_key: Optional[str] = None
+        self.api_key: str = "key"  # Adding a place holder "key" to stop OpenAI from crashing when using local server
         self.api_version: Optional[str] = None
         self.custom_llm_provider: Optional[str] = None
 
@@ -175,20 +175,18 @@ Continuing...
         }
 
         # Optional inputs
+        if self.api_key:
+            params["api_key"] = self.api_key
         if self.api_base:
             params["api_base"] = self.api_base
         if self.custom_llm_provider:
             params["custom_llm_provider"] = self.custom_llm_provider
-            params["api_key"] = "dummy_key"
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:
             params["max_tokens"] = self.max_tokens
         if self.temperature:
             params["temperature"] = self.temperature
-        # Set api_key last so we can add dummy keys to other params first and overwrite it if there is one
-        if self.api_key:
-            params["api_key"] = self.api_key
 
         # Set some params directly on LiteLLM
         if self.max_budget:
@@ -222,12 +220,4 @@ def fixed_litellm_completions(**params):
             print(
                 "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `interpreter.llm.api_key = 'x'`)"
             )
-
-        # So, let's try one more time with a dummy API key:
-        params["api_key"] = "x"
-
-        try:
-            yield from litellm.completion(**params)
-        except:
-            # If the second attempt also fails, raise the first error
-            raise first_error
+        raise first_error
