@@ -72,10 +72,10 @@ interpreter
 ### Python
 
 ```python
-import interpreter
+from interpreter import interpreter
 
 interpreter.chat("Vẽ giá cổ phiếu đã bình hoá của AAPL và META ") # Chạy trên 1 dòng lệnh
-interpreter.chat() # Khởi động chat có khả năng tương tác  
+interpreter.chat() # Khởi động chat có khả năng tương tác
 ```
 
 ## So sánh Code Interpreter của ChatGPT
@@ -90,10 +90,10 @@ Tuy nhiên, dịch vụ của OpenAI được lưu trữ, mã nguồn đóng, v�
 - Trạng thái tin nhắn bị xoá kèm với các tệp và liên kết được tạo trước đó khi đóng môi trường lại.
 
 ---
+
 Open Interpreter khắc phục những hạn chế này bằng cách chạy cục bộ trobộ môi trường máy tính của bạn. Nó có toàn quyền truy cập vào Internet, không bị hạn chế về thời gian hoặc kích thước tệp và có thể sử dụng bất kỳ gói hoặc thư viện nào.
 
 Đây là sự kết hợp sức mạnh của mã nguồn của GPT-4 với tính linh hoạt của môi trường phát triển cục bộ của bạn.
-
 
 ## Dòng lệnh
 
@@ -148,7 +148,7 @@ interpreter.chat("Nhìn đẹp đấy nhưng bạn có thể làm cho phụ đ�
 Trong Python, Open Interpreter ghi nhớ lịch sử hội thoại, nếu muốn bắt đầu lại từ đầu, bạn có thể cài thứ:
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### Lưu và khôi phục cuộc trò chuyện
@@ -157,7 +157,7 @@ interpreter.reset()
 
 ```python
 messages = interpreter.chat("Tên của tôi là Killian.") # Lưu tin nhắn tới 'messages'
-interpreter.reset() # Khởi động lại trình phiên dịch ("Killian" sẽ bị lãng quên)
+interpreter.messages = [] # Khởi động lại trình phiên dịch ("Killian" sẽ bị lãng quên)
 
 interpreter.messages = messages # Tiếp tục cuộc trò chuyện từ 'messages' ("Killian" sẽ được ghi nhớ)
 ```
@@ -178,6 +178,7 @@ print(interpreter.system_message)
 Open Interpreter sử dụng mô hình [LiteLLM](https://docs.litellm.ai/docs/providers/) để kết nối tới các mô hình ngôn ngữ được lưu trữ trước đó.
 
 Bạn có thể thay đổi mô hình ngôn ngữ bằng cách thay đổi tham số mô hình:
+
 ```shell
 interpreter --model gpt-3.5-turbo
 interpreter --model claude-2
@@ -187,7 +188,7 @@ interpreter --model command-nightly
 Ở trong Python, đổi model bằng cách thay đổi đối tượng:
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 [Tìm tên chuỗi "mô hình" phù hợp cho mô hình ngôn ngữ của bạn ở đây.](https://docs.litellm.ai/docs/providers/)
@@ -227,16 +228,16 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 ### Chế độ sửa lỗi
 
-Để giúp đóng góp kiểm tra Open Interpreter, thì chế độ `--debug` hơi dài dòng.
+Để giúp đóng góp kiểm tra Open Interpreter, thì chế độ `--verbose` hơi dài dòng.
 
-Bạn có thể khởi động chế độ sửa lỗi bằng cách sử dụng cờ (`interpreter --debug`), hoặc mid-chat:
+Bạn có thể khởi động chế độ sửa lỗi bằng cách sử dụng cờ (`interpreter --verbose`), hoặc mid-chat:
 
 ```shell
 $ interpreter
 ...
-> %debug true <- Khởi động chế độ gỡ lỗi
+> %verbose true <- Khởi động chế độ gỡ lỗi
 
-> %debug false <- Tắt chế độ gỡ lỗi
+> %verbose false <- Tắt chế độ gỡ lỗi
 ```
 
 ### Lệnh chế độ tương tác
@@ -245,7 +246,7 @@ Trong chế độ tương tác, bạn có thể sử dụng những dòng lệnh
 
 **Các lệnh có sẵn:**
 
-- `%debug [true/false]`: Bật chế độ gỡ lỗi. Có hay không có `true` đều khởi động chế độ gỡ lỗi. Với `false` thì nó tắt chế độ gỡ lỗi.
+- `%verbose [true/false]`: Bật chế độ gỡ lỗi. Có hay không có `true` đều khởi động chế độ gỡ lỗi. Với `false` thì nó tắt chế độ gỡ lỗi.
 - `%reset`: Khởi động lại toàn bộ phiên trò chuyện hiện tại.
 - `%undo`: Xóa tin nhắn của người dùng trước đó và phản hồi của AI khỏi lịch sử tin nhắn.
 - `%save_message [path]`: Lưu tin nhắn vào một đường dẫn JSON được xác định từ trước. Nếu không có đường dẫn nào được cung cấp, nó sẽ mặc định là `messages.json`.
@@ -258,7 +259,6 @@ Trong chế độ tương tác, bạn có thể sử dụng những dòng lệnh
 Open Interpreter cho phép bạn thiết lập các tác vụ mặc định bằng cách sử dụng file `config.yaml`.
 
 Điều này cung cấp một cách linh hoạt để định cấu hình trình thông dịch mà không cần thay đổi đối số dòng lệnh mỗi lần
-
 
 Chạy lệnh sau để mở tệp cấu hình:
 
@@ -286,7 +286,7 @@ interpreter --config_file $config_path
 
 **Chú ý**: Thay đổi `$config_path` với tên hoặc đường dẫn đến tệp cấu hình của bạn.
 
-##### Ví dụ CLI 
+##### Ví dụ CLI
 
 1. Tạo mới một file `config.turbo.yaml`
    ```
@@ -304,7 +304,7 @@ Bạn cũng có thể tải các tệp cấu hình khi gọi Open Interpreter t�
 
 ```python
 import os
-import interpreter
+from interpreter import interpreter
 
 currentPath = os.path.dirname(os.path.abspath(__file__))
 config_path=os.path.join(currentPath, './config.test.yaml')
@@ -326,7 +326,7 @@ Bản cập nhật trình tạo cho phép điều khiển Trình thông dịch m
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import interpreter
+from interpreter import interpreter
 
 app = FastAPI()
 

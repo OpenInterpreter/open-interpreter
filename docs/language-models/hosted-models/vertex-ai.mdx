@@ -1,0 +1,48 @@
+---
+title: Google (Vertex AI)
+---
+
+## Pre-requisites
+* `pip install google-cloud-aiplatform`
+* Authentication: 
+    * run `gcloud auth application-default login` See [Google Cloud Docs](https://cloud.google.com/docs/authentication/external/set-up-adc)
+    * Alternatively you can set `application_default_credentials.json`
+
+To use Open Interpreter with Google's Vertex AI API, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model gemini-pro
+interpreter --model gemini-pro-vision
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "gemini-pro"
+interpreter.llm.model = "gemini-pro-vision"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+Environment Variable  | Description  | Where to Find  |
+--------------------- | ------------ | -------------- |
+`VERTEXAI_PROJECT`       | The Google Cloud project ID. | [Google Cloud Console](https://console.cloud.google.com/vertex-ai) |
+`VERTEXAI_LOCATION`      | The location of your Vertex AI resources. | [Google Cloud Console](https://console.cloud.google.com/vertex-ai) |
+
+## Supported Models
+
+- gemini-pro
+- gemini-pro-vision
+- chat-bison-32k
+- chat-bison
+- chat-bison@001
+- codechat-bison
+- codechat-bison-32k
+- codechat-bison@001

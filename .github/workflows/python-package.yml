@@ -2,9 +2,9 @@ name: Build and Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -12,26 +12,26 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.10"]
+        python-version: ["3.10", "3.12"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-    - name: Install dependencies
-      run: |
-        # Update poetry to the latest version.
-        poetry self update
-        # Ensure dependencies are installed without relying on a lock file.
-        poetry update
-        poetry install
-    - name: Test with pytest
-      run: |
-        poetry run pytest -s
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+      - name: Install dependencies
+        run: |
+          # Update poetry to the latest version.
+          poetry self update
+          # Ensure dependencies are installed without relying on a lock file.
+          poetry update
+          poetry install
+      - name: Test with pytest
+        run: |
+          poetry run pytest -s -x
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

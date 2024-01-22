@@ -3,6 +3,7 @@ import subprocess
 
 import pkg_resources
 import psutil
+import toml
 
 
 def get_python_version():
@@ -19,8 +20,8 @@ def get_pip_version():
 
 def get_oi_version():
     try:
-        oi_version_cmd = (
-            subprocess.check_output(["interpreter", "--version"]).decode().split()[1]
+        oi_version_cmd = subprocess.check_output(
+            ["interpreter", "--version"], text=True
         )
     except Exception as e:
         oi_version_cmd = str(e)
@@ -45,32 +46,77 @@ def get_ram_info():
     return f"{total_ram_gb:.2f} GB, used: {used_ram_gb:.2f}, free: {free_ram_gb:.2f}"
 
 
+def get_package_mismatches(file_path="pyproject.toml"):
+    with open(file_path, "r") as file:
+        pyproject = toml.load(file)
+    dependencies = pyproject["tool"]["poetry"]["dependencies"]
+    dev_dependencies = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]
+    dependencies.update(dev_dependencies)
+
+    installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}
+
+    mismatches = []
+    for package, version_info in dependencies.items():
+        if isinstance(version_info, dict):
+            version_info = version_info["version"]
+        installed_version = installed_packages.get(package)
+        if installed_version and version_info.startswith("^"):
+            expected_version = version_info[1:]
+            if not installed_version.startswith(expected_version):
+                mismatches.append(
+                    f"\t  {package}: Mismatch, pyproject.toml={expected_version}, pip={installed_version}"
+                )
+        else:
+            mismatches.append(f"\t  {package}: Not found in pip list")
+
+    return "\n" + "\n".join(mismatches)
+
+
 def interpreter_info(interpreter):
     try:
-        if interpreter.local:
+        if interpreter.offline and interpreter.llm.api_base:
             try:
-                curl = subprocess.check_output(f"curl {interpreter.api_base}")
+                curl = subprocess.check_output(f"curl {interpreter.llm.api_base}")
             except Exception as e:
                 curl = str(e)
         else:
             curl = "Not local"
 
-        # System message:{interpreter.system_message}
+        messages_to_display = []
+        for message in interpreter.messages:
+            message = message.copy()
+            try:
+                if len(message["content"]) > 600:
+                    message["content"] = (
+                        message["content"][:300] + "..." + message["content"][-300:]
+                    )
+            except Exception as e:
+                print(str(e), "for message:", message)
+            messages_to_display.append(message)
+
         return f"""
 
-        Interpreter Info
-        Vision: {interpreter.vision}
-        Model: {interpreter.model}
-        Function calling: {interpreter.function_calling_llm}
-        Context window: {interpreter.context_window}
-        Max tokens: {interpreter.max_tokens}
+        # Interpreter Info
+        
+        Vision: {interpreter.llm.supports_vision}
+        Model: {interpreter.llm.model}
+        Function calling: {interpreter.llm.supports_functions}
+        Context window: {interpreter.llm.context_window}
+        Max tokens: {interpreter.llm.max_tokens}
 
         Auto run: {interpreter.auto_run}
-        API base: {interpreter.api_base}
-        Local: {interpreter.local}
+        API base: {interpreter.llm.api_base}
+        Offline: {interpreter.offline}
 
         Curl output: {curl}
-    """
+
+        # Messages
+
+        System Message: {interpreter.system_message}
+
+        """ + "\n\n".join(
+            [str(m) for m in messages_to_display]
+        )
     except:
         return "Error, couldn't get interpreter info"
 
@@ -81,10 +127,15 @@ def system_info(interpreter):
         f"""
         Python Version: {get_python_version()}
         Pip Version: {get_pip_version()}
-        Open-interpreter Version: cmd:{oi_version[0]}, pkg: {oi_version[1]}
+        Open-interpreter Version: cmd: {oi_version[0]}, pkg: {oi_version[1]}
         OS Version and Architecture: {get_os_version()}
         CPU Info: {get_cpu_info()}
         RAM Info: {get_ram_info()}
         {interpreter_info(interpreter)}
     """
     )
+
+    # Removed the following, as it causes `FileNotFoundError: [Errno 2] No such file or directory: 'pyproject.toml'`` on prod
+    # (i think it works on dev, but on prod the pyproject.toml will not be in the cwd. might not be accessible at all)
+    # Package Version Mismatches:
+    # {get_package_mismatches()}

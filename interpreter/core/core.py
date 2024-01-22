@@ -1,84 +1,95 @@
 """
 This file defines the Interpreter class.
-It's the main file. `import interpreter` will import an instance of this class.
+It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
 
 import json
 import os
 from datetime import datetime
 
-from ..terminal_interface.start_terminal_interface import start_terminal_interface
 from ..terminal_interface.terminal_interface import terminal_interface
-from ..terminal_interface.utils.get_config import get_config, user_config_path
 from ..terminal_interface.utils.local_storage_path import get_storage_path
 from .computer.computer import Computer
-from .generate_system_message import generate_system_message
-from .llm.setup_llm import setup_llm
+from .default_system_message import default_system_message
+from .extend_system_message import extend_system_message
+from .llm.llm import Llm
 from .respond import respond
+from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
 
 
-class Interpreter:
-    def start_terminal_interface(self):
-        start_terminal_interface(self)
+class OpenInterpreter:
+    """
+    This class (one instance is called an `interpreter`) is the "grand central station" of this project.
 
-    def __init__(self):
+    Its responsibilities are to:
+
+    1. Given some user input, prompt the language model.
+    2. Parse the language models responses, converting them into LMC Messages.
+    3. Send code to the computer.
+    4. Parse the computer's response (which will already be LMC Messages).
+    5. Send the computer's response back to the language model.
+    ...
+
+    The above process should repeat—going back and forth between the language model and the computer— until:
+
+    6. Decide when the process is finished based on the language model's response.
+    """
+
+    def __init__(
+        self,
+        messages=None,
+        offline=False,
+        auto_run=False,
+        verbose=False,
+        max_output=2800,
+        safe_mode="off",
+        shrink_images=False,
+        force_task_completion=False,
+        anonymous_telemetry=os.getenv("ANONYMIZED_TELEMETRY", "True") == "True",
+        in_terminal_interface=False,
+        conversation_history=True,
+        conversation_filename=None,
+        conversation_history_path=get_storage_path("conversations"),
+        os=False,
+        speak_messages=False,
+        llm=None,
+        system_message=default_system_message,
+        custom_instructions="",
+        computer=None,
+    ):
         # State
-        self.messages = []
-
-        self.config_file = user_config_path
+        self.messages = [] if messages is None else messages
 
         # Settings
-        self.local = False
-        self.auto_run = False
-        self.debug_mode = False
-        self.max_output = 2000
-        self.safe_mode = "off"
-        self.disable_procedures = False
-        self.force_task_completion = False
+        self.offline = offline
+        self.auto_run = auto_run
+        self.verbose = verbose
+        self.max_output = max_output
+        self.safe_mode = safe_mode
+        self.shrink_images = shrink_images
+        self.force_task_completion = force_task_completion
+        self.anonymous_telemetry = anonymous_telemetry
+        self.in_terminal_interface = in_terminal_interface
 
         # Conversation history
-        self.conversation_history = True
-        self.conversation_filename = None
-        self.conversation_history_path = get_storage_path("conversations")
+        self.conversation_history = conversation_history
+        self.conversation_filename = conversation_filename
+        self.conversation_history_path = conversation_history_path
 
-        # LLM settings
-        self.model = ""
-        self.temperature = None
-        self.system_message = ""
-        self.context_window = None
-        self.max_tokens = None
-        self.api_base = None
-        self.api_key = None
-        self.api_version = None
-        self.max_budget = None
-        self._llm = None
-        self.function_calling_llm = None
-        self.vision = False  # LLM supports vision
+        # OS control mode related attributes
+        self.os = os
+        self.speak_messages = speak_messages
 
-        # Computer settings
-        self.computer = Computer()
-        # Permitted languages, all lowercase
-        self.languages = [i.name.lower() for i in self.computer.terminal.languages]
-        # (Not implemented) Permitted functions
-        # self.functions = [globals]
+        # LLM
+        self.llm = Llm(self) if llm is None else llm
 
-        # OS control mode
-        self.os = False
-        self.speak_messages = False
+        # These are LLM related
+        self.system_message = system_message
+        self.custom_instructions = custom_instructions
 
-        # Load config defaults
-        self.extend_config(self.config_file)
-
-        # Expose class so people can make new instances
-        self.Interpreter = Interpreter
-
-    def extend_config(self, config_path):
-        if self.debug_mode:
-            print(f"Extending configuration from `{config_path}`")
-
-        config = get_config(config_path)
-        self.__dict__.update(config)
+        # Computer
+        self.computer = Computer() if computer is None else computer
 
     def chat(self, message=None, display=True, stream=False):
         if self.vision:
@@ -89,23 +100,48 @@ class Interpreter:
             self.max_tokens = 4096
             self.force_task_completion = True
 
-        if stream:
-            return self._streaming_chat(message=message, display=display)
+        try:
+            if self.anonymous_telemetry and not self.offline:
+                message_type = type(
+                    message
+                ).__name__  # Only send message type, no content
+                send_telemetry(
+                    "started_chat",
+                    properties={
+                        "in_terminal_interface": self.in_terminal_interface,
+                        "message_type": message_type,
+                        "os_mode": self.os,
+                    },
+                )
 
-        initial_message_count = len(self.messages)
+            if stream:
+                return self._streaming_chat(message=message, display=display)
 
-        # If stream=False, *pull* from the stream.
-        for _ in self._streaming_chat(message=message, display=display):
-            pass
+            initial_message_count = len(self.messages)
 
-        # Return new messages
-        return self.messages[initial_message_count:]
+            # If stream=False, *pull* from the stream.
+            for _ in self._streaming_chat(message=message, display=display):
+                pass
+
+            # Return new messages
+            return self.messages[initial_message_count:]
+
+        except Exception as e:
+            if self.anonymous_telemetry and not self.offline:
+                message_type = type(message).__name__
+                send_telemetry(
+                    "errored",
+                    properties={
+                        "error": str(e),
+                        "in_terminal_interface": self.in_terminal_interface,
+                        "message_type": message_type,
+                        "os_mode": self.os,
+                    },
+                )
+
+            raise
 
     def _streaming_chat(self, message=None, display=True):
-        # Setup the LLM
-        if not self._llm:
-            self._llm = setup_llm(self)
-
         # Sometimes a little more code -> a much better experience!
         # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
@@ -138,11 +174,11 @@ class Interpreter:
             # REENABLE this when multimodal becomes more common:
 
             # Make sure we're using a model that can handle this
-            # if not self.vision:
+            # if not self.llm.supports_vision:
             #     for message in self.messages:
             #         if message["type"] == "image":
             #             raise Exception(
-            #                 "Use a multimodal model and set `interpreter.vision` to True to handle image messages."
+            #                 "Use a multimodal model and set `interpreter.llm.supports_vision` to True to handle image messages."
             #             )
 
             # This is where it all happens!
@@ -204,6 +240,7 @@ class Interpreter:
                     last_flag_base = None
                 yield chunk
                 # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
+                # ... rethink this though.
                 self.messages.append(
                     {
                         "role": "computer",
@@ -267,11 +304,11 @@ class Interpreter:
         self.computer.terminate()  # Terminates all languages
 
         # Reset the function below, in case the user set it
-        self.generate_system_message = lambda: generate_system_message(self)
+        self.extend_system_message = lambda: extend_system_message(self)
 
         self.__init__()
 
     # These functions are worth exposing to developers
     # I wish we could just dynamically expose all of our functions to devs...
-    def generate_system_message(self):
-        return generate_system_message(self)
+    def extend_system_message(self):
+        return extend_system_message(self)

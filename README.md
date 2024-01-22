@@ -9,8 +9,7 @@
     <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
-    <b>Let language models run code on your computer.</b><br>
-    An open-source, locally running implementation of OpenAI's Code Interpreter.<br>
+    <strong>Let language models run code.</strong><br>
     <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
@@ -19,14 +18,16 @@
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
-
-**Update:** ● 0.1.12 supports `interpreter --vision` ([documentation](https://docs.openinterpreter.com/usage/terminal/vision))
-
+<p align="center">
+<strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
+</p>
 <br>
 
 ```shell
 pip install open-interpreter
 ```
+
+> Not working? Read our [setup guide](https://docs.openinterpreter.com/getting-started/setup).
 
 ```shell
 interpreter
@@ -55,7 +56,7 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
 
-#### Along with an example implementation of a voice interface (inspired by _Her_):
+#### Along with an example voice interface, inspired by _Her_:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
 
@@ -76,7 +77,7 @@ interpreter
 ### Python
 
 ```python
-import interpreter
+from interpreter import interpreter
 
 interpreter.chat("Plot AAPL and META's normalized stock prices") # Executes a single command
 interpreter.chat() # Starts an interactive chat
@@ -152,7 +153,7 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### Save and Restore Chats
@@ -161,7 +162,7 @@ interpreter.reset()
 
 ```python
 messages = interpreter.chat("My name is Killian.") # Save messages to 'messages'
-interpreter.reset() # Reset interpreter ("Killian" will be forgotten)
+interpreter.messages = [] # Reset interpreter ("Killian" will be forgotten)
 
 interpreter.messages = messages # Resume chat from 'messages' ("Killian" will be remembered)
 ```
@@ -192,7 +193,7 @@ interpreter --model command-nightly
 In Python, set the model on the object:
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 [Find the appropriate "model" string for your language model here.](https://docs.litellm.ai/docs/providers/)
@@ -227,12 +228,12 @@ Once the server is running, you can begin your conversation with Open Interprete
 Our Python package gives you more control over each setting. To replicate `--local` and connect to LM Studio, use these settings:
 
 ```python
-import interpreter
+from interpreter import interpreter
 
-interpreter.local = True # Disables online features like Open Procedures
-interpreter.model = "openai/x" # Tells OI to send messages in OpenAI's format
-interpreter.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
-interpreter.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+interpreter.offline = True # Disables online features like Open Procedures
+interpreter.llm.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.llm.api_key = "fake_key" # LiteLLM, which we use to talk to LM Studio, requires this
+interpreter.llm.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
 
 interpreter.chat()
 ```
@@ -241,24 +242,24 @@ interpreter.chat()
 
 You can modify the `max_tokens` and `context_window` (in tokens) of locally running models.
 
-For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's is failing / if it's slow. Make sure `max_tokens` is less than `context_window`.
+For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's failing / if it's slow. Make sure `max_tokens` is less than `context_window`.
 
 ```shell
 interpreter --local --max_tokens 1000 --context_window 3000
 ```
 
-### Debug mode
+### Verbose mode
 
-To help contributors inspect Open Interpreter, `--debug` mode is highly verbose.
+To help you inspect Open Interpreter we have a `--verbose` mode for debugging.
 
-You can activate debug mode by using it's flag (`interpreter --debug`), or mid-chat:
+You can activate verbose mode by using its flag (`interpreter --verbose`), or mid-chat:
 
 ```shell
 $ interpreter
 ...
-> %debug true <- Turns on debug mode
+> %verbose true <- Turns on verbose mode
 
-> %debug false <- Turns off debug mode
+> %verbose false <- Turns off verbose mode
 ```
 
 ### Interactive Mode Commands
@@ -267,12 +268,10 @@ In the interactive mode, you can use the below commands to enhance your experien
 
 **Available Commands:**
 
-- `%debug [true/false]`: Toggle debug mode. Without arguments or with `true` it
-  enters debug mode. With `false` it exits debug mode.
+- `%verbose [true/false]`: Toggle verbose mode. Without arguments or with `true` it
+  enters verbose mode. With `false` it exits verbose mode.
 - `%reset`: Resets the current session's conversation.
 - `%undo`: Removes the previous user message and the AI's response from the message history.
-- `%save_message [path]`: Saves messages to a specified JSON path. If no path is provided, it defaults to `messages.json`.
-- `%load_message [path]`: Loads messages from a specified JSON path. If no path is provided, it defaults to `messages.json`.
 - `%tokens [prompt]`: (_Experimental_) Calculate the tokens that will be sent with the next prompt as context and estimate their cost. Optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated costs.
 - `%help`: Show the help message.
 
@@ -308,7 +307,7 @@ interpreter --config_file $config_path
 
 **Note**: Replace `$config_path` with the name of or path to your configuration file.
 
-##### CLI Example
+##### Example
 
 1. Create a new `config.turbo.yaml` file
    ```
@@ -320,25 +319,6 @@ interpreter --config_file $config_path
    interpreter --config_file config.turbo.yaml
    ```
 
-##### Python Example
-
-You can also load configuration files when calling Open Interpreter from Python scripts:
-
-```python
-import os
-import interpreter
-
-currentPath = os.path.dirname(os.path.abspath(__file__))
-config_path=os.path.join(currentPath, './config.test.yaml')
-
-interpreter.extend_config(config_path=config_path)
-
-message = "What operating system are we on?"
-
-for chunk in interpreter.chat(message, display=False, stream=True):
-  print(chunk)
-```
-
 ## Sample FastAPI Server
 
 The generator update enables Open Interpreter to be controlled via HTTP REST endpoints:
@@ -348,7 +328,7 @@ The generator update enables Open Interpreter to be controlled via HTTP REST end
 
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
-import interpreter
+from interpreter import interpreter
 
 app = FastAPI()
 
@@ -369,6 +349,10 @@ def history_endpoint():
 pip install fastapi uvicorn
 uvicorn server:app --reload
 ```
+
+## Android
+
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
 
 ## Safety Notice
 
@@ -401,6 +385,8 @@ Please see our [contributing guidelines](docs/CONTRIBUTING.md) for more details 
 Visit [our roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) to preview the future of Open Interpreter.
 
 **Note**: This software is not affiliated with OpenAI.
+
+![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
 
 > Having access to a junior programmer working at the speed of your fingertips ... can make new workflows effortless and efficient, as well as open the benefits of programming to new audiences.
 >

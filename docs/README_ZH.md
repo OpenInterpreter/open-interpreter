@@ -66,7 +66,7 @@ interpreter
 ### Python
 
 ```python
-import interpreter
+from interpreter import interpreter
 
 interpreter.chat("Plot AAPL and META's normalized stock prices") # 执行单一命令
 interpreter.chat() # 开始交互式聊天
@@ -124,14 +124,14 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 在 Python 中，Open Interpreter 会记录历史对话。如果你想从头开始，可以进行重置：
 
 ```python
-interpreter.reset()
+interpreter.messages = []
 ```
 
 ### 保存和恢复聊天
 
 ```python
 messages = interpreter.chat("My name is Killian.") # 保存消息到 'messages'
-interpreter.reset() # 重置解释器 ("Killian" 将被遗忘)
+interpreter.messages = [] # 重置解释器 ("Killian" 将被遗忘)
 
 interpreter.messages = messages # 从 'messages' 恢复聊天 ("Killian" 将被记住)
 ```
@@ -162,7 +162,7 @@ interpreter --model command-nightly
 在 Python 环境下，您需要手动设置模型：
 
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 ### 在本地运行 Open Interpreter（开放解释器）
@@ -173,16 +173,16 @@ interpreter --local
 
 ### 调试模式
 
-为了帮助贡献者检查和调试 Open Interpreter，`--debug` 模式提供了详细的日志。
+为了帮助贡献者检查和调试 Open Interpreter，`--verbose` 模式提供了详细的日志。
 
-您可以使用 `interpreter --debug` 来激活调试模式，或者直接在终端输入：
+您可以使用 `interpreter --verbose` 来激活调试模式，或者直接在终端输入：
 
 ```shell
 $ interpreter
 ...
-> %debug true <- 开启调试模式
+> %verbose true <- 开启调试模式
 
-> %debug false <- 关闭调试模式
+> %verbose false <- 关闭调试模式
 ```
 
 ## 安全提示

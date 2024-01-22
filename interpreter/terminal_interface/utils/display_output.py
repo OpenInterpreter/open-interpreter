@@ -14,7 +14,7 @@ def display_output(output):
         if output["type"] == "console":
             print(output["content"])
         elif output["type"] == "image":
-            if output["format"] == "base64":
+            if "base64" in output["format"]:
                 # Decode the base64 image data
                 image_data = base64.b64decode(output["content"])
                 display(Image(image_data))
@@ -38,10 +38,22 @@ def display_output_cli(output):
     if output["type"] == "console":
         print(output["content"])
     elif output["type"] == "image":
-        if output["format"] == "base64":
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_file:
+        if "base64" in output["format"]:
+            if "." in output["format"]:
+                extension = output["format"].split(".")[-1]
+            else:
+                extension = "png"
+            with tempfile.NamedTemporaryFile(
+                delete=False, suffix="." + extension
+            ) as tmp_file:
                 image_data = base64.b64decode(output["content"])
                 tmp_file.write(image_data)
+
+                # # Display in Terminal (DISABLED, i couldn't get it to work)
+                # from term_image.image import from_file
+                # image = from_file(tmp_file.name)
+                # image.draw()
+
                 open_file(tmp_file.name)
         elif output["format"] == "path":
             open_file(output["content"])
@@ -50,8 +62,6 @@ def display_output_cli(output):
             delete=False, suffix=".html", mode="w"
         ) as tmp_file:
             html = output["content"]
-            if "<html>" not in html:
-                html = "<html>\n" + html + "\n</html>"
             tmp_file.write(html)
             open_file(tmp_file.name)
     elif "format" in output and output["format"] == "javascript":

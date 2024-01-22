@@ -1,0 +1,64 @@
+---
+title: Docker
+---
+
+Docker support is currently experimental. Running Open Interpreter inside of a Docker container may not function as you expect. Let us know on [Discord](https://discord.com/invite/6p3fD6rBVm) if you encounter errors or have suggestions to improve Docker support.
+
+We are working on an official integration for Docker in the coming weeks. For now, you can use Open Interpreter in a sandboxed Docker container environment using the following steps:
+
+1. If you do not have Docker Desktop installed, [install it](https://www.docker.com/products/docker-desktop) before proceeding.
+
+2. Create a new directory and add a file named `Dockerfile` in it with the following contents:
+
+```dockerfile
+# Start with Python 3.11
+FROM python:3.11
+
+# Replace <your_openai_api_key> with your own key
+ENV OPENAI_API_KEY <your_openai_api_key>
+
+# Install Open Interpreter
+RUN pip install open-interpreter
+```
+
+3. Run the following commands in the same directory to start Open Interpreter.
+
+```bash
+docker build -t openinterpreter .
+docker run -d -it --name interpreter-instance openinterpreter interpreter
+docker attach interpreter-instance
+```
+
+## Mounting Volumes
+
+This is how you let it access _some_ files, by telling it a folder (a volume) it will be able to see / manipulate.
+
+To mount a volume, you can use the `-v` flag followed by the path to the directory on your host machine, a colon, and then the path where you want to mount the directory in the container.
+
+```bash
+docker run -d -it -v /path/on/your/host:/path/in/the/container --name interpreter-instance openinterpreter interpreter
+```
+
+Replace `/path/on/your/host` with the path to the directory on your host machine that you want to mount, and replace `/path/in/the/container` with the path in the Docker container where you want to mount the directory.
+
+Here's a simple example:
+
+```bash
+docker run -d -it -v $(pwd):/files --name interpreter-instance openinterpreter interpreter
+```
+
+In this example, `$(pwd)` is your current directory, and it is mounted to a `/files` directory in the Docker container (this creates that folder too).
+
+## Flags
+
+To add flags to the command, just append them after `interpreter`. For example, to run the interpreter with custom instructions, run the following command:
+
+```bash
+docker-compose run --rm oi interpreter --custom_instructions "Be as concise as possible"
+```
+
+Please note that some flags will not work. For example, `--config` will not work, because it cannot open the config file in the container. If you want to use a config file other than the default, you can create a `config.yml` file inside of the same directory, add your custom config, and then run the following command:
+
+```bash
+docker-compose run --rm oi interpreter --config_file config.yml
+```

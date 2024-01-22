@@ -1,8 +1,12 @@
-import getpass
+"""
+I do not like this and I want to get rid of it lol. Like, what is it doing..?
+"""
+
 import os
 import time
 
 import litellm
+from prompt_toolkit import prompt
 
 from .utils.display_markdown_message import display_markdown_message
 
@@ -15,7 +19,7 @@ def validate_llm_settings(interpreter):
     # This runs in a while loop so `continue` lets us start from the top
     # after changing settings (like switching to/from local)
     while True:
-        if interpreter.local:
+        if interpreter.offline:
             # We have already displayed a message.
             # (This strange behavior makes me think validate_llm_settings needs to be rethought / refactored)
             break
@@ -24,8 +28,8 @@ def validate_llm_settings(interpreter):
             # Ensure API keys are set as environment variables
 
             # OpenAI
-            if interpreter.model in litellm.open_ai_chat_completion_models:
-                if not os.environ.get("OPENAI_API_KEY") and not interpreter.api_key:
+            if interpreter.llm.model in litellm.open_ai_chat_completion_models:
+                if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key:
                     display_welcome_message_once()
 
                     display_markdown_message(
@@ -40,8 +44,7 @@ def validate_llm_settings(interpreter):
                     """
                     )
 
-                    response = getpass.getpass("OpenAI API key: ")
-                    print(f"OpenAI API key: {response[:4]}...{response[-4:]}")
+                    response = prompt("OpenAI API key: ", is_password=True)
 
                     display_markdown_message(
                         """
@@ -51,7 +54,7 @@ def validate_llm_settings(interpreter):
                     ---"""
                     )
 
-                    interpreter.api_key = response
+                    interpreter.llm.api_key = response
                     time.sleep(2)
                     break
 
@@ -61,9 +64,9 @@ def validate_llm_settings(interpreter):
     # If we're here, we passed all the checks.
 
     # Auto-run is for fast, light useage -- no messages.
-    # If local, we've already displayed a message.
-    if not interpreter.auto_run and not interpreter.local:
-        display_markdown_message(f"> Model set to `{interpreter.model}`")
+    # If offline, it's usually a bogus model name for LiteLLM since LM Studio doesn't require one.
+    if not interpreter.auto_run and not interpreter.offline:
+        display_markdown_message(f"> Model set to `{interpreter.llm.model}`")
     return
 
 

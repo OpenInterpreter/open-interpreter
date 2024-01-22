@@ -1,15 +1,29 @@
-import pyautogui
-import pyperclip
+import os
+
+try:
+    import pyperclip
+except:
+    # Optional package
+    pass
 
 
 class Clipboard:
-    def get_selected_text(self):
-        # Store the current clipboard content
-        current_clipboard = pyperclip.paste()
-        # Copy the selected text to clipboard
-        pyautogui.hotkey("ctrl", "c", interval=0.15)
-        # Get the selected text from clipboard
-        selected_text = pyperclip.paste()
-        # Reset the clipboard to its original content
-        pyperclip.copy(current_clipboard)
-        return selected_text
+    def __init__(self, computer):
+        self.computer = computer
+
+        if os.name == "nt":
+            self.modifier_key = "ctrl"
+        else:
+            self.modifier_key = "command"
+
+    def view(self):
+        return pyperclip.paste()
+
+    def copy(self, text=None):
+        if text is not None:
+            pyperclip.copy(text)
+        else:
+            self.computer.keyboard.hotkey(self.modifier_key, "c")
+
+    def paste(self):
+        self.computer.keyboard.hotkey(self.modifier_key, "v")

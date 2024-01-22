@@ -12,7 +12,7 @@ title: Arguments
 
 #### `messages`
 
-This property holds a list of `messages` between the user and the interpreter. 
+This property holds a list of `messages` between the user and the interpreter.
 
 You can use it to restore a conversation:
 
@@ -49,13 +49,15 @@ interpreter.messages = messages # A list that resembles the one above
 
 ---
 
-#### `local`
+#### `offline`
 
-This boolean flag determines whether the model [runs locally](/language-model-setup/local-models/overview) (`True`) or in the cloud (`False`). 
+<Info>This replaced `interpreter.local` in the New Computer Update (`0.2.0`).</Info>
+
+This boolean flag determines whether to enable or disable some offline features like [open procedures](https://open-procedures.replit.app/).
 
 ```python
-interpreter.local = True  # Run locally
-interpreter.local = False  # Run in the cloud
+interpreter.offline = True  # Check for updates, use procedures
+interpreter.offline = False  # Don't check for updates, don't use procedures
 ```
 
 Use this in conjunction with the `model` parameter to set your language model.
@@ -73,13 +75,13 @@ interpreter.auto_run = False  # Require user confirmation (default)
 
 ---
 
-#### `debug_mode`
+#### `verbose`
 
-Use this boolean flag to toggle debug mode on or off. Debug mode will print information at every step to help diagnose problems.
+Use this boolean flag to toggle verbose mode on or off. Verbose mode will print information at every step to help diagnose problems.
 
 ```python
-interpreter.debug_mode = True  # Turns on debug mode
-interpreter.debug_mode = False  # Turns off debug mode
+interpreter.verbose = True  # Turns on verbose mode
+interpreter.verbose = False  # Turns off verbose mode
 ```
 
 ---
@@ -130,10 +132,8 @@ interpreter.conversation_history_path = os.path.join("my_folder", "conversations
 
 Specifies the language model to be used.
 
-If `interpreter.local` is set to `True`, [the language model will be run locally.](/language-model-setup/local-models/overview)
-
 ```python
-interpreter.model = "gpt-3.5-turbo"
+interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
 ---
@@ -143,7 +143,7 @@ interpreter.model = "gpt-3.5-turbo"
 Sets the randomness level of the model's output.
 
 ```python
-interpreter.temperature = 0.7
+interpreter.llm.temperature = 0.7
 ```
 
 ---
@@ -165,7 +165,7 @@ This manually sets the context window size in tokens.
 We try to guess the right context window size for you model, but you can override it with this parameter.
 
 ```python
-interpreter.context_window = 16000
+interpreter.llm.context_window = 16000
 ```
 
 ---
@@ -175,7 +175,7 @@ interpreter.context_window = 16000
 Sets the maximum number of tokens the model can generate in a single response.
 
 ```python
-interpreter.max_tokens = 100
+interpreter.llm.max_tokens = 100
 ```
 
 ---
@@ -185,7 +185,7 @@ interpreter.max_tokens = 100
 If you are using a custom API, you can specify its base URL here.
 
 ```python
-interpreter.api_base = "https://api.example.com"
+interpreter.llm.api_base = "https://api.example.com"
 ```
 
 ---
@@ -195,7 +195,7 @@ interpreter.api_base = "https://api.example.com"
 Set your API key for authentication.
 
 ```python
-interpreter.api_key = "your_api_key_here"
+interpreter.llm.api_key = "your_api_key_here"
 ```
 
 ---

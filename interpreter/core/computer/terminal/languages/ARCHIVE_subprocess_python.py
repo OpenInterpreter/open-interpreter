@@ -49,7 +49,9 @@ def preprocess_python(code):
     """
 
     # Add print commands that tell us what the active line is
-    code = add_active_line_prints(code)
+    # but don't do this if any line starts with ! or %
+    if not any(line.strip().startswith(("!", "%")) for line in code.split("\n")):
+        code = add_active_line_prints(code)
 
     # Wrap in a try except
     code = wrap_in_try_except(code)

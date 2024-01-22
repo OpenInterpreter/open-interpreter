@@ -5,86 +5,146 @@ from random import randint
 
 import pytest
 
-import interpreter
+#####
+from interpreter import OpenInterpreter
+from interpreter.terminal_interface.utils.apply_config import apply_config
 from interpreter.terminal_interface.utils.count_tokens import (
     count_messages_tokens,
     count_tokens,
 )
+
+interpreter = OpenInterpreter()
+#####
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_find_text_api():
+    start = time.time()
+    interpreter.computer.mouse.move(
+        "Left Arrow Left Arrow and a bunch of hallucinated text? or was it..."
+    )
+    # Left Arrow Left Arrow
+    # and a bunch of hallucinated text? or was it...
+    print(time.time() - start)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_getActiveWindow():
+    import pywinctl
+
+    print(pywinctl.getActiveWindow())
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_notify():
+    interpreter.computer.os.notify("Hello")
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_get_text():
+    print(interpreter.computer.display.get_text_as_list_of_lists())
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_keyboard():
+    time.sleep(2)
+    interpreter.computer.keyboard.write("Hello " * 50 + "\n" + "hi" * 50)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_get_selected_text():
+    print("Getting selected text")
+    time.sleep(1)
+    text = interpreter.computer.os.get_selected_text()
+    print(text)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_verbose():
+    interpreter.computer.verbose = True
+    interpreter.verbose = True
+    interpreter.computer.mouse.move(x=500, y=500)
+    assert False
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_api():
+    start = time.time()
+    time.sleep(5)
+
+    def say(icon_name):
+        import subprocess
+
+        subprocess.run(["say", "-v", "Fred", icon_name])
+
+    say("walk")
+    interpreter.computer.mouse.move(icon="walk")
+    say("run")
+    interpreter.computer.mouse.move(icon="run")
+    say("martini")
+    interpreter.computer.mouse.move(icon="martini")
+    say("walk icon")
+    interpreter.computer.mouse.move(icon="walk icon")
+    say("run icon")
+    interpreter.computer.mouse.move(icon="run icon")
+    say("martini icon")
+    interpreter.computer.mouse.move(icon="martini icon")
+
+    say("compass")
+    interpreter.computer.mouse.move(icon="compass")
+    say("photo")
+    interpreter.computer.mouse.move(icon="photo")
+    say("mountain")
+    interpreter.computer.mouse.move(icon="mountain")
+    say("boat")
+    interpreter.computer.mouse.move(icon="boat")
+    say("coffee")
+    interpreter.computer.mouse.move(icon="coffee")
+    say("pizza")
+    interpreter.computer.mouse.move(icon="pizza")
+    say("printer")
+    interpreter.computer.mouse.move(icon="printer")
+    say("home")
+    interpreter.computer.mouse.move(icon="home")
+    say("compass icon")
+    interpreter.computer.mouse.move(icon="compass icon")
+    say("photo icon")
+    interpreter.computer.mouse.move(icon="photo icon")
+    say("mountain icon")
+    interpreter.computer.mouse.move(icon="mountain icon")
+    say("boat icon")
+    interpreter.computer.mouse.move(icon="boat icon")
+    say("coffee icon")
+    interpreter.computer.mouse.move(icon="coffee icon")
+    say("pizza icon")
+    interpreter.computer.mouse.move(icon="pizza icon")
+    say("printer icon")
+    interpreter.computer.mouse.move(icon="printer icon")
+    say("home icon")
+    interpreter.computer.mouse.move(icon="home icon")
+    # interpreter.computer.mouse.move(icon="caution")
+    # interpreter.computer.mouse.move(icon="bluetooth")
+    # interpreter.computer.mouse.move(icon="gear")
+    # interpreter.computer.mouse.move(icon="play button")
+    # interpreter.computer.mouse.move(icon="code icon with '>_' in it")
+    print(time.time() - start)
+    assert False
 
 
 # this function will run before each test
 # we're clearing out the messages Array so we can start fresh and reduce token usage
 def setup_function():
     interpreter.reset()
-    interpreter.temperature = 0
+    interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.model = "gpt-3.5-turbo"
-    interpreter.debug_mode = False
-
-
-# this function will run after each test
-# we're introducing some sleep to help avoid timeout issues with the OpenAI API
-def teardown_function():
-    time.sleep(4)
-
-
-@pytest.mark.skip(reason="Mac only + no way to fail test")
-def test_spotlight():
-    interpreter.computer.keyboard.hotkey("command", "space")
-
-
-def test_config_loading():
-    # because our test is running from the root directory, we need to do some
-    # path manipulation to get the actual path to the config file or our config
-    # loader will try to load from the wrong directory and fail
-    currentPath = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(currentPath, "./config.test.yaml")
-
-    interpreter.extend_config(config_path=config_path)
-
-    # check the settings we configured in our config.test.yaml file
-    temperature_ok = interpreter.temperature == 0.25
-    model_ok = interpreter.model == "gpt-3.5-turbo"
-    debug_mode_ok = interpreter.debug_mode == True
-
-    assert temperature_ok and model_ok and debug_mode_ok
-
-
-def test_files():
-    messages = [
-        {"role": "user", "type": "message", "content": "Does this file exist?"},
-        {
-            "role": "user",
-            "type": "file",
-            "format": "path",
-            "content": "/Users/Killian/image.png",
-        },
-    ]
-    interpreter.chat(messages)
-
-
-@pytest.mark.skip(reason="Only 100 vision calls allowed / day!")
-def test_vision():
-    base64png = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC"
-    messages = [
-        {"role": "user", "type": "message", "content": "describe this image"},
-        {
-            "role": "user",
-            "type": "image",
-            "format": "base64.png",
-            "content": base64png,
-        },
-    ]
-
-    interpreter.vision = True
-    interpreter.model = "gpt-4-vision-preview"
-    interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
-    interpreter.function_calling_llm = False
-    interpreter.context_window = 110000
-    interpreter.max_tokens = 4096
-    interpreter.force_task_completion = True
-
-    interpreter.chat(messages)
+    interpreter.llm.model = "gpt-3.5-turbo"
+    interpreter.verbose = False
 
 
 def test_generator():
@@ -93,10 +153,10 @@ def test_generator():
     """
 
     for tests in [
-        {"query": "What's 38023*40334?", "display": True},
-        {"query": "What's 2334*34335555?", "display": True},
-        {"query": "What's 3545*22?", "display": False},
-        {"query": "What's 0.0021*3433335555?", "display": False},
+        {"query": "What's 38023*40334? Use Python", "display": True},
+        {"query": "What's 2334*34335555? Use Python", "display": True},
+        {"query": "What's 3545*22? Use Python", "display": False},
+        {"query": "What's 0.0021*3433335555? Use Python", "display": False},
     ]:
         assistant_message_found = False
         console_output_found = False
@@ -168,13 +228,93 @@ def test_generator():
         assert active_line_found, "No active line was found"
 
 
-def test_multiple_instances():
-    import interpreter
+def test_long_message():
+    messages = [
+        {
+            "role": "user",
+            "type": "message",
+            "content": "ABCD" * 20000 + "\ndescribe to me what i just said",
+        }
+    ]
+    interpreter.llm.context_window = 300
+    interpreter.chat(messages)
+    assert len(interpreter.messages) > 1
+    assert "A" in interpreter.messages[-1]["content"]
 
+
+# this function will run after each test
+# we're introducing some sleep to help avoid timeout issues with the OpenAI API
+def teardown_function():
+    time.sleep(4)
+
+
+@pytest.mark.skip(reason="Mac only + no way to fail test")
+def test_spotlight():
+    interpreter.computer.keyboard.hotkey("command", "space")
+
+
+@pytest.mark.skip(reason="We no longer test")
+def test_config_loading():
+    # because our test is running from the root directory, we need to do some
+    # path manipulation to get the actual path to the config file or our config
+    # loader will try to load from the wrong directory and fail
+    currentPath = os.path.dirname(os.path.abspath(__file__))
+    config_path = os.path.join(currentPath, "./config.test.yaml")
+
+    interpreter = apply_config(interpreter, config_path=config_path)
+
+    # check the settings we configured in our config.test.yaml file
+    temperature_ok = interpreter.llm.temperature == 0.25
+    model_ok = interpreter.llm.model == "gpt-3.5-turbo"
+    verbose_ok = interpreter.verbose == True
+
+    assert temperature_ok and model_ok and verbose_ok
+
+
+def test_files():
+    messages = [
+        {"role": "user", "type": "message", "content": "Does this file exist?"},
+        {
+            "role": "user",
+            "type": "file",
+            "format": "path",
+            "content": "/Users/Killian/image.png",
+        },
+    ]
+    interpreter.chat(messages)
+
+
+@pytest.mark.skip(reason="Only 100 vision calls allowed / day!")
+def test_vision():
+    base64png = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC"
+    messages = [
+        {"role": "user", "type": "message", "content": "describe this image"},
+        {
+            "role": "user",
+            "type": "image",
+            "format": "base64.png",
+            "content": base64png,
+        },
+    ]
+
+    interpreter.llm.supports_vision = True
+    interpreter.llm.model = "gpt-4-vision-preview"
+    interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
+    interpreter.llm.supports_functions = False
+    interpreter.llm.context_window = 110000
+    interpreter.llm.max_tokens = 4096
+    interpreter.force_task_completion = True
+
+    interpreter.chat(messages)
+
+    interpreter.force_task_completion = False
+
+
+def test_multiple_instances():
     interpreter.system_message = "i"
-    agent_1 = interpreter.Interpreter()
+    agent_1 = OpenInterpreter()
     agent_1.system_message = "<3"
-    agent_2 = interpreter.Interpreter()
+    agent_2 = OpenInterpreter()
     agent_2.system_message = "u"
 
     assert interpreter.system_message == "i"
@@ -253,7 +393,7 @@ with open('numbers.txt', 'a+') as f:
         f.seek(0, os.SEEK_END)
         """
     print("starting to code")
-    for chunk in interpreter.computer.run("python", code):
+    for chunk in interpreter.computer.run("python", code, stream=True, display=True):
         print(chunk)
         if "format" in chunk and chunk["format"] == "output":
             if "adding 3 to file" in chunk["content"]:
@@ -273,18 +413,20 @@ with open('numbers.txt', 'a+') as f:
 
 def test_delayed_exec():
     interpreter.chat(
-        """Can you write a single block of code and execute it that prints something, then delays 1 second, then prints something else? No talk just code. Thanks!"""
+        """Can you write a single block of code and execute it that prints something, then delays 1 second, then prints something else? No talk just code, execute the code. Thanks!"""
     )
 
 
 def test_nested_loops_and_multiple_newlines():
     interpreter.chat(
-        """Can you write a nested for loop in python and shell and run them? Don't forget to properly format your shell script and use semicolons where necessary. Also put 1-3 newlines between each line in the code. Only generate and execute the code. No explanations. Thanks!"""
+        """Can you write a nested for loop in python and shell and run them? Don't forget to properly format your shell script and use semicolons where necessary. Also put 1-3 newlines between each line in the code. Only generate and execute the code. Yes, execute the code instantly! No explanations. Thanks!"""
     )
 
 
 def test_write_to_file():
-    interpreter.chat("""Write the word 'Washington' to a .txt file called file.txt""")
+    interpreter.chat(
+        """Write the word 'Washington' to a .txt file called file.txt. Instantly run the code! Save the file!"""
+    )
     assert os.path.exists("file.txt")
     interpreter.messages = []  # Just reset message history, nothing else for this test
     messages = interpreter.chat(
@@ -324,19 +466,19 @@ def test_reset():
 
 def test_token_counter():
     system_tokens = count_tokens(
-        text=interpreter.system_message, model=interpreter.model
+        text=interpreter.system_message, model=interpreter.llm.model
     )
 
     prompt = "How many tokens is this?"
 
-    prompt_tokens = count_tokens(text=prompt, model=interpreter.model)
+    prompt_tokens = count_tokens(text=prompt, model=interpreter.llm.model)
 
     messages = [
         {"role": "system", "message": interpreter.system_message}
     ] + interpreter.messages
 
     system_token_test = count_messages_tokens(
-        messages=messages, model=interpreter.model
+        messages=messages, model=interpreter.llm.model
     )
 
     system_tokens_ok = system_tokens == system_token_test[0]
@@ -344,7 +486,7 @@ def test_token_counter():
     messages.append({"role": "user", "message": prompt})
 
     prompt_token_test = count_messages_tokens(
-        messages=messages, model=interpreter.model
+        messages=messages, model=interpreter.llm.model
     )
 
     prompt_tokens_ok = system_tokens + prompt_tokens == prompt_token_test[0]

@@ -12,7 +12,7 @@ system_message: |
   Write messages to the user in Markdown. Write code on multiple lines with proper indentation for readability.
   In general, try to **make plans** with as few steps as possible. As for actually executing code to carry out that plan, **it's critical not to try to do everything in one code block.** You should try something, print information about it, then continue from there in tiny, informed steps. You will never get it on the first try, and attempting it in one go will often lead to errors you cant see.
   You are capable of **any** task.
-local: false
-model: "gpt-3.5-turbo"
-temperature: 0.25
-debug_mode: true
+offline: false
+llm.model: "gpt-3.5-turbo"
+llm.temperature: 0.25
+verbose: true

@@ -1,3 +1,7 @@
+"""
+surely this can be simpler?? i feel like the responsibilities of these functions is unclear
+"""
+
 import os
 import shutil
 from importlib import resources
@@ -42,25 +46,38 @@ def get_config_path(path=user_config_path):
                 # Copying the file using shutil.copy
                 new_file = shutil.copy(default_config_path, path)
 
-                print("Copied the default config file to the user's directory because the user's config file was not found.")
-
     return path
 
 
 def get_config(path=user_config_path):
     path = get_config_path(path)
-    
+
     config = None
 
-    with open(path, "r") as file:
-        config = yaml.safe_load(file)
-        if config is not None:
-            return config
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            config = yaml.safe_load(file)
+            if config is not None:
+                return config
+    except UnicodeDecodeError:
+        print("")
+        print(
+            "WARNING: Config file can't be read due to a Unicode decoding error. Ensure it is saved in UTF-8 format. Run `interpreter --reset_config` to reset it."
+        )
+        print("")
+        return {}
+    except Exception as e:
+        print("")
+        print(
+            f"WARNING: An error occurred while reading the config file: {e}. Run `interpreter --reset_config` to reset it."
+        )
+        print("")
+        return {}
 
     if config is None:
         # Deleting empty file because get_config_path copies the default if file is missing
         os.remove(path)
         path = get_config_path(path)
-        with open(path, "r") as file:
+        with open(path, "r", encoding="utf-8") as file:
             config = yaml.safe_load(file)
             return config

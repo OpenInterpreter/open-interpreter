@@ -1,0 +1,32 @@
+---
+title: Together AI
+---
+
+To use Open Interpreter with Together AI, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model together_ai/<together_ai-model>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "together_ai/<together_ai-model>"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+All models on Together AI are supported.
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable  | Description                                   | Where to Find                                                                               |
+| --------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `TOGETHERAI_API_KEY'` | The TogetherAI API key from the Settings page | [TogetherAI -> Profile -> Settings -> API Keys](https://api.together.xyz/settings/api-keys) |
