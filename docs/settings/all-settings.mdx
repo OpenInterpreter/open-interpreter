@@ -6,7 +6,7 @@ title: All Settings
 
 ### Model Selection
 
-Specifies which language model to use. Check out the [models](https://docs.openinterpreter.com/language-model-setup/introduction) section for a list of available models.
+Specifies which language model to use. Check out the [models](/language-models/) section for a list of available models.
 
 <CodeGroup>
 
@@ -198,11 +198,15 @@ interpreter --no-llm_supports_functions
 interpreter.llm.llm_supports_functions = False
 ```
 
+```yaml Profile
+llm_supports_functions: false
+```
+
 </CodeGroup>
 
 ### LLM Supports Vision
 
-Inform Open Interpreter that the language model you're using supports vision.
+Inform Open Interpreter that the language model you're using supports vision. Defaults to `False`.
 
 <CodeGroup>
 
@@ -224,7 +228,7 @@ llm_supports_vision: true
 
 ### Vision Mode
 
-Enables vision mode for multimodal models. Defaults to GPT-4-turbo.
+Enables vision mode, which adds some special instructions to the prompt and switches to `gpt-4-vision-preview`.
 
 <CodeGroup>
 ```bash Terminal
@@ -245,7 +249,7 @@ llm.model: "gpt-4-vision-preview" # Any vision supporting model
 
 ### OS Mode
 
-Enables OS mode for multimodal models. Defaults to GPT-4-turbo. Currently not available in Python.
+Enables OS mode for multimodal models. Currently not available in Python.
 
 <CodeGroup>
 
@@ -278,7 +282,7 @@ Opens the profiles directory.
 <CodeGroup>
 
 ```bash Terminal
-interpreter --profile
+interpreter --profiles
 ```
 
 </CodeGroup>
@@ -290,7 +294,7 @@ Select a profile to use.
 <CodeGroup>
 
 ```bash Terminal
-interpreter --profile "profile.yaml"
+interpreter --profile local.yaml
 ```
 
 </CodeGroup>
@@ -517,8 +521,15 @@ This boolean flag determines whether to enable or disable some offline features 
 <CodeGroup>
 
 ```python Python
-interpreter.offline = True  # Check for updates, use procedures
-interpreter.offline = False  # Don't check for updates, don't use procedures
+interpreter.offline = True
+```
+
+```bash Terminal
+interpreter --offline true
+```
+
+```yaml Profile
+offline: true
 ```
 
 </CodeGroup>
@@ -563,130 +574,56 @@ interpreter.messages = messages # A list that resembles the one above
 
 # Computer
 
-The following settings and functions are primarily for the language model to use, not for users to use.
+The `computer` object in `interpreter.computer` is a virtual computer that the AI controls. Its primary interface/function is to execute code and return the output in real-time.
 
-### Display - View
+### Offline
 
-Takes a screenshot of the primary display.
+Running the `computer` in offline mode will disable some online features, like the hosted [Computer API](https://api.openinterpreter.com/). Inherits from `interpreter.offline`.
 
 <CodeGroup>
 
 ```python Python
-interpreter.computer.display.view()
+interpreter.computer.offline = True
+```
+
+```yaml Profile
+computer.offline: True
 ```
 
 </CodeGroup>
 
-### Display - Center
+### Verbose
 
-Gets the x, y value of the center of the screen.
+This is primarily used for debugging `interpreter.computer`. Inherits from `interpreter.verbose`.
 
 <CodeGroup>
 
 ```python Python
-x, y = interpreter.computer.display.center()
+interpreter.computer.verbose = True
+```
+
+```yaml Profile
+computer.verbose: True
 ```
 
 </CodeGroup>
 
-### Keyboard - Hotkey
+### Emit Images
 
-Performs a hotkey on the computer
+The `emit_images` attribute in `interpreter.computer` controls whether the computer should emit images or not. This is inherited from `interpreter.llm.supports_vision`.
+
+This is used for multimodel vs. text only models. Running `computer.display.view()` will return an actual screenshot for multimodal models if `emit_images` is True. If it's False, `computer.display.view()` will return all the text on the screen.
+
+Many other functions of the computer can produce image/text outputs, and this parameter controls that.
 
 <CodeGroup>
 
 ```python Python
-interpreter.computer.keboard.hotkey(" ", "command")
+interpreter.computer.emit_images = True
 ```
 
-</CodeGroup>
-
-### Keyboard - Write
-
-Writes the text into the currently focused window.
-
-<CodeGroup>
-
-```python Python
-interpreter.computer.keyboard.write("hello")
-```
-
-</CodeGroup>
-
-### Mouse - Click
-
-Clicks on the specified coordinates, or an icon, or text. If text is specified, OCR will be run on the screenshot to find the text coordinates and click on it.
-
-<CodeGroup>
-
-```python Python
-# Click on coordinates
-interpreter.computer.mouse.click(x=100, y=100)
-
-# Click on text on the screen
-interpreter.computer.mouse.click("Onscreen Text")
-
-# Click on a gear icon
-interpreter.computer.mouse.click(icon="gear icon")
-```
-
-</CodeGroup>
-
-### Mouse - Move
-
-Moves to the specified coordinates, or an icon, or text. If text is specified, OCR will be run on the screenshot to find the text coordinates and move to it.
-
-<CodeGroup>
-
-```python Python
-# Click on coordinates
-interpreter.computer.mouse.move(x=100, y=100)
-
-# Click on text on the screen
-interpreter.computer.mouse.move("Onscreen Text")
-
-# Click on a gear icon
-interpreter.computer.mouse.move(icon="gear icon")
-```
-
-</CodeGroup>
-
-### Mouse - Scroll
-
-Scrolls the mouse a specified number of pixels.
-
-<CodeGroup>
-
-```python Python
-# Scroll Down
-interpreter.computer.mouse.scroll(-10)
-
-# Scroll Up
-interpreter.computer.mouse.scroll(10)
-```
-
-</CodeGroup>
-
-### Clipboard - View
-
-Returns the contents of the clipboard.
-
-<CodeGroup>
-
-```python Python
-interpreter.computer.clipboard.view()
-```
-
-</CodeGroup>
-
-### OS - Get Selected Text
-
-Get the selected text on the screen.
-
-<CodeGroup>
-
-```python Python
-interpreter.computer.os.get_selected_text()
+```yaml Profile
+computer.emit_images: True
 ```
 
 </CodeGroup>
