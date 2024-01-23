@@ -17,14 +17,6 @@ from .utils.profiles import apply_profile, get_profile_path
 from .validate_llm_settings import validate_llm_settings
 
 
-def main():
-    interpreter = OpenInterpreter()
-    try:
-        start_terminal_interface(interpreter)
-    except KeyboardInterrupt as e:
-        print(e)
-
-
 def start_terminal_interface(interpreter):
     """
     Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
@@ -698,3 +690,11 @@ Once the server is running, you can begin your conversation below.
     interpreter.in_terminal_interface = True
 
     interpreter.chat()
+
+
+def main():
+    interpreter = OpenInterpreter()
+    try:
+        start_terminal_interface(interpreter)
+    except KeyboardInterrupt as e:
+        print(e)
