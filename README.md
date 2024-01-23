@@ -1,7 +1,7 @@
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
-    <a href="https://discord.gg/6p3fD6rBVm">
+    <a href="https://discord.gg/Hvz9Axh84z">
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
     <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
