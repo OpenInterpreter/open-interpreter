@@ -7,6 +7,7 @@ import time
 
 import pkg_resources
 
+from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
 from .utils.apply_config import apply_config
 from .utils.check_for_update import check_for_update
@@ -14,6 +15,14 @@ from .utils.display_markdown_message import display_markdown_message
 from .utils.get_config import get_config_path
 from .utils.profiles import apply_profile, get_profile_path
 from .validate_llm_settings import validate_llm_settings
+
+
+def main():
+    interpreter = OpenInterpreter()
+    try:
+        start_terminal_interface(interpreter)
+    except KeyboardInterrupt as e:
+        print(e)
 
 
 def start_terminal_interface(interpreter):
