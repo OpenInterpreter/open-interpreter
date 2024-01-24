@@ -697,4 +697,8 @@ def main():
     try:
         start_terminal_interface(interpreter)
     except KeyboardInterrupt as e:
-        print(e)
+        print("Interrupted by user:", e)
+    except Exception as e:
+        print("An error occurred:", e)
+    finally:
+        print("Closing the program.")
