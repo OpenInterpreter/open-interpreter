@@ -2,11 +2,41 @@
 title: All Settings
 ---
 
+<CardGroup>
+
+<Card
+  title="Language Model"
+  icon="robot"
+  iconType="solid"
+  href="/settings/all-settings#language-model"
+>
+  Modify the language model and its parameters
+</Card>
+
+<Card
+  title="Interpreter"
+  icon="circle"
+  iconType="solid"
+  href="/settings/all-settings#interpreter"
+>
+  Modify the Interpreter core settings
+</Card>
+<Card
+  title="Computer"
+  icon="desktop"
+  iconType="solid"
+  href="/settings/all-settings#computer"
+>
+  Modify the interpreter.computer settings
+</Card>
+
+</CardGroup>
+
 # Language Model
 
 ### Model Selection
 
-Specifies which language model to use. Check out the [models](/language-models/) section for a list of available models.
+Specifies which language model to use. Check out the [models](/language-models/) section for a list of available models. Open Interpreter uses [LiteLLM](https://github.com/BerriAI/litellm) under the hood to support over 100+ models.
 
 <CodeGroup>
 
@@ -26,7 +56,7 @@ model: gpt-3.5-turbo
 
 ### Temperature
 
-Sets the randomness level of the model's output.
+Sets the randomness level of the model's output. The default temperature is 0, you can set it to any value between 0 and 1. The higher the temperature, the more random and creative the output will be.
 
 <CodeGroup>
 
@@ -46,7 +76,7 @@ temperature: 0.7
 
 ### Context Window
 
-Manually set the context window size in tokens for the model.
+Manually set the context window size in tokens for the model. For local models, using a smaller context window will use less RAM, which is more suitable for most devices.
 
 <CodeGroup>
 
@@ -126,7 +156,7 @@ api_base: https://api.example.com
 
 ### API Key
 
-Set your API key for authentication when making API calls.
+Set your API key for authentication when making API calls. For OpenAI models, you can get your API key [here](https://platform.openai.com/api-keys).
 
 <CodeGroup>
 
@@ -249,7 +279,7 @@ llm.model: "gpt-4-vision-preview" # Any vision supporting model
 
 ### OS Mode
 
-Enables OS mode for multimodal models. Currently not available in Python.
+Enables OS mode for multimodal models. Currently not available in Python. Check out more information on OS mode [here](/guides/os-mode).
 
 <CodeGroup>
 
@@ -277,7 +307,7 @@ interpreter --version
 
 ### Open Profiles Directory
 
-Opens the profiles directory.
+Opens the profiles directory. New yaml profile files can be added to this directory.
 
 <CodeGroup>
 
@@ -289,7 +319,7 @@ interpreter --profiles
 
 ### Select Profile
 
-Select a profile to use.
+Select a profile to use. If no profile is specified, the default profile will be used.
 
 <CodeGroup>
 

@@ -57,8 +57,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-interpreter = "interpreter.terminal_interface.cli:main"
-i = "interpreter.terminal_interface.cli:main"
+interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
+i = "interpreter.terminal_interface.start_terminal_interface:main"
 
 [tool.black]
 target-version = ['py311']
