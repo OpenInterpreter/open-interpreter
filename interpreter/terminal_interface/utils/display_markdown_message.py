@@ -16,7 +16,11 @@ def display_markdown_message(message):
         elif line == "---":
             rich_print(Rule(style="white"))
         else:
-            rich_print(Markdown(line))
+            try:
+                rich_print(Markdown(line))
+            except UnicodeEncodeError as e:
+                # Replace the problematic character or handle the error as needed
+                print("Error displaying line:", line)
 
     if "\n" not in message and message.startswith(">"):
         # Aesthetic choice. For these tags, they need a space below them
