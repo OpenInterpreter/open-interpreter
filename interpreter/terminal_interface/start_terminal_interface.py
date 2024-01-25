@@ -7,6 +7,7 @@ import time
 
 import pkg_resources
 
+from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
 from .utils.apply_config import apply_config
 from .utils.check_for_update import check_for_update
@@ -689,3 +690,15 @@ Once the server is running, you can begin your conversation below.
     interpreter.in_terminal_interface = True
 
     interpreter.chat()
+
+
+def main():
+    interpreter = OpenInterpreter()
+    try:
+        start_terminal_interface(interpreter)
+    except KeyboardInterrupt as e:
+        print("Interrupted by user:", e)
+    except Exception as e:
+        print("An error occurred:", e)
+    finally:
+        print("Closing the program.")
