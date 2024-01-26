@@ -41,6 +41,8 @@ yaspin = { version = "^3.0.1", optional = true }
 pytesseract = { version = "^0.3.10", optional = true }
 prompt-toolkit = "^3.0.43"
 send2trash = "^1.8.2"
+uvicorn = "^0.27.0"
+fastapi = "^0.109.0"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
