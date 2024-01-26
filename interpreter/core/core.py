@@ -3,6 +3,7 @@ This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
 
+import asyncio
 import json
 import os
 from datetime import datetime
@@ -16,6 +17,7 @@ from .default_system_message import default_system_message
 from .extend_system_message import extend_system_message
 from .llm.llm import Llm
 from .respond import respond
+from .server import server
 from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
 
@@ -92,6 +94,12 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer() if computer is None else computer
+
+    async def async_chat(self, *args, **kwargs):
+        return await asyncio.to_thread(self.chat, *args, **kwargs)
+
+    def server(self, *args, **kwargs):
+        server(self, *args, **kwargs)
 
     def chat(self, message=None, display=True, stream=False):
         try:
