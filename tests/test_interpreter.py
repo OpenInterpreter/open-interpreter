@@ -15,6 +15,44 @@ from interpreter.terminal_interface.utils.count_tokens import (
 interpreter = OpenInterpreter()
 #####
 
+import threading
+import time
+
+import pytest
+from websocket import create_connection
+
+
+def test_websocket_server():
+    # Start the server in a new thread
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    # Give the server a moment to start
+    time.sleep(3)
+
+    # Connect to the server
+    ws = create_connection("ws://localhost:8000/")
+
+    # Send the first message
+    ws.send(
+        "Hello, interpreter! What operating system are you on? Also, what time is it in Seattle?"
+    )
+    # Wait for a moment before sending the second message
+    time.sleep(1)
+    ws.send("Actually, nevermind. Thank you!")
+
+    # Receive the responses
+    responses = []
+    while True:
+        response = ws.recv()
+        print(response)
+        responses.append(response)
+
+    # Check the responses
+    assert responses  # Check that some responses were received
+
+    ws.close()
+
 
 def test_i():
     import requests

@@ -210,6 +210,11 @@ def start_terminal_interface(interpreter):
             "type": bool,
         },
         {
+            "name": "server",
+            "help_text": "start open interpreter as a server",
+            "type": bool,
+        },
+        {
             "name": "version",
             "help_text": "get Open Interpreter's version number",
             "type": bool,
@@ -372,6 +377,10 @@ def start_terminal_interface(interpreter):
     # If --conversations is used, run conversation_navigator
     if args.conversations:
         conversation_navigator(interpreter)
+        return
+
+    if args.server:
+        interpreter.server()
         return
 
     validate_llm_settings(interpreter)
