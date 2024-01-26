@@ -368,8 +368,13 @@ def start_terminal_interface(interpreter):
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
     if interpreter.llm.api_base:
-        if not interpreter.llm.model.lower().split("/", 1)[0] in litellm.provider_list:
-            interpreter.llm.custom_llm_provider = "openai"
+        interpreter.llm.custom_llm_provider = "openai"
+        
+    if not interpreter.llm.model.lower().split("/", 1)[0] in litellm.provider_list:
+        if interpreter.verbose:
+            print("setting llm provider format to openai")
+            print(litellm.provider_list)
+        interpreter.llm.custom_llm_provider = "openai"
 
     # If --conversations is used, run conversation_navigator
     if args.conversations:
