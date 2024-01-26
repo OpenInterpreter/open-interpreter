@@ -35,7 +35,7 @@ class Llm:
         self.context_window: Optional[int] = None
         self.max_tokens: Optional[int] = None
         self.api_base: Optional[str] = None
-        self.api_key: str = "key"  # Adding a place holder "key" to stop OpenAI from crashing when using local server
+        self.api_key: Optional[str] = None  # Adding a place holder "key" to stop OpenAI from crashing when using local server
         self.api_version: Optional[str] = None
         self.custom_llm_provider: Optional[str] = None
 
