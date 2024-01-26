@@ -1,13 +1,13 @@
 import re
 
 
-def render_system_message(interpreter):
+def render_message(interpreter, message):
     """
-    Renders the dynamic system message into a string.
+    Renders a dynamic message into a string.
     """
 
-    # Split the system message into parts by {{ and }}, including multi-line strings
-    parts = re.split(r"({{.*?}})", interpreter.system_message, flags=re.DOTALL)
+    # Split the message into parts by {{ and }}, including multi-line strings
+    parts = re.split(r"({{.*?}})", message, flags=re.DOTALL)
 
     for i in range(len(parts)):
         part = parts[i]
@@ -28,7 +28,7 @@ def render_system_message(interpreter):
             # Replace the part with the output
             parts[i] = output
 
-    # Join the parts back into the system message
-    rendered_system_message = "".join(parts)
+    # Join the parts back into the message
+    rendered_message = "".join(parts)
 
-    return rendered_system_message
+    return rendered_message

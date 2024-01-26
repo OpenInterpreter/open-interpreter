@@ -5,7 +5,7 @@ import traceback
 import litellm
 
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
-from .render_system_message import render_system_message
+from .render_message import render_message
 
 
 def respond(interpreter):
@@ -20,18 +20,21 @@ def respond(interpreter):
     while True:
         ## RENDER SYSTEM MESSAGE ##
 
-        rendered_system_message = render_system_message(interpreter)
+        system_message = interpreter.system_message
 
         # Add language-specific system messages
         for language in interpreter.computer.terminal.languages:
             if hasattr(language, "system_message"):
-                rendered_system_message += "\n\n" + language.system_message
+                system_message += "\n\n" + language.system_message
 
         # Add custom instructions
         if interpreter.custom_instructions:
-            rendered_system_message += "\n\n" + interpreter.custom_instructions
+            system_message += "\n\n" + interpreter.custom_instructions
 
-        # Create message object
+        ## Rendering ↓
+        rendered_system_message = render_message(interpreter, system_message)
+        ## Rendering ↑
+
         rendered_system_message = {
             "role": "system",
             "type": "message",

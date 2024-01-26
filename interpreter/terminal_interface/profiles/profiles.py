@@ -44,10 +44,18 @@ def get_profile(filename_or_url):
     for shortcut in shortcuts:
         if filename_or_url.startswith(shortcut):
             filename_or_url = filename_or_url.replace(
-                shortcut, "openinterpreter.com/profiles/"
+                shortcut, "https://openinterpreter.com/profiles/"
             )
-            if not filename_or_url.endswith(".py"):
-                filename_or_url += ".py"
+            if "." not in filename_or_url.split("/")[-1]:
+                extensions = [".json", ".py", ".yaml"]
+                for ext in extensions:
+                    try:
+                        response = requests.get(filename_or_url + ext)
+                        response.raise_for_status()
+                        filename_or_url += ext
+                        break
+                    except requests.exceptions.HTTPError:
+                        continue
             break
 
     profile_path = os.path.join(profile_dir, filename_or_url)
@@ -77,7 +85,7 @@ def get_profile(filename_or_url):
     response = requests.get(filename_or_url)
     response.raise_for_status()
     if extension == ".py":
-        return {"start_script": response.text}
+        return {"start_script": response.text, "version": "0.2.0"}
     elif extension == ".json":
         return json.loads(response.text)
     elif extension == ".yaml":
