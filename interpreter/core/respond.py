@@ -29,7 +29,7 @@ def respond(interpreter):
 
         # Add custom instructions
         if interpreter.custom_instructions:
-            system_message += "\n\n" + interpreter.custom_instructions
+            rendered_system_message += "\n\n" + interpreter.custom_instructions
 
         # Create message object
         rendered_system_message = {

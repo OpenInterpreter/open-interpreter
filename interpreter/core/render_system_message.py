@@ -31,6 +31,4 @@ def render_system_message(interpreter):
     # Join the parts back into the system message
     rendered_system_message = "".join(parts)
 
-    print(rendered_system_message)
-
     return rendered_system_message
