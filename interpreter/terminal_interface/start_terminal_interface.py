@@ -5,8 +5,8 @@ import time
 import pkg_resources
 
 from ..core.core import OpenInterpreter
-from .config.config import configure, open_config_dir, reset_config
 from .conversation_navigator import conversation_navigator
+from .profiles.profiles import open_profile_dir, profile, reset_profile
 from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
@@ -18,14 +18,12 @@ def start_terminal_interface(interpreter):
     """
 
     arguments = [
-        # Profiles coming soon— after we seperate core from TUI
         {
-            "name": "config",
-            "nickname": "c",
-            "help_text": "name of config file. run `--config` without an argument to open config directory",
+            "name": "profile",
+            "nickname": "p",
+            "help_text": "name of profile. run `--profiles` to open profile directory",
             "type": str,
             "default": "default.yaml",
-            "nargs": "?",  # This means you can pass in nothing if you want
         },
         {
             "name": "custom_instructions",
@@ -199,12 +197,13 @@ def start_terminal_interface(interpreter):
         },
         # Special commands
         {
-            "name": "reset_config",
-            "help_text": "reset a config file. run `--reset_config` without an argument to reset all default configs",
+            "name": "reset_profile",
+            "help_text": "reset a profile file. run `--reset_profile` without an argument to reset all default profiles",
             "type": str,
             "default": "NOT_PROVIDED",
             "nargs": "?",  # This means you can pass in nothing if you want
         },
+        {"name": "profiles", "help_text": "opens profiles directory", "type": bool},
         {
             "name": "conversations",
             "help_text": "list conversations to resume",
@@ -283,14 +282,14 @@ def start_terminal_interface(interpreter):
 
     args = parser.parse_args()
 
-    if args.config == None:  # --config was provided without a value
-        open_config_dir()
+    if args.profiles:
+        open_profile_dir()
         return
 
-    if args.reset_config != "NOT_PROVIDED":
-        reset_config(
-            args.reset_config
-        )  # This will be None if they just ran `--reset_config`
+    if args.reset_profile != "NOT_PROVIDED":
+        reset_profile(
+            args.reset_profile
+        )  # This will be None if they just ran `--reset_profile`
         return
 
     if args.version:
@@ -314,7 +313,7 @@ def start_terminal_interface(interpreter):
         interpreter.llm.supports_vision = True
 
         if not args.model:
-            # This will cause it to override the config, which is what we want
+            # This will cause it to override the profile, which is what we want
             args.model = "gpt-4-vision-preview"
 
         interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
@@ -329,20 +328,20 @@ def start_terminal_interface(interpreter):
             display_markdown_message("> `Vision` enabled (experimental)\n")
 
     if args.os:
-        args.config = "os.py"
+        args.profile = "os.py"
 
     if args.local:
-        args.config = "local.py"
+        args.profile = "local.py"
 
-    ### Set attributes on interpreter, so that a config script can read the arguments passed in via the CLI
+    ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
 
     set_attributes(args, arguments)
 
-    ### Apply config file
+    ### Apply profile
 
-    interpreter = configure(interpreter, args.config)
+    interpreter = profile(interpreter, args.profile)
 
-    ### Set attributes on interpreter, because the arguments passed in via the CLI should override config
+    ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
     set_attributes(args, arguments)
 

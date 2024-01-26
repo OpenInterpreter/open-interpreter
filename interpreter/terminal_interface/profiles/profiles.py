@@ -14,31 +14,31 @@ import yaml
 
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.oi_dir import oi_dir
-from .historical_configs import historical_configs
+from .historical_profiles import historical_profiles
 
-config_dir = os.path.join(oi_dir, "configs")
-user_default_config_path = os.path.join(config_dir, "default.yaml")
+profile_dir = os.path.join(oi_dir, "profiles")
+user_default_profile_path = os.path.join(profile_dir, "default.yaml")
 
 here = os.path.abspath(os.path.dirname(__file__))
-oi_default_configs_path = os.path.join(here, "defaults")
-default_configs_paths = glob.glob(os.path.join(oi_default_configs_path, "*"))
-default_configs_names = [os.path.basename(path) for path in default_configs_paths]
+oi_default_profiles_path = os.path.join(here, "defaults")
+default_profiles_paths = glob.glob(os.path.join(oi_default_profiles_path, "*"))
+default_profiles_names = [os.path.basename(path) for path in default_profiles_paths]
 
 
-def configure(interpreter, filename_or_url):
+def profile(interpreter, filename_or_url):
     try:
-        config = get_config(filename_or_url)
+        profile = get_profile(filename_or_url)
     except:
-        if filename_or_url in default_configs_names:
-            reset_config(filename_or_url)
-            config = get_config(filename_or_url)
+        if filename_or_url in default_profiles_names:
+            reset_profile(filename_or_url)
+            profile = get_profile(filename_or_url)
         else:
             raise
 
-    return apply_config(interpreter, config)
+    return apply_profile(interpreter, profile)
 
 
-def get_config(filename_or_url):
+def get_profile(filename_or_url):
     # i.com/ is a shortcut for openinterpreter.com/profiles/
     shortcuts = ["i.com/", "www.i.com/", "https://i.com/", "http://i.com/"]
     for shortcut in shortcuts:
@@ -50,12 +50,12 @@ def get_config(filename_or_url):
                 filename_or_url += ".py"
             break
 
-    config_path = os.path.join(config_dir, filename_or_url)
+    profile_path = os.path.join(profile_dir, filename_or_url)
     extension = os.path.splitext(filename_or_url)[-1]
 
     # Try local
-    if os.path.exists(config_path):
-        with open(config_path, "r", encoding="utf-8") as file:
+    if os.path.exists(profile_path):
+        with open(profile_path, "r", encoding="utf-8") as file:
             if extension == ".py":
                 python_script = file.read()
 
@@ -83,7 +83,7 @@ def get_config(filename_or_url):
     elif extension == ".yaml":
         return yaml.safe_load(response.text)
 
-    raise Exception(f"Config '{filename_or_url}' not found.")
+    raise Exception(f"Profile '{filename_or_url}' not found.")
 
 
 class RemoveInterpreter(ast.NodeTransformer):
@@ -108,16 +108,16 @@ class RemoveInterpreter(ast.NodeTransformer):
         return node  # return node otherwise to keep it in the AST
 
 
-def apply_config(interpreter, config):
-    if "start_script" in config:
-        exec(config["start_script"])
+def apply_profile(interpreter, profile):
+    if "start_script" in profile:
+        exec(profile["start_script"])
 
     if (
-        "version" not in config or config["version"] != "0.2.0"
+        "version" not in profile or profile["version"] != "0.2.0"
     ):  # Remember to update this number up there! ^
         print("")
         print(
-            "We have updated our configuration file format. Would you like to migrate your configuration file to the new format? No data will be lost."
+            "We have updated our profile file format. Would you like to migrate your profile file to the new format? No data will be lost."
         )
         print("")
         message = input("(y/n): ")
@@ -140,11 +140,11 @@ def apply_config(interpreter, config):
                 "local": "offline",
             }
 
-            # Update attribute names in the config
+            # Update attribute names in the profile
             for old_attribute, new_attribute in attribute_mapping.items():
-                if old_attribute in config:
-                    config[new_attribute] = config[old_attribute]
-                    del config[old_attribute]
+                if old_attribute in profile:
+                    profile[new_attribute] = profile[old_attribute]
+                    del profile[old_attribute]
 
             old_system_messages = [
                 """You are Open Interpreter, a world-class programmer that can complete any goal by executing code.
@@ -353,7 +353,7 @@ In general, try to **make plans** with as few steps as possible. As for actually
 You are capable of **any** task.""",
             ]
 
-            if "system_message" in config:
+            if "system_message" in profile:
                 # Make it just the lowercase characters, so they can be compared and minor whitespace changes are fine
                 def normalize_text(message):
                     return (
@@ -364,34 +364,34 @@ You are capable of **any** task.""",
                         .strip()
                     )
 
-                normalized_system_message = normalize_text(config["system_message"])
+                normalized_system_message = normalize_text(profile["system_message"])
                 normalized_old_system_messages = [
                     normalize_text(message) for message in old_system_messages
                 ]
 
                 # If the whole thing is system message, just delete it
                 if normalized_system_message in normalized_old_system_messages:
-                    del config["system_message"]
+                    del profile["system_message"]
                 else:
                     for old_message in old_system_messages:
                         # This doesn't use the normalized versions! We wouldn't want whitespace to cut it off at a weird part
-                        if config["system_message"].strip().startswith(old_message):
+                        if profile["system_message"].strip().startswith(old_message):
                             # Extract the ending part and make it into custom_instructions
-                            config["custom_instructions"] = config["system_message"][
+                            profile["custom_instructions"] = profile["system_message"][
                                 len(old_message) :
                             ].strip()
-                            del config["system_message"]
+                            del profile["system_message"]
                             break
 
-            # Save config file
-            with open(config_path, "w") as file:
-                yaml.dump(config, file)
+            # Save profile file
+            with open(profile_path, "w") as file:
+                yaml.dump(profile, file)
 
             # Wrap it in comments and the version at the bottom
             comment_wrapper = """
-### OPEN INTERPRETER CONFIGURATION FILE
+### OPEN INTERPRETER PROFILE
 
-{old_config}
+{old_profile}
 
 # Be sure to remove the "#" before the following settings to use them.
 
@@ -408,101 +408,104 @@ You are capable of **any** task.""",
 # llm.api_base: ...  # The URL where an OpenAI-compatible server is running
 # llm.api_version: ...  # The version of the API (this is primarily for Azure)
 
-# All options: https://docs.openinterpreter.com/usage/terminal/config
+# All options: https://docs.openinterpreter.com/settings
 
-version: 0.2.0 # Configuration file version (do not modify)
+version: 0.2.0 # Profile version (do not modify)
                 """.strip()
 
-            # Read the current config file
-            with open(config_path, "r") as file:
-                old_config = file.read()
+            # Read the current profile file
+            with open(profile_path, "r") as file:
+                old_profile = file.read()
 
-            # Replace {old_config} in comment_wrapper with the current config
+            # Replace {old_profile} in comment_wrapper with the current profile
             comment_wrapper = comment_wrapper.replace(
-                "{old_config}", old_config.strip()
+                "{old_profile}", old_profile.strip()
             )
 
-            # Sometimes this happens if config ended up empty
+            # Sometimes this happens if profile ended up empty
             comment_wrapper.replace("\n{}\n", "\n")
 
-            # Write the commented config to the file
-            with open(config_path, "w") as file:
+            # Write the commented profile to the file
+            with open(profile_path, "w") as file:
                 file.write(comment_wrapper)
 
             print("Migration complete.")
             print("")
         else:
-            print("Skipping loading config...")
+            print("Skipping loading profile...")
             print("")
             return interpreter
 
-    if "system_message" in config:
+    if "system_message" in profile:
         display_markdown_message(
-            "\n**FYI:** A `system_message` was found in your configuration file.\n\nBecause we frequently improve our default system message, we highly recommend removing the `system_message` parameter in your configuration file (which overrides the default system message) or simply resetting your configuration file.\n\n**To reset your configuration file, run `interpreter --reset_config`.**\n"
+            "\n**FYI:** A `system_message` was found in your profile.\n\nBecause we frequently improve our default system message, we highly recommend removing the `system_message` parameter in your profile (which overrides the default system message) or simply resetting your profile.\n\n**To reset your profile, run `interpreter --reset_profile`.**\n"
         )
         time.sleep(2)
         display_markdown_message("---")
 
-    if "computer" in config and "languages" in config["computer"]:
+    if "computer" in profile and "languages" in profile["computer"]:
         # this is handled specially
         interpreter.computer.languages = [
             i
             for i in interpreter.computer.languages
-            if i.name.lower() in [l.lower() for l in config["computer"]["languages"]]
+            if i.name.lower() in [l.lower() for l in profile["computer"]["languages"]]
         ]
-        del config["computer.languages"]
+        del profile["computer.languages"]
 
-    apply_config_to_object(interpreter, config)
+    apply_profile_to_object(interpreter, profile)
 
     return interpreter
 
 
-def apply_config_to_object(obj, config):
-    for key, value in config.items():
+def apply_profile_to_object(obj, profile):
+    for key, value in profile.items():
         if isinstance(value, dict):
-            apply_config_to_object(getattr(obj, key), value)
+            apply_profile_to_object(getattr(obj, key), value)
         else:
             setattr(obj, key, value)
 
 
-def open_config_dir():
-    print(f"Opening config directory ({config_dir})...")
+def open_profile_dir():
+    print(f"Opening profile directory ({profile_dir})...")
 
     if platform.system() == "Windows":
-        os.startfile(config_dir)
+        os.startfile(profile_dir)
     else:
         try:
             # Try using xdg-open on non-Windows platforms
-            subprocess.call(["xdg-open", config_dir])
+            subprocess.call(["xdg-open", profile_dir])
         except FileNotFoundError:
             # Fallback to using 'open' on macOS if 'xdg-open' is not available
-            subprocess.call(["open", config_dir])
+            subprocess.call(["open", profile_dir])
     return
 
 
-def reset_config(specific_default_config=None):
-    if specific_default_config and specific_default_config not in default_configs_names:
+def reset_profile(specific_default_profile=None):
+    if (
+        specific_default_profile
+        and specific_default_profile not in default_profiles_names
+    ):
         raise ValueError(
-            f"The specific default config '{specific_default_config}' is not a default config."
+            f"The specific default profile '{specific_default_profile}' is not a default profile."
         )
 
-    for default_yaml_file in default_configs_paths:
+    for default_yaml_file in default_profiles_paths:
         filename = os.path.basename(default_yaml_file)
 
-        if specific_default_config and filename != specific_default_config:
+        if specific_default_profile and filename != specific_default_profile:
             continue
 
-        target_file = os.path.join(config_dir, filename)
+        target_file = os.path.join(profile_dir, filename)
 
-        if not os.path.exists(config_dir):
-            os.makedirs(config_dir)
+        if not os.path.exists(profile_dir):
+            os.makedirs(profile_dir)
 
         if not os.path.exists(target_file):
             shutil.copy(default_yaml_file, target_file)
         else:
             with open(target_file, "r") as file:
-                current_config = file.read()
-            if current_config not in historical_configs:
+                current_profile = file.read()
+            if current_profile not in historical_profiles:
                 user_input = input(
                     f"Would you like to reset/update {filename}? (y/n): "
                 )

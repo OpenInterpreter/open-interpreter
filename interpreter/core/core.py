@@ -316,9 +316,9 @@ class OpenInterpreter:
         return extend_system_message(self)
 
     def display_message(self, markdown):
-        # This is just handy for start_script in configs.
+        # This is just handy for start_script in profiles.
         display_markdown_message(markdown)
 
     def get_oi_dir(self):
-        # Again, just handy for start_script in configs.
+        # Again, just handy for start_script in profiles.
         return oi_dir
