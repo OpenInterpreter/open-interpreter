@@ -7,19 +7,11 @@ from .display_markdown_message import display_markdown_message
 from .get_config import get_config, user_config_path
 
 
-def apply_config(self, config_path=None):
-    if config_path == None:
-        config_path = user_config_path
-
-    if self.verbose:
-        print(f"Extending configuration from `{config_path}`")
-
-    config = get_config(config_path)
-
+def apply_config(self, config):
     if "version" not in config or config["version"] != "0.2.0":
         print("")
         print(
-            "We have update our configuration file format. Would you like to migrate your configuration file to the new format? No data will be lost."
+            "We have updated our configuration file format. Would you like to migrate your configuration file to the new format? No data will be lost."
         )
         print("")
         message = input("(y/n): ")

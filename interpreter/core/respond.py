@@ -5,6 +5,7 @@ import traceback
 import litellm
 
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
+from .render_message import render_message
 
 
 def respond(interpreter):
@@ -17,20 +18,32 @@ def respond(interpreter):
     insert_force_task_completion_message = False
 
     while True:
-        ## EXTEND SYSTEM MESSAGE ##
+        ## RENDER SYSTEM MESSAGE ##
 
-        extended_system_message = interpreter.extend_system_message()
+        system_message = interpreter.system_message
 
-        # Create message object
-        extended_system_message = {
+        # Add language-specific system messages
+        for language in interpreter.computer.terminal.languages:
+            if hasattr(language, "system_message"):
+                system_message += "\n\n" + language.system_message
+
+        # Add custom instructions
+        if interpreter.custom_instructions:
+            system_message += "\n\n" + interpreter.custom_instructions
+
+        ## Rendering ↓
+        rendered_system_message = render_message(interpreter, system_message)
+        ## Rendering ↑
+
+        rendered_system_message = {
             "role": "system",
             "type": "message",
-            "content": extended_system_message,
+            "content": rendered_system_message,
         }
 
         # Create the version of messages that we'll send to the LLM
         messages_for_llm = interpreter.messages.copy()
-        messages_for_llm = [extended_system_message] + messages_for_llm
+        messages_for_llm = [rendered_system_message] + messages_for_llm
 
         if insert_force_task_completion_message:
             messages_for_llm.append(

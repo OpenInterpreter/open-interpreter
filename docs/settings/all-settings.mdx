@@ -2,18 +2,657 @@
 title: All Settings
 ---
 
-import ComputerSettings from "/snippets/computer-settings.mdx";
-import LanguageModelSettings from "/snippets/language-model-settings.mdx";
-import InterpreterSettings from "/snippets/interpreter-settings.mdx";
+<CardGroup cols={3}>
 
-# Interpreter
+<Card
+  title="Language Model Settings"
+  icon="microchip"
+  href="#language-model"
+>
+  Set your `model`, `api_key`, `temperature`, etc.
+</Card>
 
-<InterpreterSettings />
+<Card
+  title="Interpreter Settings"
+  icon="circle"
+  iconType="solid"
+  href="#interpreter"
+>
+  Change your `system_message`, set your interpreter to run `offline`, etc.
+</Card>
+<Card
+  title="Code Execution Settings"
+  icon="code"
+  iconType="solid"
+  href="#computer"
+>
+  Modify the `interpreter.computer`, which handles code execution.
+</Card>
+
+</CardGroup>
 
 # Language Model
 
-<LanguageModelSettings />
+### Model Selection
+
+Specifies which language model to use. Check out the [models](/language-models/) section for a list of available models. Open Interpreter uses [LiteLLM](https://github.com/BerriAI/litellm) under the hood to support over 100+ models.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model "gpt-3.5-turbo"
+```
+
+```python Python
+interpreter.llm.model = "gpt-3.5-turbo"
+```
+
+```yaml Profile
+model: gpt-3.5-turbo
+```
+
+</CodeGroup>
+
+### Temperature
+
+Sets the randomness level of the model's output. The default temperature is 0, you can set it to any value between 0 and 1. The higher the temperature, the more random and creative the output will be.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --temperature 0.7
+```
+
+```python Python
+interpreter.llm.temperature = 0.7
+```
+
+```yaml Profile
+temperature: 0.7
+```
+
+</CodeGroup>
+
+### Context Window
+
+Manually set the context window size in tokens for the model. For local models, using a smaller context window will use less RAM, which is more suitable for most devices.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --context_window 16000
+```
+
+```python Python
+interpreter.llm.context_window = 16000
+```
+
+```yaml Profile
+context_window: 16000
+```
+
+</CodeGroup>
+
+### Max Tokens
+
+Sets the maximum number of tokens that the model can generate in a single response.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_tokens 100
+```
+
+```python Python
+interpreter.llm.max_tokens = 100
+```
+
+```yaml Profile
+max_tokens: 100
+```
+
+</CodeGroup>
+
+### Max Output
+
+Set the maximum number of characters for code outputs.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_output 1000
+```
+
+```python Python
+interpreter.llm.max_output = 1000
+```
+
+```yaml Profile
+max_output: 1000
+```
+
+</CodeGroup>
+
+### API Base
+
+If you are using a custom API, specify its base URL with this argument.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_base "https://api.example.com"
+```
+
+```python Python
+interpreter.llm.api_base = "https://api.example.com"
+```
+
+```yaml Profile
+api_base: https://api.example.com
+```
+
+</CodeGroup>
+
+### API Key
+
+Set your API key for authentication when making API calls. For OpenAI models, you can get your API key [here](https://platform.openai.com/api-keys).
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_key "your_api_key_here"
+```
+
+```python Python
+interpreter.llm.api_key = "your_api_key_here"
+```
+
+```yaml Profile
+api_key: your_api_key_here
+```
+
+</CodeGroup>
+
+### API Version
+
+Optionally set the API version to use with your selected model. (This will override environment variables)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_version 2.0.2
+```
+
+```python Python
+interpreter.llm.api_version = '2.0.2'
+```
+
+```yaml Profile
+api_version: 2.0.2
+```
+
+</CodeGroup>
+
+### LLM Supports Functions
+
+Inform Open Interpreter that the language model you're using supports function calling.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --llm_supports_functions
+```
+
+```python Python
+interpreter.llm.llm_supports_functions = True
+```
+
+```yaml Profile
+llm_supports_functions: true
+```
+
+</CodeGroup>
+
+### LLM Does Not Support Functions
+
+Inform Open Interpreter that the language model you're using does not support function calling.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --no-llm_supports_functions
+```
+
+```python Python
+interpreter.llm.llm_supports_functions = False
+```
+
+```yaml Profile
+llm_supports_functions: false
+```
+
+</CodeGroup>
+
+### LLM Supports Vision
+
+Inform Open Interpreter that the language model you're using supports vision. Defaults to `False`.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --llm_supports_vision
+```
+
+```python Python
+interpreter.llm.llm_supports_vision = True
+```
+
+```yaml Profile
+llm_supports_vision: true
+```
+
+</CodeGroup>
+
+# Interpreter
+
+### Vision Mode
+
+Enables vision mode, which adds some special instructions to the prompt and switches to `gpt-4-vision-preview`.
+
+<CodeGroup>
+```bash Terminal
+interpreter --vision
+```
+
+```python Python
+interpreter.vision = True
+interpreter.llm.model = "gpt-4-vision-preview" # Any vision supporting model
+```
+
+```yaml Profile
+vision: true
+llm.model: "gpt-4-vision-preview" # Any vision supporting model
+```
+
+</CodeGroup>
+
+### OS Mode
+
+Enables OS mode for multimodal models. Currently not available in Python. Check out more information on OS mode [here](/guides/os-mode).
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --os
+```
+
+```yaml Profile
+os: true
+```
+
+</CodeGroup>
+
+### Version
+
+Get the current installed version number of Open Interpreter.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --version
+```
+
+</CodeGroup>
+
+### Open Profiles Directory
+
+Opens the profiles directory. New yaml profile files can be added to this directory.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --profiles
+```
+
+</CodeGroup>
+
+### Select Profile
+
+Select a profile to use. If no profile is specified, the default profile will be used.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --profile local.yaml
+```
+
+</CodeGroup>
+
+### Help
+
+Display all available terminal arguments.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --help
+```
+
+</CodeGroup>
+
+### Force Task Completion
+
+Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --force_task_completion
+```
+
+```python Python
+interpreter.force_task_completion = True
+```
+
+```yaml Profile
+force_task_completion: true
+```
+
+</CodeGroup>
+
+### Verbose
+
+Run the interpreter in verbose mode. Debug information will be printed at each step to help diagnose issues.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --verbose
+```
+
+```python Python
+interpreter.verbose = True
+```
+
+```yaml Profile
+verbose: true
+```
+
+</CodeGroup>
+
+### Safe Mode
+
+Enable or disable experimental safety mechanisms like code scanning. Valid options are `off`, `ask`, and `auto`.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --safe_mode ask
+```
+
+```python Python
+interpreter.safe_mode = 'ask'
+```
+
+```yaml Profile
+safe_mode: ask
+```
+
+</CodeGroup>
+
+### Auto Run
+
+Automatically run the interpreter without requiring user confirmation.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --auto_run
+```
+
+```python Python
+interpreter.auto_run = True
+```
+
+```yaml Profile
+auto_run: true
+```
+
+</CodeGroup>
+
+### Max Budget
+
+Sets the maximum budget limit for the session in USD.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_budget 0.01
+```
+
+```python Python
+interpreter.max_budget = 0.01
+```
+
+```yaml Profile
+max_budget: 0.01
+```
+
+</CodeGroup>
+
+### Local Mode
+
+Run the model locally. Check the [models page](/language-models/local-models/lm-studio) for more information.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --local
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.offline = True # Disables online features like Open Procedures
+interpreter.llm.model = "openai/x" # Tells OI to send messages in OpenAI's format
+interpreter.llm.api_key = "fake_key" # LiteLLM, which we use to talk to local models, requires this
+interpreter.llm.api_base = "http://localhost:1234/v1" # Point this at any OpenAI compatible server
+
+interpreter.chat()
+```
+
+```yaml Profile
+local: true
+```
+
+</CodeGroup>
+
+### Fast Mode
+
+Sets the model to gpt-3.5-turbo and encourages it to only write code without confirmation.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --fast
+```
+
+```yaml Profile
+fast: true
+```
+
+</CodeGroup>
+
+### Custom Instructions
+
+Appends custom instructions to the system message. This is useful for adding information about your system, preferred languages, etc.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --custom_instructions "This is a custom instruction."
+```
+
+```python Python
+interpreter.custom_instructions = "This is a custom instruction."
+```
+
+```yaml Profile
+custom_instructions: "This is a custom instruction."
+```
+
+</CodeGroup>
+
+### System Message
+
+We don't recommend modifying the system message, as doing so opts you out of future updates to the core system message. Use `--custom_instructions` instead, to add relevant information to the system message. If you must modify the system message, you can do so by using this argument, or by changing a profile file.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --system_message "You are Open Interpreter..."
+```
+
+```python Python
+interpreter.system_message = "You are Open Interpreter..."
+```
+
+```yaml Profile
+system_message: "You are Open Interpreter..."
+```
+
+</CodeGroup>
+
+### Disable Telemetry
+
+Opt out of [telemetry](telemetry/telemetry).
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --disable_telemetry
+```
+
+```python Python
+interpreter.anonymized_telemetry = False
+```
+
+```yaml Profile
+disable_telemetry: true
+```
+
+</CodeGroup>
+
+### Offline
+
+This boolean flag determines whether to enable or disable some offline features like [open procedures](https://open-procedures.replit.app/). Use this in conjunction with the `model` parameter to set your language model.
+
+<CodeGroup>
+
+```python Python
+interpreter.offline = True
+```
+
+```bash Terminal
+interpreter --offline true
+```
+
+```yaml Profile
+offline: true
+```
+
+</CodeGroup>
+
+### Messages
+
+This property holds a list of `messages` between the user and the interpreter.
+
+You can use it to restore a conversation:
+
+<CodeGroup>
+
+```python
+interpreter.chat("Hi! Can you print hello world?")
+
+print(interpreter.messages)
+
+# This would output:
+
+# [
+#    {
+#       "role": "user",
+#       "message": "Hi! Can you print hello world?"
+#    },
+#    {
+#       "role": "assistant",
+#       "message": "Sure!"
+#    }
+#    {
+#       "role": "assistant",
+#       "language": "python",
+#       "code": "print('Hello, World!')",
+#       "output": "Hello, World!"
+#    }
+# ]
+
+#You can use this to restore `interpreter` to a previous conversation.
+interpreter.messages = messages # A list that resembles the one above
+```
+
+</CodeGroup>
 
 # Computer
 
-<ComputerSettings />
+The `computer` object in `interpreter.computer` is a virtual computer that the AI controls. Its primary interface/function is to execute code and return the output in real-time.
+
+### Offline
+
+Running the `computer` in offline mode will disable some online features, like the hosted [Computer API](https://api.openinterpreter.com/). Inherits from `interpreter.offline`.
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.offline = True
+```
+
+```yaml Profile
+computer.offline: True
+```
+
+</CodeGroup>
+
+### Verbose
+
+This is primarily used for debugging `interpreter.computer`. Inherits from `interpreter.verbose`.
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.verbose = True
+```
+
+```yaml Profile
+computer.verbose: True
+```
+
+</CodeGroup>
+
+### Emit Images
+
+The `emit_images` attribute in `interpreter.computer` controls whether the computer should emit images or not. This is inherited from `interpreter.llm.supports_vision`.
+
+This is used for multimodel vs. text only models. Running `computer.display.view()` will return an actual screenshot for multimodal models if `emit_images` is True. If it's False, `computer.display.view()` will return all the text on the screen.
+
+Many other functions of the computer can produce image/text outputs, and this parameter controls that.
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.emit_images = True
+```
+
+```yaml Profile
+computer.emit_images: True
+```
+
+</CodeGroup>

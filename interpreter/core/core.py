@@ -3,17 +3,22 @@ This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
 
+import asyncio
 import json
 import os
+import threading
+import time
 from datetime import datetime
 
 from ..terminal_interface.terminal_interface import terminal_interface
+from ..terminal_interface.utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.utils.local_storage_path import get_storage_path
+from ..terminal_interface.utils.oi_dir import oi_dir
 from .computer.computer import Computer
 from .default_system_message import default_system_message
-from .extend_system_message import extend_system_message
 from .llm.llm import Llm
 from .respond import respond
+from .server import server
 from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
 
@@ -60,6 +65,8 @@ class OpenInterpreter:
     ):
         # State
         self.messages = [] if messages is None else messages
+        self.responding = False
+        self.last_messages_count = 0
 
         # Settings
         self.offline = offline
@@ -91,8 +98,18 @@ class OpenInterpreter:
         # Computer
         self.computer = Computer() if computer is None else computer
 
-    def chat(self, message=None, display=True, stream=False):
+    def server(self, *args, **kwargs):
+        server(self, *args, **kwargs)
+
+    def wait(self):
+        while self.responding:
+            time.sleep(0.2)
+        # Return new messages
+        return self.messages[self.last_messages_count :]
+
+    def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
+            self.responding = True
             if self.anonymous_telemetry and not self.offline:
                 message_type = type(
                     message
@@ -106,19 +123,26 @@ class OpenInterpreter:
                     },
                 )
 
+            if not blocking:
+                chat_thread = threading.Thread(
+                    target=self.chat, args=(message, display, stream, True)
+                )  # True as in blocking = True
+                chat_thread.start()
+                return
+
             if stream:
                 return self._streaming_chat(message=message, display=display)
-
-            initial_message_count = len(self.messages)
 
             # If stream=False, *pull* from the stream.
             for _ in self._streaming_chat(message=message, display=display):
                 pass
 
             # Return new messages
-            return self.messages[initial_message_count:]
+            self.responding = False
+            return self.messages[self.last_messages_count :]
 
         except Exception as e:
+            self.responding = False
             if self.anonymous_telemetry and not self.offline:
                 message_type = type(message).__name__
                 send_telemetry(
@@ -161,6 +185,10 @@ class OpenInterpreter:
             # List (this is like the OpenAI API)
             elif isinstance(message, list):
                 self.messages = message
+
+            # Now that the user's messages have been added, we set last_messages_count.
+            # This way we will only return the messages after what they added.
+            self.last_messages_count = len(self.messages)
 
             # DISABLED because I think we should just not transmit images to non-multimodal models?
             # REENABLE this when multimodal becomes more common:
@@ -294,13 +322,12 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
-
-        # Reset the function below, in case the user set it
-        self.extend_system_message = lambda: extend_system_message(self)
-
         self.__init__()
 
-    # These functions are worth exposing to developers
-    # I wish we could just dynamically expose all of our functions to devs...
-    def extend_system_message(self):
-        return extend_system_message(self)
+    def display_message(self, markdown):
+        # This is just handy for start_script in profiles.
+        display_markdown_message(markdown)
+
+    def get_oi_dir(self):
+        # Again, just handy for start_script in profiles.
+        return oi_dir

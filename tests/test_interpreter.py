@@ -7,7 +7,6 @@ import pytest
 
 #####
 from interpreter import OpenInterpreter
-from interpreter.terminal_interface.utils.apply_config import apply_config
 from interpreter.terminal_interface.utils.count_tokens import (
     count_messages_tokens,
     count_tokens,
@@ -15,6 +14,78 @@ from interpreter.terminal_interface.utils.count_tokens import (
 
 interpreter = OpenInterpreter()
 #####
+
+import threading
+import time
+
+import pytest
+from websocket import create_connection
+
+
+def test_websocket_server():
+    # Start the server in a new thread
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    # Give the server a moment to start
+    time.sleep(3)
+
+    # Connect to the server
+    ws = create_connection("ws://localhost:8000/")
+
+    # Send the first message
+    ws.send(
+        "Hello, interpreter! What operating system are you on? Also, what time is it in Seattle?"
+    )
+    # Wait for a moment before sending the second message
+    time.sleep(1)
+    ws.send("Actually, nevermind. Thank you!")
+
+    # Receive the responses
+    responses = []
+    while True:
+        response = ws.recv()
+        print(response)
+        responses.append(response)
+
+    # Check the responses
+    assert responses  # Check that some responses were received
+
+    ws.close()
+
+
+def test_i():
+    import requests
+
+    url = "http://localhost:8000/"
+    data = "Hello, interpreter! What operating system are you on? Also, what time is it in Seattle?"
+    headers = {"Content-Type": "text/plain"}
+
+    import threading
+
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    import time
+
+    time.sleep(3)
+
+    response = requests.post(url, data=data, headers=headers, stream=True)
+
+    full_response = ""
+
+    for line in response.iter_lines():
+        if line:
+            decoded_line = line.decode("utf-8")
+            print(decoded_line, end="", flush=True)
+            full_response += decoded_line
+
+    assert full_response != ""
+
+
+def test_async():
+    interpreter.chat("Hello!", blocking=False)
+    print(interpreter.wait())
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
@@ -251,24 +322,6 @@ def teardown_function():
 @pytest.mark.skip(reason="Mac only + no way to fail test")
 def test_spotlight():
     interpreter.computer.keyboard.hotkey("command", "space")
-
-
-@pytest.mark.skip(reason="We no longer test")
-def test_config_loading():
-    # because our test is running from the root directory, we need to do some
-    # path manipulation to get the actual path to the config file or our config
-    # loader will try to load from the wrong directory and fail
-    currentPath = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(currentPath, "./config.test.yaml")
-
-    interpreter = apply_config(interpreter, config_path=config_path)
-
-    # check the settings we configured in our config.test.yaml file
-    temperature_ok = interpreter.llm.temperature == 0.25
-    model_ok = interpreter.llm.model == "gpt-3.5-turbo"
-    verbose_ok = interpreter.verbose == True
-
-    assert temperature_ok and model_ok and verbose_ok
 
 
 def test_files():

@@ -40,6 +40,9 @@ semgrep = { version = "^1.52.0", optional = true }
 yaspin = { version = "^3.0.1", optional = true }
 pytesseract = { version = "^0.3.10", optional = true }
 prompt-toolkit = "^3.0.43"
+send2trash = "^1.8.2"
+uvicorn = "^0.27.0"
+fastapi = "^0.109.0"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
@@ -57,8 +60,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-interpreter = "interpreter.terminal_interface.cli:main"
-i = "interpreter.terminal_interface.cli:main"
+interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
+i = "interpreter.terminal_interface.start_terminal_interface:main"
 
 [tool.black]
 target-version = ['py311']
