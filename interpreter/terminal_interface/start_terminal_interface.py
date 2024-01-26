@@ -1,19 +1,14 @@
 import argparse
-import os
-import platform
-import subprocess
 import sys
 import time
 
 import pkg_resources
 
 from ..core.core import OpenInterpreter
+from .config.config import configure, open_config_dir, reset_config
 from .conversation_navigator import conversation_navigator
-from .utils.apply_config import apply_config
 from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
-from .utils.get_config import get_config_path
-from .utils.profiles import apply_profile, get_profile_path
 from .validate_llm_settings import validate_llm_settings
 
 
@@ -24,18 +19,18 @@ def start_terminal_interface(interpreter):
 
     arguments = [
         # Profiles coming soon— after we seperate core from TUI
-        # {
-        #     "name": "profile",
-        #     "nickname": "p",
-        #     "help_text": "profile (from your config file) to use. sets multiple settings at once",
-        #     "type": str,
-        #     "default": "default",
-        #     "attribute": {"object": interpreter, "attr_name": "profile"},
-        # },
+        {
+            "name": "config",
+            "nickname": "c",
+            "help_text": "name of config file. run `--config` without an argument to open config directory",
+            "type": str,
+            "default": "default.yaml",
+            "nargs": "?",  # This means you can pass in nothing if you want
+        },
         {
             "name": "custom_instructions",
             "nickname": "ci",
-            "help_text": "custom instructions for the language model, will be appended to the system_message",
+            "help_text": "custom instructions for the language model. will be appended to the system_message",
             "type": str,
             "attribute": {"object": interpreter, "attr_name": "custom_instructions"},
         },
@@ -79,6 +74,7 @@ def start_terminal_interface(interpreter):
             "nickname": "lsv",
             "help_text": "inform OI that your model supports vision, and can recieve vision inputs",
             "type": bool,
+            "action": argparse.BooleanOptionalAction,
             "attribute": {"object": interpreter.llm, "attr_name": "supports_vision"},
         },
         {
@@ -91,7 +87,7 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "context_window",
-            "nickname": "c",
+            "nickname": "cw",
             "help_text": "optional context window size for the language model",
             "type": int,
             "attribute": {"object": interpreter.llm, "attr_name": "context_window"},
@@ -164,7 +160,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "speak_messages",
             "nickname": "sm",
-            "help_text": "(Mac only) use the applescript `say` command to read messages aloud",
+            "help_text": "(Mac only, experimental) use the applescript `say` command to read messages aloud",
             "type": bool,
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
         },
@@ -176,13 +172,6 @@ def start_terminal_interface(interpreter):
             "choices": ["off", "ask", "auto"],
             "default": "off",
             "attribute": {"object": interpreter, "attr_name": "safe_mode"},
-        },
-        {
-            "name": "config_file",
-            "nickname": "cf",
-            "help_text": "optionally set a custom config file to use",
-            "type": str,
-            "attribute": {"object": interpreter, "attr_name": "config_file"},
         },
         {
             "name": "fast",
@@ -210,11 +199,6 @@ def start_terminal_interface(interpreter):
         },
         # Special commands
         {
-            "name": "config",
-            "help_text": "open config.yaml file in text editor",
-            "type": bool,
-        },
-        {
             "name": "reset_config",
             "help_text": "reset config.yaml to default",
             "type": bool,
@@ -232,14 +216,17 @@ def start_terminal_interface(interpreter):
     ]
 
     # Check for deprecated flags before parsing arguments
-    if "--debug_mode" in sys.argv or "-d" in sys.argv:
-        print("\n`--debug_mode` / `-d` has been renamed to `--verbose` / `-v`.\n")
-        time.sleep(1.5)
-        if "--debug_mode" in sys.argv:
-            sys.argv.remove("--debug_mode")
-        if "-d" in sys.argv:
-            sys.argv.remove("-d")
-        sys.argv.append("--verbose")
+    deprecated_flags = {
+        "--debug_mode": "--verbose",
+        "-d": "-v",
+    }
+
+    for old_flag, new_flag in deprecated_flags.items():
+        if old_flag in sys.argv:
+            print(f"\n`{old_flag}` has been renamed to `{new_flag}`.\n")
+            time.sleep(1.5)
+            sys.argv.remove(old_flag)
+            sys.argv.append(new_flag)
 
     parser = argparse.ArgumentParser(description="Open Interpreter")
 
@@ -279,6 +266,7 @@ def start_terminal_interface(interpreter):
                     type=arg["type"],
                     choices=choices,
                     default=default,
+                    nargs=arg.get("nargs"),
                 )
             else:
                 parser.add_argument(
@@ -288,45 +276,23 @@ def start_terminal_interface(interpreter):
                     type=arg["type"],
                     choices=choices,
                     default=default,
+                    nargs=arg.get("nargs"),
                 )
 
     args = parser.parse_args()
 
-    # This should be pushed into an open_config.py util
-    # If --config is used, open the config.yaml file in the Open Interpreter folder of the user's config dir
-    if args.config:
-        if args.config_file:
-            config_file = get_config_path(args.config_file)
-        else:
-            config_file = get_config_path()
-
-        config_directory = os.path.dirname(config_file)
-
-        print("Opening config directory...")
-
-        if platform.system() == "Windows":
-            os.startfile(config_directory)
-        else:
-            try:
-                # Try using xdg-open on non-Windows platforms
-                subprocess.call(["xdg-open", config_directory])
-            except FileNotFoundError:
-                # Fallback to using 'open' on macOS if 'xdg-open' is not available
-                subprocess.call(["open", config_file])
+    if args.config == None:  # --config was provided without a value
+        open_config_dir()
         return
 
-    # This should be pushed into a utility:
     if args.reset_config:
-        if args.config_file:
-            config_file = get_config_path(args.config_file)
-        else:
-            config_file = get_config_path()
-        if os.path.exists(config_file):
-            os.remove(config_file)
-            config_file = get_config_path()
-            print("`config.yaml` has been reset.")
-        else:
-            print("`config.yaml` does not exist.")
+        reset_config()
+        return
+
+    if args.version:
+        version = pkg_resources.get_distribution("open-interpreter").version
+        update_name = "New Computer Update"  # Change this with each major update
+        print(f"Open Interpreter {version} {update_name}")
         return
 
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
@@ -334,12 +300,6 @@ def start_terminal_interface(interpreter):
         interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
     ):
         setattr(interpreter, "auto_run", False)
-
-    if args.version:
-        version = pkg_resources.get_distribution("open-interpreter").version
-        update_name = "New Computer"  # Change this with each major update
-        print(f"Open Interpreter {version} {update_name}")
-        return
 
     if args.fast:
         if not (args.local or args.vision or args.os):
@@ -558,88 +518,14 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
             print("")  # < - Aesthetic choice
 
     if args.local:
-        # Default local (LM studio) attributes
+        args.config = "local.py"
 
-        if not (args.os or args.vision):
-            interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
+    ### Apply config file
 
-        interpreter.offline = True
-        interpreter.llm.model = "openai/x"  # "openai/" tells LiteLLM it's an OpenAI compatible server, the "x" part doesn't matter
-        interpreter.llm.api_base = "http://localhost:1234/v1"
-        interpreter.llm.max_tokens = 1000
-        interpreter.llm.context_window = 3000
-        interpreter.llm.api_key = "x"
+    interpreter = configure(interpreter, args.config)
 
-        if not (args.os or args.vision):
-            display_markdown_message(
-                """
-> Open Interpreter's local mode is powered by **`LM Studio`**.
+    ### Set attributes on interpreter
 
-
-You will need to run **LM Studio** in the background.
-
-1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
-2. Select a language model then click **Download**.
-3. Click the **<->** button on the left (below the chat button).
-4. Select your model at the top, then click **Start Server**.
-
-
-Once the server is running, you can begin your conversation below.
-
-> **Warning:** This feature is highly experimental.
-> Don't expect `gpt-3.5` / `gpt-4` level quality, speed, or reliability yet!
-
-"""
-            )
-        else:
-            if args.vision:
-                display_markdown_message(
-                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
-                )
-                time.sleep(1)
-                display_markdown_message("---\n")
-            elif args.os:
-                time.sleep(1)
-                display_markdown_message("*Setting up local OS control...*\n")
-                time.sleep(2.5)
-                display_markdown_message("---")
-                display_markdown_message(
-                    "> `Local Vision` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background **and using a vision-compatible model**.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
-                )
-            else:
-                time.sleep(1)
-                display_markdown_message(
-                    "> `Local Mode` enabled (experimental)\n\nEnsure LM Studio's local server is running in the background.\n\nRun `interpreter --local` with no other arguments for a setup guide.\n"
-                )
-
-    # Check for update
-    try:
-        if not args.offline:
-            # This message should actually be pushed into the utility
-            if check_for_update():
-                display_markdown_message(
-                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
-                )
-    except:
-        # Doesn't matter
-        pass
-
-    # Apply config
-    if args.config_file:
-        user_config = get_config_path(args.config_file)
-        interpreter = apply_config(interpreter, config_path=user_config)
-    else:
-        # Apply default config file
-        interpreter = apply_config(interpreter)
-
-    # if args.profile:
-    #     # We can add custom profile path, I'll leave it out for first PR
-    #     print(vars(args).get("profile"))
-    #     interpreter.profile = vars(args).get("profile")
-    #     user_profile = get_profile_path()
-    #     interpreter = apply_profile(interpreter, user_profile)
-
-    # Set attributes on interpreter
     for argument_name, argument_value in vars(args).items():
         if argument_value is not None:
             argument_dictionary = [a for a in arguments if a["name"] == argument_name]
@@ -653,6 +539,8 @@ Once the server is running, you can begin your conversation below.
                         print(
                             f"Setting attribute {attr_dict['attr_name']} on {attr_dict['object'].__class__.__name__.lower()} to '{argument_value}'..."
                         )
+
+    ### Set some helpful settings we know are likely to be true
 
     if interpreter.llm.model == "gpt-4-1106-preview":
         if interpreter.llm.context_window is None:
@@ -669,6 +557,19 @@ Once the server is running, you can begin your conversation below.
             interpreter.llm.max_tokens = 4096
         if interpreter.llm.supports_functions is None:
             interpreter.llm.supports_functions = True
+
+    ### Check for update
+
+    try:
+        if not interpreter.offline:
+            # This message should actually be pushed into the utility
+            if check_for_update():
+                display_markdown_message(
+                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                )
+    except:
+        # Doesn't matter
+        pass
 
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
@@ -696,9 +597,5 @@ def main():
     interpreter = OpenInterpreter()
     try:
         start_terminal_interface(interpreter)
-    except KeyboardInterrupt as e:
-        print("Interrupted by user:", e)
-    except Exception as e:
-        print("An error occurred:", e)
-    finally:
-        print("Closing the program.")
+    except KeyboardInterrupt:
+        pass

@@ -8,7 +8,9 @@ import os
 from datetime import datetime
 
 from ..terminal_interface.terminal_interface import terminal_interface
+from ..terminal_interface.utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.utils.local_storage_path import get_storage_path
+from ..terminal_interface.utils.oi_dir import oi_dir
 from .computer.computer import Computer
 from .default_system_message import default_system_message
 from .extend_system_message import extend_system_message
@@ -304,3 +306,11 @@ class OpenInterpreter:
     # I wish we could just dynamically expose all of our functions to devs...
     def extend_system_message(self):
         return extend_system_message(self)
+
+    def display_message(self, markdown):
+        # This is just handy for start_script in configs.
+        display_markdown_message(markdown)
+
+    def get_oi_dir(self):
+        # Again, just handy for start_script in configs.
+        return oi_dir
