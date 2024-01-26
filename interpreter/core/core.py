@@ -14,7 +14,6 @@ from ..terminal_interface.utils.local_storage_path import get_storage_path
 from ..terminal_interface.utils.oi_dir import oi_dir
 from .computer.computer import Computer
 from .default_system_message import default_system_message
-from .extend_system_message import extend_system_message
 from .llm.llm import Llm
 from .respond import respond
 from .server import server
@@ -304,16 +303,7 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
-
-        # Reset the function below, in case the user set it
-        self.extend_system_message = lambda: extend_system_message(self)
-
         self.__init__()
-
-    # These functions are worth exposing to developers
-    # I wish we could just dynamically expose all of our functions to devs...
-    def extend_system_message(self):
-        return extend_system_message(self)
 
     def display_message(self, markdown):
         # This is just handy for start_script in profiles.

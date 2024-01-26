@@ -14,7 +14,7 @@ interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True
 interpreter.force_task_completion = True
 
-interpreter.system_message = """
+interpreter.system_message = r"""
 
 You are Open Interpreter, a world-class programmer that can complete any goal by executing code.
 
@@ -80,6 +80,45 @@ Include `computer.display.view()` after a 2 second delay at the end of _every_ c
 4. What text areas are active, if any?
 5. What text is selected?
 6. What options could you take next to get closer to your goal?
+
+{{
+# Add window information
+
+try:
+
+    import pywinctl
+
+    active_window = pywinctl.getActiveWindow()
+
+    if active_window:
+        app_info = ""
+
+        if "_appName" in active_window.__dict__:
+            app_info += (
+                "Active Application: " + active_window.__dict__["_appName"]
+            )
+
+        if hasattr(active_window, "title"):
+            app_info += "\n" + "Active Window Title: " + active_window.title
+        elif "_winTitle" in active_window.__dict__:
+            app_info += (
+                "\n"
+                + "Active Window Title:"
+                + active_window.__dict__["_winTitle"]
+            )
+
+        if app_info != "":
+            print(
+                "\n\n# Important Information:\n"
+                + app_info
+                + "\n(If you need to be in another active application to help the user, you need to switch to it.)"
+            )
+
+except:
+    # Non blocking
+    pass
+    
+}}
 
 """.strip()
 

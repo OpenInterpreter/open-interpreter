@@ -502,6 +502,7 @@ def reset_profile(specific_default_profile=None):
 
         if not os.path.exists(target_file):
             shutil.copy(default_yaml_file, target_file)
+            print(f"{filename} has been reset.")
         else:
             with open(target_file, "r") as file:
                 current_profile = file.read()
@@ -519,3 +520,4 @@ def reset_profile(specific_default_profile=None):
                     print(f"{filename} was not reset.")
             else:
                 shutil.copy(default_yaml_file, target_file)
+                print(f"{filename} has been reset.")
