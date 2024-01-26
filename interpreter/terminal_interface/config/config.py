@@ -1,3 +1,4 @@
+import ast
 import glob
 import json
 import os
@@ -28,7 +29,6 @@ def configure(interpreter, filename_or_url):
     try:
         config = get_config(filename_or_url)
     except:
-        raise
         if filename_or_url in default_configs_names:
             reset_config(filename_or_url)
             config = get_config(filename_or_url)
@@ -58,10 +58,16 @@ def get_config(filename_or_url):
         with open(config_path, "r", encoding="utf-8") as file:
             if extension == ".py":
                 python_script = file.read()
-                python_script = python_script.replace(
-                    "from interpreter import interpreter", ""
-                )  # We will create the interpreter object
-                return {"start_script": python_script}
+
+                # Remove `from interpreter import interpreter` and `interpreter = OpenInterpreter()`, because we handle that before the script
+                tree = ast.parse(python_script)
+                tree = RemoveInterpreter().visit(tree)
+                python_script = ast.unparse(tree)
+
+                return {
+                    "start_script": python_script,
+                    "version": "0.2.0",
+                }  # Python scripts are always the latest version
             elif extension == ".json":
                 return json.load(file)
             else:
@@ -80,11 +86,35 @@ def get_config(filename_or_url):
     raise Exception(f"Config '{filename_or_url}' not found.")
 
 
+class RemoveInterpreter(ast.NodeTransformer):
+    """Remove `from interpreter import interpreter` and `interpreter = OpenInterpreter()`"""
+
+    def visit_ImportFrom(self, node):
+        if node.module == "interpreter":
+            for alias in node.names:
+                if alias.name == "interpreter":
+                    return None
+        return node
+
+    def visit_Assign(self, node):
+        if (
+            isinstance(node.targets[0], ast.Name)
+            and node.targets[0].id == "interpreter"
+            and isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Name)
+            and node.value.func.id == "OpenInterpreter"
+        ):
+            return None  # None will remove the node from the AST
+        return node  # return node otherwise to keep it in the AST
+
+
 def apply_config(interpreter, config):
     if "start_script" in config:
         exec(config["start_script"])
 
-    if "version" not in config or config["version"] != "0.2.0":
+    if (
+        "version" not in config or config["version"] != "0.2.0"
+    ):  # Remember to update this number up there! ^
         print("")
         print(
             "We have updated our configuration file format. Would you like to migrate your configuration file to the new format? No data will be lost."
