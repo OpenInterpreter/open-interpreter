@@ -6,6 +6,8 @@ It's the main file. `from interpreter import interpreter` will import an instanc
 import asyncio
 import json
 import os
+import threading
+import time
 from datetime import datetime
 
 from ..terminal_interface.terminal_interface import terminal_interface
@@ -63,6 +65,8 @@ class OpenInterpreter:
     ):
         # State
         self.messages = [] if messages is None else messages
+        self.responding = False
+        self.last_messages_count = 0
 
         # Settings
         self.offline = offline
@@ -94,14 +98,18 @@ class OpenInterpreter:
         # Computer
         self.computer = Computer() if computer is None else computer
 
-    async def async_chat(self, *args, **kwargs):
-        return await asyncio.to_thread(self.chat, *args, **kwargs)
-
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
 
-    def chat(self, message=None, display=True, stream=False):
+    def wait(self):
+        while self.responding:
+            time.sleep(0.2)
+        # Return new messages
+        return self.messages[self.last_messages_count :]
+
+    def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
+            self.responding = True
             if self.anonymous_telemetry and not self.offline:
                 message_type = type(
                     message
@@ -115,19 +123,26 @@ class OpenInterpreter:
                     },
                 )
 
+            if not blocking:
+                chat_thread = threading.Thread(
+                    target=self.chat, args=(message, display, stream, True)
+                )  # True as in blocking = True
+                chat_thread.start()
+                return
+
             if stream:
                 return self._streaming_chat(message=message, display=display)
-
-            initial_message_count = len(self.messages)
 
             # If stream=False, *pull* from the stream.
             for _ in self._streaming_chat(message=message, display=display):
                 pass
 
             # Return new messages
-            return self.messages[initial_message_count:]
+            self.responding = False
+            return self.messages[self.last_messages_count :]
 
         except Exception as e:
+            self.responding = False
             if self.anonymous_telemetry and not self.offline:
                 message_type = type(message).__name__
                 send_telemetry(
@@ -170,6 +185,10 @@ class OpenInterpreter:
             # List (this is like the OpenAI API)
             elif isinstance(message, list):
                 self.messages = message
+
+            # Now that the user's messages have been added, we set last_messages_count.
+            # This way we will only return the messages after what they added.
+            self.last_messages_count = len(self.messages)
 
             # DISABLED because I think we should just not transmit images to non-multimodal models?
             # REENABLE this when multimodal becomes more common:
