@@ -16,7 +16,6 @@ def render_past_conversation(messages):
     render_cursor = False
     ran_code_block = False
 
-    print(messages)
     for chunk in messages:
         # Only addition to the terminal interface:
         if chunk["role"] == "user":
