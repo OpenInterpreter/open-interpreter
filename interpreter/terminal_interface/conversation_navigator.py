@@ -64,6 +64,10 @@ def conversation_navigator(interpreter):
     ]
     answers = inquirer.prompt(questions)
 
+    # User chose to exit
+    if not answers:
+        return
+
     # If the user selected to open the folder, do so and return
     if answers["name"] == "> Open folder":
         open_folder(conversations_dir)
