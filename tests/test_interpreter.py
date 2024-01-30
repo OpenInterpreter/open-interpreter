@@ -21,6 +21,7 @@ import time
 import pytest
 from websocket import create_connection
 
+
 @pytest.mark.skip(reason="Server is not a stable feature")
 def test_websocket_server():
     # Start the server in a new thread
@@ -53,6 +54,7 @@ def test_websocket_server():
 
     ws.close()
 
+
 @pytest.mark.skip(reason="Server is not a stable feature")
 def test_i():
     import requests
@@ -81,6 +83,7 @@ def test_i():
             full_response += decoded_line
 
     assert full_response != ""
+
 
 def test_async():
     interpreter.chat("Hello!", blocking=False)

@@ -4,7 +4,7 @@ import shutil
 
 import yaml
 
-from .local_storage_path import get_storage_path
+from ...core.utils.local_storage_path import get_storage_path
 
 # Constants for file paths
 PROFILE_FILENAME = "profiles.yaml"

@@ -11,14 +11,13 @@ import inquirer
 
 from .render_past_conversation import render_past_conversation
 from .utils.display_markdown_message import display_markdown_message
-from .utils.local_storage_path import get_storage_path
 
 
 def conversation_navigator(interpreter):
     import time
 
     time.sleep(5)
-    conversations_dir = get_storage_path("conversations")
+    conversations_dir = interpreter.conversation_history_path
 
     display_markdown_message(
         f"""> Conversations are stored in "`{conversations_dir}`".
