@@ -507,7 +507,8 @@ def test_system_message_appending():
 
     interpreter.system_message += ping_system_message
 
-    messages = interpreter.chat(ping_request)
+    interpreter.chat(ping_request)
+    messages = interpreter.messages
 
     assert messages == [
         {"role": "user", "type": "message", "content": ping_request},
