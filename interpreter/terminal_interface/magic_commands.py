@@ -2,10 +2,9 @@ import json
 import os
 import subprocess
 import time
-import nbformat
+import sys
 
 from datetime import datetime
-from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
 from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
 from .utils.display_markdown_message import display_markdown_message
@@ -185,7 +184,37 @@ def get_desktop_path():
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
     return desktop
 
+def install_and_import(package):
+    try:
+        __import__(package)
+    except ImportError:
+        try:
+            # Install the package silently with pip
+            print("")
+            print(f"Installing {package}...")
+            print("")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+        except subprocess.CalledProcessError:
+            # If pip fails, try pip3
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip3", "install", package],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+            except subprocess.CalledProcessError:
+                print(f"Failed to install package {package}.")
+                return
+    finally:
+        globals()[package] = __import__(package)
+
 def jupyter(self, arguments):
+    # Dynamically install nbformat if not already installed
+    install_and_import('nbformat')
+    from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
+
     desktop = get_desktop_path()
     current_time = datetime.now()
     formatted_time = current_time.strftime("%m-%d-%y-%I%M%p")
@@ -216,6 +245,7 @@ def jupyter(self, arguments):
     with open(notebook_path, 'w', encoding='utf-8') as f:
         nbformat.write(nb, f)
     
+    print("")
     display_markdown_message(f"Jupyter notebook file exported to {os.path.abspath(notebook_path)}")
 
 
