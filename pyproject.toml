@@ -30,6 +30,7 @@ matplotlib = "^3.8.2"
 toml = "^0.10.2"
 posthog = "^3.1.0"
 tiktoken = "^0.5.2"
+nbformat = "^5.9.2"
 
 #Optional dependencies
 opencv-python = { version = "^4.8.1.78", optional = true }
