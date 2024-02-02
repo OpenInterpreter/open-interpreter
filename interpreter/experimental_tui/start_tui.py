@@ -3,10 +3,6 @@ from textual.reactive import reactive
 from textual.widgets import Header, Footer, TextArea, Placeholder, Static
 from textual.containers import Container, Horizontal, VerticalScroll
 
-class Message_bubble(Static):
-    position = reactive()
-
-
 class Open_Interpreter_App(App):
     """A Textual app for a chat interface."""
 
