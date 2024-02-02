@@ -5,23 +5,6 @@ sleep 2
 echo "This will take approximately 5 minutes..."
 sleep 2
 
-
-# Check if Rust is installed
-if ! command -v rustc &> /dev/null
-then
-    echo "Rust is not installed. Installing now..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-    source $HOME/.cargo/env
-else
-    echo "Rust is already installed."
-fi
-
-# Check if Homebrew is installed
-if ! command -v brew &> /dev/null
-then
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-
 # Define pyenv location
 pyenv_root="$HOME/.pyenv/bin/pyenv"
 
@@ -29,7 +12,7 @@ pyenv_root="$HOME/.pyenv/bin/pyenv"
 if ! command -v $pyenv_root &> /dev/null
 then
     echo "pyenv is not installed. Installing now..."
-    brew install pyenv
+    curl https://pyenv.run | bash
 else
     echo "pyenv is already installed."
 fi

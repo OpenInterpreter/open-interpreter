@@ -178,13 +178,18 @@ class Display:
         )
         print(message)
 
+        start = time.time()
         # Take a screenshot
         screenshot = self.screenshot(show=False)
+
+        # Downscale the screenshot to 1920x1080
+        screenshot = screenshot.resize((1920, 1080))
 
         # Convert the screenshot to base64
         buffered = BytesIO()
         screenshot.save(buffered, format="PNG")
         screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+        print("PIC TOOK THIS LONG:", time.time() - start)
 
         try:
             response = requests.post(

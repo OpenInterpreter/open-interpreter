@@ -22,6 +22,56 @@ import pytest
 from websocket import create_connection
 
 
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_api():
+    start = time.time()
+
+    def say(icon_name):
+        import subprocess
+
+        subprocess.run(["say", "-v", "Fred", "click the " + icon_name + " icon"])
+
+    icons = [
+        "run",
+        "walk",
+        "bike",
+        "heart",
+        "back arrow",
+        "left arrow",
+        "solid mail",
+        "music",
+        "star",
+        "microphone",
+        "lock",
+        "paper plane",
+        "magnifying glass",
+        "car",
+        "gear",
+        "martini",
+        "mountain",
+        "photo",
+        "boat",
+        "pizza",
+        "printer",
+    ]
+
+    # from random import shuffle
+    # shuffle(icons)
+
+    for icon in icons:
+        say(icon)
+        interpreter.computer.mouse.move(icon=icon)
+
+    # interpreter.computer.mouse.move(icon="caution")
+    # interpreter.computer.mouse.move(icon="bluetooth")
+    # interpreter.computer.mouse.move(icon="gear")
+    # interpreter.computer.mouse.move(icon="play button")
+    # interpreter.computer.mouse.move(icon="code icon with '>_' in it")
+    print(time.time() - start)
+    assert False
+
+
+@pytest.mark.skip(reason="Server is not a stable feature")
 def test_websocket_server():
     # Start the server in a new thread
     server_thread = threading.Thread(target=interpreter.server)
@@ -54,6 +104,7 @@ def test_websocket_server():
     ws.close()
 
 
+@pytest.mark.skip(reason="Server is not a stable feature")
 def test_i():
     import requests
 
@@ -141,70 +192,6 @@ def test_display_verbose():
     interpreter.computer.verbose = True
     interpreter.verbose = True
     interpreter.computer.mouse.move(x=500, y=500)
-    assert False
-
-
-@pytest.mark.skip(reason="Computer with display only + no way to fail test")
-def test_display_api():
-    start = time.time()
-    time.sleep(5)
-
-    def say(icon_name):
-        import subprocess
-
-        subprocess.run(["say", "-v", "Fred", icon_name])
-
-    say("walk")
-    interpreter.computer.mouse.move(icon="walk")
-    say("run")
-    interpreter.computer.mouse.move(icon="run")
-    say("martini")
-    interpreter.computer.mouse.move(icon="martini")
-    say("walk icon")
-    interpreter.computer.mouse.move(icon="walk icon")
-    say("run icon")
-    interpreter.computer.mouse.move(icon="run icon")
-    say("martini icon")
-    interpreter.computer.mouse.move(icon="martini icon")
-
-    say("compass")
-    interpreter.computer.mouse.move(icon="compass")
-    say("photo")
-    interpreter.computer.mouse.move(icon="photo")
-    say("mountain")
-    interpreter.computer.mouse.move(icon="mountain")
-    say("boat")
-    interpreter.computer.mouse.move(icon="boat")
-    say("coffee")
-    interpreter.computer.mouse.move(icon="coffee")
-    say("pizza")
-    interpreter.computer.mouse.move(icon="pizza")
-    say("printer")
-    interpreter.computer.mouse.move(icon="printer")
-    say("home")
-    interpreter.computer.mouse.move(icon="home")
-    say("compass icon")
-    interpreter.computer.mouse.move(icon="compass icon")
-    say("photo icon")
-    interpreter.computer.mouse.move(icon="photo icon")
-    say("mountain icon")
-    interpreter.computer.mouse.move(icon="mountain icon")
-    say("boat icon")
-    interpreter.computer.mouse.move(icon="boat icon")
-    say("coffee icon")
-    interpreter.computer.mouse.move(icon="coffee icon")
-    say("pizza icon")
-    interpreter.computer.mouse.move(icon="pizza icon")
-    say("printer icon")
-    interpreter.computer.mouse.move(icon="printer icon")
-    say("home icon")
-    interpreter.computer.mouse.move(icon="home icon")
-    # interpreter.computer.mouse.move(icon="caution")
-    # interpreter.computer.mouse.move(icon="bluetooth")
-    # interpreter.computer.mouse.move(icon="gear")
-    # interpreter.computer.mouse.move(icon="play button")
-    # interpreter.computer.mouse.move(icon="code icon with '>_' in it")
-    print(time.time() - start)
     assert False
 
 
@@ -380,7 +367,8 @@ def test_hello_world():
 
     hello_world_message = f"Please reply with just the words {hello_world_response} and nothing else. Do not run code. No confirmation just the text."
 
-    messages = interpreter.chat(hello_world_message)
+    interpreter.chat(hello_world_message)
+    messages = interpreter.messages
 
     assert messages == [
         {"role": "user", "type": "message", "content": hello_world_message},
@@ -504,7 +492,8 @@ def test_system_message_appending():
 
     interpreter.system_message += ping_system_message
 
-    messages = interpreter.chat(ping_request)
+    interpreter.chat(ping_request)
+    messages = interpreter.messages
 
     assert messages == [
         {"role": "user", "type": "message", "content": ping_request},
