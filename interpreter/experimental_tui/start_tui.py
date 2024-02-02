@@ -1,29 +1,35 @@
-from interpreter import interpreter
 from textual.app import App, ComposeResult
+from textual.reactive import reactive
+from textual.widgets import Header, Footer, TextArea, Placeholder, Static
 from textual.containers import Container, Horizontal, VerticalScroll
-from textual.widgets import Static, TextArea
 
-TEXT = """\
-Docking a widget removes it from the layout and fixes its position, aligned to either the top, right, bottom, or left edges of a container.
+class Message_bubble(Static):
+    position = reactive()
 
-Docked widgets will not scroll out of view, making them ideal for sticky headers, footers, and sidebars.
-
-"""
 
 class Open_Interpreter_App(App):
-    CSS_PATH = "style.tcss"
+    """A Textual app for a chat interface."""
+
+    BINDINGS = [("d", "toggle_dark", "Toggle dark mode")]
 
     def compose(self) -> ComposeResult:
-        with Container(id="sidebar"):
-            yield Static("USERNAME")
-            with VerticalScroll(id="chat-history"):
-                pass
+        yield Header()
         
-        with Container(id="chat"):
-            with VerticalScroll(id="chat-scroll"):
-                pass #yield messages
-            yield TextArea("test", language="python")
+        with Horizontal():
+            with VerticalScroll():
+                yield Placeholder()
+            with Container():
+                yield Static()
+                with VerticalScroll():
+                    for message in range(10):
+                        yield Placeholder()
+
+    def action_toggle_dark(self) -> None:
+        """An action to toggle dark mode."""
+        self.dark = not self.dark
+
+    # Additional methods for handling chat interactions can be added here
 
 if __name__ == "__main__":
-    oia = Open_Interpreter_App()
-    oia.run()
+    app = Open_Interpreter_App()
+    app.run()
