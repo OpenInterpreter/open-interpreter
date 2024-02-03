@@ -35,7 +35,7 @@ class Llm:
         self.context_window: Optional[int] = None
         self.max_tokens: Optional[int] = None
         self.api_base: Optional[str] = None
-        self.api_key: Optional[str] = None 
+        self.api_key: Optional[str] = None
         self.api_version: Optional[str] = None
         self.custom_llm_provider: Optional[str] = None
 
@@ -220,7 +220,7 @@ def fixed_litellm_completions(**params):
             print(
                 "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `interpreter.llm.api_key = 'x'`)"
             )
-        
+
         # So, let's try one more time with a dummy API key:
         params["api_key"] = "x"
 

@@ -1,8 +1,8 @@
 import argparse
 import sys
 import time
-import litellm
 
+import litellm
 import pkg_resources
 
 from ..core.core import OpenInterpreter
@@ -369,10 +369,9 @@ def start_terminal_interface(interpreter):
         if interpreter.verbose:
             print("setting llm provider format to openai")
             print(litellm.provider_list)
-            
+
         interpreter.llm.custom_llm_provider = "openai"
-        #We can assume if there is not provider it is localhost
-        
+        # We can assume if there is not provider it is localhost
 
     # If we've set a custom api base, we want it to be sent in an openai compatible way.
     # So we need to tell LiteLLM to do this by changing the model name:
