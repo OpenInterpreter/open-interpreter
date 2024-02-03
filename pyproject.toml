@@ -9,7 +9,7 @@ authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.9,<3.12"
 
 appdirs = "^1.4.4"
 astor = "^0.8.1"
@@ -43,6 +43,7 @@ prompt-toolkit = "^3.0.43"
 send2trash = "^1.8.2"
 uvicorn = "^0.27.0"
 fastapi = "^0.109.0"
+aifs = "^0.0.5"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
