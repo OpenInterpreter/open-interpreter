@@ -175,14 +175,14 @@ def handle_count_tokens(self, prompt):
 
     display_markdown_message("\n".join(outputs))
 
-def get_desktop_path():
-    # For Windows
+def get_downloads_path():
     if os.name == 'nt':
-        desktop = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-    # For MacOS and Linux
+        # For Windows
+        downloads = os.path.join(os.environ['USERPROFILE'], 'Downloads')
     else:
-        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop')
-    return desktop
+        # For MacOS and Linux
+        downloads = os.path.join(os.path.expanduser('~'), 'Downloads')
+    return downloads
 
 def install_and_import(package):
     try:
@@ -215,11 +215,11 @@ def jupyter(self, arguments):
     install_and_import('nbformat')
     from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
 
-    desktop = get_desktop_path()
+    downloads = get_downloads_path()
     current_time = datetime.now()
     formatted_time = current_time.strftime("%m-%d-%y-%I%M%p")
     filename = f"open-interpreter-{formatted_time}.ipynb"
-    notebook_path = os.path.join(desktop, filename)
+    notebook_path = os.path.join(downloads, filename)
     nb = new_notebook()
     cells = []
     
