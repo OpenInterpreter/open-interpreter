@@ -107,7 +107,7 @@ class Files:
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if openai_api_key is None:
             openai_api_key = prompt(
-                message="Please enter your OpenAI API key: ", is_password=True
+                "Please enter your OpenAI API key: ", is_password=True
             )
 
         openai.api_key = openai_api_key
