@@ -220,4 +220,11 @@ def fixed_litellm_completions(**params):
             print(
                 "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `interpreter.llm.api_key = 'x'`)"
             )
-        raise first_error
+        # So, let's try one more time with a dummy API key:
+        params["api_key"] = "x"
+
+        try:
+            yield from litellm.completion(**params)
+        except:
+            # If the second attempt also fails, raise the first error
+            raise first_error
