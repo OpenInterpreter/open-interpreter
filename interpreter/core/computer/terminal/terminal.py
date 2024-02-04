@@ -12,7 +12,8 @@ from .languages.shell import Shell
 
 
 class Terminal:
-    def __init__(self):
+    def __init__(self, computer):
+        self.computer = computer
         self.languages = [
             Python,
             Shell,

@@ -11,7 +11,7 @@ from .terminal.terminal import Terminal
 
 class Computer:
     def __init__(self):
-        self.terminal = Terminal()
+        self.terminal = Terminal(self)
 
         self.offline = False
         self.verbose = False
