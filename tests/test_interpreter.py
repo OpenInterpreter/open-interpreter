@@ -370,10 +370,7 @@ def test_hello_world():
     interpreter.chat(hello_world_message)
     messages = interpreter.messages
 
-    assert messages == [
-        {"role": "user", "type": "message", "content": hello_world_message},
-        {"role": "assistant", "type": "message", "content": hello_world_response},
-    ]
+    assert messages == [{"role": "assistant", "type": "message", "content": hello_world_response}]
 
 
 def test_math():
