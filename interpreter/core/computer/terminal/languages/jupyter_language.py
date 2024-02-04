@@ -21,7 +21,9 @@ class JupyterLanguage(BaseLanguage):
     file_extension = "py"
     name = "Python"
 
-    def __init__(self):
+    def __init__(self, computer):
+        self.computer = computer
+
         self.km = KernelManager(kernel_name="python3")
         self.km.start_kernel()
         self.kc = self.km.client()
@@ -61,6 +63,16 @@ class JupyterLanguage(BaseLanguage):
         self.km.shutdown_kernel()
 
     def run(self, code):
+        ################################################################
+        ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
+        ################################################################
+
+        functions = string_to_python(code)
+        skill_library_path = self.computer.skills.path
+        for filename, code in functions.items():
+            with open(f"{skill_library_path}/{filename}.py", "w") as file:
+                file.write(code)
+
         # lel
         # exec(code)
         # return
@@ -365,3 +377,7 @@ def wrap_in_try_except(code):
 
     # Convert the modified AST back to source code
     return ast.unparse(parsed_code)
+
+
+def string_to_python(code):
+    return {"function_name": "def function_name(): ..."}

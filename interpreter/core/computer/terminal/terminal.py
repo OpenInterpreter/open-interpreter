@@ -12,7 +12,8 @@ from .languages.shell import Shell
 
 
 class Terminal:
-    def __init__(self):
+    def __init__(self, computer):
+        self.computer = computer
         self.languages = [
             Python,
             Shell,
@@ -56,7 +57,13 @@ class Terminal:
 
     def _streaming_run(self, language, code, display=False):
         if language not in self._active_languages:
-            self._active_languages[language] = self.get_language(language)()
+            # Get the language. Pass in self.computer *if it takes a single argument*
+            # but pass in nothing if not. This makes custom languages easier to add / understand.
+            lang_class = self.get_language(language)
+            if lang_class.__init__.__code__.co_argcount > 1:
+                self._active_languages[language] = lang_class(self.computer)
+            else:
+                self._active_languages[language] = lang_class()
         try:
             for chunk in self._active_languages[language].run(code):
                 # self.format_to_recipient can format some messages as having a certain recipient.

@@ -6,12 +6,13 @@ from .display.display import Display
 from .keyboard.keyboard import Keyboard
 from .mouse.mouse import Mouse
 from .os.os import Os
+from .skills.skills import Skills
 from .terminal.terminal import Terminal
 
 
 class Computer:
     def __init__(self):
-        self.terminal = Terminal()
+        self.terminal = Terminal(self)
 
         self.offline = False
         self.verbose = False
@@ -22,6 +23,7 @@ class Computer:
         self.clipboard = Clipboard(self)
         self.browser = Browser(self)
         self.os = Os(self)
+        self.skills = Skills(self)
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
