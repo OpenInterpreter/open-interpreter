@@ -79,6 +79,7 @@ parsed_code = ast.parse(python_code_string)
 # Initialize containers for different categories
 import_statements = []
 functions = []
+functions_dict = {}
 
 # Traverse the AST
 for node in ast.walk(parsed_code):
@@ -99,20 +100,10 @@ for node in ast.walk(parsed_code):
         }
         functions.append(func_info)
 
-# Directory to save the function files
-output_dir = "./function_files"
-os.makedirs(output_dir, exist_ok=True)
-
-# Generate a Python file for each function
 for func in functions:
-    file_content = '\n'.join(import_statements) + '\n\n'
-    file_content += f"def {func['name']}():\n    \"\"\"{func['docstring']}\"\"\"\n    {func['body']}\n"
+    # Consolidating import statements and function definition
+    function_content = '\n'.join(import_statements) + '\n\n'
+    function_content += f"def {func['name']}():\n    \"\"\"{func['docstring']}\"\"\"\n    {func['body']}\n"
     
-    # File path for the function
-    file_path = os.path.join(output_dir, f"{func['name']}.py")
-    
-    # Write the function and imports to the file
-    with open(file_path, "w") as file:
-        file.write(file_content)
-
-    print(f"Created file for function {func['name']}: {file_path}")
+    # Adding to dictionary
+    functions_dict[func['name']] = function_content
