@@ -413,4 +413,5 @@ def string_to_python(code_as_string):
         
         # Adding to dictionary
         functions_dict[func['name']] = function_content
+
     return functions_dict
