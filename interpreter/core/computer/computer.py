@@ -23,7 +23,7 @@ class Computer:
         self.clipboard = Clipboard(self)
         self.browser = Browser(self)
         self.os = Os(self)
-        self.skills = Skills()
+        self.skills = Skills(self)
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
