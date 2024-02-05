@@ -1,4 +1,5 @@
 import litellm
+import openai
 import tokentrim as tt
 
 from ...terminal_interface.utils.display_markdown_message import (
@@ -38,6 +39,15 @@ class Llm:
 
         # Budget manager powered by LiteLLM
         self.max_budget = None
+
+        if not self.api_key:
+            # If it works with a dummy key, let's keep it
+            print("not self.api_key:")
+            if self.check_valid_key(model=self.model, api_base=self.api_base, api_key="sk-dummy-key"):
+                self.api_key = "sk-dummy-key"
+                print("self.api_key = sk-dummy-key")
+            else:
+                print("self.api_key = ''")
 
     def run(self, messages):
         """
@@ -193,6 +203,23 @@ Continuing...
             yield from run_function_calling_llm(self, params)
         else:
             yield from run_text_llm(self, params)
+    
+    def check_valid_key(model=None, api_base=None, api_key=None):
+        messages = [{"role": "user", "content": "Please respond with: Yes it is working"}]
+        print("testing")
+        try:
+            litellm.completion(
+                model=model,
+                api_base=api_base,
+                messages=messages, 
+                api_key=api_key, 
+                max_tokens=10
+            )
+        except litellm.AuthenticationError:
+            return False
+        except Exception:
+            return False
+        return True
 
 
 def fixed_litellm_completions(**params):
@@ -200,27 +227,9 @@ def fixed_litellm_completions(**params):
     Just uses a dummy API key, since we use litellm without an API key sometimes.
     Hopefully they will fix this!
     """
-
-    # Run completion
-    first_error = None
+        
     try:
         yield from litellm.completion(**params)
     except Exception as e:
-        # Store the first error
-        first_error = e
-        # LiteLLM can fail if there's no API key,
-        # even though some models (like local ones) don't require it.
-
-        if "api key" in str(first_error).lower() and "api_key" not in params:
-            print(
-                "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `interpreter.llm.api_key = 'x'`)"
-            )
-
-        # So, let's try one more time with a dummy API key:
-        params["api_key"] = "x"
-
-        try:
-            yield from litellm.completion(**params)
-        except:
-            # If the second attempt also fails, raise the first error
-            raise first_error
+        raise e
+    
