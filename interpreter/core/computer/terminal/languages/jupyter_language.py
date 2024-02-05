@@ -384,7 +384,6 @@ def wrap_in_try_except(code):
 
 
 def string_to_python(code_as_string):
-    print(code_as_string)
     parsed_code = ast.parse(code_as_string)
 
     # Initialize containers for different categories

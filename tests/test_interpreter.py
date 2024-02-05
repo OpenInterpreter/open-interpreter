@@ -367,10 +367,11 @@ def test_hello_world():
 
     hello_world_message = f"Please reply with just the words {hello_world_response} and nothing else. Do not run code. No confirmation just the text."
 
-    interpreter.chat(hello_world_message)
-    messages = interpreter.messages
+    messages = interpreter.chat(hello_world_message)
 
-    assert messages == [{"role": "assistant", "type": "message", "content": hello_world_response}]
+    assert messages == [
+        {"role": "assistant", "type": "message", "content": hello_world_response}
+    ]
 
 
 def test_math():
