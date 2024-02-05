@@ -44,9 +44,9 @@ class JupyterLanguage(BaseLanguage):
         backend = "Agg"
 
         code = f"""
-        import matplotlib
-        matplotlib.use('{backend}')
-        """
+import matplotlib
+matplotlib.use('{backend}')
+        """.strip()
         for _ in self.run(code):
             pass
 
@@ -67,7 +67,11 @@ class JupyterLanguage(BaseLanguage):
         ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
         ################################################################
 
-        functions = string_to_python(code)
+        try:
+            functions = string_to_python(code)
+        except:
+            # Non blocking
+            functions = []
         skill_library_path = self.computer.skills.path
         for filename, code in functions.items():
             with open(f"{skill_library_path}/{filename}.py", "w") as file:
@@ -380,6 +384,7 @@ def wrap_in_try_except(code):
 
 
 def string_to_python(code_as_string):
+    print(code_as_string)
     parsed_code = ast.parse(code_as_string)
 
     # Initialize containers for different categories
@@ -400,18 +405,20 @@ def string_to_python(code_as_string):
         # Check for function definitions
         elif isinstance(node, ast.FunctionDef):
             func_info = {
-                'name': node.name,
-                'docstring': ast.get_docstring(node),
-                'body': '\n    '.join(ast.unparse(stmt) for stmt in node.body[1:])  # Excludes the docstring
+                "name": node.name,
+                "docstring": ast.get_docstring(node),
+                "body": "\n    ".join(
+                    ast.unparse(stmt) for stmt in node.body[1:]
+                ),  # Excludes the docstring
             }
             functions.append(func_info)
 
     for func in functions:
         # Consolidating import statements and function definition
-        function_content = '\n'.join(import_statements) + '\n\n'
+        function_content = "\n".join(import_statements) + "\n\n"
         function_content += f"def {func['name']}():\n    \"\"\"{func['docstring']}\"\"\"\n    {func['body']}\n"
-        
+
         # Adding to dictionary
-        functions_dict[func['name']] = function_content
+        functions_dict[func["name"]] = function_content
 
     return functions_dict
