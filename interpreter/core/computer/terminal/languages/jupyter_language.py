@@ -69,9 +69,10 @@ class JupyterLanguage(BaseLanguage):
 
         functions = string_to_python(code)
         skill_library_path = self.computer.skills.path
-        for filename, code in functions.items():
-            with open(f"{skill_library_path}/{filename}.py", "w") as file:
-                file.write(code)
+        if functions:
+            for filename, code in functions.items():
+                with open(f"{skill_library_path}/{filename}.py", "w") as file:
+                    file.write(code)
 
         # lel
         # exec(code)
@@ -380,4 +381,4 @@ def wrap_in_try_except(code):
 
 
 def string_to_python(code):
-    return {"function_name": "def function_name(): ..."}
+    return ""#{"function_name": "def function_name(): ..."}
