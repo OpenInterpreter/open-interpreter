@@ -71,7 +71,7 @@ matplotlib.use('{backend}')
             functions = string_to_python(code)
         except:
             # Non blocking
-            functions = []
+            functions = {}
         skill_library_path = self.computer.skills.path
         for filename, code in functions.items():
             with open(f"{skill_library_path}/{filename}.py", "w") as file:
