@@ -1,7 +1,7 @@
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
-    <a href="https://discord.gg/6p3fD6rBVm">
+    <a href="https://discord.gg/Hvz9Axh84z">
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
     <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
@@ -242,7 +242,7 @@ interpreter.chat()
 
 You can modify the `max_tokens` and `context_window` (in tokens) of locally running models.
 
-For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's is failing / if it's slow. Make sure `max_tokens` is less than `context_window`.
+For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's failing / if it's slow. Make sure `max_tokens` is less than `context_window`.
 
 ```shell
 interpreter --local --max_tokens 1000 --context_window 3000
@@ -252,7 +252,7 @@ interpreter --local --max_tokens 1000 --context_window 3000
 
 To help you inspect Open Interpreter we have a `--verbose` mode for debugging.
 
-You can activate verbose mode by using it's flag (`interpreter --verbose`), or mid-chat:
+You can activate verbose mode by using its flag (`interpreter --verbose`), or mid-chat:
 
 ```shell
 $ interpreter
@@ -275,49 +275,27 @@ In the interactive mode, you can use the below commands to enhance your experien
 - `%tokens [prompt]`: (_Experimental_) Calculate the tokens that will be sent with the next prompt as context and estimate their cost. Optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated costs.
 - `%help`: Show the help message.
 
-### Configuration
+### Configuration / Profiles
 
-Open Interpreter allows you to set default behaviors using a `config.yaml` file.
+Open Interpreter allows you to set default behaviors using `yaml` files.
 
 This provides a flexible way to configure the interpreter without changing command-line arguments every time.
 
-Run the following command to open the configuration file:
+Run the following command to open the profiles directory:
 
 ```
-interpreter --config
+interpreter --profiles
 ```
 
-#### Multiple Configuration Files
+You can add `yaml` files there. The default profile is named `default.yaml`.
 
-Open Interpreter supports multiple `config.yaml` files, allowing you to easily switch between configurations via the `--config_file` argument.
+#### Multiple Profiles
 
-**Note**: `--config_file` accepts either a file name or a file path. File names will use the default configuration directory, while file paths will use the specified path.
-
-To create or edit a new configuration, run:
+Open Interpreter supports multiple `yaml` files, allowing you to easily switch between configurations:
 
 ```
-interpreter --config --config_file $config_path
+interpreter --profile my_profile.yaml
 ```
-
-To have Open Interpreter load a specific configuration file run:
-
-```
-interpreter --config_file $config_path
-```
-
-**Note**: Replace `$config_path` with the name of or path to your configuration file.
-
-##### Example
-
-1. Create a new `config.turbo.yaml` file
-   ```
-   interpreter --config --config_file config.turbo.yaml
-   ```
-2. Edit the `config.turbo.yaml` file to set `model` to `gpt-3.5-turbo`
-3. Run Open Interpreter with the `config.turbo.yaml` configuration
-   ```
-   interpreter --config_file config.turbo.yaml
-   ```
 
 ## Sample FastAPI Server
 
@@ -349,6 +327,12 @@ def history_endpoint():
 pip install fastapi uvicorn
 uvicorn server:app --reload
 ```
+
+You can also start a server identical to the one above by simply running `interpreter.server()`.
+
+## Android
+
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
 
 ## Safety Notice
 

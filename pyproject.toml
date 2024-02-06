@@ -9,17 +9,16 @@ authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4.0"
+python = ">=3.9,<3.12"
 
 appdirs = "^1.4.4"
 astor = "^0.8.1"
 git-python = "^1.0.3"
 inquirer = "^3.1.3"
-litellm = "^1.15.10"
+litellm = "^1.18.4"
 pyyaml = "^6.0.1"
 rich = "^13.4.2"
 six = "^1.16.0"
-tiktoken = "^0.4.0"
 tokentrim = "^0.1.13"
 wget = "^3.2"
 psutil = "^5.9.6"
@@ -30,7 +29,7 @@ jupyter-client = "^8.6.0"
 matplotlib = "^3.8.2"
 toml = "^0.10.2"
 posthog = "^3.1.0"
-openai = "^1.6.1"
+tiktoken = "^0.5.2"
 
 #Optional dependencies
 opencv-python = { version = "^4.8.1.78", optional = true }
@@ -40,6 +39,11 @@ pywinctl = { version = "^0.3", optional = true }
 semgrep = { version = "^1.52.0", optional = true }
 yaspin = { version = "^3.0.1", optional = true }
 pytesseract = { version = "^0.3.10", optional = true }
+prompt-toolkit = "^3.0.43"
+send2trash = "^1.8.2"
+uvicorn = "^0.27.0"
+fastapi = "^0.109.0"
+aifs = "^0.0.7"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
@@ -57,8 +61,8 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-interpreter = "interpreter:interpreter.start_terminal_interface"
-i = "interpreter:interpreter.start_terminal_interface"
+interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
+i = "interpreter.terminal_interface.start_terminal_interface:main"
 
 [tool.black]
 target-version = ['py311']

@@ -1,0 +1,233 @@
+import time
+
+from interpreter import interpreter
+
+interpreter.os = True
+interpreter.llm.supports_vision = True
+# interpreter.shrink_images = True # Faster but less accurate
+
+interpreter.llm.model = "gpt-4-vision-preview"
+
+interpreter.llm.supports_functions = False
+interpreter.llm.context_window = 110000
+interpreter.llm.max_tokens = 4096
+interpreter.auto_run = True
+interpreter.force_task_completion = True
+
+interpreter.system_message = r"""
+
+You are Open Interpreter, a world-class programmer that can complete any goal by executing code.
+
+When you write code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task.
+
+When a user refers to a filename, they're likely referring to an existing file in the directory you're currently executing code in.
+
+In general, try to make plans with as few steps as possible. As for actually executing code to carry out that plan, **don't try to do everything in one code block.** You should try something, print information about it, then continue from there in tiny, informed steps. You will never get it on the first try, and attempting it in one go will often lead to errors you cant see.
+
+Manually summarize text.
+
+Do not try to write code that attempts the entire task at once, and verify at each step whether or not you're on track.
+
+# Computer
+
+You may use the `computer` Python module to complete tasks:
+
+```python
+computer.browser.search(query)
+
+computer.display.view() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
+
+computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
+computer.keyboard.write("hello")
+
+computer.mouse.click("text onscreen") # This clicks on the UI element with that text. Use this **frequently** and get creative! To click a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
+computer.mouse.move("open recent >") # This moves the mouse over the UI element with that text. Many dropdowns will disappear if you click them. You have to hover over items to reveal more.
+computer.mouse.click(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
+computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often
+
+computer.mouse.scroll(-10) # Scrolls down. If you don't find some text on screen that you expected to be there, you probably want to do this
+x, y = computer.display.center() # Get your bearings
+
+computer.clipboard.view() # Returns contents of clipboard
+computer.os.get_selected_text() # Use frequently. If editing text, the user often wants this
+```
+
+For rare and complex mouse actions, consider using computer vision libraries on the `computer.display.view()` `pil_image` to produce a list of coordinates for the mouse to move/drag to.
+
+If the user highlighted text in an editor, then asked you to modify it, they probably want you to `keyboard.write` over their version of the text.
+
+Tasks are 100% computer-based. DO NOT simply write long messages to the user to complete tasks. You MUST put your text back into the program they're using to deliver your text!
+
+Clicking text is the most reliable way to use the mouse— for example, clicking a URL's text you see in the URL bar, or some textarea's placeholder text (like "Search" to get into a search bar).
+
+Applescript might be best for some tasks.
+
+If you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you.
+
+It is very important to make sure you are focused on the right application and window. Often, your first command should always be to explicitly switch to the correct application.
+
+When searching the web, use query parameters. For example, https://www.amazon.com/s?k=monitor
+
+Try multiple methods before saying the task is impossible. **You can do it!**
+
+# Critical Routine Procedure for Multi-Step Tasks
+
+Include `computer.display.view()` after a 2 second delay at the end of _every_ code block to verify your progress, then answer these questions in extreme detail:
+
+1. Generally, what is happening on-screen?
+2. What is the active app?
+3. What hotkeys does this app support that might get be closer to my goal?
+4. What text areas are active, if any?
+5. What text is selected?
+6. What options could you take next to get closer to your goal?
+
+{{
+# Add window information
+
+try:
+
+    import pywinctl
+
+    active_window = pywinctl.getActiveWindow()
+
+    if active_window:
+        app_info = ""
+
+        if "_appName" in active_window.__dict__:
+            app_info += (
+                "Active Application: " + active_window.__dict__["_appName"]
+            )
+
+        if hasattr(active_window, "title"):
+            app_info += "\n" + "Active Window Title: " + active_window.title
+        elif "_winTitle" in active_window.__dict__:
+            app_info += (
+                "\n"
+                + "Active Window Title:"
+                + active_window.__dict__["_winTitle"]
+            )
+
+        if app_info != "":
+            print(
+                "\n\n# Important Information:\n"
+                + app_info
+                + "\n(If you need to be in another active application to help the user, you need to switch to it.)"
+            )
+
+except:
+    # Non blocking
+    pass
+    
+}}
+
+""".strip()
+
+if interpreter.offline:
+    # Icon finding does not work offline
+    interpreter.system_message = interpreter.system_message.replace(
+        'computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often\n',
+        "",
+    )
+
+# Check if required packages are installed
+
+# THERE IS AN INCONSISTENCY HERE.
+# We should be testing if they import WITHIN OI's computer, not here.
+
+packages = ["cv2", "plyer", "pyautogui", "pyperclip", "pywinctl"]
+missing_packages = []
+for package in packages:
+    try:
+        __import__(package)
+    except ImportError:
+        missing_packages.append(package)
+
+if missing_packages:
+    interpreter.display_message(
+        f"> **Missing Package(s): {', '.join(['`' + p + '`' for p in missing_packages])}**\n\nThese packages are required for OS Control.\n\nInstall them?\n"
+    )
+    user_input = input("(y/n) > ")
+    if user_input.lower() != "y":
+        print("\nPlease try to install them manually.\n\n")
+        time.sleep(2)
+        print("Attempting to start OS control anyway...\n\n")
+
+    for pip_name in ["pip", "pip3"]:
+        command = f"{pip_name} install 'open-interpreter[os]'"
+
+        interpreter.computer.run("shell", command, display=True)
+
+        got_em = True
+        for package in missing_packages:
+            try:
+                __import__(package)
+            except ImportError:
+                got_em = False
+        if got_em:
+            break
+
+    missing_packages = []
+    for package in packages:
+        try:
+            __import__(package)
+        except ImportError:
+            missing_packages.append(package)
+
+    if missing_packages != []:
+        print(
+            "\n\nWarning: The following packages could not be installed:",
+            ", ".join(missing_packages),
+        )
+        print("\nPlease try to install them manually.\n\n")
+        time.sleep(2)
+        print("Attempting to start OS control anyway...\n\n")
+
+interpreter.display_message("> `OS Control` enabled")
+
+# Should we explore other options for ^ these kinds of tags?
+# Like:
+
+# from rich import box
+# from rich.console import Console
+# from rich.panel import Panel
+# console = Console()
+# print(">\n\n")
+# console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
+# print(">\n\n")
+# console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.HEAVY, expand=False), style="white on black")
+# print(">\n\n")
+# console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.DOUBLE, expand=False), style="white on black")
+# print(">\n\n")
+# console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
+
+if not interpreter.offline and not interpreter.auto_run:
+    api_message = "To find items on the screen, Open Interpreter has been instructed to send screenshots to [api.openinterpreter.com](https://api.openinterpreter.com/) (we do not store them). Add `--offline` to attempt this locally."
+    interpreter.display_message(api_message)
+    print("")
+
+if not interpreter.auto_run:
+    screen_recording_message = "**Make sure that screen recording permissions are enabled for your Terminal or Python environment.**"
+    interpreter.display_message(screen_recording_message)
+    print("")
+
+# # FOR TESTING ONLY
+# # Install Open Interpreter from GitHub
+# for chunk in interpreter.computer.run(
+#     "shell",
+#     "pip install git+https://github.com/KillianLucas/open-interpreter.git",
+# ):
+#     if chunk.get("format") != "active_line":
+#         print(chunk.get("content"))
+
+# Give it access to the computer via Python
+interpreter.computer.run(
+    language="python",
+    code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
+    display=interpreter.verbose,
+)
+
+if not interpreter.auto_run:
+    interpreter.display_message(
+        "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+    )
+    print("")  # < - Aesthetic choice

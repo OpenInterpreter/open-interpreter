@@ -7,7 +7,6 @@ import pytest
 
 #####
 from interpreter import OpenInterpreter
-from interpreter.terminal_interface.utils.apply_config import apply_config
 from interpreter.terminal_interface.utils.count_tokens import (
     count_messages_tokens,
     count_tokens,
@@ -15,6 +14,129 @@ from interpreter.terminal_interface.utils.count_tokens import (
 
 interpreter = OpenInterpreter()
 #####
+
+import threading
+import time
+
+import pytest
+from websocket import create_connection
+
+
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_display_api():
+    start = time.time()
+
+    def say(icon_name):
+        import subprocess
+
+        subprocess.run(["say", "-v", "Fred", "click the " + icon_name + " icon"])
+
+    icons = [
+        "run",
+        "walk",
+        "bike",
+        "heart",
+        "back arrow",
+        "left arrow",
+        "solid mail",
+        "music",
+        "star",
+        "microphone",
+        "lock",
+        "paper plane",
+        "magnifying glass",
+        "car",
+        "gear",
+        "martini",
+        "mountain",
+        "photo",
+        "boat",
+        "pizza",
+        "printer",
+    ]
+
+    # from random import shuffle
+    # shuffle(icons)
+
+    for icon in icons:
+        say(icon)
+        interpreter.computer.mouse.move(icon=icon)
+
+    # interpreter.computer.mouse.move(icon="caution")
+    # interpreter.computer.mouse.move(icon="bluetooth")
+    # interpreter.computer.mouse.move(icon="gear")
+    # interpreter.computer.mouse.move(icon="play button")
+    # interpreter.computer.mouse.move(icon="code icon with '>_' in it")
+    print(time.time() - start)
+    assert False
+
+
+@pytest.mark.skip(reason="Server is not a stable feature")
+def test_websocket_server():
+    # Start the server in a new thread
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    # Give the server a moment to start
+    time.sleep(3)
+
+    # Connect to the server
+    ws = create_connection("ws://localhost:8000/")
+
+    # Send the first message
+    ws.send(
+        "Hello, interpreter! What operating system are you on? Also, what time is it in Seattle?"
+    )
+    # Wait for a moment before sending the second message
+    time.sleep(1)
+    ws.send("Actually, nevermind. Thank you!")
+
+    # Receive the responses
+    responses = []
+    while True:
+        response = ws.recv()
+        print(response)
+        responses.append(response)
+
+    # Check the responses
+    assert responses  # Check that some responses were received
+
+    ws.close()
+
+
+@pytest.mark.skip(reason="Server is not a stable feature")
+def test_i():
+    import requests
+
+    url = "http://localhost:8000/"
+    data = "Hello, interpreter! What operating system are you on? Also, what time is it in Seattle?"
+    headers = {"Content-Type": "text/plain"}
+
+    import threading
+
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    import time
+
+    time.sleep(3)
+
+    response = requests.post(url, data=data, headers=headers, stream=True)
+
+    full_response = ""
+
+    for line in response.iter_lines():
+        if line:
+            decoded_line = line.decode("utf-8")
+            print(decoded_line, end="", flush=True)
+            full_response += decoded_line
+
+    assert full_response != ""
+
+
+def test_async():
+    interpreter.chat("Hello!", blocking=False)
+    print(interpreter.wait())
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
@@ -70,70 +192,6 @@ def test_display_verbose():
     interpreter.computer.verbose = True
     interpreter.verbose = True
     interpreter.computer.mouse.move(x=500, y=500)
-    assert False
-
-
-@pytest.mark.skip(reason="Computer with display only + no way to fail test")
-def test_display_api():
-    start = time.time()
-    time.sleep(5)
-
-    def say(icon_name):
-        import subprocess
-
-        subprocess.run(["say", "-v", "Fred", icon_name])
-
-    say("walk")
-    interpreter.computer.mouse.move(icon="walk")
-    say("run")
-    interpreter.computer.mouse.move(icon="run")
-    say("martini")
-    interpreter.computer.mouse.move(icon="martini")
-    say("walk icon")
-    interpreter.computer.mouse.move(icon="walk icon")
-    say("run icon")
-    interpreter.computer.mouse.move(icon="run icon")
-    say("martini icon")
-    interpreter.computer.mouse.move(icon="martini icon")
-
-    say("compass")
-    interpreter.computer.mouse.move(icon="compass")
-    say("photo")
-    interpreter.computer.mouse.move(icon="photo")
-    say("mountain")
-    interpreter.computer.mouse.move(icon="mountain")
-    say("boat")
-    interpreter.computer.mouse.move(icon="boat")
-    say("coffee")
-    interpreter.computer.mouse.move(icon="coffee")
-    say("pizza")
-    interpreter.computer.mouse.move(icon="pizza")
-    say("printer")
-    interpreter.computer.mouse.move(icon="printer")
-    say("home")
-    interpreter.computer.mouse.move(icon="home")
-    say("compass icon")
-    interpreter.computer.mouse.move(icon="compass icon")
-    say("photo icon")
-    interpreter.computer.mouse.move(icon="photo icon")
-    say("mountain icon")
-    interpreter.computer.mouse.move(icon="mountain icon")
-    say("boat icon")
-    interpreter.computer.mouse.move(icon="boat icon")
-    say("coffee icon")
-    interpreter.computer.mouse.move(icon="coffee icon")
-    say("pizza icon")
-    interpreter.computer.mouse.move(icon="pizza icon")
-    say("printer icon")
-    interpreter.computer.mouse.move(icon="printer icon")
-    say("home icon")
-    interpreter.computer.mouse.move(icon="home icon")
-    # interpreter.computer.mouse.move(icon="caution")
-    # interpreter.computer.mouse.move(icon="bluetooth")
-    # interpreter.computer.mouse.move(icon="gear")
-    # interpreter.computer.mouse.move(icon="play button")
-    # interpreter.computer.mouse.move(icon="code icon with '>_' in it")
-    print(time.time() - start)
     assert False
 
 
@@ -253,24 +311,6 @@ def test_spotlight():
     interpreter.computer.keyboard.hotkey("command", "space")
 
 
-@pytest.mark.skip(reason="We no longer test")
-def test_config_loading():
-    # because our test is running from the root directory, we need to do some
-    # path manipulation to get the actual path to the config file or our config
-    # loader will try to load from the wrong directory and fail
-    currentPath = os.path.dirname(os.path.abspath(__file__))
-    config_path = os.path.join(currentPath, "./config.test.yaml")
-
-    interpreter = apply_config(interpreter, config_path=config_path)
-
-    # check the settings we configured in our config.test.yaml file
-    temperature_ok = interpreter.llm.temperature == 0.25
-    model_ok = interpreter.llm.model == "gpt-3.5-turbo"
-    verbose_ok = interpreter.verbose == True
-
-    assert temperature_ok and model_ok and verbose_ok
-
-
 def test_files():
     messages = [
         {"role": "user", "type": "message", "content": "Does this file exist?"},
@@ -330,8 +370,7 @@ def test_hello_world():
     messages = interpreter.chat(hello_world_message)
 
     assert messages == [
-        {"role": "user", "type": "message", "content": hello_world_message},
-        {"role": "assistant", "type": "message", "content": hello_world_response},
+        {"role": "assistant", "type": "message", "content": hello_world_response}
     ]
 
 
@@ -393,7 +432,7 @@ with open('numbers.txt', 'a+') as f:
         f.seek(0, os.SEEK_END)
         """
     print("starting to code")
-    for chunk in interpreter.computer.run("python", code):
+    for chunk in interpreter.computer.run("python", code, stream=True, display=True):
         print(chunk)
         if "format" in chunk and chunk["format"] == "output":
             if "adding 3 to file" in chunk["content"]:
@@ -439,24 +478,6 @@ def test_markdown():
     interpreter.chat(
         """Hi, can you test out a bunch of markdown features? Try writing a fenced code block, a table, headers, everything. DO NOT write the markdown inside a markdown code block, just write it raw."""
     )
-
-
-def test_system_message_appending():
-    ping_system_message = (
-        "Respond to a `ping` with a `pong`. No code. No explanations. Just `pong`."
-    )
-
-    ping_request = "ping"
-    pong_response = "pong"
-
-    interpreter.system_message += ping_system_message
-
-    messages = interpreter.chat(ping_request)
-
-    assert messages == [
-        {"role": "user", "type": "message", "content": ping_request},
-        {"role": "assistant", "type": "message", "content": pong_response},
-    ]
 
 
 def test_reset():

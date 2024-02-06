@@ -32,8 +32,6 @@ class Display:
             # pyautogui is an optional package, so it's okay if this fails
             pass
 
-        self.api_base = "https://api.openinterpreter.com"
-
     def size(self):
         return pyautogui.size()
 
@@ -124,7 +122,7 @@ class Display:
 
             try:
                 response = requests.post(
-                    f'{self.api_base.strip("/")}/v0/point/text/',
+                    f'{self.computer.api_base.strip("/")}/point/text/',
                     json={"query": text, "base64": screenshot_base64},
                 )
                 response = response.json()
@@ -154,7 +152,7 @@ class Display:
 
             try:
                 response = requests.post(
-                    f'{self.api_base.strip("/")}/v0/text/',
+                    f'{self.computer.api_base.strip("/")}/text/',
                     json={"base64": screenshot_base64},
                 )
                 response = response.json()
@@ -180,17 +178,22 @@ class Display:
         )
         print(message)
 
+        start = time.time()
         # Take a screenshot
         screenshot = self.screenshot(show=False)
+
+        # Downscale the screenshot to 1920x1080
+        screenshot = screenshot.resize((1920, 1080))
 
         # Convert the screenshot to base64
         buffered = BytesIO()
         screenshot.save(buffered, format="PNG")
         screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+        print("PIC TOOK THIS LONG:", time.time() - start)
 
         try:
             response = requests.post(
-                f'{self.api_base.strip("/")}/v0/point/',
+                f'{self.computer.api_base.strip("/")}/point/',
                 json={"query": query, "base64": screenshot_base64},
             )
             return response.json()
