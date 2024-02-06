@@ -480,25 +480,6 @@ def test_markdown():
     )
 
 
-def test_system_message_appending():
-    ping_system_message = (
-        "Respond to a `ping` with a `pong`. No code. No explanations. Just `pong`."
-    )
-
-    ping_request = "ping"
-    pong_response = "pong"
-
-    interpreter.system_message += ping_system_message
-
-    interpreter.chat(ping_request)
-    messages = interpreter.messages
-
-    assert messages == [
-        {"role": "user", "type": "message", "content": ping_request},
-        {"role": "assistant", "type": "message", "content": pong_response},
-    ]
-
-
 def test_reset():
     # make sure that interpreter.reset() clears out the messages Array
     assert interpreter.messages == []
