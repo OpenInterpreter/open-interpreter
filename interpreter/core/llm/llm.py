@@ -1,5 +1,3 @@
-from typing import Optional
-
 import litellm
 import tokentrim as tt
 
@@ -29,20 +27,22 @@ class Llm:
         self.model: str = "gpt-4"
         self.temperature: float = 0
         self.supports_vision: bool = False
-        self.supports_functions: Optional[bool] = None  # Will try to auto-detect
+        self.supports_functions = None  # Will try to auto-detect
 
         # Optional settings
-        self.context_window: Optional[int] = None
-        self.max_tokens: Optional[int] = None
-        self.api_base: Optional[str] = None
-        self.api_key: Optional[str] = None
-        self.api_version: Optional[str] = None
+        self.context_window = None
+        self.max_tokens = None
+        self.api_base = None
+        self.api_key = None
+        self.api_version = None
+        
         if self.model.split("/")[0] not in litellm.provider_list:
-            print("litellm.provider_list")
-            self.custom_llm_provider: Optional[str] = "openai"
+            if interpreter.verbose:
+                print("Setting litellm.custom_llm_provider to openai")
+            self.custom_llm_provider = "openai"
 
         # Budget manager powered by LiteLLM
-        self.max_budget: Optional[float] = None
+        self.max_budget = None
 
     def run(self, messages):
         """
