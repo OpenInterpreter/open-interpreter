@@ -37,7 +37,9 @@ class Llm:
         self.api_base: Optional[str] = None
         self.api_key: Optional[str] = None
         self.api_version: Optional[str] = None
-        self.custom_llm_provider: Optional[str] = None
+        if self.model.split("/")[0] not in litellm.provider_list:
+            print("litellm.provider_list")
+            self.custom_llm_provider: Optional[str] = "openai"
 
         # Budget manager powered by LiteLLM
         self.max_budget: Optional[float] = None
