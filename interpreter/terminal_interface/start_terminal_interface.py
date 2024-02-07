@@ -2,7 +2,6 @@ import argparse
 import sys
 import time
 
-import litellm
 import pkg_resources
 
 from ..core.core import OpenInterpreter
