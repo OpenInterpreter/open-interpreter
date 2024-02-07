@@ -24,9 +24,9 @@ class Llm:
         self.completions = fixed_litellm_completions
 
         # Settings
-        self.model: str = "gpt-4"
-        self.temperature: float = 0
-        self.supports_vision: bool = False
+        self.model = "gpt-4"
+        self.temperature = 0
+        self.supports_vision = False
         self.supports_functions = None  # Will try to auto-detect
 
         # Optional settings
@@ -35,7 +35,7 @@ class Llm:
         self.api_base = None
         self.api_key = None
         self.api_version = None
-        
+
         if self.model.split("/")[0] not in litellm.provider_list:
             if interpreter.verbose:
                 print("Setting litellm.custom_llm_provider to openai")
