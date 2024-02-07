@@ -1,9 +1,9 @@
-import getpass
 import os
 from concurrent.futures import ThreadPoolExecutor
 
 import openai
 import tiktoken
+from prompt_toolkit import prompt
 
 
 def split_into_chunks(text, tokens, model, overlap):
@@ -106,9 +106,10 @@ class Files:
         # Retrieve OpenAI API key
         openai_api_key = os.getenv("OPENAI_API_KEY")
         if openai_api_key is None:
-            openai_api_key = getpass.getpass(
-                prompt="Please enter your OpenAI API key: "
+            openai_api_key = prompt(
+                "Please enter your OpenAI API key: ", is_password=True
             )
+
         openai.api_key = openai_api_key
 
         model = "gpt-3.5-turbo"

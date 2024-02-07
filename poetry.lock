@@ -2,13 +2,13 @@
 
 [[package]]
 name = "aifs"
-version = "0.0.5"
+version = "0.0.7"
 description = "Local semantic search. Stupidly simple."
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "aifs-0.0.5-py3-none-any.whl", hash = "sha256:cfe667a076d1eef7a5d341608a0d0a3b54b44250f6175cf42be337d57e8e6add"},
-    {file = "aifs-0.0.5.tar.gz", hash = "sha256:489af28c7ad79dd8a52803f5218415a98e6ee069d455e17c85a7bb29810b7c4f"},
+    {file = "aifs-0.0.7-py3-none-any.whl", hash = "sha256:8a263ffffa93fad1f91cd30fd1252f19dec96bb73a771d28c9004a621bf0ff08"},
+    {file = "aifs-0.0.7.tar.gz", hash = "sha256:87e84d7f437ade4cf3a519eeb88ec379e3809253b6ba58418156fbe41f87f4ae"},
 ]
 
 [package.dependencies]
@@ -9776,4 +9776,4 @@ safe = ["semgrep", "yaspin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "a6f687ed4c3468d903143f094417eb5540b4fb9b1ffcf113fe6c3da0a23ad428"
+content-hash = "a2345a0ad106bb4121a073d03018d0c5bb5c47320032f07c173a44bbd0789f54"

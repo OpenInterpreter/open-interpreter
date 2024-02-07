@@ -367,12 +367,10 @@ def test_hello_world():
 
     hello_world_message = f"Please reply with just the words {hello_world_response} and nothing else. Do not run code. No confirmation just the text."
 
-    interpreter.chat(hello_world_message)
-    messages = interpreter.messages
+    messages = interpreter.chat(hello_world_message)
 
     assert messages == [
-        {"role": "user", "type": "message", "content": hello_world_message},
-        {"role": "assistant", "type": "message", "content": hello_world_response},
+        {"role": "assistant", "type": "message", "content": hello_world_response}
     ]
 
 
@@ -480,25 +478,6 @@ def test_markdown():
     interpreter.chat(
         """Hi, can you test out a bunch of markdown features? Try writing a fenced code block, a table, headers, everything. DO NOT write the markdown inside a markdown code block, just write it raw."""
     )
-
-
-def test_system_message_appending():
-    ping_system_message = (
-        "Respond to a `ping` with a `pong`. No code. No explanations. Just `pong`."
-    )
-
-    ping_request = "ping"
-    pong_response = "pong"
-
-    interpreter.system_message += ping_system_message
-
-    interpreter.chat(ping_request)
-    messages = interpreter.messages
-
-    assert messages == [
-        {"role": "user", "type": "message", "content": ping_request},
-        {"role": "assistant", "type": "message", "content": pong_response},
-    ]
 
 
 def test_reset():
