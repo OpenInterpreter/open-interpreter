@@ -8,7 +8,10 @@ class Docs:
     def __init__(self, computer):
         self.computer = computer
 
-    def search(self, module, query):
+    def search(self, query, module=None):
+        if module == None:
+            module = self.computer
+
         # Get the path of the module
         module_path = os.path.dirname(inspect.getfile(module.__class__))
 
