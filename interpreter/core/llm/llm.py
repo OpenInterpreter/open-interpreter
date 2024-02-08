@@ -36,11 +36,6 @@ class Llm:
         self.api_key = None
         self.api_version = None
 
-        if self.model.split("/")[0] not in litellm.provider_list:
-            if interpreter.verbose:
-                print("Setting litellm.custom_llm_provider to openai")
-            self.custom_llm_provider = "openai"
-
         # Budget manager powered by LiteLLM
         self.max_budget = None
 
@@ -176,13 +171,15 @@ Continuing...
             "stream": True,
         }
 
+        if params["model"].split("/")[0].lower() not in litellm.provider_list:
+            params["custom_llm_provider"] = "openai"
+
         # Optional inputs
         if self.api_key:
             params["api_key"] = self.api_key
         if self.api_base:
             params["api_base"] = self.api_base
-        if self.custom_llm_provider:
-            params["custom_llm_provider"] = self.custom_llm_provider
+            params["custom_llm_provider"] = "openai"
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:
