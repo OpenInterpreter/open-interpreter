@@ -13,7 +13,5 @@ class Skills:
         self.path = skills_dir
 
     def search(self, query):
-        os.environ["AIFS_MINIMAL_PYTHON_INDEXING"] = "True"
-        result = aifs.search(skills_dir, query)
-        os.environ["AIFS_MINIMAL_PYTHON_INDEXING"] = "False"
+        result = aifs.search(skills_dir, query, python_docstrings_only=True)
         return result
