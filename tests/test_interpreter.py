@@ -22,7 +22,7 @@ import pytest
 from websocket import create_connection
 
 
-# @pytest.mark.skip(reason="Computer with display only + no way to fail test")
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_api():
     start = time.time()
 
