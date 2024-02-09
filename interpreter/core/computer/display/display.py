@@ -136,7 +136,7 @@ class Display:
         centers = find_text_in_image(screenshot, text)
 
         return [
-            {"coordinates": centers, "text": "", "similarity": 1}
+            {"coordinates": center, "text": "", "similarity": 1} for center in centers
         ]  # Have it deliver the text properly soon.
 
     def get_text_as_list_of_lists(self, screenshot=None):
@@ -171,7 +171,7 @@ class Display:
                 )
 
     # locate text should be moved here as well!
-    def find_icon(self, query):
+    def find_icon(self, query, screenshot=None):
         message = format_to_recipient(
             "Locating this icon will take ~30 seconds. We're working on speeding this up.",
             recipient="user",
@@ -180,7 +180,8 @@ class Display:
 
         start = time.time()
         # Take a screenshot
-        screenshot = self.screenshot(show=False)
+        if screenshot == None:
+            screenshot = self.screenshot(show=False)
 
         # Downscale the screenshot to 1920x1080
         screenshot = screenshot.resize((1920, 1080))

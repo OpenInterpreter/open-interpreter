@@ -27,6 +27,7 @@ class Computer:
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
+        # self.api_base = "http://0.0.0.0/v0"
 
     # Shortcut for computer.terminal.languages
     @property

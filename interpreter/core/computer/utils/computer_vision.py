@@ -55,6 +55,28 @@ def find_text_in_image(img, text):
 
     # Loop through each box
     for i in range(n_boxes):
+        # # (DEBUGGING) Draw each box on the grayscale image
+        # cv2.rectangle(
+        #     img_draw,
+        #     (d["left"][i], d["top"][i]),
+        #     (d["left"][i] + d["width"][i], d["top"][i] + d["height"][i]),
+        #     (0, 255, 0),
+        #     2,
+        # )
+        # # Draw the detected text in the rectangle in small font
+        # font = cv2.FONT_HERSHEY_SIMPLEX
+        # font_scale = 0.5
+        # font_color = (0, 0, 255)
+        # line_type = 2
+
+        # cv2.putText(img_draw,
+        #             d["text"][i],
+        #             (d["left"][i], d["top"][i] - 10),
+        #             font,
+        #             font_scale,
+        #             font_color,
+        #             line_type)
+
         # Print the text of the box
         # If the text in the box matches the given text
         if text.lower() in d["text"][i].lower():
