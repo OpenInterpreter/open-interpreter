@@ -186,7 +186,7 @@ def get_downloads_path():
 
 def install_and_import(package):
     try:
-        __import__(package)
+        module = __import__(package)
     except ImportError:
         try:
             # Install the package silently with pip
@@ -197,6 +197,7 @@ def install_and_import(package):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
+            module = __import__(package)
         except subprocess.CalledProcessError:
             # If pip fails, try pip3
             try:
@@ -208,11 +209,12 @@ def install_and_import(package):
                 print(f"Failed to install package {package}.")
                 return
     finally:
-        globals()[package] = __import__(package)
+        globals()[package] = module
+    return module 
 
 def jupyter(self, arguments):
     # Dynamically install nbformat if not already installed
-    install_and_import('nbformat')
+    nbformat = install_and_import('nbformat') 
     from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
 
     downloads = get_downloads_path()
