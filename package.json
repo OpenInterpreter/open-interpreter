@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "moment": "^2.30.1",
-    "moment-timezone": "^0.5.44"
-  }
-}

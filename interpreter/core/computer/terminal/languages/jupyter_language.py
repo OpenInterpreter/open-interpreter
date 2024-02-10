@@ -4,6 +4,7 @@ Gotta split this out, generalize it, and move all the python additions to python
 """
 
 import ast
+import os
 import queue
 import re
 import threading
@@ -72,7 +73,12 @@ matplotlib.use('{backend}')
         except:
             # Non blocking
             functions = {}
+
         skill_library_path = self.computer.skills.path
+
+        if not os.path.exists(skill_library_path):
+            os.makedirs(skill_library_path)
+
         for filename, code in functions.items():
             with open(f"{skill_library_path}/{filename}.py", "w") as file:
                 file.write(code)
