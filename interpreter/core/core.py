@@ -6,6 +6,7 @@ It's the main file. `from interpreter import interpreter` will import an instanc
 import asyncio
 import json
 import os
+from pathlib import Path
 import threading
 import time
 from datetime import datetime
@@ -21,8 +22,6 @@ from .respond import respond
 from .server import server
 from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
-
-default_skills_dir = os.path.join(oi_dir, "skills")
 
 
 class OpenInterpreter:
@@ -102,7 +101,8 @@ class OpenInterpreter:
         # Computer
         self.computer = Computer() if computer is None else computer
         self.computer.skills.skills_dir = (
-            skills_dir if skills_dir else default_skills_dir
+            skills_dir if skills_dir else str(Path(oi_dir) / "skills")
+
         )
         if import_skills:
             self.computer.skills.import_skills()
