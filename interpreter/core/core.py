@@ -22,6 +22,8 @@ from .server import server
 from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
 
+default_skills_dir = os.path.join(oi_dir, "skills")
+
 
 class OpenInterpreter:
     """
@@ -62,6 +64,8 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         computer=None,
+        skills_dir=None,
+        import_skills=True,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -97,6 +101,11 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer() if computer is None else computer
+        self.computer.skills.skills_dir = (
+            skills_dir if skills_dir else default_skills_dir
+        )
+        if import_skills:
+            self.computer.skills.import_skills()
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
