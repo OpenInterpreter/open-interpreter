@@ -6,6 +6,7 @@ It's the main file. `from interpreter import interpreter` will import an instanc
 import asyncio
 import json
 import os
+from pathlib import Path
 import threading
 import time
 from datetime import datetime
@@ -62,6 +63,8 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         computer=None,
+        skills_dir=None,
+        import_skills=True,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -97,6 +100,12 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer() if computer is None else computer
+        self.computer.skills.skills_dir = (
+            skills_dir if skills_dir else str(Path(oi_dir) / "skills")
+
+        )
+        if import_skills:
+            self.computer.skills.import_skills()
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
