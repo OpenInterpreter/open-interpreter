@@ -10,6 +10,7 @@ except ImportError:
 
 import os
 import platform
+import tempfile
 import random
 import re
 import subprocess
@@ -44,6 +45,7 @@ except:
 
 
 def terminal_interface(interpreter, message):
+    global language
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -268,6 +270,7 @@ def terminal_interface(interpreter, message):
                             active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = language
                             active_block.code = code
+                            break
                         else:
                             # User declined to run code.
                             interpreter.messages.append(
