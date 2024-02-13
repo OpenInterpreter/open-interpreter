@@ -147,7 +147,7 @@ class Display:
         centers = find_text_in_image(screenshot, text)
 
         return [
-            {"coordinates": centers, "text": "", "similarity": 1}
+            {"coordinates": center, "text": "", "similarity": 1} for center in centers
         ]  # Have it deliver the text properly soon.
 
     def get_text_as_list_of_lists(self, screenshot=None):
@@ -184,7 +184,7 @@ class Display:
                 )
 
     # locate text should be moved here as well!
-    def find_icon(self, query):
+    def find_icon(self, query, screenshot=None):
         """
         Locates an icon on the screen and returns its coordinates.
         """
@@ -194,13 +194,19 @@ class Display:
         )
         print(message)
 
+        start = time.time()
         # Take a screenshot
-        screenshot = self.screenshot(show=False)
+        if screenshot == None:
+            screenshot = self.screenshot(show=False)
+
+        # Downscale the screenshot to 1920x1080
+        screenshot = screenshot.resize((1920, 1080))
 
         # Convert the screenshot to base64
         buffered = BytesIO()
         screenshot.save(buffered, format="PNG")
         screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+        print("PIC TOOK THIS LONG:", time.time() - start)
 
         try:
             response = requests.post(

@@ -38,11 +38,10 @@ class Mouse:
                 f"An error occurred while retrieving the mouse position: {e}. "
             )
 
-    def move(self, *args, x=None, y=None, icon=None, text=None):
+    def move(self, *args, x=None, y=None, icon=None, text=None, screenshot=None):
         """
         Moves the mouse to specified coordinates, an icon, or text.
         """
-        screenshot = None
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
@@ -51,13 +50,16 @@ class Mouse:
             if len(args) == 1:
                 text = args[0]
 
-            screenshot = self.computer.display.screenshot(show=False)
+            if screenshot == None:
+                screenshot = self.computer.display.screenshot(show=False)
 
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
 
             is_fuzzy = any([c["similarity"] != 1 for c in coordinates])
 
             if len(coordinates) == 0:
+                return self.move(icon=text)  # Is this a better solution?
+
                 if self.computer.emit_images:
                     plt.imshow(np.array(screenshot))
                     with warnings.catch_warnings():
@@ -135,7 +137,10 @@ class Mouse:
                 )
             )
         elif icon is not None:
-            coordinates = self.computer.display.find_icon(icon)
+            if screenshot == None:
+                screenshot = self.computer.display.screenshot(show=False)
+
+            coordinates = self.computer.display.find_icon(icon, screenshot)
 
             if len(coordinates) > 1:
                 if self.computer.emit_images:
@@ -213,9 +218,8 @@ class Mouse:
                 warnings.simplefilter("ignore")
                 plt.show()
 
-            time.sleep(5)
-
-        pyautogui.moveTo(x, y, duration=0.5)
+        # pyautogui.moveTo(x, y, duration=0.5)
+        smooth_move_to(x, y)
 
     def click(self, *args, button="left", clicks=1, interval=0.1, **kwargs):
         """
@@ -260,3 +264,31 @@ class Mouse:
         Releases the mouse button.
         """
         pyautogui.mouseUp()
+
+
+import math
+import time
+
+
+def smooth_move_to(x, y, duration=2):
+    start_x, start_y = pyautogui.position()
+    dx = x - start_x
+    dy = y - start_y
+    distance = math.hypot(dx, dy)  # Calculate the distance in pixels
+
+    start_time = time.time()
+
+    while True:
+        elapsed_time = time.time() - start_time
+        if elapsed_time > duration:
+            break
+
+        t = elapsed_time / duration
+        eased_t = (1 - math.cos(t * math.pi)) / 2  # easeInOutSine function
+
+        target_x = start_x + dx * eased_t
+        target_y = start_y + dy * eased_t
+        pyautogui.moveTo(target_x, target_y)
+
+    # Ensure the mouse ends up exactly at the target (x, y)
+    pyautogui.moveTo(x, y)
