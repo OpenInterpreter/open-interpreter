@@ -49,8 +49,8 @@ class Computer:
 
     def exec(self, code):
         """
-        It has hallucinated this.
         Shortcut for computer.terminal.run("shell", code)
+        It has hallucinated this.
         """
         return self.terminal.run("shell", code)
 

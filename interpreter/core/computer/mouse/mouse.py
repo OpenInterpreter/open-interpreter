@@ -19,6 +19,9 @@ class Mouse:
         self.computer = computer
 
     def scroll(self, clicks):
+        """
+        Scrolls the mouse wheel up or down the specified number of clicks.
+        """
         pyautogui.scroll(clicks)
 
     def position(self):
@@ -36,6 +39,10 @@ class Mouse:
             )
 
     def move(self, *args, x=None, y=None, icon=None, text=None, screenshot=None):
+        """
+        Moves the mouse to specified coordinates, an icon, or text.
+        """
+        screenshot = None
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
@@ -216,29 +223,47 @@ class Mouse:
         smooth_move_to(x, y)
 
     def click(self, *args, button="left", clicks=1, interval=0.1, **kwargs):
+        """
+        Clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.click(button=button, clicks=clicks, interval=interval)
 
     def double_click(self, *args, button="left", interval=0.1, **kwargs):
+        """
+        Double-clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.doubleClick(button=button, interval=interval)
 
     def triple_click(self, *args, button="left", interval=0.1, **kwargs):
+        """
+        Triple-clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.tripleClick(button=button, interval=interval)
 
     def right_click(self, *args, **kwargs):
+        """
+        Right-clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.rightClick()
 
     def down(self):
+        """
+        Presses the mouse button down.
+        """
         pyautogui.mouseDown()
 
     def up(self):
+        """
+        Releases the mouse button.
+        """
         pyautogui.mouseUp()
 
 
