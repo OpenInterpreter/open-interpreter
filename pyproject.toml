@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.2.0"
+version = "0.2.1"
 description = "Let language models run code."
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -43,7 +43,7 @@ prompt-toolkit = "^3.0.43"
 send2trash = "^1.8.2"
 uvicorn = "^0.27.0"
 fastapi = "^0.109.0"
-aifs = "^0.0.7"
+aifs = "^0.0.8"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]

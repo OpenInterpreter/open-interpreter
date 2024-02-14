@@ -35,8 +35,7 @@ class Mouse:
                 f"An error occurred while retrieving the mouse position: {e}. "
             )
 
-    def move(self, *args, x=None, y=None, icon=None, text=None):
-        screenshot = None
+    def move(self, *args, x=None, y=None, icon=None, text=None, screenshot=None):
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
@@ -45,13 +44,16 @@ class Mouse:
             if len(args) == 1:
                 text = args[0]
 
-            screenshot = self.computer.display.screenshot(show=False)
+            if screenshot == None:
+                screenshot = self.computer.display.screenshot(show=False)
 
             coordinates = self.computer.display.find_text(text, screenshot=screenshot)
 
             is_fuzzy = any([c["similarity"] != 1 for c in coordinates])
 
             if len(coordinates) == 0:
+                return self.move(icon=text)  # Is this a better solution?
+
                 if self.computer.emit_images:
                     plt.imshow(np.array(screenshot))
                     with warnings.catch_warnings():
@@ -129,7 +131,10 @@ class Mouse:
                 )
             )
         elif icon is not None:
-            coordinates = self.computer.display.find_icon(icon)
+            if screenshot == None:
+                screenshot = self.computer.display.screenshot(show=False)
+
+            coordinates = self.computer.display.find_icon(icon, screenshot)
 
             if len(coordinates) > 1:
                 if self.computer.emit_images:

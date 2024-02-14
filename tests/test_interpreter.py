@@ -26,41 +26,68 @@ from websocket import create_connection
 def test_display_api():
     start = time.time()
 
+    # interpreter.computer.display.find_text("submit")
+    # assert False
+
     def say(icon_name):
         import subprocess
 
-        subprocess.run(["say", "-v", "Fred", "click the " + icon_name + " icon"])
+        subprocess.run(["say", "-v", "Fred", icon_name])
 
     icons = [
-        "run",
-        "walk",
-        "bike",
-        "heart",
-        "back arrow",
-        "left arrow",
-        "solid mail",
-        "music",
+        "Submit",
+        "Yes",
+        "Profile picture icon",
+        "Left arrow",
+        "Magnifying glass",
         "star",
-        "microphone",
-        "lock",
-        "paper plane",
-        "magnifying glass",
-        "car",
-        "gear",
-        "martini",
-        "mountain",
-        "photo",
-        "boat",
-        "pizza",
-        "printer",
+        "record icon icon",
+        "age text",
+        "call icon icon",
+        "account text",
+        "home icon",
+        "settings text",
+        "form text",
+        "gear icon icon",
+        "trash icon",
+        "new folder icon",
+        "phone icon icon",
+        "home button",
+        "trash button icon",
+        "folder icon icon",
+        "black heart icon icon",
+        "white heart icon icon",
+        "image icon",
+        "test@mail.com text",
     ]
 
     # from random import shuffle
     # shuffle(icons)
 
+    say("The test will begin in 3")
+    time.sleep(1)
+    say("2")
+    time.sleep(1)
+    say("1")
+    time.sleep(1)
+
+    import pyautogui
+
+    pyautogui.mouseDown()
+
     for icon in icons:
-        say(icon)
-        interpreter.computer.mouse.move(icon=icon)
+        if icon.endswith("icon icon"):
+            say("click the " + icon)
+            interpreter.computer.mouse.move(icon=icon.replace("icon icon", "icon"))
+        elif icon.endswith("icon"):
+            say("click the " + icon)
+            interpreter.computer.mouse.move(icon=icon.replace(" icon", ""))
+        elif icon.endswith("text"):
+            say("click " + icon)
+            interpreter.computer.mouse.move(icon.replace(" text", ""))
+        else:
+            say("click " + icon)
+            interpreter.computer.mouse.move(icon=icon)
 
     # interpreter.computer.mouse.move(icon="caution")
     # interpreter.computer.mouse.move(icon="bluetooth")

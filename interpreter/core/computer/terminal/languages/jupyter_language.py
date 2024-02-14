@@ -4,6 +4,7 @@ Gotta split this out, generalize it, and move all the python additions to python
 """
 
 import ast
+import os
 import queue
 import re
 import threading
@@ -72,10 +73,16 @@ matplotlib.use('{backend}')
         except:
             # Non blocking
             functions = {}
-        skill_library_path = self.computer.skills.path
-        for filename, code in functions.items():
-            with open(f"{skill_library_path}/{filename}.py", "w") as file:
-                file.write(code)
+
+        if self.computer.save_skills and functions:
+            skill_library_path = self.computer.skills.path
+
+            if not os.path.exists(skill_library_path):
+                os.makedirs(skill_library_path)
+
+            for filename, code in functions.items():
+                with open(f"{skill_library_path}/{filename}.py", "w") as file:
+                    file.write(code)
 
         # lel
         # exec(code)
@@ -403,6 +410,9 @@ def string_to_python(code_as_string):
                     import_statements.append(f"import {alias.name}")
         # Check for function definitions
         elif isinstance(node, ast.FunctionDef):
+            if node.name.startswith("_"):
+                # ignore private functions
+                continue
             func_info = {
                 "name": node.name,
                 "docstring": ast.get_docstring(node),
