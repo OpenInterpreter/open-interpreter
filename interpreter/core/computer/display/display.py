@@ -33,9 +33,15 @@ class Display:
             pass
 
     def size(self):
+        """
+        Returns the current screen size as a tuple (width, height).
+        """
         return pyautogui.size()
 
     def center(self):
+        """
+        Calculates and returns the center point of the screen as a tuple (x, y).
+        """
         return self.width // 2, self.height // 2
 
     def view(self, show=True, quadrant=None):
@@ -48,6 +54,9 @@ class Display:
     #     return get_active_window()
 
     def screenshot(self, show=True, quadrant=None, active_app_only=False):
+        """
+       Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!** 
+        """
         time.sleep(2)
         if not self.computer.emit_images:
             text = self.get_text_as_list_of_lists()
@@ -110,7 +119,9 @@ class Display:
         return screenshot
 
     def find_text(self, text, screenshot=None):
-        # Take a screenshot
+        """
+        Searches for specified text within a screenshot or the current screen if no screenshot is provided.
+        """
         if screenshot == None:
             screenshot = self.screenshot(show=False)
 
@@ -140,7 +151,9 @@ class Display:
         ]  # Have it deliver the text properly soon.
 
     def get_text_as_list_of_lists(self, screenshot=None):
-        # Take a screenshot
+        """
+        Extracts and returns text from a screenshot or the current screen as a list of lists, each representing a line of text.
+        """
         if screenshot == None:
             screenshot = self.screenshot(show=False)
 
@@ -172,6 +185,9 @@ class Display:
 
     # locate text should be moved here as well!
     def find_icon(self, query, screenshot=None):
+        """
+        Locates an icon on the screen and returns its coordinates.
+        """
         message = format_to_recipient(
             "Locating this icon will take ~30 seconds. We're working on speeding this up.",
             recipient="user",
@@ -201,5 +217,5 @@ class Display:
         except Exception as e:
             raise Exception(
                 str(e)
-                + "\n\nIcon locating API not avaliable, or we were unable to find the icon. Please try another method to find this icon."
+                + "\n\nIcon locating API not available, or we were unable to find the icon. Please try another method to find this icon."
             )
