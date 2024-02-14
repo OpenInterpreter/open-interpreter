@@ -364,16 +364,6 @@ def start_terminal_interface(interpreter):
         # Doesn't matter
         pass
 
-    # If we've set a custom api base, we want it to be sent in an openai compatible way.
-    # So we need to tell LiteLLM to do this by changing the model name:
-    if interpreter.llm.api_base:
-        if (
-            not interpreter.llm.model.lower().startswith("openai/")
-            and not interpreter.llm.model.lower().startswith("azure/")
-            and not interpreter.llm.model.lower().startswith("ollama")
-        ):
-            interpreter.llm.model = "openai/" + interpreter.llm.model
-
     # If --conversations is used, run conversation_navigator
     if args.conversations:
         conversation_navigator(interpreter)
