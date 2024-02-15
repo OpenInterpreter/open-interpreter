@@ -332,7 +332,7 @@ You can also start a server identical to the one above by simply running `interp
 
 ## Android
 
-The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/MikeBirdTech/open-interpreter-termux).
 
 ## Safety Notice
 
