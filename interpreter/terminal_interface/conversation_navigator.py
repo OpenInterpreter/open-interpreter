@@ -17,7 +17,6 @@ from .utils.local_storage_path import get_storage_path
 def conversation_navigator(interpreter):
     import time
 
-    time.sleep(5)
     conversations_dir = get_storage_path("conversations")
 
     display_markdown_message(

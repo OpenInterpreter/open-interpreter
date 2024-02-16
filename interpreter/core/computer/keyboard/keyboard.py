@@ -1,13 +1,10 @@
 import os
 import platform
 import time
+from ...utils.lazy_import import lazy_import
 
-try:
-    import pyautogui
-except:
-    # Optional packages
-    pass
-
+# Lazy import of pyautogui
+pyautogui = lazy_import('pyautogui')
 
 class Keyboard:
     """A class to simulate keyboard inputs"""

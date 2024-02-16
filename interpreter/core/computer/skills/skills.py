@@ -1,7 +1,10 @@
 import glob
 import os
 
-import aifs
+from ...utils.lazy_import import lazy_import
+
+# Lazy import of aifs, imported when needed to speed up start time
+aifs = lazy_import('aifs')
 
 
 class Skills:
