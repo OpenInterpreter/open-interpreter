@@ -172,10 +172,11 @@ Continuing...
         }
 
         # Optional inputs
-        if self.api_base:
-            params["api_base"] = self.api_base
         if self.api_key:
             params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
+            params["custom_llm_provider"] = "openai"
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:
