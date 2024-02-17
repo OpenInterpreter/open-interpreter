@@ -1,11 +1,8 @@
 import os
+from ...utils.lazy_import import lazy_import
 
-try:
-    import pyperclip
-except:
-    # Optional package
-    pass
-
+# Lazy import of optional packages
+pyperclip = lazy_import('pyperclip')
 
 class Clipboard:
     def __init__(self, computer):

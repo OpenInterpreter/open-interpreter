@@ -1,7 +1,9 @@
 import difflib
 
-from aifs import search
+from ...utils.lazy_import import lazy_import
 
+# Lazy import of aifs, imported when needed
+aifs = lazy_import('aifs')
 
 class Files:
     def __init__(self, computer):
@@ -11,7 +13,7 @@ class Files:
         """
         Search the filesystem for the given query.
         """
-        return search(*args, **kwargs)
+        return aifs.search(*args, **kwargs)
 
     def edit(self, path, original_text, replacement_text):
         """

@@ -4,20 +4,18 @@ import time
 import warnings
 from io import BytesIO
 
-import matplotlib.pyplot as plt
 import requests
 
 from ..utils.recipient_utils import format_to_recipient
+from ...utils.lazy_import import lazy_import
 
 # Still experimenting with this
 # from utils.get_active_window import get_active_window
 
-try:
-    import numpy as np
-    import pyautogui
-except:
-    # Optional packages
-    pass
+# Lazy import of optional packages
+pyautogui = lazy_import('pyautogui')
+np = lazy_import('numpy')
+plt = lazy_import('matplotlib.pyplot')
 
 from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 
@@ -25,13 +23,23 @@ from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 class Display:
     def __init__(self, computer):
         self.computer = computer
+        #set width and height to None initially to prevent pyautogui from importing until it's needed
+        self._width = None
+        self._height = None
+        
+    # We use properties here so that this code only executes when height/width are accessed for the first time
+    @property
+    def width(self):
+        if self._width is None:
+            self._width, _ = pyautogui.size()
+        return self._width
 
-        try:
-            self.width, self.height = pyautogui.size()
-        except:
-            # pyautogui is an optional package, so it's okay if this fails
-            pass
-
+    @property
+    def height(self):
+        if self._height is None:
+            _, self._height = pyautogui.size()
+        return self._height
+    
     def size(self):
         """
         Returns the current screen size as a tuple (width, height).

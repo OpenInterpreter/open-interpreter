@@ -1,19 +1,13 @@
 import io
 
-from PIL import Image
+from ...utils.lazy_import import lazy_import
 
-try:
-    import cv2
-    import numpy as np
-except:
-    # Optional packages
-    pass
-
-try:
-    from pytesseract import Output, pytesseract
-except:
-    # this is very very optional, we don't even reccomend it unless the api has failed
-    pass
+# Lazy import of optional packages
+np = lazy_import('numpy')
+cv2 = lazy_import('cv2')
+PIL = lazy_import('PIL')
+# pytesseract is very very optional, we don't even recommend it unless the api has failed
+pytesseract = lazy_import('pytesseract')
 
 
 def pytesseract_get_text(img):
@@ -37,7 +31,7 @@ def find_text_in_image(img, text):
     gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
 
     # Use pytesseract to get the data from the image
-    d = pytesseract.image_to_data(gray, output_type=Output.DICT)
+    d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
 
     # Initialize an empty list to store the centers of the bounding boxes
     centers = []
@@ -175,7 +169,7 @@ def find_text_in_image(img, text):
             if centers:
                 break
 
-    bounding_box_image = Image.fromarray(img_draw)
+    bounding_box_image = PIL.Image.fromarray(img_draw)
     bounding_box_image.format = img.format
 
     # Convert centers to relative

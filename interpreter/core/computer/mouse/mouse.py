@@ -1,17 +1,15 @@
 import time
 import warnings
 
-import matplotlib.pyplot as plt
 
 from ..utils.recipient_utils import format_to_recipient
+from ...utils.lazy_import import lazy_import
 
-try:
-    import cv2
-    import numpy as np
-    import pyautogui
-except:
-    # Optional packages
-    pass
+# Lazy import of optional packages
+cv2 = lazy_import('cv2', )
+np = lazy_import('numpy')
+pyautogui = lazy_import('pyautogui')
+plt = lazy_import('matplotlib.pyplot')
 
 
 class Mouse:
