@@ -4,10 +4,10 @@ It's the main file. `from interpreter import interpreter` will import an instanc
 """
 import json
 import os
-from pathlib import Path
 import threading
 import time
 from datetime import datetime
+from pathlib import Path
 
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
@@ -98,9 +98,11 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer() if computer is None else computer
+        self.sync_computer = (
+            True  # Sync the interpreter's computer with the user's interpreter.computer
+        )
         self.computer.skills.skills_dir = (
             skills_dir if skills_dir else str(Path(oi_dir) / "skills")
-
         )
         if import_skills:
             self.computer.skills.import_skills()

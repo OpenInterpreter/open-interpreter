@@ -171,7 +171,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                     break
 
                 # don't let it import computer on os mode — we handle that!
-                if interpreter.computer.sync and language == "python":
+                if interpreter.sync_computer and language == "python":
                     code = code.replace("import computer\n", "pass\n")
                     code = re.sub(
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
@@ -202,7 +202,7 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # sync up the interpreter's computer with your computer
                 try:
-                    if interpreter.computer.sync and language == "python":
+                    if interpreter.sync_computer and language == "python":
                         computer_dict = interpreter.computer.to_dict()
                         if computer_dict:
                             computer_json = json.dumps(computer_dict)
