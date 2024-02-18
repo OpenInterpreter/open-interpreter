@@ -415,10 +415,12 @@ def string_to_python(code_as_string):
             if docstring:
                 body = body[1:]
 
+            code_body = ast.unparse(body[0]).replace("\n", "\n    ")
+
             func_info = {
                 "name": node.name,
                 "docstring": docstring,
-                "body": "\n    ".join(ast.unparse(stmt) for stmt in body),
+                "body": code_body,
             }
             functions.append(func_info)
 
