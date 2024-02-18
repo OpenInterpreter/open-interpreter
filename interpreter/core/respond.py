@@ -31,6 +31,9 @@ def respond(interpreter):
         if interpreter.custom_instructions:
             system_message += "\n\n" + interpreter.custom_instructions
 
+        # Storing the messages so they're accessible in the interpreter's computer
+        output = interpreter.computer.run("python", f"messages={interpreter.messages}")
+
         ## Rendering ↓
         rendered_system_message = render_message(interpreter, system_message)
         ## Rendering ↑
