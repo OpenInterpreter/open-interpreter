@@ -75,18 +75,15 @@ matplotlib.use('{backend}')
             functions = {}
 
         if self.computer.save_skills and functions:
-            skill_library_path = self.computer.skills.path
+            skill_library_path = self.computer.skills.skills_dir
 
             if not os.path.exists(skill_library_path):
                 os.makedirs(skill_library_path)
 
-            for filename, code in functions.items():
+            for filename, function_code in functions.items():
                 with open(f"{skill_library_path}/{filename}.py", "w") as file:
-                    file.write(code)
+                    file.write(function_code)
 
-        # lel
-        # exec(code)
-        # return
         self.finish_flag = False
         try:
             try:
@@ -413,12 +410,17 @@ def string_to_python(code_as_string):
             if node.name.startswith("_"):
                 # ignore private functions
                 continue
+            docstring = ast.get_docstring(node)
+            body = node.body
+            if docstring:
+                body = body[1:]
+
+            code_body = ast.unparse(body[0]).replace("\n", "\n    ")
+
             func_info = {
                 "name": node.name,
-                "docstring": ast.get_docstring(node),
-                "body": "\n    ".join(
-                    ast.unparse(stmt) for stmt in node.body[1:]
-                ),  # Excludes the docstring
+                "docstring": docstring,
+                "body": code_body,
             }
             functions.append(func_info)
 
