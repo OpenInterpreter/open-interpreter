@@ -22,6 +22,28 @@ import pytest
 from websocket import create_connection
 
 
+def test_skills():
+    import json
+    from pathlib import Path
+
+    interpreter.model = "gpt-3.5"
+
+    messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
+
+    combined_messages = "\\n".join(json.dumps(x) for x in messages[-3:])
+    query_msg = interpreter.chat(
+        f"This is the conversation so far: {combined_messages}. What is a hypothetical python function that might help resolve the user's query? Respond with nothing but the hypothetical function name exactly."
+    )
+    query = query_msg[0]["content"]
+    # skills_path = '/01OS/server/skills'
+    # interpreter.computer.skills.path = skills_path
+    skills = interpreter.computer.skills.search(query)
+    lowercase_skills = [skill[0].lower() + skill[1:] for skill in skills]
+    output = "\\n".join(lowercase_skills)
+    print(output)
+    assert False
+
+
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_display_api():
     start = time.time()

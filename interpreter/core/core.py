@@ -7,7 +7,6 @@ import os
 import threading
 import time
 from datetime import datetime
-from pathlib import Path
 
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
@@ -63,7 +62,7 @@ class OpenInterpreter:
         computer=None,
         sync_computer=True,
         import_computer_api=True,
-        skills_dir=None,
+        skills_path=None,
         import_skills=True,
     ):
         # State
@@ -105,9 +104,9 @@ class OpenInterpreter:
         self.computer.import_computer_api = import_computer_api
 
         # Skills
-        self.computer.skills.skills_dir = (
-            skills_dir if skills_dir else str(Path(oi_dir) / "skills")
-        )
+        if skills_path:
+            self.computer.skills.path = skills_path
+
         self.import_skills = import_skills
         if import_skills:
             self.computer.skills.import_skills()

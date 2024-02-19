@@ -75,7 +75,7 @@ matplotlib.use('{backend}')
             functions = {}
 
         if self.computer.save_skills and functions:
-            skill_library_path = self.computer.skills.skills_dir
+            skill_library_path = self.computer.skills.path
 
             if not os.path.exists(skill_library_path):
                 os.makedirs(skill_library_path)
