@@ -49,8 +49,7 @@ def test_skills():
     skills = interpreter.computer.skills.search(query)
     lowercase_skills = [skill[0].lower() + skill[1:] for skill in skills]
     output = "\\n".join(lowercase_skills)
-    print(output)
-    assert False
+    assert "testing_skilsl" in str(output)
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
