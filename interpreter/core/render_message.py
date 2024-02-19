@@ -22,7 +22,12 @@ def render_message(interpreter, message):
             outputs = []
             for line in output:
                 if line.get("format") == "output":
-                    outputs.append(line["content"])
+                    if "IGNORE_ALL_ABOVE_THIS_LINE" in line["content"]:
+                        outputs.append(
+                            line["content"].split("IGNORE_ALL_ABOVE_THIS_LINE")[1]
+                        )
+                    else:
+                        outputs.append(line["content"])
             output = "\n".join(outputs)
 
             # Replace the part with the output
