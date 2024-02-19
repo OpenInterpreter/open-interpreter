@@ -24,7 +24,6 @@ from websocket import create_connection
 
 def test_skills():
     import json
-    from pathlib import Path
 
     interpreter.model = "gpt-3.5"
 
@@ -37,6 +36,16 @@ def test_skills():
     query = query_msg[0]["content"]
     # skills_path = '/01OS/server/skills'
     # interpreter.computer.skills.path = skills_path
+    print(interpreter.computer.skills.path)
+    print("Path: ", interpreter.computer.skills.path)
+    print("Files in the path: ")
+    interpreter.computer.run("python", "def testing_skilsl():\n    print('hi')")
+    for file in os.listdir(interpreter.computer.skills.path):
+        print(file)
+    interpreter.computer.run("python", "def testing_skill():\n    print('hi')")
+    print("Files in the path: ")
+    for file in os.listdir(interpreter.computer.skills.path):
+        print(file)
     skills = interpreter.computer.skills.search(query)
     lowercase_skills = [skill[0].lower() + skill[1:] for skill in skills]
     output = "\\n".join(lowercase_skills)
