@@ -61,6 +61,8 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         computer=None,
+        sync_computer=True,
+        import_computer_api=True,
         skills_dir=None,
         import_skills=True,
     ):
@@ -98,12 +100,15 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer() if computer is None else computer
-        self.sync_computer = (
-            True  # Sync the interpreter's computer with the user's interpreter.computer
-        )
+
+        self.sync_computer = sync_computer
+        self.computer.import_computer_api = import_computer_api
+
+        # Skills
         self.computer.skills.skills_dir = (
             skills_dir if skills_dir else str(Path(oi_dir) / "skills")
         )
+        self.import_skills = import_skills
         if import_skills:
             self.computer.skills.import_skills()
 

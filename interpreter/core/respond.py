@@ -32,7 +32,10 @@ def respond(interpreter):
             system_message += "\n\n" + interpreter.custom_instructions
 
         # Storing the messages so they're accessible in the interpreter's computer
-        output = interpreter.computer.run("python", f"messages={interpreter.messages}")
+        if interpreter.sync_computer:
+            output = interpreter.computer.run(
+                "python", f"messages={interpreter.messages}"
+            )
 
         ## Rendering ↓
         rendered_system_message = render_message(interpreter, system_message)
@@ -133,7 +136,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                 language = interpreter.messages[-1]["format"].lower().strip()
                 code = interpreter.messages[-1]["content"]
 
-                if interpreter.os and language == "text":
+                if language == "text":
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
                     continue
@@ -173,8 +176,8 @@ If LM Studio's local server is running, please try a language model with a diffe
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
-                # don't let it import computer on os mode — we handle that!
-                if interpreter.sync_computer and language == "python":
+                # don't let it import computer — we handle that!
+                if interpreter.computer.import_computer_api and language == "python":
                     code = code.replace("import computer\n", "pass\n")
                     code = re.sub(
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
@@ -224,7 +227,7 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # sync up your computer with the interpreter's computer
                 try:
-                    if interpreter.os and language == "python":
+                    if interpreter.sync_computer and language == "python":
                         # sync up the interpreter's computer with your computer
                         result = interpreter.computer.run(
                             "python",

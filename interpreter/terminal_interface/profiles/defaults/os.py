@@ -219,12 +219,6 @@ if not interpreter.auto_run:
 #     if chunk.get("format") != "active_line":
 #         print(chunk.get("content"))
 
-# Give it access to the computer via Python
-interpreter.computer.run(
-    language="python",
-    code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
-    display=interpreter.verbose,
-)
 
 if not interpreter.auto_run:
     interpreter.display_message(

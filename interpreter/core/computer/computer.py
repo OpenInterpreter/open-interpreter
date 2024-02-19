@@ -32,6 +32,9 @@ class Computer:
         self.save_skills = True
         # self.api_base = "http://0.0.0.0/v0"
 
+        self.import_computer_api = True
+        self._has_imported_computer_api = False  # Because we only want to do this once
+
     # Shortcut for computer.terminal.languages
     @property
     def languages(self):
