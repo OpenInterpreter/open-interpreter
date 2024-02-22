@@ -29,7 +29,7 @@ from interpreter import interpreter
 
 interpreter.offline = True # Disables online features like Open Procedures
 interpreter.llm.model = "ollama_chat/<model-name>"
-interpreter.llm.api_base = "http://localhost:11434"
+interpreter.llm.api_base = "http://localhost:11434/v1"
 
 interpreter.chat()
 ```
