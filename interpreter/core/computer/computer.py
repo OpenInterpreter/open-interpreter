@@ -1,5 +1,6 @@
 import json
 
+from .ai.ai import Ai
 from .browser.browser import Browser
 from .clipboard.clipboard import Clipboard
 from .display.display import Display
@@ -26,6 +27,7 @@ class Computer:
         self.os = Os(self)
         self.skills = Skills(self)
         self.docs = Docs(self)
+        self.ai = Ai(self)
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
