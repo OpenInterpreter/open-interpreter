@@ -166,10 +166,17 @@ Continuing...
         ## Start forming the request
 
         params = {
-            "model": self.model,
             "messages": messages,
             "stream": True,
         }
+
+        if self.model:
+            # if model is azure, set the deployment_id instead of model
+            if self.model.startswith("azure/"):
+                params["deployment_id"] = self.model.split("/").pop()
+            # otherwise, set the model
+            else:
+                params["model"] = self.model
 
         # Optional inputs
         if self.api_key:
