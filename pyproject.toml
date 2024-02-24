@@ -42,7 +42,7 @@ pytesseract = { version = "^0.3.10", optional = true }
 prompt-toolkit = "^3.0.43"
 send2trash = "^1.8.2"
 uvicorn = "^0.27.0"
-fastapi = "^0.109.0"
+fastapi = "^0.110.0"
 aifs = "^0.0.9"
 
 [tool.poetry.extras]
