@@ -183,11 +183,6 @@ Continuing...
             params["api_key"] = self.api_key
         if self.api_base:
             params["api_base"] = self.api_base
-            # if model is azure, set the deployment_id
-            if self.model.startswith("azure/"):
-                params["deployment_id"] = self.model.split("/").pop()
-            else:
-                params["custom_llm_provider"] = "openai"
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:
