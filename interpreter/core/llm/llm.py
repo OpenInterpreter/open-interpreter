@@ -171,10 +171,10 @@ Continuing...
         }
 
         if self.model:
-            # if model is azure, set the deployment_id instead of model
+            # if model is azure, set the deployment_id and model
             if self.model.startswith("azure/"):
                 params["deployment_id"] = self.model.split("/").pop()
-            # otherwise, set the model
+            # otherwise, set only the model
             else:
                 params["model"] = self.model
 
