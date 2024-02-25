@@ -2,11 +2,9 @@
 
 ## Documentation
 
-- [x] Require documentation for PRs
+
 - [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
 - [ ] Better comments throughout the package (they're like docs for contributors)
-- [ ] Document the New Computer Update
-- [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response)) thanks ty!
 - [ ] Show how to replace interpreter.llm so you can use a custom llm
 - [ ] Show how to replace interpreter.computer or add to interpreter.computer.languages for like, e2b execution, remote execution, new programming languages, etc.
 
@@ -35,8 +33,6 @@
   - [x] Has attributes `.supports_functions`, `.supports_vision`, and `.context_window`
 - [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed` or `computer.ai.embed`) which will let us do semantic search
 - [ ] (Maybe) if a git is detected, switch to a mode that's good for developers, like showing nested file structure in dynamic system message, searching for relevant functions (use computer.files.search)
-- [x] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
-  - [x] Make it so function calling dynamically uses the languages in interpreter.computer.languages
 - [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstrings. Keep this minimal!
   - [ ] If `interpreter.skill_library == True`, we should add a decorator above all functions, then show OI how to search its skill library
   - [ ] Use computer.files.search over a folder that decorator saves functions (and import statements to)
@@ -88,6 +84,11 @@
   - [x] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
   - [x] Swap out the information with information from LiteLLM
   - [x] Repeat with other models
+  - [x] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
+  - [x] Make it so function calling dynamically uses the languages in interpreter.computer.languages
+  - [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response)) thanks ty!
+  - [x] Require documentation for PRs
+  - [x] Document the New Computer Update
 
 # What's in our scope?
 
