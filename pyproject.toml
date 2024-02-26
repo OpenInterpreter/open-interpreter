@@ -43,6 +43,7 @@ send2trash = "^1.8.2"
 uvicorn = "^0.27.0"
 fastapi = "^0.110.0"
 aifs = "^0.0.9"
+platformdirs = "^4.2.0"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
