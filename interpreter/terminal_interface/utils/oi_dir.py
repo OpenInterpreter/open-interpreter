@@ -1,3 +1,3 @@
-import appdirs
+import platformdirs
 
-oi_dir = appdirs.user_config_dir("Open Interpreter Terminal")
+oi_dir = platformdirs.user_config_dir("Open Interpreter Terminal")
