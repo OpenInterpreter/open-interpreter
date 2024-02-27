@@ -56,3 +56,4 @@ interpreter.llm.temperature = 0
 interpreter.llm.api_base = "https://localhost:8080/v1"
 interpreter.llm.max_tokens = 1000
 interpreter.llm.context_window = 3000
+interpreter.llm.supports_functions = False

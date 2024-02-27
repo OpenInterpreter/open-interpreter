@@ -4,6 +4,8 @@
 
 llm:
   model: "gpt-3.5-turbo"
+  context_window: 16385
+  max_tokens: 4096
   temperature: 0
   # api_key: ...  # Your API key, if the API requires it
   # api_base: ...  # The URL where an OpenAI-compatible server is running to handle LLM API requests

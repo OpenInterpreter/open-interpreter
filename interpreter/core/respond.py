@@ -98,8 +98,8 @@ def respond(interpreter):
                 print("")  # <- Aesthetic choice
 
                 if response.strip().lower() == "y":
-                    interpreter.llm.model = "gpt-3.5-turbo-1106"
-                    interpreter.llm.context_window = 16000
+                    interpreter.llm.model = "gpt-3.5-turbo"
+                    interpreter.llm.context_window = 16385
                     interpreter.llm.max_tokens = 4096
                     interpreter.llm.supports_functions = True
                     display_markdown_message(
