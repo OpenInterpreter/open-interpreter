@@ -7,13 +7,13 @@ from tqdm import tqdm
 
 from interpreter import interpreter
 
-if platform.system() == "Darwin":
+if platform.system() == "Darwin": # Check if the system is MacOS
     result = subprocess.run(
         ["xcode-select", "-p"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
     if result.returncode != 0:
         interpreter.display_message(
-            "Xcode is not installed. Please install Xcode and try again."
+            "To use the new, fully-managed `interpreter --local` (powered by Llamafile) Open Interpreter requires Mac users to have Xcode installed. You can install Xcode from https://developer.apple.com/xcode/ .\n\nAlternatively, you can use `LM Studio`, `Jan.ai`, or `Ollama` to manage local language models. Learn more at https://docs.openinterpreter.com/guides/running-locally ."
         )
         time.sleep(3)
         raise Exception("Xcode is not installed. Please install Xcode and try again.")
@@ -49,10 +49,12 @@ if not os.path.exists(llamafile_path) or os.path.getsize(llamafile_path) != 1823
     if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
         print("ERROR, something went wrong")
 
+# Make the new llamafile executable
 if platform.system() != "Windows":
     subprocess.run(["chmod", "+x", llamafile_path], check=True)
 
-if os.path.exists(llamafile_path):
+# Run the new llamafile in the background
+if os.path.exists(llamafile_path) and os.path.getsize(llamafile_path) == 1823084900:
     subprocess.Popen([llamafile_path])
 else:
     error_message = "The llamafile does not exist. Please ensure it has been downloaded correctly."
