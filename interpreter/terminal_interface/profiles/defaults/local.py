@@ -28,7 +28,7 @@ if not os.path.exists(models_dir):
 llamafile_path = os.path.join(models_dir, "phi-2.Q4_K_M.llamafile")
 
 # Check if the new llamafile exists, if not download it
-if not os.path.exists(llamafile_path) or os.path.getsize(llamafile_path) != 1823084900:
+if not os.path.exists(llamafile_path):
     interpreter.display_message(
         "Attempting to download the `Phi-2` language model. This may take a few minutes."
     )
@@ -42,7 +42,7 @@ if platform.system() != "Windows":
     subprocess.run(["chmod", "+x", llamafile_path], check=True)
 
 # Run the new llamafile in the background
-if os.path.exists(llamafile_path) and os.path.getsize(llamafile_path) == 1823084900:
+if os.path.exists(llamafile_path):
     subprocess.Popen([llamafile_path, "-ngl", "9999"])
 else:
     error_message = "The llamafile does not exist or is corrupted. Please ensure it has been downloaded correctly or try again."
