@@ -1615,13 +1615,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "huggingface-hub"
-version = "0.21.0"
+version = "0.21.1"
 description = "Client library to download and publish models, datasets and other repos on the huggingface.co hub"
 optional = false
 python-versions = ">=3.8.0"
 files = [
-    {file = "huggingface_hub-0.21.0-py3-none-any.whl", hash = "sha256:59c17d65c9b8f011dbf2719436802c863c041eec95d21addb60568110323b48d"},
-    {file = "huggingface_hub-0.21.0.tar.gz", hash = "sha256:b11200deefaa802f3f5060e4689bf2a441d65b6fbf9325c27cb631ec9dd7eb68"},
+    {file = "huggingface_hub-0.21.1-py3-none-any.whl", hash = "sha256:b40dd1dc5c589b7c73178f5f17996bac516524dce83f16d5219a83e33a565712"},
+    {file = "huggingface_hub-0.21.1.tar.gz", hash = "sha256:c458ae6b3e8e197472c4ef01d8cc5f8b3ddb70e9288afcd494753d832dac3a70"},
 ]
 
 [package.dependencies]
@@ -2138,13 +2138,13 @@ six = "*"
 
 [[package]]
 name = "litellm"
-version = "1.27.8"
+version = "1.27.9"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = ">=3.8, !=2.7.*, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.7.*"
 files = [
-    {file = "litellm-1.27.8-py3-none-any.whl", hash = "sha256:924e8b6fe435233d481157ddb7a4f0adf448bd18ea884e9da45be0d4d0a6b326"},
-    {file = "litellm-1.27.8.tar.gz", hash = "sha256:7571f623ec4c18ff6a479b7896e9c9876f590c7bf6792eb9554e0901c902dc14"},
+    {file = "litellm-1.27.9-py3-none-any.whl", hash = "sha256:daad8c6c2332ac9fb26ca43ff233660b0295100f5bd97b3b8281bca3a2c6a8d8"},
+    {file = "litellm-1.27.9.tar.gz", hash = "sha256:5848aafaf9860a259263c30588a8a25a405c240c0b0fc2e1bea98d5b6cfd9c2e"},
 ]
 
 [package.dependencies]
@@ -7406,16 +7406,16 @@ xmod = "*"
 
 [[package]]
 name = "semgrep"
-version = "1.62.0"
+version = "1.63.0"
 description = "Lightweight static analysis for many languages. Find bug variants with patterns that look like source code."
 optional = true
 python-versions = ">=3.8"
 files = [
-    {file = "semgrep-1.62.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-any.whl", hash = "sha256:19000ac37436445b829d515e4f9384db26c1040318b4bc77199caa1470c5f3d0"},
-    {file = "semgrep-1.62.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-macosx_10_14_x86_64.whl", hash = "sha256:8057ace60a29af022b0393d8330b7382d9f643e09c147a20bcbafd5da019da6e"},
-    {file = "semgrep-1.62.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-macosx_11_0_arm64.whl", hash = "sha256:a330d3d91184c4c815b36bda4c623722bb73183d7b5b965c206684832bfe199c"},
-    {file = "semgrep-1.62.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-musllinux_1_0_aarch64.manylinux2014_aarch64.whl", hash = "sha256:00e98d3b859ae9b602bd3d9a16a88bc08a74f9720f534a2e24caa1863dc71abd"},
-    {file = "semgrep-1.62.0.tar.gz", hash = "sha256:2e766ff8bb15ce461df053d8f80ee625be245980c69767ef871b02f00c850a90"},
+    {file = "semgrep-1.63.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-any.whl", hash = "sha256:281898775cd60f1b394f6006478f68fd7d89e9eb29baa8bbca40a1dd9b20f22e"},
+    {file = "semgrep-1.63.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-macosx_10_14_x86_64.whl", hash = "sha256:11f56929d444e6abc454c1aef1050cd7cdd83cd0e383142571ade751bde6d6dc"},
+    {file = "semgrep-1.63.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-macosx_11_0_arm64.whl", hash = "sha256:92caa455d13b6886de1134b12e90d779fe879afec6e4bc50d3ebfefc6f4ea4a9"},
+    {file = "semgrep-1.63.0-cp38.cp39.cp310.cp311.py37.py38.py39.py310.py311-none-musllinux_1_0_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e178e9a83b5ffc0a26175b00ffd9b747d613971be8e52f70fd0ad415097a7d92"},
+    {file = "semgrep-1.63.0.tar.gz", hash = "sha256:b73c67dc94fe487f4fe87e0c0e8193602c8dd79cf1f841b1209d610239acc46a"},
 ]
 
 [package.dependencies]
@@ -8599,4 +8599,4 @@ safe = ["semgrep", "yaspin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<3.12"
-content-hash = "0dd07e8c15e6b250ece0525a341c0fcb57ad26a0757eaf1fabc3d4488562a506"
+content-hash = "cbc188d2815d9c869b44af0b39133ede7147a88addb201752029fc4324c505ff"

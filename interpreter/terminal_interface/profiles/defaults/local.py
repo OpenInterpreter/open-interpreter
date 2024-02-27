@@ -2,8 +2,7 @@ import os
 import platform
 import subprocess
 import time
-import requests
-from tqdm import tqdm
+import wget
 
 from interpreter import interpreter
 
@@ -36,22 +35,7 @@ if not os.path.exists(llamafile_path) or os.path.getsize(llamafile_path) != 1823
     time.sleep(3)
     
     url = "https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q4_K_M.llamafile"
-    response = requests.get(url, stream=True)
-    response.raise_for_status()  # Ensure the request was successful
-
-    total_size_in_bytes = int(response.headers.get('content-length', 0))
-    block_size = 1024  # 1 Kibibyte
-
-    progress_bar = tqdm(total=total_size_in_bytes, unit='iB', unit_scale=True)
-
-    with open(llamafile_path, "wb") as file:
-        for data in response.iter_content(block_size):
-            progress_bar.update(len(data))
-            file.write(data)
-    progress_bar.close()
-
-    if total_size_in_bytes != 0 and progress_bar.n != total_size_in_bytes:
-        print("ERROR, something went wrong")
+    wget.download(url, llamafile_path)
 
 # Make the new llamafile executable
 if platform.system() != "Windows":
@@ -59,7 +43,7 @@ if platform.system() != "Windows":
 
 # Run the new llamafile in the background
 if os.path.exists(llamafile_path) and os.path.getsize(llamafile_path) == 1823084900:
-    subprocess.Popen([llamafile_path])
+    subprocess.Popen([llamafile_path, "-ngl", "9999"])
 else:
     error_message = "The llamafile does not exist or is corrupted. Please ensure it has been downloaded correctly or try again."
     print(error_message)
