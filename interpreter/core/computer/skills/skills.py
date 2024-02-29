@@ -24,3 +24,20 @@ class Skills:
             with open(file, "r") as f:
                 self.computer.run("python", f.read())
         self.computer.save_skills = True
+
+
+class Teach:
+    def __init__(self):
+        self.steps = []
+        print(
+            "Welcome to the teaching session. Please add steps using .add_step('step text')"
+        )
+
+    def add_step(self, step_text):
+        self.steps.append(step_text)
+        print("Step added. Run .finish() when you are done.")
+
+    def finish(self):
+        print("Teaching session finished. Here are the steps you added:")
+        for i, step in enumerate(self.steps, start=1):
+            print(f"Step {i}: {step}")
