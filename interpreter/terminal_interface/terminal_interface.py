@@ -76,7 +76,7 @@ def terminal_interface(interpreter, message):
         try:
             if interactive:
                 ### This is the primary input for Open Interpreter.
-                message = cli_input("> ").strip()
+                message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
 
                 try:
                     # This lets users hit the up arrow key for past messages
