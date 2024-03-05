@@ -178,6 +178,13 @@ def start_terminal_interface(interpreter):
             "type": bool,
         },
         {
+            "name": "multi_line",
+            "nickname": "ml",
+            "help_text": "enable multi-line inputs starting and ending with ```",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "multi_line"},
+        },
+        {
             "name": "local",
             "nickname": "l",
             "help_text": "experimentally run the LLM locally via LM Studio (this changes many more settings than `--offline`)",
