@@ -25,6 +25,7 @@ from .utils.check_for_package import check_for_package
 from .utils.display_markdown_message import display_markdown_message
 from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
+from .utils.cli_input import cli_input
 
 # Add examples to the readline history
 examples = [
@@ -75,7 +76,7 @@ def terminal_interface(interpreter, message):
         try:
             if interactive:
                 ### This is the primary input for Open Interpreter.
-                message = input("> ").strip()
+                message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
 
                 try:
                     # This lets users hit the up arrow key for past messages
