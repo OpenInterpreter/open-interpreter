@@ -64,6 +64,7 @@ class OpenInterpreter:
         import_computer_api=True,
         skills_path=None,
         import_skills=True,
+        multi_line=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -80,6 +81,7 @@ class OpenInterpreter:
         self.force_task_completion = force_task_completion
         self.anonymous_telemetry = anonymous_telemetry
         self.in_terminal_interface = in_terminal_interface
+        self.multi_line = multi_line
 
         # Conversation history
         self.conversation_history = conversation_history

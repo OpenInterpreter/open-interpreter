@@ -15,6 +15,7 @@ custom_instructions: "The user has set you to FAST mode. **No talk, just code.**
 # safe_mode: "off"  # The safety mode for the LLM — one of "off", "ask", "auto"
 # offline: False  # If True, will disable some online features like checking for updates
 # verbose: False  # If True, will print detailed logs
+# multi_line: False # If True, you can input multiple lines starting and ending with ```
 
 # All options: https://docs.openinterpreter.com/settings
 
