@@ -65,7 +65,7 @@ class Mouse:
                         warnings.simplefilter("ignore")
                         plt.show()
                 raise ValueError(
-                    f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was not found on the screen. Please try again. If you're 100% sure the text should be there, consider using `computer.mouse.scroll(-10)` to scroll down.\n\nYou can use `computer.display.get_text_as_list_of_lists()` to see all the text on the screen."
+                    f"Your text ('{text}') was not found on the screen. Please try again. If you're 100% sure the text should be there, consider using `computer.mouse.scroll(-10)` to scroll down.\n\nYou can use `computer.display.get_text_as_list_of_lists()` to see all the text on the screen."
                 )
             elif len(coordinates) > 1 or is_fuzzy:
                 if self.computer.emit_images:
@@ -112,12 +112,12 @@ class Mouse:
                 ]
                 if is_fuzzy:
                     error_message = (
-                        f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was not found exactly, but some similar text was found. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
+                        f"Your text ('{text}') was not found exactly, but some similar text was found. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
                         + "\n".join(coordinates)
                     )
                 else:
                     error_message = (
-                        f"@@@HIDE_TRACEBACK@@@Your text ('{text}') was found multiple times on the screen. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
+                        f"Your text ('{text}') was found multiple times on the screen. Please review the attached image, then click/move over one of the following coordinates with computer.mouse.click(x=x, y=y) or computer.mouse.move(x=x, y=y):\n"
                         + "\n".join(coordinates)
                     )
                 raise ValueError(error_message)
