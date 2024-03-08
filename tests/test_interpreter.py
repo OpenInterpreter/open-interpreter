@@ -22,6 +22,15 @@ import pytest
 from websocket import create_connection
 
 
+@pytest.mark.skip(reason="Computer with display only + no way to fail test")
+def test_point():
+    interpreter.offline = True
+    interpreter.computer.mouse.move(icon="gear")
+    interpreter.computer.mouse.move(icon="refresh")
+    interpreter.computer.mouse.move("Spaces:")
+    assert False
+
+
 def test_skills():
     import json
 

@@ -33,7 +33,7 @@ Do not try to write code that attempts the entire task at once, and verify at ea
 You may use the `computer` Python module to complete tasks:
 
 ```python
-computer.browser.search(query)
+computer.browser.search(query) # Searches Google and returns the result as a screen. Does nothing to the user's computer (does not open a browser!)
 
 computer.display.view() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
 

@@ -1,15 +1,16 @@
 import time
 import warnings
 
-
-from ..utils.recipient_utils import format_to_recipient
 from ...utils.lazy_import import lazy_import
+from ..utils.recipient_utils import format_to_recipient
 
 # Lazy import of optional packages
-cv2 = lazy_import('cv2', )
-np = lazy_import('numpy')
-pyautogui = lazy_import('pyautogui')
-plt = lazy_import('matplotlib.pyplot')
+cv2 = lazy_import(
+    "cv2",
+)
+np = lazy_import("numpy")
+pyautogui = lazy_import("pyautogui")
+plt = lazy_import("matplotlib.pyplot")
 
 
 class Mouse:
@@ -52,9 +53,14 @@ class Mouse:
             if screenshot == None:
                 screenshot = self.computer.display.screenshot(show=False)
 
-            coordinates = self.computer.display.find_text(text, screenshot=screenshot)
+            coordinates = self.computer.display.find(
+                '"' + text + '"', screenshot=screenshot
+            )
 
             is_fuzzy = any([c["similarity"] != 1 for c in coordinates])
+            # nah just hey, if it's fuzzy, then whatever, it prob wont see the message then decide something else (not really smart enough yet usually)
+            # so for now, just lets say it's always not fuzzy so if there's 1 coord it will pick it automatically
+            is_fuzzy = False
 
             if len(coordinates) == 0:
                 return self.move(icon=text)  # Is this a better solution?
@@ -139,7 +145,7 @@ class Mouse:
             if screenshot == None:
                 screenshot = self.computer.display.screenshot(show=False)
 
-            coordinates = self.computer.display.find_icon(icon, screenshot)
+            coordinates = self.computer.display.find(icon.strip('"'), screenshot)
 
             if len(coordinates) > 1:
                 if self.computer.emit_images:

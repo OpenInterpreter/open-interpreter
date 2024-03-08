@@ -44,9 +44,10 @@ uvicorn = "^0.27.0"
 fastapi = "^0.110.0"
 aifs = "^0.0.9"
 platformdirs = "^4.2.0"
+sentence-transformers = "^2.5.1"
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers"]
 safe = ["semgrep", "yaspin"]
 
 [tool.poetry.group.dev.dependencies]

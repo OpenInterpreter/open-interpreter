@@ -1,21 +1,23 @@
 import base64
+import os
 import pprint
 import time
 import warnings
+from contextlib import redirect_stdout
 from io import BytesIO
 
 import requests
 
-from ..utils.recipient_utils import format_to_recipient
 from ...utils.lazy_import import lazy_import
+from ..utils.recipient_utils import format_to_recipient
 
 # Still experimenting with this
 # from utils.get_active_window import get_active_window
 
 # Lazy import of optional packages
-pyautogui = lazy_import('pyautogui')
-np = lazy_import('numpy')
-plt = lazy_import('matplotlib.pyplot')
+pyautogui = lazy_import("pyautogui")
+np = lazy_import("numpy")
+plt = lazy_import("matplotlib.pyplot")
 
 from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 
@@ -23,10 +25,10 @@ from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 class Display:
     def __init__(self, computer):
         self.computer = computer
-        #set width and height to None initially to prevent pyautogui from importing until it's needed
+        # set width and height to None initially to prevent pyautogui from importing until it's needed
         self._width = None
         self._height = None
-        
+
     # We use properties here so that this code only executes when height/width are accessed for the first time
     @property
     def width(self):
@@ -39,7 +41,7 @@ class Display:
         if self._height is None:
             _, self._height = pyautogui.size()
         return self._height
-    
+
     def size(self):
         """
         Returns the current screen size as a tuple (width, height).
@@ -63,7 +65,7 @@ class Display:
 
     def screenshot(self, show=True, quadrant=None, active_app_only=False):
         """
-       Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!** 
+        Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
         """
         time.sleep(2)
         if not self.computer.emit_images:
@@ -125,6 +127,56 @@ class Display:
                 plt.show()
 
         return screenshot
+
+    def find(self, description, screenshot=None):
+        if description.startswith('"') and description.endswith('"'):
+            return self.find_text(description.strip('"'), screenshot)
+        else:
+            try:
+                message = format_to_recipient(
+                    "Locating this icon will take ~10 seconds. Subsequent icons should be found more quickly.",
+                    recipient="user",
+                )
+                print(message)
+                from .point.point import point
+
+                with open(os.devnull, "w") as f, redirect_stdout(f):
+                    result = point(description, screenshot)
+                return result
+            except:
+                if self.computer.offline:
+                    raise
+                message = format_to_recipient(
+                    "Locating this icon will take ~30 seconds. We're working on speeding this up.",
+                    recipient="user",
+                )
+                print(message)
+
+                start = time.time()
+                # Take a screenshot
+                if screenshot == None:
+                    screenshot = self.screenshot(show=False)
+
+                # Downscale the screenshot to 1920x1080
+                screenshot = screenshot.resize((1920, 1080))
+
+                # Convert the screenshot to base64
+                buffered = BytesIO()
+                screenshot.save(buffered, format="PNG")
+                screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+                print("PIC TOOK THIS LONG:", time.time() - start)
+
+                try:
+                    response = requests.post(
+                        f'{self.computer.api_base.strip("/")}/point/',
+                        json={"query": description, "base64": screenshot_base64},
+                    )
+                    return response.json()
+                except Exception as e:
+                    raise Exception(
+                        str(e)
+                        + "\n\nIcon locating API not available, or we were unable to find the icon. Please try another method to find this icon."
+                    )
 
     def find_text(self, text, screenshot=None):
         """
@@ -190,40 +242,3 @@ class Display:
                 raise Exception(
                     "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
                 )
-
-    # locate text should be moved here as well!
-    def find_icon(self, query, screenshot=None):
-        """
-        Locates an icon on the screen and returns its coordinates.
-        """
-        message = format_to_recipient(
-            "Locating this icon will take ~30 seconds. We're working on speeding this up.",
-            recipient="user",
-        )
-        print(message)
-
-        start = time.time()
-        # Take a screenshot
-        if screenshot == None:
-            screenshot = self.screenshot(show=False)
-
-        # Downscale the screenshot to 1920x1080
-        screenshot = screenshot.resize((1920, 1080))
-
-        # Convert the screenshot to base64
-        buffered = BytesIO()
-        screenshot.save(buffered, format="PNG")
-        screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
-        print("PIC TOOK THIS LONG:", time.time() - start)
-
-        try:
-            response = requests.post(
-                f'{self.computer.api_base.strip("/")}/point/',
-                json={"query": query, "base64": screenshot_base64},
-            )
-            return response.json()
-        except Exception as e:
-            raise Exception(
-                str(e)
-                + "\n\nIcon locating API not available, or we were unable to find the icon. Please try another method to find this icon."
-            )

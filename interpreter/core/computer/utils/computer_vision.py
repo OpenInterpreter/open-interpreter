@@ -3,11 +3,11 @@ import io
 from ...utils.lazy_import import lazy_import
 
 # Lazy import of optional packages
-np = lazy_import('numpy')
-cv2 = lazy_import('cv2')
-PIL = lazy_import('PIL')
+np = lazy_import("numpy")
+cv2 = lazy_import("cv2")
+PIL = lazy_import("PIL")
 # pytesseract is very very optional, we don't even recommend it unless the api has failed
-pytesseract = lazy_import('pytesseract')
+pytesseract = lazy_import("pytesseract")
 
 
 def pytesseract_get_text(img):
@@ -21,6 +21,35 @@ def pytesseract_get_text(img):
     text = pytesseract.image_to_string(gray)
 
     return text
+
+
+def pytesseract_get_text_bounding_boxes(img):
+    # Convert PIL Image to NumPy array
+    img_array = np.array(img)
+
+    # Convert the image to grayscale
+    gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
+
+    # Use pytesseract to get the data from the image
+    d = pytesseract.image_to_data(gray, output_type=pytesseract.Output.DICT)
+
+    # Create an empty list to hold dictionaries for each bounding box
+    boxes = []
+
+    # Iterate through the number of detected boxes based on the length of one of the property lists
+    for i in range(len(d["text"])):
+        # For each box, create a dictionary with the properties you're interested in
+        box = {
+            "text": d["text"][i],
+            "top": d["top"][i],
+            "left": d["left"][i],
+            "width": d["width"][i],
+            "height": d["height"][i],
+        }
+        # Append this box dictionary to the list
+        boxes.append(box)
+
+    return boxes
 
 
 def find_text_in_image(img, text):
