@@ -17,6 +17,8 @@ else
     echo "pyenv is already installed."
 fi
 
+$pyenv_root init
+
 $pyenv_root install 3.11.7 --skip-existing
 
 $pyenv_root shell 3.11.7
