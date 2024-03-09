@@ -129,3 +129,111 @@ interpreter.computer.os.get_selected_text()
 ```
 
 </CodeGroup>
+
+### Mail - Get
+
+Retrieves the last {number} emails from the inbox, optionally filtering for only unread emails. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.mail.get(number=10, unread=True)
+```
+
+</CodeGroup>
+
+### Mail - Send
+
+Sends an email with the given parameters using the default mail app. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.mail.send("john@email.com", "Subject", "Body", ["path/to/attachment.pdf", "path/to/attachment2.pdf"])
+```
+
+</CodeGroup>
+
+### Mail - Unread Count
+
+Retrieves the count of unread emails in the inbox. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.mail.unread_count()
+```
+
+</CodeGroup>
+
+### SMS - Send
+
+Send a text message using the default SMS app. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.sms.send("2068675309", "Hello from Open Interpreter!")
+```
+
+</CodeGroup>
+
+### Contacts - Get Phone Number
+
+Returns the phone number of a contact name. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.contacts.get_phone_number("John Doe")
+```
+
+</CodeGroup>
+
+### Contacts - Get Email Address
+
+Returns the email of a contact name. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.contacts.get_phone_number("John Doe")
+```
+
+</CodeGroup>
+
+### Calendar - Get Events
+
+Fetches calendar events for the given date or date range from all calendars. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.calendar.get_events(datetime, datetime)
+```
+
+</CodeGroup>
+
+### Calendar - Create Event
+
+Creates a new calendar event. Uses first calendar if none is specified (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.calendar.create_event(title="Title", start_date=datetime, end_date=datetime, location="Location", notes="Notes", calendar="Work")
+```
+
+</CodeGroup>
+
+### Calendar - Delete Event
+
+Delete a specific calendar event. (Mac only)
+
+<CodeGroup>
+
+```python Python
+interpreter.computer.calendar.delete_event(event_title="Title", start_date=datetime, calendar="Work")
+```
+
+</CodeGroup>
