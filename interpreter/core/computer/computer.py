@@ -3,6 +3,10 @@ import json
 from .ai.ai import Ai
 from .browser.browser import Browser
 from .clipboard.clipboard import Clipboard
+from .mail.mail import Mail
+from .sms.sms import SMS
+from .calendar.calendar import Calendar
+from .contacts.contacts import Contacts
 from .display.display import Display
 from .docs.docs import Docs
 from .keyboard.keyboard import Keyboard
@@ -23,6 +27,10 @@ class Computer:
         self.keyboard = Keyboard(self)
         self.display = Display(self)
         self.clipboard = Clipboard(self)
+        self.mail = Mail(self)
+        self.sms = SMS(self)
+        self.calendar = Calendar(self)
+        self.contacts = Contacts(self)
         self.browser = Browser(self)
         self.os = Os(self)
         self.skills = Skills(self)
