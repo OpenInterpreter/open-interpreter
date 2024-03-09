@@ -43,7 +43,7 @@ if platform.system() != "Windows":
 
 # Run the new llamafile in the background
 if os.path.exists(llamafile_path):
-    subprocess.Popen([llamafile_path, "-ngl", "9999"])
+    subprocess.Popen(f'"{llamafile_path}" ' + ' '.join(["-ngl", "9999"]), shell=True)
 else:
     error_message = "The llamafile does not exist or is corrupted. Please ensure it has been downloaded correctly or try again."
     print(error_message)
