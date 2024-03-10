@@ -673,11 +673,12 @@ def migrate_app_directory(old_dir, new_dir, profile_dir):
             with open(file_path, "r") as file:
                 lines = file.readlines()
             
-            with open(file_path, "w") as file:
-                for line in lines:
-                    if not line.strip().startswith("version:"):
-                        file.write(line)
-                file.write("\nversion: 0.2.1  # Profile version (do not modify)")
+            # Check if a version line already exists
+            version_exists = any(line.strip().startswith("version:") for line in lines)
+            
+            if not version_exists:
+                with open(file_path, "a") as file:  # Open for appending
+                    file.write("\nversion: 0.2.1  # Profile version (do not modify)")
 
 
 def migrate_user_app_directory():
