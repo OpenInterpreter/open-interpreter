@@ -437,13 +437,13 @@ def get_element_boxes(image_data, debug):
 
     def process_image(
         pil_image,
-        contrast_level=20.0,
+        contrast_level=1.8,
         debug=False,
         debug_path=None,
-        adaptive_method=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        adaptive_method=cv2.ADAPTIVE_THRESH_MEAN_C,
         threshold_type=cv2.THRESH_BINARY_INV,
         block_size=11,
-        C=2,
+        C=3,
     ):
         # Apply an extreme contrast filter
         enhancer = ImageEnhance.Contrast(pil_image)
