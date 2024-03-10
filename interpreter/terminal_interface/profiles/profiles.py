@@ -8,10 +8,10 @@ import string
 import subprocess
 import time
 
+import platformdirs
 import requests
 import send2trash
 import yaml
-import platformdirs
 
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.oi_dir import oi_dir
@@ -28,7 +28,15 @@ default_profiles_names = [os.path.basename(path) for path in default_profiles_pa
 # Constant to hold the version number
 OI_VERSION = "0.2.1"
 
+
 def profile(interpreter, filename_or_url):
+    # See if they're doing shorthand for a default profile
+    filename_without_extension = os.path.splitext(filename_or_url)[0]
+    for profile in default_profiles_names:
+        if filename_without_extension == os.path.splitext(profile)[0]:
+            filename_or_url = profile
+            break
+
     profile_path = os.path.join(profile_dir, filename_or_url)
     try:
         profile = get_profile(filename_or_url, profile_path)
@@ -144,7 +152,9 @@ def apply_profile(interpreter, profile, profile_path):
             # If the migration is skipped, add the version number to the end of the file
             if profile_path.endswith("default.yaml"):
                 with open(profile_path, "a") as file:
-                    file.write(f"\nversion: {OI_VERSION}  # Profile version (do not modify)")
+                    file.write(
+                        f"\nversion: {OI_VERSION}  # Profile version (do not modify)"
+                    )
             return interpreter
 
     if "system_message" in profile:
@@ -195,21 +205,20 @@ def migrate_profile(old_path, new_path):
         else:
             mapped_profile[key] = value
 
-
     # Reformat the YAML keys with indentation
     reformatted_profile = {}
     for key, value in profile.items():
         keys = key.split(".")
         current_level = reformatted_profile
         # Iterate through parts of the key except the last one
-        for part in keys[:-1]: 
+        for part in keys[:-1]:
             if part not in current_level:
                 # Create a new dictionary if the part doesn't exist
-                current_level[part] = {} 
+                current_level[part] = {}
             # Move to the next level of the nested structure
-            current_level = current_level[part]  
+            current_level = current_level[part]
         # Set the value at the deepest level
-        current_level[keys[-1]] = value 
+        current_level[keys[-1]] = value
 
     profile = reformatted_profile
 
@@ -453,8 +462,7 @@ You are capable of **any** task.""",
                     ].strip()
                     del profile["system_message"]
                     break
-    
-    
+
     # Save modified profile file so far, so that it can be read later
     with open(new_path, "w") as file:
         yaml.dump(profile, file)
@@ -492,19 +500,29 @@ version: {OI_VERSION}  # Profile version (do not modify)
         old_profile = old_file.read()
 
     # Remove all lines that start with a # comment from the old profile, and old version numbers
-    old_profile_lines = old_profile.split('\n')
-    old_profile = '\n'.join([line for line in old_profile_lines if not line.strip().startswith('#')])
-    old_profile = '\n'.join([line for line in old_profile.split('\n') if not line.strip().startswith('version:')])
+    old_profile_lines = old_profile.split("\n")
+    old_profile = "\n".join(
+        [line for line in old_profile_lines if not line.strip().startswith("#")]
+    )
+    old_profile = "\n".join(
+        [
+            line
+            for line in old_profile.split("\n")
+            if not line.strip().startswith("version:")
+        ]
+    )
 
     # Replace {old_profile} in comment_wrapper with the modified current profile, and add the version
-    comment_wrapper = comment_wrapper.replace("{old_profile}", old_profile).replace("{OI_VERSION}", OI_VERSION)
+    comment_wrapper = comment_wrapper.replace("{old_profile}", old_profile).replace(
+        "{OI_VERSION}", OI_VERSION
+    )
     # Sometimes this happens if profile ended up empty
     comment_wrapper.replace("\n{}\n", "\n")
-    
-    
+
     # Write the commented profile to the file
     with open(new_path, "w") as file:
         file.write(comment_wrapper)
+
 
 def apply_profile_to_object(obj, profile):
     for key, value in profile.items():
@@ -540,7 +558,7 @@ def reset_profile(specific_default_profile=None):
 
     # Check version, before making the profile directory
     current_version = determine_user_version()
-    
+
     for default_yaml_file in default_profiles_paths:
         filename = os.path.basename(default_yaml_file)
 
@@ -551,12 +569,12 @@ def reset_profile(specific_default_profile=None):
 
         # Variable to see if we should display the 'reset' print statement or not
         create_oi_directory = False
-        
+
         # Make the profile directory if it does not exist
         if not os.path.exists(profile_dir):
             if not os.path.exists(oi_dir):
                 create_oi_directory = True
-                
+
             os.makedirs(profile_dir)
 
         if not os.path.exists(target_file):
@@ -564,7 +582,9 @@ def reset_profile(specific_default_profile=None):
             if current_version is None:
                 # If there is no version, add it to the default yaml
                 with open(target_file, "a") as file:
-                    file.write(f"\nversion: {OI_VERSION}  # Profile version (do not modify)")
+                    file.write(
+                        f"\nversion: {OI_VERSION}  # Profile version (do not modify)"
+                    )
             if not create_oi_directory:
                 print(f"{filename} has been reset.")
         else:
@@ -586,6 +606,7 @@ def reset_profile(specific_default_profile=None):
                 shutil.copy(default_yaml_file, target_file)
                 print(f"{filename} has been reset.")
 
+
 def determine_user_version():
     # Pre 0.2.0 directory
     old_dir_pre_020 = platformdirs.user_config_dir("Open Interpreter")
@@ -601,7 +622,9 @@ def determine_user_version():
                 if "version" in default_profile:
                     return default_profile["version"]
 
-    if os.path.exists(old_dir_020) or (os.path.exists(old_dir_pre_020) and os.path.exists(old_dir_020)):
+    if os.path.exists(old_dir_020) or (
+        os.path.exists(old_dir_pre_020) and os.path.exists(old_dir_020)
+    ):
         # If both old_dir_pre_020 and old_dir_020 are found, or just old_dir_020, return 0.2.0
         return "0.2.0"
     if os.path.exists(old_dir_pre_020):
@@ -609,7 +632,8 @@ def determine_user_version():
         return "pre_0.2.0"
     # If none of the directories are found, return None
     return None
-    
+
+
 def migrate_app_directory(old_dir, new_dir, profile_dir):
     # Copy the "profiles" folder and its contents if it exists
     profiles_old_path = os.path.join(old_dir, "profiles")
@@ -620,20 +644,21 @@ def migrate_app_directory(old_dir, new_dir, profile_dir):
         for filename in os.listdir(profiles_old_path):
             old_file_path = os.path.join(profiles_old_path, filename)
             new_file_path = os.path.join(profiles_new_path, filename)
-            
-            
+
             # Migrate yaml files to new format
             if filename.endswith(".yaml"):
                 migrate_profile(old_file_path, new_file_path)
             else:
-                #if not yaml, just copy it over
+                # if not yaml, just copy it over
                 shutil.copy(old_file_path, new_file_path)
 
     # Copy the "conversations" folder and its contents if it exists
     conversations_old_path = os.path.join(old_dir, "conversations")
     conversations_new_path = os.path.join(new_dir, "conversations")
     if os.path.exists(conversations_old_path):
-        shutil.copytree(conversations_old_path, conversations_new_path, dirs_exist_ok=True)
+        shutil.copytree(
+            conversations_old_path, conversations_new_path, dirs_exist_ok=True
+        )
 
     # Migrate the "config.yaml" file to the new format
     config_old_path = os.path.join(old_dir, "config.yaml")
@@ -641,9 +666,10 @@ def migrate_app_directory(old_dir, new_dir, profile_dir):
         new_file_path = os.path.join(profiles_new_path, "default.yaml")
         migrate_profile(config_old_path, new_file_path)
 
+
 def migrate_user_app_directory():
     user_version = determine_user_version()
-    
+
     if user_version == "pre_0.2.0":
         old_dir = platformdirs.user_config_dir("Open Interpreter")
         migrate_app_directory(old_dir, oi_dir, profile_dir)

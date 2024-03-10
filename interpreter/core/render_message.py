@@ -19,9 +19,14 @@ def render_message(interpreter, message):
                 "python", part[2:-2].strip(), display=interpreter.verbose
             )
 
+            if interpreter.debug:
+                print("RUNNING CODE FOR SYSTEM MESSAGE:", part[2:-2].strip())
+
             # Turn it into just a simple string
             outputs = []
             for line in output:
+                if interpreter.debug:
+                    print(line)
                 if line.get("format") == "output":
                     if "IGNORE_ALL_ABOVE_THIS_LINE" in line["content"]:
                         outputs.append(
