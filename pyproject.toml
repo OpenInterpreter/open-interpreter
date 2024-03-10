@@ -38,17 +38,20 @@ pywinctl = { version = "^0.3", optional = true }
 semgrep = { version = "^1.52.0", optional = true }
 yaspin = { version = "^3.0.1", optional = true }
 pytesseract = { version = "^0.3.10", optional = true }
+sentence-transformers = { version = "^2.5.1", optional = true }
+nltk = { version = "^3.8.1", optional = true }
+ipywidgets = { version = "^8.1.2", optional = true }
+torch = { version = "^2.2.1", optional = true }
+timm = { version = "^0.9.16", optional = true }
 prompt-toolkit = "^3.0.43"
 send2trash = "^1.8.2"
 uvicorn = "^0.27.0"
 fastapi = "^0.110.0"
 aifs = "^0.0.9"
 platformdirs = "^4.2.0"
-sentence-transformers = "^2.5.1"
-nltk = "^3.8.1"
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]
 safe = ["semgrep", "yaspin"]
 
 [tool.poetry.group.dev.dependencies]

@@ -41,6 +41,5 @@ def render_message(interpreter, message):
         print("\n\n\nSYSTEM MESSAGE\n\n\n")
         print(rendered_message)
         print("\n\n\n")
-        time.sleep(5)
 
     return rendered_message

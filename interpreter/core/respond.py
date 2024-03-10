@@ -219,6 +219,8 @@ If LM Studio's local server is running, please try a language model with a diffe
                             sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
                             interpreter.computer.run("python", sync_code)
                 except Exception as e:
+                    if interpreter.debug:
+                        raise
                     print(str(e))
                     print("Continuing...")
 
@@ -242,6 +244,8 @@ If LM Studio's local server is running, please try a language model with a diffe
                             json.loads(result.strip('"').strip("'"))
                         )
                 except Exception as e:
+                    if interpreter.debug:
+                        raise
                     print(str(e))
                     print("Continuing.")
 

@@ -44,7 +44,7 @@ from ...utils.computer_vision import find_text_in_image
 
 def point(description, screenshot=None, debug=False, hashes=None):
     if description.startswith('"') and description.endswith('"'):
-        return find_text_in_image(description.strip('"'), screenshot)
+        return find_text_in_image(description.strip('"'), screenshot, debug)
     else:
         return find_icon(description, screenshot, debug, hashes)
 
@@ -432,58 +432,126 @@ def get_element_boxes(image_data, debug):
 
     pil_image = image_data
 
-    # Apply an extreme contrast filter
-    enhancer = ImageEnhance.Contrast(pil_image)
-    contrasted_image = enhancer.enhance(20.0)  # Significantly increase contrast
+    # Convert to grayscale
+    pil_image = pil_image.convert("L")
 
-    if debug:
-        contrasted_image_path = os.path.join(debug_path, "contrasted_image.jpg")
-        contrasted_image.save(contrasted_image_path)
-        print(f"DEBUG: Contrasted image saved to {contrasted_image_path}")
+    def process_image(
+        pil_image,
+        contrast_level=20.0,
+        debug=False,
+        debug_path=None,
+        adaptive_method=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        threshold_type=cv2.THRESH_BINARY_INV,
+        block_size=11,
+        C=2,
+    ):
+        # Apply an extreme contrast filter
+        enhancer = ImageEnhance.Contrast(pil_image)
+        contrasted_image = enhancer.enhance(
+            contrast_level
+        )  # Significantly increase contrast
 
-    # Convert the contrast-enhanced image to OpenCV format
-    contrasted_image_cv = cv2.cvtColor(np.array(contrasted_image), cv2.COLOR_RGB2BGR)
+        # Create a string with all parameters
+        parameters_string = f"contrast_level_{contrast_level}-adaptive_method_{adaptive_method}-threshold_type_{threshold_type}-block_size_{block_size}-C_{C}"
 
-    # Convert the contrast-enhanced image to grayscale
-    gray_contrasted = cv2.cvtColor(contrasted_image_cv, cv2.COLOR_BGR2GRAY)
-    if debug:
-        image_path = os.path.join(debug_path, "gray_contrasted_image.jpg")
-        cv2.imwrite(image_path, gray_contrasted)
-        print("DEBUG: Grayscale contrasted image saved at:", image_path)
+        if debug:
+            print("TRYING:", parameters_string)
+            contrasted_image_path = os.path.join(
+                debug_path, f"contrasted_image_{parameters_string}.jpg"
+            )
+            contrasted_image.save(contrasted_image_path)
+            print(f"DEBUG: Contrasted image saved to {contrasted_image_path}")
 
-    # Apply adaptive thresholding to create a binary image where the GUI elements are isolated
-    binary_contrasted = cv2.adaptiveThreshold(
-        gray_contrasted,
-        255,
-        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        cv2.THRESH_BINARY_INV,
-        11,
-        2,
-    )
-
-    if debug:
-        binary_contrasted_image_path = os.path.join(
-            debug_path, "binary_contrasted_image.jpg"
+        # Convert the contrast-enhanced image to OpenCV format
+        contrasted_image_cv = cv2.cvtColor(
+            np.array(contrasted_image), cv2.COLOR_RGB2BGR
         )
-        cv2.imwrite(binary_contrasted_image_path, binary_contrasted)
-        print(f"DEBUG: Binary contrasted image saved to {binary_contrasted_image_path}")
 
-    # Find contours from the binary image
-    contours_contrasted, _ = cv2.findContours(
-        binary_contrasted, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE
-    )
+        # Convert the contrast-enhanced image to grayscale
+        gray_contrasted = cv2.cvtColor(contrasted_image_cv, cv2.COLOR_BGR2GRAY)
+        if debug:
+            image_path = os.path.join(
+                debug_path, f"gray_contrasted_image_{parameters_string}.jpg"
+            )
+            cv2.imwrite(image_path, gray_contrasted)
+            print("DEBUG: Grayscale contrasted image saved at:", image_path)
 
-    # Optionally, draw contours on the image for visualization
-    contour_image = np.zeros_like(binary_contrasted)
-    cv2.drawContours(contour_image, contours_contrasted, -1, (255, 255, 255), 1)
+        # Apply adaptive thresholding to create a binary image where the GUI elements are isolated
+        binary_contrasted = cv2.adaptiveThreshold(
+            src=gray_contrasted,
+            maxValue=255,
+            adaptiveMethod=adaptive_method,
+            thresholdType=threshold_type,
+            blockSize=block_size,
+            C=C,
+        )
+
+        if debug:
+            binary_contrasted_image_path = os.path.join(
+                debug_path, f"binary_contrasted_image_{parameters_string}.jpg"
+            )
+            cv2.imwrite(binary_contrasted_image_path, binary_contrasted)
+            print(
+                f"DEBUG: Binary contrasted image saved to {binary_contrasted_image_path}"
+            )
+
+        # Find contours from the binary image
+        contours_contrasted, _ = cv2.findContours(
+            binary_contrasted, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE
+        )
+
+        # Optionally, draw contours on the image for visualization
+        contour_image = np.zeros_like(binary_contrasted)
+        cv2.drawContours(contour_image, contours_contrasted, -1, (255, 255, 255), 1)
+
+        if debug:
+            contoured_contrasted_image_path = os.path.join(
+                debug_path, f"contoured_contrasted_image_{parameters_string}.jpg"
+            )
+            cv2.imwrite(contoured_contrasted_image_path, contour_image)
+            print(
+                f"DEBUG: Contoured contrasted image saved at: {contoured_contrasted_image_path}"
+            )
+
+        return contours_contrasted
 
     if debug:
-        contoured_contrasted_image_path = os.path.join(
-            debug_path, "contoured_contrasted_image.jpg"
-        )
-        cv2.imwrite(contoured_contrasted_image_path, contour_image)
-        print(
-            f"DEBUG: Contoured contrasted image saved at: {contoured_contrasted_image_path}"
+        import random
+
+        for _ in range(10):
+            random_contrast = random.uniform(
+                1, 40
+            )  # Random contrast in range 0.5 to 1.5
+            random_block_size = random.choice(
+                range(1, 11, 2)
+            )  # Random block size in range 1 to 10, but only odd numbers
+            random_block_size = 11
+            random_adaptive_method = random.choice(
+                [cv2.ADAPTIVE_THRESH_MEAN_C, cv2.ADAPTIVE_THRESH_GAUSSIAN_C]
+            )  # Random adaptive method
+            random_threshold_type = random.choice(
+                [cv2.THRESH_BINARY, cv2.THRESH_BINARY_INV]
+            )  # Random threshold type
+            random_C = random.randint(-10, 10)  # Random C in range 1 to 10
+            contours_contrasted = process_image(
+                pil_image,
+                contrast_level=random_contrast,
+                block_size=random_block_size,
+                adaptive_method=random_adaptive_method,
+                threshold_type=random_threshold_type,
+                C=random_C,
+                debug=debug,
+                debug_path=debug_path,
+            )
+
+        print("Random Contrast: ", random_contrast)
+        print("Random Block Size: ", random_block_size)
+        print("Random Adaptive Method: ", random_adaptive_method)
+        print("Random Threshold Type: ", random_threshold_type)
+        print("Random C: ", random_C)
+    else:
+        contours_contrasted = process_image(
+            pil_image, debug=debug, debug_path=debug_path
         )
 
     # Initialize an empty list to store the boxes

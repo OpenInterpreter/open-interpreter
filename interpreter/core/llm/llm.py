@@ -103,22 +103,12 @@ class Llm:
 
         if self.interpreter.debug:
             print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
-            messages_to_display = []
             for message in messages:
-                message = message.copy()
-                try:
-                    if len(message["content"]) > 3000:
-                        message["content"] = (
-                            message["content"][:1500]
-                            + "..."
-                            + message["content"][-1500:]
-                        )
-                except Exception as e:
-                    print("ERROR PARSING.", str(e), "for message:", message)
-                messages_to_display.append(message)
-            print(messages_to_display)
+                if message["type"] == "image":
+                    print("IMAGE")
+                else:
+                    print(message)
             print("\n\n\n")
-            time.sleep(5)
 
         system_message = messages[0]["content"]
         messages = messages[1:]

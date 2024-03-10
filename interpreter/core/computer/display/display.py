@@ -212,7 +212,7 @@ class Display:
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
         # Find the text in the screenshot
-        centers = find_text_in_image(screenshot, text)
+        centers = find_text_in_image(screenshot, text, self.computer.debug)
 
         return [
             {"coordinates": center, "text": "", "similarity": 1} for center in centers

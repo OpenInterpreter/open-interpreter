@@ -145,13 +145,6 @@ except:
 
 """.strip()
 
-if interpreter.offline:
-    # Icon finding does not work offline
-    interpreter.system_message = interpreter.system_message.replace(
-        'computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often\n',
-        "",
-    )
-
 # Check if required packages are installed
 
 # THERE IS AN INCONSISTENCY HERE.

@@ -52,7 +52,7 @@ def pytesseract_get_text_bounding_boxes(img):
     return boxes
 
 
-def find_text_in_image(img, text):
+def find_text_in_image(img, text, debug=False):
     # Convert PIL Image to NumPy array
     img_array = np.array(img)
 
@@ -78,27 +78,30 @@ def find_text_in_image(img, text):
 
     # Loop through each box
     for i in range(n_boxes):
-        # # (DEBUGGING) Draw each box on the grayscale image
-        # cv2.rectangle(
-        #     img_draw,
-        #     (d["left"][i], d["top"][i]),
-        #     (d["left"][i] + d["width"][i], d["top"][i] + d["height"][i]),
-        #     (0, 255, 0),
-        #     2,
-        # )
-        # # Draw the detected text in the rectangle in small font
-        # font = cv2.FONT_HERSHEY_SIMPLEX
-        # font_scale = 0.5
-        # font_color = (0, 0, 255)
-        # line_type = 2
+        if debug:
+            # (DEBUGGING) Draw each box on the grayscale image
+            cv2.rectangle(
+                img_draw,
+                (d["left"][i], d["top"][i]),
+                (d["left"][i] + d["width"][i], d["top"][i] + d["height"][i]),
+                (0, 255, 0),
+                2,
+            )
+            # Draw the detected text in the rectangle in small font
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 0.5
+            font_color = (0, 0, 255)
+            line_type = 2
 
-        # cv2.putText(img_draw,
-        #             d["text"][i],
-        #             (d["left"][i], d["top"][i] - 10),
-        #             font,
-        #             font_scale,
-        #             font_color,
-        #             line_type)
+            cv2.putText(
+                img_draw,
+                d["text"][i],
+                (d["left"][i], d["top"][i] - 10),
+                font,
+                font_scale,
+                font_color,
+                line_type,
+            )
 
         # Print the text of the box
         # If the text in the box matches the given text
