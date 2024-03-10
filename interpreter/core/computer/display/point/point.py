@@ -515,7 +515,7 @@ def get_element_boxes(image_data, debug):
 
         return contours_contrasted
 
-    if debug:
+    if os.getenv("OI_POINT_PERMUTATE", "False") == "True":
         import random
 
         for _ in range(10):
