@@ -72,6 +72,7 @@ The `computer` module is ALREADY IMPORTED, and can be used for most tasks:
 
 ```python
 computer.browser.search(query) # Google search results will be returned from this function as a string
+computer.files.edit(path, original_text, replacement_text)
 computer.calendar.get_events(start_date=datetime.date.today(), end_date=None)
 computer.calendar.create_event(title: str, start_date: datetime.datetime, end_date: datetime.datetime, location: str = "", notes: str = "", calendar: str = None) -> str
 computer.calendar.delete_event(event_title: str, start_date: datetime.datetime,  calendar: str = None)

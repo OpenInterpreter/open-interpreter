@@ -68,12 +68,51 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
 
     icons_bounding_boxes = get_element_boxes(image_data, debug)
 
+    if debug:
+        # Create a draw object
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw red rectangles around all blocks
+        for block in icons_bounding_boxes:
+            left, top, width, height = (
+                block["left"],
+                block["top"],
+                block["width"],
+                block["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="red")
+        image_data_copy.save(
+            os.path.join(debug_path, "before_filtering_out_extremes.png")
+        )
+
     # Filter out extremes
+    min_icon_width = int(os.getenv("OI_POINT_MIN_ICON_WIDTH", "10"))
+    max_icon_width = int(os.getenv("OI_POINT_MAX_ICON_WIDTH", "500"))
+    min_icon_height = int(os.getenv("OI_POINT_MIN_ICON_HEIGHT", "10"))
+    max_icon_height = int(os.getenv("OI_POINT_MAX_ICON_HEIGHT", "500"))
     icons_bounding_boxes = [
         box
         for box in icons_bounding_boxes
-        if 10 <= box["width"] <= 500 and 10 <= box["height"] <= 500
+        if min_icon_width <= box["width"] <= max_icon_width
+        and min_icon_height <= box["height"] <= max_icon_height
     ]
+
+    if debug:
+        # Create a draw object
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw red rectangles around all blocks
+        for block in icons_bounding_boxes:
+            left, top, width, height = (
+                block["left"],
+                block["top"],
+                block["width"],
+                block["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="red")
+        image_data_copy.save(
+            os.path.join(debug_path, "after_filtering_out_extremes.png")
+        )
 
     # Compute center_x and center_y for each box
     for box in icons_bounding_boxes:

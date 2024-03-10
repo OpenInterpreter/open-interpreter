@@ -183,13 +183,10 @@ If LM Studio's local server is running, please try a language model with a diffe
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
                     )
                     code = re.sub(
-                        r"from computer import (\w+)", r"\1 = computer.\1", code
-                    )
-                    code = re.sub(
                         r"from computer import (.+)",
                         lambda m: "\n".join(
                             f"{x.strip()} = computer.{x.strip()}"
-                            for x in m.group(1).split(",")
+                            for x in m.group(1).split(", ")
                         ),
                         code,
                     )
