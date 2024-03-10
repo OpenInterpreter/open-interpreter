@@ -45,6 +45,7 @@ fastapi = "^0.110.0"
 aifs = "^0.0.9"
 platformdirs = "^4.2.0"
 sentence-transformers = "^2.5.1"
+nltk = "^3.8.1"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers"]

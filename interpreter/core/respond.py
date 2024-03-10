@@ -204,6 +204,7 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # sync up some things (is this how we want to do this?)
                 interpreter.computer.verbose = interpreter.verbose
+                interpreter.computer.debug = interpreter.debug
                 interpreter.computer.emit_images = interpreter.llm.supports_vision
 
                 # sync up the interpreter's computer with your computer

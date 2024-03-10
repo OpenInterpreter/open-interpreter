@@ -2,26 +2,29 @@ import json
 
 from .ai.ai import Ai
 from .browser.browser import Browser
-from .clipboard.clipboard import Clipboard
-from .mail.mail import Mail
-from .sms.sms import SMS
 from .calendar.calendar import Calendar
+from .clipboard.clipboard import Clipboard
 from .contacts.contacts import Contacts
 from .display.display import Display
 from .docs.docs import Docs
 from .keyboard.keyboard import Keyboard
+from .mail.mail import Mail
 from .mouse.mouse import Mouse
 from .os.os import Os
 from .skills.skills import Skills
+from .sms.sms import SMS
 from .terminal.terminal import Terminal
 
 
 class Computer:
-    def __init__(self):
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
+
         self.terminal = Terminal(self)
 
         self.offline = False
         self.verbose = False
+        self.debug = False
 
         self.mouse = Mouse(self)
         self.keyboard = Keyboard(self)

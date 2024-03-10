@@ -9,6 +9,7 @@ from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
 litellm.suppress_debug_info = True
+import time
 
 
 class Llm:
@@ -99,6 +100,25 @@ class Llm:
             vision=self.supports_vision,
             shrink_images=self.interpreter.shrink_images,
         )
+
+        if self.interpreter.debug:
+            print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
+            messages_to_display = []
+            for message in messages:
+                message = message.copy()
+                try:
+                    if len(message["content"]) > 3000:
+                        message["content"] = (
+                            message["content"][:1500]
+                            + "..."
+                            + message["content"][-1500:]
+                        )
+                except Exception as e:
+                    print("ERROR PARSING.", str(e), "for message:", message)
+                messages_to_display.append(message)
+            print(messages_to_display)
+            print("\n\n\n")
+            time.sleep(5)
 
         system_message = messages[0]["content"]
         messages = messages[1:]

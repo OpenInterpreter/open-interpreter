@@ -1,4 +1,5 @@
 import re
+import time
 
 
 def render_message(interpreter, message):
@@ -34,6 +35,12 @@ def render_message(interpreter, message):
             parts[i] = output
 
     # Join the parts back into the message
-    rendered_message = "".join(parts)
+    rendered_message = "".join(parts).strip()
+
+    if interpreter.debug:
+        print("\n\n\nSYSTEM MESSAGE\n\n\n")
+        print(rendered_message)
+        print("\n\n\n")
+        time.sleep(5)
 
     return rendered_message

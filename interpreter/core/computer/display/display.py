@@ -138,12 +138,19 @@ class Display:
                     recipient="user",
                 )
                 print(message)
+
+                if self.computer.debug:
+                    print("DEBUG MODE ON")
+
                 from .point.point import point
 
-                with open(os.devnull, "w") as f, redirect_stdout(f):
-                    result = point(description, screenshot)
+                result = point(description, screenshot, self.computer.debug)
+
                 return result
             except:
+                if self.computer.debug:
+                    # We want to know these bugs lmao
+                    raise
                 if self.computer.offline:
                     raise
                 message = format_to_recipient(
@@ -152,7 +159,6 @@ class Display:
                 )
                 print(message)
 
-                start = time.time()
                 # Take a screenshot
                 if screenshot == None:
                     screenshot = self.screenshot(show=False)
@@ -164,7 +170,6 @@ class Display:
                 buffered = BytesIO()
                 screenshot.save(buffered, format="PNG")
                 screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
-                print("PIC TOOK THIS LONG:", time.time() - start)
 
                 try:
                     response = requests.post(

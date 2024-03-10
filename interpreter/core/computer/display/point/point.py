@@ -5,12 +5,22 @@ import subprocess
 from typing import List
 
 import cv2
+import nltk
 import numpy as np
 import torch
-from PIL import Image, ImageDraw, ImageEnhance
+from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from sentence_transformers import SentenceTransformer, util
 
 from ...utils.computer_vision import pytesseract_get_text_bounding_boxes
+
+try:
+    nltk.corpus.words.words()
+except LookupError:
+    nltk.download("words", quiet=True)
+from nltk.corpus import words
+
+# Create a set of English words
+english_words = set(words.words())
 
 
 def take_screenshot_to_pil(filename="temp_screenshot.png"):
@@ -31,14 +41,14 @@ def take_screenshot_to_pil(filename="temp_screenshot.png"):
 from ...utils.computer_vision import find_text_in_image
 
 
-def point(description, screenshot=None):
+def point(description, screenshot=None, debug=False):
     if description.startswith('"') and description.endswith('"'):
         return find_text_in_image(description.strip('"'), screenshot)
     else:
-        return find_icon(description, screenshot)
+        return find_icon(description, screenshot, debug)
 
 
-def find_icon(description, screenshot=None):
+def find_icon(description, screenshot=None, debug=False):
     if screenshot == None:
         image_data = take_screenshot_to_pil()
     else:
@@ -52,7 +62,7 @@ def find_icon(description, screenshot=None):
     #     temp_image_path = temp_file.name
     #   print("yeah took", time.time()-thetime)
 
-    icons_bounding_boxes = get_element_boxes(image_data)
+    icons_bounding_boxes = get_element_boxes(image_data, debug)
 
     # Filter out extremes
     icons_bounding_boxes = [
@@ -70,9 +80,79 @@ def find_icon(description, screenshot=None):
 
     response = pytesseract_get_text_bounding_boxes(screenshot)
 
+    if debug:
+        # Create a draw object
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw red rectangles around all blocks
+        for block in response:
+            left, top, width, height = (
+                block["left"],
+                block["top"],
+                block["width"],
+                block["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="blue")
+        # Save the image to the desktop
+        debug_path = os.path.join(os.path.expanduser("~"), "Desktop", "oi-debug")
+        if not os.path.exists(debug_path):
+            os.makedirs(debug_path)
+        image_data_copy.save(os.path.join(debug_path, "pytesseract_blocks_image.png"))
+
     blocks = [
         b for b in response if len(b["text"]) > 2
     ]  # icons are sometimes text, like "X"
+
+    # Filter blocks so the text.lower() needs to be a real word in the English dictionary
+    filtered_blocks = []
+    for b in blocks:
+        words = b["text"].lower().split()
+        words = [
+            "".join(e for e in word if e.isalnum()) for word in words
+        ]  # remove punctuation
+        if all(word in english_words for word in words):
+            filtered_blocks.append(b)
+    blocks = filtered_blocks
+
+    if debug:
+        # Create a draw object
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw red rectangles around all blocks
+        for block in blocks:
+            left, top, width, height = (
+                block["left"],
+                block["top"],
+                block["width"],
+                block["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="green")
+        image_data_copy.save(
+            os.path.join(debug_path, "pytesseract_filtered_blocks_image.png")
+        )
+
+    if debug:
+        # Create a draw object
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw red rectangles around all blocks
+        for block in blocks:
+            left, top, width, height = (
+                block["left"],
+                block["top"],
+                block["width"],
+                block["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="green")
+            # Draw the detected text in the rectangle in small font
+            # Use PIL's built-in bitmap font
+            font = ImageFont.load_default()
+            draw.text(
+                (block["left"], block["top"]), block["text"], fill="red", font=font
+            )
+        image_data_copy.save(
+            os.path.join(debug_path, "pytesseract_filtered_blocks_image_with_text.png")
+        )
 
     # Create an empty list to store the filtered boxes
     filtered_boxes = []
@@ -97,6 +177,19 @@ def find_icon(description, screenshot=None):
 
     icons_bounding_boxes = filtered_boxes
 
+    # Filter out boxes that intersect with text at all
+    filtered_boxes = []
+    for box in icons_bounding_boxes:
+        if not any(
+            max(text_box["left"], box["x"])
+            < min(text_box["left"] + text_box["width"], box["x"] + box["width"])
+            and max(text_box["top"], box["y"])
+            < min(text_box["top"] + text_box["height"], box["y"] + box["height"])
+            for text_box in blocks
+        ):
+            filtered_boxes.append(box)
+    icons_bounding_boxes = filtered_boxes
+
     # Desired dimensions
     desired_width = 30
     desired_height = 30
@@ -115,7 +208,7 @@ def find_icon(description, screenshot=None):
     icons_bounding_boxes = sorted_boxes  # DISABLED [:150]
 
     # Define the pixel expansion amount
-    pixel_expand = 10
+    pixel_expand = int(os.getenv("OI_POINT_PIXEL_EXPAND", 7))
 
     # Expand each box by pixel_expand
     for box in icons_bounding_boxes:
@@ -134,6 +227,41 @@ def find_icon(description, screenshot=None):
             if box["y"] + box["height"] + pixel_expand * 2 <= image_height
             else image_height - box["y"] - box["height"]
         )
+
+    # Combine overlapping icons
+    if os.getenv("OI_POINT_OVERLAP", "True") == "True":
+        combined_boxes = []
+        for box in icons_bounding_boxes:
+            # Check if the box overlaps with any box in the combined_boxes list
+            for i, combined_box in enumerate(combined_boxes):
+                if (
+                    box["x"] < combined_box["x"] + combined_box["width"]
+                    and box["x"] + box["width"] > combined_box["x"]
+                    and box["y"] < combined_box["y"] + combined_box["height"]
+                    and box["y"] + box["height"] > combined_box["y"]
+                ):
+                    # The boxes overlap, combine them
+                    combined_box["x"] = min(box["x"], combined_box["x"])
+                    combined_box["y"] = min(box["y"], combined_box["y"])
+                    combined_box["width"] = (
+                        max(
+                            box["x"] + box["width"],
+                            combined_box["x"] + combined_box["width"],
+                        )
+                        - combined_box["x"]
+                    )
+                    combined_box["height"] = (
+                        max(
+                            box["y"] + box["height"],
+                            combined_box["y"] + combined_box["height"],
+                        )
+                        - combined_box["y"]
+                    )
+                    break
+            else:
+                # The box does not overlap with any box in the combined_boxes list, add it to the list
+                combined_boxes.append(box.copy())
+        icons_bounding_boxes = combined_boxes
 
     icons = []
     for box in icons_bounding_boxes:
@@ -162,12 +290,14 @@ def find_icon(description, screenshot=None):
         icons.append(icon)
 
     # Draw and show an image with the full screenshot and all the icons bounding boxes drawn on it in red
-    if False:
-        draw = ImageDraw.Draw(image_data)
+    if debug:
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
         for icon in icons:
             x, y, w, h = icon["x"], icon["y"], icon["width"], icon["height"]
             draw.rectangle([(x, y), (x + w, y + h)], outline="red")
-        image_data.show()
+        desktop = os.path.join(os.path.join(os.path.expanduser("~")), "Desktop")
+        image_data_copy.save(os.path.join(desktop, "point_vision.png"))
 
     top_icons = image_search(description, icons)
 
@@ -279,8 +409,12 @@ def image_search(query, icons):
     return [icons[hit["corpus_id"]] for hit in results]
 
 
-def get_element_boxes(image_data):
-    DEBUG = False
+def get_element_boxes(image_data, debug):
+    if debug:
+        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+        debug_path = os.path.join(desktop_path, "oi-debug")
+        if not os.path.exists(debug_path):
+            os.makedirs(debug_path)
 
     # Re-import the original image for contrast adjustment
     # original_image = cv2.imread(image_path)
@@ -294,18 +428,20 @@ def get_element_boxes(image_data):
     enhancer = ImageEnhance.Contrast(pil_image)
     contrasted_image = enhancer.enhance(20.0)  # Significantly increase contrast
 
-    if DEBUG:
-        contrasted_image.save("debug/contrasted_image.jpg")
-        print("Contrasted image saved at: debug/contrasted_image.jpg")
+    if debug:
+        contrasted_image_path = os.path.join(debug_path, "contrasted_image.jpg")
+        contrasted_image.save(contrasted_image_path)
+        print(f"DEBUG: Contrasted image saved to {contrasted_image_path}")
 
     # Convert the contrast-enhanced image to OpenCV format
     contrasted_image_cv = cv2.cvtColor(np.array(contrasted_image), cv2.COLOR_RGB2BGR)
 
     # Convert the contrast-enhanced image to grayscale
     gray_contrasted = cv2.cvtColor(contrasted_image_cv, cv2.COLOR_BGR2GRAY)
-    if DEBUG:
-        cv2.imwrite("debug/gray_contrasted_image.jpg", gray_contrasted)
-        print("Grayscale contrasted image saved at: debug/gray_contrasted_image.jpg")
+    if debug:
+        image_path = os.path.join(debug_path, "gray_contrasted_image.jpg")
+        cv2.imwrite(image_path, gray_contrasted)
+        print("DEBUG: Grayscale contrasted image saved at:", image_path)
 
     # Apply adaptive thresholding to create a binary image where the GUI elements are isolated
     binary_contrasted = cv2.adaptiveThreshold(
@@ -317,9 +453,12 @@ def get_element_boxes(image_data):
         2,
     )
 
-    if DEBUG:
-        cv2.imwrite("debug/binary_contrasted_image.jpg", binary_contrasted)
-        print("Binary contrasted image saved at: debug/binary_contrasted_image.jpg")
+    if debug:
+        binary_contrasted_image_path = os.path.join(
+            debug_path, "binary_contrasted_image.jpg"
+        )
+        cv2.imwrite(binary_contrasted_image_path, binary_contrasted)
+        print(f"DEBUG: Binary contrasted image saved to {binary_contrasted_image_path}")
 
     # Find contours from the binary image
     contours_contrasted, _ = cv2.findContours(
@@ -329,10 +468,14 @@ def get_element_boxes(image_data):
     # Optionally, draw contours on the image for visualization
     contour_image = np.zeros_like(binary_contrasted)
     cv2.drawContours(contour_image, contours_contrasted, -1, (255, 255, 255), 1)
-    if DEBUG:
-        cv2.imwrite("debug/contoured_contrasted_image.jpg", contour_image)
+
+    if debug:
+        contoured_contrasted_image_path = os.path.join(
+            debug_path, "contoured_contrasted_image.jpg"
+        )
+        cv2.imwrite(contoured_contrasted_image_path, contour_image)
         print(
-            "Contoured contrasted image saved at: debug/contoured_contrasted_image.jpg"
+            f"DEBUG: Contoured contrasted image saved at: {contoured_contrasted_image_path}"
         )
 
     # Initialize an empty list to store the boxes
