@@ -11,6 +11,7 @@ import torch
 from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from sentence_transformers import SentenceTransformer, util
 
+from .....terminal_interface.utils.oi_dir import oi_dir
 from ...utils.computer_vision import pytesseract_get_text_bounding_boxes
 
 try:
@@ -41,18 +42,21 @@ def take_screenshot_to_pil(filename="temp_screenshot.png"):
 from ...utils.computer_vision import find_text_in_image
 
 
-def point(description, screenshot=None, debug=False):
+def point(description, screenshot=None, debug=False, hashes=None):
     if description.startswith('"') and description.endswith('"'):
         return find_text_in_image(description.strip('"'), screenshot)
     else:
-        return find_icon(description, screenshot, debug)
+        return find_icon(description, screenshot, debug, hashes)
 
 
-def find_icon(description, screenshot=None, debug=False):
+def find_icon(description, screenshot=None, debug=False, hashes=None):
     if screenshot == None:
         image_data = take_screenshot_to_pil()
     else:
         image_data = screenshot
+
+    if hashes == None:
+        hashes = {}
 
     image_width, image_height = image_data.size
 
@@ -190,22 +194,27 @@ def find_icon(description, screenshot=None, debug=False):
             filtered_boxes.append(box)
     icons_bounding_boxes = filtered_boxes
 
-    # Desired dimensions
-    desired_width = 30
-    desired_height = 30
+    # # (DISABLED)
+    # # Filter to the most icon-like dimensions
 
-    # Calculating the distance of each box's dimensions from the desired dimensions
-    for box in icons_bounding_boxes:
-        width_diff = abs(box["width"] - desired_width)
-        height_diff = abs(box["height"] - desired_height)
-        # Sum of absolute differences as a simple measure of "closeness"
-        box["distance"] = width_diff + height_diff
+    # # Desired dimensions
+    # desired_width = 30
+    # desired_height = 30
 
-    # Sorting the boxes based on their closeness to the desired dimensions
-    sorted_boxes = sorted(icons_bounding_boxes, key=lambda x: x["distance"])
+    # # Calculating the distance of each box's dimensions from the desired dimensions
+    # for box in icons_bounding_boxes:
+    #     width_diff = abs(box["width"] - desired_width)
+    #     height_diff = abs(box["height"] - desired_height)
+    #     # Sum of absolute differences as a simple measure of "closeness"
+    #     box["distance"] = width_diff + height_diff
 
-    # Selecting the top 150 closest boxes
-    icons_bounding_boxes = sorted_boxes  # DISABLED [:150]
+    # # Sorting the boxes based on their closeness to the desired dimensions
+    # sorted_boxes = sorted(icons_bounding_boxes, key=lambda x: x["distance"])
+
+    # # Selecting the top 150 closest boxes
+    # icons_bounding_boxes = sorted_boxes  # DISABLED [:150]
+
+    # Expand a little
 
     # Define the pixel expansion amount
     pixel_expand = int(os.getenv("OI_POINT_PIXEL_EXPAND", 7))
@@ -299,7 +308,7 @@ def find_icon(description, screenshot=None, debug=False):
         desktop = os.path.join(os.path.join(os.path.expanduser("~")), "Desktop")
         image_data_copy.save(os.path.join(desktop, "point_vision.png"))
 
-    top_icons = image_search(description, icons)
+    top_icons = image_search(description, icons, hashes)
 
     coordinates = [t["coordinate"] for t in top_icons]
 
@@ -356,13 +365,12 @@ if fast_model == False:
     # embeddings = embed_images(images, model, transforms)
 
 
-hashes = {}
 device = torch.device("cpu")  # or 'cpu' for CPU, 'cuda:0' for the first GPU, etc.
 # Move the model to the specified device
 model = model.to(device)
 
 
-def image_search(query, icons):
+def image_search(query, icons, hashes):
     hashed_icons = [icon for icon in icons if icon["hash"] in hashes]
     unhashed_icons = [icon for icon in icons if icon["hash"] not in hashes]
 

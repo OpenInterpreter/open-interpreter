@@ -193,6 +193,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                         ),
                         code,
                     )
+                    code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
                     if code.split("\n")[-1] in [
                         "computer.display.view()",
@@ -211,6 +212,8 @@ If LM Studio's local server is running, please try a language model with a diffe
                 try:
                     if interpreter.sync_computer and language == "python":
                         computer_dict = interpreter.computer.to_dict()
+                        if "_hashes" in computer_dict:
+                            computer_dict.pop("_hashes")
                         if computer_dict:
                             computer_json = json.dumps(computer_dict)
                             sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
@@ -232,7 +235,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                         # sync up the interpreter's computer with your computer
                         result = interpreter.computer.run(
                             "python",
-                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  print(json.dumps(computer_dict))",
+                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  if '_hashes' in computer_dict:\n    computer_dict.pop('_hashes')\n  print(json.dumps(computer_dict))",
                         )
                         result = result[-1]["content"]
                         interpreter.computer.load_dict(

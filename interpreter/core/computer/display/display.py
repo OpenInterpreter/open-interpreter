@@ -28,6 +28,7 @@ class Display:
         # set width and height to None initially to prevent pyautogui from importing until it's needed
         self._width = None
         self._height = None
+        self._hashes = {}
 
     # We use properties here so that this code only executes when height/width are accessed for the first time
     @property
@@ -144,7 +145,9 @@ class Display:
 
                 from .point.point import point
 
-                result = point(description, screenshot, self.computer.debug)
+                result = point(
+                    description, screenshot, self.computer.debug, self._hashes
+                )
 
                 return result
             except:
