@@ -181,6 +181,24 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
 
     icons_bounding_boxes = filtered_boxes
 
+    if debug:
+        # Create a copy of the image data
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw green rectangles around all filtered boxes
+        for box in filtered_boxes:
+            left, top, width, height = (
+                box["x"],
+                box["y"],
+                box["width"],
+                box["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="green")
+        # Save the image with the drawn rectangles
+        image_data_copy.save(
+            os.path.join(debug_path, "pytesseract_filtered_boxes_image.png")
+        )
+
     # Filter out boxes that intersect with text at all
     filtered_boxes = []
     for box in icons_bounding_boxes:
@@ -193,6 +211,24 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
         ):
             filtered_boxes.append(box)
     icons_bounding_boxes = filtered_boxes
+
+    if debug:
+        # Create a copy of the image data
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        # Draw green rectangles around all filtered boxes
+        for box in icons_bounding_boxes:
+            left, top, width, height = (
+                box["x"],
+                box["y"],
+                box["width"],
+                box["height"],
+            )
+            draw.rectangle([(left, top), (left + width, top + height)], outline="green")
+        # Save the image with the drawn rectangles
+        image_data_copy.save(
+            os.path.join(debug_path, "debug_image_after_filtering_boxes.png")
+        )
 
     # # (DISABLED)
     # # Filter to the most icon-like dimensions
@@ -237,40 +273,68 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
             else image_height - box["y"] - box["height"]
         )
 
-    # Combine overlapping icons
-    if os.getenv("OI_POINT_OVERLAP", "True") == "True":
-        combined_boxes = []
+    # Save a debug image with a descriptive name for the step we just went through
+    if debug:
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
         for box in icons_bounding_boxes:
-            # Check if the box overlaps with any box in the combined_boxes list
-            for i, combined_box in enumerate(combined_boxes):
-                if (
-                    box["x"] < combined_box["x"] + combined_box["width"]
-                    and box["x"] + box["width"] > combined_box["x"]
-                    and box["y"] < combined_box["y"] + combined_box["height"]
-                    and box["y"] + box["height"] > combined_box["y"]
-                ):
-                    # The boxes overlap, combine them
-                    combined_box["x"] = min(box["x"], combined_box["x"])
-                    combined_box["y"] = min(box["y"], combined_box["y"])
-                    combined_box["width"] = (
-                        max(
-                            box["x"] + box["width"],
-                            combined_box["x"] + combined_box["width"],
+            left = box["x"]
+            top = box["y"]
+            width = box["width"]
+            height = box["height"]
+            draw.rectangle([(left, top), (left + width, top + height)], outline="red")
+        image_data_copy.save(
+            os.path.join(debug_path, "debug_image_after_expanding_boxes.png")
+        )
+
+    def combine_boxes(icons_bounding_boxes):
+        while True:
+            combined_boxes = []
+            for box in icons_bounding_boxes:
+                for i, combined_box in enumerate(combined_boxes):
+                    if (
+                        box["x"] < combined_box["x"] + combined_box["width"]
+                        and box["x"] + box["width"] > combined_box["x"]
+                        and box["y"] < combined_box["y"] + combined_box["height"]
+                        and box["y"] + box["height"] > combined_box["y"]
+                    ):
+                        combined_box["x"] = min(box["x"], combined_box["x"])
+                        combined_box["y"] = min(box["y"], combined_box["y"])
+                        combined_box["width"] = (
+                            max(
+                                box["x"] + box["width"],
+                                combined_box["x"] + combined_box["width"],
+                            )
+                            - combined_box["x"]
                         )
-                        - combined_box["x"]
-                    )
-                    combined_box["height"] = (
-                        max(
-                            box["y"] + box["height"],
-                            combined_box["y"] + combined_box["height"],
+                        combined_box["height"] = (
+                            max(
+                                box["y"] + box["height"],
+                                combined_box["y"] + combined_box["height"],
+                            )
+                            - combined_box["y"]
                         )
-                        - combined_box["y"]
-                    )
-                    break
+                        break
+                else:
+                    combined_boxes.append(box.copy())
+            if len(combined_boxes) == len(icons_bounding_boxes):
+                break
             else:
-                # The box does not overlap with any box in the combined_boxes list, add it to the list
-                combined_boxes.append(box.copy())
-        icons_bounding_boxes = combined_boxes
+                icons_bounding_boxes = combined_boxes
+        return combined_boxes
+
+    if os.getenv("OI_POINT_OVERLAP", "True") == "True":
+        icons_bounding_boxes = combine_boxes(icons_bounding_boxes)
+
+    if debug:
+        image_data_copy = image_data.copy()
+        draw = ImageDraw.Draw(image_data_copy)
+        for box in icons_bounding_boxes:
+            x, y, w, h = box["x"], box["y"], box["width"], box["height"]
+            draw.rectangle([(x, y), (x + w, y + h)], outline="blue")
+        image_data_copy.save(
+            os.path.join(debug_path, "debug_image_after_combining_boxes.png")
+        )
 
     icons = []
     for box in icons_bounding_boxes:
