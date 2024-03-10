@@ -104,8 +104,8 @@ class Llm:
         if self.interpreter.debug:
             print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
             for message in messages:
-                if message["type"] == "image":
-                    print("IMAGE")
+                if len(str(message) > 2000):
+                    print(str(message)[:200])
                 else:
                     print(message)
             print("\n\n\n")
