@@ -358,8 +358,8 @@ def test_long_message():
         {
             "role": "user",
             "type": "message",
-            "content": "ABCD" * 20000
-            + "\nwhat are the characters I just sent you? dont run code, just tell me the characters",
+            "content": "ALKI" * 20000
+            + "\nwhat are the four characters I just sent you? dont run ANY code, just tell me the characters. DO NOT RUN CODE. DO NOT PLAN. JUST TELL ME THE CHARACTERS RIGHT NOW. ONLY respond with the 4 characters, NOTHING else.",
         }
     ]
     interpreter.llm.context_window = 300
