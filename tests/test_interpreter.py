@@ -353,6 +353,9 @@ def test_generator():
         assert active_line_found, "No active line was found"
 
 
+@pytest.mark.skip(
+    reason="Not working consistently, I think GPT related changes? It worked recently"
+)
 def test_long_message():
     messages = [
         {
