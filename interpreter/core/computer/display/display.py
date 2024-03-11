@@ -134,14 +134,15 @@ class Display:
             return self.find_text(description.strip('"'), screenshot)
         else:
             try:
-                message = format_to_recipient(
-                    "Locating this icon will take ~10 seconds. Subsequent icons should be found more quickly.",
-                    recipient="user",
-                )
-                print(message)
-
                 if self.computer.debug:
                     print("DEBUG MODE ON")
+                    print("NUM HASHES:", len(self._hashes))
+                else:
+                    message = format_to_recipient(
+                        "Locating this icon will take ~10 seconds. Subsequent icons should be found more quickly.",
+                        recipient="user",
+                    )
+                    print(message)
 
                 from .point.point import point
 

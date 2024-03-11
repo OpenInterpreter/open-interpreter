@@ -104,10 +104,11 @@ class Llm:
         if self.interpreter.debug:
             print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
             for message in messages:
-                if len(str(message)) > 2000:
-                    print(str(message)[:200])
+                if len(str(message)) > 5000:
+                    print(str(message)[:200] + "...")
                 else:
                     print(message)
+                print("\n")
             print("\n\n\n")
 
         system_message = messages[0]["content"]

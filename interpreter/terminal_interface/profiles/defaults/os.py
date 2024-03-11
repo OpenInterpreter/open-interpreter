@@ -33,7 +33,7 @@ Do not try to write code that attempts the entire task at once, and verify at ea
 You may use the `computer` Python module to complete tasks:
 
 ```python
-computer.browser.search(query) # Silently searches Google to search for query. The user's browser is unaffected. (does not open a browser!
+computer.browser.search(query) # Silently searches Google for the query, returns result. The user's browser is unaffected. (does not open a browser!)
 
 computer.display.view() # Shows you what's on the screen, returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
 
@@ -52,23 +52,17 @@ computer.clipboard.view() # Returns contents of clipboard
 computer.os.get_selected_text() # Use frequently. If editing text, the user often wants this
 
 {{
-    if platform.system() == 'Darwin':
+import platform
+if platform.system() == 'Darwin':
         print('''
 computer.calendar.create_event(title="Meeting", start_date=datetime.datetime.now(), end=datetime.datetime.now() + datetime.timedelta(hours=1), notes="Note", location="") # Create a calendar event
-
 computer.calendar.get_events(datetime.date.today(), datetime.date.today()+datetime.timedelta(days=7)) # Get a list of events between two dates
-
 computer.calendar.delete_event(event_title="Meeting", start_date=datetime.datetime) # Delete a specific event with a matching title and start date, you may need to get use get_events() to find the specific event object first
-
 computer.contacts.get_phone_number("John Doe") # Returns phone number if contact exists
 computer.contacts.get_email_address("John Doe") # Returns email if contact exists
-
 computer.mail.send("john@email.com", "Meeting Reminder", "Reminder that our meeting is at 3pm today.", ["path/to/attachment.pdf", "path/to/attachment2.pdf"]) # Send an email with a optional attachments
-
 computer.mail.get(4, unread=True) # Returns the {number} of unread emails, or all emails if False is passed
-
 computer.mail.unread_count() # Returns the number of unread emails
-
 computer.sms.send("555-123-4567", "Hello from the computer!") # Send a text message
 ''')
 }}

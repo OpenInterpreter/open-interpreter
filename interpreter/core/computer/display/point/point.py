@@ -68,6 +68,8 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
 
     icons_bounding_boxes = get_element_boxes(image_data, debug)
 
+    debug_path = os.path.join(os.path.expanduser("~"), "Desktop", "oi-debug")
+
     if debug:
         # Create a draw object
         image_data_copy = image_data.copy()
@@ -75,8 +77,8 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
         # Draw red rectangles around all blocks
         for block in icons_bounding_boxes:
             left, top, width, height = (
-                block["left"],
-                block["top"],
+                block["x"],
+                block["y"],
                 block["width"],
                 block["height"],
             )
@@ -104,8 +106,8 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
         # Draw red rectangles around all blocks
         for block in icons_bounding_boxes:
             left, top, width, height = (
-                block["left"],
-                block["top"],
+                block["x"],
+                block["y"],
                 block["width"],
                 block["height"],
             )
@@ -136,8 +138,8 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
                 block["height"],
             )
             draw.rectangle([(left, top), (left + width, top + height)], outline="blue")
+
         # Save the image to the desktop
-        debug_path = os.path.join(os.path.expanduser("~"), "Desktop", "oi-debug")
         if not os.path.exists(debug_path):
             os.makedirs(debug_path)
         image_data_copy.save(os.path.join(debug_path, "pytesseract_blocks_image.png"))
@@ -411,6 +413,9 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
         desktop = os.path.join(os.path.join(os.path.expanduser("~")), "Desktop")
         image_data_copy.save(os.path.join(desktop, "point_vision.png"))
 
+    if "icon" not in description.lower():
+        description += " icon"
+
     top_icons = image_search(description, icons, hashes)
 
     coordinates = [t["coordinate"] for t in top_icons]
@@ -664,5 +669,31 @@ def get_element_boxes(image_data, debug):
         x, y, w, h = cv2.boundingRect(contour)
         # Append the box as a dictionary to the list
         boxes.append({"x": x, "y": y, "width": w, "height": h})
+
+    # Remove any boxes whose edges cross over any contours
+    filtered_boxes = []
+    for box in boxes:
+        crosses_contour = False
+        for contour in contours_contrasted:
+            if (
+                cv2.pointPolygonTest(contour, (box["x"], box["y"]), False) >= 0
+                or cv2.pointPolygonTest(
+                    contour, (box["x"] + box["width"], box["y"]), False
+                )
+                >= 0
+                or cv2.pointPolygonTest(
+                    contour, (box["x"], box["y"] + box["height"]), False
+                )
+                >= 0
+                or cv2.pointPolygonTest(
+                    contour, (box["x"] + box["width"], box["y"] + box["height"]), False
+                )
+                >= 0
+            ):
+                crosses_contour = True
+                break
+        if not crosses_contour:
+            filtered_boxes.append(box)
+    boxes = filtered_boxes
 
     return boxes
