@@ -358,7 +358,8 @@ def test_long_message():
         {
             "role": "user",
             "type": "message",
-            "content": "ABCD" * 20000 + "\ndescribe to me what i just said",
+            "content": "ABCD" * 20000
+            + "\nwhat are the characters I just sent you? dont run code, just tell me the characters",
         }
     ]
     interpreter.llm.context_window = 300
