@@ -18,6 +18,8 @@ class SMS:
         if platform.system() != 'Darwin':
             return "This method is only supported on MacOS"
         
+        # Remove any newline characters from the recipient number.
+        to = to.replace("\n", "")
         # Escape double quotes in the message and recipient variables to prevent script errors.
         escaped_message = message.replace('"', '\\"')
         escaped_to = to.replace('"', '\\"')
