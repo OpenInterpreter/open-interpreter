@@ -10,6 +10,7 @@ class Browser:
         Searches the web for the specified query and returns the results.
         """
         response = requests.get(
-            f'{self.computer.api_base.strip("/")}/browser/search', params={"q": query}
+            f'{self.computer.api_base.strip("/")}/browser/search',
+            params={"query": query},
         )
         return response.json()["result"]

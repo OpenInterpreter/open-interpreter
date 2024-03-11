@@ -24,11 +24,12 @@ from websocket import create_connection
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")
 def test_point():
-    interpreter.offline = True
     # interpreter.computer.debug = True
     interpreter.computer.mouse.move(icon="gear")
     interpreter.computer.mouse.move(icon="refresh")
-    # interpreter.computer.mouse.move("Spaces:")
+    interpreter.computer.mouse.move(icon="play")
+    interpreter.computer.mouse.move(icon="magnifying glass")
+    interpreter.computer.mouse.move("Spaces:")
     assert False
 
 
@@ -60,6 +61,15 @@ def test_skills():
     lowercase_skills = [skill[0].lower() + skill[1:] for skill in skills]
     output = "\\n".join(lowercase_skills)
     assert "testing_skilsl" in str(output)
+
+
+@pytest.mark.skip(reason="Local only")
+def test_browser():
+    interpreter.computer.api_base = "http://0.0.0.0:80/v0"
+    print(
+        interpreter.computer.browser.search("When's the next Dune showing in Seattle?")
+    )
+    assert False
 
 
 @pytest.mark.skip(reason="Computer with display only + no way to fail test")

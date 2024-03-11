@@ -1,5 +1,6 @@
 import base64
 import os
+import platform
 import pprint
 import time
 import warnings
@@ -64,12 +65,13 @@ class Display:
     # def get_active_window(self):
     #     return get_active_window()
 
-    def screenshot(self, show=True, quadrant=None, active_app_only=False):
+    def screenshot(
+        self, show=True, quadrant=None, active_app_only=False, force_image=False
+    ):
         """
         Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
         """
-        time.sleep(2)
-        if not self.computer.emit_images:
+        if not self.computer.emit_images and force_image == False:
             text = self.get_text_as_list_of_lists()
             pp = pprint.PrettyPrinter(indent=4)
             pretty_text = pp.pformat(text)  # language models like it pretty!
@@ -89,7 +91,10 @@ class Display:
                 region = self.get_active_window()["region"]
                 screenshot = pyautogui.screenshot(region=region)
             else:
-                screenshot = pyautogui.screenshot()
+                if platform.system() == "Darwin":
+                    screenshot = take_screenshot_to_pil()
+                else:
+                    screenshot = pyautogui.screenshot()
                 # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
                 # print(message)
 
@@ -139,10 +144,13 @@ class Display:
                     print("NUM HASHES:", len(self._hashes))
                 else:
                     message = format_to_recipient(
-                        "Locating this icon will take ~10 seconds. Subsequent icons should be found more quickly.",
+                        "Locating this icon will take ~15 seconds. Subsequent icons should be found more quickly.",
                         recipient="user",
                     )
                     print(message)
+
+                if len(self._hashes) > 5000:
+                    self._hashes = dict(list(self._hashes.items())[-5000:])
 
                 from .point.point import point
 
@@ -251,3 +259,24 @@ class Display:
                 raise Exception(
                     "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
                 )
+
+
+import io
+import subprocess
+
+from PIL import Image
+
+
+def take_screenshot_to_pil(filename="temp_screenshot.png"):
+    # Capture the screenshot and save it to a temporary file
+    subprocess.run(["screencapture", "-x", filename], check=True)
+
+    # Open the image file with PIL
+    with open(filename, "rb") as f:
+        image_data = f.read()
+    image = Image.open(io.BytesIO(image_data))
+
+    # Optionally, delete the temporary file if you don't need it after loading
+    os.remove(filename)
+
+    return image

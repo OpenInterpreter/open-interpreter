@@ -50,6 +50,8 @@ def point(description, screenshot=None, debug=False, hashes=None):
 
 
 def find_icon(description, screenshot=None, debug=False, hashes=None):
+    if debug:
+        print("STARTING")
     if screenshot == None:
         image_data = take_screenshot_to_pil()
     else:
@@ -67,6 +69,9 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
     #   print("yeah took", time.time()-thetime)
 
     icons_bounding_boxes = get_element_boxes(image_data, debug)
+
+    if debug:
+        print("GOT ICON BOUNDING BOXES")
 
     debug_path = os.path.join(os.path.expanduser("~"), "Desktop", "oi-debug")
 
@@ -123,7 +128,13 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
 
     # # Filter out text
 
+    if debug:
+        print("GETTING TEXT")
+
     response = pytesseract_get_text_bounding_boxes(screenshot)
+
+    if debug:
+        print("GOT TEXT, processing it")
 
     if debug:
         # Create a draw object
@@ -416,7 +427,13 @@ def find_icon(description, screenshot=None, debug=False, hashes=None):
     if "icon" not in description.lower():
         description += " icon"
 
-    top_icons = image_search(description, icons, hashes)
+    if debug:
+        print("FINALLY, SEARCHING")
+
+    top_icons = image_search(description, icons, hashes, debug)
+
+    if debug:
+        print("DONE")
 
     coordinates = [t["coordinate"] for t in top_icons]
 
@@ -478,7 +495,7 @@ device = torch.device("cpu")  # or 'cpu' for CPU, 'cuda:0' for the first GPU, et
 model = model.to(device)
 
 
-def image_search(query, icons, hashes):
+def image_search(query, icons, hashes, debug):
     hashed_icons = [icon for icon in icons if icon["hash"] in hashes]
     unhashed_icons = [icon for icon in icons if icon["hash"] not in hashes]
 
@@ -488,7 +505,7 @@ def image_search(query, icons, hashes):
             [query] + [icon["data"] for icon in unhashed_icons],
             batch_size=128,
             convert_to_tensor=True,
-            show_progress_bar=False,
+            show_progress_bar=debug,
         )
     else:
         query_and_unhashed_icons_embeds = embed_images(
@@ -526,9 +543,10 @@ def image_search(query, icons, hashes):
 
 
 def get_element_boxes(image_data, debug):
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+    debug_path = os.path.join(desktop_path, "oi-debug")
+
     if debug:
-        desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-        debug_path = os.path.join(desktop_path, "oi-debug")
         if not os.path.exists(debug_path):
             os.makedirs(debug_path)
 
@@ -662,6 +680,9 @@ def get_element_boxes(image_data, debug):
             pil_image, debug=debug, debug_path=debug_path
         )
 
+    if debug:
+        print("WE HERE")
+
     # Initialize an empty list to store the boxes
     boxes = []
     for contour in contours_contrasted:
@@ -670,30 +691,41 @@ def get_element_boxes(image_data, debug):
         # Append the box as a dictionary to the list
         boxes.append({"x": x, "y": y, "width": w, "height": h})
 
-    # Remove any boxes whose edges cross over any contours
-    filtered_boxes = []
-    for box in boxes:
-        crosses_contour = False
-        for contour in contours_contrasted:
-            if (
-                cv2.pointPolygonTest(contour, (box["x"], box["y"]), False) >= 0
-                or cv2.pointPolygonTest(
-                    contour, (box["x"] + box["width"], box["y"]), False
-                )
-                >= 0
-                or cv2.pointPolygonTest(
-                    contour, (box["x"], box["y"] + box["height"]), False
-                )
-                >= 0
-                or cv2.pointPolygonTest(
-                    contour, (box["x"] + box["width"], box["y"] + box["height"]), False
-                )
-                >= 0
-            ):
-                crosses_contour = True
-                break
-        if not crosses_contour:
-            filtered_boxes.append(box)
-    boxes = filtered_boxes
+    if debug:
+        print("WE HHERE")
+
+    if (
+        False
+    ):  # Disabled. I thought this would be faster but it's actually slower than just embedding all of them.
+        # Remove any boxes whose edges cross over any contours
+        filtered_boxes = []
+        for box in boxes:
+            crosses_contour = False
+            for contour in contours_contrasted:
+                if (
+                    cv2.pointPolygonTest(contour, (box["x"], box["y"]), False) >= 0
+                    or cv2.pointPolygonTest(
+                        contour, (box["x"] + box["width"], box["y"]), False
+                    )
+                    >= 0
+                    or cv2.pointPolygonTest(
+                        contour, (box["x"], box["y"] + box["height"]), False
+                    )
+                    >= 0
+                    or cv2.pointPolygonTest(
+                        contour,
+                        (box["x"] + box["width"], box["y"] + box["height"]),
+                        False,
+                    )
+                    >= 0
+                ):
+                    crosses_contour = True
+                    break
+            if not crosses_contour:
+                filtered_boxes.append(box)
+        boxes = filtered_boxes
+
+    if debug:
+        print("WE HHHERE")
 
     return boxes
