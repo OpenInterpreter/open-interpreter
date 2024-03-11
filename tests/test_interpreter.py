@@ -35,7 +35,7 @@ def test_point():
 def test_skills():
     import json
 
-    interpreter.model = "gpt-4-0125-preview"
+    interpreter.model = "gpt-3.5"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
@@ -268,7 +268,7 @@ def setup_function():
     interpreter.reset()
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.llm.model = "gpt-3.5-turbo"
+    interpreter.llm.model = "gpt-4-0125-preview"
     interpreter.verbose = False
 
 
