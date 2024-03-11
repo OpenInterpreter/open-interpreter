@@ -35,7 +35,7 @@ def test_point():
 def test_skills():
     import json
 
-    interpreter.model = "gpt-3.5"
+    interpreter.model = "gpt-4-0125-preview"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
