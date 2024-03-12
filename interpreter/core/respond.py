@@ -283,6 +283,7 @@ If LM Studio's local server is running, please try a language model with a diffe
             if (
                 interpreter.force_task_completion
                 and interpreter.messages
+                and interpreter.messages[-1].get("role", "").lower() == "assistant"
                 and not any(
                     task_status in interpreter.messages[-1].get("content", "").lower()
                     for task_status in force_task_completion_responses
