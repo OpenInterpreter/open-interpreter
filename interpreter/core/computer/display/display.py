@@ -232,7 +232,7 @@ class Display:
         Extracts and returns text from a screenshot or the current screen as a list of lists, each representing a line of text.
         """
         if screenshot == None:
-            screenshot = self.screenshot(show=False)
+            screenshot = self.screenshot(show=False, force_image=True)
 
         if not self.computer.offline:
             # Convert the screenshot to base64
@@ -252,13 +252,12 @@ class Display:
 
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
-        if self.computer.offline == True:
-            try:
-                return pytesseract_get_text(screenshot)
-            except:
-                raise Exception(
-                    "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
-                )
+        try:
+            return pytesseract_get_text(screenshot)
+        except:
+            raise Exception(
+                "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
+            )
 
 
 import io

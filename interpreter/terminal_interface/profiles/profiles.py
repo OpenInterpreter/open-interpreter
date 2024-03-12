@@ -38,18 +38,29 @@ def profile(interpreter, filename_or_url):
             break
 
     profile_path = os.path.join(profile_dir, filename_or_url)
+    profile = None
 
-    if filename_or_url in default_profiles_names:
-        reset_profile(filename_or_url)
+    # If they have a profile at a reserved profile name, rename it to {name}_custom.
+    # Don't do this for the default one though.
+    if (
+        filename_or_url not in ["default", "default.yaml"]
+        and filename_or_url in default_profiles_names
+    ):
+        if os.path.isfile(profile_path):
+            base, extension = os.path.splitext(profile_path)
+            os.rename(profile_path, f"{base}_custom{extension}")
+        profile = get_default_profile(filename_or_url)
 
-    try:
-        profile = get_profile(filename_or_url, profile_path)
-    except:
-        if filename_or_url in default_profiles_names:
-            reset_profile(filename_or_url)
+    if profile == None:
+        try:
             profile = get_profile(filename_or_url, profile_path)
-        else:
-            raise
+        except:
+            if filename_or_url in ["default", "default.yaml"]:
+                # Literally this just happens to default.yaml
+                reset_profile(filename_or_url)
+                profile = get_profile(filename_or_url, profile_path)
+            else:
+                raise
 
     return apply_profile(interpreter, profile, profile_path)
 
@@ -609,6 +620,35 @@ def reset_profile(specific_default_profile=None):
             else:
                 shutil.copy(default_yaml_file, target_file)
                 print(f"{filename} has been reset.")
+
+
+def get_default_profile(specific_default_profile):
+    for default_yaml_file in default_profiles_paths:
+        filename = os.path.basename(default_yaml_file)
+
+        if specific_default_profile and filename != specific_default_profile:
+            continue
+
+        profile_path = os.path.join(oi_default_profiles_path, filename)
+        extension = os.path.splitext(filename)[-1]
+
+        with open(profile_path, "r", encoding="utf-8") as file:
+            if extension == ".py":
+                python_script = file.read()
+
+                # Remove `from interpreter import interpreter` and `interpreter = OpenInterpreter()`, because we handle that before the script
+                tree = ast.parse(python_script)
+                tree = RemoveInterpreter().visit(tree)
+                python_script = ast.unparse(tree)
+
+                return {
+                    "start_script": python_script,
+                    "version": OI_VERSION,
+                }  # Python scripts are always the latest version
+            elif extension == ".json":
+                return json.load(file)
+            else:
+                return yaml.safe_load(file)
 
 
 def determine_user_version():
