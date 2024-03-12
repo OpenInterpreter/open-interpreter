@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import platform
@@ -17,6 +18,10 @@ class Mail:
         if platform.system() != 'Darwin':
             return "This method is only supported on MacOS"
         
+        too_many_emails_msg = ""
+        if number > 50:
+            number = min(number, 50)
+            too_many_emails_msg = "This method is limited to 10 emails, returning the first 10: "
         # This is set up to retry if the number of emails is less than the number requested, but only a max of three times
         retries = 0  # Initialize the retry counter
         while retries < 3:
@@ -45,10 +50,10 @@ class Mail:
                         continue
                 break
             elif stdout:
-                print(stdout)
-                return stdout
-            break
-        return None  # Return None if the operation fails after max_retries
+                if too_many_emails_msg:
+                    return f"{too_many_emails_msg}\n\n{stdout}"
+                else:
+                    return stdout
 
     def send(self, to, subject, body, attachments=None):
         """
@@ -57,11 +62,24 @@ class Mail:
         if platform.system() != 'Darwin':
             return "This method is only supported on MacOS"
         
+        # Strip newlines from the to field
+        to = to.replace("\n", "")
+        
         attachment_clause = ''
+        delay_seconds = 5  # Default delay in seconds
+        
         if attachments:
+            formatted_attachments = [self.format_path_for_applescript(path) for path in attachments]
+
             # Generate AppleScript to attach each file
-            attachment_clause = '\n'.join(f'make new attachment with properties {{file name:"{path}"}} at after the last paragraph of the content of new_message' for path in attachments)
+            attachment_clause = '\n'.join(f'make new attachment with properties {{file name:{path}}} at after the last paragraph of the content of new_message' for path in formatted_attachments)
+
             
+            
+            # Calculate the delay based on the size of the attachments
+            delay_seconds = self.calculate_upload_delay(attachments)
+
+        print(f"Delaying for {delay_seconds} seconds")
         # In the future, we might consider allowing the llm to specify an email to send from
         script = f'''
         tell application "{self.mail_app}"
@@ -71,6 +89,7 @@ class Mail:
                 make new to recipient at end of to recipients with properties {{address:"{to}"}}
                 {attachment_clause}
             end tell
+            {f'delay {delay_seconds}' if attachments else ''}
             send new_message
         end tell
         '''
@@ -82,19 +101,46 @@ class Mail:
 
     def unread_count(self):
             """
-            Retrieves the count of unread emails in the inbox.
+            Retrieves the count of unread emails in the inbox, limited to 50.
             """
             if platform.system() != 'Darwin':
                 return "This method is only supported on MacOS"
             
             script = f'''
             tell application "{self.mail_app}"
-                return count of (messages of inbox whose read status is false)
+                set unreadMessages to (messages of inbox whose read status is false)
+                if (count of unreadMessages) > 50 then
+                    return 50
+                else
+                    return count of unreadMessages
+                end if
             end tell
             '''
             try:
-                return int(run_applescript(script))
+                unreads = int(run_applescript(script))
+                if unreads >= 50:
+                    return "50 or more"
+                return unreads
             except subprocess.CalledProcessError as e:
                 print(e)
                 return 0
 
+    # Estimate how long something will take to upload
+    def calculate_upload_delay(self, attachments):
+        try:
+            total_size_mb = sum(os.path.getsize(att) for att in attachments) / (1024 * 1024)
+            # Assume 1 MBps upload speed, which is conservative on purpose
+            upload_speed_mbps = 1  
+            estimated_time_seconds = total_size_mb / upload_speed_mbps
+            return round(max(0.2, estimated_time_seconds + 1), 1)  # Add 1 second buffer, ensure a minimum delay of 1.2 seconds, rounded to one decimal place
+        except:
+            # Return a default delay of 5 seconds if an error occurs
+            return 5
+        
+        
+    def format_path_for_applescript(self, file_path):
+        # Escape backslashes, quotes, and curly braces for AppleScript
+        file_path = file_path.replace('\\', '\\\\').replace('"', '\\"').replace('{', '\\{').replace('}', '\\}')
+        # Convert to a POSIX path and quote for AppleScript
+        posix_path = f'POSIX file "{file_path}"'
+        return posix_path
