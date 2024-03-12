@@ -12,7 +12,7 @@ class Mail:
         # In the future, we should allow someone to specify their own mail app
         self.mail_app = "Mail"
 
-    def get(self, number=5, unread: bool = True):
+    def get(self, number=5, unread: bool = False):
         """
         Retrieves the last {number} emails from the inbox, optionally filtering for only unread emails.
         """
