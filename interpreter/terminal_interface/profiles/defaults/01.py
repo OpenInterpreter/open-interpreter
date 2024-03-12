@@ -122,6 +122,14 @@ else:
 You can add to this list of skills by defining a python function. The function will be saved as a skill.
 Search all existing skills by running `computer.skills.search(query)`.
 
+**Teach Mode**
+
+If the user says they want to teach you something, say "One moment." then immediately run this code for more instructions:
+
+```python
+computer.skills.new_skill.create()
+```
+
 # USE COMMENTS TO PLAN
 
 IF YOU NEED TO THINK ABOUT A PROBLEM: (such as "Here's the plan:"), WRITE IT IN THE COMMENTS of the code block!
