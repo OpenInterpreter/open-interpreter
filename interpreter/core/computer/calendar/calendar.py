@@ -30,7 +30,16 @@ class Calendar:
         script = f'''
         set theDate to date "{applescript_start_date}"
         set endDate to date "{applescript_end_date}"
-
+        tell application "System Events"
+            set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
+            if calendarIsRunning then
+                tell application "{self.calendar_app}" to activate
+            else
+                tell application "{self.calendar_app}" to launch
+                delay 1 -- Wait for the application to open
+                tell application "{self.calendar_app}" to activate
+            end if
+        end tell
 
         set outputText to ""
 
@@ -159,6 +168,17 @@ class Calendar:
                 return "Can't find a default calendar. Please try again and specify a calendar name."
             
         script = f'''
+        -- Open and activate calendar first
+        tell application "System Events"
+            set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
+            if calendarIsRunning then
+                tell application "{self.calendar_app}" to activate
+            else
+                tell application "{self.calendar_app}" to launch
+                delay 1 -- Wait for the application to open
+                tell application "{self.calendar_app}" to activate
+            end if
+        end tell
         tell application "{self.calendar_app}"
             tell calendar "{calendar}"
                 set startDate to date "{applescript_start_date}"
@@ -196,6 +216,17 @@ class Calendar:
         # Format datetime for AppleScript
         applescript_start_date = start_date.strftime('%B %d, %Y %I:%M:%S %p')
         script = f'''
+        -- Open and activate calendar first
+        tell application "System Events"
+            set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
+            if calendarIsRunning then
+                tell application "{self.calendar_app}" to activate
+            else
+                tell application "{self.calendar_app}" to launch
+                delay 1 -- Wait for the application to open
+                tell application "{self.calendar_app}" to activate
+            end if
+        end tell
         tell application "{self.calendar_app}"
             -- Specify the name of the calendar where the event is located
             set myCalendar to calendar "{calendar}"
@@ -237,6 +268,14 @@ class Calendar:
         
         # Literally just gets the first calendar name of all the calendars on the system. AppleScript does not provide a way to get the "default" calendar
         script = f"""
+            -- Open calendar first
+            tell application "System Events"
+                set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
+                if calendarIsRunning is false then
+                    tell application "{self.calendar_app}" to launch
+                    delay 1 -- Wait for the application to open
+                end if
+            end tell
             tell application "{self.calendar_app}"
             -- Get the name of the first calendar
                 set firstCalendarName to name of first calendar
