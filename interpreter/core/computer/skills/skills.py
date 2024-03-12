@@ -70,12 +70,16 @@ If the user says the skill is complete, or that that was the last step, run `com
         print(
             """
         
-Step added.
-Now, ask the user what the next step is, then try to execute code to accomplish that step.
-Then, ask the user if you completed the step correctly.
-Repeat this until the user said you completed the step correctly.
-Then, run `computer.skills.new_skill.add_step(step, code)` where step is a natural language description of the step, and code is the code you ran to complete it.
-If the user says the skill is complete, or that that was the last step, run `computer.skills.new_skill.save()`.
+Step added. Now, follow these next steps EXACTLY:
+
+1. Ask the user what the next step is.
+2. When the user replies, execute code to accomplish that step.
+3. Ask the user if you completed the step correctly.
+    a. IF you completed it correctly, run `computer.skills.new_skill.add_step(step, code)` where step is a natural language description of the step, and code is the code you ran to complete it.
+    b. IF you did not complete it correctly, try to fix your code and ask the user again.
+4. If the user says the skill is complete, or that that was the last step, run `computer.skills.new_skill.save()`.
+
+YOU MUST FOLLOW THESE 4 STEPS **EXACTLY**. IT IS CRITICAL, IT IS PARAMOUNT TO YOUR SUCCESS.
 
         """.strip()
         )

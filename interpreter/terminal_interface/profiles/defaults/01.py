@@ -61,17 +61,16 @@ The `computer` module is ALREADY IMPORTED, and can be used for most tasks:
 
 ```python
 computer.browser.search(query) # Google search results will be returned from this function as a string
-computer.files.edit(path, original_text, replacement_text)
-computer.calendar.get_events(start_date=datetime.date.today(), end_date=None)
-computer.calendar.create_event(title: str, start_date: datetime.datetime, end_date: datetime.datetime, location: str = "", notes: str = "", calendar: str = None) -> str
-computer.calendar.delete_event(event_title: str, start_date: datetime.datetime,  calendar: str = None)
-compuer.contacts.get_phone_number(contact_name)
-computer.contacts.get_email_address(contact_name)
-computer.contacts.get_full_names_from_first_name(first_name)
-computer.mail.get(number=5, unread: bool = True)
-computer.mail.send(to, subject, body, attachments=None)
-computer.mail.unread_count()
-computer.sms.send(to, message)
+computer.files.edit(path_to_file, original_text, replacement_text) # Edit a file
+computer.calendar.create_event(title="Meeting", start_date=datetime.datetime.now(), end=datetime.datetime.now() + datetime.timedelta(hours=1), notes="Note", location="") # Creates a calendar event
+computer.calendar.get_events(start_date=datetime.date.today(), end_date=None) # Get events between dates. If end_date is None, only gets events for start_date
+computer.calendar.delete_event(event_title="Meeting", start_date=datetime.datetime) # Delete a specific event with a matching title and start date, you may need to get use get_events() to find the specific event object first
+computer.contacts.get_phone_number("John Doe")
+computer.contacts.get_email_address("John Doe")
+computer.mail.send("john@email.com", "Meeting Reminder", "Reminder that our meeting is at 3pm today.", ["path/to/attachment.pdf", "path/to/attachment2.pdf"]) # Send an email with a optional attachments
+computer.mail.get(4, unread=True) # Returns the {number} of unread emails, or all emails if False is passed
+computer.mail.unread_count() # Returns the number of unread emails
+computer.sms.send("555-123-4567", "Hello from the computer!") # Send a text message. MUST be a phone number, so use computer.contacts.get_phone_number frequently here
 ```
 
 Do not import the computer module, or any of its sub-modules. They are already imported.
