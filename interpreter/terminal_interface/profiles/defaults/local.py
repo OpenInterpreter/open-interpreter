@@ -2,11 +2,22 @@ import os
 import platform
 import subprocess
 import time
+
 import wget
 
 from interpreter import interpreter
 
-if platform.system() == "Darwin": # Check if the system is MacOS
+print(
+    """
+
+We've changed the way Open Interpreter connects to local language models.
+
+Before 0.2.1, Open Interpreter connected to LM Studio. This is still supported by changing the API base via `interpreter --api_base {your local LLM URL}`
+      
+"""
+)
+
+if platform.system() == "Darwin":  # Check if the system is MacOS
     result = subprocess.run(
         ["xcode-select", "-p"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
@@ -33,7 +44,7 @@ if not os.path.exists(llamafile_path):
         "Attempting to download the `Phi-2` language model. This may take a few minutes."
     )
     time.sleep(3)
-    
+
     url = "https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q4_K_M.llamafile"
     wget.download(url, llamafile_path)
 
@@ -43,7 +54,7 @@ if platform.system() != "Windows":
 
 # Run the new llamafile in the background
 if os.path.exists(llamafile_path):
-    subprocess.Popen(f'"{llamafile_path}" ' + ' '.join(["-ngl", "9999"]), shell=True)
+    subprocess.Popen(f'"{llamafile_path}" ' + " ".join(["-ngl", "9999"]), shell=True)
 else:
     error_message = "The llamafile does not exist or is corrupted. Please ensure it has been downloaded correctly or try again."
     print(error_message)
