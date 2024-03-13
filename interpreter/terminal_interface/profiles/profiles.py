@@ -580,6 +580,10 @@ def reset_profile(specific_default_profile=None):
         if specific_default_profile and filename != specific_default_profile:
             continue
 
+        # Only reset default.yaml, all else are loaded from python package
+        if specific_default_profile != "default.yaml":
+            continue
+
         target_file = os.path.join(profile_dir, filename)
 
         # Variable to see if we should display the 'reset' print statement or not

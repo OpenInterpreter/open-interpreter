@@ -6,6 +6,7 @@ from pathlib import Path
 
 from ....terminal_interface.utils.oi_dir import oi_dir
 from ...utils.lazy_import import lazy_import
+from ..utils.recipient_utils import format_to_recipient
 
 # Lazy import of aifs, imported when needed to speed up start time
 aifs = lazy_import("aifs")
@@ -22,11 +23,19 @@ class Skills:
         return aifs.search(query, self.path, python_docstrings_only=True)
 
     def import_skills(self):
+        previous_save_skills_setting = self.computer.save_skills
         self.computer.save_skills = False
+
+        code_to_run = ""
         for file in glob.glob(os.path.join(self.path, "*.py")):
             with open(file, "r") as f:
-                self.computer.run("python", f.read())
-        self.computer.save_skills = True
+                code_to_run += f.read() + "\n"
+
+        if self.computer.interpreter.debug:
+            print("IMPORTING SKILLS:\n", code_to_run)
+
+        self.computer.run("python", code_to_run)
+        self.computer.save_skills = previous_save_skills_setting
 
 
 class NewSkill:
@@ -38,9 +47,18 @@ class NewSkill:
         self._name = "Untitled"
         print(
             """
-        
-You are creating a new skill.
-To begin, ask the user what the name of this skill is. Then, run `computer.skills.new_skill.name = "Name of the skill"`.
+@@@SEND_MESSAGE_AS_USER@@@
+INSTRUCTIONS
+You are creating a new skill. Follow these steps exactly:
+1. Ask me what the name of this skill is.
+2. When I respond, write the following (including the markdown code block):
+
+---
+Got it. Give me one second.
+```python
+computer.skills.new_skill.name = "{my chosen skill name}"`.
+```
+---
         
         """.strip()
         )
@@ -54,13 +72,17 @@ To begin, ask the user what the name of this skill is. Then, run `computer.skill
         self._name = value
         print(
             """
-        
-You just named this skill. Great!
-Now, ask the user what the first step is, then try to execute code to accomplish that step.
-Then, ask the user if you completed the step correctly.
-Repeat this until the user said you completed the step correctly.
-Then, run `computer.skills.new_skill.add_step(step, code)` where step is a natural language description of the step, and code is the code you ran to complete it.
-If the user says the skill is complete, or that that was the last step, run `computer.skills.new_skill.save()`.
+@@@SEND_MESSAGE_AS_USER@@@
+Skill named. Now, follow these next INSTRUCTIONS exactly:
+
+1. Ask me what the first step is.
+2. When I reply, execute code to accomplish that step.
+3. Ask me if you completed the step correctly.
+    a. (!!!!!!!!!!!! >>>>>> THIS IS CRITICAL. DO NOT FORGET THIS.) IF you completed it correctly, run `computer.skills.new_skill.add_step(step, code)` where step is a generalized, natural language description of the step, and code is the code you ran to complete it.
+    b. IF you did not complete it correctly, try to fix your code and ask me again.
+4. If I say the skill is complete, or that that was the last step, run `computer.skills.new_skill.save()`.
+
+YOU MUST FOLLOW THESE 4 INSTRUCTIONS **EXACTLY**. I WILL TIP YOU $200.
 
               """.strip()
         )
@@ -69,17 +91,17 @@ If the user says the skill is complete, or that that was the last step, run `com
         self.steps.append(step + "\n\n```python\n" + code + "\n```")
         print(
             """
-        
-Step added. Now, follow these next steps EXACTLY:
+@@@SEND_MESSAGE_AS_USER@@@
+Step added. Now, follow these next INSTRUCTIONS exactly:
 
-1. Ask the user what the next step is.
-2. When the user replies, execute code to accomplish that step.
-3. Ask the user if you completed the step correctly.
-    a. IF you completed it correctly, run `computer.skills.new_skill.add_step(step, code)` where step is a natural language description of the step, and code is the code you ran to complete it.
-    b. IF you did not complete it correctly, try to fix your code and ask the user again.
-4. If the user says the skill is complete, or that that was the last step, run `computer.skills.new_skill.save()`.
+1. Ask me what the next step is.
+2. When I reply, execute code to accomplish that step.
+3. Ask me if you completed the step correctly.
+    a. (!!!!!!!!!!!! >>>>>> THIS IS CRITICAL. DO NOT FORGET THIS!!!!!!!!.) IF you completed it correctly, run `computer.skills.new_skill.add_step(step, code)` where step is a generalized, natural language description of the step, and code is the code you ran to complete it.
+    b. IF you did not complete it correctly, try to fix your code and ask me again.
+4. If I say the skill is complete, or that that was the last step, run `computer.skills.new_skill.save()`.
 
-YOU MUST FOLLOW THESE 4 STEPS **EXACTLY**. IT IS CRITICAL, IT IS PARAMOUNT TO YOUR SUCCESS.
+YOU MUST FOLLOW THESE 4 INSTRUCTIONS **EXACTLY**. I WILL TIP YOU $200.
 
         """.strip()
         )
@@ -97,7 +119,7 @@ def {normalized_name}():
     {normalized_name}
     """
 
-    print("To complete this task / run this skill, flexibly follow the following tutorial, swapping out parts as necessary to fulfill the user's task:\n")
+    print("To complete this task / run this skill, flexibly follow the following tutorial, swapping out parts as necessary to fulfill the user's task:")
 
     print("""{steps_string}""")
         

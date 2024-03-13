@@ -15,7 +15,7 @@ def respond(interpreter):
     """
 
     last_unsupported_code = ""
-    insert_force_task_completion_message = False
+    insert_loop_message = False
 
     while True:
         ## RENDER SYSTEM MESSAGE ##
@@ -51,16 +51,17 @@ def respond(interpreter):
         messages_for_llm = interpreter.messages.copy()
         messages_for_llm = [rendered_system_message] + messages_for_llm
 
-        if insert_force_task_completion_message:
+        if insert_loop_message:
             messages_for_llm.append(
                 {
                     "role": "user",
                     "type": "message",
-                    "content": force_task_completion_message,
+                    "content": loop_message,
                 }
             )
             # Yield two newlines to seperate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
+            insert_loop_message = False
 
         ### RUN THE LLM ###
 
@@ -264,36 +265,31 @@ If LM Studio's local server is running, please try a language model with a diffe
                 }
 
         else:
-            ## FORCE TASK COMLETION
+            ## LOOP MESSAGE
             # This makes it utter specific phrases if it doesn't want to be told to "Proceed."
 
-            force_task_completion_message = """Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
+            loop_message = interpreter.loop_message
             if interpreter.os:
-                force_task_completion_message.replace(
+                loop_message = loop_message.replace(
                     "If the entire task I asked for is done,",
                     "If the entire task I asked for is done, take a screenshot to verify it's complete, or if you've already taken a screenshot and verified it's complete,",
                 )
-            force_task_completion_responses = [
-                "the task is done.",
-                "the task is impossible.",
-                "let me know what you'd like to do next.",
-                "please provide more information.",
-            ]
+            loop_breakers = interpreter.loop_breakers
 
             if (
-                interpreter.force_task_completion
+                interpreter.loop
                 and interpreter.messages
                 and interpreter.messages[-1].get("role", "").lower() == "assistant"
                 and not any(
-                    task_status in interpreter.messages[-1].get("content", "").lower()
-                    for task_status in force_task_completion_responses
+                    task_status in interpreter.messages[-1].get("content", "")
+                    for task_status in loop_breakers
                 )
             ):
-                # Remove past force_task_completion messages
+                # Remove past loop_message messages
                 interpreter.messages = [
                     message
                     for message in interpreter.messages
-                    if message.get("content", "") != force_task_completion_message
+                    if message.get("content", "") != loop_message
                 ]
                 # Combine adjacent assistant messages, so hopefully it learns to just keep going!
                 combined_messages = []
@@ -310,8 +306,8 @@ If LM Studio's local server is running, please try a language model with a diffe
                         combined_messages.append(message)
                 interpreter.messages = combined_messages
 
-                # Send model the force_task_completion_message:
-                insert_force_task_completion_message = True
+                # Send model the loop_message:
+                insert_loop_message = True
 
                 continue
 

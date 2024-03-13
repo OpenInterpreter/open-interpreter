@@ -2,7 +2,6 @@ import time
 
 from interpreter import interpreter
 
-interpreter.os = True
 interpreter.llm.supports_vision = True
 interpreter.shrink_images = True  # Faster but less accurate
 
@@ -12,7 +11,15 @@ interpreter.llm.supports_functions = False
 interpreter.llm.context_window = 110000
 interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True
-interpreter.force_task_completion = True
+
+interpreter.loop = True
+interpreter.loop_message = """Proceed with what you were doing (this is not confirmation, if you just asked me something). You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task is done, say exactly 'The task is done.' If you need some specific information (like username, message text, skill name, skill step, etc.) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going. CRITICAL: REMEMBER TO FOLLOW ALL PREVIOUS INSTRUCTIONS. If I'm teaching you something, remember to run the related `computer.skills.new_skill` function."""
+interpreter.loop_breakers = [
+    "The task is done.",
+    "The task is impossible.",
+    "Let me know what you'd like to do next.",
+    "Please provide more information.",
+]
 
 interpreter.system_message = r"""
 
@@ -99,35 +106,55 @@ When searching the web, use query parameters. For example, https://www.amazon.co
 
 # SKILLS
 
-Try to use the following functions (assume they're imported) to complete your goals whenever possible:
+Try to use the following special functions (or "skills") to complete your goals whenever possible.
+THESE ARE ALREADY IMPORTED. YOU CAN CALL THEM INSTANTLY.
 
 ---
 {{
 import sys
 import os
 import json
+import ast
 from platformdirs import user_data_dir
 
-directory = user_data_dir('01', 'skills')
-files = os.listdir(directory)
-if len(files) > 10:
-    print(files[:10])
-    print("...")
-else:
-    print(files)
-}}
----
+directory = os.path.join(user_data_dir('01'), 'skills')
+if not os.path.exists(directory):
+    os.mkdir(directory)
 
-You can add to this list of skills by defining a python function. The function will be saved as a skill.
+def get_function_info(file_path):
+    with open(file_path, "r") as file:
+        tree = ast.parse(file.read())
+        functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)]
+        for function in functions:
+            docstring = ast.get_docstring(function)
+            args = [arg.arg for arg in function.args.args]
+            print(f"Function Name: {function.name}")
+            print(f"Arguments: {args}")
+            print(f"Docstring: {docstring}")
+            print("---")
+
+files = os.listdir(directory)
+for file in files:
+    if file.endswith(".py"):
+        file_path = os.path.join(directory, file)
+        get_function_info(file_path)
+}}
+
+YOU can add to the above list of skills by defining a python function. The function will be saved as a skill.
 Search all existing skills by running `computer.skills.search(query)`.
 
 **Teach Mode**
 
-If the user says they want to teach you something, say "One moment." then immediately run this code for more instructions:
+If the USER says they want to teach you something, exactly write the following, including the markdown code block:
 
+---
+One moment.
 ```python
 computer.skills.new_skill.create()
 ```
+---
+
+If you decide to make a skill yourself to help the user, simply define a python function. `computer.skills.new_skill.create()` is for user-described skills.
 
 # USE COMMENTS TO PLAN
 
@@ -251,6 +278,15 @@ if not interpreter.auto_run:
 # ):
 #     if chunk.get("format") != "active_line":
 #         print(chunk.get("content"))
+
+import os
+
+from platformdirs import user_data_dir
+
+directory = os.path.join(user_data_dir("01"), "skills")
+interpreter.computer.skills.path = directory
+interpreter.computer.skills.import_skills()
+
 
 # Initialize user's task list
 interpreter.computer.run(

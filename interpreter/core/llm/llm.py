@@ -78,9 +78,9 @@ class Llm:
             image_messages = [msg for msg in messages if msg["type"] == "image"]
 
             if self.interpreter.os:
-                # Keep only the last image if the interpreter is running in OS mode
+                # Keep only the last two images if the interpreter is running in OS mode
                 if len(image_messages) > 1:
-                    for img_msg in image_messages[:-1]:
+                    for img_msg in image_messages[:-2]:
                         messages.remove(img_msg)
                         if self.interpreter.verbose:
                             print("Removing image message!")
