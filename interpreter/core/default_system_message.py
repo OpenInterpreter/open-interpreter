@@ -28,7 +28,7 @@ computer.calendar.delete_event(event_title="Meeting", start_date=datetime.dateti
 computer.contacts.get_phone_number("John Doe")
 computer.contacts.get_email_address("John Doe")
 computer.mail.send("john@email.com", "Meeting Reminder", "Reminder that our meeting is at 3pm today.", ["path/to/attachment.pdf", "path/to/attachment2.pdf"]) # Send an email with a optional attachments
-computer.mail.get(4, unread=True) # Returns the {number} of unread emails, or all emails if False is passed
+computer.mail.get(4, unread=True) # Returns the number of unread emails, or all emails if False is passed
 computer.mail.unread_count() # Returns the number of unread emails
 computer.sms.send("555-123-4567", "Hello from the computer!") # Send a text message. MUST be a phone number, so use computer.contacts.get_phone_number frequently here
 ```
