@@ -25,6 +25,8 @@ Run the provided script (`enable_long_paths.cmd`) as an administrator:
 
 After running the script, a Local Group Policy Editor dialog box might appear. If it does, follow these steps to verify that the Long Paths Group Policy setting is enabled:
 
+![pop up]([image link](https://github.com/855princekumar/open-interpreter/blob/main/fix-enable-long-paths/after%20running%20the%20script%20if%20this%20appears.png))
+
 1. Navigate to `Computer Configuration > Administrative Templates > System > Filesystem`.
 2. Double-click on "Enable Win32 long paths" to open its properties.
 3. Ensure that the setting is set to "Enabled".
