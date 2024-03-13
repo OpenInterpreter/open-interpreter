@@ -195,13 +195,21 @@ interpreter.llm.model = "gpt-3.5-turbo"
 
 ### Chạy Open Interpreter trên máy cục bộ
 
-Open Interpreter sử dụng [LM Studio](https://lmstudio.ai/) để kết nối tới các mô hình cục bộ (thử nghiệm).
+Open Interpreter có thể sử dụng máy chủ tương thích với OpenAI để chạy các mô hình cục bộ. (LM Studio, jan.ai, ollama, v.v.)
 
-Cơ bản chạy `interpreter` trong chế độ cục bộ từ command line:
+Chỉ cần chạy `interpreter` với URL api_base của máy chủ suy luận của bạn (đối với LM studio, nó là `http://localhost:1234/v1` theo mặc định):
 
-```shell
-interpreter --local
+``` vỏ
+trình thông dịch --api_base "http://localhost:1234/v1" --api_key "fake_key"
 ```
+
+Ngoài ra, bạn có thể sử dụng Llamafile mà không cần cài đặt bất kỳ phần mềm bên thứ ba nào chỉ bằng cách chạy
+
+``` vỏ
+thông dịch viên --local
+```
+
+để biết hướng dẫn chi tiết hơn, hãy xem [video này của Mike Bird](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)
 
 **Bạn sẽ cần chạy LM Studio trong nền.**
 
@@ -212,7 +220,6 @@ interpreter --local
 
 Một khi server chạy, bạn có thể bắt đầu trò chuyện với Open Interpreter.
 
-(Khi bạn chạy lệnh `interpreter --local`, các bước ở dưới sẽ được hiện ra.)
 
 > **Lưu ý:** Chế độ cục bộ chỉnh `context_window` của bạn tới 3000, và `max_tokens` của bạn tới 600. Nếu mô hình của bạn có các yêu cầu khác, thì hãy chỉnh các tham số thủ công (xem bên dưới).
 

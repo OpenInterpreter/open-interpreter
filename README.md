@@ -202,13 +202,21 @@ interpreter.llm.model = "gpt-3.5-turbo"
 
 #### Terminal
 
-Open Interpreter uses [LM Studio](https://lmstudio.ai/) to connect to local language models (experimental).
+Open Interpreter can use OpenAI-compatible server to run models locally. (LM Studio, jan.ai, ollama etc)
 
-Simply run `interpreter` in local mode from the command line:
+Simply run `interpreter` with the api_base URL of your inference server (for LM studio it is `http://localhost:1234/v1` by default):
 
 ```shell
-interpreter --local
+interpreter --api_base "http://localhost:1234/v1" --api_key "fake_key"
 ```
+
+Alternatively you can use Llamafile without installing any third party software just by running
+
+```shell
+interpeter --local
+```
+
+for a more detailed guide check out [this video by Mike Bird](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)
 
 **You will need to run LM Studio in the background.**
 
@@ -219,13 +227,11 @@ interpreter --local
 
 Once the server is running, you can begin your conversation with Open Interpreter.
 
-(When you run the command `interpreter --local`, the steps above will be displayed.)
-
 > **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually (see below).
 
 #### Python
 
-Our Python package gives you more control over each setting. To replicate `--local` and connect to LM Studio, use these settings:
+Our Python package gives you more control over each setting. To replicate and connect to LM Studio, use these settings:
 
 ```python
 from interpreter import interpreter
