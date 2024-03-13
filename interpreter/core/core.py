@@ -45,6 +45,7 @@ class OpenInterpreter:
         offline=False,
         auto_run=False,
         verbose=False,
+        debug=False,
         max_output=2800,
         safe_mode="off",
         shrink_images=False,
@@ -64,6 +65,7 @@ class OpenInterpreter:
         import_computer_api=True,
         skills_path=None,
         import_skills=True,
+        multi_line=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -74,12 +76,14 @@ class OpenInterpreter:
         self.offline = offline
         self.auto_run = auto_run
         self.verbose = verbose
+        self.debug = debug
         self.max_output = max_output
         self.safe_mode = safe_mode
         self.shrink_images = shrink_images
         self.force_task_completion = force_task_completion
         self.anonymous_telemetry = anonymous_telemetry
         self.in_terminal_interface = in_terminal_interface
+        self.multi_line = multi_line
 
         # Conversation history
         self.conversation_history = conversation_history
@@ -98,7 +102,7 @@ class OpenInterpreter:
         self.custom_instructions = custom_instructions
 
         # Computer
-        self.computer = Computer() if computer is None else computer
+        self.computer = Computer(self) if computer is None else computer
 
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
