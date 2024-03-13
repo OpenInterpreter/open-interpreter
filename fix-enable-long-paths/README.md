@@ -1,7 +1,3 @@
-Certainly! Here's the README document with some interactive emojis added:
-
----
-
 # Enable Long Paths on Windows 🚀
 
 This repository contains a script to enable Long Paths support on Windows. Long Paths are useful for working with file paths exceeding the standard 260-character limit in Windows.
