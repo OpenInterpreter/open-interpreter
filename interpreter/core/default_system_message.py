@@ -33,10 +33,13 @@ Do not import the computer module, or any of its sub-modules. They are already i
 
 User Info{{import getpass
 import os
-import platform}}
-Name: {{getpass.getuser()}}
-CWD: {{os.getcwd()}}
-SHELL: {{os.environ.get('SHELL')}}
-OS: {{platform.system()}}"
+import platform
+
+print(f"Name: {getpass.getuser()}")
+print(f"CWD: {os.getcwd()}")
+print(f"SHELL: {os.environ.get('SHELL')}")
+print(f"OS: {platform.system()}")
+
+}}
 
 """.strip()
