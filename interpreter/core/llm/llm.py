@@ -9,6 +9,7 @@ from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
 litellm.suppress_debug_info = True
+import time
 
 
 class Llm:
@@ -100,6 +101,16 @@ class Llm:
             shrink_images=self.interpreter.shrink_images,
         )
 
+        if self.interpreter.debug:
+            print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
+            for message in messages:
+                if len(str(message)) > 5000:
+                    print(str(message)[:200] + "...")
+                else:
+                    print(message)
+                print("\n")
+            print("\n\n\n")
+
         system_message = messages[0]["content"]
         messages = messages[1:]
 
@@ -172,10 +183,11 @@ Continuing...
         }
 
         # Optional inputs
-        if self.api_base:
-            params["api_base"] = self.api_base
         if self.api_key:
             params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
+            params["custom_llm_provider"] = "openai"
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:

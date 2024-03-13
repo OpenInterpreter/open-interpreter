@@ -1,32 +1,51 @@
 import json
 
+from .ai.ai import Ai
 from .browser.browser import Browser
+from .calendar.calendar import Calendar
 from .clipboard.clipboard import Clipboard
+from .contacts.contacts import Contacts
 from .display.display import Display
+from .docs.docs import Docs
 from .keyboard.keyboard import Keyboard
+from .mail.mail import Mail
 from .mouse.mouse import Mouse
 from .os.os import Os
 from .skills.skills import Skills
+from .sms.sms import SMS
 from .terminal.terminal import Terminal
 
 
 class Computer:
-    def __init__(self):
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
+
         self.terminal = Terminal(self)
 
         self.offline = False
         self.verbose = False
+        self.debug = False
 
         self.mouse = Mouse(self)
         self.keyboard = Keyboard(self)
         self.display = Display(self)
         self.clipboard = Clipboard(self)
+        self.mail = Mail(self)
+        self.sms = SMS(self)
+        self.calendar = Calendar(self)
+        self.contacts = Contacts(self)
         self.browser = Browser(self)
         self.os = Os(self)
         self.skills = Skills(self)
+        self.docs = Docs(self)
+        self.ai = Ai(self)
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
+        self.save_skills = True
+
+        self.import_computer_api = True
+        self._has_imported_computer_api = False  # Because we only want to do this once
 
     # Shortcut for computer.terminal.languages
     @property
@@ -45,8 +64,8 @@ class Computer:
 
     def exec(self, code):
         """
-        It has hallucinated this.
         Shortcut for computer.terminal.run("shell", code)
+        It has hallucinated this.
         """
         return self.terminal.run("shell", code)
 

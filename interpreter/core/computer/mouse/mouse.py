@@ -1,17 +1,16 @@
 import time
 import warnings
 
-import matplotlib.pyplot as plt
-
+from ...utils.lazy_import import lazy_import
 from ..utils.recipient_utils import format_to_recipient
 
-try:
-    import cv2
-    import numpy as np
-    import pyautogui
-except:
-    # Optional packages
-    pass
+# Lazy import of optional packages
+cv2 = lazy_import(
+    "cv2",
+)
+np = lazy_import("numpy")
+pyautogui = lazy_import("pyautogui")
+plt = lazy_import("matplotlib.pyplot")
 
 
 class Mouse:
@@ -19,6 +18,9 @@ class Mouse:
         self.computer = computer
 
     def scroll(self, clicks):
+        """
+        Scrolls the mouse wheel up or down the specified number of clicks.
+        """
         pyautogui.scroll(clicks)
 
     def position(self):
@@ -35,8 +37,10 @@ class Mouse:
                 f"An error occurred while retrieving the mouse position: {e}. "
             )
 
-    def move(self, *args, x=None, y=None, icon=None, text=None):
-        screenshot = None
+    def move(self, *args, x=None, y=None, icon=None, text=None, screenshot=None):
+        """
+        Moves the mouse to specified coordinates, an icon, or text.
+        """
         if len(args) > 1:
             raise ValueError(
                 "Too many positional arguments provided. To move/click specific coordinates, use kwargs (x=x, y=y).\n\nPlease take a screenshot with computer.display.view() to find text/icons to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed."
@@ -45,13 +49,21 @@ class Mouse:
             if len(args) == 1:
                 text = args[0]
 
-            screenshot = self.computer.display.screenshot(show=False)
+            if screenshot == None:
+                screenshot = self.computer.display.screenshot(show=False)
 
-            coordinates = self.computer.display.find_text(text, screenshot=screenshot)
+            coordinates = self.computer.display.find(
+                '"' + text + '"', screenshot=screenshot
+            )
 
             is_fuzzy = any([c["similarity"] != 1 for c in coordinates])
+            # nah just hey, if it's fuzzy, then whatever, it prob wont see the message then decide something else (not really smart enough yet usually)
+            # so for now, just lets say it's always not fuzzy so if there's 1 coord it will pick it automatically
+            is_fuzzy = False
 
             if len(coordinates) == 0:
+                return self.move(icon=text)  # Is this a better solution?
+
                 if self.computer.emit_images:
                     plt.imshow(np.array(screenshot))
                     with warnings.catch_warnings():
@@ -129,7 +141,10 @@ class Mouse:
                 )
             )
         elif icon is not None:
-            coordinates = self.computer.display.find_icon(icon)
+            if screenshot == None:
+                screenshot = self.computer.display.screenshot(show=False)
+
+            coordinates = self.computer.display.find(icon.strip('"'), screenshot)
 
             if len(coordinates) > 1:
                 if self.computer.emit_images:
@@ -211,29 +226,47 @@ class Mouse:
         smooth_move_to(x, y)
 
     def click(self, *args, button="left", clicks=1, interval=0.1, **kwargs):
+        """
+        Clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.click(button=button, clicks=clicks, interval=interval)
 
     def double_click(self, *args, button="left", interval=0.1, **kwargs):
+        """
+        Double-clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.doubleClick(button=button, interval=interval)
 
     def triple_click(self, *args, button="left", interval=0.1, **kwargs):
+        """
+        Triple-clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.tripleClick(button=button, interval=interval)
 
     def right_click(self, *args, **kwargs):
+        """
+        Right-clicks the mouse at the specified coordinates, icon, or text.
+        """
         if args or kwargs:
             self.move(*args, **kwargs)
         pyautogui.rightClick()
 
     def down(self):
+        """
+        Presses the mouse button down.
+        """
         pyautogui.mouseDown()
 
     def up(self):
+        """
+        Releases the mouse button.
+        """
         pyautogui.mouseUp()
 
 

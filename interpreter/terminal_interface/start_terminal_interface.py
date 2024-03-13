@@ -172,10 +172,24 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "safe_mode"},
         },
         {
+            "name": "debug",
+            "nickname": "debug",
+            "help_text": "debug mode for open interpreter developers",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "debug"},
+        },
+        {
             "name": "fast",
             "nickname": "f",
             "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
             "type": bool,
+        },
+        {
+            "name": "multi_line",
+            "nickname": "ml",
+            "help_text": "enable multi-line inputs starting and ending with ```",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "multi_line"},
         },
         {
             "name": "local",
@@ -224,7 +238,6 @@ def start_terminal_interface(interpreter):
     # Check for deprecated flags before parsing arguments
     deprecated_flags = {
         "--debug_mode": "--verbose",
-        "-d": "-v",
     }
 
     for old_flag, new_flag in deprecated_flags.items():
@@ -363,16 +376,6 @@ def start_terminal_interface(interpreter):
     except:
         # Doesn't matter
         pass
-
-    # If we've set a custom api base, we want it to be sent in an openai compatible way.
-    # So we need to tell LiteLLM to do this by changing the model name:
-    if interpreter.llm.api_base:
-        if (
-            not interpreter.llm.model.lower().startswith("openai/")
-            and not interpreter.llm.model.lower().startswith("azure/")
-            and not interpreter.llm.model.lower().startswith("ollama")
-        ):
-            interpreter.llm.model = "openai/" + interpreter.llm.model
 
     # If --conversations is used, run conversation_navigator
     if args.conversations:

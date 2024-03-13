@@ -6,16 +6,16 @@ To support the incoming `L`anguage `M`odel `C`omputer architecture, we extend Op
 
 ```python
 # The user sends a message.
-{"role": "user", "type": "message": "content": "What's 2380*3875?"}
+{"role": "user", "type": "message", "content": "What's 2380*3875?"}
 
 # The assistant runs some code.
-{"role": "assistant", "type": "code", "format": "python", "content", "2380*3875"}
+{"role": "assistant", "type": "code", "format": "python", "content": "2380*3875"}
 
 # The computer responds with the result of the code.
-{"role": "computer", "type": "console", "format": "output", "content", "9222500"}
+{"role": "computer", "type": "console", "format": "output", "content": "9222500"}
 
 # The assistant sends a message.
-{"role": "assistant", "type": "message", "content", "The result of multiplying 2380 by 3875 is 9222500."}
+{"role": "assistant", "type": "message", "content": "The result of multiplying 2380 by 3875 is 9222500."}
 ```
 
 ## Anatomy

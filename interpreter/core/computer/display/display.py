@@ -1,23 +1,24 @@
 import base64
+import os
+import platform
 import pprint
 import time
 import warnings
+from contextlib import redirect_stdout
 from io import BytesIO
 
-import matplotlib.pyplot as plt
 import requests
 
+from ...utils.lazy_import import lazy_import
 from ..utils.recipient_utils import format_to_recipient
 
 # Still experimenting with this
 # from utils.get_active_window import get_active_window
 
-try:
-    import numpy as np
-    import pyautogui
-except:
-    # Optional packages
-    pass
+# Lazy import of optional packages
+pyautogui = lazy_import("pyautogui")
+np = lazy_import("numpy")
+plt = lazy_import("matplotlib.pyplot")
 
 from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 
@@ -25,17 +26,34 @@ from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 class Display:
     def __init__(self, computer):
         self.computer = computer
+        # set width and height to None initially to prevent pyautogui from importing until it's needed
+        self._width = None
+        self._height = None
+        self._hashes = {}
 
-        try:
-            self.width, self.height = pyautogui.size()
-        except:
-            # pyautogui is an optional package, so it's okay if this fails
-            pass
+    # We use properties here so that this code only executes when height/width are accessed for the first time
+    @property
+    def width(self):
+        if self._width is None:
+            self._width, _ = pyautogui.size()
+        return self._width
+
+    @property
+    def height(self):
+        if self._height is None:
+            _, self._height = pyautogui.size()
+        return self._height
 
     def size(self):
+        """
+        Returns the current screen size as a tuple (width, height).
+        """
         return pyautogui.size()
 
     def center(self):
+        """
+        Calculates and returns the center point of the screen as a tuple (x, y).
+        """
         return self.width // 2, self.height // 2
 
     def view(self, show=True, quadrant=None):
@@ -47,9 +65,13 @@ class Display:
     # def get_active_window(self):
     #     return get_active_window()
 
-    def screenshot(self, show=True, quadrant=None, active_app_only=False):
-        time.sleep(2)
-        if not self.computer.emit_images:
+    def screenshot(
+        self, show=True, quadrant=None, active_app_only=False, force_image=False
+    ):
+        """
+        Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
+        """
+        if not self.computer.emit_images and force_image == False:
             text = self.get_text_as_list_of_lists()
             pp = pprint.PrettyPrinter(indent=4)
             pretty_text = pp.pformat(text)  # language models like it pretty!
@@ -69,7 +91,10 @@ class Display:
                 region = self.get_active_window()["region"]
                 screenshot = pyautogui.screenshot(region=region)
             else:
-                screenshot = pyautogui.screenshot()
+                if platform.system() == "Darwin":
+                    screenshot = take_screenshot_to_pil()
+                else:
+                    screenshot = pyautogui.screenshot()
                 # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
                 # print(message)
 
@@ -109,8 +134,71 @@ class Display:
 
         return screenshot
 
+    def find(self, description, screenshot=None):
+        if description.startswith('"') and description.endswith('"'):
+            return self.find_text(description.strip('"'), screenshot)
+        else:
+            try:
+                if self.computer.debug:
+                    print("DEBUG MODE ON")
+                    print("NUM HASHES:", len(self._hashes))
+                else:
+                    message = format_to_recipient(
+                        "Locating this icon will take ~15 seconds. Subsequent icons should be found more quickly.",
+                        recipient="user",
+                    )
+                    print(message)
+
+                if len(self._hashes) > 5000:
+                    self._hashes = dict(list(self._hashes.items())[-5000:])
+
+                from .point.point import point
+
+                result = point(
+                    description, screenshot, self.computer.debug, self._hashes
+                )
+
+                return result
+            except:
+                if self.computer.debug:
+                    # We want to know these bugs lmao
+                    raise
+                if self.computer.offline:
+                    raise
+                message = format_to_recipient(
+                    "Locating this icon will take ~30 seconds. We're working on speeding this up.",
+                    recipient="user",
+                )
+                print(message)
+
+                # Take a screenshot
+                if screenshot == None:
+                    screenshot = self.screenshot(show=False)
+
+                # Downscale the screenshot to 1920x1080
+                screenshot = screenshot.resize((1920, 1080))
+
+                # Convert the screenshot to base64
+                buffered = BytesIO()
+                screenshot.save(buffered, format="PNG")
+                screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
+
+                try:
+                    response = requests.post(
+                        f'{self.computer.api_base.strip("/")}/point/',
+                        json={"query": description, "base64": screenshot_base64},
+                    )
+                    return response.json()
+                except Exception as e:
+                    raise Exception(
+                        str(e)
+                        + "\n\nIcon locating API not available, or we were unable to find the icon. Please try another method to find this icon."
+                    )
+
     def find_text(self, text, screenshot=None):
-        # Take a screenshot
+        """
+        Searches for specified text within a screenshot or the current screen if no screenshot is provided.
+        """
         if screenshot == None:
             screenshot = self.screenshot(show=False)
 
@@ -133,16 +221,18 @@ class Display:
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
         # Find the text in the screenshot
-        centers = find_text_in_image(screenshot, text)
+        centers = find_text_in_image(screenshot, text, self.computer.debug)
 
         return [
-            {"coordinates": centers, "text": "", "similarity": 1}
+            {"coordinates": center, "text": "", "similarity": 1} for center in centers
         ]  # Have it deliver the text properly soon.
 
     def get_text_as_list_of_lists(self, screenshot=None):
-        # Take a screenshot
+        """
+        Extracts and returns text from a screenshot or the current screen as a list of lists, each representing a line of text.
+        """
         if screenshot == None:
-            screenshot = self.screenshot(show=False)
+            screenshot = self.screenshot(show=False, force_image=True)
 
         if not self.computer.offline:
             # Convert the screenshot to base64
@@ -162,43 +252,30 @@ class Display:
 
         # We'll only get here if 1) self.computer.offline = True, or the API failed
 
-        if self.computer.offline == True:
-            try:
-                return pytesseract_get_text(screenshot)
-            except:
-                raise Exception(
-                    "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
-                )
-
-    # locate text should be moved here as well!
-    def find_icon(self, query):
-        message = format_to_recipient(
-            "Locating this icon will take ~30 seconds. We're working on speeding this up.",
-            recipient="user",
-        )
-        print(message)
-
-        start = time.time()
-        # Take a screenshot
-        screenshot = self.screenshot(show=False)
-
-        # Downscale the screenshot to 1920x1080
-        screenshot = screenshot.resize((1920, 1080))
-
-        # Convert the screenshot to base64
-        buffered = BytesIO()
-        screenshot.save(buffered, format="PNG")
-        screenshot_base64 = base64.b64encode(buffered.getvalue()).decode()
-        print("PIC TOOK THIS LONG:", time.time() - start)
-
         try:
-            response = requests.post(
-                f'{self.computer.api_base.strip("/")}/point/',
-                json={"query": query, "base64": screenshot_base64},
-            )
-            return response.json()
-        except Exception as e:
+            return pytesseract_get_text(screenshot)
+        except:
             raise Exception(
-                str(e)
-                + "\n\nIcon locating API not avaliable, or we were unable to find the icon. Please try another method to find this icon."
+                "Failed to find text locally.\n\nTo find text in order to use the mouse, please make sure you've installed `pytesseract` along with the Tesseract executable (see this Stack Overflow answer for help installing Tesseract: https://stackoverflow.com/questions/50951955/pytesseract-tesseractnotfound-error-tesseract-is-not-installed-or-its-not-i)."
             )
+
+
+import io
+import subprocess
+
+from PIL import Image
+
+
+def take_screenshot_to_pil(filename="temp_screenshot.png"):
+    # Capture the screenshot and save it to a temporary file
+    subprocess.run(["screencapture", "-x", filename], check=True)
+
+    # Open the image file with PIL
+    with open(filename, "rb") as f:
+        image_data = f.read()
+    image = Image.open(io.BytesIO(image_data))
+
+    # Optionally, delete the temporary file if you don't need it after loading
+    os.remove(filename)
+
+    return image

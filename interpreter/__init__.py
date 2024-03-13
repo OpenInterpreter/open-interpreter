@@ -2,6 +2,7 @@ from .core.computer.terminal.base_language import BaseLanguage
 from .core.core import OpenInterpreter
 
 interpreter = OpenInterpreter()
+computer = interpreter.computer
 
 #     ____                      ____      __                            __
 #    / __ \____  ___  ____     /  _/___  / /____  _________  ________  / /____  _____
