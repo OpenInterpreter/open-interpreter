@@ -12,9 +12,9 @@ interpreter.llm.context_window = 110000
 interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True
 
-interpreter.loop = True
-interpreter.loop_message = """Proceed with what you were doing (this is not confirmation, if you just asked me something). You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task is done, say exactly 'The task is done.' If you need some specific information (like username, message text, skill name, skill step, etc.) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going. CRITICAL: REMEMBER TO FOLLOW ALL PREVIOUS INSTRUCTIONS. If I'm teaching you something, remember to run the related `computer.skills.new_skill` function."""
-interpreter.loop_breakers = [
+interpreter.force_task_completion = True
+interpreter.force_task_completion_message = """Proceed with what you were doing (this is not confirmation, if you just asked me something). You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task is done, say exactly 'The task is done.' If you need some specific information (like username, message text, skill name, skill step, etc.) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going. CRITICAL: REMEMBER TO FOLLOW ALL PREVIOUS INSTRUCTIONS. If I'm teaching you something, remember to run the related `computer.skills.new_skill` function."""
+interpreter.force_task_completion_breakers = [
     "The task is done.",
     "The task is impossible.",
     "Let me know what you'd like to do next.",
@@ -64,23 +64,25 @@ If there are tasks, you should guide the user through their list one task at a t
 
 # THE COMPUTER API
 
-The `computer` module is ALREADY IMPORTED, and can be used for most tasks:
+The `computer` module is ALREADY IMPORTED, and can be used for some tasks:
 
 ```python
-computer.browser.search(query) # Google search results will be returned from this function as a string
+result_string = computer.browser.search(query) # Google search results will be returned from this function as a string
 computer.files.edit(path_to_file, original_text, replacement_text) # Edit a file
 computer.calendar.create_event(title="Meeting", start_date=datetime.datetime.now(), end=datetime.datetime.now() + datetime.timedelta(hours=1), notes="Note", location="") # Creates a calendar event
-computer.calendar.get_events(start_date=datetime.date.today(), end_date=None) # Get events between dates. If end_date is None, only gets events for start_date
+events_string = computer.calendar.get_events(start_date=datetime.date.today(), end_date=None) # Get events between dates. If end_date is None, only gets events for start_date
 computer.calendar.delete_event(event_title="Meeting", start_date=datetime.datetime) # Delete a specific event with a matching title and start date, you may need to get use get_events() to find the specific event object first
-computer.contacts.get_phone_number("John Doe")
-computer.contacts.get_email_address("John Doe")
+phone_string = computer.contacts.get_phone_number("John Doe")
+contact_string = computer.contacts.get_email_address("John Doe")
 computer.mail.send("john@email.com", "Meeting Reminder", "Reminder that our meeting is at 3pm today.", ["path/to/attachment.pdf", "path/to/attachment2.pdf"]) # Send an email with a optional attachments
-computer.mail.get(4, unread=True) # Returns the {number} of unread emails, or all emails if False is passed
-computer.mail.unread_count() # Returns the number of unread emails
+emails_string = computer.mail.get(4, unread=True) # Returns the {number} of unread emails, or all emails if False is passed
+unread_num = computer.mail.unread_count() # Returns the number of unread emails
 computer.sms.send("555-123-4567", "Hello from the computer!") # Send a text message. MUST be a phone number, so use computer.contacts.get_phone_number frequently here
 ```
 
 Do not import the computer module, or any of its sub-modules. They are already imported.
+
+DO NOT use the computer module for ALL tasks. Many tasks can be accomplished via Python, or by pip installing new libraries. Be creative!
 
 # GUI CONTROL (RARE)
 

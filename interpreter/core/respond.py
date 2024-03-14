@@ -15,7 +15,7 @@ def respond(interpreter):
     """
 
     last_unsupported_code = ""
-    insert_loop_message = False
+    insert_force_task_completion_message = False
 
     while True:
         ## RENDER SYSTEM MESSAGE ##
@@ -51,17 +51,17 @@ def respond(interpreter):
         messages_for_llm = interpreter.messages.copy()
         messages_for_llm = [rendered_system_message] + messages_for_llm
 
-        if insert_loop_message:
+        if insert_force_task_completion_message:
             messages_for_llm.append(
                 {
                     "role": "user",
                     "type": "message",
-                    "content": loop_message,
+                    "content": force_task_completion_message,
                 }
             )
             # Yield two newlines to seperate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
-            insert_loop_message = False
+            insert_force_task_completion_message = False
 
         ### RUN THE LLM ###
 
@@ -261,28 +261,28 @@ def respond(interpreter):
             ## LOOP MESSAGE
             # This makes it utter specific phrases if it doesn't want to be told to "Proceed."
 
-            loop_message = interpreter.loop_message
+            force_task_completion_message = interpreter.force_task_completion_message
             if interpreter.os:
-                loop_message = loop_message.replace(
+                force_task_completion_message = force_task_completion_message.replace(
                     "If the entire task I asked for is done,",
                     "If the entire task I asked for is done, take a screenshot to verify it's complete, or if you've already taken a screenshot and verified it's complete,",
                 )
-            loop_breakers = interpreter.loop_breakers
+            force_task_completion_breakers = interpreter.force_task_completion_breakers
 
             if (
-                interpreter.loop
+                interpreter.force_task_completion
                 and interpreter.messages
                 and interpreter.messages[-1].get("role", "").lower() == "assistant"
                 and not any(
                     task_status in interpreter.messages[-1].get("content", "")
-                    for task_status in loop_breakers
+                    for task_status in force_task_completion_breakers
                 )
             ):
-                # Remove past loop_message messages
+                # Remove past force_task_completion_message messages
                 interpreter.messages = [
                     message
                     for message in interpreter.messages
-                    if message.get("content", "") != loop_message
+                    if message.get("content", "") != force_task_completion_message
                 ]
                 # Combine adjacent assistant messages, so hopefully it learns to just keep going!
                 combined_messages = []
@@ -299,8 +299,8 @@ def respond(interpreter):
                         combined_messages.append(message)
                 interpreter.messages = combined_messages
 
-                # Send model the loop_message:
-                insert_loop_message = True
+                # Send model the force_task_completion_message:
+                insert_force_task_completion_message = True
 
                 continue
 

@@ -1,7 +1,9 @@
-import subprocess
-import platform
 import datetime
-from ..utils.run_applescript import  run_applescript_capture, run_applescript
+import platform
+import subprocess
+
+from ..utils.run_applescript import run_applescript, run_applescript_capture
+
 
 class Calendar:
     def __init__(self, computer):
@@ -9,25 +11,28 @@ class Calendar:
         # In the future, we might consider a way to use a different calender app. For now its Calendar
         self.calendar_app = "Calendar"
 
-
-
-
     def get_events(self, start_date=datetime.date.today(), end_date=None):
         """
         Fetches calendar events for the given date or date range.
         """
-        if platform.system() != 'Darwin':
+        if platform.system() != "Darwin":
             return "This method is only supported on MacOS"
 
         # Format dates for AppleScript
-        applescript_start_date = start_date.strftime('%A, %B %d, %Y') + " at 12:00:00 AM"
+        applescript_start_date = (
+            start_date.strftime("%A, %B %d, %Y") + " at 12:00:00 AM"
+        )
         if end_date:
-            applescript_end_date = end_date.strftime('%A, %B %d, %Y') + " at 11:59:59 PM"
+            applescript_end_date = (
+                end_date.strftime("%A, %B %d, %Y") + " at 11:59:59 PM"
+            )
         else:
-            applescript_end_date = start_date.strftime('%A, %B %d, %Y') + " at 11:59:59 PM"
-    
+            applescript_end_date = (
+                start_date.strftime("%A, %B %d, %Y") + " at 11:59:59 PM"
+            )
+
         # AppleScript command
-        script = f'''
+        script = f"""
         set theDate to date "{applescript_start_date}"
         set endDate to date "{applescript_end_date}"
         tell application "System Events"
@@ -135,7 +140,7 @@ class Calendar:
             return theString
         end listToString
 
-        '''
+        """
 
         # Get outputs from AppleScript
         stdout, stderr = run_applescript_capture(script)
@@ -148,26 +153,32 @@ class Calendar:
 
         return stdout
 
-
-
-    def create_event(self, title: str, start_date: datetime.datetime, end_date: datetime.datetime, location: str = "", notes: str = "", calendar: str = None) -> str:
+    def create_event(
+        self,
+        title: str,
+        start_date: datetime.datetime,
+        end_date: datetime.datetime,
+        location: str = "",
+        notes: str = "",
+        calendar: str = None,
+    ) -> str:
         """
         Creates a new calendar event in the default calendar with the given parameters using AppleScript.
         """
-        if platform.system() != 'Darwin':
+        if platform.system() != "Darwin":
             return "This method is only supported on MacOS"
 
         # Format datetime for AppleScript
-        applescript_start_date = start_date.strftime('%B %d, %Y %I:%M:%S %p')
-        applescript_end_date = end_date.strftime('%B %d, %Y %I:%M:%S %p')
-        
+        applescript_start_date = start_date.strftime("%B %d, %Y %I:%M:%S %p")
+        applescript_end_date = end_date.strftime("%B %d, %Y %I:%M:%S %p")
+
         # If there is no calendar, lets use the first calendar applescript returns. This should probably be modified in the future
         if calendar is None:
             calendar = self.get_first_calendar()
             if calendar is None:
                 return "Can't find a default calendar. Please try again and specify a calendar name."
-            
-        script = f'''
+
+        script = f"""
         -- Open and activate calendar first
         tell application "System Events"
             set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
@@ -188,34 +199,33 @@ class Calendar:
             -- tell the Calendar app to refresh if it's running, so the new event shows up immediately
             tell application "{self.calendar_app}" to reload calendars
         end tell
-        '''
-
+        """
 
         try:
             run_applescript(script)
-            return f'''Event created successfully in the "{calendar}" calendar.'''
+            return f"""Event created successfully in the "{calendar}" calendar."""
         except subprocess.CalledProcessError as e:
             return str(e)
-        
-        
-        
-    def delete_event(self, event_title: str, start_date: datetime.datetime,  calendar: str = None) -> str:
-        if platform.system() != 'Darwin':
+
+    def delete_event(
+        self, event_title: str, start_date: datetime.datetime, calendar: str = None
+    ) -> str:
+        if platform.system() != "Darwin":
             return "This method is only supported on MacOS"
-        
+
         # The applescript requires a title and start date to get the right event
         if event_title is None or start_date is None:
             return "Event title and start date are required"
-        
+
         # If there is no calendar, lets use the first calendar applescript returns. This should probably be modified in the future
         if calendar is None:
             calendar = self.get_first_calendar()
             if not calendar:
                 return "Can't find a default calendar. Please try again and specify a calendar name."
-        
+
         # Format datetime for AppleScript
-        applescript_start_date = start_date.strftime('%B %d, %Y %I:%M:%S %p')
-        script = f'''
+        applescript_start_date = start_date.strftime("%B %d, %Y %I:%M:%S %p")
+        script = f"""
         -- Open and activate calendar first
         tell application "System Events"
             set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
@@ -250,22 +260,20 @@ class Calendar:
                 return "Event deleted successfully."
             end if
         end tell
-        '''
-        
+        """
+
         stderr, stdout = run_applescript_capture(script)
         if stdout:
             return stdout[0].strip()
         elif stderr:
             if "successfully" in stderr:
                 return stderr
-            
-            return f'''Error deleting event: {stderr}'''
+
+            return f"""Error deleting event: {stderr}"""
         else:
             return "Unknown error deleting event. Please check event title and date."
 
-
     def get_first_calendar(self) -> str:
-        
         # Literally just gets the first calendar name of all the calendars on the system. AppleScript does not provide a way to get the "default" calendar
         script = f"""
             -- Open calendar first
