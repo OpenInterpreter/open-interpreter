@@ -115,13 +115,6 @@ def respond(interpreter):
                 raise Exception(
                     "Error occurred. "
                     + str(e)
-                    + """
-
-If you're running `interpreter --local`, please make sure LM Studio's local server is running.
-
-If LM Studio's local server is running, please try a language model with a different architecture.
-
-                    """
                 )
             else:
                 raise
