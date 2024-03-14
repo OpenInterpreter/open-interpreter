@@ -2,17 +2,23 @@
 title: LM Studio
 ---
 
-# Terminal
+Open Interpreter can use OpenAI-compatible server to run models locally. (LM Studio, jan.ai, ollama etc)
 
-By default, Open Interpreter's terminal interface uses [LM Studio](https://lmstudio.ai/) to connect to local language models.
+Simply run `interpreter` with the api_base URL of your inference server (for LM studio it is `http://localhost:1234/v1` by default):
 
-Simply run `interpreter` in local mode from the command line:
+```shell
+interpreter --api_base "http://localhost:1234/v1" --api_key "fake_key"
+```
+
+Alternatively you can use Llamafile without installing any third party software just by running
 
 ```shell
 interpreter --local
 ```
 
-**You will need to run LM Studio in the background.**
+for a more detailed guide check out [this video by Mike Bird](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)
+
+**How to run LM Studio in the background.**
 
 1. Download [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
 2. Select a model then click **↓ Download**.
@@ -31,7 +37,7 @@ Compared to the terminal interface, our Python package gives you more granular c
 
 You can point `interpreter.llm.api_base` at any OpenAI compatible server (including one running locally).
 
-For example, to replicate [`--local` mode](/language-model-setup/local-models/overview) and connect to [LM Studio](https://lmstudio.ai/), use these settings:
+For example, to connect to [LM Studio](https://lmstudio.ai/), use these settings:
 
 ```python
 from interpreter import interpreter

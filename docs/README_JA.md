@@ -215,7 +215,7 @@ Open Interpreter は、OpenAI 互換サーバーを使用してモデルをロ�
 
 より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
 
-**バックグラウンドで LM Studio を実行する必要があります。**
+**LM Studioをバックグラウンドで使用する方法**
 
 1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
 2. モデルを選択し、**↓ ダウンロード** をクリックします。

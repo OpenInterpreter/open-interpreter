@@ -194,7 +194,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "local",
             "nickname": "l",
-            "help_text": "experimentally run the LLM locally via LM Studio (this changes many more settings than `--offline`)",
+            "help_text": "experimentally run the LLM locally via Llamafile (this changes many more settings than `--offline`)",
             "type": bool,
         },
         {

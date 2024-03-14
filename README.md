@@ -213,12 +213,12 @@ interpreter --api_base "http://localhost:1234/v1" --api_key "fake_key"
 Alternatively you can use Llamafile without installing any third party software just by running
 
 ```shell
-interpeter --local
+interpreter --local
 ```
 
 for a more detailed guide check out [this video by Mike Bird](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)
 
-**You will need to run LM Studio in the background.**
+**How to run LM Studio in the background.**
 
 1. Download [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
 2. Select a model then click **↓ Download**.

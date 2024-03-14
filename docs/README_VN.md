@@ -211,7 +211,7 @@ thông dịch viên --local
 
 để biết hướng dẫn chi tiết hơn, hãy xem [video này của Mike Bird](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)
 
-**Bạn sẽ cần chạy LM Studio trong nền.**
+**Để chạy LM Studio ở chế độ nền.**
 
 1. Tải [https://lmstudio.ai/](https://lmstudio.ai/) và khởi động.
 2. Chọn một mô hình rồi nhấn **↓ Download**.
