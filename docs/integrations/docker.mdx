@@ -57,8 +57,8 @@ To add flags to the command, just append them after `interpreter`. For example, 
 docker-compose run --rm oi interpreter --custom_instructions "Be as concise as possible"
 ```
 
-Please note that some flags will not work. For example, `--config` will not work, because it cannot open the config file in the container. If you want to use a config file other than the default, you can create a `config.yml` file inside of the same directory, add your custom config, and then run the following command:
+Please note that some flags will not work. For example, `--profiles` will not work, because it cannot open the config file in the container. If you want to use a config file other than the default, you can create a `config.yml` file inside of the same directory, add your custom config, and then run the following command:
 
 ```bash
-docker-compose run --rm oi interpreter --config_file config.yml
+docker-compose run --rm oi interpreter --profiles_file config.yml
 ```

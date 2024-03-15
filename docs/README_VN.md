@@ -270,25 +270,25 @@ Open Interpreter cho phép bạn thiết lập các tác vụ mặc định bằ
 Chạy lệnh sau để mở tệp cấu hình:
 
 ```
-interpreter --config
+interpreter --profiles
 ```
 
 #### Cấu hình cho nhiều tệp
 
-Open Interpreter hỗ trợ nhiều file `config.yaml`, cho phép bạn dễ dàng chuyển đổi giữa các cấu hình thông qua lệnh `--config_file`.
+Open Interpreter hỗ trợ nhiều file `config.yaml`, cho phép bạn dễ dàng chuyển đổi giữa các cấu hình thông qua lệnh `--profiles_file`.
 
-**Chú ý**: `--config_file` chấp nhận tên tệp hoặc đường dẫn tệp. Tên tệp sẽ sử dụng thư mục cấu hình mặc định, trong khi đường dẫn tệp sẽ sử dụng đường dẫn đã chỉ định.
+**Chú ý**: `--profiles_file` chấp nhận tên tệp hoặc đường dẫn tệp. Tên tệp sẽ sử dụng thư mục cấu hình mặc định, trong khi đường dẫn tệp sẽ sử dụng đường dẫn đã chỉ định.
 
 Để tạo hoặc chỉnh sửa cấu hình mới, hãy chạy:
 
 ```
-interpreter --config --config_file $config_path
+interpreter --profiles --profiles_file $config_path
 ```
 
 Để yêu cầu Open Interpreter chạy một tệp cấu hình cụ thể, hãy chạy:
 
 ```
-interpreter --config_file $config_path
+interpreter --profiles_file $config_path
 ```
 
 **Chú ý**: Thay đổi `$config_path` với tên hoặc đường dẫn đến tệp cấu hình của bạn.
@@ -297,12 +297,12 @@ interpreter --config_file $config_path
 
 1. Tạo mới một file `config.turbo.yaml`
    ```
-   interpreter --config --config_file config.turbo.yaml
+   interpreter --profiles --profiles_file config.turbo.yaml
    ```
 2. Chạy file `config.turbo.yaml`để đặt lại `model` thành `gpt-3.5-turbo`
 3. Chạy Open Interpreter với cấu hình `config.turbo.yaml
    ```
-   interpreter --config_file config.turbo.yaml
+   interpreter --profiles_file config.turbo.yaml
    ```
 
 ##### Ví dụ Python

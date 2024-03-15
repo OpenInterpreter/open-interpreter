@@ -273,25 +273,25 @@ Open Interpreter では、`config.yaml` ファイルを使用してデフォル�
 以下のコマンドを実行して設定ファイルを開きます:
 
 ```
-interpreter --config
+interpreter --profiles
 ```
 
 #### 設定ファイルの複数利用
 
-Open Interpreter は複数の `config.yaml` ファイルをサポートしており、`--config_file` 引数を通じて簡単に設定を切り替えることができます。
+Open Interpreter は複数の `config.yaml` ファイルをサポートしており、`--profiles_file` 引数を通じて簡単に設定を切り替えることができます。
 
-**注意**: `--config_file` はファイル名またはファイルパスを受け入れます。ファイル名はデフォルトの設定ディレクトリを使用し、ファイルパスは指定されたパスを使用します。
+**注意**: `--profiles_file` はファイル名またはファイルパスを受け入れます。ファイル名はデフォルトの設定ディレクトリを使用し、ファイルパスは指定されたパスを使用します。
 
 新しい設定を作成または編集するには、次のコマンドを実行します:
 
 ```
-interpreter --config --config_file $config_path
+interpreter --profiles --profiles_file $config_path
 ```
 
 特定の設定ファイルをロードして Open Interpreter を実行するには、次のコマンドを実行します:
 
 ```
-interpreter --config_file $config_path
+interpreter --profiles_file $config_path
 ```
 
 **注意**: `$config_path` をあなたの設定ファイルの名前またはパスに置き換えてください。
@@ -300,12 +300,12 @@ interpreter --config_file $config_path
 
 1. 新しい `config.turbo.yaml` ファイルを作成します
    ```
-   interpreter --config --config_file config.turbo.yaml
+   interpreter --profiles --profiles_file config.turbo.yaml
    ```
 2. `config.turbo.yaml` ファイルを編集して、`model` を `gpt-3.5-turbo` に設定します
 3. `config.turbo.yaml` 設定で、Open Interpreter を実行します
    ```
-   interpreter --config_file config.turbo.yaml
+   interpreter --profiles_file config.turbo.yaml
    ```
 
 ##### Python での使用例
