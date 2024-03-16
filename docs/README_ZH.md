@@ -8,8 +8,8 @@
     <br>
     <br>
     <b>让语言模型在您的计算机上运行代码。</b><br>
-    在本地实现的开源OpenAI的代码解释器。<br>
-    <br><a href="https://openinterpreter.com">登记以提前获取Open Interpreter（开放解释器）桌面应用程序</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">阅读新文档</a></b><br>
+    在本地实现的开源 OpenAI 的代码解释器。<br>
+    <br><a href="https://openinterpreter.com">登记以提前获取 Open Interpreter 桌面端程序</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">阅读新文档</a></b><br>
 </p>
 
 <br>
@@ -35,7 +35,7 @@ interpreter
 - 创建和编辑照片、视频、PDF 等
 - 控制 Chrome 浏览器进行搜索
 - 绘制、清理和分析大型数据集
-- ...
+- 等等...
 
 **⚠️ 注意：在代码运行前都会要求您批准执行代码。**
 
@@ -48,6 +48,10 @@ https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4
 #### Google Colab 上也提供了交互式演示：
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+
+#### 还有一个受*Her*启发的语音交互示例
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
+
 
 ## 快速开始
 
@@ -133,7 +137,7 @@ interpreter.messages = []
 messages = interpreter.chat("My name is Killian.") # 保存消息到 'messages'
 interpreter.messages = [] # 重置解释器 ("Killian" 将被遗忘)
 
-interpreter.messages = messages # 从 'messages' 恢复聊天 ("Killian" 将被记住)
+interpreter.messages = messages # 从 'messages' 恢复聊天 ("Killian" 将被重新恢复)
 ```
 
 ### 自定义系统消息
