@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  open-interpreter:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/content
+
+    # ports:
+    #   - 1234:1234
+    tty:
+      true
+
+    working_dir: /content
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
