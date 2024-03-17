@@ -1,32 +1,34 @@
+
 <h1 align="center">● Open Interpreter</h1>
 
 <p align="center">
-    <a href="https://discord.gg/6p3fD6rBVm">
+    <a href="https://discord.gg/Hvz9Axh84z">
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
-    <a href="../README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
-    <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
-    <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
+    <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
+    <a href="docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="docs/README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
     <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
-    <b>自然言語で指示するだけでコードを書いて実行までしてくれる。</b><br>
-    ローカルに実装したOpenAI Code Interpreterのオープンソース版。<br>
-    <br><a href="https://openinterpreter.com">デスクトップアプリへの早期アクセス</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">ドキュメント</a><br>
+    <strong>言語モデルにコードを実行させよう</strong><br>
+    <br><a href="https://openinterpreter.com">デスクトップアプリへの早期アクセスを取得</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">ドキュメント</a><br>
 </p>
 
 <br>
 
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
-<br>
-
-**Update:** ● 0.1.12 アップデートで `interpreter --vision` 機能が導入されました。([ドキュメント](https://docs.openinterpreter.com/usage/terminal/vision))
-
+<br> 
+<p align="center">
+<strong>ニューコンピューターアップデート</strong>で<strong><code>--os</code></strong>と新しい<strong>コンピューターAPI</strong>が導入されました。<a href="https://changes.openinterpreter.com/log/the-new-computer-update">続きを読む→</a>
+</p>
 <br>
 
 ```shell
-pip install open-interpreter
+pip install open-interpreter  
 ```
+
+> うまくいかない場合は[セットアップガイド](https://docs.openinterpreter.com/getting-started/setup)をご覧ください。
 
 ```shell
 interpreter
@@ -34,16 +36,16 @@ interpreter
 
 <br>
 
-**Open Interpreter**は、言語モデルに指示し、コード（Python、Javascript、Shell など）をローカル環境で実行できるようにします。インストール後、`$ interpreter` を実行するとターミナル経由で ChatGPT のようなインターフェースを介し、Open Interpreter とチャットができます。
+**Open Interpreter**を使うと、LLMがローカル環境でコード(Python、JavaScript、シェルスクリプトなど)を実行できるようになります。インストール後に`$ interpreter`を実行すると、ターミナル内のChatGPTのようなインターフェースを通じてOpen Interpreterとチャットできます。
 
-これにより、自然言語のインターフェースを通して、パソコンの一般的な機能が操作できます。
+これにより、コンピューターの汎用的な機能に自然言語でアクセスできるようになります:
 
-- 写真、動画、PDF などの作成や編集
-- Chrome ブラウザの制御とリサーチ作業
+- 写真、動画、PDF等の作成・編集
+- Chromeブラウザーを操作して調査を実行
 - 大規模なデータセットのプロット、クリーニング、分析
-- 等々
+- ...など
 
-**⚠️ 注意: 実行する前にコードを承認するよう求められます。**
+**⚠️ 注意: コードを実行する前にユーザーの承認が求められます。**
 
 <br>
 
@@ -51,11 +53,11 @@ interpreter
 
 https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
-#### Google Colab でも対話形式のデモを利用できます:
+#### インタラクティブなデモもGoogle Colabで利用可能です:
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)  
 
-#### 音声インターフェースの実装例 (_Her_ からインスピレーションを得たもの):
+#### 映画「Her」からインスパイアされた音声インターフェースの例もあります:
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
 
@@ -67,9 +69,9 @@ pip install open-interpreter
 
 ### ターミナル
 
-インストール後、`interpreter` を実行するだけです:
+インストール後、`interpreter`を実行するだけです:
 
-```shell
+```shell  
 interpreter
 ```
 
@@ -78,56 +80,56 @@ interpreter
 ```python
 from interpreter import interpreter
 
-interpreter.chat("AAPLとMETAの株価グラフを描いてください") # コマンドを実行
-interpreter.chat() # 対話形式のチャットを開始
+interpreter.chat("AAPLとMETAの正規化された株価をプロット") # 単一のコマンドを実行
+interpreter.chat() # インタラクティブなチャットを開始
 ```
 
-## ChatGPT の Code Interpreter との違い
+## ChatGPTのコードインタープリターとの比較
 
-GPT-4 で実装された OpenAI の [Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter) は、実世界のタスクを ChatGPT で操作できる素晴らしい機会を提供しています。
+OpenAIがGPT-4で[Code Interpreter](https://openai.com/blog/chatgpt-plugins#code-interpreter)をリリースしたことで、ChatGPTを使って現実世界のタスクを達成する素晴らしい機会が訪れました。
 
-しかし、OpenAI のサービスはホスティングされていてるクローズドな環境で、かなり制限がされています:
+しかし、OpenAIのサービスはホスト型で、クローズドソースであり、大きく制限されています:
 
-- インターネットに接続できない。
-- [プリインストールされているパッケージが限られている](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。
-- 最大アップロードは 100MB で、120 秒という実行時間の制限も。
-- 生成されたファイルやリンクとともに状態がリセットされる。
+- インターネットアクセス不可。
+- [事前インストールされたパッケージが限定的](https://wfhbrian.com/mastering-chatgpts-code-interpreter-list-of-python-packages/)。  
+- 最大アップロード容量100MB、実行時間制限120.0秒。
+- 環境が終了すると、状態(生成されたファイルやリンクを含む)がクリアされる。
 
 ---
 
-Open Interpreter は、ローカル環境で操作することで、これらの制限を克服しています。インターネットにフルアクセスでき、時間やファイルサイズの制限を受けず、どんなパッケージやライブラリも利用できます。
+Open Interpreterは、ローカル環境で実行することでこれらの制限を克服します。インターネットにフルアクセスでき、時間やファイルサイズの制限がなく、あらゆるパッケージやライブラリを利用できます。
 
-Open Interpter は、GPT-4 Code Interpreter のパワーとローカル開発環境の柔軟性を組み合わせたものです。
+これにより、GPT-4のコードインタープリターのパワーとローカル開発環境の柔軟性が組み合わされます。
 
 ## コマンド
 
-**更新:** アップデート(0.1.5)でストリーミング機能が導入されました:
+**アップデート:** ジェネレーターアップデート(0.1.5)でストリーミングが導入されました:
 
 ```python
-message = "どのオペレーティングシステムを使用していますか？"
+message = "現在使用しているOSは何ですか?"
 
 for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
-```
+```  
 
-### 対話型チャット
+### インタラクティブチャット
 
-ターミナルで対話形式のチャットを開始するには、コマンドラインから `interpreter` を実行します。
+ターミナルでインタラクティブチャットを開始するには、コマンドラインから`interpreter`を実行します:
 
 ```shell
-interpreter
+interpreter  
 ```
 
-または、.py ファイルから `interpreter.chat()` も利用できます。
+または、Pythonファイルから`interpreter.chat()`を実行します:
 
 ```python
 interpreter.chat()
 ```
 
-**ストリーミングすることで chunk 毎に処理することも可能です:**
+**各チャンクをストリーミングすることもできます:**
 
 ```python
-message = "What operating system are we on?"
+message = "現在使用しているOSは何ですか?" 
 
 for chunk in interpreter.chat(message, display=False, stream=True):
   print(chunk)
@@ -135,201 +137,175 @@ for chunk in interpreter.chat(message, display=False, stream=True):
 
 ### プログラム的なチャット
 
-より精確な制御のために、メッセージを直接`.chat(message)`に渡すことができます。
+より正確な制御が必要な場合は、メッセージを直接`.chat(message)`に渡すことができます:
 
 ```python
-interpreter.chat("/videos フォルダにあるすべての動画に字幕を追加する。")
+interpreter.chat("/videosにあるすべての動画に字幕を追加して。")
 
-# ... ターミナルに出力をストリームし、タスクを完了 ...
+# ... ターミナルに出力をストリーミングし、タスクを完了 ...
 
-interpreter.chat("ついでに、字幕を大きくできますか？")
+interpreter.chat("良い感じだけど、字幕をもう少し大きくできる?") 
 
 # ...
 ```
 
 ### 新しいチャットを開始
 
-プログラム的チャットで Open Interpreter は、会話の履歴を記憶しています。新しくやり直したい場合は、リセットすることができます:
+Pythonでは、Open Interpreterは会話履歴を記憶します。新しく開始したい場合は、リセットできます:
 
 ```python
-interpreter.messages = []
+interpreter.messages = []  
 ```
 
 ### チャットの保存と復元
 
-`interpreter.chat()` はメッセージのリストを返し, `interpreter.messages = messages` のように使用することで会話を再開することが可能です:
+`interpreter.chat()`はメッセージのリストを返します。これを使って`interpreter.messages = messages`で会話を再開できます:
 
 ```python
-messages = interpreter.chat("私の名前は田中です。") # 'messages'にメッセージを保存
-interpreter.messages = [] # インタープリタをリセット（"田中"は忘れられる）
+messages = interpreter.chat("私の名前はKillianです。") # メッセージを'messages'に保存
+interpreter.messages = [] # インタープリターをリセット("Killian"は忘れられる)
 
-interpreter.messages = messages # 'messages'からチャットを再開（"田中"は記憶される）
+interpreter.messages = messages # 'messages'からチャットを再開("Killian"は記憶される)  
 ```
 
 ### システムメッセージのカスタマイズ
 
-Open Interpreter のシステムメッセージを確認し、設定することで、機能を拡張したり、権限を変更したり、またはより多くのコンテキストを与えたりすることができます。
+Open Interpreterのシステムメッセージを確認・設定して、機能を拡張したり、権限を変更したり、より多くのコンテキストを与えることができます。
 
 ```python
-interpreter.system_message += """
-シェルコマンドを '-y' フラグ付きで実行し、ユーザーが確認する必要がないようにする。
+interpreter.system_message += """  
+ユーザーが確認しなくても良いように、シェルコマンドを-yオプション付きで実行してください。
 """
 print(interpreter.system_message)
 ```
 
-### モデルの変更
+### 言語モデルの変更
 
-Open Interpreter は、ホストされた言語モデルへの接続に [LiteLLM](https://docs.litellm.ai/docs/providers/) を使用しています。
+Open Interpreterは[LiteLLM](https://docs.litellm.ai/docs/providers/)を使ってホスト型の言語モデルに接続します。 
 
-model パラメータを設定することで、モデルを変更することが可能です:
+モデルパラメーターを設定することで、モデルを変更できます:
 
 ```shell
-interpreter --model gpt-3.5-turbo
+interpreter --model gpt-3.5-turbo  
 interpreter --model claude-2
 interpreter --model command-nightly
 ```
 
-Python では、オブジェクト上でモデルを設定します:
+Pythonでは、オブジェクトにモデルを設定します:
 
-```python
+```python 
 interpreter.llm.model = "gpt-3.5-turbo"
 ```
 
-[適切な "model" の値はこちらから検索してください。](https://docs.litellm.ai/docs/providers/)
+[適切な"model"文字列はこちらで確認できます。](https://docs.litellm.ai/docs/providers/)
 
-### ローカルのモデルを実行する
+### Open Interpreterをローカルで実行
 
-Open Interpreter は、OpenAI 互換サーバーを使用してモデルをローカルで実行できます。 (LM Studio、jan.ai、ollam など)
+#### ターミナル
 
-推論サーバーの api_base URL を指定して「interpreter」を実行するだけです (LM Studio の場合、デフォルトでは「http://localhost:1234/v1」です)。
+Open InterpreterはOpenAI互換のサーバーを使ってモデルをローカルで実行できます。(LM Studio、jan.ai、ollamaなど)
 
-```シェル
-インタープリター --api_base "http://localhost:1234/v1" --api_key "fake_key"
+推論サーバーのapi_base URLを指定して`interpreter`を実行するだけです(LM Studioのデフォルトは`http://localhost:1234/v1`):
+
+```shell
+interpreter --api_base "http://localhost:1234/v1" --api_key "fake_key"  
 ```
 
-あるいは、サードパーティのソフトウェアをインストールせずに、単に実行するだけで Llamafile を使用することもできます。
+あるいは、サードパーティ製ソフトウェアをインストールせずにLlamafileを使う方法もあります:
 
-```シェル
-インターピーター --local
+```shell
+interpreter --local
 ```
 
-より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
+詳しいガイドは[Mike Birdのこの動画](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)をご覧ください。
 
-**LM Studioをバックグラウンドで使用する方法**
+**LM Studioをバックグラウンドで実行する方法**
 
-1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
-2. モデルを選択し、**↓ ダウンロード** をクリックします。
-3. 左側の **↔️** ボタン（💬 の下）をクリックします。
-4. 上部でモデルを選択し、**サーバーを起動** をクリックします。
+1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動。
+2. モデルを選択し、**↓ Download**をクリック。
+3. 左側(💬の下)にある**↔️**ボタンをクリック。
+4. 上部でモデルを選択し、**Start Server**をクリック。
 
-サーバーが稼働を開始したら、Open Interpreter との会話を開始できます。
+サーバーが起動したら、Open Interpreterとの会話を開始できます。 
 
-> **注意:** ローカルモードでは、`context_window` を 3000 に、`max_tokens` を 1000 に設定します。モデルによって異なる要件がある場合、これらのパラメータを手動で設定してください（下記参照）。
+> **注意:** ローカルモードでは`context_window`が3000に、`max_tokens`が1000に設定されます。モデルの要件が異なる場合は、これらのパラメーターを手動で設定してください(下記参照)。
+
+#### Python
+
+Pythonパッケージを使うと、各設定をより細かく制御できます。LM Studioを複製して接続するには、以下の設定を使用します:
+
+```python
+from interpreter import interpreter
+
+interpreter.offline = True # Open Proceduresなどのオンライン機能を無効化
+interpreter.llm.model = "openai/x" # OIにOpenAIのフォーマットでメッセージを送るよう指示
+interpreter.llm.api_key = "fake_key" # LM Studioとの通信に使用するLiteLLMにはこれが必要
+interpreter.llm.api_base = "http://localhost:1234/v1" # OpenAI互換のサーバーを指定
+
+interpreter.chat()  
+```
 
 #### コンテキストウィンドウ、最大トークン数
 
-ローカルで実行しているモデルの `max_tokens` と `context_window`（トークン単位）を変更することができます。
+ローカルで実行するモデルの`max_tokens`と`context_window`(トークン単位)を変更できます。
 
-ローカルモードでは、小さいコンテキストウィンドウは RAM を少なく使用するので、失敗する場合や遅い場合は、より短いウィンドウ（〜1000）を試すことをお勧めします。`max_tokens` が `context_window` より小さいことを確認してください。
+ローカルモードでは、コンテキストウィンドウが小さいほどRAMの使用量が少なくなります。失敗する場合や遅い場合は、もっと短いウィンドウ(~1000)を試してみることをおすすめします。`max_tokens`が`context_window`より小さいことを確認してください。
 
 ```shell
 interpreter --local --max_tokens 1000 --context_window 3000
 ```
 
-### デバッグモード
+### 詳細モード
 
-コントリビューターが Open Interpreter を調査するのを助けるために、`--verbose` モードは非常に便利です。
+Open Interpreterを調べるために、デバッグ用の`--verbose`モードを用意しています。
 
-デバッグモードは、フラグ（`interpreter --verbose`）を使用するか、またはチャットの中から有効にできます:
+詳細モードは、フラグ(`interpreter --verbose`)を使うか、チャット中に有効にできます:
 
-```shell
+```shell  
 $ interpreter
-...
-> %verbose true # <- デバッグモードを有効にする
+... 
+> %verbose true <- 詳細モードをオン
 
-> %verbose false # <- デバッグモードを無効にする
+> %verbose false <- 詳細モードをオフ  
 ```
 
-### 対話モードのコマンド
+### インタラクティブモードのコマンド
 
-対話モードでは、以下のコマンドを使用して操作を便利にすることができます。利用可能なコマンドのリストは以下の通りです:
+インタラクティブモードでは、以下のコマンドを使って操作性を向上できます。利用可能なコマンドの一覧:
 
 **利用可能なコマンド:**
 
-- `%verbose [true/false]`: デバッグモードを切り替えます。引数なしまたは `true` でデバッグモードに入ります。`false` でデバッグモードを終了します。
+- `%verbose [true/false]`: 詳細モードの切り替え。引数なしまたは`true`で詳細モードに入ります。`false`で詳細モードを終了します。
 - `%reset`: 現在のセッションの会話をリセットします。
-- `%undo`: メッセージ履歴から前のユーザーメッセージと AI の応答を削除します。
-- `%save_message [path]`: メッセージを指定した JSON パスに保存します。パスが指定されていない場合、デフォルトは `messages.json` になります。
-- `%load_message [path]`: 指定した JSON パスからメッセージを読み込みます。パスが指定されていない場合、デフォルトは `messages.json` になります。
-- `%tokens [prompt]`: (_実験的_) 次のプロンプトのコンテキストとして送信されるトークンを計算し、そのコストを見積もります。オプションで、`prompt` が提供された場合のトークンと見積もりコストを計算します。見積もりコストは [LiteLLM の `cost_per_token()` メソッド](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token)に依存します。
+- `%undo`: 直前のユーザーメッセージとAIの応答をメッセージ履歴から削除します。
+- `%tokens [prompt]`: (_実験的_) 次のプロンプトとともにコンテキストとして送信されるトークンを計算し、そのコストを見積もります。オプションで、`prompt`が指定された場合はそのトークンとコストを計算します。見積もりコストには[LiteLLMの`cost_per_token()`メソッド](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token)を使用します。
 - `%help`: ヘルプメッセージを表示します。
 
-### 設定
+### 設定 / プロファイル
 
-Open Interpreter では、`config.yaml` ファイルを使用してデフォルトの動作を設定することができます。
+Open Interpreterでは、`yaml`ファイルを使ってデフォルトの動作を設定できます。
 
-これにより、毎回コマンドライン引数を変更することなく柔軟に設定することができます。
+これにより、コマンドライン引数を毎回変更することなく、柔軟にインタープリターの設定ができます。
 
-以下のコマンドを実行して設定ファイルを開きます:
-
-```
-interpreter --config
-```
-
-#### 設定ファイルの複数利用
-
-Open Interpreter は複数の `config.yaml` ファイルをサポートしており、`--config_file` 引数を通じて簡単に設定を切り替えることができます。
-
-**注意**: `--config_file` はファイル名またはファイルパスを受け入れます。ファイル名はデフォルトの設定ディレクトリを使用し、ファイルパスは指定されたパスを使用します。
-
-新しい設定を作成または編集するには、次のコマンドを実行します:
+以下のコマンドを実行して、プロファイルディレクトリを開きます:
 
 ```
-interpreter --config --config_file $config_path
+interpreter --profiles  
 ```
 
-特定の設定ファイルをロードして Open Interpreter を実行するには、次のコマンドを実行します:
+そこに`yaml`ファイルを追加できます。デフォルトのプロファイルは`default.yaml`という名前です。
+
+#### 複数のプロファイル
+
+Open Interpreterは複数の`yaml`ファイルをサポートしているので、設定を簡単に切り替えることができます:
 
 ```
-interpreter --config_file $config_path
+interpreter --profile my_profile.yaml
 ```
 
-**注意**: `$config_path` をあなたの設定ファイルの名前またはパスに置き換えてください。
+## FastAPIサーバーのサンプル
 
-##### 対話モードでの使用例
-
-1. 新しい `config.turbo.yaml` ファイルを作成します
-   ```
-   interpreter --config --config_file config.turbo.yaml
-   ```
-2. `config.turbo.yaml` ファイルを編集して、`model` を `gpt-3.5-turbo` に設定します
-3. `config.turbo.yaml` 設定で、Open Interpreter を実行します
-   ```
-   interpreter --config_file config.turbo.yaml
-   ```
-
-##### Python での使用例
-
-Python のスクリプトから Open Interpreter を呼び出すときにも設定ファイルをロードできます:
-
-```python
-import os
-from interpreter import interpreter
-
-currentPath = os.path.dirname(os.path.abspath(__file__))
-config_path=os.path.join(currentPath, './config.test.yaml')
-
-interpreter.extend_config(config_path=config_path)
-
-message = "What operating system are we on?"
-
-for chunk in interpreter.chat(message, display=False, stream=True):
-  print(chunk)
-```
-
-## FastAPI サーバーのサンプル
-
-アップデートにより Open Interpreter は、HTTP REST エンドポイントを介して制御できるようになりました:
+ジェネレーターアップデートにより、Open InterpreterをHTTP RESTエンドポイントから制御できるようになりました:
 
 ```python
 # server.py
@@ -348,7 +324,7 @@ def chat_endpoint(message: str):
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
-@app.get("/history")
+@app.get("/history") 
 def history_endpoint():
     return interpreter.messages
 ```
@@ -358,40 +334,48 @@ pip install fastapi uvicorn
 uvicorn server:app --reload
 ```
 
-## 安全に関する注意
+また、`interpreter.server()`を実行するだけで、上記と同一のサーバーを起動することもできます。
 
-生成されたコードはローカル環境で実行されるため、ファイルやシステム設定と相互作用する可能性があり、データ損失やセキュリティリスクなど予期せぬ結果につながる可能性があります。
+## Android
 
-**⚠️ Open Interpreter はコードを実行する前にユーザーの確認を求めます。**
+AndroidデバイスへのOpen Interpreterのインストール方法については、[open-interpreter-termuxリポジトリ](https://github.com/MikeBirdTech/open-interpreter-termux)のステップバイステップガイドをご覧ください。
 
-この確認を回避するには、`interpreter -y` を実行するか、`interpreter.auto_run = True` を設定します。その場合:
+## 安全性に関する注意
 
-- ファイルやシステム設定を変更するコマンドを要求するときは注意してください。
-- Open Interpreter を自動運転車のように監視し、ターミナルを閉じてプロセスを終了できるように準備しておいてください。
-- Google Colab や Replit のような制限された環境で Open Interpreter を実行することを検討してください。これらの環境はより隔離されており、任意のコードの実行に関連するリスクを軽減します。
+生成されたコードはローカル環境で実行されるため、ファイルやシステム設定と相互作用し、データ損失やセキュリティリスクなどの予期しない結果につながる可能性があります。 
 
-一部のリスクを軽減するための[セーフモード](docs/SAFE_MODE.md)と呼ばれる **実験的な** サポートがあります。
+**⚠️ Open Interpreterはコードを実行する前にユーザーの確認を求めます。**
 
-## Open Interpreter はどのように機能するのか？
+`interpreter -y`を実行するか、`interpreter.auto_run = True`を設定すると、この確認をバイパスできます。その場合:
 
-Open Interpreter は、[関数が呼び出せる言語モデル](https://platform.openai.com/docs/guides/gpt/function-calling)に `exec()` 関数を装備し、実行する言語（"python"や"javascript"など）とコードが渡せるようになっています。
+- ファイルやシステム設定を変更するコマンドを要求する際は注意してください。
+- Open Interpreterを自動運転車のように監視し、ターミナルを閉じてプロセスを終了する準備をしてください。  
+- Google ColabやReplitのような制限された環境でOpen Interpreterを実行することを検討してください。これらの環境はより隔離されており、任意のコードを実行するリスクを軽減します。
 
-そして、モデルからのメッセージ、コード、システムの出力を Markdown としてターミナルにストリーミングします。
+リスクを軽減するための[セーフモード](docs/SAFE_MODE.md)の**実験的**サポートがあります。
+
+## 動作原理
+
+Open Interpreterは、`language`(PythonやJavaScriptなど)と実行する`code`を受け取る`exec()`関数を備えた[関数呼び出し言語モデル](https://platform.openai.com/docs/guides/gpt/function-calling)を装備しています。
+
+そして、モデルのメッセージ、コード、システムの出力をマークダウンとしてターミナルにストリーミングします。
 
 # 貢献
 
-貢献に興味を持っていただき、ありがとうございます！コミュニティからの参加を歓迎しています。
+ご協力いただきありがとうございます!コミュニティからの関与を歓迎します。
 
-詳しくは、[貢献ガイドライン](CONTRIBUTING.md)を参照してください。
+関わり方の詳細については、[貢献ガイドライン](docs/CONTRIBUTING.md)をご覧ください。 
 
 # ロードマップ
 
-Open Interpreter の未来を一足先に見るために、[私たちのロードマップ](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md)をご覧ください。
+Open Interpreterの未来を見るには、[ロードマップ](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md)をご覧ください。
 
-**注意**: このソフトウェアは OpenAI とは関連していません。
+**注意**: このソフトウェアはOpenAIと提携していません。
 
-> あなたの指先のスピードで作業するジュニアプログラマーにアクセスすることで、… 新しいワークフローを楽で効率的なものにし、プログラミングの利点を新しいオーディエンスに開放することができます。
->
-> — _OpenAI Code Interpreter リリース_
+![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
+
+> 指先の速さで動くジュニアプログラマーにアクセスできることで、新しいワークフローが楽に効率的になり、プログラミングの恩恵が新しい聴衆にもたらされる可能性があります。
+>  
+> - _OpenAIのCode Interpreterリリースより_
 
 <br>
