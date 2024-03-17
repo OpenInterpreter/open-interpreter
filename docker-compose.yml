@@ -4,9 +4,8 @@ services:
   open-interpreter:
     build: 
       context: ./docker
-      dockerfile: Dockerfile_mini
+      dockerfile: Dockerfile.mini
     volumes:
       - .:/app
     tty:
       true
-    working_dir: /app
