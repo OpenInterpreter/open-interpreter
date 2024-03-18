@@ -547,20 +547,21 @@ def apply_profile_to_object(obj, profile):
             setattr(obj, key, value)
 
 
-def open_profile_dir():
-    print(f"Opening profile directory ({profile_dir})...")
+def open_storage_dir(directory):
+    dir = os.path.join(oi_dir, directory)
+    
+    print(f"Opening {directory} directory ({dir})...")
 
     if platform.system() == "Windows":
-        os.startfile(profile_dir)
+        os.startfile(dir)
     else:
         try:
             # Try using xdg-open on non-Windows platforms
-            subprocess.call(["xdg-open", profile_dir])
+            subprocess.call(["xdg-open", dir])
         except FileNotFoundError:
             # Fallback to using 'open' on macOS if 'xdg-open' is not available
-            subprocess.call(["open", profile_dir])
+            subprocess.call(["open", dir])
     return
-
 
 def reset_profile(specific_default_profile=None):
     if (
