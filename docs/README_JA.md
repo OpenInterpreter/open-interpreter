@@ -199,15 +199,23 @@ interpreter.llm.model = "gpt-3.5-turbo"
 
 ### ローカルのモデルを実行する
 
-Open Interpreter は、ローカルの言語モデルへの接続に [LM Studio](https://lmstudio.ai/) を実験的に使用しています。
+Open Interpreter は、OpenAI 互換サーバーを使用してモデルをローカルで実行できます。 (LM Studio、jan.ai、ollam など)
 
-コマンドラインから `interpreter` をローカルモードで実行するだけです:
+推論サーバーの api_base URL を指定して「interpreter」を実行するだけです (LM Studio の場合、デフォルトでは「http://localhost:1234/v1」です)。
 
-```shell
-interpreter --local
+```シェル
+インタープリター --api_base "http://localhost:1234/v1" --api_key "fake_key"
 ```
 
-**バックグラウンドで LM Studio を実行する必要があります。**
+あるいは、サードパーティのソフトウェアをインストールせずに、単に実行するだけで Llamafile を使用することもできます。
+
+```シェル
+インターピーター --local
+```
+
+より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
+
+**LM Studioをバックグラウンドで使用する方法**
 
 1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
 2. モデルを選択し、**↓ ダウンロード** をクリックします。
@@ -215,8 +223,6 @@ interpreter --local
 4. 上部でモデルを選択し、**サーバーを起動** をクリックします。
 
 サーバーが稼働を開始したら、Open Interpreter との会話を開始できます。
-
-（`interpreter --local` コマンドを実行した際にも、上記の手順が表示されます。）
 
 > **注意:** ローカルモードでは、`context_window` を 3000 に、`max_tokens` を 1000 に設定します。モデルによって異なる要件がある場合、これらのパラメータを手動で設定してください（下記参照）。
 

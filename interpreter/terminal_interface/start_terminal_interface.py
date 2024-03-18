@@ -172,6 +172,13 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "safe_mode"},
         },
         {
+            "name": "debug",
+            "nickname": "debug",
+            "help_text": "debug mode for open interpreter developers",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "debug"},
+        },
+        {
             "name": "fast",
             "nickname": "f",
             "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
@@ -187,7 +194,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "local",
             "nickname": "l",
-            "help_text": "experimentally run the LLM locally via LM Studio (this changes many more settings than `--offline`)",
+            "help_text": "experimentally run the LLM locally via Llamafile (this changes many more settings than `--offline`)",
             "type": bool,
         },
         {
@@ -231,7 +238,6 @@ def start_terminal_interface(interpreter):
     # Check for deprecated flags before parsing arguments
     deprecated_flags = {
         "--debug_mode": "--verbose",
-        "-d": "-v",
     }
 
     for old_flag, new_flag in deprecated_flags.items():

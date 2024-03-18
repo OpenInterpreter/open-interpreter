@@ -61,6 +61,7 @@ def respond(interpreter):
             )
             # Yield two newlines to seperate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
+            insert_force_task_completion_message = False
 
         ### RUN THE LLM ###
 
@@ -114,13 +115,6 @@ def respond(interpreter):
                 raise Exception(
                     "Error occurred. "
                     + str(e)
-                    + """
-
-If you're running `interpreter --local`, please make sure LM Studio's local server is running.
-
-If LM Studio's local server is running, please try a language model with a different architecture.
-
-                    """
                 )
             else:
                 raise
@@ -183,16 +177,14 @@ If LM Studio's local server is running, please try a language model with a diffe
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
                     )
                     code = re.sub(
-                        r"from computer import (\w+)", r"\1 = computer.\1", code
-                    )
-                    code = re.sub(
                         r"from computer import (.+)",
                         lambda m: "\n".join(
                             f"{x.strip()} = computer.{x.strip()}"
-                            for x in m.group(1).split(",")
+                            for x in m.group(1).split(", ")
                         ),
                         code,
                     )
+                    code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
                     if code.split("\n")[-1] in [
                         "computer.display.view()",
@@ -204,17 +196,22 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # sync up some things (is this how we want to do this?)
                 interpreter.computer.verbose = interpreter.verbose
+                interpreter.computer.debug = interpreter.debug
                 interpreter.computer.emit_images = interpreter.llm.supports_vision
 
                 # sync up the interpreter's computer with your computer
                 try:
                     if interpreter.sync_computer and language == "python":
                         computer_dict = interpreter.computer.to_dict()
+                        if "_hashes" in computer_dict:
+                            computer_dict.pop("_hashes")
                         if computer_dict:
                             computer_json = json.dumps(computer_dict)
                             sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
                             interpreter.computer.run("python", sync_code)
                 except Exception as e:
+                    if interpreter.debug:
+                        raise
                     print(str(e))
                     print("Continuing...")
 
@@ -231,13 +228,15 @@ If LM Studio's local server is running, please try a language model with a diffe
                         # sync up the interpreter's computer with your computer
                         result = interpreter.computer.run(
                             "python",
-                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  print(json.dumps(computer_dict))",
+                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  if '_hashes' in computer_dict:\n    computer_dict.pop('_hashes')\n  print(json.dumps(computer_dict))",
                         )
                         result = result[-1]["content"]
                         interpreter.computer.load_dict(
                             json.loads(result.strip('"').strip("'"))
                         )
                 except Exception as e:
+                    if interpreter.debug:
+                        raise
                     print(str(e))
                     print("Continuing.")
 
@@ -259,31 +258,27 @@ If LM Studio's local server is running, please try a language model with a diffe
                 }
 
         else:
-            ## FORCE TASK COMLETION
+            ## LOOP MESSAGE
             # This makes it utter specific phrases if it doesn't want to be told to "Proceed."
 
-            force_task_completion_message = """Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
+            force_task_completion_message = interpreter.force_task_completion_message
             if interpreter.os:
-                force_task_completion_message.replace(
+                force_task_completion_message = force_task_completion_message.replace(
                     "If the entire task I asked for is done,",
                     "If the entire task I asked for is done, take a screenshot to verify it's complete, or if you've already taken a screenshot and verified it's complete,",
                 )
-            force_task_completion_responses = [
-                "the task is done.",
-                "the task is impossible.",
-                "let me know what you'd like to do next.",
-                "please provide more information.",
-            ]
+            force_task_completion_breakers = interpreter.force_task_completion_breakers
 
             if (
                 interpreter.force_task_completion
                 and interpreter.messages
+                and interpreter.messages[-1].get("role", "").lower() == "assistant"
                 and not any(
-                    task_status in interpreter.messages[-1].get("content", "").lower()
-                    for task_status in force_task_completion_responses
+                    task_status in interpreter.messages[-1].get("content", "")
+                    for task_status in force_task_completion_breakers
                 )
             ):
-                # Remove past force_task_completion messages
+                # Remove past force_task_completion_message messages
                 interpreter.messages = [
                     message
                     for message in interpreter.messages

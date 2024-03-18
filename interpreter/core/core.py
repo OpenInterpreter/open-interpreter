@@ -45,10 +45,18 @@ class OpenInterpreter:
         offline=False,
         auto_run=False,
         verbose=False,
+        debug=False,
         max_output=2800,
         safe_mode="off",
         shrink_images=False,
         force_task_completion=False,
+        force_task_completion_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
+        force_task_completion_breakers=[
+            "the task is done.",
+            "the task is impossible.",
+            "let me know what you'd like to do next.",
+            "please provide more information.",
+        ],
         anonymous_telemetry=os.getenv("ANONYMIZED_TELEMETRY", "True") == "True",
         in_terminal_interface=False,
         conversation_history=True,
@@ -75,13 +83,18 @@ class OpenInterpreter:
         self.offline = offline
         self.auto_run = auto_run
         self.verbose = verbose
+        self.debug = debug
         self.max_output = max_output
         self.safe_mode = safe_mode
         self.shrink_images = shrink_images
-        self.force_task_completion = force_task_completion
         self.anonymous_telemetry = anonymous_telemetry
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
+
+        # Loop messages
+        self.force_task_completion = force_task_completion
+        self.force_task_completion_message = force_task_completion_message
+        self.force_task_completion_breakers = force_task_completion_breakers
 
         # Conversation history
         self.conversation_history = conversation_history
@@ -100,7 +113,7 @@ class OpenInterpreter:
         self.custom_instructions = custom_instructions
 
         # Computer
-        self.computer = Computer() if computer is None else computer
+        self.computer = Computer(self) if computer is None else computer
 
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
@@ -111,6 +124,8 @@ class OpenInterpreter:
 
         self.import_skills = import_skills
         if import_skills:
+            if self.verbose:
+                print("Importing skills")
             self.computer.skills.import_skills()
 
     def server(self, *args, **kwargs):

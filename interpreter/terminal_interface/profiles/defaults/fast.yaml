@@ -19,4 +19,4 @@ custom_instructions: "The user has set you to FAST mode. **No talk, just code.**
 
 # All options: https://docs.openinterpreter.com/settings
 
-version: 0.2.0 # Configuration file version (do not modify)
+version: 0.2.1 # Configuration file version (do not modify)

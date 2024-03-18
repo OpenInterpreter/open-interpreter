@@ -17,7 +17,12 @@ else
     echo "pyenv is already installed."
 fi
 
+$pyenv_root init
+
 $pyenv_root install 3.11.7 --skip-existing
+
+# do we need to do this? it works on a computer where shell didn't, but it doesn't install the command to `interpreter`
+# PYENV_VERSION=3.11.7 $pyenv_root exec pip install open-interpreter
 
 $pyenv_root shell 3.11.7
 
