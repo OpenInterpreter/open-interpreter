@@ -4,11 +4,7 @@ title: All Settings
 
 <CardGroup cols={3}>
 
-<Card
-  title="Language Model Settings"
-  icon="microchip"
-  href="#language-model"
->
+<Card title="Language Model Settings" icon="microchip" href="#language-model">
   Set your `model`, `api_key`, `temperature`, etc.
 </Card>
 
@@ -300,6 +296,18 @@ Get the current installed version number of Open Interpreter.
 
 ```bash Terminal
 interpreter --version
+```
+
+</CodeGroup>
+
+### Open Local Models Directory
+
+Opens the models directory. All downloaded Llamafiles are saved here.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --local_models
 ```
 
 </CodeGroup>
