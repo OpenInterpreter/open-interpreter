@@ -233,6 +233,12 @@ def start_terminal_interface(interpreter):
             "help_text": "get Open Interpreter's version number",
             "type": bool,
         },
+        {
+            "name": "load_message",
+            "help_text": "load a first prompt from a file",
+            "type": str,
+            "default": None,
+        },
     ]
 
     # Check for deprecated flags before parsing arguments
@@ -386,11 +392,16 @@ def start_terminal_interface(interpreter):
         interpreter.server()
         return
 
+    loaded_message = None
+    if args.load_message:
+        with open(args.load_message, "r") as f:
+            loaded_message = f.read()
+
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
 
-    interpreter.chat()
+    interpreter.chat(loaded_message=loaded_message)
 
 
 def set_attributes(args, arguments):

@@ -44,7 +44,11 @@ except:
     pass
 
 
-def terminal_interface(interpreter, message):
+def terminal_interface(
+        interpreter,
+        message,
+        loaded_message: str = None,
+    ):
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -76,7 +80,10 @@ def terminal_interface(interpreter, message):
         try:
             if interactive:
                 ### This is the primary input for Open Interpreter.
-                message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
+                if loaded_message and len(interpreter.messages) == 0: # When the first chat, interpreter has no messages
+                    message = loaded_message
+                else:
+                    message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
 
                 try:
                     # This lets users hit the up arrow key for past messages
