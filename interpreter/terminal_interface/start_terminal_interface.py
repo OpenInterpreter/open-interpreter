@@ -357,11 +357,9 @@ def start_terminal_interface(interpreter):
         "gpt-4-turbo-preview",
         "gpt-4-0125-preview",
         "gpt-4-1106-preview",
-        "gpt-4-1106-vision-preview",
         "openai/gpt-4-turbo-preview",
         "openai/gpt-4-0125-preview",
         "openai/gpt-4-1106-preview",
-        "openai/gpt-4-1106-vision-preview",
     ]:
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 128000
@@ -369,6 +367,14 @@ def start_terminal_interface(interpreter):
             interpreter.llm.max_tokens = 4096
         if interpreter.llm.supports_functions is None:
             interpreter.llm.supports_functions = True
+
+    if interpreter.llm.model in ["gpt-4-1106-vision-preview", "openai/gpt-4-1106-vision-preview"]:
+        if interpreter.llm.context_window is None:
+            interpreter.llm.context_window = 128000
+        if interpreter.llm.max_tokens is None:
+            interpreter.llm.max_tokens = 4096
+        if interpreter.llm.supports_functions is None:
+            interpreter.llm.supports_functions = False
 
     if interpreter.llm.model in ["gpt-3.5-turbo-1106", "openai/gpt-3.5-turbo-1106"]:
         if interpreter.llm.context_window is None:
