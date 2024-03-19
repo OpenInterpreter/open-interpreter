@@ -352,7 +352,8 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
-        self.__init__()
+        self.messages = []
+        self.last_messages_count = 0
 
     def display_message(self, markdown):
         # This is just handy for start_script in profiles.
