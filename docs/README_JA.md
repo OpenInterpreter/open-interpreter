@@ -203,14 +203,14 @@ Open Interpreter は、OpenAI 互換サーバーを使用してモデルをロ�
 
 推論サーバーの api_base URL を指定して「interpreter」を実行するだけです (LM Studio の場合、デフォルトでは「http://localhost:1234/v1」です)。
 
-```シェル
-インタープリター --api_base "http://localhost:1234/v1" --api_key "fake_key"
+```shell
+interpreter --api_base "http://localhost:1234/v1" --api_key "fake_key"
 ```
 
 あるいは、サードパーティのソフトウェアをインストールせずに、単に実行するだけで Llamafile を使用することもできます。
 
-```シェル
-インターピーター --local
+```shell
+interpreter --local
 ```
 
 より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
