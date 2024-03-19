@@ -2,7 +2,6 @@
 
 ## Documentation
 
-
 - [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
 - [ ] Better comments throughout the package (they're like docs for contributors)
 - [ ] Show how to replace interpreter.llm so you can use a custom llm
@@ -80,13 +79,13 @@
 - [x] Switch core code interpreter to be Jupyter-powered
 - [x] Make sure breaking from generator during execution stops the execution
 - [x] (thanks ty!) Add more hosted model instructions from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
-  - [x] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.openinterpreter.com/language-model-setup/hosted-models/openai)
+  - [x] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.testdriver.ai/language-model-setup/hosted-models/openai)
   - [x] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
   - [x] Swap out the information with information from LiteLLM
   - [x] Repeat with other models
   - [x] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
   - [x] Make it so function calling dynamically uses the languages in interpreter.computer.languages
-  - [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response)) thanks ty!
+  - [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.testdriver.ai/usage/python/streaming-response)) thanks ty!
   - [x] Require documentation for PRs
   - [x] Document the New Computer Update
 

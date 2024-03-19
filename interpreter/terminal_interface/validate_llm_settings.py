@@ -38,7 +38,7 @@ def validate_llm_settings(interpreter):
 
                     To use `GPT-4` (highly recommended) please provide an OpenAI API key.
 
-                    To use another language model, consult the documentation at [docs.openinterpreter.com](https://docs.openinterpreter.com/language-model-setup/).
+                    To use another language model, consult the documentation at [docs.testdriver.ai](https://docs.testdriver.ai/language-model-setup/).
                     
                     ---
                     """
@@ -81,7 +81,7 @@ def display_welcome_message_once():
             """
         ●
 
-        Welcome to **Open Interpreter**.
+        Welcome to **TestDriver**.
         """
         )
         time.sleep(1.5)

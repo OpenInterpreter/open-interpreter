@@ -31,7 +31,7 @@ title: All Settings
 
 ### Model Selection
 
-Specifies which language model to use. Check out the [models](/language-models/) section for a list of available models. Open Interpreter uses [LiteLLM](https://github.com/BerriAI/litellm) under the hood to support over 100+ models.
+Specifies which language model to use. Check out the [models](/language-models/) section for a list of available models. TestDriver uses [LiteLLM](https://github.com/BerriAI/litellm) under the hood to support over 100+ models.
 
 <CodeGroup>
 
@@ -191,7 +191,7 @@ llm.api_version: 2.0.2
 
 ### LLM Supports Functions
 
-Inform Open Interpreter that the language model you're using supports function calling.
+Inform TestDriver that the language model you're using supports function calling.
 
 <CodeGroup>
 
@@ -211,7 +211,7 @@ llm.llm_supports_functions: true
 
 ### LLM Does Not Support Functions
 
-Inform Open Interpreter that the language model you're using does not support function calling.
+Inform TestDriver that the language model you're using does not support function calling.
 
 <CodeGroup>
 
@@ -231,7 +231,7 @@ llm.llm_supports_functions: false
 
 ### LLM Supports Vision
 
-Inform Open Interpreter that the language model you're using supports vision. Defaults to `False`.
+Inform TestDriver that the language model you're using supports vision. Defaults to `False`.
 
 <CodeGroup>
 
@@ -290,7 +290,7 @@ os: true
 
 ### Version
 
-Get the current installed version number of Open Interpreter.
+Get the current installed version number of TestDriver.
 
 <CodeGroup>
 
@@ -350,7 +350,7 @@ interpreter --help
 
 ### Force Task Completion
 
-Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
+Runs TestDriver in a loop, requiring it to admit to completing or failing every task.
 
 <CodeGroup>
 
@@ -518,15 +518,15 @@ We don't recommend modifying the system message, as doing so opts you out of fut
 <CodeGroup>
 
 ```bash Terminal
-interpreter --system_message "You are Open Interpreter..."
+interpreter --system_message "You are TestDriver..."
 ```
 
 ```python Python
-interpreter.system_message = "You are Open Interpreter..."
+interpreter.system_message = "You are TestDriver..."
 ```
 
 ```yaml Profile
-system_message: "You are Open Interpreter..."
+system_message: "You are TestDriver..."
 ```
 
 </CodeGroup>
@@ -615,7 +615,7 @@ The `computer` object in `interpreter.computer` is a virtual computer that the A
 
 ### Offline
 
-Running the `computer` in offline mode will disable some online features, like the hosted [Computer API](https://api.openinterpreter.com/). Inherits from `interpreter.offline`.
+Running the `computer` in offline mode will disable some online features, like the hosted [Computer API](https://api.testdriver.ai/). Inherits from `interpreter.offline`.
 
 <CodeGroup>
 

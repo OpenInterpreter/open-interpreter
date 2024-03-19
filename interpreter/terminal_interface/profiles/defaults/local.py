@@ -144,7 +144,7 @@ def download_model(models_dir, models, interpreter):
 
 
 # START OF LOCAL MODEL PROVIDER LOGIC
-interpreter.display_message("> Open Interpreter is compatible with several local model providers.\n")
+interpreter.display_message("> TestDriver is compatible with several local model providers.\n")
 
 # Define the choices for local models
 choices = [
@@ -171,7 +171,7 @@ selected_model = answers["model"]
 if selected_model == "LM Studio":
     interpreter.display_message(
         """
-To use use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
+To use use TestDriver with **LM Studio**, you will need to run **LM Studio** in the background.
 
 1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/), then start it.
 2. Select a language model then click **Download**.
@@ -235,7 +235,7 @@ elif selected_model == "Ollama":
 elif selected_model == "Jan":
     interpreter.display_message(
         """
-To use use Open Interpreter with **Jan**, you will need to run **Jan** in the background.
+To use use TestDriver with **Jan**, you will need to run **Jan** in the background.
 
 1. Download **Jan** from [https://jan.ai/](https://jan.ai/), then start it.
 2. Select a language model from the "Hub" tab, then click **Download**.
@@ -272,7 +272,7 @@ elif selected_model == "Llamafile":
         )
         if result.returncode != 0:
             interpreter.display_message(
-                "To use Llamafile, Open Interpreter requires Mac users to have Xcode installed. You can install Xcode from https://developer.apple.com/xcode/ .\n\nAlternatively, you can use `LM Studio`, `Jan.ai`, or `Ollama` to manage local language models. Learn more at https://docs.openinterpreter.com/guides/running-locally ."
+                "To use Llamafile, TestDriver requires Mac users to have Xcode installed. You can install Xcode from https://developer.apple.com/xcode/ .\n\nAlternatively, you can use `LM Studio`, `Jan.ai`, or `Ollama` to manage local language models. Learn more at https://docs.testdriver.ai/guides/running-locally ."
             )
             time.sleep(3)
             raise Exception("Xcode is not installed. Please install Xcode and try again.")
@@ -332,7 +332,7 @@ elif selected_model == "Llamafile":
     interpreter.llm.supports_functions = False
 
 # Set the system message to a minimal version for all local models.
-interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
+interpreter.system_message = "You are TestDriver, a world-class programmer that can execute code on the user's machine."
 # Set offline for all local models
 interpreter.offline = True
 

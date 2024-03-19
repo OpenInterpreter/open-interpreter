@@ -263,7 +263,7 @@ interpreter.display_message("> `This profile simulates the 01.`")
 # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
 
 if not interpreter.offline and not interpreter.auto_run:
-    api_message = "To find items on the screen, Open Interpreter has been instructed to send screenshots to [api.openinterpreter.com](https://api.openinterpreter.com/) (we do not store them). Add `--offline` to attempt this locally."
+    api_message = "To find items on the screen, TestDriver has been instructed to send screenshots to [api.testdriver.ai](https://api.testdriver.ai/) (we do not store them). Add `--offline` to attempt this locally."
     interpreter.display_message(api_message)
     print("")
 
@@ -273,7 +273,7 @@ if not interpreter.auto_run:
     print("")
 
 # # FOR TESTING ONLY
-# # Install Open Interpreter from GitHub
+# # Install TestDriver from GitHub
 # for chunk in interpreter.computer.run(
 #     "shell",
 #     "pip install git+https://github.com/KillianLucas/open-interpreter.git",
@@ -306,6 +306,6 @@ interpreter.computer.run(
 
 if not interpreter.auto_run:
     interpreter.display_message(
-        "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+        "**Warning:** In this mode, TestDriver will not require approval before performing actions. Be ready to close your terminal."
     )
     print("")  # < - Aesthetic choice

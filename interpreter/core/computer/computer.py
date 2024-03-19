@@ -41,7 +41,7 @@ class Computer:
         self.ai = Ai(self)
 
         self.emit_images = True
-        self.api_base = "https://api.openinterpreter.com/v0"
+        self.api_base = "https://api.testdriver.ai/v0"
         self.save_skills = True
 
         self.import_computer_api = True

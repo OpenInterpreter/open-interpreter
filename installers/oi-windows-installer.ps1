@@ -1,4 +1,4 @@
-Write-Output "Starting Open Interpreter installation..."
+Write-Output "Starting TestDriver installation..."
 Start-Sleep -Seconds 2
 Write-Output "This will take approximately 5 minutes..."
 Start-Sleep -Seconds 2
@@ -37,6 +37,6 @@ $env:PYENV_VERSION="3.11.7"
 Remove-Item Env:\PYENV_VERSION
 
 Write-Output ""
-Write-Output "Open Interpreter has been installed. Run the following command to use it: "
+Write-Output "TestDriver has been installed. Run the following command to use it: "
 Write-Output ""
 Write-Output "interpreter"

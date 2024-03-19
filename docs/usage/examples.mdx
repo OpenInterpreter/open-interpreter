@@ -11,7 +11,7 @@ description: Get started by copying these code snippets into your terminal, a `.
   iconType="solid"
   href="https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing"
 >
-  Try Open Interpreter without installing anything on your computer
+  Try TestDriver without installing anything on your computer
 </Card>
 
 <Card
@@ -20,7 +20,7 @@ description: Get started by copying these code snippets into your terminal, a `.
   iconType="solid"
   href="https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK"
 >
-  An example implementation of Open Interpreter's streaming capabilities
+  An example implementation of TestDriver's streaming capabilities
 </Card>
 
 </CardGroup>
@@ -61,13 +61,13 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 
 ### Start a New Chat
 
-In your terminal, Open Interpreter behaves like ChatGPT and will not remember previous conversations. Simply run `interpreter` to start a new chat:
+In your terminal, TestDriver behaves like ChatGPT and will not remember previous conversations. Simply run `interpreter` to start a new chat:
 
 ```shell
 interpreter
 ```
 
-In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
+In Python, TestDriver remembers conversation history. If you want to start fresh, you can reset it:
 
 ```python
 interpreter.messages = []
@@ -77,7 +77,7 @@ interpreter.messages = []
 
 ### Save and Restore Chats
 
-In your terminal, Open Interpreter will save previous conversations to `<your application directory>/Open Interpreter/conversations/`.
+In your terminal, TestDriver will save previous conversations to `<your application directory>/TestDriver/conversations/`.
 
 You can resume any of them by running `--conversations`. Use your arrow keys to select one , then press `ENTER` to resume it.
 
@@ -110,7 +110,7 @@ interpreter --config
 
 You can use this to set your default language model, system message (custom instructions), max budget, etc.
 
-<Info>**Note:** The Python library will also inherit settings from this config file, but you can only change it by running `interpreter --config` or navigating to `<your application directory>/Open Interpreter/config.yaml` and editing it manually.</Info>
+<Info>**Note:** The Python library will also inherit settings from this config file, but you can only change it by running `interpreter --config` or navigating to `<your application directory>/TestDriver/config.yaml` and editing it manually.</Info>
 
 ---
 
@@ -118,7 +118,7 @@ You can use this to set your default language model, system message (custom inst
 
 In your terminal, modify the system message by [editing your configuration file as described here](#configure-default-settings).
 
-In Python, you can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
+In Python, you can inspect and configure TestDriver's system message to extend its functionality, modify permissions, or give it more context.
 
 ```python
 interpreter.system_message += """
@@ -131,7 +131,7 @@ print(interpreter.system_message)
 
 ### Change your Language Model
 
-Open Interpreter uses [LiteLLM](https://docs.litellm.ai/docs/providers/) to connect to language models.
+TestDriver uses [LiteLLM](https://docs.litellm.ai/docs/providers/) to connect to language models.
 
 You can change the model by setting the model parameter:
 

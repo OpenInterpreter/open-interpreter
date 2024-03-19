@@ -63,7 +63,7 @@ Enables OS mode for multimodal models. Defaults to GPT-4-turbo.
 
 #### `--model` or `-m`
 
-Specifies which language model to use. Check out the [models](https://docs.openinterpreter.com/language-model-setup/introduction) section for a list of available models.
+Specifies which language model to use. Check out the [models](https://docs.testdriver.ai/language-model-setup/introduction) section for a list of available models.
 
 <CodeGroup>
     
@@ -218,7 +218,7 @@ api_version: 2.0.2
 </CodeGroup>
 #### `--llm_supports_functions` or `-lsf`
 
-Inform Open Interpreter that the language model you're using supports function calling.
+Inform TestDriver that the language model you're using supports function calling.
 
 <CodeGroup>
 ```bash Terminal
@@ -230,19 +230,17 @@ llm_supports_functions: true
 ```
 
 </CodeGroup>
-#### `--no-llm_supports_functions` 
+#### `--no-llm_supports_functions`
 
-Inform Open Interpreter that the language model you're using does not support function calling.
+Inform TestDriver that the language model you're using does not support function calling.
 
 <CodeGroup>
-```bash Terminal
-interpreter --no-llm_supports_functions
-```
+  ```bash Terminal interpreter --no-llm_supports_functions ```
 </CodeGroup>
 
 #### `--llm_supports_vision` or `-lsv`
 
-Inform Open Interpreter that the language model you're using supports vision.
+Inform TestDriver that the language model you're using supports vision.
 
 <CodeGroup>
 ```bash Terminal
@@ -302,11 +300,11 @@ We don't recommend modifying the system message, as doing so opts you out of fut
 
 <CodeGroup>
 ```bash Terminal
-interpreter --system_message "You are Open Interpreter..."
+interpreter --system_message "You are TestDriver..."
 ```
 
 ```yaml Config
-system_message: "You are Open Interpreter..."
+system_message: "You are TestDriver..."
 ```
 
 </CodeGroup>
@@ -358,7 +356,7 @@ auto_run: true
 
 #### `--force_task_completion` or `-fc`
 
-Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
+Runs TestDriver in a loop, requiring it to admit to completing or failing every task.
 
 <CodeGroup>
 ```bash Terminal
@@ -439,7 +437,7 @@ multi_line: true
 
 #### `--version`
 
-Get the current installed version number of Open Interpreter.
+Get the current installed version number of TestDriver.
 
 <CodeGroup>```bash Terminal interpreter --version ```</CodeGroup>
 

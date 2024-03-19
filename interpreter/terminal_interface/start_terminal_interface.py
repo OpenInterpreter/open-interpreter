@@ -174,7 +174,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "debug",
             "nickname": "debug",
-            "help_text": "debug mode for open interpreter developers",
+            "help_text": "debug mode for TestDriver developers",
             "type": bool,
             "attribute": {"object": interpreter, "attr_name": "debug"},
         },
@@ -206,7 +206,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "os",
             "nickname": "os",
-            "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
+            "help_text": "experimentally let TestDriver control your mouse and keyboard",
             "type": bool,
         },
         # Special commands
@@ -226,12 +226,12 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "server",
-            "help_text": "start open interpreter as a server",
+            "help_text": "start TestDriver as a server",
             "type": bool,
         },
         {
             "name": "version",
-            "help_text": "get Open Interpreter's version number",
+            "help_text": "get TestDriver's version number",
             "type": bool,
         },
     ]
@@ -248,7 +248,7 @@ def start_terminal_interface(interpreter):
             sys.argv.remove(old_flag)
             sys.argv.append(new_flag)
 
-    parser = argparse.ArgumentParser(description="Open Interpreter")
+    parser = argparse.ArgumentParser(description="TestDriver")
 
     # Add arguments
     for arg in arguments:
@@ -318,7 +318,7 @@ def start_terminal_interface(interpreter):
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
         update_name = "New Computer Update"  # Change this with each major update
-        print(f"Open Interpreter {version} {update_name}")
+        print(f"TestDriver {version} {update_name}")
         return
 
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
@@ -376,7 +376,7 @@ def start_terminal_interface(interpreter):
             # This message should actually be pushed into the utility
             if check_for_update():
                 display_markdown_message(
-                    "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
+                    "> **A new version of TestDriver is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
                 )
     except:
         # Doesn't matter

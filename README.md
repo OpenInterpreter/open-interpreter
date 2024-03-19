@@ -10,7 +10,7 @@
     <br>
     <br>
     <strong>Let language models run code.</strong><br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
+    <br><a href="https://testdriver.ai">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.testdriver.ai/">Documentation</a><br>
 </p>
 
 <br>
@@ -19,7 +19,7 @@
 
 <br>
 <p align="center">
-<strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
+<strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.testdriver.ai/log/the-new-computer-update">Read On →</a>
 </p>
 <br>
 
@@ -27,7 +27,7 @@
 pip install open-interpreter
 ```
 
-> Not working? Read our [setup guide](https://docs.openinterpreter.com/getting-started/setup).
+> Not working? Read our [setup guide](https://docs.testdriver.ai/getting-started/setup).
 
 ```shell
 interpreter

@@ -4,7 +4,7 @@ title: E2B
 
 [E2B](https://e2b.dev/) is a secure, sandboxed environment where you can run arbitrary code.
 
-To build this integration, you just need to replace Open Interpreter's `python` (which runs locally) with a `python` that runs on E2B.
+To build this integration, you just need to replace TestDriver's `python` (which runs locally) with a `python` that runs on E2B.
 
 First, [get an API key here](https://e2b.dev/), and set it:
 
@@ -13,14 +13,14 @@ import os
 os.environ["E2B_API_KEY"] = "<your_api_key_here>"
 ```
 
-Then, define a custom language for Open Interpreter. The class name doesn't matter, but we'll call it `PythonE2B`:
+Then, define a custom language for TestDriver. The class name doesn't matter, but we'll call it `PythonE2B`:
 
 ```python
 import e2b
 
 class PythonE2B:
     """
-    This class contains all requirements for being a custom language in Open Interpreter:
+    This class contains all requirements for being a custom language in TestDriver:
 
     - name (an attribute)
     - run (a method)
@@ -64,7 +64,7 @@ class PythonE2B:
 # (Tip: Do this before adding/removing languages, otherwise OI might retain the state of previous languages:)
 interpreter.computer.terminate()
 
-# Give Open Interpreter its languages. This will only let it run PythonE2B:
+# Give TestDriver its languages. This will only let it run PythonE2B:
 interpreter.computer.languages = [PythonE2B]
 
 # Try it out!

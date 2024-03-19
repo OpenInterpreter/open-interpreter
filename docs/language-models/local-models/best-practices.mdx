@@ -4,7 +4,7 @@ title: "Best Practices"
 
 Most settings — like model architecture and GPU offloading — can be adjusted via your LLM providers like [LM Studio.](https://lmstudio.ai/)
 
-**However, `max_tokens` and `context_window` should be set via Open Interpreter.**
+**However, `max_tokens` and `context_window` should be set via TestDriver.**
 
 For local mode, smaller context windows will use less RAM, so we recommend trying a much shorter window (~1000) if it's is failing or if it's slow.
 
