@@ -11,7 +11,7 @@
     <br>
     <b>chạy mô hình ngôn ngữ trí tuệ nhân tạo trên máy tính của bạn.</b><br>
     Mã nguồn mở và ứng dụng phát triển dựa trên code của OpenAI.<br>
-    <br><a href="https://openinterpreter.com">Quyền truy cập sớm dành cho máy tính cá nhân</a>‎ ‎ |‎ ‎ <b><a href="https://docs.openinterpreter.com/">Tài liệu đọc tham khảo</a></b><br>
+    <br><a href="https://testdriver.ai">Quyền truy cập sớm dành cho máy tính cá nhân</a>‎ ‎ |‎ ‎ <b><a href="https://docs.testdriver.ai/">Tài liệu đọc tham khảo</a></b><br>
 </p>
 
 <br>
@@ -199,13 +199,13 @@ Open Interpreter có thể sử dụng máy chủ tương thích với OpenAI đ
 
 Chỉ cần chạy `interpreter` với URL api_base của máy chủ suy luận của bạn (đối với LM studio, nó là `http://localhost:1234/v1` theo mặc định):
 
-``` vỏ
+```vỏ
 trình thông dịch --api_base "http://localhost:1234/v1" --api_key "fake_key"
 ```
 
 Ngoài ra, bạn có thể sử dụng Llamafile mà không cần cài đặt bất kỳ phần mềm bên thứ ba nào chỉ bằng cách chạy
 
-``` vỏ
+```vỏ
 thông dịch viên --local
 ```
 
@@ -219,7 +219,6 @@ thông dịch viên --local
 4. Chọn mô hình của bạn ở phía trên, rồi nhấn chạy **Start Server**.
 
 Một khi server chạy, bạn có thể bắt đầu trò chuyện với Open Interpreter.
-
 
 > **Lưu ý:** Chế độ cục bộ chỉnh `context_window` của bạn tới 3000, và `max_tokens` của bạn tới 600. Nếu mô hình của bạn có các yêu cầu khác, thì hãy chỉnh các tham số thủ công (xem bên dưới).
 

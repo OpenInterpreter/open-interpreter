@@ -5,7 +5,7 @@ packages = [
 ]
 version = "0.2.2" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
-authors = ["Killian Lucas <killian@openinterpreter.com>"]
+authors = ["Killian Lucas <killian@testdriver.ai>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

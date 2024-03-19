@@ -66,12 +66,12 @@ def profile(interpreter, filename_or_url):
 
 
 def get_profile(filename_or_url, profile_path):
-    # i.com/ is a shortcut for openinterpreter.com/profiles/
+    # i.com/ is a shortcut for testdriver.ai/profiles/
     shortcuts = ["i.com/", "www.i.com/", "https://i.com/", "http://i.com/"]
     for shortcut in shortcuts:
         if filename_or_url.startswith(shortcut):
             filename_or_url = filename_or_url.replace(
-                shortcut, "https://openinterpreter.com/profiles/"
+                shortcut, "https://testdriver.ai/profiles/"
             )
             if "." not in filename_or_url.split("/")[-1]:
                 extensions = [".json", ".py", ".yaml"]
@@ -492,7 +492,7 @@ You are capable of **any** task.""",
 
 # custom_instructions: ""  # This will be appended to the system message
 # auto_run: False  # If True, code will run without asking for confirmation
-# safe_mode: "off"  # The safety mode (see https://docs.openinterpreter.com/usage/safe-mode)
+# safe_mode: "off"  # The safety mode (see https://docs.testdriver.ai/usage/safe-mode)
 # offline: False  # If True, will disable some online features like checking for updates
 # verbose: False  # If True, will print detailed logs
 
@@ -505,7 +505,7 @@ You are capable of **any** task.""",
     # api_version: ...  # The version of the API (this is primarily for Azure)
     # max_output: 2800  # The maximum characters of code output visible to the LLM
 
-# All options: https://docs.openinterpreter.com/settings
+# All options: https://docs.testdriver.ai/settings
 
 version: {OI_VERSION}  # Profile version (do not modify)
         """.strip()

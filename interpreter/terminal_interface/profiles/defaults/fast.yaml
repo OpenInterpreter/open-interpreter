@@ -17,6 +17,6 @@ custom_instructions: "The user has set you to FAST mode. **No talk, just code.**
 # verbose: False  # If True, will print detailed logs
 # multi_line: False # If True, you can input multiple lines starting and ending with ```
 
-# All options: https://docs.openinterpreter.com/settings
+# All options: https://docs.testdriver.ai/settings
 
 version: 0.2.1 # Configuration file version (do not modify)

@@ -272,7 +272,7 @@ elif selected_model == "Llamafile":
         )
         if result.returncode != 0:
             interpreter.display_message(
-                "To use Llamafile, TestDriver requires Mac users to have Xcode installed. You can install Xcode from https://developer.apple.com/xcode/ .\n\nAlternatively, you can use `LM Studio`, `Jan.ai`, or `Ollama` to manage local language models. Learn more at https://docs.openinterpreter.com/guides/running-locally ."
+                "To use Llamafile, TestDriver requires Mac users to have Xcode installed. You can install Xcode from https://developer.apple.com/xcode/ .\n\nAlternatively, you can use `LM Studio`, `Jan.ai`, or `Ollama` to manage local language models. Learn more at https://docs.testdriver.ai/guides/running-locally ."
             )
             time.sleep(3)
             raise Exception("Xcode is not installed. Please install Xcode and try again.")

@@ -292,7 +292,7 @@ You are capable of **any** task.""",
 # custom_instructions: ""  # This will be appended to the system message
 # auto_run: False  # If True, code will run without asking for confirmation
 # max_output: 2800  # The maximum characters of code output visible to the LLM
-# safe_mode: "off"  # The safety mode (see https://docs.openinterpreter.com/usage/safe-mode)
+# safe_mode: "off"  # The safety mode (see https://docs.testdriver.ai/usage/safe-mode)
 # offline: False  # If True, will disable some online features like checking for updates
 # verbose: False  # If True, will print detailed logs
 
@@ -302,7 +302,7 @@ You are capable of **any** task.""",
 # llm.api_base: ...  # The URL where an OpenAI-compatible server is running
 # llm.api_version: ...  # The version of the API (this is primarily for Azure)
 
-# All options: https://docs.openinterpreter.com/usage/terminal/config
+# All options: https://docs.testdriver.ai/usage/terminal/config
 
 version: 0.2.0 # Configuration file version (do not modify)
                 """.strip()

@@ -15,7 +15,7 @@ llm:
     If the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.
     If you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you.
 
-# All options: https://docs.openinterpreter.com/usage/terminal/settings
+# All options: https://docs.testdriver.ai/usage/terminal/settings
 
 version: 0.2.1 # Configuration file version (do not modify)
 

@@ -11,7 +11,7 @@
     <br><br>
     <b>Lassen Sie Sprachmodelle Code auf Ihrem Computer ausführen.</b><br>
     Eine Open-Source, lokal laufende Implementierung von OpenAIs Code-Interpreter.<br>
-    <br><a href="https://openinterpreter.com">Erhalten Sie frühen Zugang zur Desktop-Anwendung.</a><br>
+    <br><a href="https://testdriver.ai">Erhalten Sie frühen Zugang zur Desktop-Anwendung.</a><br>
 </p>
 
 <br>

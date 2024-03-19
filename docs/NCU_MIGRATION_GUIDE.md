@@ -1,6 +1,6 @@
 # `0.2.0` Migration Guide
 
-Open Interpreter is [changing](https://changes.openinterpreter.com/log/the-new-computer-update). This guide will help you migrate your application to `0.2.0`, also called the _New Computer Update_ (NCU), the latest major version of Open Interpreter.
+Open Interpreter is [changing](https://changes.testdriver.ai/log/the-new-computer-update). This guide will help you migrate your application to `0.2.0`, also called the _New Computer Update_ (NCU), the latest major version of Open Interpreter.
 
 ## A New Start
 

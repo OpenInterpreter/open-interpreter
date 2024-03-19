@@ -11,7 +11,7 @@
     <br>
     <b>自然言語で指示するだけでコードを書いて実行までしてくれる。</b><br>
     ローカルに実装したOpenAI Code Interpreterのオープンソース版。<br>
-    <br><a href="https://openinterpreter.com">デスクトップアプリへの早期アクセス</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">ドキュメント</a><br>
+    <br><a href="https://testdriver.ai">デスクトップアプリへの早期アクセス</a>‎ ‎ |‎ ‎ <a href="https://docs.testdriver.ai/">ドキュメント</a><br>
 </p>
 
 <br>
@@ -20,7 +20,7 @@
 
 <br>
 
-**Update:** ● 0.1.12 アップデートで `interpreter --vision` 機能が導入されました。([ドキュメント](https://docs.openinterpreter.com/usage/terminal/vision))
+**Update:** ● 0.1.12 アップデートで `interpreter --vision` 機能が導入されました。([ドキュメント](https://docs.testdriver.ai/usage/terminal/vision))
 
 <br>
 
@@ -215,7 +215,7 @@ interpreter --local
 
 より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
 
-**LM Studioをバックグラウンドで使用する方法**
+**LM Studio をバックグラウンドで使用する方法**
 
 1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
 2. モデルを選択し、**↓ ダウンロード** をクリックします。
