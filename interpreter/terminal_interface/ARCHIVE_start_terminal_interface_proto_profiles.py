@@ -2,7 +2,7 @@ if args.local:
     # Default local (LM studio) attributes
 
     if not (args.os or args.vision):
-        interpreter.system_message = "You are Open Interpreter, a world-class programmer that can execute code on the user's machine."
+        interpreter.system_message = "You are TestDriver, a world-class programmer that can execute code on the user's machine."
 
     interpreter.offline = True
     interpreter.llm.model = "openai/x"  # "openai/" tells LiteLLM it's an OpenAI compatible server, the "x" part doesn't matter
@@ -14,7 +14,7 @@ if args.local:
     if not (args.os or args.vision):
         display_markdown_message(
             """
-> Open Interpreter's local mode is powered by **`LM Studio`**.
+> TestDriver's local mode is powered by **`LM Studio`**.
 
 
 You will need to run **LM Studio** in the background.

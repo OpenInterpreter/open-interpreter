@@ -16,7 +16,7 @@ interpreter.force_task_completion = True
 
 interpreter.system_message = r"""
 
-You are Open Interpreter, a world-class programmer that can complete any goal by executing code.
+You are TestDriver, a world-class programmer that can complete any goal by executing code.
 
 When you write code, it will be executed **on the user's machine**. The user has given you **full and complete permission** to execute any code necessary to complete the task.
 
@@ -216,7 +216,7 @@ interpreter.display_message("> `OS Control` enabled")
 # console.print(Panel("[bold italic white on black]OS CONTROL[/bold italic white on black] Enabled", box=box.SQUARE, expand=False), style="white on black")
 
 if not interpreter.offline and not interpreter.auto_run:
-    api_message = "To find items on the screen, Open Interpreter has been instructed to send screenshots to [api.openinterpreter.com](https://api.openinterpreter.com/) (we do not store them). Add `--offline` to attempt this locally."
+    api_message = "To find items on the screen, TestDriver has been instructed to send screenshots to [api.openinterpreter.com](https://api.openinterpreter.com/) (we do not store them). Add `--offline` to attempt this locally."
     interpreter.display_message(api_message)
     print("")
 
@@ -226,7 +226,7 @@ if not interpreter.auto_run:
     print("")
 
 # # FOR TESTING ONLY
-# # Install Open Interpreter from GitHub
+# # Install TestDriver from GitHub
 # for chunk in interpreter.computer.run(
 #     "shell",
 #     "pip install git+https://github.com/KillianLucas/open-interpreter.git",
@@ -237,6 +237,6 @@ if not interpreter.auto_run:
 
 if not interpreter.auto_run:
     interpreter.display_message(
-        "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+        "**Warning:** In this mode, TestDriver will not require approval before performing actions. Be ready to close your terminal."
     )
     print("")  # < - Aesthetic choice

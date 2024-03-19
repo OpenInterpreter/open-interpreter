@@ -25,7 +25,7 @@ class Os:
         Displays a notification on the computer.
         """
         try:
-            title = "Open Interpreter"
+            title = "TestDriver"
 
             if len(text) > 200:
                 text = text[:200] + "..."

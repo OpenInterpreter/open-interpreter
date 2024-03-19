@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "Starting Open Interpreter installation..."
+echo "Starting TestDriver installation..."
 sleep 2
 echo "This will take approximately 5 minutes..."
 sleep 2
@@ -31,6 +31,6 @@ pip install open-interpreter
 $pyenv_root shell --unset
 
 echo ""
-echo "Open Interpreter has been installed. Run the following command to use it: "
+echo "TestDriver has been installed. Run the following command to use it: "
 echo ""
 echo "interpreter"

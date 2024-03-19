@@ -2,7 +2,7 @@
 title: Custom Languages
 ---
 
-You can add or edit the programming languages that Open Interpreter's computer runs.
+You can add or edit the programming languages that TestDriver's computer runs.
 
 In this example, we'll swap out the `python` language for a version of `python` that runs in the cloud. We'll use `E2B` to do this.
 
@@ -15,14 +15,14 @@ import os
 os.environ["E2B_API_KEY"] = "<your_api_key_here>"
 ```
 
-Then, define a custom language for Open Interpreter. The class name doesn't matter, but we'll call it `PythonE2B`:
+Then, define a custom language for TestDriver. The class name doesn't matter, but we'll call it `PythonE2B`:
 
 ```python
 import e2b
 
 class PythonE2B:
     """
-    This class contains all requirements for being a custom language in Open Interpreter:
+    This class contains all requirements for being a custom language in TestDriver:
 
     - name (an attribute)
     - run (a method)
@@ -68,7 +68,7 @@ class PythonE2B:
 # (Tip: Do this before adding/removing languages, otherwise OI might retain the state of previous languages:)
 interpreter.computer.terminate()
 
-# Give Open Interpreter its languages. This will only let it run PythonE2B:
+# Give TestDriver its languages. This will only let it run PythonE2B:
 interpreter.computer.languages = [PythonE2B]
 
 # Try it out!

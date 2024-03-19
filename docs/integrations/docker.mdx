@@ -2,9 +2,9 @@
 title: Docker
 ---
 
-Docker support is currently experimental. Running Open Interpreter inside of a Docker container may not function as you expect. Let us know on [Discord](https://discord.com/invite/6p3fD6rBVm) if you encounter errors or have suggestions to improve Docker support.
+Docker support is currently experimental. Running TestDriver inside of a Docker container may not function as you expect. Let us know on [Discord](https://discord.com/invite/6p3fD6rBVm) if you encounter errors or have suggestions to improve Docker support.
 
-We are working on an official integration for Docker in the coming weeks. For now, you can use Open Interpreter in a sandboxed Docker container environment using the following steps:
+We are working on an official integration for Docker in the coming weeks. For now, you can use TestDriver in a sandboxed Docker container environment using the following steps:
 
 1. If you do not have Docker Desktop installed, [install it](https://www.docker.com/products/docker-desktop) before proceeding.
 
@@ -17,11 +17,11 @@ FROM python:3.11
 # Replace <your_openai_api_key> with your own key
 ENV OPENAI_API_KEY <your_openai_api_key>
 
-# Install Open Interpreter
+# Install TestDriver
 RUN pip install open-interpreter
 ```
 
-3. Run the following commands in the same directory to start Open Interpreter.
+3. Run the following commands in the same directory to start TestDriver.
 
 ```bash
 docker build -t openinterpreter .

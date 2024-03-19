@@ -2,7 +2,7 @@
 title: Streaming Response
 ---
 
-You can stream messages, code, and code outputs out of Open Interpreter by setting `stream=True` in an `interpreter.chat(message)` call.
+You can stream messages, code, and code outputs out of TestDriver by setting `stream=True` in an `interpreter.chat(message)` call.
 
 ```python
 for chunk in interpreter.chat("What's 34/24?", stream=True, display=False):
@@ -89,7 +89,7 @@ When the LLM finishes writing code, it will send an "end" chunk:
 
 ## Code Output
 
-After the LLM finishes writing a code block, Open Interpreter will attempt to run it.
+After the LLM finishes writing a code block, TestDriver will attempt to run it.
 
 **Before** it runs it, the following chunk is sent:
 
@@ -116,7 +116,7 @@ for chunk in interpreter.chat("What's 34/24?", stream=True):
 {"role": "computer", "type": "console", "format": "active_line", "content": "1"}
 ```
 
-We use this to highlight the active line of code on our UI, which keeps the user aware of what Open Interpreter is doing.
+We use this to highlight the active line of code on our UI, which keeps the user aware of what TestDriver is doing.
 
 You'll then recieve its output, if it produces any:
 

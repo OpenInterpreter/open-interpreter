@@ -2,7 +2,7 @@
 title: Introduction
 ---
 
-Open Interpreter contains a telemetry feature that collects **anonymous** usage information.
+TestDriver contains a telemetry feature that collects **anonymous** usage information.
 
 We use this information to help us understand how OI is used, to help us prioritize work on new features and bug fixes, and to help us improve OI's performance and stability.
 
@@ -39,7 +39,7 @@ anonymized_telemetry: false
 
 Set `ANONYMIZED_TELEMETRY` to `False` in your shell or server environment.
 
-If you are running Open Interpreter on your local computer with `docker-compose` you can set this value in an `.env` file placed in the same directory as the `docker-compose.yml` file:
+If you are running TestDriver on your local computer with `docker-compose` you can set this value in an `.env` file placed in the same directory as the `docker-compose.yml` file:
 
 ```
 ANONYMIZED_TELEMETRY=False
@@ -49,9 +49,9 @@ ANONYMIZED_TELEMETRY=False
 
 We will only track usage details that help us make product decisions, specifically:
 
-- Open Interpreter version and environment (i.e whether or not it's running in Python / a terminal)
+- TestDriver version and environment (i.e whether or not it's running in Python / a terminal)
 - When interpreter.chat is run, in what mode (e.g `--os` mode), and the type of the message being passed in (e.g `None`, `str`, or `list`)
-- Exceptions that occur within Open Interpreter (not tracebacks)
+- Exceptions that occur within TestDriver (not tracebacks)
 
 We **do not** collect personally-identifiable or sensitive information, such as: usernames, hostnames, file names, environment variables, or hostnames of systems being tested.
 

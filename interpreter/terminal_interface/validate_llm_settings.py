@@ -81,7 +81,7 @@ def display_welcome_message_once():
             """
         ●
 
-        Welcome to **Open Interpreter**.
+        Welcome to **TestDriver**.
         """
         )
         time.sleep(1.5)
