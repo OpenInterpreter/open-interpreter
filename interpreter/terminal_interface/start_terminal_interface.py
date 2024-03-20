@@ -218,7 +218,11 @@ def start_terminal_interface(interpreter):
             "nargs": "?",  # This means you can pass in nothing if you want
         },
         {"name": "profiles", "help_text": "opens profiles directory", "type": bool},
-        {"name": "local_models", "help_text": "opens local models directory", "type": bool},
+        {
+            "name": "local_models",
+            "help_text": "opens local models directory",
+            "type": bool,
+        },
         {
             "name": "conversations",
             "help_text": "list conversations to resume",
@@ -304,7 +308,7 @@ def start_terminal_interface(interpreter):
     if args.profiles:
         open_storage_dir("profiles")
         return
-    
+
     if args.local_models:
         open_storage_dir("models")
         return
@@ -381,8 +385,7 @@ def start_terminal_interface(interpreter):
     except:
         # Doesn't matter
         pass
-    
-    
+
     if interpreter.llm.api_base:
         if (
             not interpreter.llm.model.lower().startswith("openai/")
@@ -391,11 +394,10 @@ def start_terminal_interface(interpreter):
             and not interpreter.llm.model.lower().startswith("jan")
             and not interpreter.llm.model.lower().startswith("local")
         ):
-            interpreter.llm.model = "openai/" + interpreter.llm.model 
+            interpreter.llm.model = "openai/" + interpreter.llm.model
         elif interpreter.llm.model.lower().startswith("jan/"):
             # Strip jan/ from the model name
             interpreter.llm.model = interpreter.llm.model[4:]
-
 
     # If --conversations is used, run conversation_navigator
     if args.conversations:
