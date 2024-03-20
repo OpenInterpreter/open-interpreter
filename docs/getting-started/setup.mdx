@@ -40,7 +40,12 @@ If you already use Python, we recommend installing Open Interpreter via `pip`:
 pip install open-interpreter
 ```
 
-<Info>**Note:** You'll need Python [3.10](https://www.python.org/downloads/release/python-3100/) or [3.11](https://www.python.org/downloads/release/python-3110/). Run `python --version` to check yours.</Info>
+<Info>
+  **Note:** You'll need Python
+  [3.10](https://www.python.org/downloads/release/python-3100/) or
+  [3.11](https://www.python.org/downloads/release/python-3110/). Run `python
+  --version` to check yours.
+</Info>
 
 ## Python usage
 
@@ -59,3 +64,23 @@ interpreter.chat("Get the last 5 BBC news headlines.")
 ```
 
 [Click here](/usage/python/streaming-response) to learn how to stream its response into your application.
+
+## Running your locally modified version
+
+To run your local changes with [Poetry](https://python-poetry.org/docs/#installing-with-the-official-installer), follow these steps:
+
+Navigate to your project's root directory and run:
+
+```bash
+poetry install
+```
+
+This command installs your project along with its dependencies in a virtual environment managed by Poetry.
+
+Run your local version of Open Interpreter with:
+
+```bash
+poetry run interpreter
+```
+
+This ensures Open Interpreter runs within the Poetry-created virtual environment, using the correct dependencies and your local changes.
