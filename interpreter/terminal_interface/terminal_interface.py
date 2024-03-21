@@ -43,11 +43,13 @@ except:
     # If they don't have readline, that's fine
     pass
 
+def has_loaded_message(interpreter, message):
+    return bool(message) and len(interpreter.messages) == 0
+
 
 def terminal_interface(
         interpreter,
         message,
-        loaded_message: str = None,
     ):
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
@@ -72,6 +74,8 @@ def terminal_interface(
         interactive = False
     else:
         interactive = True
+    if has_loaded_message(interpreter, message):
+        interactive = True
 
     active_block = None
     voice_subprocess = None
@@ -80,9 +84,7 @@ def terminal_interface(
         try:
             if interactive:
                 ### This is the primary input for Open Interpreter.
-                if loaded_message and len(interpreter.messages) == 0: # When the first chat, interpreter has no messages
-                    message = loaded_message
-                else:
+                if not has_loaded_message(interpreter, message): # When the first chat, interpreter has no messages
                     message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
 
                 try:

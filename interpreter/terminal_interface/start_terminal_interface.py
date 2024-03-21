@@ -400,8 +400,7 @@ def start_terminal_interface(interpreter):
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
-
-    interpreter.chat(loaded_message=loaded_message)
+    interpreter.chat(message=loaded_message)
 
 
 def set_attributes(args, arguments):

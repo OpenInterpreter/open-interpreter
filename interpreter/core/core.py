@@ -137,7 +137,7 @@ class OpenInterpreter:
         # Return new messages
         return self.messages[self.last_messages_count :]
 
-    def chat(self, message=None, display=True, stream=False, blocking=True, loaded_message=None):
+    def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
             self.responding = True
             if self.anonymous_telemetry and not self.offline:
@@ -161,10 +161,10 @@ class OpenInterpreter:
                 return
 
             if stream:
-                return self._streaming_chat(message=message, display=display, loaded_message=loaded_message)
+                return self._streaming_chat(message=message, display=display)
 
             # If stream=False, *pull* from the stream.
-            for _ in self._streaming_chat(message=message, display=display, loaded_message=loaded_message):
+            for _ in self._streaming_chat(message=message, display=display):
                 pass
 
             # Return new messages
@@ -187,13 +187,13 @@ class OpenInterpreter:
 
             raise
 
-    def _streaming_chat(self, message=None, display=True, loaded_message=None):
+    def _streaming_chat(self, message=None, display=True):
         # Sometimes a little more code -> a much better experience!
         # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
         # Quite different from the plain generator stuff. So redirect to that
         if display:
-            yield from terminal_interface(self, message, loaded_message)
+            yield from terminal_interface(self, message)
             return
 
         # One-off message
