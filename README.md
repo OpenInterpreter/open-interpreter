@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
-    <strong>Let language models run code.</strong><br>
+    <strong>Today we launched a new computer (the 01) with Open Interpreter at the center. <a href="https://github.com/OpenInterpreter/01">Star the repo →</a></strong><br>
     <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
@@ -18,9 +18,9 @@
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
-<p align="center">
+<!--<p align="center">
 <strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
-</p>
+</p>-->
 <br>
 
 ```shell
