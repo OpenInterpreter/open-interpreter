@@ -14,7 +14,7 @@ from .os.os import Os
 from .skills.skills import Skills
 from .sms.sms import SMS
 from .terminal.terminal import Terminal
-
+from .files.files import Files
 
 class Computer:
     def __init__(self, interpreter):
@@ -39,6 +39,7 @@ class Computer:
         self.skills = Skills(self)
         self.docs = Docs(self)
         self.ai = Ai(self)
+        self.files = Files(self)
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
