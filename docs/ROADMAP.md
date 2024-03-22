@@ -45,7 +45,7 @@
 
 ## Future-proofing
 
-- [ ] Really good tests / optimization framework, to be run less frequently than Github actions tests
+- [ ] Really good tests / optimization framework, to be run less frequently than GitHub Actions tests
   - [x] Figure out how to run us on [GAIA](https://huggingface.co/gaia-benchmark)
     - [x] How do we just get the questions out of this thing?
     - [x] How do we assess whether or not OI has solved the task?
