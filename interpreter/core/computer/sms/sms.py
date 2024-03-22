@@ -1,5 +1,6 @@
-import subprocess
 import platform
+import subprocess
+
 from ..utils.run_applescript import run_applescript
 
 
@@ -8,16 +9,14 @@ class SMS:
         self.computer = computer
         self.messages_app = "Messages"
 
-
-
     def send(self, to, message):
         """
         Sends an SMS message to the specified recipient using the Messages app.
         """
         # Check if the operating system is MacOS, as this functionality is MacOS-specific.
-        if platform.system() != 'Darwin':
+        if platform.system() != "Darwin":
             return "This method is only supported on MacOS"
-        
+
         # Remove any newline characters from the recipient number.
         to = to.replace("\n", "")
         # Escape double quotes in the message and recipient variables to prevent script errors.

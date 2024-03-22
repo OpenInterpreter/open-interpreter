@@ -112,10 +112,7 @@ def respond(interpreter):
                     )
             elif interpreter.offline and not interpreter.os:
                 print(traceback.format_exc())
-                raise Exception(
-                    "Error occurred. "
-                    + str(e)
-                )
+                raise Exception("Error occurred. " + str(e))
             else:
                 raise
 

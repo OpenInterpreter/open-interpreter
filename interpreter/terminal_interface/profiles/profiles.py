@@ -549,7 +549,7 @@ def apply_profile_to_object(obj, profile):
 
 def open_storage_dir(directory):
     dir = os.path.join(oi_dir, directory)
-    
+
     print(f"Opening {directory} directory ({dir})...")
 
     if platform.system() == "Windows":
@@ -562,6 +562,7 @@ def open_storage_dir(directory):
             # Fallback to using 'open' on macOS if 'xdg-open' is not available
             subprocess.call(["open", dir])
     return
+
 
 def reset_profile(specific_default_profile=None):
     if (
