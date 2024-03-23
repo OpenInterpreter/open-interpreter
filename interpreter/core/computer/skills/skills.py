@@ -47,23 +47,25 @@ class Skills:
         if self.computer.interpreter.debug:
             print("IMPORTING SKILLS:\n", code_to_run)
 
-        output = self.computer.run("python", code_to_run)
+        outputs = self.computer.run("python", code_to_run)
 
-        if "traceback" in output.lower():
-            # Import them individually
-            for file in glob.glob(os.path.join(self.path, "*.py")):
-                with open(file, "r") as f:
-                    code_to_run = f.read() + "\n"
+        for output in outputs:
+            if type(output) == "str" and "traceback" in output.lower():
+                # Import them individually
+                for file in glob.glob(os.path.join(self.path, "*.py")):
+                    with open(file, "r") as f:
+                        code_to_run = f.read() + "\n"
 
-                if self.computer.interpreter.debug:
-                    print("IMPORTING SKILL:\n", code_to_run)
+                    if self.computer.interpreter.debug:
+                        print("IMPORTING SKILL:\n", code_to_run)
 
-                output = self.computer.run("python", code_to_run)
-
-                if "traceback" in output.lower():
-                    print(
-                        f"Skill at {file} might be broken— it produces a traceback when run."
-                    )
+                    outputs = self.computer.run("python", code_to_run)
+                    
+                    for output in outputs:
+                        if type(output) == "str" and "traceback" in output.lower():
+                            print(
+                                f"Skill at {file} might be broken— it produces a traceback when run."
+                            )
 
         self.computer.save_skills = previous_save_skills_setting
 
