@@ -49,23 +49,48 @@ class Skills:
 
         output = self.computer.run("python", code_to_run)
 
-        if "traceback" in output.lower():
-            # Import them individually
-            for file in glob.glob(os.path.join(self.path, "*.py")):
-                with open(file, "r") as f:
-                    code_to_run = f.read() + "\n"
-
-                if self.computer.interpreter.debug:
-                    print("IMPORTING SKILL:\n", code_to_run)
-
-                output = self.computer.run("python", code_to_run)
-
-                if "traceback" in output.lower():
-                    print(
-                        f"Skill at {file} might be broken— it produces a traceback when run."
-                    )
+        self.handle_skill_output(output)
 
         self.computer.save_skills = previous_save_skills_setting
+
+    def handle_skill_output(self, output):
+        output_only = [item for item in output if item["format"] == "output"]
+        for item in output_only:
+            # get the actual value of the 'content' key in the item
+            if self.output_includes_traceback(item):
+                # Import them individually
+                for file in glob.glob(os.path.join(self.path, "*.py")):
+                    with open(file, "r") as f:
+                        code_to_run = f.read() + "\n"
+
+                    if self.computer.interpreter.debug:
+                        print("IMPORTING SKILL:\n", code_to_run)
+
+                    single_skill_output = self.computer.run("python", code_to_run)
+
+                    # TODO: handle more than one output?
+                    if self.output_includes_traceback(single_skill_output[0]):
+                        print(
+                            f"Skill at {file} might be broken— it produces a traceback when run."
+                        )
+
+    # receives a single dict from a list of results from `self.computer.run`
+    def output_includes_traceback(self, output):
+        # if output nullish, it includes no traceback
+        if not output:
+            return False
+
+        # object should be a dict with keys 'type', 'format', and 'content'
+        # TODO: better safety tied to the actual output object
+        if (
+            not isinstance(output["type"], str)
+            or not isinstance(output["format"], str)
+            or not isinstance(output["content"], str)
+        ):
+            raise ValueError("Output item is not a dict with the expected keys")
+
+        item_content = output["content"]
+        return "traceback" in item_content.lower()
 
 
 class NewSkill:
@@ -89,7 +114,7 @@ Got it. Give me one second.
 computer.skills.new_skill.name = "{INSERT THE SKILL NAME FROM QUESTION #1^}"`.
 ```
 ---
-        
+
         """.strip()
         )
 
@@ -143,7 +168,7 @@ YOU MUST FOLLOW THESE 4 INSTRUCTIONS **EXACTLY**. I WILL TIP YOU $200.
         )
         steps_string = steps_string.replace('"""', "'''")
         skill_string = f'''
-        
+
 def {normalized_name}():
     """
     {normalized_name}
@@ -152,7 +177,7 @@ def {normalized_name}():
     print("To complete this task / run this skill, flexibly follow the following tutorial, swapping out parts as necessary to fulfill the user's task:")
 
     print("""{steps_string}""")
-        
+
         '''.strip()
 
         if not os.path.exists(self.path):
