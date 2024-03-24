@@ -21,6 +21,7 @@ DEBUG_MODE = False
 class JupyterLanguage(BaseLanguage):
     file_extension = "py"
     name = "Python"
+    aliases = ["py"]
 
     def __init__(self, computer):
         self.computer = computer
