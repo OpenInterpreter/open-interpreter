@@ -2,7 +2,8 @@
 
 **Open Interpreter is large, open-source initiative to build a standard interface between language models and computers.**
 
-There are many ways to contribute, from helping others on [GitHub](https://github.com/OpenInterpreter/open-interpreter/issues) or [Discord](https://discord.gg/6p3fD6rBVm), writing documentation, or improving code.
+There are many ways to contribute, from helping others on [GitHub](https://github.com/OpenInterpreter/open-interpreter/issues) or [Discord](https://discord.gg/Hvz9Axh84z), writing documentation, or improving code.
+
 
 We depend on contributors like you. Let's build this.
 
