@@ -69,7 +69,7 @@ class OpenInterpreter:
         custom_instructions="",
         computer=None,
         sync_computer=True,
-        import_computer_api=True,
+        import_computer_api=False,
         skills_path=None,
         import_skills=True,
         multi_line=False,

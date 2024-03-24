@@ -7,6 +7,7 @@ from .clipboard.clipboard import Clipboard
 from .contacts.contacts import Contacts
 from .display.display import Display
 from .docs.docs import Docs
+from .files.files import Files
 from .keyboard.keyboard import Keyboard
 from .mail.mail import Mail
 from .mouse.mouse import Mouse
@@ -39,12 +40,13 @@ class Computer:
         self.skills = Skills(self)
         self.docs = Docs(self)
         self.ai = Ai(self)
+        self.files = Files(self)
 
         self.emit_images = True
         self.api_base = "https://api.openinterpreter.com/v0"
         self.save_skills = True
 
-        self.import_computer_api = True
+        self.import_computer_api = False  # Defaults to false
         self._has_imported_computer_api = False  # Because we only want to do this once
 
     # Shortcut for computer.terminal.languages

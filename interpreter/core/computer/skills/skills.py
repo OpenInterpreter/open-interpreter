@@ -49,7 +49,7 @@ class Skills:
 
         output = self.computer.run("python", code_to_run)
 
-        if "traceback" in output.lower():
+        if type(output) == str and "traceback" in output.lower():
             # Import them individually
             for file in glob.glob(os.path.join(self.path, "*.py")):
                 with open(file, "r") as f:
@@ -60,7 +60,7 @@ class Skills:
 
                 output = self.computer.run("python", code_to_run)
 
-                if "traceback" in output.lower():
+                if type(output) == str and "traceback" in output.lower():
                     print(
                         f"Skill at {file} might be broken— it produces a traceback when run."
                     )
