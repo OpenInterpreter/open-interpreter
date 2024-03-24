@@ -432,7 +432,7 @@ def set_attributes(args, arguments):
 
 
 def main():
-    interpreter = OpenInterpreter()
+    interpreter = OpenInterpreter(import_computer_api=True)
     try:
         start_terminal_interface(interpreter)
     except KeyboardInterrupt:
