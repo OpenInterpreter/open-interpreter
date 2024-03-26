@@ -10,7 +10,7 @@
     <br>
     <br>
     <strong>Today we launched a new computer (the 01) with Open Interpreter at the center. <a href="https://github.com/OpenInterpreter/01">Star the repo →</a></strong><br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
+    <br><a href="https://0ggfznkwh4j.typeform.com/to/G21i9lJ2">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
 <br>
