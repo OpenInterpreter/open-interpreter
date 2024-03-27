@@ -170,7 +170,8 @@ def convert_to_openai_messages(
         else:
             raise Exception(f"Unable to convert this message type: {message}")
 
-        new_message["content"] = new_message["content"].strip()
+        if isinstance(new_message["content"], str):
+            new_message["content"] = new_message["content"].strip()
 
         new_messages.append(new_message)
 
