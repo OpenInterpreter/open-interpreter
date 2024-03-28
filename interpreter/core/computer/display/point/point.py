@@ -490,7 +490,13 @@ if fast_model == False:
     # embeddings = embed_images(images, model, transforms)
 
 
-device = torch.device("cpu")  # or 'cpu' for CPU, 'cuda:0' for the first GPU, etc.
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
+
 # Move the model to the specified device
 model = model.to(device)
 
