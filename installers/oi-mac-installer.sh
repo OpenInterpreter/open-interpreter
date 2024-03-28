@@ -12,22 +12,25 @@ pyenv_root="$HOME/.pyenv/bin/pyenv"
 if ! command -v $pyenv_root &> /dev/null
 then
     echo "pyenv is not installed. Installing now..."
-    curl https://pyenv.run | bash
+    curl https://pyenv.run | zsh #zsh is the default shell for mac now. Changing this may cause install to fail 
 else
     echo "pyenv is already installed."
 fi
 
+PYENV_VERSION='3.11.7'
+
 $pyenv_root init
 
-$pyenv_root install 3.11.7 --skip-existing
+$pyenv_root install $PYENV_VERSION --skip-existing
 
-# do we need to do this? it works on a computer where shell didn't, but it doesn't install the command to `interpreter`
-# PYENV_VERSION=3.11.7 $pyenv_root exec pip install open-interpreter
+$pyenv_root init
 
-$pyenv_root shell 3.11.7
+$pyenv_root global $PYENV_VERSION
 
-pip install open-interpreter
+$pyenv_root exec pip install open-interpreter
 
+$pyenv_root shell $PYENV_VERSION 
+$pyenv_root pip install open-interpreter
 $pyenv_root shell --unset
 
 echo ""
