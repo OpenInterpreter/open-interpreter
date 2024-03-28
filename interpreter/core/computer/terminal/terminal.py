@@ -6,6 +6,7 @@ from .languages.powershell import PowerShell
 from .languages.python import Python
 from .languages.r import R
 from .languages.react import React
+from .languages.ruby import Ruby
 from .languages.shell import Shell
 
 # Should this be renamed to OS or System?
@@ -15,6 +16,7 @@ class Terminal:
     def __init__(self, computer):
         self.computer = computer
         self.languages = [
+            Ruby,
             Python,
             Shell,
             JavaScript,
