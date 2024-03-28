@@ -50,13 +50,13 @@ fastapi = "^0.110.0"
 aifs = "^0.0.9"
 platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
+ruff = "^0.3.4"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]
 safe = ["semgrep", "yaspin"]
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.10.1"
 isort = "^5.12.0"
 pre-commit = "^3.5.0"
 pytest = "^7.4.0"

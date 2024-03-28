@@ -37,7 +37,7 @@ Once you've forked the code and created a new branch for your work, you can run 
 
 After modifying the source code, you will need to do `poetry run interpreter` again.
 
-**Note**: This project uses [`black`](https://black.readthedocs.io/en/stable/index.html) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
+**Note**: This project uses [`ruff`](https://docs.astral.sh/ruff/) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
 
 ### Installing New Dependencies
 
@@ -57,7 +57,7 @@ Then run `poetry install` again. If this doesn't work, please join our [Discord 
 
 ## Code Formatting and Linting
 
-Our project uses `black` for code formatting and `isort` for import sorting. To ensure consistency across contributions, please adhere to the following guidelines:
+Our project uses `ruff` for code formatting and `isort` for import sorting. To ensure consistency across contributions, please adhere to the following guidelines:
 
 1. **Install Pre-commit Hooks**:
 
@@ -75,8 +75,8 @@ Our project uses `black` for code formatting and `isort` for import sorting. To 
    If you choose not to use the pre-commit hooks, you can manually format your code using:
 
    ```bash
-   black .
-   isort .
+   poetry run ruff format .
+   poetry run isort .
    ```
 
 # Licensing
