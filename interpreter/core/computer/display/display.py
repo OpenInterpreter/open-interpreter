@@ -12,6 +12,10 @@ import requests
 from ...utils.lazy_import import lazy_import
 from ..utils.recipient_utils import format_to_recipient
 
+import cv2
+from screeninfo import get_monitors #for getting info about connected monitors
+
+
 # Still experimenting with this
 # from utils.get_active_window import get_active_window
 
@@ -19,6 +23,7 @@ from ..utils.recipient_utils import format_to_recipient
 pyautogui = lazy_import("pyautogui")
 np = lazy_import("numpy")
 plt = lazy_import("matplotlib.pyplot")
+
 
 from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
 
@@ -94,7 +99,7 @@ class Display:
                 if platform.system() == "Darwin":
                     screenshot = take_screenshot_to_pil()
                 else:
-                    screenshot = pyautogui.screenshot()
+                    screenshot = take_screenshot_to_pil() #function should work fine for windows too
                 # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
                 # print(message)
 
@@ -266,16 +271,67 @@ import subprocess
 from PIL import Image
 
 
-def take_screenshot_to_pil(filename="temp_screenshot.png"):
-    # Capture the screenshot and save it to a temporary file
-    subprocess.run(["screencapture", "-x", filename], check=True)
+def take_screenshot_to_pil(all_screens=False):
+    if all_screens:
+        # Get information about all screens
+        monitors = get_monitors()
 
-    # Open the image file with PIL
-    with open(filename, "rb") as f:
-        image_data = f.read()
-    image = Image.open(io.BytesIO(image_data))
+        # Take a screenshot of each screen and save them in a list
+        screenshots = [pyautogui.screenshot(region=(monitor.x, monitor.y, monitor.width, monitor.height)) for monitor in monitors]
 
-    # Optionally, delete the temporary file if you don't need it after loading
-    os.remove(filename)
+        # Combine all screenshots horizontally
+        total_width = sum([img.width for img in screenshots])
+        max_height = max([img.height for img in screenshots])
 
-    return image
+        # Create a new image with a size that can contain all screenshots
+        new_img = Image.new('RGB', (total_width, max_height))
+
+        # Paste each screenshot into the new image
+        
+        x_offset = 0
+        for i, img in enumerate(screenshots):
+            # Convert PIL Image to OpenCV Image (numpy array)
+            img_cv = np.array(img)
+            img_cv = cv2.cvtColor(img_cv, cv2.COLOR_RGB2BGR)
+
+            # Convert new_img PIL Image to OpenCV Image (numpy array)
+            new_img_cv = np.array(new_img)
+            new_img_cv = cv2.cvtColor(new_img_cv, cv2.COLOR_RGB2BGR)
+
+            # Paste each screenshot into the new image using OpenCV
+            new_img_cv[0:img_cv.shape[0], x_offset:x_offset+img_cv.shape[1]] = img_cv
+            x_offset += img.width
+
+            # Add monitor labels using OpenCV
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 4
+            font_color = (255, 255, 255)
+            line_type = 2
+
+            if i == 0:
+                text = "Primary Monitor"
+            else:
+                text = f"Monitor {i}"
+                
+            # Calculate the font scale that will fit the text perfectly in the center of the monitor
+            text_size = cv2.getTextSize(text, font, font_scale, line_type)[0]
+            font_scale = min(img.width / text_size[0], img.height / text_size[1])
+            
+            # Recalculate the text size with the new font scale
+            text_size = cv2.getTextSize(text, font, font_scale, line_type)[0]
+            
+            # Calculate the position to center the text
+            text_x = x_offset - img.width // 2 - text_size[0] // 2
+            text_y = max_height // 2 - text_size[1] // 2
+            
+            cv2.putText(new_img_cv, text, (text_x, text_y), font, font_scale, font_color, line_type)
+
+            # Convert new_img from OpenCV Image back to PIL Image
+            new_img_cv = cv2.cvtColor(new_img_cv, cv2.COLOR_BGR2RGB)
+            new_img = Image.fromarray(new_img_cv)
+
+        return new_img
+
+    else:
+        # Take a screenshot of the primary screen
+        return pyautogui.screenshot()
