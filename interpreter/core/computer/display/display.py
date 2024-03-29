@@ -61,17 +61,17 @@ class Display:
         """
         return self.width // 2, self.height // 2
 
-    def view(self, show=True, quadrant=None):
+    def view(self, show=True, quadrant=None, all_screens=True):
         """
         Redirects to self.screenshot
         """
-        return self.screenshot(show, quadrant)
+        return self.screenshot(all_screens, show, quadrant )
 
     # def get_active_window(self):
     #     return get_active_window()
 
     def screenshot(
-        self, show=True, quadrant=None, active_app_only=False, force_image=False
+        self,all_screens, show=True, quadrant=None, active_app_only=False, force_image=False,
     ):
         """
         Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
@@ -97,9 +97,9 @@ class Display:
                 screenshot = pyautogui.screenshot(region=region)
             else:
                 if platform.system() == "Darwin":
-                    screenshot = take_screenshot_to_pil()
+                    screenshot = take_screenshot_to_pil(all_screens=all_screens)
                 else:
-                    screenshot = take_screenshot_to_pil() #function should work fine for windows too
+                    screenshot = take_screenshot_to_pil(all_screens=all_screens) #function should work fine for windows too
                 # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
                 # print(message)
 
@@ -271,7 +271,7 @@ import subprocess
 from PIL import Image
 
 
-def take_screenshot_to_pil(all_screens=False):
+def take_screenshot_to_pil(all_screens=True):
     if all_screens:
         # Get information about all screens
         monitors = get_monitors()
