@@ -76,7 +76,6 @@ def terminal_interface(interpreter, message):
         try:
             if interactive:
                 ### This is the primary input for Open Interpreter.
-                message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
 
                 try:
                     # This lets users hit the up arrow key for past messages
@@ -84,6 +83,7 @@ def terminal_interface(interpreter, message):
                 except:
                     # If the user doesn't have readline (may be the case on windows), that's fine
                     pass
+                message = cli_input("> ", interpreter.multi_line).strip()
 
         except KeyboardInterrupt:
             # Exit gracefully
