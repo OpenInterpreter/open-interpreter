@@ -61,7 +61,7 @@ class Display:
         """
         return self.width // 2, self.height // 2
 
-    def view(self, show=True, quadrant=None, all_screens=False, combine_screens=True
+    def view(self, show=True, quadrant=None, all_screens=True, combine_screens=True
     ):
         """
         Redirects to self.screenshot
@@ -72,7 +72,7 @@ class Display:
     #     return get_active_window()
 
     def screenshot(
-        self, all_screens=False, show=True, quadrant=None, active_app_only=False, force_image=False,combine_screens=True
+        self, all_screens=True, show=True, quadrant=None, active_app_only=False, force_image=False,combine_screens=True
     ):
         """
         Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**

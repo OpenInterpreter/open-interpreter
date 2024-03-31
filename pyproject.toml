@@ -30,8 +30,9 @@ toml = "^0.10.2"
 posthog = "^3.1.0"
 tiktoken = "^0.5.2"
 
+
 #Optional dependencies
-opencv-python = { version = "^4.8.1.78", optional = true }
+opencv-python = { version = "^4.8.1.78", optional = false }
 pyautogui = { version = "^0.9.54", optional = true }
 plyer = { version = "^2.1.0", optional = true }
 pywinctl = { version = "^0.3", optional = true }
@@ -50,6 +51,7 @@ fastapi = "^0.110.0"
 aifs = "^0.0.9"
 platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
+screeninfo = "^0.8.1"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]
