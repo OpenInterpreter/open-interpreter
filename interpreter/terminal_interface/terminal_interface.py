@@ -368,12 +368,12 @@ def terminal_interface(interpreter, message):
                                 # (unless we figure out how to do this AFTER taking the screenshot)
                                 # otherwise it will try to click this notification!
 
-                                if action in [
-                                    "computer.screenshot()",
-                                    "computer.display.screenshot()",
-                                    "computer.display.view()",
-                                    "computer.view()",
-                                ]:
+                                if any(action.startswith(text) for text in [
+                                    "computer.screenshot",
+                                    "computer.display.screenshot",
+                                    "computer.display.view",
+                                    "computer.view"
+                                ]):
                                     description = "Viewing screen..."
                                 elif action == "computer.mouse.click()":
                                     description = "Clicking..."

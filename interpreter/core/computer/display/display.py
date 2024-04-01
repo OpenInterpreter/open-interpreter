@@ -61,18 +61,25 @@ class Display:
         """
         return self.width // 2, self.height // 2
 
-    def view(self, show=True, quadrant=None, all_screens=True, combine_screens=True
+    def info(self):
+        """
+        Returns a list of all connected montitor/displays and thir information
+        """
+        return get_displays()
+    
+    
+    def view(self, show=True, quadrant=None, screen=0, combine_screens=True
     ):
         """
         Redirects to self.screenshot
         """
-        return self.screenshot(all_screens=all_screens, show=show, quadrant=quadrant, combine_screens=combine_screens)
+        return self.screenshot(screen=screen, show=show, quadrant=quadrant, combine_screens=combine_screens)
 
     # def get_active_window(self):
     #     return get_active_window()
 
     def screenshot(
-        self, all_screens=True, show=True, quadrant=None, active_app_only=False, force_image=False,combine_screens=True
+        self, screen=0, show=True, quadrant=None, active_app_only=False, force_image=False,combine_screens=True
     ):
         """
         Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
@@ -99,7 +106,7 @@ class Display:
                 region = self.get_active_window()["region"]
                 screenshot = pyautogui.screenshot(region=region)
             else:
-                screenshot = take_screenshot_to_pil(all_screens=all_screens, combine_screens=combine_screens) #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
+                screenshot = take_screenshot_to_pil(screen=screen, combine_screens=combine_screens) #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
                 # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
                 # print(message)
 
@@ -273,10 +280,11 @@ class Display:
             )
 
 
-def take_screenshot_to_pil(all_screens=False, combine_screens=True):
-    if all_screens:
-        # Get information about all screens
-        monitors = get_monitors()
+def take_screenshot_to_pil(screen=0, combine_screens=True):
+    # Get information about all screens
+    monitors = get_monitors()
+    if screen == -1: # All screens
+        
         # Take a screenshot of each screen and save them in a list
         screenshots = [pyautogui.screenshot(region=(monitor.x, monitor.y, monitor.width, monitor.height)) for monitor in monitors]
 
@@ -334,6 +342,16 @@ def take_screenshot_to_pil(all_screens=False, combine_screens=True):
             return new_img
         else:
             return screenshots
+    elif screen > 0:
+        # Take a screenshot of the selected screen
+        return pyautogui.screenshot(region=(monitors[screen].x, monitors[screen].y, monitors[screen].width, monitors[screen].height))
+        
     else:
         # Take a screenshot of the primary screen
-        return pyautogui.screenshot()
+        return pyautogui.screenshot(region=(monitors[screen].x, monitors[screen].y, monitors[screen].width, monitors[screen].height))
+
+
+def get_displays():
+    monitors = get_monitors()
+    return monitors
+    
