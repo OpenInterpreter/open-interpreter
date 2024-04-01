@@ -258,50 +258,31 @@ def start_terminal_interface(interpreter):
     for arg in arguments:
         action = arg.get("action", "store_true")
         nickname = arg.get("nickname")
-        default = arg.get("default")
+
+        name_or_flags = [f'--{arg["name"]}']
+        if nickname:
+            name_or_flags.append(f"-{nickname}")
 
         if arg["type"] == bool:
-            if nickname:
-                parser.add_argument(
-                    f"-{nickname}",
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    action=action,
-                    default=default,
-                )
-            else:
-                parser.add_argument(
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    action=action,
-                    default=default,
-                )
+            parser.add_argument(
+                *name_or_flags,
+                dest=arg["name"],
+                help=arg["help_text"],
+                action=action,
+                default=None,
+            )
         else:
             choices = arg.get("choices")
 
-            if nickname:
-                parser.add_argument(
-                    f"-{nickname}",
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    type=arg["type"],
-                    choices=choices,
-                    default=default,
-                    nargs=arg.get("nargs"),
-                )
-            else:
-                parser.add_argument(
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    type=arg["type"],
-                    choices=choices,
-                    default=default,
-                    nargs=arg.get("nargs"),
-                )
+            parser.add_argument(
+                *name_or_flags,
+                dest=arg["name"],
+                help=arg["help_text"],
+                type=arg["type"],
+                choices=choices,
+                default=None,
+                nargs=arg.get("nargs"),
+            )
 
     args = parser.parse_args()
 
@@ -313,7 +294,7 @@ def start_terminal_interface(interpreter):
         open_storage_dir("models")
         return
 
-    if args.reset_profile != "NOT_PROVIDED":
+    if args.reset_profile is not None and args.reset_profile != "NOT_PROVIDED":
         reset_profile(
             args.reset_profile
         )  # This will be None if they just ran `--reset_profile`
@@ -349,7 +330,7 @@ def start_terminal_interface(interpreter):
 
     ### Apply profile
 
-    interpreter = profile(interpreter, args.profile)
+    interpreter = profile(interpreter, args.profile or get_argument_dictionary(arguments, "profile")["default"])
 
     ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
@@ -418,9 +399,7 @@ def start_terminal_interface(interpreter):
 def set_attributes(args, arguments):
     for argument_name, argument_value in vars(args).items():
         if argument_value is not None:
-            argument_dictionary = [a for a in arguments if a["name"] == argument_name]
-            if len(argument_dictionary) > 0:
-                argument_dictionary = argument_dictionary[0]
+            if argument_dictionary := get_argument_dictionary(arguments, argument_name):
                 if "attribute" in argument_dictionary:
                     attr_dict = argument_dictionary["attribute"]
                     setattr(attr_dict["object"], attr_dict["attr_name"], argument_value)
@@ -429,6 +408,12 @@ def set_attributes(args, arguments):
                         print(
                             f"Setting attribute {attr_dict['attr_name']} on {attr_dict['object'].__class__.__name__.lower()} to '{argument_value}'..."
                         )
+
+
+def get_argument_dictionary(arguments: list[dict], key: str) -> dict:
+    if len(argument_dictionary_list := list(filter(lambda x: x["name"] == key, arguments))) > 0:
+        return argument_dictionary_list[0]
+    return {}
 
 
 def main():
