@@ -83,7 +83,7 @@ class Display:
     ):
         """
         Shows you what's on the screen by taking a screenshot of the entire screen or a specified quadrant. Returns a `pil_image` `in case you need it (rarely). **You almost always want to do this first!**
-        :param all_screens: If True, take a screenshot of primary and secondary displays.
+        :param screen: specify which display; 0 for primary and 1 and above for secondary.
         :param combine_screens: If True, a collage of all display screens will be returned. Otherwise, a list of display screens will be returned.
         """
         if not self.computer.emit_images and force_image == False:
