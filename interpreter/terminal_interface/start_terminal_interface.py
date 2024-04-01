@@ -144,9 +144,8 @@ def start_terminal_interface(interpreter):
             "nickname": "dt",
             "help_text": "disables sending of basic anonymous usage stats",
             "type": bool,
-            "default": True,
-            "action": "store_false",
-            "attribute": {"object": interpreter, "attr_name": "anonymous_telemetry"},
+            "default": False,
+            "attribute": {"object": interpreter, "attr_name": "disable_telemetry"},
         },
         {
             "name": "offline",
