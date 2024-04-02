@@ -6,7 +6,7 @@ import pkg_resources
 
 from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
-from .profiles.profiles import open_profile_dir, profile, reset_profile
+from .profiles.profiles import open_storage_dir, profile, reset_profile
 from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
@@ -219,6 +219,11 @@ def start_terminal_interface(interpreter):
         },
         {"name": "profiles", "help_text": "opens profiles directory", "type": bool},
         {
+            "name": "local_models",
+            "help_text": "opens local models directory",
+            "type": bool,
+        },
+        {
             "name": "conversations",
             "help_text": "list conversations to resume",
             "type": bool,
@@ -307,7 +312,11 @@ def start_terminal_interface(interpreter):
     args = parser.parse_args()
 
     if args.profiles:
-        open_profile_dir()
+        open_storage_dir("profiles")
+        return
+
+    if args.local_models:
+        open_storage_dir("models")
         return
 
     if args.reset_profile != "NOT_PROVIDED":
@@ -354,15 +363,15 @@ def start_terminal_interface(interpreter):
 
     ### Set some helpful settings we know are likely to be true
 
-    if interpreter.llm.model == "gpt-4-1106-preview":
+    if interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith("openai/gpt-4"):
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 128000
         if interpreter.llm.max_tokens is None:
             interpreter.llm.max_tokens = 4096
         if interpreter.llm.supports_functions is None:
-            interpreter.llm.supports_functions = True
+            interpreter.llm.supports_functions = False if "vision" in interpreter.llm.model else True
 
-    if interpreter.llm.model == "gpt-3.5-turbo-1106":
+    if interpreter.llm.model.startswith("gpt-3.5-turbo") or interpreter.llm.model.startswith("openai/gpt-3.5-turbo"):
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 16000
         if interpreter.llm.max_tokens is None:
@@ -382,6 +391,19 @@ def start_terminal_interface(interpreter):
     except:
         # Doesn't matter
         pass
+
+    if interpreter.llm.api_base:
+        if (
+            not interpreter.llm.model.lower().startswith("openai/")
+            and not interpreter.llm.model.lower().startswith("azure/")
+            and not interpreter.llm.model.lower().startswith("ollama")
+            and not interpreter.llm.model.lower().startswith("jan")
+            and not interpreter.llm.model.lower().startswith("local")
+        ):
+            interpreter.llm.model = "openai/" + interpreter.llm.model
+        elif interpreter.llm.model.lower().startswith("jan/"):
+            # Strip jan/ from the model name
+            interpreter.llm.model = interpreter.llm.model[4:]
 
     # If --conversations is used, run conversation_navigator
     if args.conversations:
@@ -420,7 +442,7 @@ def set_attributes(args, arguments):
 
 
 def main():
-    interpreter = OpenInterpreter()
+    interpreter = OpenInterpreter(import_computer_api=True)
     try:
         start_terminal_interface(interpreter)
     except KeyboardInterrupt:

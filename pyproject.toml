@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.2.2" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.2.4" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -49,6 +49,7 @@ uvicorn = "^0.27.0"
 fastapi = "^0.110.0"
 aifs = "^0.0.9"
 platformdirs = "^4.2.0"
+pydantic = "^2.6.4"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]

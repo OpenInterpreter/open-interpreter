@@ -69,7 +69,7 @@ class OpenInterpreter:
         custom_instructions="",
         computer=None,
         sync_computer=True,
-        import_computer_api=True,
+        import_computer_api=False,
         skills_path=None,
         import_skills=True,
         multi_line=False,
@@ -352,7 +352,8 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
-        self.__init__()
+        self.messages = []
+        self.last_messages_count = 0
 
     def display_message(self, markdown):
         # This is just handy for start_script in profiles.

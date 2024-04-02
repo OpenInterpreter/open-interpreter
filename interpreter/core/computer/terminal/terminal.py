@@ -6,6 +6,7 @@ from .languages.powershell import PowerShell
 from .languages.python import Python
 from .languages.r import R
 from .languages.react import React
+from .languages.ruby import Ruby
 from .languages.shell import Shell
 
 # Should this be renamed to OS or System?
@@ -15,6 +16,7 @@ class Terminal:
     def __init__(self, computer):
         self.computer = computer
         self.languages = [
+            Ruby,
             Python,
             Shell,
             JavaScript,
@@ -29,7 +31,7 @@ class Terminal:
     def get_language(self, language):
         for lang in self.languages:
             if language.lower() == lang.name.lower() or (
-                hasattr(lang, "aliases") and language in lang.aliases
+                hasattr(lang, "aliases") and language.lower() in (alias.lower() for alias in lang.aliases)
             ):
                 return lang
         return None
