@@ -260,48 +260,30 @@ def start_terminal_interface(interpreter):
         nickname = arg.get("nickname")
         default = arg.get("default")
 
+        # Construct argument name flags
+        flags = (
+            [f"-{nickname}", f'--{arg["name"]}'] if nickname else [f'--{arg["name"]}']
+        )
+
         if arg["type"] == bool:
-            if nickname:
-                parser.add_argument(
-                    f"-{nickname}",
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    action=action,
-                    default=default,
-                )
-            else:
-                parser.add_argument(
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    action=action,
-                    default=default,
-                )
+            parser.add_argument(
+                *flags,
+                dest=arg["name"],
+                help=arg["help_text"],
+                action=action,
+                default=default,
+            )
         else:
             choices = arg.get("choices")
-
-            if nickname:
-                parser.add_argument(
-                    f"-{nickname}",
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    type=arg["type"],
-                    choices=choices,
-                    default=default,
-                    nargs=arg.get("nargs"),
-                )
-            else:
-                parser.add_argument(
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    type=arg["type"],
-                    choices=choices,
-                    default=default,
-                    nargs=arg.get("nargs"),
-                )
+            parser.add_argument(
+                *flags,
+                dest=arg["name"],
+                help=arg["help_text"],
+                type=arg["type"],
+                choices=choices,
+                default=default,
+                nargs=arg.get("nargs"),
+            )
 
     args = parser.parse_args()
 
@@ -357,15 +339,21 @@ def start_terminal_interface(interpreter):
 
     ### Set some helpful settings we know are likely to be true
 
-    if interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith("openai/gpt-4"):
+    if interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith(
+        "openai/gpt-4"
+    ):
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 128000
         if interpreter.llm.max_tokens is None:
             interpreter.llm.max_tokens = 4096
         if interpreter.llm.supports_functions is None:
-            interpreter.llm.supports_functions = False if "vision" in interpreter.llm.model else True
+            interpreter.llm.supports_functions = (
+                False if "vision" in interpreter.llm.model else True
+            )
 
-    if interpreter.llm.model.startswith("gpt-3.5-turbo") or interpreter.llm.model.startswith("openai/gpt-3.5-turbo"):
+    if interpreter.llm.model.startswith(
+        "gpt-3.5-turbo"
+    ) or interpreter.llm.model.startswith("openai/gpt-3.5-turbo"):
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 16000
         if interpreter.llm.max_tokens is None:
