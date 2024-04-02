@@ -252,7 +252,9 @@ def start_terminal_interface(interpreter):
             sys.argv.remove(old_flag)
             sys.argv.append(new_flag)
 
-    parser = argparse.ArgumentParser(description="Open Interpreter")
+    parser = argparse.ArgumentParser(
+        description="Open Interpreter", usage="%(prog)s [options]"
+    )
 
     # Add arguments
     for arg in arguments:
