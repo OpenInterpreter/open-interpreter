@@ -2,17 +2,18 @@
 
 [[package]]
 name = "aifs"
-version = "0.0.12"
+version = "0.0.13"
 description = "Local semantic search. Stupidly simple."
 optional = false
-python-versions = ">=3.8"
+python-versions = "<4,>=3.9"
 files = [
-    {file = "aifs-0.0.12-py3-none-any.whl", hash = "sha256:a990290fdeda2c1e7c6210b2623371bce03c10e83fefb5429815582f7d97fdff"},
-    {file = "aifs-0.0.12.tar.gz", hash = "sha256:f082fa6efaf21a86b7c8d1beaf0e96a527940a2d11c22c50fd8c2cd67b95a4a2"},
+    {file = "aifs-0.0.13-py3-none-any.whl", hash = "sha256:a1d3f740eeba3c88825abc5fe1a952d0581c9ff6d2f92cb775f8583636b006fa"},
+    {file = "aifs-0.0.13.tar.gz", hash = "sha256:b43909da99b09cb046879600e197dec6f9531b932097b58375737bd3bb29f945"},
 ]
 
 [package.dependencies]
 chromadb = ">=0.4.22,<0.5.0"
+numpy = ">=1.26.4,<2.0.0"
 
 [[package]]
 name = "aiohttp"
@@ -2840,11 +2841,11 @@ files = [
 [package.dependencies]
 numpy = [
     {version = ">=1.21.0", markers = "python_version == \"3.9\" and platform_system == \"Darwin\" and platform_machine == \"arm64\""},
+    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
+    {version = ">=1.23.5", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
     {version = ">=1.21.4", markers = "python_version >= \"3.10\" and platform_system == \"Darwin\" and python_version < \"3.11\""},
     {version = ">=1.21.2", markers = "platform_system != \"Darwin\" and python_version >= \"3.10\" and python_version < \"3.11\""},
     {version = ">=1.19.3", markers = "platform_system == \"Linux\" and platform_machine == \"aarch64\" and python_version >= \"3.8\" and python_version < \"3.10\" or python_version > \"3.9\" and python_version < \"3.10\" or python_version >= \"3.9\" and platform_system != \"Darwin\" and python_version < \"3.10\" or python_version >= \"3.9\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
-    {version = ">=1.23.5", markers = "python_version >= \"3.11\" and python_version < \"3.12\""},
-    {version = ">=1.26.0", markers = "python_version >= \"3.12\""},
 ]
 
 [[package]]
@@ -8802,4 +8803,4 @@ safe = ["semgrep", "yaspin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "b9eea4c65631aa8a945b3516bcd3e39682a501b84f7467fdec37d1f68333b51e"
+content-hash = "0978ddd8aa22efedee22a229a45af4a5864e1d410556370e53d10c4991c7592a"
