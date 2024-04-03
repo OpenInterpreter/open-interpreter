@@ -67,7 +67,13 @@ def test_skills():
     for file in os.listdir(interpreter.computer.skills.path):
         print(file)
     
-    skills = interpreter.computer.skills.search(query)
+    try:
+        skills = interpreter.computer.skills.search(query)
+    except ImportError:
+        print("Attempting to install unstructured[all-docs]")
+        import subprocess
+        subprocess.run(['pip', 'install', 'unstructured[all-docs]'], check=True)
+        skills = interpreter.computer.skills.search(query)
 
     lowercase_skills = [skill[0].lower() + skill[1:] for skill in skills]
     output = "\\n".join(lowercase_skills)
