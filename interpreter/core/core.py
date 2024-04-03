@@ -352,6 +352,7 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
+        self.computer._has_imported_computer_api = False  # Flag reset
         self.messages = []
         self.last_messages_count = 0
 
