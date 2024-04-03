@@ -1,5 +1,9 @@
+from typing import Any
+
 import litellm
 import tokentrim as tt
+
+from interpreter.core.core import OpenInterpreter
 
 from ...terminal_interface.utils.display_markdown_message import (
     display_markdown_message,
@@ -9,7 +13,6 @@ from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
 litellm.suppress_debug_info = True
-import time
 
 
 class Llm:
@@ -17,7 +20,7 @@ class Llm:
     A stateless LMC-style LLM with some helpful properties.
     """
 
-    def __init__(self, interpreter):
+    def __init__(self, interpreter: OpenInterpreter):
         # Store a reference to parent interpreter
         self.interpreter = interpreter
 
@@ -40,7 +43,7 @@ class Llm:
         # Budget manager powered by LiteLLM
         self.max_budget = None
 
-    def run(self, messages):
+    def run(self, messages: list[dict[str, Any]]):
         """
         We're responsible for formatting the call into the llm.completions object,
         starting with LMC messages in interpreter.messages, going to OpenAI compatible messages into the llm,

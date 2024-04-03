@@ -12,7 +12,7 @@ from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
 
 
-def start_terminal_interface(interpreter):
+def start_terminal_interface(interpreter: OpenInterpreter):
     """
     Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
     """
@@ -357,15 +357,21 @@ def start_terminal_interface(interpreter):
 
     ### Set some helpful settings we know are likely to be true
 
-    if interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith("openai/gpt-4"):
+    if interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith(
+        "openai/gpt-4"
+    ):
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 128000
         if interpreter.llm.max_tokens is None:
             interpreter.llm.max_tokens = 4096
         if interpreter.llm.supports_functions is None:
-            interpreter.llm.supports_functions = False if "vision" in interpreter.llm.model else True
+            interpreter.llm.supports_functions = (
+                False if "vision" in interpreter.llm.model else True
+            )
 
-    if interpreter.llm.model.startswith("gpt-3.5-turbo") or interpreter.llm.model.startswith("openai/gpt-3.5-turbo"):
+    if interpreter.llm.model.startswith(
+        "gpt-3.5-turbo"
+    ) or interpreter.llm.model.startswith("openai/gpt-3.5-turbo"):
         if interpreter.llm.context_window is None:
             interpreter.llm.context_window = 16000
         if interpreter.llm.max_tokens is None:

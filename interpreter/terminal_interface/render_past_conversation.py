@@ -3,12 +3,13 @@ This is all messed up.... Uses the old streaming structure.
 """
 
 
+from typing import Any
+
 from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
-from .utils.display_markdown_message import display_markdown_message
 
 
-def render_past_conversation(messages):
+def render_past_conversation(messages: list[dict[str, Any]]):
     # This is a clone of the terminal interface.
     # So we should probably find a way to deduplicate...
 

@@ -4,11 +4,13 @@ import traceback
 
 import litellm
 
+from interpreter.core.core import OpenInterpreter
+
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
 from .render_message import render_message
 
 
-def respond(interpreter):
+def respond(interpreter: OpenInterpreter):
     """
     Yields chunks.
     Responds until it decides not to run any more code or say anything else.
@@ -112,10 +114,7 @@ def respond(interpreter):
                     )
             elif interpreter.offline and not interpreter.os:
                 print(traceback.format_exc())
-                raise Exception(
-                    "Error occurred. "
-                    + str(e)
-                )
+                raise Exception("Error occurred. " + str(e))
             else:
                 raise
 

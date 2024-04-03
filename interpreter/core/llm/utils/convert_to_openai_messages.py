@@ -1,21 +1,22 @@
 import base64
 import io
 import json
+from typing import Any
 
 from PIL import Image
 
 
 def convert_to_openai_messages(
-    messages,
-    function_calling=True,
-    vision=False,
-    shrink_images=True,
-    code_output_sender="assistant",
+    messages: list[dict[str, Any]],
+    function_calling: bool = True,
+    vision: bool = False,
+    shrink_images: bool = True,
+    code_output_sender: str = "assistant",
 ):
     """
     Converts LMC messages into OpenAI messages
     """
-    new_messages = []
+    new_messages: list[dict[str, Any]] = []
 
     for message in messages:
         # Is this for thine eyes?

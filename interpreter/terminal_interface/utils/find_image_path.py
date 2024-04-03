@@ -2,7 +2,7 @@ import os
 import re
 
 
-def find_image_path(text):
+def find_image_path(text: str):
     pattern = r"([A-Za-z]:\\[^:\n]*?\.(png|jpg|jpeg|PNG|JPG|JPEG))|(/[^:\n]*?\.(png|jpg|jpeg|PNG|JPG|JPEG))"
     matches = [match.group() for match in re.finditer(pattern, text) if match.group()]
     matches += [match.replace("\\", "") for match in matches if match]

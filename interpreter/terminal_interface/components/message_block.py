@@ -14,7 +14,7 @@ class MessageBlock(BaseBlock):
         self.type = "message"
         self.message = ""
 
-    def refresh(self, cursor=True):
+    def refresh(self, cursor: bool = True):
         # De-stylize any code blocks in markdown,
         # to differentiate from our Code Blocks
         content = textify_markdown_code_blocks(self.message)
@@ -28,7 +28,7 @@ class MessageBlock(BaseBlock):
         self.live.refresh()
 
 
-def textify_markdown_code_blocks(text):
+def textify_markdown_code_blocks(text: str):
     """
     To distinguish CodeBlocks from markdown code, we simply turn all markdown code
     (like '```python...') into text code blocks ('```text') which makes the code black and white.

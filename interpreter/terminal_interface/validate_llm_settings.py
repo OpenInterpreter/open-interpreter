@@ -8,10 +8,12 @@ import time
 import litellm
 from prompt_toolkit import prompt
 
+from interpreter.core.core import OpenInterpreter
+
 from .utils.display_markdown_message import display_markdown_message
 
 
-def validate_llm_settings(interpreter):
+def validate_llm_settings(interpreter: OpenInterpreter):
     """
     Interactively prompt the user for required LLM settings
     """
@@ -29,7 +31,11 @@ def validate_llm_settings(interpreter):
 
             # OpenAI
             if interpreter.llm.model in litellm.open_ai_chat_completion_models:
-                if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key and not interpreter.llm.api_base:
+                if (
+                    not os.environ.get("OPENAI_API_KEY")
+                    and not interpreter.llm.api_key
+                    and not interpreter.llm.api_base
+                ):
                     display_welcome_message_once()
 
                     display_markdown_message(

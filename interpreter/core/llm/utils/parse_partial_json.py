@@ -2,7 +2,7 @@ import json
 import re
 
 
-def parse_partial_json(s):
+def parse_partial_json(s: str):
     # Attempt to parse the string as-is.
     try:
         return json.loads(s)
@@ -11,7 +11,7 @@ def parse_partial_json(s):
 
     # Initialize variables.
     new_s = ""
-    stack = []
+    stack: list[str] = []
     is_inside_string = False
     escaped = False
 
@@ -55,6 +55,6 @@ def parse_partial_json(s):
     # Attempt to parse the modified string as JSON.
     try:
         return json.loads(new_s)
-    except:
+    except Exception:
         # If we still can't parse the string as JSON, return None to indicate failure.
         return None

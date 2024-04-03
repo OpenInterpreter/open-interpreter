@@ -7,11 +7,14 @@ import shutil
 import string
 import subprocess
 import time
+from typing import Any
 
 import platformdirs
 import requests
 import send2trash
 import yaml
+
+from interpreter.core.core import OpenInterpreter
 
 from ..utils.display_markdown_message import display_markdown_message
 from ..utils.oi_dir import oi_dir
@@ -29,7 +32,7 @@ default_profiles_names = [os.path.basename(path) for path in default_profiles_pa
 OI_VERSION = "0.2.1"
 
 
-def profile(interpreter, filename_or_url):
+def profile(interpreter: OpenInterpreter, filename_or_url: str):
     # See if they're doing shorthand for a default profile
     filename_without_extension = os.path.splitext(filename_or_url)[0]
     for profile in default_profiles_names:
@@ -65,7 +68,7 @@ def profile(interpreter, filename_or_url):
     return apply_profile(interpreter, profile, profile_path)
 
 
-def get_profile(filename_or_url, profile_path):
+def get_profile(filename_or_url: str, profile_path: str):
     # i.com/ is a shortcut for openinterpreter.com/profiles/
     shortcuts = ["i.com/", "www.i.com/", "https://i.com/", "http://i.com/"]
     for shortcut in shortcuts:
@@ -193,7 +196,7 @@ def apply_profile(interpreter, profile, profile_path):
     return interpreter
 
 
-def migrate_profile(old_path, new_path):
+def migrate_profile(old_path: str, new_path: str):
     with open(old_path, "r") as old_file:
         profile = yaml.safe_load(old_file)
     # Mapping old attribute names to new ones
@@ -539,7 +542,7 @@ version: {OI_VERSION}  # Profile version (do not modify)
         file.write(comment_wrapper)
 
 
-def apply_profile_to_object(obj, profile):
+def apply_profile_to_object(obj, profile: dict[str, Any]):
     for key, value in profile.items():
         if isinstance(value, dict):
             apply_profile_to_object(getattr(obj, key), value)
@@ -547,9 +550,9 @@ def apply_profile_to_object(obj, profile):
             setattr(obj, key, value)
 
 
-def open_storage_dir(directory):
+def open_storage_dir(directory: str):
     dir = os.path.join(oi_dir, directory)
-    
+
     print(f"Opening {directory} directory ({dir})...")
 
     if platform.system() == "Windows":
@@ -563,7 +566,8 @@ def open_storage_dir(directory):
             subprocess.call(["open", dir])
     return
 
-def reset_profile(specific_default_profile=None):
+
+def reset_profile(specific_default_profile: str | None = None):
     if (
         specific_default_profile
         and specific_default_profile not in default_profiles_names
@@ -683,7 +687,7 @@ def determine_user_version():
     return None
 
 
-def migrate_app_directory(old_dir, new_dir, profile_dir):
+def migrate_app_directory(old_dir: str, new_dir: str, profile_dir: str):
     # Copy the "profiles" folder and its contents if it exists
     profiles_old_path = os.path.join(old_dir, "profiles")
     profiles_new_path = os.path.join(new_dir, "profiles")

@@ -6,7 +6,7 @@ import platformdirs
 config_dir = platformdirs.user_config_dir("open-interpreter")
 
 
-def get_storage_path(subdirectory=None):
+def get_storage_path(subdirectory: str = None):
     if subdirectory is None:
         return config_dir
     else:
