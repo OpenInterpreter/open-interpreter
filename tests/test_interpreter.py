@@ -34,6 +34,12 @@ def test_point():
 
 
 def test_skills():
+
+    import sys
+    if sys.version_info[:2] == (3, 12):
+        print("skills.search is only for python 3.11 for now, because it depends on unstructured. skipping this test.")
+        return
+
     import json
 
     interpreter.model = "gpt-3.5"
@@ -48,6 +54,8 @@ def test_skills():
     # skills_path = '/01OS/server/skills'
     # interpreter.computer.skills.path = skills_path
     print(interpreter.computer.skills.path)
+    for file in os.listdir(interpreter.computer.skills.path):
+        os.remove(os.path.join(interpreter.computer.skills.path, file))
     print("Path: ", interpreter.computer.skills.path)
     print("Files in the path: ")
     interpreter.computer.run("python", "def testing_skilsl():\n    print('hi')")
@@ -57,7 +65,9 @@ def test_skills():
     print("Files in the path: ")
     for file in os.listdir(interpreter.computer.skills.path):
         print(file)
+    
     skills = interpreter.computer.skills.search(query)
+
     lowercase_skills = [skill[0].lower() + skill[1:] for skill in skills]
     output = "\\n".join(lowercase_skills)
     assert "testing_skilsl" in str(output)
