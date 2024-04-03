@@ -54,8 +54,9 @@ def test_skills():
     # skills_path = '/01OS/server/skills'
     # interpreter.computer.skills.path = skills_path
     print(interpreter.computer.skills.path)
-    for file in os.listdir(interpreter.computer.skills.path):
-        os.remove(os.path.join(interpreter.computer.skills.path, file))
+    if os.path.exists(interpreter.computer.skills.path):
+        for file in os.listdir(interpreter.computer.skills.path):
+            os.remove(os.path.join(interpreter.computer.skills.path, file))
     print("Path: ", interpreter.computer.skills.path)
     print("Files in the path: ")
     interpreter.computer.run("python", "def testing_skilsl():\n    print('hi')")
