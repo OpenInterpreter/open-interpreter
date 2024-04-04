@@ -123,10 +123,7 @@ class OpenInterpreter:
             self.computer.skills.path = skills_path
 
         self.import_skills = import_skills
-        if import_skills:
-            if self.verbose:
-                print("Importing skills")
-            self.computer.skills.import_skills()
+        self.computer.should_import_skills = import_skills
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
