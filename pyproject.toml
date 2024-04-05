@@ -49,7 +49,7 @@ uvicorn = "^0.27.0"
 fastapi = "^0.110.0"
 platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
-aifs = "^0.0.13"
+aifs = "^0.0.14"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]
