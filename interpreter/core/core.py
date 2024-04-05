@@ -68,10 +68,10 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         computer=None,
-        sync_computer=True,
+        sync_computer=False,
         import_computer_api=False,
         skills_path=None,
-        import_skills=True,
+        import_skills=False,
         multi_line=False,
     ):
         # State
@@ -114,7 +114,6 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer(self) if computer is None else computer
-
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
 
@@ -122,8 +121,7 @@ class OpenInterpreter:
         if skills_path:
             self.computer.skills.path = skills_path
 
-        self.import_skills = import_skills
-        self.computer.should_import_skills = import_skills
+        self.computer.import_skills = import_skills
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
