@@ -452,3 +452,5 @@ def main():
         start_terminal_interface(interpreter)
     except KeyboardInterrupt:
         pass
+    finally:
+        interpreter.computer.terminate()

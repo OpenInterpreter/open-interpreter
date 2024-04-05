@@ -51,6 +51,13 @@ class Terminal:
                     display=self.computer.verbose,
                 )
 
+            if not self.computer._has_imported_skills:
+                self.computer._has_imported_skills = True
+                if self.computer.should_import_skills:
+                    if self.verbose:
+                        print("Importing skills")
+                    self.computer.skills.import_skills()
+
         if stream == False:
             # If stream == False, *pull* from _streaming_run.
             output_messages = []
