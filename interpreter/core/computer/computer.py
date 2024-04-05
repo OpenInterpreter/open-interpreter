@@ -49,7 +49,7 @@ class Computer:
         self.import_computer_api = False  # Defaults to false
         self._has_imported_computer_api = False  # Because we only want to do this once
 
-        self.should_import_skills = False
+        self.import_skills = False
         self._has_imported_skills = False
 
     # Shortcut for computer.terminal.languages
