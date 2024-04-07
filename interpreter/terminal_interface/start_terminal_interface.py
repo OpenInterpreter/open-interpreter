@@ -252,7 +252,9 @@ def start_terminal_interface(interpreter):
             sys.argv.remove(old_flag)
             sys.argv.append(new_flag)
 
-    parser = argparse.ArgumentParser(description="Open Interpreter")
+    parser = argparse.ArgumentParser(
+        description="Open Interpreter", usage="%(prog)s [options]"
+    )
 
     # Add arguments
     for arg in arguments:
@@ -260,48 +262,30 @@ def start_terminal_interface(interpreter):
         nickname = arg.get("nickname")
         default = arg.get("default")
 
+        # Construct argument name flags
+        flags = (
+            [f"-{nickname}", f'--{arg["name"]}'] if nickname else [f'--{arg["name"]}']
+        )
+
         if arg["type"] == bool:
-            if nickname:
-                parser.add_argument(
-                    f"-{nickname}",
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    action=action,
-                    default=default,
-                )
-            else:
-                parser.add_argument(
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    action=action,
-                    default=default,
-                )
+            parser.add_argument(
+                *flags,
+                dest=arg["name"],
+                help=arg["help_text"],
+                action=action,
+                default=default,
+            )
         else:
             choices = arg.get("choices")
-
-            if nickname:
-                parser.add_argument(
-                    f"-{nickname}",
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    type=arg["type"],
-                    choices=choices,
-                    default=default,
-                    nargs=arg.get("nargs"),
-                )
-            else:
-                parser.add_argument(
-                    f'--{arg["name"]}',
-                    dest=arg["name"],
-                    help=arg["help_text"],
-                    type=arg["type"],
-                    choices=choices,
-                    default=default,
-                    nargs=arg.get("nargs"),
-                )
+            parser.add_argument(
+                *flags,
+                dest=arg["name"],
+                help=arg["help_text"],
+                type=arg["type"],
+                choices=choices,
+                default=default,
+                nargs=arg.get("nargs"),
+            )
 
     args, unknown_args = parser.parse_known_args()
 
