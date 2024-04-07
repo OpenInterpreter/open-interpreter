@@ -57,7 +57,7 @@ class OpenInterpreter:
             "let me know what you'd like to do next.",
             "please provide more information.",
         ],
-        anonymous_telemetry=os.getenv("ANONYMIZED_TELEMETRY", "True") == "True",
+        disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true",
         in_terminal_interface=False,
         conversation_history=True,
         conversation_filename=None,
@@ -87,7 +87,7 @@ class OpenInterpreter:
         self.max_output = max_output
         self.safe_mode = safe_mode
         self.shrink_images = shrink_images
-        self.anonymous_telemetry = anonymous_telemetry
+        self.disable_telemetry = disable_telemetry
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
 
@@ -132,10 +132,14 @@ class OpenInterpreter:
         # Return new messages
         return self.messages[self.last_messages_count :]
 
+    @property
+    def anonymous_telemetry(self) -> bool:
+        return not self.disable_telemetry and not self.offline
+
     def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
             self.responding = True
-            if self.anonymous_telemetry and not self.offline:
+            if self.anonymous_telemetry:
                 message_type = type(
                     message
                 ).__name__  # Only send message type, no content
@@ -168,7 +172,7 @@ class OpenInterpreter:
 
         except Exception as e:
             self.responding = False
-            if self.anonymous_telemetry and not self.offline:
+            if self.anonymous_telemetry:
                 message_type = type(message).__name__
                 send_telemetry(
                     "errored",
