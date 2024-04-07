@@ -3,7 +3,7 @@
 # Remove the "#" before the settings below to use them.
 
 llm:
-  model: "gpt-4"
+  model: "gpt-4-turbo-preview"
   temperature: 0
   # api_key: ...  # Your API key, if the API requires it
   # api_base: ...  # The URL where an OpenAI-compatible server is running to handle LLM API requests

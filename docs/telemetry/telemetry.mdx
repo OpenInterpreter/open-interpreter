@@ -12,11 +12,11 @@ If you prefer to opt out of telemetry, you can do this in two ways.
 
 ### Python
 
-Set `anonymized_telemetry` to `false` on the `interpreter` object:
+Set `disable_telemetry` to `true` on the `interpreter` object:
 
 ```python
 from interpreter import interpreter
-interpreter.anonymized_telemetry = False
+interpreter.disable_telemetry = True
 ```
 
 ### Terminal
@@ -29,20 +29,20 @@ interpreter --disable_telemetry
 
 ### Configuration File
 
-Set `anonymized_telemetry` to `false`. This will persist to future terminal sessions:
+Set `disable_telemetry` to `true`. This will persist to future terminal sessions:
 
 ```yaml
-anonymized_telemetry: false
+disable_telemetry: true
 ```
 
 ### Environment Variables
 
-Set `ANONYMIZED_TELEMETRY` to `False` in your shell or server environment.
+Set `DISABLE_TELEMETRY` to `true` in your shell or server environment.
 
 If you are running Open Interpreter on your local computer with `docker-compose` you can set this value in an `.env` file placed in the same directory as the `docker-compose.yml` file:
 
 ```
-ANONYMIZED_TELEMETRY=False
+DISABLE_TELEMETRY=true
 ```
 
 # What do you track?

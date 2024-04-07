@@ -53,18 +53,10 @@ def terminal_interface(interpreter, message):
 
     history = history_autosaver()  # Will stop when goes out of context
     while True:
-        try:
-            if interactive:
-                ### This is the primary input for Open Interpreter.
-
-                message = cli_input("> ", interpreter.multi_line).strip()
-                history.add(message)  # Maybe move this in cli_input?
-
-        except KeyboardInterrupt:
-            # Exit gracefully
-            # Disconnect from the computer interface
-            interpreter.computer.terminate()
-            break
+        if interactive:
+            ### This is the primary input for Open Interpreter.
+            message = cli_input("> ", interpreter.multi_line).strip()
+            history.add(message)  # Maybe move this in cli_input?
 
         if isinstance(message, str):
             # This is for the terminal interface being used as a CLI — messages are strings.
