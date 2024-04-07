@@ -13,6 +13,7 @@ interpreter.llm.context_window = 110000
 interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True
 interpreter.force_task_completion = True
+interpreter.sync_computer = True
 
 interpreter.system_message = r"""
 

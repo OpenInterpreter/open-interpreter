@@ -37,12 +37,8 @@ class Terminal:
         return None
 
     def run(self, language, code, stream=False, display=False):
-        if (
-            language == "python"
-            and self.computer.import_computer_api
-            and "computer" in code
-        ):
-            if not self.computer._has_imported_computer_api:
+        if language == "python":
+            if self.computer.import_computer_api and not self.computer._has_imported_computer_api and "computer" in code:
                 self.computer._has_imported_computer_api = True
                 # Give it access to the computer via Python
                 self.computer.run(
@@ -50,6 +46,10 @@ class Terminal:
                     code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
                     display=self.computer.verbose,
                 )
+
+            if self.computer.import_skills and not self.computer._has_imported_skills:
+                self.computer._has_imported_skills = True
+                self.computer.skills.import_skills()
 
         if stream == False:
             # If stream == False, *pull* from _streaming_run.

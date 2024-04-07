@@ -68,10 +68,10 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         computer=None,
-        sync_computer=True,
+        sync_computer=False,
         import_computer_api=False,
         skills_path=None,
-        import_skills=True,
+        import_skills=False,
         multi_line=False,
     ):
         # State
@@ -114,7 +114,6 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer(self) if computer is None else computer
-
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
 
@@ -122,11 +121,7 @@ class OpenInterpreter:
         if skills_path:
             self.computer.skills.path = skills_path
 
-        self.import_skills = import_skills
-        if import_skills:
-            if self.verbose:
-                print("Importing skills")
-            self.computer.skills.import_skills()
+        self.computer.import_skills = import_skills
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
@@ -242,9 +237,11 @@ class OpenInterpreter:
             if self.conversation_history:
                 # If it's the first message, set the conversation name
                 if not self.conversation_filename:
-                    first_few_words = "_".join(
-                        self.messages[0]["content"][:25].split(" ")[:-1]
-                    )
+                    first_few_words_list = self.messages[0]["content"][:25].split(" ")
+                    if len(first_few_words_list) >= 2:  # for languages like English with blank between words
+                        first_few_words = "_".join(first_few_words_list[:-1])
+                    else:  # for languages like Chinese without blank between words
+                        first_few_words = self.messages[0]["content"][:15]
                     for char in '<>:"/\\|?*!':  # Invalid characters for filenames
                         first_few_words = first_few_words.replace(char, "")
 
@@ -356,6 +353,7 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
+        self.computer._has_imported_computer_api = False  # Flag reset
         self.messages = []
         self.last_messages_count = 0
 
