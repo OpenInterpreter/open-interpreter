@@ -257,6 +257,7 @@ def start_terminal_interface(interpreter):
 
     # Add arguments
     for arg in arguments:
+        default = arg.get("default")
         action = arg.get("action", "store_true")
         nickname = arg.get("nickname")
         default = arg.get("default")
