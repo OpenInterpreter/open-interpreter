@@ -260,7 +260,6 @@ def start_terminal_interface(interpreter):
         default = arg.get("default")
         action = arg.get("action", "store_true")
         nickname = arg.get("nickname")
-        default = arg.get("default")
 
         name_or_flags = [f'--{arg["name"]}']
         if nickname:
