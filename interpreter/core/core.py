@@ -42,7 +42,7 @@ class OpenInterpreter:
 
     def __init__(
         self,
-        messages: str | None = None,
+        messages: list[dict[str, Any]] | None = None,
         offline: bool = False,
         auto_run: bool = False,
         verbose: bool = False,
@@ -58,22 +58,22 @@ class OpenInterpreter:
             "let me know what you'd like to do next.",
             "please provide more information.",
         ],
-        anonymous_telemetry: bool = bool(os.getenv("ANONYMIZED_TELEMETRY", True))
+        disable_telemetry: bool = bool(os.getenv("DISABLE_TELEMETRY", "false").lower())
         == True,
         in_terminal_interface: bool = False,
         conversation_history: bool = True,
-        conversation_filename: bool = None,
+        conversation_filename: str | None = None,
         conversation_history_path: str = get_storage_path("conversations"),
         os: bool = False,
         speak_messages: bool = False,
-        llm: Llm = None,
-        system_message=default_system_message,
-        custom_instructions="",
+        llm: Llm | None = None,
+        system_message: str = default_system_message,
+        custom_instructions: str = "",
         computer: Computer | None = None,
         sync_computer: bool = True,
         import_computer_api: bool = False,
-        skills_path=None,
-        import_skills: bool = True,
+        skills_path: str | None = None,
+        import_skills: bool = False,
         multi_line: bool = False,
     ):
         # State
@@ -89,7 +89,7 @@ class OpenInterpreter:
         self.max_output = max_output
         self.safe_mode = safe_mode
         self.shrink_images = shrink_images
-        self.anonymous_telemetry = anonymous_telemetry
+        self.disable_telemetry = disable_telemetry
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
 
@@ -116,7 +116,6 @@ class OpenInterpreter:
 
         # Computer
         self.computer = Computer(self) if computer is None else computer
-
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
 
@@ -124,11 +123,7 @@ class OpenInterpreter:
         if skills_path:
             self.computer.skills.path = skills_path
 
-        self.import_skills = import_skills
-        if import_skills:
-            if self.verbose:
-                print("Importing skills")
-            self.computer.skills.import_skills()
+        self.computer.import_skills = import_skills
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
@@ -139,16 +134,20 @@ class OpenInterpreter:
         # Return new messages
         return self.messages[self.last_messages_count :]
 
+    @property
+    def anonymous_telemetry(self) -> bool:
+        return not self.disable_telemetry and not self.offline
+
     def chat(
         self,
         message: str | None = None,
         display: bool = True,
         stream: bool = False,
         blocking: bool = True,
-    ) -> list[dict[str, Any]] | str:
+    ):
         try:
             self.responding = True
-            if self.anonymous_telemetry and not self.offline:
+            if self.anonymous_telemetry:
                 message_type = type(
                     message
                 ).__name__  # Only send message type, no content
@@ -181,7 +180,7 @@ class OpenInterpreter:
 
         except Exception as e:
             self.responding = False
-            if self.anonymous_telemetry and not self.offline:
+            if self.anonymous_telemetry:
                 message_type = type(message).__name__
                 send_telemetry(
                     "errored",
@@ -246,9 +245,13 @@ class OpenInterpreter:
             if self.conversation_history:
                 # If it's the first message, set the conversation name
                 if not self.conversation_filename:
-                    first_few_words = "_".join(
-                        self.messages[0]["content"][:25].split(" ")[:-1]
-                    )
+                    first_few_words_list = self.messages[0]["content"][:25].split(" ")
+                    if (
+                        len(first_few_words_list) >= 2
+                    ):  # for languages like English with blank between words
+                        first_few_words = "_".join(first_few_words_list[:-1])
+                    else:  # for languages like Chinese without blank between words
+                        first_few_words = self.messages[0]["content"][:15]
                     for char in '<>:"/\\|?*!':  # Invalid characters for filenames
                         first_few_words = first_few_words.replace(char, "")
 
@@ -281,7 +284,7 @@ class OpenInterpreter:
         """
 
         # Utility function
-        def is_active_line_chunk(chunk):
+        def is_active_line_chunk(chunk: dict[str, Any]) -> bool:
             return "format" in chunk and chunk["format"] == "active_line"
 
         last_flag_base = None
@@ -360,10 +363,11 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
+        self.computer._has_imported_computer_api = False  # Flag reset
         self.messages = []
         self.last_messages_count = 0
 
-    def display_message(self, markdown):
+    def display_message(self, markdown: str):
         # This is just handy for start_script in profiles.
         display_markdown_message(markdown)
 

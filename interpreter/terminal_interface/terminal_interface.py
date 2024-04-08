@@ -75,27 +75,20 @@ def terminal_interface(interpreter: OpenInterpreter, message: str):
     voice_subprocess = None
 
     while True:
-        try:
-            if interactive:
-                ### This is the primary input for Open Interpreter.
-                message = (
-                    cli_input("> ").strip()
-                    if interpreter.multi_line
-                    else input("> ").strip()
-                )
+        if interactive:
+            ### This is the primary input for Open Interpreter.
+            message = (
+                cli_input("> ").strip()
+                if interpreter.multi_line
+                else input("> ").strip()
+            )
 
-                try:
-                    # This lets users hit the up arrow key for past messages
-                    readline.add_history(message)
-                except Exception:
-                    # If the user doesn't have readline (may be the case on windows), that's fine
-                    pass
-
-        except KeyboardInterrupt:
-            # Exit gracefully
-            # Disconnect from the computer interface
-            interpreter.computer.terminate()
-            break
+            try:
+                # This lets users hit the up arrow key for past messages
+                readline.add_history(message)
+            except Exception:
+                # If the user doesn't have readline (may be the case on windows), that's fine
+                pass
 
         if isinstance(message, str):  # type: ignore
             # This is for the terminal interface being used as a CLI — messages are strings.
@@ -151,13 +144,12 @@ def terminal_interface(interpreter: OpenInterpreter, message: str):
 
                 # Comply with PyAutoGUI fail-safe for OS mode
                 # so people can turn it off by moving their mouse to a corner
-                if interpreter.os:
-                    if (
-                        chunk.get("format") == "output"
-                        and "failsafeexception" in chunk["content"].lower()
-                    ):
-                        print("Fail-safe triggered (mouse in one of the four corners).")
-                        break
+                if interpreter.os and (
+                    chunk.get("format") == "output"
+                    and "failsafeexception" in chunk["content"].lower()
+                ):
+                    print("Fail-safe triggered (mouse in one of the four corners).")
+                    break
 
                 if "end" in chunk and active_block:
                     active_block.refresh(cursor=False)
@@ -248,7 +240,7 @@ def terminal_interface(interpreter: OpenInterpreter, message: str):
 
                         should_scan_code = False
 
-                        if not interpreter.safe_mode == "off":
+                        if interpreter.safe_mode != "off":
                             if interpreter.safe_mode == "auto":
                                 should_scan_code = True
                             elif interpreter.safe_mode == "ask":
@@ -423,11 +415,10 @@ def terminal_interface(interpreter: OpenInterpreter, message: str):
                     active_block.refresh(cursor=render_cursor)
 
             # (Sometimes -- like if they CTRL-C quickly -- active_block is still None here)
-            if "active_block" in locals():
-                if active_block:
-                    active_block.end()
-                    active_block = None
-                    time.sleep(0.1)
+            if "active_block" in locals() and active_block:
+                active_block.end()
+                active_block = None
+                time.sleep(0.1)
 
             if not interactive:
                 # Don't loop
