@@ -108,14 +108,14 @@ class OpenInterpreter:
         self.speak_messages = speak_messages
 
         # LLM
-        self.llm = Llm(self) if llm is None else llm
+        self.llm: Llm = Llm(self) if llm is None else llm
 
         # These are LLM related
         self.system_message = system_message
         self.custom_instructions = custom_instructions
 
         # Computer
-        self.computer = Computer(self) if computer is None else computer
+        self.computer: Computer = Computer(self) if computer is None else computer
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
 
@@ -194,7 +194,9 @@ class OpenInterpreter:
 
             raise
 
-    def _streaming_chat(self, message: str | None = None, display: bool = True):
+    def _streaming_chat(
+        self, message: str | dict[str, Any] | None = None, display: bool = True
+    ):
         # Sometimes a little more code -> a much better experience!
         # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
@@ -273,7 +275,7 @@ class OpenInterpreter:
                     json.dump(self.messages, f)
             return
 
-        raise Exception(
+        raise RuntimeError(
             "`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`."
         )
 

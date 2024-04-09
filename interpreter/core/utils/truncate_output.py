@@ -1,3 +1,6 @@
+from typing import Any
+
+
 def truncate_output(data: str, max_output_chars: int = 2000):
     needs_truncation = False
 
