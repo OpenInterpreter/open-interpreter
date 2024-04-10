@@ -216,7 +216,7 @@ if missing_packages:
         print("Attempting to start OS control anyway...\n\n")
 
     for pip_name in ["pip", "pip3"]:
-        command = f"{pip_name} install 'open-interpreter[os]'"
+        command = f"{pip_name} install open-interpreter[os]"
 
         interpreter.computer.run("shell", command, display=True)
 
