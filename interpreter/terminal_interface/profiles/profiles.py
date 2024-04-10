@@ -26,7 +26,7 @@ default_profiles_paths = glob.glob(os.path.join(oi_default_profiles_path, "*"))
 default_profiles_names = [os.path.basename(path) for path in default_profiles_paths]
 
 # Constant to hold the version number
-OI_VERSION = "0.2.1"
+OI_VERSION = "0.2.5"
 
 
 def profile(interpreter, filename_or_url):

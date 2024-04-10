@@ -353,11 +353,21 @@ def start_terminal_interface(interpreter):
 
     ### Set some helpful settings we know are likely to be true
 
-    if interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith(
+    if interpreter.llm.model == "gpt-4" or interpreter.llm.model == "openai/gpt-4":
+        if interpreter.llm.context_window is None:
+            interpreter.llm.context_window = 6500
+        if interpreter.llm.max_tokens is None:
+            interpreter.llm.max_tokens = 4096
+        if interpreter.llm.supports_functions is None:
+            interpreter.llm.supports_functions = (
+                False if "vision" in interpreter.llm.model else True
+            )
+
+    elif interpreter.llm.model.startswith("gpt-4") or interpreter.llm.model.startswith(
         "openai/gpt-4"
     ):
         if interpreter.llm.context_window is None:
-            interpreter.llm.context_window = 128000
+            interpreter.llm.context_window = 123000
         if interpreter.llm.max_tokens is None:
             interpreter.llm.max_tokens = 4096
         if interpreter.llm.supports_functions is None:
