@@ -161,6 +161,24 @@ def apply_profile(interpreter, profile, profile_path):
             migrate_user_app_directory()
             print("Migration complete.")
             print("")
+            if profile_path.endswith("default.yaml"):
+                with open(profile_path, "r") as file:
+                    text = file.read()
+                text = text.replace("version: " + str(profile["version"]), f"version: {OI_VERSION}")
+
+                try:
+                    if profile["llm"]["model"] == "gpt-4":
+                        text = text.replace("gpt-4", "gpt-4-turbo")
+                        profile["llm"]["model"] = "gpt-4-turbo"
+                    elif profile["llm"]["model"] == "gpt-4-turbo-preview":
+                        text = text.replace("gpt-4-turbo-preview", "gpt-4-turbo")
+                        profile["llm"]["model"] = "gpt-4-turbo"
+                except:
+                    raise
+                    pass # fine
+
+                with open(profile_path, "w") as file:
+                    file.write(text)
         else:
             print("Skipping loading profile...")
             print("")
