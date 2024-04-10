@@ -1636,13 +1636,13 @@ files = [
 
 [[package]]
 name = "litellm"
-version = "1.34.28"
+version = "1.34.22"
 description = "Library to easily interface with LLM API providers"
 optional = false
 python-versions = "!=2.7.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,!=3.7.*,>=3.8"
 files = [
-    {file = "litellm-1.34.28-py3-none-any.whl", hash = "sha256:1e175b5a3e07b133535a3c42b1249cd16db04b820a2adedfa7fdc5badec8eaef"},
-    {file = "litellm-1.34.28.tar.gz", hash = "sha256:734e193d6567a8a41db859d0053386ca234821e689c7ba921a3604d766b5a90a"},
+    {file = "litellm-1.34.22-py3-none-any.whl", hash = "sha256:0e573d56d762f4060c53493da4a08c48034b5bb5ba22e34517065739adfd9154"},
+    {file = "litellm-1.34.22.tar.gz", hash = "sha256:ca50ede3ca8d3f9dc2765ca13cf2ff5c4e4b9afb4db222f9d7cb9ee838b6180f"},
 ]
 
 [package.dependencies]
@@ -6566,13 +6566,13 @@ wcmatch = ">=8.3,<9.0"
 
 [[package]]
 name = "send2trash"
-version = "1.8.2"
+version = "1.8.3"
 description = "Send file to trash natively under Mac OS X, Windows and Linux"
 optional = false
-python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 files = [
-    {file = "Send2Trash-1.8.2-py3-none-any.whl", hash = "sha256:a384719d99c07ce1eefd6905d2decb6f8b7ed054025bb0e618919f945de4f679"},
-    {file = "Send2Trash-1.8.2.tar.gz", hash = "sha256:c132d59fa44b9ca2b1699af5c86f57ce9f4c5eb56629d5d55fbb7a35f84e2312"},
+    {file = "Send2Trash-1.8.3-py3-none-any.whl", hash = "sha256:0c31227e0bd08961c7665474a3d1ef7193929fedda4233843689baa056be46c9"},
+    {file = "Send2Trash-1.8.3.tar.gz", hash = "sha256:b18e7a3966d99871aefeb00cfbcfdced55ce4871194810fc71f4aa484b953abf"},
 ]
 
 [package.extras]
@@ -7484,4 +7484,4 @@ safe = ["semgrep", "yaspin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "1745080063b165e0ae29150c633225ced75388806f293e89e5dfecb6fabaddd0"
+content-hash = "ddbc1388511c314f899ef01b4bd4519461d2e451060db37426edb9aed6f3152f"
