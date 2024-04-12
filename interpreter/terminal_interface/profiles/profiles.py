@@ -26,7 +26,7 @@ default_profiles_paths = glob.glob(os.path.join(oi_default_profiles_path, "*"))
 default_profiles_names = [os.path.basename(path) for path in default_profiles_paths]
 
 # Constant to hold the version number
-OI_VERSION = "0.2.1"
+OI_VERSION = "0.2.5"
 
 
 def profile(interpreter, filename_or_url):
@@ -161,6 +161,24 @@ def apply_profile(interpreter, profile, profile_path):
             migrate_user_app_directory()
             print("Migration complete.")
             print("")
+            if profile_path.endswith("default.yaml"):
+                with open(profile_path, "r") as file:
+                    text = file.read()
+                text = text.replace("version: " + str(profile["version"]), f"version: {OI_VERSION}")
+
+                try:
+                    if profile["llm"]["model"] == "gpt-4":
+                        text = text.replace("gpt-4", "gpt-4-turbo")
+                        profile["llm"]["model"] = "gpt-4-turbo"
+                    elif profile["llm"]["model"] == "gpt-4-turbo-preview":
+                        text = text.replace("gpt-4-turbo-preview", "gpt-4-turbo")
+                        profile["llm"]["model"] = "gpt-4-turbo"
+                except:
+                    raise
+                    pass # fine
+
+                with open(profile_path, "w") as file:
+                    file.write(text)
         else:
             print("Skipping loading profile...")
             print("")

@@ -26,16 +26,6 @@ class JupyterLanguage(BaseLanguage):
 
     def __init__(self, computer):
         self.computer = computer
-        # Filter out the following messages from IPKernelApp, to prevent the logs from showing up anytime someone presses CTRL+C
-        if not DEBUG_MODE:
-            ipkernel_logger = logging.getLogger('IPKernelApp')
-            # Create a filter using a lambda function
-            warning_filter = lambda record: not any(msg in record.getMessage() for msg in [
-                "Parent appears to have exited, shutting down.",
-                "Could not destroy zmq context"
-            ])
-            # Add the filter to the logger
-            ipkernel_logger.addFilter(warning_filter)
             
         self.km = KernelManager(kernel_name="python3")
         self.km.start_kernel()
