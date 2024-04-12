@@ -1,5 +1,4 @@
 import re
-import time
 
 
 def render_message(interpreter, message):
@@ -13,8 +12,7 @@ def render_message(interpreter, message):
     # Split the message into parts by {{ and }}, including multi-line strings
     parts = re.split(r"({{.*?}})", message, flags=re.DOTALL)
 
-    for i in range(len(parts)):
-        part = parts[i]
+    for i, part in enumerate(parts):
         # If the part is enclosed in {{ and }}
         if part.startswith("{{") and part.endswith("}}"):
             # Run the code inside the brackets
@@ -22,22 +20,11 @@ def render_message(interpreter, message):
                 "python", part[2:-2].strip(), display=interpreter.verbose
             )
 
-            # Turn it into just a simple string
-            outputs = []
-            for line in output:
-                if interpreter.debug:
-                    print(line)
-                if line.get("format") == "output":
-                    if "IGNORE_ALL_ABOVE_THIS_LINE" in line["content"]:
-                        outputs.append(
-                            line["content"].split("IGNORE_ALL_ABOVE_THIS_LINE")[1]
-                        )
-                    else:
-                        outputs.append(line["content"])
-            output = "\n".join(outputs)
+            # Extract the output content
+            outputs = (line["content"] for line in output if line.get("format") == "output" and "IGNORE_ALL_ABOVE_THIS_LINE" not in line["content"])
 
             # Replace the part with the output
-            parts[i] = output
+            parts[i] = "\n".join(outputs)
 
     # Join the parts back into the message
     rendered_message = "".join(parts).strip()
