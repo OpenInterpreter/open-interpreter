@@ -1,7 +1,8 @@
 import importlib.util
 import sys
 
-def lazy_import(name, optional=True):
+
+def lazy_import(name: str, optional: bool = True):
     """Lazily import a module, specified by the name. Useful for optional packages, to speed up startup times."""
     # Check if module is already imported
     if name in sys.modules:

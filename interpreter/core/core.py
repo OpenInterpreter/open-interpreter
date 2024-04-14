@@ -7,6 +7,7 @@ import os
 import threading
 import time
 from datetime import datetime
+from typing import Any
 
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
@@ -41,41 +42,42 @@ class OpenInterpreter:
 
     def __init__(
         self,
-        messages=None,
-        offline=False,
-        auto_run=False,
-        verbose=False,
-        debug=False,
-        max_output=2800,
-        safe_mode="off",
-        shrink_images=False,
-        force_task_completion=False,
-        force_task_completion_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
-        force_task_completion_breakers=[
+        messages: list[dict[str, Any]] | None = None,
+        offline: bool = False,
+        auto_run: bool = False,
+        verbose: bool = False,
+        debug: bool = False,
+        max_output: int = 2800,
+        safe_mode: str = "off",
+        shrink_images: bool = False,
+        force_task_completion: bool = False,
+        force_task_completion_message: str = """Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
+        force_task_completion_breakers: list[str] = [
             "the task is done.",
             "the task is impossible.",
             "let me know what you'd like to do next.",
             "please provide more information.",
         ],
-        disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true",
-        in_terminal_interface=False,
-        conversation_history=True,
-        conversation_filename=None,
-        conversation_history_path=get_storage_path("conversations"),
-        os=False,
-        speak_messages=False,
-        llm=None,
-        system_message=default_system_message,
-        custom_instructions="",
-        computer=None,
-        sync_computer=False,
-        import_computer_api=False,
-        skills_path=None,
-        import_skills=False,
-        multi_line=False,
+        disable_telemetry: bool = bool(os.getenv("DISABLE_TELEMETRY", "false").lower())
+        == True,
+        in_terminal_interface: bool = False,
+        conversation_history: bool = True,
+        conversation_filename: str | None = None,
+        conversation_history_path: str = get_storage_path("conversations"),
+        os: bool = False,
+        speak_messages: bool = False,
+        llm: Llm | None = None,
+        system_message: str = default_system_message,
+        custom_instructions: str = "",
+        computer: Computer | None = None,
+        sync_computer: bool = True,
+        import_computer_api: bool = False,
+        skills_path: str | None = None,
+        import_skills: bool = False,
+        multi_line: bool = False,
     ):
         # State
-        self.messages = [] if messages is None else messages
+        self.messages: list[dict[str, Any]] = [] if messages is None else messages
         self.responding = False
         self.last_messages_count = 0
 
@@ -106,14 +108,14 @@ class OpenInterpreter:
         self.speak_messages = speak_messages
 
         # LLM
-        self.llm = Llm(self) if llm is None else llm
+        self.llm: Llm = Llm(self) if llm is None else llm
 
         # These are LLM related
         self.system_message = system_message
         self.custom_instructions = custom_instructions
 
         # Computer
-        self.computer = Computer(self) if computer is None else computer
+        self.computer: Computer = Computer(self) if computer is None else computer
         self.sync_computer = sync_computer
         self.computer.import_computer_api = import_computer_api
 
@@ -136,7 +138,13 @@ class OpenInterpreter:
     def anonymous_telemetry(self) -> bool:
         return not self.disable_telemetry and not self.offline
 
-    def chat(self, message=None, display=True, stream=False, blocking=True):
+    def chat(
+        self,
+        message: str | None = None,
+        display: bool = True,
+        stream: bool = False,
+        blocking: bool = True,
+    ):
         try:
             self.responding = True
             if self.anonymous_telemetry:
@@ -186,7 +194,9 @@ class OpenInterpreter:
 
             raise
 
-    def _streaming_chat(self, message=None, display=True):
+    def _streaming_chat(
+        self, message: str | dict[str, Any] | None = None, display: bool = True
+    ):
         # Sometimes a little more code -> a much better experience!
         # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
@@ -238,7 +248,9 @@ class OpenInterpreter:
                 # If it's the first message, set the conversation name
                 if not self.conversation_filename:
                     first_few_words_list = self.messages[0]["content"][:25].split(" ")
-                    if len(first_few_words_list) >= 2:  # for languages like English with blank between words
+                    if (
+                        len(first_few_words_list) >= 2
+                    ):  # for languages like English with blank between words
                         first_few_words = "_".join(first_few_words_list[:-1])
                     else:  # for languages like Chinese without blank between words
                         first_few_words = self.messages[0]["content"][:15]
@@ -263,7 +275,7 @@ class OpenInterpreter:
                     json.dump(self.messages, f)
             return
 
-        raise Exception(
+        raise RuntimeError(
             "`interpreter.chat()` requires a display. Set `display=True` or pass a message into `interpreter.chat(message)`."
         )
 
@@ -274,7 +286,7 @@ class OpenInterpreter:
         """
 
         # Utility function
-        def is_active_line_chunk(chunk):
+        def is_active_line_chunk(chunk: dict[str, Any]) -> bool:
             return "format" in chunk and chunk["format"] == "active_line"
 
         last_flag_base = None
@@ -357,7 +369,7 @@ class OpenInterpreter:
         self.messages = []
         self.last_messages_count = 0
 
-    def display_message(self, markdown):
+    def display_message(self, markdown: str):
         # This is just handy for start_script in profiles.
         display_markdown_message(markdown)
 

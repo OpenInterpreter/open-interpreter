@@ -3,11 +3,13 @@ import json
 from typing import Generator
 
 import uvicorn
-from fastapi import Body, FastAPI, Request, Response, WebSocket
-from fastapi.responses import PlainTextResponse, StreamingResponse
+from fastapi import FastAPI, Request, Response, WebSocket
+from fastapi.responses import PlainTextResponse
+
+from interpreter.core.core import OpenInterpreter
 
 
-def server(interpreter, host="0.0.0.0", port=8000):
+def server(interpreter: OpenInterpreter, host: str = "0.0.0.0", port: int = 8000):
     app = FastAPI()
 
     @app.post("/chat")

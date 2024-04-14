@@ -1,4 +1,9 @@
-def run_text_llm(llm, params):
+from typing import Any
+
+from interpreter.core.llm.llm import Llm
+
+
+def run_text_llm(llm: Llm, params: dict[str, Any]):
     ## Setup
 
     if llm.interpreter.computer.terminal.languages != []:

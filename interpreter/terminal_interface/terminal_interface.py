@@ -15,6 +15,8 @@ import re
 import subprocess
 import time
 
+from interpreter.core.core import OpenInterpreter
+
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
 from ..core.utils.truncate_output import truncate_output
@@ -22,10 +24,10 @@ from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
 from .utils.check_for_package import check_for_package
+from .utils.cli_input import cli_input
 from .utils.display_markdown_message import display_markdown_message
 from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
-from .utils.cli_input import cli_input
 
 # Add examples to the readline history
 examples = [
@@ -39,12 +41,12 @@ random.shuffle(examples)
 try:
     for example in examples:
         readline.add_history(example)
-except:
+except Exception:
     # If they don't have readline, that's fine
     pass
 
 
-def terminal_interface(interpreter, message):
+def terminal_interface(interpreter: OpenInterpreter, message: str):
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -75,16 +77,20 @@ def terminal_interface(interpreter, message):
     while True:
         if interactive:
             ### This is the primary input for Open Interpreter.
-            message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
+            message = (
+                cli_input("> ").strip()
+                if interpreter.multi_line
+                else input("> ").strip()
+            )
 
             try:
                 # This lets users hit the up arrow key for past messages
                 readline.add_history(message)
-            except:
+            except Exception:
                 # If the user doesn't have readline (may be the case on windows), that's fine
                 pass
 
-        if isinstance(message, str):
+        if isinstance(message, str):  # type: ignore
             # This is for the terminal interface being used as a CLI — messages are strings.
             # This won't fire if they're in the python package, display=True, and they passed in an array of messages (for example).
 
@@ -138,13 +144,12 @@ def terminal_interface(interpreter, message):
 
                 # Comply with PyAutoGUI fail-safe for OS mode
                 # so people can turn it off by moving their mouse to a corner
-                if interpreter.os:
-                    if (
-                        chunk.get("format") == "output"
-                        and "failsafeexception" in chunk["content"].lower()
-                    ):
-                        print("Fail-safe triggered (mouse in one of the four corners).")
-                        break
+                if interpreter.os and (
+                    chunk.get("format") == "output"
+                    and "failsafeexception" in chunk["content"].lower()
+                ):
+                    print("Fail-safe triggered (mouse in one of the four corners).")
+                    break
 
                 if "end" in chunk and active_block:
                     active_block.refresh(cursor=False)
@@ -235,7 +240,7 @@ def terminal_interface(interpreter, message):
 
                         should_scan_code = False
 
-                        if not interpreter.safe_mode == "off":
+                        if interpreter.safe_mode != "off":
                             if interpreter.safe_mode == "auto":
                                 should_scan_code = True
                             elif interpreter.safe_mode == "ask":
@@ -410,11 +415,10 @@ def terminal_interface(interpreter, message):
                     active_block.refresh(cursor=render_cursor)
 
             # (Sometimes -- like if they CTRL-C quickly -- active_block is still None here)
-            if "active_block" in locals():
-                if active_block:
-                    active_block.end()
-                    active_block = None
-                    time.sleep(0.1)
+            if "active_block" in locals() and active_block:
+                active_block.end()
+                active_block = None
+                time.sleep(0.1)
 
             if not interactive:
                 # Don't loop

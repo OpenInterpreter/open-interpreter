@@ -13,12 +13,12 @@ class BaseBlock:
         )
         self.live.start()
 
-    def update_from_message(self, message):
+    def update_from_message(self, message: str):
         raise NotImplementedError("Subclasses must implement this method")
 
     def end(self):
         self.refresh(cursor=False)
         self.live.stop()
 
-    def refresh(self, cursor=True):
+    def refresh(self, cursor: bool = True):
         raise NotImplementedError("Subclasses must implement this method")

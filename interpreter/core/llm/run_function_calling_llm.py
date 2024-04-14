@@ -1,7 +1,11 @@
+from typing import Any
+
+from interpreter.core.llm.llm import Llm
+
 from .utils.merge_deltas import merge_deltas
 from .utils.parse_partial_json import parse_partial_json
 
-function_schema = {
+function_schema: dict[str, Any] = {
     "name": "execute",
     "description": "Executes code on the user's machine **in the users local environment** and returns the output",
     "parameters": {
@@ -21,7 +25,7 @@ function_schema = {
 }
 
 
-def run_function_calling_llm(llm, request_params):
+def run_function_calling_llm(llm: Llm, request_params: dict[str, Any]):
     ## Setup
 
     # Add languages OI has access to

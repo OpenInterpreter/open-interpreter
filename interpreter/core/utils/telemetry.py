@@ -12,6 +12,7 @@ based on ChromaDB's telemetry: https://github.com/chroma-core/chroma/tree/main/c
 import contextlib
 import os
 import uuid
+from typing import Any
 
 import pkg_resources
 from posthog import Posthog
@@ -38,7 +39,7 @@ def get_or_create_uuid():
             with open(uuid_file_path, "w") as file:
                 file.write(new_uuid)
             return new_uuid
-    except:
+    except Exception:
         # Non blocking
         return "idk"
 
@@ -46,7 +47,7 @@ def get_or_create_uuid():
 user_id = get_or_create_uuid()
 
 
-def send_telemetry(event_name, properties=None):
+def send_telemetry(event_name: str, properties: dict[str, Any] | None = None):
     try:
         if properties == None:
             properties = {}
@@ -57,6 +58,6 @@ def send_telemetry(event_name, properties=None):
             f
         ), contextlib.redirect_stderr(f):
             posthog.capture(user_id, event_name, properties)
-    except:
+    except Exception:
         # Non blocking
         pass

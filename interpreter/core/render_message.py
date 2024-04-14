@@ -1,8 +1,9 @@
 import re
-import time
+
+from interpreter.core.core import OpenInterpreter
 
 
-def render_message(interpreter, message):
+def render_message(interpreter: OpenInterpreter, message: str):
     """
     Renders a dynamic message into a string.
     """

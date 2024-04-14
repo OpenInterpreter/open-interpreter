@@ -9,14 +9,14 @@ import subprocess
 
 import inquirer
 
+from interpreter.core.core import OpenInterpreter
+
 from .render_past_conversation import render_past_conversation
 from .utils.display_markdown_message import display_markdown_message
 from .utils.local_storage_path import get_storage_path
 
 
-def conversation_navigator(interpreter):
-    import time
-
+def conversation_navigator(interpreter: OpenInterpreter):
     conversations_dir = get_storage_path("conversations")
 
     display_markdown_message(

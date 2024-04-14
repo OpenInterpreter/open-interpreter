@@ -20,7 +20,7 @@ class Os:
         self.computer.clipboard.copy(current_clipboard)
         return selected_text
 
-    def notify(self, text):
+    def notify(self, text: str):
         """
         Displays a notification on the computer.
         """
@@ -71,7 +71,7 @@ class Os:
                     import plyer
 
                     plyer.notification.notify(title=title, message=text)
-                except:
+                except Exception:
                     # Optional package
                     pass
         except Exception as e:

@@ -5,6 +5,8 @@ import pkg_resources
 import psutil
 import toml
 
+from interpreter.core.core import OpenInterpreter
+
 
 def get_python_version():
     return platform.python_version()
@@ -72,7 +74,7 @@ def get_package_mismatches(file_path="pyproject.toml"):
     return "\n" + "\n".join(mismatches)
 
 
-def interpreter_info(interpreter):
+def interpreter_info(interpreter: OpenInterpreter):
     try:
         if interpreter.offline and interpreter.llm.api_base:
             try:
@@ -121,7 +123,7 @@ def interpreter_info(interpreter):
         return "Error, couldn't get interpreter info"
 
 
-def system_info(interpreter):
+def system_info(interpreter: OpenInterpreter):
     oi_version = get_oi_version()
     print(
         f"""

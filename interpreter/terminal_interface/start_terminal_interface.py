@@ -12,7 +12,7 @@ from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
 
 
-def start_terminal_interface(interpreter):
+def start_terminal_interface(interpreter: OpenInterpreter):
     """
     Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
     """
@@ -345,7 +345,10 @@ def start_terminal_interface(interpreter):
 
     ### Apply profile
 
-    interpreter = profile(interpreter, args.profile or get_argument_dictionary(arguments, "profile")["default"])
+    interpreter = profile(
+        interpreter,
+        args.profile or get_argument_dictionary(arguments, "profile")["default"],
+    )
 
     ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
@@ -442,7 +445,14 @@ def set_attributes(args, arguments):
 
 
 def get_argument_dictionary(arguments: list[dict], key: str) -> dict:
-    if len(argument_dictionary_list := list(filter(lambda x: x["name"] == key, arguments))) > 0:
+    if (
+        len(
+            argument_dictionary_list := list(
+                filter(lambda x: x["name"] == key, arguments)
+            )
+        )
+        > 0
+    ):
         return argument_dictionary_list[0]
     return {}
 

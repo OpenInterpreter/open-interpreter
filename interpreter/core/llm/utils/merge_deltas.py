@@ -1,4 +1,7 @@
-def merge_deltas(original, delta):
+from typing import Any
+
+
+def merge_deltas(original: dict[str, Any], delta):
     """
     Pushes the delta into the original and returns that.
 

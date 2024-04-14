@@ -2,7 +2,7 @@ import os
 import tempfile
 
 
-def cleanup_temporary_file(temp_file_name, verbose=False):
+def cleanup_temporary_file(temp_file_name: str, verbose: bool = False):
     """
     clean up temporary file
     """
@@ -21,7 +21,9 @@ def cleanup_temporary_file(temp_file_name, verbose=False):
         print("")
 
 
-def create_temporary_file(contents, extension=None, verbose=False):
+def create_temporary_file(
+    contents: str, extension: str | None = None, verbose: bool = False
+):
     """
     create a temporary file with the given contents
     """

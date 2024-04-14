@@ -3,7 +3,7 @@ import sys
 
 
 # borrowed from: https://stackoverflow.com/a/1051266/656011
-def check_for_package(package):
+def check_for_package(package: str):
     if package in sys.modules:
         return True
     elif (spec := importlib.util.find_spec(package)) is not None:

@@ -3,11 +3,12 @@ import os
 import platform
 import subprocess
 import tempfile
+from typing import Any
 
 from .in_jupyter_notebook import in_jupyter_notebook
 
 
-def display_output(output):
+def display_output(output: dict[str, Any]):
     if in_jupyter_notebook():
         from IPython.display import HTML, Image, Javascript, display
 
@@ -34,7 +35,7 @@ def display_output(output):
     return "Displayed on the user's machine."
 
 
-def display_output_cli(output):
+def display_output_cli(output: dict[str, Any]):
     if output["type"] == "console":
         print(output["content"])
     elif output["type"] == "image":
@@ -72,7 +73,7 @@ def display_output_cli(output):
             open_file(tmp_file.name)
 
 
-def open_file(file_path):
+def open_file(file_path: str):
     try:
         if platform.system() == "Windows":
             os.startfile(file_path)

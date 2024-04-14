@@ -1,12 +1,14 @@
+from typing import Any
+
 try:
     import tiktoken
     from litellm import cost_per_token
-except:
+except Exception:
     # Non-essential feature
     pass
 
 
-def count_tokens(text="", model="gpt-4"):
+def count_tokens(text: str = "", model: str = "gpt-4"):
     """
     Count the number of tokens in a string
     """
@@ -25,12 +27,12 @@ def count_tokens(text="", model="gpt-4"):
             encoder = tiktoken.encoding_for_model("gpt-4")
 
         return len(encoder.encode(text))
-    except:
+    except Exception:
         # Non-essential feature
         return 0
 
 
-def token_cost(tokens=0, model="gpt-4"):
+def token_cost(tokens: int = 0, model: str = "gpt-4"):
     """
     Calculate the cost of the current number of tokens
     """
@@ -39,12 +41,14 @@ def token_cost(tokens=0, model="gpt-4"):
         (prompt_cost, _) = cost_per_token(model=model, prompt_tokens=tokens)
 
         return round(prompt_cost, 6)
-    except:
+    except Exception:
         # Non-essential feature
         return 0
 
 
-def count_messages_tokens(messages=[], model=None):
+def count_messages_tokens(
+    messages: list[dict[str, Any]] = [], model: str | None = None
+):
     """
     Count the number of tokens in a list of messages
     """
@@ -66,6 +70,6 @@ def count_messages_tokens(messages=[], model=None):
         prompt_cost = token_cost(tokens_used, model=model)
 
         return (tokens_used, prompt_cost)
-    except:
+    except Exception:
         # Non-essential feature
         return (0, 0)
