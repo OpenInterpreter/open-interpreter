@@ -12,7 +12,6 @@ from PIL import Image
 import requests
 from ...utils.lazy_import import lazy_import
 from ..utils.recipient_utils import format_to_recipient
-import cv2
 from screeninfo import get_monitors # for getting info about connected monitors
 
 
@@ -20,6 +19,7 @@ from screeninfo import get_monitors # for getting info about connected monitors
 # from utils.get_active_window import get_active_window
 
 # Lazy import of optional packages
+cv2 = lazy_import("cv2")
 pyautogui = lazy_import("pyautogui")
 np = lazy_import("numpy")
 plt = lazy_import("matplotlib.pyplot")
