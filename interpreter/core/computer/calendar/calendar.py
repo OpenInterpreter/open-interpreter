@@ -5,6 +5,21 @@ import subprocess
 from ..utils.run_applescript import run_applescript, run_applescript_capture
 
 
+makeDateFunction = """
+on makeDate(yr, mon, day, hour, min, sec)
+	set theDate to current date
+	tell theDate
+		set its year to yr
+		set its month to mon
+		set its day to day
+		set its hours to hour
+		set its minutes to min
+		set its seconds to sec
+	end tell
+	return theDate
+end makeDate
+"""
+
 class Calendar:
     def __init__(self, computer):
         self.computer = computer
@@ -18,23 +33,13 @@ class Calendar:
         if platform.system() != "Darwin":
             return "This method is only supported on MacOS"
 
-        # Format dates for AppleScript
-        applescript_start_date = (
-            start_date.strftime("%A, %B %d, %Y") + " at 12:00:00 AM"
-        )
-        if end_date:
-            applescript_end_date = (
-                end_date.strftime("%A, %B %d, %Y") + " at 11:59:59 PM"
-            )
-        else:
-            applescript_end_date = (
-                start_date.strftime("%A, %B %d, %Y") + " at 11:59:59 PM"
-            )
-
+        if not end_date:
+            end_date = start_date
         # AppleScript command
         script = f"""
-        set theDate to date "{applescript_start_date}"
-        set endDate to date "{applescript_end_date}"
+        {makeDateFunction}
+        set theDate to makeDate({start_date.strftime("%Y, %m, %d, 0, 0, 0")})
+        set endDate to makeDate({end_date.strftime("%Y, %m, %d, 23, 59, 59")})
         tell application "System Events"
             set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
             if calendarIsRunning then
@@ -179,6 +184,9 @@ class Calendar:
                 return "Can't find a default calendar. Please try again and specify a calendar name."
 
         script = f"""
+        {makeDateFunction}
+        set startDate to makeDate({start_date.strftime("%Y, %m, %d, %H, %M, %S")})
+        set endDate to makeDate({end_date.strftime("%Y, %m, %d, %H, %M, %S")})
         -- Open and activate calendar first
         tell application "System Events"
             set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
@@ -192,8 +200,6 @@ class Calendar:
         end tell
         tell application "{self.calendar_app}"
             tell calendar "{calendar}"
-                set startDate to date "{applescript_start_date}"
-                set endDate to date "{applescript_end_date}"
                 make new event at end with properties {{summary:"{title}", start date:startDate, end date:endDate, location:"{location}", description:"{notes}"}}
             end tell
             -- tell the Calendar app to refresh if it's running, so the new event shows up immediately
@@ -223,9 +229,9 @@ class Calendar:
             if not calendar:
                 return "Can't find a default calendar. Please try again and specify a calendar name."
 
-        # Format datetime for AppleScript
-        applescript_start_date = start_date.strftime("%B %d, %Y %I:%M:%S %p")
         script = f"""
+        {makeDateFunction}
+        set eventStartDate to makeDate({start_date.strftime("%Y, %m, %d, %H, %M, %S")})
         -- Open and activate calendar first
         tell application "System Events"
             set calendarIsRunning to (name of processes) contains "{self.calendar_app}"
@@ -242,7 +248,6 @@ class Calendar:
             set myCalendar to calendar "{calendar}"
             
             -- Define the exact start date and name of the event to find and delete
-            set eventStartDate to date "{applescript_start_date}"
             set eventSummary to "{event_title}"
             
             -- Find the event by start date and summary
