@@ -7551,4 +7551,4 @@ safe = ["semgrep", "yaspin"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "c836a3483512c7eeeaf0426e3d6a35b4ce375430b726ab102ad55363c0bc329a"
+content-hash = "ccaab202dbfa1eb20b35a80d2ee80a9b3e3d71a41c01078acf7e080cbb29285a"
