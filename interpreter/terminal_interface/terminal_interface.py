@@ -88,6 +88,10 @@ def terminal_interface(interpreter, message):
             # This is for the terminal interface being used as a CLI — messages are strings.
             # This won't fire if they're in the python package, display=True, and they passed in an array of messages (for example).
 
+            if message == "":
+                # Ignore empty messages when user presses enter without typing anything
+                continue
+
             if message.startswith("%") and interactive:
                 handle_magic_command(interpreter, message)
                 continue
