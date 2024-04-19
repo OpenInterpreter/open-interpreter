@@ -55,9 +55,9 @@ class Open_Interpreter_App(App):
         yield Header()
         
         with Horizontal(id="main"):
-            with ListView(id="sidebar"):
+            with VerticalScroll(id="sidebar"):
                 for conversation in get_chat_conversations():
-                    yield ListItem(Label(conversation))
+                    yield Button(label=conversation, classes="conversation-button")
 
             with Container():
                 with VerticalScroll():
@@ -65,7 +65,6 @@ class Open_Interpreter_App(App):
                         yield Placeholder()
     
     def load_messages(self, event: events.Event) -> None:
-        """Load messages from a .diffs file."""
         # Get the selected ListItem
         item = event.item
         # Extract the conversation name from the Label
