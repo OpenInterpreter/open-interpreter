@@ -21,6 +21,7 @@ curl https://pyenv.run | bash
 pyenv_root="$HOME/.pyenv/bin/pyenv"
 
 # Install specific Python version using pyenv
+$pyenv_root init
 $pyenv_root install 3.11.7 --skip-existing
 $pyenv_root shell 3.11.7
 

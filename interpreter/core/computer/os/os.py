@@ -7,6 +7,9 @@ class Os:
         self.computer = computer
 
     def get_selected_text(self):
+        """
+        Returns the currently selected text.
+        """
         # Store the current clipboard content
         current_clipboard = self.computer.clipboard.view()
         # Copy the selected text to clipboard
@@ -18,6 +21,9 @@ class Os:
         return selected_text
 
     def notify(self, text):
+        """
+        Displays a notification on the computer.
+        """
         try:
             title = "Open Interpreter"
 

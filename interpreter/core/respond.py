@@ -31,6 +31,12 @@ def respond(interpreter):
         if interpreter.custom_instructions:
             system_message += "\n\n" + interpreter.custom_instructions
 
+        # Storing the messages so they're accessible in the interpreter's computer
+        if interpreter.sync_computer:
+            output = interpreter.computer.run(
+                "python", f"messages={interpreter.messages}"
+            )
+
         ## Rendering ↓
         rendered_system_message = render_message(interpreter, system_message)
         ## Rendering ↑
@@ -55,6 +61,7 @@ def respond(interpreter):
             )
             # Yield two newlines to seperate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
+            insert_force_task_completion_message = False
 
         ### RUN THE LLM ###
 
@@ -83,7 +90,7 @@ def respond(interpreter):
             ):
                 output = traceback.format_exc()
                 raise Exception(
-                    f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here',\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
+                    f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here'. Update your ~/.zshrc on MacOS or ~/.bashrc on Linux with the new key if it has already been persisted there.,\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
                 )
             elif interpreter.offline == False and "not have access" in str(e).lower():
                 response = input(
@@ -108,13 +115,6 @@ def respond(interpreter):
                 raise Exception(
                     "Error occurred. "
                     + str(e)
-                    + """
-
-If you're running `interpreter --local`, please make sure LM Studio's local server is running.
-
-If LM Studio's local server is running, please try a language model with a different architecture.
-
-                    """
                 )
             else:
                 raise
@@ -130,7 +130,7 @@ If LM Studio's local server is running, please try a language model with a diffe
                 language = interpreter.messages[-1]["format"].lower().strip()
                 code = interpreter.messages[-1]["content"]
 
-                if interpreter.os and language == "text":
+                if language == "text":
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
                     continue
@@ -170,45 +170,48 @@ If LM Studio's local server is running, please try a language model with a diffe
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
-                # don't let it import computer on os mode — we handle that!
-                if interpreter.os and language == "python":
+                # don't let it import computer — we handle that!
+                if interpreter.computer.import_computer_api and language == "python":
                     code = code.replace("import computer\n", "pass\n")
                     code = re.sub(
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
                     )
                     code = re.sub(
-                        r"from computer import (\w+)", r"\1 = computer.\1", code
-                    )
-                    code = re.sub(
                         r"from computer import (.+)",
                         lambda m: "\n".join(
                             f"{x.strip()} = computer.{x.strip()}"
-                            for x in m.group(1).split(",")
+                            for x in m.group(1).split(", ")
                         ),
                         code,
                     )
+                    code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
-                    if code.split("\n")[-1] in [
-                        "computer.display.view()",
-                        "computer.display.screenshot()",
-                        "computer.view()",
-                        "computer.screenshot()",
-                    ]:
+                    if any(code.split("\n")[-1].startswith(text) for text in [
+                        "computer.display.view",
+                        "computer.display.screenshot",
+                        "computer.view",
+                        "computer.screenshot",
+                    ]):
                         code = code + "\npass"
 
                 # sync up some things (is this how we want to do this?)
                 interpreter.computer.verbose = interpreter.verbose
+                interpreter.computer.debug = interpreter.debug
                 interpreter.computer.emit_images = interpreter.llm.supports_vision
 
                 # sync up the interpreter's computer with your computer
                 try:
-                    if interpreter.os and language == "python":
+                    if interpreter.sync_computer and language == "python":
                         computer_dict = interpreter.computer.to_dict()
+                        if "_hashes" in computer_dict:
+                            computer_dict.pop("_hashes")
                         if computer_dict:
                             computer_json = json.dumps(computer_dict)
                             sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
                             interpreter.computer.run("python", sync_code)
                 except Exception as e:
+                    if interpreter.debug:
+                        raise
                     print(str(e))
                     print("Continuing...")
 
@@ -221,17 +224,19 @@ If LM Studio's local server is running, please try a language model with a diffe
 
                 # sync up your computer with the interpreter's computer
                 try:
-                    if interpreter.os and language == "python":
+                    if interpreter.sync_computer and language == "python":
                         # sync up the interpreter's computer with your computer
                         result = interpreter.computer.run(
                             "python",
-                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  print(json.dumps(computer_dict))",
+                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  if '_hashes' in computer_dict:\n    computer_dict.pop('_hashes')\n  print(json.dumps(computer_dict))",
                         )
                         result = result[-1]["content"]
                         interpreter.computer.load_dict(
                             json.loads(result.strip('"').strip("'"))
                         )
                 except Exception as e:
+                    if interpreter.debug:
+                        raise
                     print(str(e))
                     print("Continuing.")
 
@@ -253,30 +258,27 @@ If LM Studio's local server is running, please try a language model with a diffe
                 }
 
         else:
-            ## FORCE TASK COMLETION
+            ## LOOP MESSAGE
             # This makes it utter specific phrases if it doesn't want to be told to "Proceed."
 
-            force_task_completion_message = """Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going."""
+            force_task_completion_message = interpreter.force_task_completion_message
             if interpreter.os:
-                force_task_completion_message.replace(
+                force_task_completion_message = force_task_completion_message.replace(
                     "If the entire task I asked for is done,",
                     "If the entire task I asked for is done, take a screenshot to verify it's complete, or if you've already taken a screenshot and verified it's complete,",
                 )
-            force_task_completion_responses = [
-                "the task is done.",
-                "the task is impossible.",
-                "let me know what you'd like to do next.",
-            ]
+            force_task_completion_breakers = interpreter.force_task_completion_breakers
 
             if (
                 interpreter.force_task_completion
                 and interpreter.messages
+                and interpreter.messages[-1].get("role", "").lower() == "assistant"
                 and not any(
                     task_status in interpreter.messages[-1].get("content", "").lower()
-                    for task_status in force_task_completion_responses
+                    for task_status in force_task_completion_breakers
                 )
             ):
-                # Remove past force_task_completion messages
+                # Remove past force_task_completion_message messages
                 interpreter.messages = [
                     message
                     for message in interpreter.messages

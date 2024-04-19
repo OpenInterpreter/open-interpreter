@@ -6,7 +6,11 @@ from PIL import Image
 
 
 def convert_to_openai_messages(
-    messages, function_calling=True, vision=False, shrink_images=True
+    messages,
+    function_calling=True,
+    vision=False,
+    shrink_images=True,
+    code_output_sender="assistant",
 ):
     """
     Converts LMC messages into OpenAI messages
@@ -36,10 +40,10 @@ def convert_to_openai_messages(
                     ),
                     # parsed_arguments isn't actually an OpenAI thing, it's an OI thing.
                     # but it's soo useful!
-                    "parsed_arguments": {
-                        "language": message["format"],
-                        "code": message["content"],
-                    },
+                    # "parsed_arguments": {
+                    #     "language": message["format"],
+                    #     "code": message["content"],
+                    # },
                 }
                 # Add empty content to avoid error "openai.error.InvalidRequestError: 'content' is a required property - 'messages.*'"
                 # especially for the OpenAI service hosted on Azure
@@ -61,17 +65,30 @@ def convert_to_openai_messages(
                     new_message["content"] = message["content"]
 
             else:
-                if message["content"].strip() == "":
-                    content = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
-                else:
-                    content = (
-                        "Code output: "
-                        + message["content"]
-                        + "\n\nWhat does this output mean / what's next (if anything, or are we done)?"
-                    )
+                # This should be experimented with.
+                if code_output_sender == "user":
+                    if message["content"].strip() == "":
+                        content = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+                    else:
+                        content = (
+                            "Code output: "
+                            + message["content"]
+                            + "\n\nWhat does this output mean / what's next (if anything, or are we done)?"
+                        )
 
-                new_message["role"] = "user"
-                new_message["content"] = content
+                    new_message["role"] = "user"
+                    new_message["content"] = content
+                elif code_output_sender == "assistant":
+                    if "@@@SEND_MESSAGE_AS_USER@@@" in message["content"]:
+                        new_message["role"] = "user"
+                        new_message["content"] = message["content"].replace(
+                            "@@@SEND_MESSAGE_AS_USER@@@", ""
+                        )
+                    else:
+                        new_message["role"] = "assistant"
+                        new_message["content"] = (
+                            "\n```output\n" + message["content"] + "\n```"
+                        )
 
         elif message["type"] == "image":
             if vision == False:
@@ -152,6 +169,9 @@ def convert_to_openai_messages(
 
         else:
             raise Exception(f"Unable to convert this message type: {message}")
+
+        if isinstance(new_message["content"], str):
+            new_message["content"] = new_message["content"].strip()
 
         new_messages.append(new_message)
 

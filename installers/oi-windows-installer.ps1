@@ -26,6 +26,7 @@ if (!(Get-Command rustc -ErrorAction SilentlyContinue)) {
 }
 
 # Use the full path to pyenv to install Python
+& "$pyenvBin" init
 & "$pyenvBin" install 3.11.7 --skip-existing
 
 # Turn on this Python and install OI

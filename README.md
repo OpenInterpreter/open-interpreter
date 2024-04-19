@@ -9,8 +9,8 @@
     <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
     <br>
     <br>
-    <strong>Let language models run code.</strong><br>
-    <br><a href="https://openinterpreter.com">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
+    <strong>We launched a new computer (the 01) with Open Interpreter at the center. <a href="https://github.com/OpenInterpreter/01">Star the repo →</a></strong><br>
+    <br><a href="https://0ggfznkwh4j.typeform.com/to/G21i9lJ2">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
 <br>
@@ -18,9 +18,9 @@
 ![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
-<p align="center">
+<!--<p align="center">
 <strong>The New Computer Update</strong> introduces <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
-</p>
+</p>-->
 <br>
 
 ```shell
@@ -82,6 +82,10 @@ from interpreter import interpreter
 interpreter.chat("Plot AAPL and META's normalized stock prices") # Executes a single command
 interpreter.chat() # Starts an interactive chat
 ```
+
+### GitHub Codespaces
+
+Press the `,` key on this repository's GitHub page to create a codespace. After a moment, you'll receive a cloud virtual machine environment pre-installed with open-interpreter. You can then start interacting with it directly and freely confirm its execution of system commands without worrying about damaging the system.
 
 ## Comparison to ChatGPT's Code Interpreter
 
@@ -202,15 +206,23 @@ interpreter.llm.model = "gpt-3.5-turbo"
 
 #### Terminal
 
-Open Interpreter uses [LM Studio](https://lmstudio.ai/) to connect to local language models (experimental).
+Open Interpreter can use OpenAI-compatible server to run models locally. (LM Studio, jan.ai, ollama etc)
 
-Simply run `interpreter` in local mode from the command line:
+Simply run `interpreter` with the api_base URL of your inference server (for LM studio it is `http://localhost:1234/v1` by default):
+
+```shell
+interpreter --api_base "http://localhost:1234/v1" --api_key "fake_key"
+```
+
+Alternatively you can use Llamafile without installing any third party software just by running
 
 ```shell
 interpreter --local
 ```
 
-**You will need to run LM Studio in the background.**
+for a more detailed guide check out [this video by Mike Bird](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H)
+
+**How to run LM Studio in the background.**
 
 1. Download [https://lmstudio.ai/](https://lmstudio.ai/) then start it.
 2. Select a model then click **↓ Download**.
@@ -219,13 +231,11 @@ interpreter --local
 
 Once the server is running, you can begin your conversation with Open Interpreter.
 
-(When you run the command `interpreter --local`, the steps above will be displayed.)
-
 > **Note:** Local mode sets your `context_window` to 3000, and your `max_tokens` to 1000. If your model has different requirements, set these parameters manually (see below).
 
 #### Python
 
-Our Python package gives you more control over each setting. To replicate `--local` and connect to LM Studio, use these settings:
+Our Python package gives you more control over each setting. To replicate and connect to LM Studio, use these settings:
 
 ```python
 from interpreter import interpreter
@@ -332,7 +342,7 @@ You can also start a server identical to the one above by simply running `interp
 
 ## Android
 
-The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/Arrendy/open-interpreter-termux).
+The step-by-step guide for installing Open Interpreter on your Android device can be found in the [open-interpreter-termux repo](https://github.com/MikeBirdTech/open-interpreter-termux).
 
 ## Safety Notice
 
@@ -353,6 +363,34 @@ There is **experimental** support for a [safe mode](docs/SAFE_MODE.md) to help m
 Open Interpreter equips a [function-calling language model](https://platform.openai.com/docs/guides/gpt/function-calling) with an `exec()` function, which accepts a `language` (like "Python" or "JavaScript") and `code` to run.
 
 We then stream the model's messages, code, and your system's outputs to the terminal as Markdown.
+
+# Access Documentation Offline
+
+The full [documentation](https://docs.openinterpreter.com/) is accessible on-the-go without the need for an internet connection.
+
+[Node](https://nodejs.org/en) is a pre-requisite:
+
+- Version 18.17.0 or any later 18.x.x version.
+- Version 20.3.0 or any later 20.x.x version.
+- Any version starting from 21.0.0 onwards, with no upper limit specified.
+
+Install [Mintlify](https://mintlify.com/):
+
+```bash
+npm i -g mintlify@latest
+```
+
+Change into the docs directory and run the appropriate command:
+
+```bash
+# Assuming you're at the project's root directory
+cd ./docs
+
+# Run the documentation server
+mintlify dev
+```
+
+A new browser window should open. The documentation will be available at [http://localhost:3000](http://localhost:3000) as long as the documentation server is running.
 
 # Contributing
 

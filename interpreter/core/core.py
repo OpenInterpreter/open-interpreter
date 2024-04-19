@@ -2,8 +2,6 @@
 This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
-
-import asyncio
 import json
 import os
 import threading
@@ -47,11 +45,19 @@ class OpenInterpreter:
         offline=False,
         auto_run=False,
         verbose=False,
+        debug=False,
         max_output=2800,
         safe_mode="off",
         shrink_images=False,
         force_task_completion=False,
-        anonymous_telemetry=os.getenv("ANONYMIZED_TELEMETRY", "True") == "True",
+        force_task_completion_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
+        force_task_completion_breakers=[
+            "the task is done.",
+            "the task is impossible.",
+            "let me know what you'd like to do next.",
+            "please provide more information.",
+        ],
+        disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true",
         in_terminal_interface=False,
         conversation_history=True,
         conversation_filename=None,
@@ -62,6 +68,11 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         computer=None,
+        sync_computer=False,
+        import_computer_api=False,
+        skills_path=None,
+        import_skills=False,
+        multi_line=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -72,12 +83,18 @@ class OpenInterpreter:
         self.offline = offline
         self.auto_run = auto_run
         self.verbose = verbose
+        self.debug = debug
         self.max_output = max_output
         self.safe_mode = safe_mode
         self.shrink_images = shrink_images
-        self.force_task_completion = force_task_completion
-        self.anonymous_telemetry = anonymous_telemetry
+        self.disable_telemetry = disable_telemetry
         self.in_terminal_interface = in_terminal_interface
+        self.multi_line = multi_line
+
+        # Loop messages
+        self.force_task_completion = force_task_completion
+        self.force_task_completion_message = force_task_completion_message
+        self.force_task_completion_breakers = force_task_completion_breakers
 
         # Conversation history
         self.conversation_history = conversation_history
@@ -96,7 +113,15 @@ class OpenInterpreter:
         self.custom_instructions = custom_instructions
 
         # Computer
-        self.computer = Computer() if computer is None else computer
+        self.computer = Computer(self) if computer is None else computer
+        self.sync_computer = sync_computer
+        self.computer.import_computer_api = import_computer_api
+
+        # Skills
+        if skills_path:
+            self.computer.skills.path = skills_path
+
+        self.computer.import_skills = import_skills
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
@@ -107,10 +132,14 @@ class OpenInterpreter:
         # Return new messages
         return self.messages[self.last_messages_count :]
 
+    @property
+    def anonymous_telemetry(self) -> bool:
+        return not self.disable_telemetry and not self.offline
+
     def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
             self.responding = True
-            if self.anonymous_telemetry and not self.offline:
+            if self.anonymous_telemetry:
                 message_type = type(
                     message
                 ).__name__  # Only send message type, no content
@@ -143,7 +172,7 @@ class OpenInterpreter:
 
         except Exception as e:
             self.responding = False
-            if self.anonymous_telemetry and not self.offline:
+            if self.anonymous_telemetry:
                 message_type = type(message).__name__
                 send_telemetry(
                     "errored",
@@ -208,9 +237,11 @@ class OpenInterpreter:
             if self.conversation_history:
                 # If it's the first message, set the conversation name
                 if not self.conversation_filename:
-                    first_few_words = "_".join(
-                        self.messages[0]["content"][:25].split(" ")[:-1]
-                    )
+                    first_few_words_list = self.messages[0]["content"][:25].split(" ")
+                    if len(first_few_words_list) >= 2:  # for languages like English with blank between words
+                        first_few_words = "_".join(first_few_words_list[:-1])
+                    else:  # for languages like Chinese without blank between words
+                        first_few_words = self.messages[0]["content"][:15]
                     for char in '<>:"/\\|?*!':  # Invalid characters for filenames
                         first_few_words = first_few_words.replace(char, "")
 
@@ -322,7 +353,9 @@ class OpenInterpreter:
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
-        self.__init__()
+        self.computer._has_imported_computer_api = False  # Flag reset
+        self.messages = []
+        self.last_messages_count = 0
 
     def display_message(self, markdown):
         # This is just handy for start_script in profiles.

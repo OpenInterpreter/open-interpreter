@@ -29,7 +29,7 @@ def validate_llm_settings(interpreter):
 
             # OpenAI
             if interpreter.llm.model in litellm.open_ai_chat_completion_models:
-                if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key:
+                if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key and not interpreter.llm.api_base:
                     display_welcome_message_once()
 
                     display_markdown_message(
@@ -49,7 +49,10 @@ def validate_llm_settings(interpreter):
                     display_markdown_message(
                         """
 
-                    **Tip:** To save this key for later, run `export OPENAI_API_KEY=your_api_key` on Mac/Linux or `setx OPENAI_API_KEY your_api_key` on Windows.
+                    **Tip:** To save this key for later, run one of the following and then restart your terminal. 
+                    MacOS: `echo '\\nexport OPENAI_API_KEY=your_api_key' >> ~/.zshrc`
+                    Linux: `echo '\\nexport OPENAI_API_KEY=your_api_key' >> ~/.bashrc`
+                    Windows: `setx OPENAI_API_KEY your_api_key`
                     
                     ---"""
                     )

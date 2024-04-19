@@ -4,11 +4,13 @@ Gotta split this out, generalize it, and move all the python additions to python
 """
 
 import ast
+import os
 import queue
 import re
 import threading
 import time
 import traceback
+import logging
 
 from jupyter_client import KernelManager
 
@@ -20,8 +22,11 @@ DEBUG_MODE = False
 class JupyterLanguage(BaseLanguage):
     file_extension = "py"
     name = "Python"
+    aliases = ["py"]
 
-    def __init__(self):
+    def __init__(self, computer):
+        self.computer = computer
+            
         self.km = KernelManager(kernel_name="python3")
         self.km.start_kernel()
         self.kc = self.km.client()
@@ -42,9 +47,9 @@ class JupyterLanguage(BaseLanguage):
         backend = "Agg"
 
         code = f"""
-        import matplotlib
-        matplotlib.use('{backend}')
-        """
+import matplotlib
+matplotlib.use('{backend}')
+        """.strip()
         for _ in self.run(code):
             pass
 
@@ -61,9 +66,26 @@ class JupyterLanguage(BaseLanguage):
         self.km.shutdown_kernel()
 
     def run(self, code):
-        # lel
-        # exec(code)
-        # return
+        ################################################################
+        ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
+        ################################################################
+
+        try:
+            functions = string_to_python(code)
+        except:
+            # Non blocking
+            functions = {}
+
+        if self.computer.save_skills and functions:
+            skill_library_path = self.computer.skills.path
+
+            if not os.path.exists(skill_library_path):
+                os.makedirs(skill_library_path)
+
+            for filename, function_code in functions.items():
+                with open(f"{skill_library_path}/{filename}.py", "w") as file:
+                    file.write(function_code)
+
         self.finish_flag = False
         try:
             try:
@@ -365,3 +387,51 @@ def wrap_in_try_except(code):
 
     # Convert the modified AST back to source code
     return ast.unparse(parsed_code)
+
+
+def string_to_python(code_as_string):
+    parsed_code = ast.parse(code_as_string)
+
+    # Initialize containers for different categories
+    import_statements = []
+    functions = []
+    functions_dict = {}
+
+    # Traverse the AST
+    for node in ast.walk(parsed_code):
+        # Check for import statements
+        if isinstance(node, ast.Import) or isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                # Handling the alias in import statements
+                if alias.asname:
+                    import_statements.append(f"import {alias.name} as {alias.asname}")
+                else:
+                    import_statements.append(f"import {alias.name}")
+        # Check for function definitions
+        elif isinstance(node, ast.FunctionDef):
+            if node.name.startswith("_"):
+                # ignore private functions
+                continue
+            docstring = ast.get_docstring(node)
+            body = node.body
+            if docstring:
+                body = body[1:]
+
+            code_body = ast.unparse(body[0]).replace("\n", "\n    ")
+
+            func_info = {
+                "name": node.name,
+                "docstring": docstring,
+                "body": code_body,
+            }
+            functions.append(func_info)
+
+    for func in functions:
+        # Consolidating import statements and function definition
+        function_content = "\n".join(import_statements) + "\n\n"
+        function_content += f"def {func['name']}():\n    \"\"\"{func['docstring']}\"\"\"\n    {func['body']}\n"
+
+        # Adding to dictionary
+        functions_dict[func["name"]] = function_content
+
+    return functions_dict

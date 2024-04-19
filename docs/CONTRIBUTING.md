@@ -31,11 +31,10 @@ We will review PRs when possible and work with you to integrate your contributio
 
 Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
 
-1. CD into the project folder `/open-interpreter`
-2. Install dependencies `poetry install`
-3. Run the program `poetry run interpreter`
-
-After modifying the source code, you will need to do `poetry run interpreter` again.
+1. CD into the project folder by running `cd open-interpreter`.
+2. Install `poetry` [according to their documentation](https://python-poetry.org/docs/#installing-with-pipx), which will create a virtual environment for development + handle dependencies.
+3. Install dependencies by running `poetry install`.
+4. Run the program with `poetry run interpreter`. Run tests with `poetry run pytest -s -x`.
 
 **Note**: This project uses [`black`](https://black.readthedocs.io/en/stable/index.html) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
 

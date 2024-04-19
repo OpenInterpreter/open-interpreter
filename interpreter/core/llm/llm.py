@@ -9,6 +9,7 @@ from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
 litellm.suppress_debug_info = True
+import time
 
 
 class Llm:
@@ -24,7 +25,7 @@ class Llm:
         self.completions = fixed_litellm_completions
 
         # Settings
-        self.model = "gpt-4"
+        self.model = "gpt-4-turbo"
         self.temperature = 0
         self.supports_vision = False
         self.supports_functions = None  # Will try to auto-detect
@@ -77,9 +78,9 @@ class Llm:
             image_messages = [msg for msg in messages if msg["type"] == "image"]
 
             if self.interpreter.os:
-                # Keep only the last image if the interpreter is running in OS mode
+                # Keep only the last two images if the interpreter is running in OS mode
                 if len(image_messages) > 1:
-                    for img_msg in image_messages[:-1]:
+                    for img_msg in image_messages[:-2]:
                         messages.remove(img_msg)
                         if self.interpreter.verbose:
                             print("Removing image message!")
@@ -99,6 +100,16 @@ class Llm:
             vision=self.supports_vision,
             shrink_images=self.interpreter.shrink_images,
         )
+
+        if self.interpreter.debug:
+            print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
+            for message in messages:
+                if len(str(message)) > 5000:
+                    print(str(message)[:200] + "...")
+                else:
+                    print(message)
+                print("\n")
+            print("\n\n\n")
 
         system_message = messages[0]["content"]
         messages = messages[1:]
@@ -172,10 +183,10 @@ Continuing...
         }
 
         # Optional inputs
-        if self.api_base:
-            params["api_base"] = self.api_base
         if self.api_key:
             params["api_key"] = self.api_key
+        if self.api_base:
+            params["api_base"] = self.api_base
         if self.api_version:
             params["api_version"] = self.api_version
         if self.max_tokens:
