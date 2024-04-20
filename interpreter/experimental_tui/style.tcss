@@ -1,0 +1,17 @@
+#sidebar {
+    dock: left;
+    width: 20%;
+    height: 100%;
+}
+
+#sidebar-content {
+    width: 100%;
+    height: 100%;
+    color: #0f2b41;
+    background: $background-darken-3;
+}
+
+.conversation-button {
+    width: 100%;
+    text-align: left;
+}

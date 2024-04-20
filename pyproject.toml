@@ -52,6 +52,7 @@ platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
 screeninfo = "^0.8.1"
 aifs = "^0.0.14"
+textual = "^0.49.0"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]
@@ -71,6 +72,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 i = "interpreter.terminal_interface.start_terminal_interface:main"
+gui = "interpreter.experimental_tui.start_tui:main"
 
 [tool.black]
 target-version = ['py311']
