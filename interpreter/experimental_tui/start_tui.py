@@ -1,6 +1,6 @@
 from typing import Type
 from textual.app import App, ComposeResult
-from textual import events
+from textual import events, on
 from textual.driver import Driver
 from textual.reactive import reactive
 from textual.widget import AwaitMount
@@ -56,27 +56,17 @@ class Open_Interpreter_App(App):
         
         with Horizontal(id="main"):
             with VerticalScroll(id="sidebar"):
-                for conversation in get_chat_conversations():
-                    yield Button(label=conversation, classes="conversation-button")
+                conversations = get_chat_conversations()
+                for key in conversations:
+                    yield Button(label=key, classes="conversation-button", name=conversations[key])
 
             with Container():
                 with VerticalScroll():
                     for message in range(10):
                         yield Placeholder()
-    
-    def load_messages(self, event: events.Event) -> None:
-        # Get the selected ListItem
-        item = event.item
-        # Extract the conversation name from the Label
-        conversation_name = item.label.text
-        # Find the corresponding .diffs file
-        path = Path(appdirs.user_config_dir("Open Interpreter") + "/conversations")
-        for file_path in path.glob(f"*{conversation_name}__*.json"):
-            if file_path.is_file():
-                with open(file_path, "r") as f:
-                    messages = json.load(f)
-                # Do something with the messages here
-                print("Loaded messages:", messages)
+    #@on(Button.Pressed)
+    def on_button_pressed(self, events: Button.Pressed) -> None:
+        print(events.button.name)
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
