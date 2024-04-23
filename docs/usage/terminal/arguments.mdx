@@ -12,7 +12,7 @@ title: Arguments
 
 **[Configuration](/docs/usage/terminal/arguments#Configuration)**
 
-`--config`, `--config_file`, `--custom_instructions`, `--system_message`.
+`--profiles`, `--profile`, `--custom_instructions`, `--system_message`.
 
 **[Options](/docs/usage/terminal/arguments#options)**
 
@@ -230,14 +230,12 @@ llm_supports_functions: true
 ```
 
 </CodeGroup>
-#### `--no-llm_supports_functions` 
+#### `--no-llm_supports_functions`
 
 Inform Open Interpreter that the language model you're using does not support function calling.
 
 <CodeGroup>
-```bash Terminal
-interpreter --no-llm_supports_functions
-```
+  ```bash Terminal interpreter --no-llm_supports_functions ```
 </CodeGroup>
 
 #### `--llm_supports_vision` or `-lsv`
@@ -259,24 +257,24 @@ llm_supports_vision: true
 
 ## Configuration
 
-#### `--config`
+#### `--profiles`
 
-Opens the configuration yaml file in your default editor.
+Opens the directory containing all profiles. They can be edited in your default editor.
 
 <CodeGroup>
 ```bash Terminal
-interpreter --config
+interpreter --profilees
 ```
 
 </CodeGroup>
 
-#### `--config_file` or `-cf`
+#### `--profile` or `-p`
 
-Optionally set a custom config file to use.
+Optionally set a profile to use.
 
 <CodeGroup>
 ```bash Terminal
-interpreter --config_file "/config.yaml"
+interpreter --profile "default.yaml"
 ```
 
 </CodeGroup>
@@ -298,7 +296,7 @@ custom_instructions: "This is a custom instruction."
 
 #### `--system_message` or `-s`
 
-We don't recommend modifying the system message, as doing so opts you out of future updates to the system message. Use `--custom_instructions` instead, to add relevant information to the system message. If you must modify the system message, you can do so by using this argument, or by opening the config file using `--config`.
+We don't recommend modifying the system message, as doing so opts you out of future updates to the system message. Use `--custom_instructions` instead, to add relevant information to the system message. If you must modify the system message, you can do so by using this argument, or by opening the profile using `--profiles`.
 
 <CodeGroup>
 ```bash Terminal
@@ -308,19 +306,6 @@ interpreter --system_message "You are Open Interpreter..."
 ```yaml Config
 system_message: "You are Open Interpreter..."
 ```
-
-</CodeGroup>
-
-#### `--reset_config`
-
-Resets the config file to the default settings.
-
-<CodeGroup>
-```bash Terminal
-interpreter --reset_config
-```
-
-</CodeGroup>
 
 ## Options
 
