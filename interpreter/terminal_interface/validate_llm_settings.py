@@ -8,6 +8,8 @@ import time
 import litellm
 from prompt_toolkit import prompt
 
+from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic
+
 from .utils.display_markdown_message import display_markdown_message
 
 
@@ -31,6 +33,8 @@ def validate_llm_settings(interpreter):
             if interpreter.llm.model in litellm.open_ai_chat_completion_models:
                 if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key and not interpreter.llm.api_base:
                     display_welcome_message_once()
+
+                    contribute_conversation_launch_logic(interpreter)
 
                     display_markdown_message(
                         """---

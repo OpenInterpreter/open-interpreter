@@ -73,6 +73,8 @@ class OpenInterpreter:
         skills_path=None,
         import_skills=False,
         multi_line=False,
+        contributing_future_conversations=None,
+        contribute_current_conversation=False
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -122,6 +124,9 @@ class OpenInterpreter:
             self.computer.skills.path = skills_path
 
         self.computer.import_skills = import_skills
+
+        self.contributing_future_conversations = contributing_future_conversations
+        self.contribute_current_conversation = contribute_current_conversation
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)

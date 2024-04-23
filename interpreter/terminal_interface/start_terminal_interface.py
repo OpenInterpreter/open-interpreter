@@ -4,6 +4,8 @@ import time
 
 import pkg_resources
 
+from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic
+
 from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
 from .profiles.profiles import open_storage_dir, profile, reset_profile
@@ -237,6 +239,11 @@ def start_terminal_interface(interpreter):
             "help_text": "get Open Interpreter's version number",
             "type": bool,
         },
+        {
+            "name": "contribute_conversation",
+            "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
+            "type": bool
+        }
     ]
 
     # Check for deprecated flags before parsing arguments
@@ -419,7 +426,9 @@ def start_terminal_interface(interpreter):
     if args.server:
         interpreter.server()
         return
-
+    
+    interpreter.contribute_conversation = args.contribute_conversation
+    
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
