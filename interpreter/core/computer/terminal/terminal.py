@@ -110,7 +110,7 @@ class Terminal:
                     and chunk.get("format") != "active_line"
                     and chunk.get("content")
                 ):
-                    print(chunk["content"])
+                    print(chunk["content"], end="")
 
         except GeneratorExit:
             self.stop()
