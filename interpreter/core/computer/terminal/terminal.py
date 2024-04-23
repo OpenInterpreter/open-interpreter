@@ -38,7 +38,8 @@ class Terminal:
 
     def run(self, language, code, stream=False, display=False):
         if language == "python":
-            if self.computer.import_computer_api and not self.computer._has_imported_computer_api and "computer" in code:
+            # If the code contains the word "computer", we will import the computer API if it hasn't been imported yet. (Fix #1225)
+            if (self.computer.import_computer_api or not self.computer._has_imported_computer_api) and "computer" in code:
                 self.computer._has_imported_computer_api = True
                 # Give it access to the computer via Python
                 self.computer.run(
