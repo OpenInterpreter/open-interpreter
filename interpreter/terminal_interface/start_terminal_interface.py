@@ -243,7 +243,7 @@ def start_terminal_interface(interpreter):
             "name": "contribute_conversation",
             "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "contribute_conversation"}
+            "attribute": {"object": interpreter, "attr_name": "contribute_conversation"},
         }
     ]
 
@@ -431,6 +431,8 @@ def start_terminal_interface(interpreter):
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
+
+    contribute_conversation_launch_logic(interpreter)
 
     interpreter.chat()
 

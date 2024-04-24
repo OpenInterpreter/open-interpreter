@@ -34,8 +34,6 @@ def validate_llm_settings(interpreter):
                 if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key and not interpreter.llm.api_base:
                     display_welcome_message_once()
 
-                    contribute_conversation_launch_logic(interpreter)
-
                     display_markdown_message(
                         """---
                     > OpenAI API key not found
