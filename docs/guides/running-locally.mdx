@@ -6,30 +6,36 @@ In this video, Mike Bird goes over three different methods for running Open Inte
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/CEs51hGWuGU?si=cN7f6QhfT4edfG5H" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
-## How to use Open Interpreter locally
+## How to Use Open Interpreter Locally
 
 ### Ollama
 
-1. Download Ollama - https://ollama.ai/download
-2. `ollama run dolphin-mixtral:8x7b-v2.6`
-3. `interpreter --model ollama/dolphin-mixtral:8x7b-v2.6`
+1. Download Ollama from https://ollama.ai/download
+2. Run the command:  
+`ollama run dolphin-mixtral:8x7b-v2.6`
+3. Execute the Open Interpreter:  
+`interpreter --model ollama/dolphin-mixtral:8x7b-v2.6`
 
-# Jan.ai
+### Jan.ai
 
-1. Download Jan - [Jan.ai](http://jan.ai/)
-2. Download model from Hub
-3. Enable API server
-   1. Settings
-   2. Advanced
+1. Download Jan from http://jan.ai
+2. Download the model from the Hub
+3. Enable API server:
+   1. Go to Settings
+   2. Navigate to Advanced
    3. Enable API server
-4. Select Model to use
-5. `interpreter --api_base http://localhost:1337/v1  --model mixtral-8x7b-instruct`
+4. Select the model to use
+5. Run the Open Interpreter with the specified API base:  
+`interpreter --api_base http://localhost:1337/v1 --model mixtral-8x7b-instruct`
 
-# llamafile
+### Llamafile
 
-1. Download or make a llamafile - https://github.com/Mozilla-Ocho/llamafile
-2. `chmod +x mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile`
-3. `./mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile`
-4. `interpreter --api_base https://localhost:8080/v1`
+⚠ Ensure that Xcode is installed for Apple Silicon
 
-Make sure that Xcode is installed for Apple Silicon
+1. Download or create a llamafile from https://github.com/Mozilla-Ocho/llamafile
+2. Make the llamafile executable:  
+`chmod +x mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile`
+3. Execute the llamafile:  
+`./mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile`
+4. Run the interpreter with the specified API base:  
+`interpreter --api_base https://localhost:8080/v1`

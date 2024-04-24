@@ -3,11 +3,17 @@ import platform
 import subprocess
 import sys
 import time
-
 import inquirer
-
 from interpreter import interpreter
 
+
+def get_ram():
+    import psutil
+
+    total_ram = psutil.virtual_memory().total / (
+        1024 * 1024 * 1024
+    )  # Convert bytes to GB
+    return total_ram
 
 def download_model(models_dir, models, interpreter):
     # For some reason, these imports need to be inside the function
@@ -16,9 +22,7 @@ def download_model(models_dir, models, interpreter):
     import wget
 
     # Get RAM and disk information
-    total_ram = psutil.virtual_memory().total / (
-        1024 * 1024 * 1024
-    )  # Convert bytes to GB
+    total_ram = get_ram()
     free_disk_space = psutil.disk_usage("/").free / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
@@ -175,8 +179,8 @@ interpreter.display_message(
 
 # Define the choices for local models
 choices = [
-    "Llamafile",
     "Ollama",
+    "Llamafile",
     "LM Studio",
     "Jan",
 ]
@@ -212,53 +216,63 @@ Once the server is running, you can begin your conversation below.
     )
 
     interpreter.llm.api_base = "http://localhost:1234/v1"
-    interpreter.llm.max_tokens = 1000
-    interpreter.llm.context_window = 3000
     interpreter.llm.api_key = "x"
 
 elif selected_model == "Ollama":
     try:
         # List out all downloaded ollama models. Will fail if ollama isn't installed
-        result = subprocess.run(
-            ["ollama", "list"], capture_output=True, text=True, check=True
-        )
-        lines = result.stdout.split("\n")
-        names = [
-            line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
-        ]  # Extract names, trim out ":latest", skip header
-
-        # If there are no downloaded models, prompt them to download a model and try again
-        if not names:
-            time.sleep(1)
-
-            interpreter.display_message(
-                f"\nYou don't have any Ollama models downloaded. To download a new model, run `ollama run <model-name>`, then start a new interpreter session. \n\n For a full list of downloadable models, check out [https://ollama.com/library](https://ollama.com/library) \n"
+        def list_ollama_models():
+            result = subprocess.run(
+                ["ollama", "list"], capture_output=True, text=True, check=True
             )
+            lines = result.stdout.split("\n")
+            names = [
+                line.split()[0].replace(":latest", "")
+                for line in lines[1:]
+                if line.strip()
+            ]  # Extract names, trim out ":latest", skip header
+            return names
 
-            print("Please download a model then try again\n")
-            time.sleep(2)
-            sys.exit(1)
+        llama3_installed = True
+        names = list_ollama_models()
+        if "llama3" not in names:
+            # If a user has other models installed but not llama3, let's display the correct message
+            if not names:
+                llama3_installed = False
+            names.insert(0, "llama3")
 
         # If there are models, prompt them to select one
-        else:
-            time.sleep(1)
+        time.sleep(1)
+
+        if llama3_installed:
             interpreter.display_message(
                 f"**{len(names)} Ollama model{'s' if len(names) != 1 else ''} found.** To download a new model, run `ollama run <model-name>`, then start a new interpreter session. \n\n For a full list of downloadable models, check out [https://ollama.com/library](https://ollama.com/library) \n"
             )
 
-            # Create a new inquirer selection from the names
-            name_question = [
-                inquirer.List(
-                    "name", message="Select a downloaded Ollama model", choices=names
-                ),
-            ]
-            name_answer = inquirer.prompt(name_question)
-            selected_name = name_answer["name"] if name_answer else None
+        # Create a new inquirer selection from the names
+        name_question = [
+            inquirer.List(
+                "name",
+                message="Select a downloaded Ollama model:"
+                if llama3_installed
+                else "No models found. Select a model to install:",
+                choices=names,
+            ),
+        ]
+        name_answer = inquirer.prompt(name_question)
+        selected_name = name_answer["name"] if name_answer else None
 
-            # Set the model to the selected model
-            interpreter.llm.model = f"ollama/{selected_name}"
-            interpreter.display_message(f"\nUsing Ollama model: `{selected_name}` \n")
-            time.sleep(1)
+        if selected_name is "llama3":
+            # If the user selects llama3, we need to check if it's installed, and if not, install it
+            all_models = list_ollama_models()
+            if "llama3" not in all_models:
+                interpreter.display_message(f"\nDownloading Llama3...\n")
+                subprocess.run(["ollama", "pull", "llama3"], check=True)
+
+        # Set the model to the selected model
+        interpreter.llm.model = f"ollama/{selected_name}"
+        interpreter.display_message(f"\nUsing Ollama model: `{selected_name}` \n")
+        time.sleep(1)
 
     # If Ollama is not installed or not recognized as a command, prompt the user to download Ollama and try again
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
@@ -286,8 +300,6 @@ Once the server is running, enter the id of the model below, then you can begin 
 """
     )
     interpreter.llm.api_base = "http://localhost:1337/v1"
-    interpreter.llm.max_tokens = 1000
-    interpreter.llm.context_window = 3000
     time.sleep(1)
 
     # Prompt the user to enter the name of the model running on Jan
@@ -374,10 +386,16 @@ elif selected_model == "Llamafile":
     interpreter.llm.model = "local"
     interpreter.llm.temperature = 0
     interpreter.llm.api_base = "http://localhost:8080/v1"
-    interpreter.llm.max_tokens = 1000
-    interpreter.llm.context_window = 3000
     interpreter.llm.supports_functions = False
 
+user_ram = get_ram()
+# Set context window and max tokens for all local models based on the users available RAM
+if user_ram and user_ram > 9:
+    interpreter.llm.max_tokens = 1200
+    interpreter.llm.context_window = 8000
+else:
+    interpreter.llm.max_tokens = 1000
+    interpreter.llm.context_window = 3000
 # Set the system message to a minimal version for all local models.
 interpreter.system_message = """
 You are Open Interpreter, a world-class programmer that can execute code on the user's machine.

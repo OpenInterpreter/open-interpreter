@@ -38,7 +38,7 @@ All stateless LLM attributes have been moved to `interpreter.llm`:
 - `interpreter.api_version` → `interpreter.llm.api_version`
 - `interpreter.api_base` → `interpreter.llm.api_base`
 
-This is reflected **1)** in Python applications using Open Interpreter and **2)** in your configuration file for OI's terminal interface, which can be edited via `interpreter --config`.
+This is reflected **1)** in Python applications using Open Interpreter and **2)** in your profile for OI's terminal interface, which can be edited via `interpreter --profiles`.
 
 ## New Static Messages Structure
 
