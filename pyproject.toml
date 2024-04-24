@@ -51,7 +51,7 @@ fastapi = "^0.110.0"
 platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
 screeninfo = "^0.8.1"
-aifs = "^0.0.14"
+aifs = "^0.0.15"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]

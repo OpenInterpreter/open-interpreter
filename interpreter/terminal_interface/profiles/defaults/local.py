@@ -214,7 +214,7 @@ Once the server is running, you can begin your conversation below.
 
 """
     )
-
+    interpreter.llm.supports_functions = False
     interpreter.llm.api_base = "http://localhost:1234/v1"
     interpreter.llm.api_key = "x"
 
