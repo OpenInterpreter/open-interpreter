@@ -28,7 +28,7 @@ jupyter-client = "^8.6.0"
 matplotlib = "^3.8.2"
 toml = "^0.10.2"
 posthog = "^3.1.0"
-tiktoken = "^0.5.2"
+tiktoken = "^0.6.0"
 
 
 #Optional dependencies
