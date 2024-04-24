@@ -51,6 +51,10 @@ class Terminal:
                 self.computer._has_imported_skills = True
                 self.computer.skills.import_skills()
 
+        # Llama 3 likes to hallucinate this tick new line thing at the start of code blocks
+        if code.startswith("`\n"):
+            code = code[2:].strip()
+
         if stream == False:
             # If stream == False, *pull* from _streaming_run.
             output_messages = []
@@ -106,7 +110,7 @@ class Terminal:
                     and chunk.get("format") != "active_line"
                     and chunk.get("content")
                 ):
-                    print(chunk["content"])
+                    print(chunk["content"], end="")
 
         except GeneratorExit:
             self.stop()
