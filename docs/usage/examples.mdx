@@ -102,15 +102,19 @@ interpreter.messages = messages
 
 ### Configure Default Settings
 
-We save default settings to a configuration file which can be edited by running the following command:
+We save default settings to a profile which can be edited by running the following command:
 
 ```shell
-interpreter --config
+interpreter --profiles
 ```
 
 You can use this to set your default language model, system message (custom instructions), max budget, etc.
 
-<Info>**Note:** The Python library will also inherit settings from this config file, but you can only change it by running `interpreter --config` or navigating to `<your application directory>/Open Interpreter/config.yaml` and editing it manually.</Info>
+<Info>
+  **Note:** The Python library will also inherit settings from the default
+  profile file. You can change it by running `interpreter --profiles` and
+  editing `default.yaml`.
+</Info>
 
 ---
 

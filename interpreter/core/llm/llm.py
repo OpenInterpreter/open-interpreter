@@ -59,20 +59,15 @@ class Llm:
             ), "No message after the first can have the role 'system'"
 
         # Detect function support
-        if self.supports_functions != None:
-            supports_functions = self.supports_functions
-        else:
-            # Guess whether or not it's a function calling LLM
-            if not self.interpreter.offline and (
-                self.interpreter.llm.model != "gpt-4-vision-preview"
-                and self.model in litellm.open_ai_chat_completion_models
-                or self.model.startswith("azure/")
-                # Once Litellm supports it, add Anthropic models here
-            ):
-                supports_functions = True
-            else:
-                supports_functions = False
-
+        if self.supports_functions == None:
+            try:
+                if litellm.supports_function_calling(self.model):
+                    self.supports_functions = True
+                else:
+                    self.supports_functions = False
+            except:
+                self.supports_functions = False
+            
         # Trim image messages if they're there
         if self.supports_vision:
             image_messages = [msg for msg in messages if msg["type"] == "image"]
@@ -96,7 +91,7 @@ class Llm:
         # Convert to OpenAI messages format
         messages = convert_to_openai_messages(
             messages,
-            function_calling=supports_functions,
+            function_calling=self.supports_functions,
             vision=self.supports_vision,
             shrink_images=self.interpreter.shrink_images,
         )
@@ -200,7 +195,7 @@ Continuing...
         if self.interpreter.verbose:
             litellm.set_verbose = True
 
-        if supports_functions:
+        if self.supports_functions:
             yield from run_function_calling_llm(self, params)
         else:
             yield from run_text_llm(self, params)
