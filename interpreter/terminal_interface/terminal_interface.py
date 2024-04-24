@@ -14,6 +14,8 @@ import random
 import re
 import subprocess
 import time
+import pyttsx3
+import threading
 
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
@@ -42,7 +44,6 @@ try:
 except:
     # If they don't have readline, that's fine
     pass
-
 
 def terminal_interface(interpreter, message):
     # Auto run and offline (this.. this isnt right) don't display messages.
@@ -197,20 +198,18 @@ def terminal_interface(interpreter, message):
                             interpreter.computer.os.notify(sanitized_message)
 
                         # Speak message aloud
-                        if platform.system() == "Darwin" and interpreter.speak_messages:
-                            if voice_subprocess:
-                                voice_subprocess.terminate()
-                            voice_subprocess = subprocess.Popen(
-                                [
-                                    "osascript",
-                                    "-e",
-                                    f'say "{sanitized_message}" using "Fred"',
-                                ]
-                            )
-                        else:
-                            pass
-                            # User isn't on a Mac, so we can't do this. You should tell them something about that when they first set this up.
-                            # Or use a universal TTS library.
+                        def speak_text(text):
+                            engine = pyttsx3.init()
+                            engine.setProperty('rate', 150)
+                            engine.setProperty('volume', 0.9)
+                            engine.say(text)
+                            engine.runAndWait()
+
+                        def threaded_speech(text):
+                            thread = threading.Thread(target=speak_text, args=(text,))
+                            thread.start()
+
+                        threaded_speech(sanitized_message)
 
                 # Assistant code blocks
                 elif chunk["role"] == "assistant" and chunk["type"] == "code":
