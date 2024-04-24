@@ -243,7 +243,7 @@ def start_terminal_interface(interpreter):
             "name": "contribute_conversation",
             "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
             "type": bool,
-            "default": False
+            "attribute": {"object": interpreter, "attr_name": "contribute_conversation"}
         }
     ]
 
@@ -428,8 +428,6 @@ def start_terminal_interface(interpreter):
         interpreter.server()
         return
     
-    interpreter.contribute_conversation = args.contribute_conversation or arguments
-    
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
@@ -468,3 +466,4 @@ def main():
             contribute_conversations([interpreter.messages])
             print("Thank you for contributing to our training data!")
         interpreter.computer.terminate()
+

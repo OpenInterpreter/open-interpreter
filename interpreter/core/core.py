@@ -141,9 +141,8 @@ class OpenInterpreter:
 
     @property
     def will_contribute(self):
-        contribute_session = self.contribute_conversation
         overrides = self.offline or not self.conversation_history or self.disable_telemetry
-        return contribute_session and not overrides
+        return self.contribute_conversation and not overrides
 
     def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
