@@ -73,8 +73,7 @@ class OpenInterpreter:
         skills_path=None,
         import_skills=False,
         multi_line=False,
-        contributing_future_conversations=None,
-        contribute_current_conversation=False
+        contribute_conversation=False
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -125,8 +124,7 @@ class OpenInterpreter:
 
         self.computer.import_skills = import_skills
 
-        self.contributing_future_conversations = contributing_future_conversations
-        self.contribute_current_conversation = contribute_current_conversation
+        self.contribute_conversation = contribute_conversation
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
@@ -140,6 +138,12 @@ class OpenInterpreter:
     @property
     def anonymous_telemetry(self) -> bool:
         return not self.disable_telemetry and not self.offline
+
+    @property
+    def will_contribute(self):
+        contribute_session = self.contribute_conversation
+        overrides = self.offline or not self.conversation_history or self.disable_telemetry
+        return contribute_session and not overrides
 
     def chat(self, message=None, display=True, stream=False, blocking=True):
         try:

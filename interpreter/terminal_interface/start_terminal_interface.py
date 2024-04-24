@@ -4,7 +4,7 @@ import time
 
 import pkg_resources
 
-from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic
+from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic, contribute_conversations
 
 from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
@@ -242,7 +242,8 @@ def start_terminal_interface(interpreter):
         {
             "name": "contribute_conversation",
             "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
-            "type": bool
+            "type": bool,
+            "default": False
         }
     ]
 
@@ -427,7 +428,7 @@ def start_terminal_interface(interpreter):
         interpreter.server()
         return
     
-    interpreter.contribute_conversation = args.contribute_conversation
+    interpreter.contribute_conversation = args.contribute_conversation or arguments
     
     validate_llm_settings(interpreter)
 
@@ -463,4 +464,7 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
+        if interpreter.will_contribute:
+            contribute_conversations([interpreter.messages])
+            print("Thank you for contributing to our training data!")
         interpreter.computer.terminate()
