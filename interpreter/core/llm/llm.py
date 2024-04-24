@@ -61,18 +61,11 @@ class Llm:
         # Detect function support
         if self.supports_functions != None:
             supports_functions = self.supports_functions
+        elif litellm.supports_function_calling(self.model):
+            supports_functions = True
         else:
-            # Guess whether or not it's a function calling LLM
-            if not self.interpreter.offline and (
-                self.interpreter.llm.model != "gpt-4-vision-preview"
-                and self.model in litellm.open_ai_chat_completion_models
-                or self.model.startswith("azure/")
-                # Once Litellm supports it, add Anthropic models here
-            ):
-                supports_functions = True
-            else:
-                supports_functions = False
-
+            supports_functions = False
+            
         # Trim image messages if they're there
         if self.supports_vision:
             image_messages = [msg for msg in messages if msg["type"] == "image"]
