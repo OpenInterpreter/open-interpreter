@@ -2,7 +2,6 @@
 
 handle_error() {
     echo "Error: $1"
-    exit 1
 }
 
 echo "Starting Open Interpreter installation..."
