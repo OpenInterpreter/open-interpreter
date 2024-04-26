@@ -1,5 +1,6 @@
 import litellm
 from groq import Groq
+
 groq_client = [None]
 
 import tokentrim as tt
@@ -12,8 +13,8 @@ from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
 litellm.suppress_debug_info = True
-import time
 import os
+import time
 
 
 class Llm:
@@ -30,7 +31,7 @@ class Llm:
 
         # Settings
         self.model = "gpt-4-turbo"
-        self.model = "groq/mixtral-8x7b-32768" # can now use models from groq. `export GROQ_API_KEY="your-key-here")` or use --model
+        self.model = "groq/mixtral-8x7b-32768"  # can now use models from groq. `export GROQ_API_KEY="your-key-here")` or use --model
         self.temperature = 0
         self.supports_vision = False
         self.supports_functions = None  # Will try to auto-detect
@@ -72,7 +73,7 @@ class Llm:
                     self.supports_functions = False
             except:
                 self.supports_functions = False
-            
+
         # Trim image messages if they're there
         if self.supports_vision:
             image_messages = [msg for msg in messages if msg["type"] == "image"]
@@ -215,37 +216,52 @@ def fixed_litellm_completions(**params):
     # Run completion
     first_error = None
     try:
-        # print(f"!!!!!1 {params}\n"*10)
         def source(**params):
-            '''Get Completions Using LiteLLM'''
+            """Get Completions Using LiteLLM"""
             yield from litellm.completion(**params)
-        
-        if "model" in params and "groq/" in params['model']:
+
+        if "model" in params and "groq/" in params["model"]:
+
             def groq_complete(**params):
                 if groq_client[0] is None:
-                     groq_client[0] = Groq(
-                                    # This is the default and can be omitted
-                                    api_key=os.environ.get("GROQ_API_KEY"),
-                                    timeout = 2,
-                                    max_retries = 3
-                                    )
-                res = groq_client[0].chat.completions.create(
-                    messages = params['messages'],
-                    model=params['model'].split("groq/")[1],
-                ).choices[0].message.content
-                print("@@@@@@@@@\n",res,'@@@@@@@@@@@')
+                    groq_client[0] = Groq(
+                        # This is the default and can be omitted
+                        api_key=os.environ.get("GROQ_API_KEY"),
+                        timeout=2,
+                        max_retries=3,
+                    )
+                res = (
+                    groq_client[0]
+                    .chat.completions.create(
+                        messages=params["messages"],
+                        model=params["model"].split("groq/")[1],
+                    )
+                    .choices[0]
+                    .message.content
+                )
                 return res
-            
+
             def s(**params):
-                '''Get Completions Using Groq'''
-                params['stream'] = False # To keep things simple for now, and groq is super fast anyway
+                """Get Completions Using Groq"""
+                params["stream"] = (
+                    False  # To keep things simple for now, and groq is super fast anyway
+                )
                 word_by_word = False
                 if word_by_word:
                     for chunk in groq_complete(**params).split(" "):
-                        yield {"choices":[{"delta":{"type": "message", "content": chunk+" "}}]} 
+                        yield {
+                            "choices": [
+                                {"delta": {"type": "message", "content": chunk + " "}}
+                            ]
+                        }
                 else:
                     for whole in [groq_complete(**params)]:
-                        yield {"choices":[{"delta":{"type": "message", "content": whole}}]} 
+                        yield {
+                            "choices": [
+                                {"delta": {"type": "message", "content": whole}}
+                            ]
+                        }
+
             source = s
         yield from source(**params)
     except Exception as e:
