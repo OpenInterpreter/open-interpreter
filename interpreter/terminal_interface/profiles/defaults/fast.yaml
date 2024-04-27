@@ -20,6 +20,7 @@ custom_instructions: "The user has set you to FAST mode. **No talk, just code.**
 # offline: False  # If True, will disable some online features like checking for updates
 # verbose: False  # If True, will print detailed logs
 # multi_line: False # If True, you can input multiple lines starting and ending with ```
+# llm_drop_params: False # If True, litellm.drop_params=True, Drop any unmapped params ```
 
 # All options: https://docs.openinterpreter.com/settings
 

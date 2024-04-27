@@ -79,6 +79,7 @@ class OpenInterpreter:
         import_skills=False,
         multi_line=False,
         contribute_conversation=False,
+        llm_drop_params=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -97,6 +98,7 @@ class OpenInterpreter:
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
         self.contribute_conversation = contribute_conversation
+        self.llm_drop_params = llm_drop_params
 
         # Loop messages
         self.loop = loop
