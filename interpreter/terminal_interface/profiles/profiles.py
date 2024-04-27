@@ -155,7 +155,7 @@ def apply_profile(interpreter, profile, profile_path):
             "We have updated our profile file format. Would you like to migrate your profile file to the new format? No data will be lost."
         )
         print("")
-        message = input("(y/n): ")
+        message = input("(y/n) ")
         print("")
         if message.lower() == "y":
             migrate_user_app_directory()
@@ -164,7 +164,9 @@ def apply_profile(interpreter, profile, profile_path):
             if profile_path.endswith("default.yaml"):
                 with open(profile_path, "r") as file:
                     text = file.read()
-                text = text.replace("version: " + str(profile["version"]), f"version: {OI_VERSION}")
+                text = text.replace(
+                    "version: " + str(profile["version"]), f"version: {OI_VERSION}"
+                )
 
                 try:
                     if profile["llm"]["model"] == "gpt-4":
@@ -175,7 +177,7 @@ def apply_profile(interpreter, profile, profile_path):
                         profile["llm"]["model"] = "gpt-4-turbo"
                 except:
                     raise
-                    pass # fine
+                    pass  # fine
 
                 with open(profile_path, "w") as file:
                     file.write(text)
@@ -567,7 +569,7 @@ def apply_profile_to_object(obj, profile):
 
 def open_storage_dir(directory):
     dir = os.path.join(oi_dir, directory)
-    
+
     print(f"Opening {directory} directory ({dir})...")
 
     if platform.system() == "Windows":
@@ -580,6 +582,7 @@ def open_storage_dir(directory):
             # Fallback to using 'open' on macOS if 'xdg-open' is not available
             subprocess.call(["open", dir])
     return
+
 
 def reset_profile(specific_default_profile=None):
     if (
@@ -629,9 +632,7 @@ def reset_profile(specific_default_profile=None):
             with open(target_file, "r") as file:
                 current_profile = file.read()
             if current_profile not in historical_profiles:
-                user_input = input(
-                    f"Would you like to reset/update {filename}? (y/n): "
-                )
+                user_input = input(f"Would you like to reset/update {filename}? (y/n) ")
                 if user_input.lower() == "y":
                     send2trash.send2trash(
                         target_file
