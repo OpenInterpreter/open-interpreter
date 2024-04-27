@@ -75,6 +75,7 @@ interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 i = "interpreter.terminal_interface.start_terminal_interface:main"
 
 [tool.black]
+line-length = 88
 target-version = ['py311']
 
 [tool.isort]
