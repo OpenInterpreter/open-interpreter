@@ -139,7 +139,8 @@ def get_all_conversations(interpreter) -> List[List]:
 
     history_path = interpreter.conversation_history_path
     all_conversations: List[List] = []
-    for mpath in os.listdir(history_path):
+    conversation_files = os.listdir(history_path) if os.path.exists(history_path) else []
+    for mpath in conversation_files:
         if not is_conversation_path(mpath):
             continue
         full_path = os.path.join(history_path, mpath)
