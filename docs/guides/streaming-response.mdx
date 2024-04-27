@@ -110,7 +110,7 @@ for chunk in interpreter.chat("What's 34/24?", stream=True):
             break
 ```
 
-**While** the code is being executed, you'll recieve the line of code that's being run:
+**While** the code is being executed, you'll receive the line of code that's being run:
 
 ```
 {"role": "computer", "type": "console", "format": "active_line", "content": "1"}
@@ -118,7 +118,7 @@ for chunk in interpreter.chat("What's 34/24?", stream=True):
 
 We use this to highlight the active line of code on our UI, which keeps the user aware of what Open Interpreter is doing.
 
-You'll then recieve its output, if it produces any:
+You'll then receive its output, if it produces any:
 
 ```
 {"role": "computer", "type": "console", "format": "output", "content": "1.4166666666666667\n"}
