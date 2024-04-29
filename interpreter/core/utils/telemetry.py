@@ -14,8 +14,8 @@ import os
 import uuid
 
 import pkg_resources
-from posthog import Posthog
 import requests
+from posthog import Posthog
 
 posthog = Posthog(
     "phc_6cmXy4MEbLfNGezqGjuUTY8abLu0sAwtGzZFpQW97lc", host="https://app.posthog.com"
@@ -66,21 +66,20 @@ def send_telemetry(event_name, properties=None):
 def contribute_conversations(conversations):
     url = "https://api.openinterpreter.com/v0/conversations/contribute/"
     version = pkg_resources.get_distribution("open-interpreter").version
-    
+
     if conversations and len(conversations) > 1:
         payload = {
             "conversations": [conv for sublist in conversations for conv in sublist],
-            "oi_version": version
+            "oi_version": version,
         }
     else:
-        payload = {
-            "conversations": [conversations[0]],
-            "oi_version": version
-        }
+        payload = {"conversations": [conversations[0]], "oi_version": version}
     try:
         response = requests.post(url, json=payload)
         if response.status_code != 200:
-            print(f"Failed to contribute conversation: {response.status_code} {response.text}")
+            print(
+                f"Failed to contribute conversation: {response.status_code} {response.text}"
+            )
             return None
         else:
             print(f"Successfully contributed conversation!")
