@@ -3,7 +3,7 @@
 force_task_completion: True
 
 llm:
-  model: "gpt-4-vision-preview"
+  model: gpt-4-turbo
   temperature: 0
   supports_vision: True
   supports_functions: False
@@ -17,5 +17,4 @@ llm:
 
 # All options: https://docs.openinterpreter.com/usage/terminal/settings
 
-version: 0.2.1 # Configuration file version (do not modify)
-
+version: 0.2.5 # Configuration file version (do not modify)
