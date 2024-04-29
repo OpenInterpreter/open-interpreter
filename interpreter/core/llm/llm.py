@@ -67,7 +67,7 @@ class Llm:
                     self.supports_functions = False
             except:
                 self.supports_functions = False
-
+            
         # Trim image messages if they're there
         if self.supports_vision:
             image_messages = [msg for msg in messages if msg["type"] == "image"]
