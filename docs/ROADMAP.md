@@ -70,7 +70,7 @@
 
 ## Completed
 
-- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
+- [x] **Split TUI from core — two separate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
 - [x] Add %% (shell) magic command
 - [x] Support multiple instances
 - [x] Split ROADMAP into sections
@@ -99,7 +99,7 @@ Open Interpreter contains two projects which support eachother, whose scopes are
 
 # What's not in our scope?
 
-Our guiding philosphy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
+Our guiding philosophy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
 
 1. Additional functions in `core` beyond running code.
 2. Advanced memory or planning. We consider these to be the LLM's responsibility, and as such OI will remain single-threaded.

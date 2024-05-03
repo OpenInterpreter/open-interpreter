@@ -202,7 +202,7 @@ selected_model = answers["model"]
 if selected_model == "LM Studio":
     interpreter.display_message(
         """
-To use use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
+To use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
 
 1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/), then start it.
 2. Select a language model then click **Download**.

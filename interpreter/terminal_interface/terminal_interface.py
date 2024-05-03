@@ -112,7 +112,7 @@ def terminal_interface(interpreter, message):
 
                 ## If we found an image, add it to the message
                 if image_path:
-                    # Add the text interpreter's messsage history
+                    # Add the text interpreter's message history
                     interpreter.messages.append(
                         {
                             "role": "user",

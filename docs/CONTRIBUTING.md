@@ -14,7 +14,7 @@ If you encounter a bug or have a feature in mind, don't hesitate to [open a new 
 
 ## Philosophy
 
-This is a minimalist, **tighly scoped** project that places a premium on simplicity. We're skeptical of new extensions, integrations, and extra features. We would rather not extend the system if it adds nonessential complexity.
+This is a minimalist, **tightly scoped** project that places a premium on simplicity. We're skeptical of new extensions, integrations, and extra features. We would rather not extend the system if it adds nonessential complexity.
 
 # Contribution Guidelines
 

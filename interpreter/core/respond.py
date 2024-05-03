@@ -59,7 +59,7 @@ def respond(interpreter):
                     "content": force_task_completion_message,
                 }
             )
-            # Yield two newlines to seperate the LLMs reply from previous messages.
+            # Yield two newlines to separate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
             insert_force_task_completion_message = False
 

@@ -63,7 +63,7 @@ class Display:
 
     def info(self):
         """
-        Returns a list of all connected montitor/displays and thir information
+        Returns a list of all connected monitor/displays and their information
         """
         return get_displays()
     
@@ -94,7 +94,7 @@ class Display:
             print(pretty_text)
             print(
                 format_to_recipient(
-                    "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
+                    "To receive the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
                     "assistant",
                 )
             )
@@ -107,7 +107,7 @@ class Display:
                 screenshot = pyautogui.screenshot(region=region)
             else:
                 screenshot = take_screenshot_to_pil(screen=screen, combine_screens=combine_screens) #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
-                # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
+                # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will receive it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
                 # print(message)
 
         else:
