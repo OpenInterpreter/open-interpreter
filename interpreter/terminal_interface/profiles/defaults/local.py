@@ -73,8 +73,8 @@ def download_model(models_dir, models, interpreter):
             },
             {
                 "name": "Phi-3-mini",
-                "file_name": "phi-2.Q5_K_M.llamafile",
-                "size": 2.67,
+                "file_name": "Phi-3-mini-4k-instruct.Q5_K_M.llamafile",
+                "size": 2.84,
                 "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
             },
             {
