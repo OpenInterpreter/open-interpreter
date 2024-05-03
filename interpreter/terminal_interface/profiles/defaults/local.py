@@ -78,6 +78,12 @@ def download_model(models_dir, models, interpreter):
                 "url": "https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q5_K_M.llamafile?download=true",
             },
             {
+                "name": "Phi-3-mini",
+                "file_name": "phi-2.Q5_K_M.llamafile",
+                "size": 2.67,
+                "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
+            },
+            {
                 "name": "LLaVA 1.5",
                 "file_name": "llava-v1.5-7b-q4.llamafile",
                 "size": 3.97,
@@ -88,6 +94,12 @@ def download_model(models_dir, models, interpreter):
                 "file_name": "mistral-7b-instruct-v0.2.Q5_K_M.llamafile",
                 "size": 5.15,
                 "url": "https://huggingface.co/jartine/Mistral-7B-Instruct-v0.2-llamafile/resolve/main/mistral-7b-instruct-v0.2.Q5_K_M.llamafile?download=true",
+            },
+            {
+                "name": "Llama-3-8B-Instruct",
+                "file_name": " Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile",
+                "size": 5.76,
+                "url": "https://huggingface.co/jartine/Meta-Llama-3-8B-Instruct-llamafile/resolve/main/Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile?download=true",
             },
             {
                 "name": "WizardCoder-Python-13B",
