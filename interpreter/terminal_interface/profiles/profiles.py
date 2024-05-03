@@ -145,7 +145,8 @@ class RemoveInterpreter(ast.NodeTransformer):
 
 def apply_profile(interpreter, profile, profile_path):
     if "start_script" in profile:
-        exec(profile["start_script"])
+        scope = {"interpreter": interpreter}
+        exec(profile["start_script"], scope, scope)
 
     if (
         "version" not in profile or profile["version"] != OI_VERSION

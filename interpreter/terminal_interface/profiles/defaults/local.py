@@ -4,23 +4,17 @@ import subprocess
 import sys
 import time
 import inquirer
+import psutil
+import wget
 from interpreter import interpreter
 
-
 def get_ram():
-    import psutil
-
     total_ram = psutil.virtual_memory().total / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
     return total_ram
 
 def download_model(models_dir, models, interpreter):
-    # For some reason, these imports need to be inside the function
-    import inquirer
-    import psutil
-    import wget
-
     # Get RAM and disk information
     total_ram = get_ram()
     free_disk_space = psutil.disk_usage("/").free / (
