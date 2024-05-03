@@ -268,7 +268,7 @@ elif selected_model == "Ollama":
         name_answer = inquirer.prompt(name_question)
         selected_name = name_answer["name"] if name_answer else None
 
-        if selected_name is "llama3":
+        if selected_name == "llama3":
             # If the user selects llama3, we need to check if it's installed, and if not, install it
             all_models = list_ollama_models()
             if "llama3" not in all_models:
