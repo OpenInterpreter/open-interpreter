@@ -136,6 +136,9 @@ def download_model(models_dir, models, interpreter):
                 )
             ]
             answers = inquirer.prompt(questions)
+            
+            if answers == None:
+                exit()
 
             # Get the selected model
             selected_model = next(
@@ -201,6 +204,8 @@ questions = [
 ]
 answers = inquirer.prompt(questions)
 
+if answers == None:
+    exit()
 
 selected_model = answers["model"]
 
@@ -266,7 +271,11 @@ elif selected_model == "Ollama":
             ),
         ]
         name_answer = inquirer.prompt(name_question)
-        selected_name = name_answer["name"] if name_answer else None
+
+        if name_answer == None:
+            exit()
+
+        selected_name = name_answer["name"]
 
         if selected_name == "llama3":
             # If the user selects llama3, we need to check if it's installed, and if not, install it
@@ -316,7 +325,11 @@ Once the server is running, enter the id of the model below, then you can begin 
         ),
     ]
     model_name_answer = inquirer.prompt(model_name_question)
-    jan_model_name = model_name_answer["jan_model_name"] if model_name_answer else None
+
+    if model_name_answer == None:
+        exit()
+
+    jan_model_name = model_name_answer["jan_model_name"]
     interpreter.llm.model = f"jan/{jan_model_name}"
     interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
     time.sleep(1)
@@ -360,6 +373,9 @@ elif selected_model == "Llamafile":
             )
         ]
         answers = inquirer.prompt(questions)
+        
+        if answers == None:
+            exit()
 
         if answers["model"] == " ↓ Download new model":
             model_path = download_model(models_dir, models, interpreter)
