@@ -383,7 +383,7 @@ elif selected_model == "Llamafile":
                 print("Model process terminated.")
 
     # Set flags for Llamafile to work with interpreter
-    interpreter.llm.model = "local"
+    interpreter.llm.model = "openai/local"
     interpreter.llm.temperature = 0
     interpreter.llm.api_base = "http://localhost:8080/v1"
     interpreter.llm.supports_functions = False
