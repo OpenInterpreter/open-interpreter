@@ -339,6 +339,9 @@ def start_terminal_interface(interpreter):
     if args.local:
         args.profile = "local.py"
 
+    if args.os and args.local:
+        args.profile = "local-os.py"
+
     ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
 
     set_attributes(args, arguments)

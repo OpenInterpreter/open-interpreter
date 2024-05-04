@@ -1,12 +1,12 @@
 def run_text_llm(llm, params):
     ## Setup
 
-    if llm.interpreter.computer.terminal.languages != []:
+    if llm.execution_instructions:
         try:
             # Add the system message
             params["messages"][0][
                 "content"
-            ] += "\nTo execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language."
+            ] += "\n" + llm.execution_instructions
         except:
             print('params["messages"][0]', params["messages"][0])
             raise

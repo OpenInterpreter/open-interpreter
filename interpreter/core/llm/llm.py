@@ -21,14 +21,18 @@ class Llm:
         # Store a reference to parent interpreter
         self.interpreter = interpreter
 
-        # Chat completions "endpoint"
+        # OpenAI-compatible chat completions "endpoint"
         self.completions = fixed_litellm_completions
 
         # Settings
         self.model = "gpt-4-turbo"
         self.temperature = 0
-        self.supports_vision = False
-        self.supports_functions = None  # Will try to auto-detect
+
+        self.supports_vision = None # Will try to auto-detect
+        self.vision_renderer = self.interpreter.computer.vision.query # Will only use if supports_vision is False
+
+        self.supports_functions = None # Will try to auto-detect
+        self.execution_instructions = "To execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language." # If supports_functions is False, this will be added to the system message
 
         # Optional settings
         self.context_window = None
@@ -67,11 +71,20 @@ class Llm:
                     self.supports_functions = False
             except:
                 self.supports_functions = False
+
+        # Detect vision support
+        if self.supports_vision == None:
+            try:
+                if litellm.supports_vision(self.model):
+                    self.supports_vision = True
+                else:
+                    self.supports_vision = False
+            except:
+                self.supports_vision = False
             
         # Trim image messages if they're there
+        image_messages = [msg for msg in messages if msg["type"] == "image"]
         if self.supports_vision:
-            image_messages = [msg for msg in messages if msg["type"] == "image"]
-
             if self.interpreter.os:
                 # Keep only the last two images if the interpreter is running in OS mode
                 if len(image_messages) > 1:
@@ -87,6 +100,11 @@ class Llm:
                         if self.interpreter.verbose:
                             print("Removing image message!")
                 # Idea: we could set detail: low for the middle messages, instead of deleting them
+        elif self.supports_vision == False and self.vision_renderer:
+            for img_msg in image_messages:
+                if img_msg["format"] != "description":
+                        img_msg["content"] = "Imagine I have just shown you an image with this description: " + self.vision_renderer(lmc=img_msg)
+                        img_msg["format"] = "description"
 
         # Convert to OpenAI messages format
         messages = convert_to_openai_messages(
@@ -95,16 +113,6 @@ class Llm:
             vision=self.supports_vision,
             shrink_images=self.interpreter.shrink_images,
         )
-
-        if self.interpreter.debug:
-            print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
-            for message in messages:
-                if len(str(message)) > 5000:
-                    print(str(message)[:200] + "...")
-                else:
-                    print(message)
-                print("\n")
-            print("\n\n\n")
 
         system_message = messages[0]["content"]
         messages = messages[1:]
@@ -195,6 +203,17 @@ Continuing...
         if self.interpreter.verbose:
             litellm.set_verbose = True
 
+        if self.interpreter.debug:
+            print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
+            for message in messages:
+                if len(str(message)) > 5000:
+                    print(str(message)[:200] + "...")
+                else:
+                    print(message)
+                print("\n")
+            print("\n\n\n")
+            time.sleep(5)
+
         if self.supports_functions:
             yield from run_function_calling_llm(self, params)
         else:
@@ -206,6 +225,10 @@ def fixed_litellm_completions(**params):
     Just uses a dummy API key, since we use litellm without an API key sometimes.
     Hopefully they will fix this!
     """
+
+    if "local" in params.get("model"):
+        # Kinda hacky, but this helps
+        params["stop"] = ["<|assistant|>", "<|end|>"]
 
     # Run completion
     first_error = None

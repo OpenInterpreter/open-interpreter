@@ -5,6 +5,7 @@
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
     <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
     <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br>
