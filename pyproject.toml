@@ -52,6 +52,9 @@ platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
 screeninfo = "^0.8.1"
 aifs = "^0.0.15"
+transformers = "^4.40.1"
+einops = "^0.8.0"
+torchvision = "^0.18.0"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm"]

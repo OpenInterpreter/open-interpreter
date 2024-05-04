@@ -272,9 +272,9 @@ def respond(interpreter):
             if (
                 interpreter.force_task_completion
                 and interpreter.messages
-                and interpreter.messages[-1].get("role", "").lower() == "assistant"
+                and interpreter.messages[-1].get("role", "") == "assistant"
                 and not any(
-                    task_status in interpreter.messages[-1].get("content", "").lower()
+                    task_status in interpreter.messages[-1].get("content", "")
                     for task_status in force_task_completion_breakers
                 )
             ):
