@@ -15,7 +15,7 @@ from .os.os import Os
 from .skills.skills import Skills
 from .sms.sms import SMS
 from .terminal.terminal import Terminal
-
+from .vision.vision import Vision
 
 class Computer:
     def __init__(self, interpreter):
@@ -37,6 +37,7 @@ class Computer:
         self.contacts = Contacts(self)
         self.browser = Browser(self)
         self.os = Os(self)
+        self.vision = Vision(self)
         self.skills = Skills(self)
         self.docs = Docs(self)
         self.ai = Ai(self)

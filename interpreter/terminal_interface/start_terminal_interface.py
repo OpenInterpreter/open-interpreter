@@ -341,14 +341,14 @@ def start_terminal_interface(interpreter):
     if args.vision:
         args.profile = "vision.yaml"
 
-    if args.os and args.local:
-        args.profile = "local-os.py"
-
     if args.os:
         args.profile = "os.py"
 
     if args.local:
         args.profile = "local.py"
+
+    if args.os and args.local:
+        args.profile = "local-os.py"
 
     ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
 
