@@ -1,24 +1,34 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from PIL import Image
 import base64
 import io
+
+from PIL import Image
+
+from ...utils.lazy_import import lazy_import
+
+transformers = lazy_import("transformers")
 
 
 class Vision:
     def __init__(self, computer):
         self.computer = computer
-        self.model = None # Will load upon first use
-        self.tokenizer = None # Will load upon first use
+        self.model = None  # Will load upon first use
+        self.tokenizer = None  # Will load upon first use
 
     def load(self):
-        print("Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior.")
-        print("Alternativley, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`.")
+        print(
+            "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
+        )
+        print(
+            "Alternativley, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
+        )
         model_id = "vikhyatk/moondream2"
         revision = "2024-04-02"
-        self.model = AutoModelForCausalLM.from_pretrained(
+        self.model = transformers.AutoModelForCausalLM.from_pretrained(
             model_id, trust_remote_code=True, revision=revision
         )
-        self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained(
+            model_id, revision=revision
+        )
 
     def query(self, query="Describe this image.", base_64=None, path=None, lmc=None):
         """
