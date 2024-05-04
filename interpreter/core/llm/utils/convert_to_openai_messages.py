@@ -193,41 +193,41 @@ def convert_to_openai_messages(
 
         new_messages.append(new_message)
 
-    combined_messages = []
-    current_role = None
-    current_content = []
+    if function_calling == False:
+        combined_messages = []
+        current_role = None
+        current_content = []
 
-    for message in new_messages:
-        if isinstance(message["content"], str):
-            if current_role is None:
-                current_role = message["role"]
-                current_content.append(message["content"])
-            elif current_role == message["role"]:
-                current_content.append(message["content"])
+        for message in new_messages:
+            if isinstance(message["content"], str):
+                if current_role is None:
+                    current_role = message["role"]
+                    current_content.append(message["content"])
+                elif current_role == message["role"]:
+                    current_content.append(message["content"])
+                else:
+                    combined_messages.append({
+                        "role": current_role,
+                        "content": "\n".join(current_content)
+                    })
+                    current_role = message["role"]
+                    current_content = [message["content"]]
             else:
-                combined_messages.append({
-                    "role": current_role,
-                    "content": "\n".join(current_content)
-                })
-                current_role = message["role"]
-                current_content = [message["content"]]
-        else:
-            if current_content:
-                combined_messages.append({
-                    "role": current_role,
-                    "content": "\n".join(current_content)
-                })
-                current_content = []
-            combined_messages.append(message)
+                if current_content:
+                    combined_messages.append({
+                        "role": current_role,
+                        "content": "\n".join(current_content)
+                    })
+                    current_content = []
+                combined_messages.append(message)
 
-    # Add the last message
-    if current_content:
-        combined_messages.append({
-            "role": current_role,
-            "content": " ".join(current_content)
-        })
+        # Add the last message
+        if current_content:
+            combined_messages.append({
+                "role": current_role,
+                "content": " ".join(current_content)
+            })
 
-    new_messages = combined_messages
-
+        new_messages = combined_messages
 
     return new_messages
