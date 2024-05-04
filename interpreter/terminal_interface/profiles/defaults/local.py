@@ -4,23 +4,17 @@ import subprocess
 import sys
 import time
 import inquirer
+import psutil
+import wget
 from interpreter import interpreter
 
-
 def get_ram():
-    import psutil
-
     total_ram = psutil.virtual_memory().total / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
     return total_ram
 
 def download_model(models_dir, models, interpreter):
-    # For some reason, these imports need to be inside the function
-    import inquirer
-    import psutil
-    import wget
-
     # Get RAM and disk information
     total_ram = get_ram()
     free_disk_space = psutil.disk_usage("/").free / (
@@ -78,6 +72,12 @@ def download_model(models_dir, models, interpreter):
                 "url": "https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q5_K_M.llamafile?download=true",
             },
             {
+                "name": "Phi-3-mini",
+                "file_name": "Phi-3-mini-4k-instruct.Q5_K_M.llamafile",
+                "size": 2.84,
+                "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
+            },
+            {
                 "name": "LLaVA 1.5",
                 "file_name": "llava-v1.5-7b-q4.llamafile",
                 "size": 3.97,
@@ -88,6 +88,12 @@ def download_model(models_dir, models, interpreter):
                 "file_name": "mistral-7b-instruct-v0.2.Q5_K_M.llamafile",
                 "size": 5.15,
                 "url": "https://huggingface.co/jartine/Mistral-7B-Instruct-v0.2-llamafile/resolve/main/mistral-7b-instruct-v0.2.Q5_K_M.llamafile?download=true",
+            },
+            {
+                "name": "Llama-3-8B-Instruct",
+                "file_name": " Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile",
+                "size": 5.76,
+                "url": "https://huggingface.co/jartine/Meta-Llama-3-8B-Instruct-llamafile/resolve/main/Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile?download=true",
             },
             {
                 "name": "WizardCoder-Python-13B",
@@ -130,6 +136,9 @@ def download_model(models_dir, models, interpreter):
                 )
             ]
             answers = inquirer.prompt(questions)
+            
+            if answers == None:
+                exit()
 
             # Get the selected model
             selected_model = next(
@@ -195,6 +204,8 @@ questions = [
 ]
 answers = inquirer.prompt(questions)
 
+if answers == None:
+    exit()
 
 selected_model = answers["model"]
 
@@ -260,9 +271,13 @@ elif selected_model == "Ollama":
             ),
         ]
         name_answer = inquirer.prompt(name_question)
-        selected_name = name_answer["name"] if name_answer else None
 
-        if selected_name is "llama3":
+        if name_answer == None:
+            exit()
+
+        selected_name = name_answer["name"]
+
+        if selected_name == "llama3":
             # If the user selects llama3, we need to check if it's installed, and if not, install it
             all_models = list_ollama_models()
             if "llama3" not in all_models:
@@ -310,7 +325,11 @@ Once the server is running, enter the id of the model below, then you can begin 
         ),
     ]
     model_name_answer = inquirer.prompt(model_name_question)
-    jan_model_name = model_name_answer["jan_model_name"] if model_name_answer else None
+
+    if model_name_answer == None:
+        exit()
+
+    jan_model_name = model_name_answer["jan_model_name"]
     interpreter.llm.model = f"jan/{jan_model_name}"
     interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
     time.sleep(1)
@@ -354,6 +373,9 @@ elif selected_model == "Llamafile":
             )
         ]
         answers = inquirer.prompt(questions)
+        
+        if answers == None:
+            exit()
 
         if answers["model"] == " ↓ Download new model":
             model_path = download_model(models_dir, models, interpreter)
@@ -383,7 +405,7 @@ elif selected_model == "Llamafile":
                 print("Model process terminated.")
 
     # Set flags for Llamafile to work with interpreter
-    interpreter.llm.model = "local"
+    interpreter.llm.model = "openai/local"
     interpreter.llm.temperature = 0
     interpreter.llm.api_base = "http://localhost:8080/v1"
     interpreter.llm.supports_functions = False
