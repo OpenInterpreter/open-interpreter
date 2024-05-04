@@ -2,11 +2,11 @@
 
 <p align="center">
     <a href="https://discord.gg/6p3fD6rBVm"><img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"></a>
-    <a href="README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
+    <a href="README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="../README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
-  <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License">
+    <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"></a>
     <br>
     <br>
     <b>让语言模型在您的计算机上运行代码。</b><br>
@@ -211,14 +211,10 @@ Open Interpreter 为[函数调用语言模型](https://platform.openai.com/docs/
 
 请参阅我们的 [贡献准则](CONTRIBUTING.md)，了解如何参与贡献的更多详情。
 
-## 许可证
+## 规划图
 
-Open Interpreter 采用 MIT 许可授权。您可以使用、复制、修改、分发、转授权和出售该软件的副本。
+若要预览 Open Interpreter 的未来，请查看[我们的路线图](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) 。
 
 **请注意**：此软件与 OpenAI 无关。
 
-> 拥有一个像您的指尖一样快速工作的初级程序员...可以使新的工作流程变得轻松高效，同时也能让新的受众群体享受到编程的好处。
->
-> — _OpenAI 的代码解释器发布宣传语_
-
-<br>
+![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
