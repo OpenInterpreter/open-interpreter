@@ -205,11 +205,12 @@ def terminal_interface(interpreter, message):
                             engine.say(text)
                             engine.runAndWait()
 
-                        def threaded_speech(text):
+                        def speak_async(text):
                             thread = threading.Thread(target=speak_text, args=(text,))
                             thread.start()
 
-                        threaded_speech(sanitized_message)
+                        if interpreter.speak_messages:
+                            speak_async(sanitized_message)
 
                 # Assistant code blocks
                 elif chunk["role"] == "assistant" and chunk["type"] == "code":
