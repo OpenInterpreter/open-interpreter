@@ -130,6 +130,11 @@ def respond(interpreter):
                 language = interpreter.messages[-1]["format"].lower().strip()
                 code = interpreter.messages[-1]["content"]
 
+                if code.startswith("`\n"):
+                    code = code[2:].strip()
+                    if interpreter.verbose:
+                        print("Removing `\n")
+
                 if language == "text":
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
@@ -272,9 +277,9 @@ def respond(interpreter):
             if (
                 interpreter.force_task_completion
                 and interpreter.messages
-                and interpreter.messages[-1].get("role", "").lower() == "assistant"
+                and interpreter.messages[-1].get("role", "") == "assistant"
                 and not any(
-                    task_status in interpreter.messages[-1].get("content", "").lower()
+                    task_status in interpreter.messages[-1].get("content", "")
                     for task_status in force_task_completion_breakers
                 )
             ):

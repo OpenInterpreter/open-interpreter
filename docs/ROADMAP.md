@@ -1,26 +1,16 @@
 # Roadmap
 
 ## Documentation
-
-
 - [ ] Work with Mintlify to translate docs. How does Mintlify let us translate our documentation automatically? I know there's a way.
 - [ ] Better comments throughout the package (they're like docs for contributors)
 - [ ] Show how to replace interpreter.llm so you can use a custom llm
-- [ ] Show how to replace interpreter.computer or add to interpreter.computer.languages for like, e2b execution, remote execution, new programming languages, etc.
 
 ## New features
-
 - [ ] Figure out how to get OI to answer to user input requests like python's `input()`. Do we somehow detect a delay in the output..? Is there some universal flag that TUIs emit when they expect user input? Should we do this semantically with embeddings, then ask OI to review it and respond..?
-- [ ] Multi-line input. Probably use `textual`
 - [ ] Placeholder text that gives a compelling example OI request. Probably use `textual`
 - [ ] Everything else `textual` offers, like could we make it easier to select text? Copy paste in and out? Code editing interface?
 - [ ] Let people edit the code OI writes. Could just open it in the user's preferred editor. Simple. [Full description of how to implement this here.](https://github.com/KillianLucas/open-interpreter/pull/830#issuecomment-1854989795)
 - [ ] Display images in the terminal interface
-- [ ] Add anonymous, opt-in data collection → open-source dataset, like `--contribute_conversations`
-  - [ ] Make that flag send each message to server
-  - [ ] Set up receiving replit server
-  - [ ] Add option to review and send previous conversations, use some PII redaction package then too
-  - [ ] Make the messaging really strong re: "We will be saving this, we will redact PII, we will open source the dataset so we (and others) can train code interpreting models"
 - [ ] There should be a function that just renders messages to the terminal, so we can revive conversation navigator, and let people look at their conversations
 - [ ] ^ This function should also render the last like 5 messages once input() is about to be run, so we don't get those weird stuttering `rich` artifacts
 - [ ] Let OI use OI, add `interpreter.chat(async=True)` bool. OI can use this to open OI on a new thread
@@ -29,14 +19,8 @@
   - [ ] If `interpreter.functions != []`:
     - [ ] set `interpreter.computer.languages` to only use Python
     - [ ] Use regex to ensure the output of code blocks conforms to just using those functions + other python basics
-- [x] Allow for custom llms (to be stored in `interpreter.llm`) which conform to some class
-  - [x] Has attributes `.supports_functions`, `.supports_vision`, and `.context_window`
 - [ ] (Maybe) Allow for a custom embedding function (`interpreter.embed` or `computer.ai.embed`) which will let us do semantic search
 - [ ] (Maybe) if a git is detected, switch to a mode that's good for developers, like showing nested file structure in dynamic system message, searching for relevant functions (use computer.files.search)
-- [ ] Add a skill library, or maybe expose post processing on code, so we can save functions for later & semantically search docstrings. Keep this minimal!
-  - [ ] If `interpreter.skill_library == True`, we should add a decorator above all functions, then show OI how to search its skill library
-  - [ ] Use computer.files.search over a folder that decorator saves functions (and import statements to)
-  - [ ] Then use dynamic system message to show relevant functions
 - [x] Allow for integrations somehow (you can replace interpreter.llm.completions with a wrapped completions endpoint for any kind of logging. need to document this tho)
   - [ ] Document this^
 - [ ] Expand "safe mode" to have proper, simple Docker support, or maybe Cosmopolitan LibC
@@ -53,42 +37,14 @@
   - [ ] Loop over that ↑ using a different prompt each time. Which prompt is best across all LLMs?
   - [ ] (For the NCU) might be good to use a Google VM with a display
   - [ ] (Future future) Use GPT-4 to assess each result, explaining each failure. Summarize. Send it all to GPT-4 + our prompt. Let it redesign the prompt, given the failures, rinse and repeat
-- [ ] Use Anthropic function calling
-- [ ] Implement Plausible\*
-- [ ] Stateless (as in, doesn't use the application directory) core python package. All `appdir` stuff should be only for the TUI
+- [ ] Stateless (as in, doesn't use the application directory) core python package. All `appdir` or `platformdirs` stuff should be only for the TUI
   - [ ] `interpreter.__dict__` = a dict derived from config is how the python package should be set, and this should be from the TUI. `interpreter` should not know about the config
   - [ ] Move conversation storage out of the core and into the TUI. When we exit or error, save messages same as core currently does
-- [ ] Local and vision should be reserved for TUI, more granular settings for Python
-  - [x] Rename `interpreter.local` → `interpreter.offline`
-  - [x] Implement custom LLMs with a `.supports_vision` attribute instead of `interpreter.vision`
 - [ ] Further split TUI from core (some utils still reach across)
-- [ ] Remove `procedures` (there must be a better way)
 - [ ] Better storage of different model keys in TUI / config file. All keys, to multiple providers, should be stored in there. Easy switching
   - [ ] Automatically migrate users from old config to new config, display a message of this
 - [ ] On update, check for new system message and ask user to overwrite theirs, or only let users pass in "custom instructions" which adds to our system message
-  - [ ] I think we could have a config that's like... system_message_version. If system_message_version is below the current version, ask the user if we can overwrite it with the default config system message of that version
-
-## Completed
-
-- [x] **Split TUI from core — two seperate folders.** (This lets us tighten our scope around those two projects. See "What's in our scope" below.)
-- [x] Add %% (shell) magic command
-- [x] Support multiple instances
-- [x] Split ROADMAP into sections
-- [x] Connect %% (shell) magic command to shell interpreter that `interpreter` runs
-- [x] Expose tool (`interpreter.computer.run(language, code)`)
-- [x] Generalize "output" and "input" — new types other than text: HTML, Image (see below)
-- [x] Switch core code interpreter to be Jupyter-powered
-- [x] Make sure breaking from generator during execution stops the execution
-- [x] (thanks ty!) Add more hosted model instructions from [LiteLLM's docs](https://docs.litellm.ai/docs/) to [our docs](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models).
-  - [x] Find a model that's [on LiteLLM's docs](https://docs.litellm.ai/docs/providers), but isn't [on ours](https://docs.openinterpreter.com/language-model-setup/hosted-models/openai)
-  - [x] Duplicate [one of our hosted model's `.mdx` file](https://github.com/KillianLucas/open-interpreter/tree/main/docs/language-model-setup/hosted-models)
-  - [x] Swap out the information with information from LiteLLM
-  - [x] Repeat with other models
-  - [x] Allow for custom languages (`interpreter.computer.languages.append(class_that_conforms_to_base_language)`)
-  - [x] Make it so function calling dynamically uses the languages in interpreter.computer.languages
-  - [x] Make a migration guide for the New Computer Update (whats different in our new streaming structure (below) vs. [our old streaming structure](https://docs.openinterpreter.com/usage/python/streaming-response)) thanks ty!
-  - [x] Require documentation for PRs
-  - [x] Document the New Computer Update
+  - [ ] I think we could have a config that's like... system_message_version. If system_message_version is below the current version, ask the user if we can overwrite it with the default config system message of that version. (This somewhat exists now but needs to be robust)
 
 # What's in our scope?
 
@@ -102,8 +58,7 @@ Open Interpreter contains two projects which support eachother, whose scopes are
 Our guiding philosphy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
 
 1. Additional functions in `core` beyond running code.
-2. Advanced memory or planning. We consider these to be the LLM's responsibility, and as such OI will remain single-threaded.
-3. More complex interactions with the LLM in `terminal_interface` beyond text (but file paths to more complex inputs, like images or video, can be included in that text).
+2. More complex interactions with the LLM in `terminal_interface` beyond text (but file paths to more complex inputs, like images or video, can be included in that text).
 
 ---
 
@@ -211,30 +166,3 @@ if __name__ == "__main__":
 This script will launch Chrome, connect to it, navigate to "https://www.example.com", and then print the accessibility tree to the console.
 
 **Note**: The script to launch Chrome assumes a typical installation path on Windows. You will need to modify this path according to your Chrome installation location and operating system. Additionally, handling different operating systems requires conditional checks and respective commands for each OS.
-
-## \* Roughly, how to build `computer.files`:
-
-Okay I'm thinking like, semantic filesystem or something. We make a new package that does really simple semantic search over a filesystem, then expose it via `computer.files.search("query")`.
-
-## \* Plausible
-
-```python
-import requests
-import json
-
-def send_event_to_plausible(domain, event_name):
-    url = f'https://plausible.io/api/event'
-    headers = {'Content-Type': 'application/json', 'User-Agent': 'YourAppName/Version'}
-    payload = {
-        'domain': domain,
-        'name': event_name,
-        'url': 'https://yourapp.com/path',  # URL where the event occurred
-        'referrer': '',
-        'props': {'prop1': 'value1', 'prop2': 'value2'}
-    }
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-    return response.status_code, response.text
-
-# Usage example
-send_event_to_plausible('yourdomain.com', 'event_name')
-```

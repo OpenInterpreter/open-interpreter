@@ -2,12 +2,21 @@ import asyncio
 import json
 from typing import Generator
 
-import uvicorn
-from fastapi import Body, FastAPI, Request, Response, WebSocket
-from fastapi.responses import PlainTextResponse, StreamingResponse
+from .utils.lazy_import import lazy_import
+
+uvicorn = lazy_import("uvicorn")
+fastapi = lazy_import("fastapi")
 
 
 def server(interpreter, host="0.0.0.0", port=8000):
+    FastAPI, Request, Response, WebSocket = (
+        fastapi.FastAPI,
+        fastapi.Request,
+        fastapi.Response,
+        fastapi.WebSocket,
+    )
+    PlainTextResponse = fastapi.responses.PlainTextResponse
+
     app = FastAPI()
 
     @app.post("/chat")
