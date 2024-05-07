@@ -73,6 +73,7 @@ class OpenInterpreter:
         skills_path=None,
         import_skills=False,
         multi_line=False,
+        stream_out=None
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -90,6 +91,7 @@ class OpenInterpreter:
         self.disable_telemetry = disable_telemetry
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
+        self.stream_out = stream_out
 
         # Loop messages
         self.force_task_completion = force_task_completion
@@ -136,7 +138,7 @@ class OpenInterpreter:
     def anonymous_telemetry(self) -> bool:
         return not self.disable_telemetry and not self.offline
 
-    def chat(self, message=None, display=True, stream=False, blocking=True):
+    def chat(self, message=None, display=True, stream=False, blocking=True, stream_out=None):
         try:
             self.responding = True
             if self.anonymous_telemetry:
@@ -163,7 +165,13 @@ class OpenInterpreter:
                 return self._streaming_chat(message=message, display=display)
 
             # If stream=False, *pull* from the stream.
-            for _ in self._streaming_chat(message=message, display=display):
+            for chunk in self._streaming_chat(message=message, display=display):
+                # Send out the stream of incoming chunks
+                # This is useful if you want to use OpenInterpreter from a different interface
+                if self.debug: print(f" ::: Streaming out: {chunk}")
+                if stream_out: stream_out(chunk) # Passed stream_out paramater takes priority over self.stream_out
+                elif self.stream_out: self.stream_out(chunk)
+                # if not streaming_out, then just *pull* from the stream
                 pass
 
             # Return new messages
