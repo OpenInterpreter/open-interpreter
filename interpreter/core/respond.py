@@ -225,8 +225,8 @@ def respond(interpreter):
                     print(str(e))
                     print("Continuing...")
 
-
                 ## ↓ CODE IS RUN HERE
+
                 for line in interpreter.computer.run(language, code, stream=True):
                     yield {"role": "computer", **line}
 

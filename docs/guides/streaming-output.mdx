@@ -1,0 +1,25 @@
+---
+title: Streaming Output
+---
+
+You can stream out all the output from Open Interpreter by adding  `stream_output=function` in an `interpreter.chat()` call (optional).
+
+You can also trigger OpenInterpreter's (Y/N) Confirmation Input REMOTELY by passing `async_input={"input":None, "code_revision":None}` changing the dict['input'] will trigger the (Y/N) confirmation, place your answer there
+
+Additionally, you can pass New Code to dict['code_revision'] and it will be executed instead of the last codeblock (usefull for manual editing)
+
+```python
+## ↓ THIS FUNCTION IS CALLED ON ALL OI'S OUTPUTS
+def stream_out_hook(partial, debug = False, *a, **kw):
+    ''' THIS FUNCTION PROCESSES ALL THE OUTPUTS FROM OPEN INTERPRETER '''
+    if debug: print("STREAMING OUT! ",partial)
+    # Replace this function with one that will send the output to YOUR APPLICATION
+
+## ↓ THIS IS OBJECT BEING WATCHED FOR TRIGGERING INPUT
+async_input_data = {"input":None, "code_revision":None}
+## ↑ CHANGING async_input_data["input"] WILL TRIGGER OI'S (Y/N/OTHER) CONFIRMATION INPUT
+
+interpreter.chat(stream_out = stream_out_hook, async_input = async_input_data)
+```
+
+## For a more comprehensive & full example, please checkout  [examples/stream_out.py](https://github.com/KillianLucas/open-interpreter/blob/main/docs/examples/stream_out.py)

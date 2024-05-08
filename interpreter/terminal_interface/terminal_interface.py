@@ -14,8 +14,6 @@ import random
 import re
 import subprocess
 import time
-import threading
-import multiprocessing
 
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
