@@ -27,11 +27,12 @@ def classic_input(input_msg):
 
 
 ## ↓ JOINT INPUT METHOD - FROM BOTH CLASSIC INTPUT() AND EXTERNAL INPUT
+# async_input:dict = {"input":None, "code_revison":None}
 def input_confirmation(input_msg, async_input=None): # async_input:dict {"input":None,""}
     ''' Changing `async_input` dict from an external process
         can trigger confirmation, just like using input()
         and also allows for manual code changes before execution
-        async_input:dict {"input":None,"code_revison"}'''
+    '''
     if async_input == None:
         # in case no async_input dict was provided, run normally
         response = input(input_msg)
