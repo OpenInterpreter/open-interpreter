@@ -29,16 +29,17 @@ from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
 from .utils.cli_input import cli_input
 from .utils.async_input import input_confirmation
+
 # Add examples to the readline history
-# TODO Add previous session's lines to readline history
 examples = [
     "How many files are on my desktop?",
     "What time is it in Seattle?",
     "Make me a simple Pomodoro app.",
     "Open Chrome and go to YouTube.",
     "Can you set my system to light mode?",
-]
+] # TODO Add previous session's lines to readline history!
 random.shuffle(examples)
+
 try:
     for example in examples:
         readline.add_history(example)
@@ -81,7 +82,7 @@ def terminal_interface(interpreter, message, async_input = None):
                 ### This is the primary input for Open Interpreter.
                 message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
             else:
-                # User has already left a message using the confirmation input
+                ### User has requested changes before execution
                 message = input_feedback
                 input_feedback = None
             try:
@@ -261,24 +262,19 @@ def terminal_interface(interpreter, message, async_input = None):
                         if should_scan_code:
                             scan_code(code, language, interpreter)
 
-                        response, code_revision = input_confirmation(
-                            "  Would you like to run this code? (y/n)\n\n  "
-                            , async_input = async_input
-                        )
-                        # print("::: input_confirmation", response, code_revision)
+                        ## ↓ JOINT INPUT METHOD - FROM BOTH CLASSIC INTPUT() AND EXTERNAL INPUT
+                        response, code_revision = input_confirmation("  Would you like to run this code? (y/n)\n\n  ", async_input = async_input)
+                        ## ↑ ALLOWS TO ACCEPT (Y/N/Other Requsts) ASWELL AS MANUAL CODE CHANGES FROM EXTERNAL PROCESS
+
                         # Resetting async_input for next time
-                        # if async_input != None: async_input[0]=None; async_input[1]=None
                         if async_input != None: async_input["input"]=None; async_input["code_revision"]=None
-
-                        # Allow user to manually edit the code before execution
                         if code_revision is not None:
-                            #Replacing Interpreter Last Content
-                            # print("XXXXXX current code:::"+str(interpreter.messages)+":::")
+                            ## ↓ USER MADE MANUAL CHANGES TO THE CODE
                             final_code = f"`\n\n{code_revision}\n"
-                            interpreter.messages[-1]["content"] = final_code
-                            # print("YYYYYY current code:::"+str(interpreter.messages)+":::")
-
+                            # Changes were made, set the new code, and replace interpreter's last content
                             code = final_code
+                            interpreter.messages[-1]["content"] = final_code
+
                         print("")  # <- Aesthetic choice
 
                         if response != None and response.strip().lower() == "y":
@@ -298,6 +294,7 @@ def terminal_interface(interpreter, message, async_input = None):
                             #         "content": response,
                             #     }
                             # )
+                            ## ↓ ALLOW USER TO REQUEST OI TO MAKE CHANGES TO THE CODE BEFORE EXECUTION
                             input_feedback = response
                             break
                         else:

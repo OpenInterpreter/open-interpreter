@@ -171,6 +171,7 @@ class OpenInterpreter:
                 if self.debug: print(f" ::: Streaming out: {chunk}")
                 if stream_out: stream_out(chunk) # Passed stream_out paramater takes priority over self.stream_out
                 elif self.stream_out: self.stream_out(chunk)
+
                 # if not streaming_out, then just *pull* from the stream
                 pass
 

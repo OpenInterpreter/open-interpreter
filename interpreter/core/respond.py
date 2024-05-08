@@ -128,7 +128,6 @@ def respond(interpreter):
             try:
                 # What language/code do you want to run?
                 language = interpreter.messages[-1]["format"].lower().strip()
-                # print("@@@@@@@@@@@@@@@@@@@\n"+str(interpreter.messages)+"\n@@@@@@@@@@")
                 code = interpreter.messages[-1]["content"]
 
                 if language == "text":
@@ -139,7 +138,6 @@ def respond(interpreter):
                 # Is this language enabled/supported?
                 if interpreter.computer.terminal.get_language(language) == None:
                     output = f"`{language}` disabled or not supported."
-                    # print(":::::::::1")
                     yield {
                         "role": "computer",
                         "type": "console",
@@ -150,14 +148,12 @@ def respond(interpreter):
                     # Let the response continue so it can deal with the unsupported code in another way. Also prevent looping on the same piece of code.
                     if code != last_unsupported_code:
                         last_unsupported_code = code
-                        # print(":::::::::2")
                         continue
                     else:
                         break
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
-                    # print(":::::::::3")
                     yield {
                         "role": "computer",
                         "type": "confirmation",
@@ -172,17 +168,15 @@ def respond(interpreter):
                     # The user might exit here.
                     # We need to tell python what we (the generator) should do if they exit
                     break
-                # print(":::::::::4")
-                # Check if code changed. Gives user a chance to manually edit the code before execution
+
+                # Check if the code was changed.
+                # Gives user a chance to manually edit the code before execution
                 if (interpreter.messages[-1]["type"] == "code" and code != interpreter.messages[-1]["content"]) or (interpreter.messages[-2]["type"] == "code" and code != interpreter.messages[-2]["content"]):
-                    code = interpreter.messages[-1]["content"] if interpreter.messages[-1]["type"] == "code" else interpreter.messages[-2]["content"]
                     print("(Code has been modified)")
-                    # print("@@@CODE CHANGED!@@@@@!!!!!!!@@@@@@@@@@@\n"+str(interpreter.messages)+"\n@@@@@!!!!!!!!!!!!!!@@@@@")
-                    # print(f"&&&&CODE:::{code}:::")
+                    code = interpreter.messages[-1]["content"] if interpreter.messages[-1]["type"] == "code" else interpreter.messages[-2]["content"]
 
                 # don't let it import computer — we handle that!
                 if interpreter.computer.import_computer_api and language == "python":
-                    # print(":::::::::5")
                     code = code.replace("import computer\n", "pass\n")
                     code = re.sub(
                         r"import computer\.(\w+) as (\w+)", r"\2 = computer.\1", code
@@ -209,7 +203,7 @@ def respond(interpreter):
                 interpreter.computer.verbose = interpreter.verbose
                 interpreter.computer.debug = interpreter.debug
                 interpreter.computer.emit_images = interpreter.llm.supports_vision
-                # print(":::::::::6")
+
                 # sync up the interpreter's computer with your computer
                 try:
                     if interpreter.sync_computer and language == "python":
@@ -226,11 +220,8 @@ def respond(interpreter):
                     print(str(e))
                     print("Continuing...")
 
-                # print(":::::::::7")
-
 
                 ## ↓ CODE IS RUN HERE
-                # print("::::::::::::FINAL RUNNING CODE::::"+code+":::")
                 for line in interpreter.computer.run(language, code, stream=True):
                     yield {"role": "computer", **line}
 
