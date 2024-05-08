@@ -73,7 +73,8 @@ class OpenInterpreter:
         skills_path=None,
         import_skills=False,
         multi_line=False,
-        contribute_conversation=False
+        contribute_conversation=False,
+        stream_out=None,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -92,6 +93,7 @@ class OpenInterpreter:
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
         self.contribute_conversation = contribute_conversation
+        self.stream_out = stream_out
 
         # Loop messages
         self.force_task_completion = force_task_completion
@@ -143,7 +145,7 @@ class OpenInterpreter:
         overrides = self.offline or not self.conversation_history or self.disable_telemetry
         return self.contribute_conversation and not overrides
 
-    def chat(self, message=None, display=True, stream=False, blocking=True):
+    def chat(self, message=None, display=True, stream=False, blocking=True, stream_out=None, async_input=None):
         try:
             self.responding = True
             if self.anonymous_telemetry:
@@ -170,7 +172,14 @@ class OpenInterpreter:
                 return self._streaming_chat(message=message, display=display)
 
             # If stream=False, *pull* from the stream.
-            for _ in self._streaming_chat(message=message, display=display):
+            for chunk in self._streaming_chat(message=message, display=display, async_input=async_input):
+                # Send out the stream of incoming chunks
+                # This is useful if you want to use OpenInterpreter from a different interface
+                if self.debug: print(f" ::: Streaming out: {chunk}")
+                if stream_out: stream_out(chunk) # Passed stream_out paramater takes priority over self.stream_out
+                elif self.stream_out: self.stream_out(chunk)
+
+                # if not streaming_out, then just *pull* from the stream
                 pass
 
             # Return new messages
@@ -193,13 +202,13 @@ class OpenInterpreter:
 
             raise
 
-    def _streaming_chat(self, message=None, display=True):
+    def _streaming_chat(self, message=None, display=True, async_input = None):
         # Sometimes a little more code -> a much better experience!
         # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
         # Quite different from the plain generator stuff. So redirect to that
         if display:
-            yield from terminal_interface(self, message)
+            yield from terminal_interface(self, message, async_input=async_input)
             return
 
         # One-off message
