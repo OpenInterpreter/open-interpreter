@@ -14,6 +14,8 @@ import random
 import re
 import subprocess
 import time
+import threading
+import multiprocessing
 
 from ..core.utils.scan_code import scan_code
 from ..core.utils.system_debug_info import system_info
@@ -26,8 +28,9 @@ from .utils.display_markdown_message import display_markdown_message
 from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
 from .utils.cli_input import cli_input
-
+from .utils.async_input import input_confirmation
 # Add examples to the readline history
+# TODO Add previous session's lines to readline history
 examples = [
     "How many files are on my desktop?",
     "What time is it in Seattle?",
@@ -43,8 +46,7 @@ except:
     # If they don't have readline, that's fine
     pass
 
-
-def terminal_interface(interpreter, message):
+def terminal_interface(interpreter, message, async_input = None):
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -69,14 +71,19 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
+    input_feedback = None
     active_block = None
     voice_subprocess = None
 
     while True:
         if interactive:
-            ### This is the primary input for Open Interpreter.
-            message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
-
+            if input_feedback is None:
+                ### This is the primary input for Open Interpreter.
+                message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
+            else:
+                # User has already left a message using the confirmation input
+                message = input_feedback
+                input_feedback = None
             try:
                 # This lets users hit the up arrow key for past messages
                 readline.add_history(message)
@@ -254,18 +261,45 @@ def terminal_interface(interpreter, message):
                         if should_scan_code:
                             scan_code(code, language, interpreter)
 
-                        response = input(
+                        response, code_revision = input_confirmation(
                             "  Would you like to run this code? (y/n)\n\n  "
+                            , async_input = async_input
                         )
+                        # print("::: input_confirmation", response, code_revision)
+                        # Resetting async_input for next time
+                        # if async_input != None: async_input[0]=None; async_input[1]=None
+                        if async_input != None: async_input["input"]=None; async_input["code_revision"]=None
+
+                        # Allow user to manually edit the code before execution
+                        if code_revision is not None:
+                            #Replacing Interpreter Last Content
+                            # print("XXXXXX current code:::"+str(interpreter.messages)+":::")
+                            final_code = f"`\n\n{code_revision}\n"
+                            interpreter.messages[-1]["content"] = final_code
+                            # print("YYYYYY current code:::"+str(interpreter.messages)+":::")
+
+                            code = final_code
                         print("")  # <- Aesthetic choice
 
-                        if response.strip().lower() == "y":
+                        if response != None and response.strip().lower() == "y":
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock()
                             active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = language
                             active_block.code = code
+
+                        elif response != None and response != "" and response.strip().lower() != "n":
+                            # User requesting changes to the code before execution.
+                            # interpreter.messages.append(
+                            #     {
+                            #         "role": "user",
+                            #         "type": "message",
+                            #         "content": response,
+                            #     }
+                            # )
+                            input_feedback = response
+                            break
                         else:
                             # User declined to run code.
                             interpreter.messages.append(

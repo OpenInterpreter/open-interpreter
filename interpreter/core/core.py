@@ -138,7 +138,7 @@ class OpenInterpreter:
     def anonymous_telemetry(self) -> bool:
         return not self.disable_telemetry and not self.offline
 
-    def chat(self, message=None, display=True, stream=False, blocking=True, stream_out=None):
+    def chat(self, message=None, display=True, stream=False, blocking=True, stream_out=None, async_input=None):
         try:
             self.responding = True
             if self.anonymous_telemetry:
@@ -165,7 +165,7 @@ class OpenInterpreter:
                 return self._streaming_chat(message=message, display=display)
 
             # If stream=False, *pull* from the stream.
-            for chunk in self._streaming_chat(message=message, display=display):
+            for chunk in self._streaming_chat(message=message, display=display, async_input=async_input):
                 # Send out the stream of incoming chunks
                 # This is useful if you want to use OpenInterpreter from a different interface
                 if self.debug: print(f" ::: Streaming out: {chunk}")
@@ -194,13 +194,13 @@ class OpenInterpreter:
 
             raise
 
-    def _streaming_chat(self, message=None, display=True):
+    def _streaming_chat(self, message=None, display=True, async_input = None):
         # Sometimes a little more code -> a much better experience!
         # Display mode actually runs interpreter.chat(display=False, stream=True) from within the terminal_interface.
         # wraps the vanilla .chat(display=False) generator in a display.
         # Quite different from the plain generator stuff. So redirect to that
         if display:
-            yield from terminal_interface(self, message)
+            yield from terminal_interface(self, message, async_input=async_input)
             return
 
         # One-off message
