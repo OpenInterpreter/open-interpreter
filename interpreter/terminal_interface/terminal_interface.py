@@ -75,7 +75,9 @@ def terminal_interface(interpreter, message):
 
     while True:
         if interactive:
+        
             if interpreter.auto_continue and auto_continue_initiated:
+                ## This sends 'continue' prompt back to LLM if auto_continue flag is True
                 message = "continue"
             else:
                 ### This is the primary input for Open Interpreter.
@@ -430,7 +432,7 @@ def terminal_interface(interpreter, message):
                 break
 
         except KeyboardInterrupt:
-            print("@@@INTERUPT DETECTED!@@@@")
+            #Reset auto_continue variable to enable user to input again
             if auto_continue_initiated:
                 auto_continue_initiated = False
             

@@ -75,6 +75,20 @@ interpreter.auto_run = False  # Require user confirmation (default)
 
 ---
 
+
+---
+
+#### `auto_continue`
+
+Setting this flag to `True` will reply with the word "continue" to Open Interpreter whenever input option is given to user. Break out of this with CTRL+C
+
+```python
+interpreter.auto_continue = True  
+interpreter.auto_continue = False
+```
+
+---
+
 #### `verbose`
 
 Use this boolean flag to toggle verbose mode on or off. Verbose mode will print information at every step to help diagnose problems.

@@ -16,7 +16,7 @@ title: Arguments
 
 **[Options](/docs/usage/terminal/arguments#options)**
 
-`--safe_mode`, `--auto_run`, `--force_task_completion`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`.
+`--safe_mode`, `--auto_run`, `--auto_continue`, `--force_task_completion`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`.
 
 **[Other](/docs/usage/terminal/arguments#other)**
 
@@ -337,6 +337,26 @@ interpreter --auto_run
 
 ```yaml Config
 auto_run: true
+```
+
+</CodeGroup>
+
+### `--auto_continue` or `-ac`
+
+Automatically tell interpreter to "continue" until CTRL+C is pressed.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --auto_continue
+```
+
+```python Python
+interpreter.auto_continue = True
+```
+
+```yaml Profile
+auto_continue: true
 ```
 
 </CodeGroup>
