@@ -44,6 +44,7 @@ class OpenInterpreter:
         messages=None,
         offline=False,
         auto_run=False,
+        auto_continue=False,
         verbose=False,
         debug=False,
         max_output=2800,
@@ -83,6 +84,7 @@ class OpenInterpreter:
         # Settings
         self.offline = offline
         self.auto_run = auto_run
+        self.auto_continue = auto_continue
         self.verbose = verbose
         self.debug = debug
         self.max_output = max_output

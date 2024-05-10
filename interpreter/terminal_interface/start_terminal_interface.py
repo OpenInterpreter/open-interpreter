@@ -49,6 +49,13 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "auto_run"},
         },
         {
+            "name": "auto_continue",
+            "nickname": "ac",
+            "help_text": "automatically tell the agent to continue after every response",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "auto_continue"},
+        },
+        {
             "name": "verbose",
             "nickname": "v",
             "help_text": "print detailed logs",
