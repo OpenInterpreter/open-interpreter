@@ -22,6 +22,8 @@ class Shell(SubprocessLanguage):
             self.start_cmd = [os.environ.get("SHELL", "bash")]
 
     def preprocess_code(self, code):
+        # Check if running sudo command
+        self.is_sudo = "sudo" in code
         return preprocess_shell(code)
 
     def line_postprocessor(self, line):

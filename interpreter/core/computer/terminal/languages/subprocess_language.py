@@ -1,4 +1,5 @@
 import os
+import pty
 import queue
 import re
 import subprocess
@@ -16,6 +17,8 @@ class SubprocessLanguage(BaseLanguage):
         self.verbose = False
         self.output_queue = queue.Queue()
         self.done = threading.Event()
+        self.slave_fd = None
+        self.is_sudo = False
 
     def detect_active_line(self, line):
         return None
@@ -38,8 +41,11 @@ class SubprocessLanguage(BaseLanguage):
     def terminate(self):
         if self.process:
             self.process.terminate()
-            self.process.stdin.close()
-            self.process.stdout.close()
+            if self.is_sudo:
+                os.close(self.slave_fd)
+            else:
+                self.process.stdin.close()
+                self.process.stdout.close()
 
     def start_process(self):
         if self.process:
@@ -47,28 +53,52 @@ class SubprocessLanguage(BaseLanguage):
 
         my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = "utf-8"
-        self.process = subprocess.Popen(
-            self.start_cmd,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-            bufsize=0,
-            universal_newlines=True,
-            env=my_env,
-            encoding="utf-8",
-            errors="replace",
-        )
-        threading.Thread(
-            target=self.handle_stream_output,
-            args=(self.process.stdout, False),
-            daemon=True,
-        ).start()
-        threading.Thread(
-            target=self.handle_stream_output,
-            args=(self.process.stderr, True),
-            daemon=True,
-        ).start()
+        if self.is_sudo:
+            # Create a pseudo-terminal to get prompts of sudo command
+            master_fd, slave_fd = pty.openpty()
+            self.slave_fd = slave_fd
+            self.process = subprocess.Popen(
+                self.start_cmd,
+                stdin=slave_fd,
+                stdout=slave_fd,
+                stderr=slave_fd,
+                text=True,
+                bufsize=0,
+                universal_newlines=True,
+                env=my_env,
+                encoding="utf-8",
+                errors="replace",
+            )
+
+            # Handle output from the pseudo-terminal
+            threading.Thread(
+                target=self.handle_sudo_output,
+                args=(master_fd,),
+                daemon=True
+            ).start()
+        else:
+            self.process = subprocess.Popen(
+                self.start_cmd,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                bufsize=0,
+                universal_newlines=True,
+                env=my_env,
+                encoding="utf-8",
+                errors="replace",
+            )
+            threading.Thread(
+                target=self.handle_stream_output,
+                args=(self.process.stdout, False),
+                daemon=True,
+            ).start()
+            threading.Thread(
+                target=self.handle_stream_output,
+                args=(self.process.stderr, True),
+                daemon=True,
+            ).start()
 
     def run(self, code):
         retry_count = 0
@@ -94,9 +124,13 @@ class SubprocessLanguage(BaseLanguage):
             self.done.clear()
 
             try:
-                self.process.stdin.write(code + "\n")
-                self.process.stdin.flush()
-                break
+                if self.is_sudo:
+                    os.write(self.slave_fd, (code + "\n").encode('utf-8'))  # 修改这里，使用os.write
+                    break
+                else:
+                    self.process.stdin.write(code + "\n")
+                    self.process.stdin.flush()
+                    break
             except:
                 if retry_count != 0:
                     # For UX, I like to hide this if it happens once. Obviously feels better to not see errors
@@ -191,3 +225,60 @@ class SubprocessLanguage(BaseLanguage):
                     print("Stream closed while reading.")
             else:
                 raise e
+
+    def handle_sudo_output(self, fd):
+        with os.fdopen(fd, 'r') as stream:
+            try:
+                for line in iter(stream.readline, ""):
+                    # print(f"Received output line:\n{line}\n---")
+                    if self.verbose:
+                        print(f"Received output line:\n{line}\n---")
+
+                    line = self.line_postprocessor(line)
+
+                    if line is None:
+                        continue  # `line = None` is the postprocessor's signal to discard completely
+
+                    if self.detect_active_line(line):
+                        active_line = self.detect_active_line(line)
+                        self.output_queue.put(
+                            {
+                                "type": "console",
+                                "format": "active_line",
+                                "content": active_line,
+                            }
+                        )
+                        # Sometimes there's a little extra on the same line, so be sure to send that out
+                        line = re.sub(r"##active_line\d+##", "", line)
+                        if line:
+                            self.output_queue.put(
+                                {"type": "console", "format": "output", "content": line}
+                            )
+                    elif self.detect_end_of_execution(line):
+                        # Sometimes there's a little extra on the same line, so be sure to send that out
+                        line = line.replace("##end_of_execution##", "").strip()
+                        if line:
+                            self.output_queue.put(
+                                {"type": "console", "format": "output", "content": line}
+                            )
+                        self.done.set()
+                    elif "KeyboardInterrupt" in line:
+                        self.output_queue.put(
+                            {
+                                "type": "console",
+                                "format": "output",
+                                "content": "KeyboardInterrupt",
+                            }
+                        )
+                        time.sleep(0.1)
+                        self.done.set()
+                    else:
+                        self.output_queue.put(
+                            {"type": "console", "format": "output", "content": line}
+                        )
+            except ValueError as e:
+                if "operation on closed file" in str(e):
+                    if self.verbose:
+                        print("Stream closed while reading.")
+                else:
+                    raise e
