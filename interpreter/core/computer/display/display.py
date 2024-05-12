@@ -94,7 +94,13 @@ class Display:
         :param combine_screens: If True, a collage of all display screens will be returned. Otherwise, a list of display screens will be returned.
         """
         if not self.computer.emit_images and force_image == False:
-            text = self.get_text_as_list_of_lists()
+            screenshot = self.screenshot(show=False, force_image=True)
+
+            description = self.computer.vision.query(pil_image=screenshot)
+            print("A DESCRIPTION OF WHAT'S ON THE SCREEN: " + description)
+
+            print("ALL OF THE TEXT ON THE SCREEN: ")
+            text = self.get_text_as_list_of_lists(screenshot=screenshot)
             pp = pprint.PrettyPrinter(indent=4)
             pretty_text = pp.pformat(text)  # language models like it pretty!
             pretty_text = format_to_recipient(pretty_text, "assistant")

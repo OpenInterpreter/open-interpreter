@@ -17,6 +17,7 @@ from .sms.sms import SMS
 from .terminal.terminal import Terminal
 from .vision.vision import Vision
 
+
 class Computer:
     def __init__(self, interpreter):
         self.interpreter = interpreter
@@ -88,6 +89,12 @@ class Computer:
         return self.terminal.terminate()
 
     def screenshot(self, *args, **kwargs):
+        """
+        Shortcut for computer.display.screenshot
+        """
+        return self.display.screenshot(*args, **kwargs)
+
+    def view(self, *args, **kwargs):
         """
         Shortcut for computer.display.screenshot
         """
