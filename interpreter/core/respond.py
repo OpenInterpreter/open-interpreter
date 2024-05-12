@@ -143,7 +143,6 @@ def respond(interpreter):
                 # Is this language enabled/supported?
                 if interpreter.computer.terminal.get_language(language) == None:
                     output = f"`{language}` disabled or not supported."
-
                     yield {
                         "role": "computer",
                         "type": "console",
@@ -174,6 +173,12 @@ def respond(interpreter):
                     # The user might exit here.
                     # We need to tell python what we (the generator) should do if they exit
                     break
+
+                # Check if the code was changed.
+                # Gives user a chance to manually edit the code before execution
+                if (interpreter.messages[-1]["type"] == "code" and code != interpreter.messages[-1]["content"]) or (interpreter.messages[-2]["type"] == "code" and code != interpreter.messages[-2]["content"]):
+                    print("(Code has been modified)")
+                    code = interpreter.messages[-1]["content"] if interpreter.messages[-1]["type"] == "code" else interpreter.messages[-2]["content"]
 
                 # don't let it import computer — we handle that!
                 if interpreter.computer.import_computer_api and language == "python":

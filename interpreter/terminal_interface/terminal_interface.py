@@ -26,6 +26,7 @@ from .utils.display_markdown_message import display_markdown_message
 from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
 from .utils.cli_input import cli_input
+from .utils.async_input import input_confirmation
 
 # Add examples to the readline history
 examples = [
@@ -34,8 +35,9 @@ examples = [
     "Make me a simple Pomodoro app.",
     "Open Chrome and go to YouTube.",
     "Can you set my system to light mode?",
-]
+] # TODO Add previous session's lines to readline history!
 random.shuffle(examples)
+
 try:
     for example in examples:
         readline.add_history(example)
@@ -43,8 +45,7 @@ except:
     # If they don't have readline, that's fine
     pass
 
-
-def terminal_interface(interpreter, message):
+def terminal_interface(interpreter, message, async_input = None):
     # Auto run and offline (this.. this isnt right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
@@ -69,14 +70,19 @@ def terminal_interface(interpreter, message):
     else:
         interactive = True
 
+    input_feedback = None
     active_block = None
     voice_subprocess = None
 
     while True:
         if interactive:
-            ### This is the primary input for Open Interpreter.
-            message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
-
+            if input_feedback is None:
+                ### This is the primary input for Open Interpreter.
+                message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
+            else:
+                ### User has requested changes before execution
+                message = input_feedback
+                input_feedback = None
             try:
                 # This lets users hit the up arrow key for past messages
                 readline.add_history(message)
@@ -254,18 +260,41 @@ def terminal_interface(interpreter, message):
                         if should_scan_code:
                             scan_code(code, language, interpreter)
 
-                        response = input(
-                            "  Would you like to run this code? (y/n)\n\n  "
-                        )
+                        ## ↓ JOINT INPUT METHOD - FROM BOTH CLASSIC INTPUT() AND EXTERNAL INPUT
+                        response, code_revision = input_confirmation("  Would you like to run this code? (y/n)\n\n  ", async_input = async_input)
+                        ## ↑ ALLOWS TO ACCEPT (Y/N/Other Requsts) ASWELL AS MANUAL CODE CHANGES FROM EXTERNAL PROCESS
+
+                        # Resetting async_input for next time
+                        if async_input != None: async_input["input"]=None; async_input["code_revision"]=None
+                        if code_revision is not None:
+                            ## ↓ USER MADE MANUAL CHANGES TO THE CODE
+                            final_code = f"`\n\n{code_revision}\n"
+                            # Changes were made, set the new code, and replace interpreter's last content
+                            code = final_code
+                            interpreter.messages[-1]["content"] = final_code
+
                         print("")  # <- Aesthetic choice
 
-                        if response.strip().lower() == "y":
+                        if response != None and response.strip().lower() == "y":
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock()
                             active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = language
                             active_block.code = code
+
+                        elif response != None and response != "" and response.strip().lower() != "n":
+                            # User requesting changes to the code before execution.
+                            # interpreter.messages.append(
+                            #     {
+                            #         "role": "user",
+                            #         "type": "message",
+                            #         "content": response,
+                            #     }
+                            # )
+                            ## ↓ ALLOW USER TO REQUEST OI TO MAKE CHANGES TO THE CODE BEFORE EXECUTION
+                            input_feedback = response
+                            break
                         else:
                             # User declined to run code.
                             interpreter.messages.append(
