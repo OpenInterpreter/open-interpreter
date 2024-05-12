@@ -1,8 +1,9 @@
-import sys
 import os
 import platform
 import subprocess
+import sys
 import time
+
 import inquirer
 
 from interpreter import interpreter
@@ -10,15 +11,18 @@ from interpreter import interpreter
 
 def get_ram():
     import psutil
-    total_ram = psutil.virtual_memory().total / (1024 * 1024 * 1024)  # Convert bytes to GB
+
+    total_ram = psutil.virtual_memory().total / (
+        1024 * 1024 * 1024
+    )  # Convert bytes to GB
     return total_ram
 
 
 def download_model(models_dir, models, interpreter):
     # For some reason, these imports need to be inside the function
     import inquirer
-    import wget
     import psutil
+    import wget
 
     # Get RAM and disk information
     global get_ram
@@ -533,8 +537,16 @@ if missing_packages:
         time.sleep(2)
         print("Attempting to start OS control anyway...\n\n")
 
-    for pip_name in ["pip", "pip3"]:
-        command = f"{pip_name} install open-interpreter[os]"
+    for pip_combo in [
+        ["pip", "quotes"],
+        ["pip", "no-quotes"],
+        ["pip3", "quotes"],
+        ["pip", "no-quotes"],
+    ]:
+        if pip_combo[1] == "quotes":
+            command = f'{pip_combo[0]} install "open-interpreter[os]"'
+        else:
+            command = f"{pip_combo[0]} install open-interpreter[os]"
 
         interpreter.computer.run("shell", command, display=True)
 
@@ -582,4 +594,3 @@ if not interpreter.auto_run:
         "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
     )
     print("")  # < - Aesthetic choice
-
