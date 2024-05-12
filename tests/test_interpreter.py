@@ -22,6 +22,7 @@ import pytest
 from websocket import create_connection
 
 
+@pytest.mark.skip(reason="Requires open-interpreter[local]")
 def test_localos():
     interpreter.computer.emit_images = False
     interpreter.computer.view()
