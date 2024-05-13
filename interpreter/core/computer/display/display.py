@@ -24,6 +24,7 @@ pyautogui = lazy_import("pyautogui")
 np = lazy_import("numpy")
 plt = lazy_import("matplotlib.pyplot")
 screeninfo = lazy_import("screeninfo")
+pywinctl = lazy_import("pywinctl")
 
 
 from ..utils.computer_vision import find_text_in_image, pytesseract_get_text
@@ -64,7 +65,7 @@ class Display:
 
     def info(self):
         """
-        Returns a list of all connected montitor/displays and thir information
+        Returns a list of all connected monitor/displays and thir information
         """
         return get_displays()
 
@@ -84,7 +85,7 @@ class Display:
         screen=0,
         show=True,
         quadrant=None,
-        active_app_only=False,
+        active_app_only=True,
         force_image=False,
         combine_screens=True,
     ):
@@ -94,30 +95,55 @@ class Display:
         :param combine_screens: If True, a collage of all display screens will be returned. Otherwise, a list of display screens will be returned.
         """
         if not self.computer.emit_images and force_image == False:
-            text = self.get_text_as_list_of_lists()
-            pp = pprint.PrettyPrinter(indent=4)
-            pretty_text = pp.pformat(text)  # language models like it pretty!
-            pretty_text = format_to_recipient(pretty_text, "assistant")
-            print(pretty_text)
-            print(
-                format_to_recipient(
-                    "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
-                    "assistant",
+            screenshot = self.screenshot(show=False, force_image=True)
+
+            description = self.computer.vision.query(pil_image=screenshot)
+            print("A DESCRIPTION OF WHAT'S ON THE SCREEN: " + description)
+
+            if self.computer.max_output > 600:
+                print("ALL OF THE TEXT ON THE SCREEN: ")
+                text = self.get_text_as_list_of_lists(screenshot=screenshot)
+                pp = pprint.PrettyPrinter(indent=4)
+                pretty_text = pp.pformat(text)  # language models like it pretty!
+                pretty_text = format_to_recipient(pretty_text, "assistant")
+                print(pretty_text)
+                print(
+                    format_to_recipient(
+                        "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
+                        "assistant",
+                    )
                 )
-            )
             return
 
         if quadrant == None:
-            # Implement active_app_only!
             if active_app_only:
-                region = self.get_active_window()["region"]
-                screenshot = pyautogui.screenshot(region=region)
+                active_window = pywinctl.getActiveWindow()
+                if active_window:
+                    screenshot = pyautogui.screenshot(
+                        region=(
+                            active_window.left,
+                            active_window.top,
+                            active_window.width,
+                            active_window.height,
+                        )
+                    )
+                    message = format_to_recipient(
+                        "Taking a screenshot of the active app (recommended). To take a screenshot of the entire screen (uncommon), use computer.display.view(active_app_only=False).",
+                        "assistant",
+                    )
+                    print(message)
+                else:
+                    screenshot = pyautogui.screenshot()
+
             else:
                 screenshot = take_screenshot_to_pil(
                     screen=screen, combine_screens=combine_screens
                 )  #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
-                # message = format_to_recipient("Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.", "assistant")
-                # print(message)
+                message = format_to_recipient(
+                    "Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.",
+                    "assistant",
+                )
+                print(message)
 
         else:
             screen_width, screen_height = pyautogui.size()

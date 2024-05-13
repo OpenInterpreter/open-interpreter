@@ -112,10 +112,7 @@ def respond(interpreter):
                     )
             elif interpreter.offline and not interpreter.os:
                 print(traceback.format_exc())
-                raise Exception(
-                    "Error occurred. "
-                    + str(e)
-                )
+                raise Exception("Error occurred. " + str(e))
             else:
                 raise
 
@@ -191,18 +188,22 @@ def respond(interpreter):
                     )
                     code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
-                    if any(code.split("\n")[-1].startswith(text) for text in [
-                        "computer.display.view",
-                        "computer.display.screenshot",
-                        "computer.view",
-                        "computer.screenshot",
-                    ]):
+                    if any(
+                        code.split("\n")[-1].startswith(text)
+                        for text in [
+                            "computer.display.view",
+                            "computer.display.screenshot",
+                            "computer.view",
+                            "computer.screenshot",
+                        ]
+                    ):
                         code = code + "\npass"
 
                 # sync up some things (is this how we want to do this?)
                 interpreter.computer.verbose = interpreter.verbose
                 interpreter.computer.debug = interpreter.debug
                 interpreter.computer.emit_images = interpreter.llm.supports_vision
+                interpreter.computer.max_output = interpreter.max_output
 
                 # sync up the interpreter's computer with your computer
                 try:

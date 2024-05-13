@@ -215,8 +215,16 @@ if missing_packages:
         time.sleep(2)
         print("Attempting to start OS control anyway...\n\n")
 
-    for pip_name in ["pip", "pip3"]:
-        command = f"{pip_name} install open-interpreter[os]"
+    for pip_combo in [
+        ["pip", "quotes"],
+        ["pip", "no-quotes"],
+        ["pip3", "quotes"],
+        ["pip", "no-quotes"],
+    ]:
+        if pip_combo[1] == "quotes":
+            command = f'{pip_combo[0]} install "open-interpreter[os]"'
+        else:
+            command = f"{pip_combo[0]} install open-interpreter[os]"
 
         interpreter.computer.run("shell", command, display=True)
 

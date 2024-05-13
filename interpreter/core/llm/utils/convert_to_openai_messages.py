@@ -10,7 +10,7 @@ def convert_to_openai_messages(
     function_calling=True,
     vision=False,
     shrink_images=True,
-    code_output_sender="assistant",
+    interpreter=None,
 ):
     """
     Converts LMC messages into OpenAI messages
@@ -27,7 +27,7 @@ def convert_to_openai_messages(
     #                 message["type"] = "message"
     #                 message["content"] = "```" + message.get("format", "") + "\n" + message.get("content").strip("\n`") + "\n```"
     #         prev_message = message
-        
+
     #     messages = [message for message in messages if message.get("type") != "code"]
 
     for message in messages:
@@ -41,7 +41,15 @@ def convert_to_openai_messages(
             new_message["role"] = message[
                 "role"
             ]  # This should never be `computer`, right?
-            new_message["content"] = message["content"]
+
+            if (
+                message["role"] == "user" and message == messages[-1]
+            ):  # Only add the template for the last message?
+                new_message["content"] = interpreter.user_message_template.replace(
+                    "{content}", message["content"]
+                )
+            else:
+                new_message["content"] = message["content"]
 
         elif message["type"] == "code":
             new_message["role"] = "assistant"
@@ -79,19 +87,17 @@ def convert_to_openai_messages(
 
             else:
                 # This should be experimented with.
-                if code_output_sender == "user":
+                if interpreter.code_output_sender == "user":
                     if message["content"].strip() == "":
-                        content = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+                        content = interpreter.empty_code_output_template
                     else:
-                        content = (
-                            "Code output: "
-                            + message["content"]
-                            + "\n\nWhat does this output mean / what's next (if anything, or are we done)?"
+                        content = interpreter.code_output_template.replace(
+                            "{content}", message["content"]
                         )
 
                     new_message["role"] = "user"
                     new_message["content"] = content
-                elif code_output_sender == "assistant":
+                elif interpreter.code_output_sender == "assistant":
                     if "@@@SEND_MESSAGE_AS_USER@@@" in message["content"]:
                         new_message["role"] = "user"
                         new_message["content"] = message["content"].replace(
@@ -136,7 +142,9 @@ def convert_to_openai_messages(
                             # Convert the image back to base64
                             buffered = io.BytesIO()
                             img.save(buffered, format=extension)
-                            img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                            img_str = base64.b64encode(buffered.getvalue()).decode(
+                                "utf-8"
+                            )
                             content = f"data:image/{extension};base64,{img_str}"
                         except:
                             # This should be non blocking. It's not required
@@ -149,7 +157,9 @@ def convert_to_openai_messages(
                     file_extension = image_path.split(".")[-1]
 
                     with open(image_path, "rb") as image_file:
-                        encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
+                        encoded_string = base64.b64encode(image_file.read()).decode(
+                            "utf-8"
+                        )
 
                     content = f"data:image/{file_extension};base64,{encoded_string}"
                 else:
@@ -158,7 +168,9 @@ def convert_to_openai_messages(
                     if "format" not in message:
                         raise Exception("Format of the image is not specified.")
                     else:
-                        raise Exception(f"Unrecognized image format: {message['format']}")
+                        raise Exception(
+                            f"Unrecognized image format: {message['format']}"
+                        )
 
                 # Calculate the size of the original binary data in bytes
                 content_size_bytes = len(content) * 3 / 4
@@ -206,27 +218,24 @@ def convert_to_openai_messages(
                 elif current_role == message["role"]:
                     current_content.append(message["content"])
                 else:
-                    combined_messages.append({
-                        "role": current_role,
-                        "content": "\n".join(current_content)
-                    })
+                    combined_messages.append(
+                        {"role": current_role, "content": "\n".join(current_content)}
+                    )
                     current_role = message["role"]
                     current_content = [message["content"]]
             else:
                 if current_content:
-                    combined_messages.append({
-                        "role": current_role,
-                        "content": "\n".join(current_content)
-                    })
+                    combined_messages.append(
+                        {"role": current_role, "content": "\n".join(current_content)}
+                    )
                     current_content = []
                 combined_messages.append(message)
 
         # Add the last message
         if current_content:
-            combined_messages.append({
-                "role": current_role,
-                "content": " ".join(current_content)
-            })
+            combined_messages.append(
+                {"role": current_role, "content": " ".join(current_content)}
+            )
 
         new_messages = combined_messages
 

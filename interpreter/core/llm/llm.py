@@ -28,11 +28,13 @@ class Llm:
         self.model = "gpt-4-turbo"
         self.temperature = 0
 
-        self.supports_vision = None # Will try to auto-detect
-        self.vision_renderer = self.interpreter.computer.vision.query # Will only use if supports_vision is False
+        self.supports_vision = None  # Will try to auto-detect
+        self.vision_renderer = (
+            self.interpreter.computer.vision.query
+        )  # Will only use if supports_vision is False
 
-        self.supports_functions = None # Will try to auto-detect
-        self.execution_instructions = "To execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language." # If supports_functions is False, this will be added to the system message
+        self.supports_functions = None  # Will try to auto-detect
+        self.execution_instructions = "To execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language."  # If supports_functions is False, this will be added to the system message
 
         # Optional settings
         self.context_window = None
@@ -81,7 +83,7 @@ class Llm:
                     self.supports_vision = False
             except:
                 self.supports_vision = False
-            
+
         # Trim image messages if they're there
         image_messages = [msg for msg in messages if msg["type"] == "image"]
         if self.supports_vision:
@@ -103,8 +105,11 @@ class Llm:
         elif self.supports_vision == False and self.vision_renderer:
             for img_msg in image_messages:
                 if img_msg["format"] != "description":
-                        img_msg["content"] = "Imagine I have just shown you an image with this description: " + self.vision_renderer(lmc=img_msg)
-                        img_msg["format"] = "description"
+                    img_msg["content"] = (
+                        "Imagine I have just shown you an image with this description: "
+                        + self.vision_renderer(lmc=img_msg)
+                    )
+                    img_msg["format"] = "description"
 
         # Convert to OpenAI messages format
         messages = convert_to_openai_messages(
@@ -112,6 +117,7 @@ class Llm:
             function_calling=self.supports_functions,
             vision=self.supports_vision,
             shrink_images=self.interpreter.shrink_images,
+            interpreter=self.interpreter,
         )
 
         system_message = messages[0]["content"]
@@ -228,7 +234,7 @@ def fixed_litellm_completions(**params):
 
     if "local" in params.get("model"):
         # Kinda hacky, but this helps
-        params["stop"] = ["<|assistant|>", "<|end|>"]
+        params["stop"] = ["<|assistant|>", "<|end|>", "<|eot_id|>"]
 
     # Run completion
     first_error = None

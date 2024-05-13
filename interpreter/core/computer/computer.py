@@ -17,6 +17,7 @@ from .sms.sms import SMS
 from .terminal.terminal import Terminal
 from .vision.vision import Vision
 
+
 class Computer:
     def __init__(self, interpreter):
         self.interpreter = interpreter
@@ -52,6 +53,9 @@ class Computer:
 
         self.import_skills = False
         self._has_imported_skills = False
+        self.max_output = (
+            self.interpreter.max_output
+        )  # Should mirror interpreter.max_output
 
     # Shortcut for computer.terminal.languages
     @property
@@ -88,6 +92,12 @@ class Computer:
         return self.terminal.terminate()
 
     def screenshot(self, *args, **kwargs):
+        """
+        Shortcut for computer.display.screenshot
+        """
+        return self.display.screenshot(*args, **kwargs)
+
+    def view(self, *args, **kwargs):
         """
         Shortcut for computer.display.screenshot
         """

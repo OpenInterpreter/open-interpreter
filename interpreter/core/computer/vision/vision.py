@@ -5,7 +5,7 @@ from PIL import Image
 
 from ...utils.lazy_import import lazy_import
 
-transformers = lazy_import("transformers")
+# transformers = lazy_import("transformers") # Doesn't work for some reason! We import it later.
 
 
 class Vision:
@@ -15,6 +15,8 @@ class Vision:
         self.tokenizer = None  # Will load upon first use
 
     def load(self):
+        import transformers  # Wait until we use it. Transformers can't be lazy loaded for some reason!
+
         print(
             "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
         )
@@ -30,7 +32,14 @@ class Vision:
             model_id, revision=revision
         )
 
-    def query(self, query="Describe this image.", base_64=None, path=None, lmc=None):
+    def query(
+        self,
+        query="Describe this image.",
+        base_64=None,
+        path=None,
+        lmc=None,
+        pil_image=None,
+    ):
         """
         Uses Moondream to ask query of the image (which can be a base64, path, or lmc message)
         """
@@ -59,6 +68,8 @@ class Vision:
             img = Image.open(io.BytesIO(img_data))
         elif path:
             img = Image.open(path)
+        elif pil_image:
+            img = pil_image
 
         enc_image = self.model.encode_image(img)
         return self.model.answer_question(enc_image, query, self.tokenizer)
