@@ -234,7 +234,7 @@ def fixed_litellm_completions(**params):
 
     if "local" in params.get("model"):
         # Kinda hacky, but this helps
-        params["stop"] = ["<|assistant|>", "<|end|>"]
+        params["stop"] = ["<|assistant|>", "<|end|>", "<|eot_id|>"]
 
     # Run completion
     first_error = None
