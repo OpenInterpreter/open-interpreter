@@ -437,13 +437,14 @@ Now, your turn:
 """
 
 # interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
-interpreter.code_output_template = "I executed that code. This was the output: {content}\n\nWhat does this output mean (I can't understand it, please help) / what's next (if anything, or are we done)?"
+interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what's next (if anything, or are we done)?'''
 interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
 interpreter.code_output_sender = "user"
-interpreter.max_output = 500
+interpreter.max_output = 600
 interpreter.llm.context_window = 8000
 interpreter.force_task_completion = False
 interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code."
+interpreter.llm.execution_instructions = False
 
 # Set offline for all local models
 interpreter.offline = True

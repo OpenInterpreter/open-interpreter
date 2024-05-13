@@ -53,6 +53,9 @@ class Computer:
 
         self.import_skills = False
         self._has_imported_skills = False
+        self.max_output = (
+            self.interpreter.max_output
+        )  # Should mirror interpreter.max_output
 
     # Shortcut for computer.terminal.languages
     @property

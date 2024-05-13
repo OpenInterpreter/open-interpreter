@@ -45,7 +45,7 @@ computer.keyboard.write("hello")
 # Use this to click text:
 computer.mouse.click("text onscreen") # This clicks on the UI element with that text. Use this **frequently** and get creative! To click a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
 # Use this to click an icon, button, or other symbol:
-computer.mouse.click(icon="gear icon") # Moves mouse to the icon with that description. Use this very often.
+computer.mouse.click(icon="gear icon") # Clicks the icon with that description. Use this very often.
 
 computer.mouse.move("open recent >") # This moves the mouse over the UI element with that text. Many dropdowns will disappear if you click them. You have to hover over items to reveal more.
 computer.mouse.click(x=500, y=500) # Use this very, very rarely. It's highly inaccurate
