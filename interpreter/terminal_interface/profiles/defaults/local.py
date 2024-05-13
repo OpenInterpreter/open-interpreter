@@ -3,20 +3,19 @@ import platform
 import subprocess
 import sys
 import time
+
 import inquirer
 import psutil
 import wget
+
 from interpreter import interpreter
 
-def get_ram():
-    total_ram = psutil.virtual_memory().total / (
-        1024 * 1024 * 1024
-    )  # Convert bytes to GB
-    return total_ram
 
 def download_model(models_dir, models, interpreter):
     # Get RAM and disk information
-    total_ram = get_ram()
+    total_ram = psutil.virtual_memory().total / (
+        1024 * 1024 * 1024
+    )  # Convert bytes to GB
     free_disk_space = psutil.disk_usage("/").free / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
@@ -54,6 +53,18 @@ def download_model(models_dir, models, interpreter):
     try:
         model_list = [
             {
+                "name": "Llama-3-8B-Instruct",
+                "file_name": " Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile",
+                "size": 5.76,
+                "url": "https://huggingface.co/jartine/Meta-Llama-3-8B-Instruct-llamafile/resolve/main/Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile?download=true",
+            },
+            {
+                "name": "Phi-3-mini",
+                "file_name": "Phi-3-mini-4k-instruct.Q5_K_M.llamafile",
+                "size": 2.84,
+                "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
+            },
+            {
                 "name": "TinyLlama-1.1B",
                 "file_name": "TinyLlama-1.1B-Chat-v1.0.Q5_K_M.llamafile",
                 "size": 0.76,
@@ -72,12 +83,6 @@ def download_model(models_dir, models, interpreter):
                 "url": "https://huggingface.co/jartine/phi-2-llamafile/resolve/main/phi-2.Q5_K_M.llamafile?download=true",
             },
             {
-                "name": "Phi-3-mini",
-                "file_name": "Phi-3-mini-4k-instruct.Q5_K_M.llamafile",
-                "size": 2.84,
-                "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
-            },
-            {
                 "name": "LLaVA 1.5",
                 "file_name": "llava-v1.5-7b-q4.llamafile",
                 "size": 3.97,
@@ -88,12 +93,6 @@ def download_model(models_dir, models, interpreter):
                 "file_name": "mistral-7b-instruct-v0.2.Q5_K_M.llamafile",
                 "size": 5.15,
                 "url": "https://huggingface.co/jartine/Mistral-7B-Instruct-v0.2-llamafile/resolve/main/mistral-7b-instruct-v0.2.Q5_K_M.llamafile?download=true",
-            },
-            {
-                "name": "Llama-3-8B-Instruct",
-                "file_name": " Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile",
-                "size": 5.76,
-                "url": "https://huggingface.co/jartine/Meta-Llama-3-8B-Instruct-llamafile/resolve/main/Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile?download=true",
             },
             {
                 "name": "WizardCoder-Python-13B",
@@ -136,7 +135,7 @@ def download_model(models_dir, models, interpreter):
                 )
             ]
             answers = inquirer.prompt(questions)
-            
+
             if answers == None:
                 exit()
 
@@ -373,7 +372,7 @@ elif selected_model == "Llamafile":
             )
         ]
         answers = inquirer.prompt(questions)
-        
+
         if answers == None:
             exit()
 
@@ -410,7 +409,9 @@ elif selected_model == "Llamafile":
     interpreter.llm.api_base = "http://localhost:8080/v1"
     interpreter.llm.supports_functions = False
 
-user_ram = get_ram()
+user_ram = total_ram = psutil.virtual_memory().total / (
+    1024 * 1024 * 1024
+)  # Convert bytes to GB
 # Set context window and max tokens for all local models based on the users available RAM
 if user_ram and user_ram > 9:
     interpreter.llm.max_tokens = 1200
@@ -434,5 +435,29 @@ You are capable of **any** task.
 Once you have accomplished the task, ask the user if they are happy with the result and wait for their response. It is very important to get feedback from the user. 
 The user will tell you the next task after you ask them.
 """
+
+interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
+
+User: Open the chrome app.
+Assistant: On it. 
+```python
+import webbrowser
+webbrowser.open('https://chrome.google.com')
+```
+User: The code you ran produced no output. Was this expected, or are we finished?
+Assistant: No further action is required; the provided snippet opens Chrome.
+
+Now, your turn:
+"""
+
+interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
+interpreter.code_output_template = "I executed that code. This was the ouput: {content}\n\nWhat does this output mean / what's next (if anything, or are we done)?"
+interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+interpreter.code_output_sender = "user"
+interpreter.max_output = 500
+interpreter.llm.context_window = 8000
+interpreter.force_task_completion = False
+# interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python or ```shell. Otherwise, don't send code and answer like a chatbot. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code."
+
 # Set offline for all local models
 interpreter.offline = True
