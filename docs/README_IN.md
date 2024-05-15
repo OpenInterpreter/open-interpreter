@@ -7,8 +7,8 @@
     <a href="README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
-    <a href="README_IN.md"><img src="https://img.shields.io/badge/Document-Hindi-white.svg" alt="IN doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
+    <a href="README_UK.md"><img src="https://img.shields.io/badge/Українська-white.svg" alt="UK doc"/></a>
+    <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br><br>
     <b>अपने कंप्यूटर पर कोड चलाने के लिए भाषा मॉडल को चलाएं।</b><br>
     ओपनएआई कोड इंटरप्रेटर का एक ओपन-सोर्स, स्थानीय चलने वाला अमल।<br>
@@ -211,13 +211,13 @@ $ interpreter
 
 इंटरैक्टिव मोड में, आप निम्नलिखित कमांडों का उपयोग करके अपने अनुभव को बेहतर बना सकते हैं। यहां उपलब्ध कमांडों की सूची है:
 
-**उपलब्ध कमांड:**  
- • `%verbose [true/false]`: डीबग मोड को टॉगल करें। कोई तर्क नहीं या 'true' के साथ, यह डीबग मोड में प्रवेश करता है। 'false' के साथ, यह डीबग मोड से बाहर निकलता है।  
- • `%reset`: वर्तमान सत्र को रीसेट करता है।  
- • `%undo`: पिछले संदेश और उसके जवाब को संदेश इतिहास से हटा देता है।  
- • `%save_message [पथ]`: संदेशों को एक निर्दिष्ट JSON पथ पर सहेजता है। यदि कोई पथ निर्दिष्ट नहीं किया गया है, तो यह डिफ़ॉल्ट रूप से 'messages.json' पर जाता है।  
- • `%load_message [पथ]`: एक निर्दिष्ट JSON पथ से संदेश लोड करता है। यदि कोई पथ निर्दिष्ट नहीं किया गया है, तो यह डिफ़ॉल्ट रूप से 'messages.json' पर जाता है।  
- • `%help`: मदद संदेश दिखाएं।
+**उपलब्ध कमांड:**
+• `%verbose [true/false]`: डीबग मोड को टॉगल करें। कोई तर्क नहीं या 'true' के साथ, यह डीबग मोड में प्रवेश करता है। 'false' के साथ, यह डीबग मोड से बाहर निकलता है।
+• `%reset`: वर्तमान सत्र को रीसेट करता है।
+• `%undo`: पिछले संदेश और उसके जवाब को संदेश इतिहास से हटा देता है।
+• `%save_message [पथ]`: संदेशों को एक निर्दिष्ट JSON पथ पर सहेजता है। यदि कोई पथ निर्दिष्ट नहीं किया गया है, तो यह डिफ़ॉल्ट रूप से 'messages.json' पर जाता है।
+• `%load_message [पथ]`: एक निर्दिष्ट JSON पथ से संदेश लोड करता है। यदि कोई पथ निर्दिष्ट नहीं किया गया है, तो यह डिफ़ॉल्ट रूप से 'messages.json' पर जाता है।
+• `%help`: मदद संदेश दिखाएं।
 
 इन कमांडों का प्रयोग करके अपनी प्रतिक्रिया दें और हमें अपनी प्रतिक्रिया दें!
 
