@@ -20,13 +20,14 @@ curl https://pyenv.run | bash
 # Define pyenv location
 pyenv_root="$HOME/.pyenv/bin/pyenv"
 
+python_version="3.11.7"
+
 # Install specific Python version using pyenv
 $pyenv_root init
-$pyenv_root install 3.11.7 --skip-existing
-$pyenv_root shell 3.11.7
+$pyenv_root install $python_version --skip-existing
+$pyenv_root shell $python_version
 
-pip install open-interpreter
-
+$pyenv_root exec pip install open-interpreter --break-system-packages
 # Unset the Python version
 $pyenv_root shell --unset
 
