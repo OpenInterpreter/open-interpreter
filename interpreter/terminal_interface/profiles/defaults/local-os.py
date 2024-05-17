@@ -1,39 +1,31 @@
-import sys
 import os
 import platform
 import subprocess
+import sys
 import time
+
 import inquirer
+import psutil
+import wget
 
 from interpreter import interpreter
 
-
-def get_ram():
-    import psutil
-    total_ram = psutil.virtual_memory().total / (1024 * 1024 * 1024)  # Convert bytes to GB
-    return total_ram
+model = None
 
 
 def download_model(models_dir, models, interpreter):
-    # For some reason, these imports need to be inside the function
-    import inquirer
-    import wget
-    import psutil
-
     # Get RAM and disk information
-    total_ram = get_ram()
+    total_ram = psutil.virtual_memory().total / (
+        1024 * 1024 * 1024
+    )  # Convert bytes to GB
     free_disk_space = psutil.disk_usage("/").free / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
-
-    time.sleep(1)
 
     # Display the users hardware specs
     interpreter.display_message(
         f"Your machine has `{total_ram:.2f}GB` of RAM, and `{free_disk_space:.2f}GB` of free storage space."
     )
-
-    time.sleep(2)
 
     if total_ram < 10:
         interpreter.display_message(
@@ -48,16 +40,24 @@ def download_model(models_dir, models, interpreter):
             f"\nYour computer should have enough RAM to run any model below.\n"
         )
 
-    time.sleep(1)
-
     interpreter.display_message(
         f"In general, the larger the model, the better the performance, but choose a model that best fits your computer's hardware. \nOnly models you have the storage space to download are shown:\n"
     )
 
-    time.sleep(1)
-
     try:
         model_list = [
+            {
+                "name": "Llama-3-8B-Instruct",
+                "file_name": " Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile",
+                "size": 5.76,
+                "url": "https://huggingface.co/jartine/Meta-Llama-3-8B-Instruct-llamafile/resolve/main/Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile?download=true",
+            },
+            {
+                "name": "Phi-3-mini",
+                "file_name": "Phi-3-mini-4k-instruct.Q5_K_M.llamafile",
+                "size": 2.84,
+                "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
+            },
             {
                 "name": "TinyLlama-1.1B",
                 "file_name": "TinyLlama-1.1B-Chat-v1.0.Q5_K_M.llamafile",
@@ -130,6 +130,9 @@ def download_model(models_dir, models, interpreter):
             ]
             answers = inquirer.prompt(questions)
 
+            if answers == None:
+                exit()
+
             # Get the selected model
             selected_model = next(
                 model
@@ -173,7 +176,7 @@ def download_model(models_dir, models, interpreter):
 
 # START OF LOCAL MODEL PROVIDER LOGIC
 interpreter.display_message(
-    "> Open Interpreter is compatible with several local model providers.\n"
+    "\n**Open Interpreter** supports multiple local model providers.\n"
 )
 
 # Define the choices for local models
@@ -188,12 +191,14 @@ choices = [
 questions = [
     inquirer.List(
         "model",
-        message="What one would you like to use?",
+        message="Select a provider",
         choices=choices,
     ),
 ]
 answers = inquirer.prompt(questions)
 
+if answers == None:
+    exit()
 
 selected_model = answers["model"]
 
@@ -213,65 +218,50 @@ Once the server is running, you can begin your conversation below.
 
 """
     )
-
+    interpreter.llm.supports_functions = False
     interpreter.llm.api_base = "http://localhost:1234/v1"
     interpreter.llm.api_key = "x"
 
 elif selected_model == "Ollama":
     try:
         # List out all downloaded ollama models. Will fail if ollama isn't installed
-        def list_ollama_models():
-            result = subprocess.run(
-                ["ollama", "list"], capture_output=True, text=True, check=True
-            )
-            lines = result.stdout.split("\n")
-            names = [
-                line.split()[0].replace(":latest", "")
-                for line in lines[1:]
-                if line.strip()
-            ]  # Extract names, trim out ":latest", skip header
-            return names
+        result = subprocess.run(
+            ["ollama", "list"], capture_output=True, text=True, check=True
+        )
+        lines = result.stdout.split("\n")
+        names = [
+            line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
+        ]  # Extract names, trim out ":latest", skip header
 
-        llama3_installed = True
-        names = list_ollama_models()
-        if "llama3" not in names:
-            # If a user has other models installed but not llama3, let's display the correct message
-            if not names:
-                llama3_installed = False
-            names.insert(0, "llama3")
-
-        # If there are models, prompt them to select one
-        time.sleep(1)
-
-        if llama3_installed:
-            interpreter.display_message(
-                f"**{len(names)} Ollama model{'s' if len(names) != 1 else ''} found.** To download a new model, run `ollama run <model-name>`, then start a new interpreter session. \n\n For a full list of downloadable models, check out [https://ollama.com/library](https://ollama.com/library) \n"
-            )
+        for model in ["llama3", "phi3", "wizardlm2"]:
+            if model not in names:
+                names.append("→ Download " + model)
 
         # Create a new inquirer selection from the names
         name_question = [
             inquirer.List(
                 "name",
-                message="Select a downloaded Ollama model:"
-                if llama3_installed
-                else "No models found. Select a model to install:",
+                message="Select a model",
                 choices=names,
             ),
         ]
         name_answer = inquirer.prompt(name_question)
-        selected_name = name_answer["name"] if name_answer else None
 
-        if selected_name is "llama3":
-            # If the user selects llama3, we need to check if it's installed, and if not, install it
-            all_models = list_ollama_models()
-            if "llama3" not in all_models:
-                interpreter.display_message(f"\nDownloading Llama3...\n")
-                subprocess.run(["ollama", "pull", "llama3"], check=True)
+        if name_answer == None:
+            exit()
+
+        selected_name = name_answer["name"]
+
+        if "download" in selected_name.lower():
+            model = selected_name.split(" ")[-1]
+            interpreter.display_message(f"\nDownloading {model}...\n")
+            subprocess.run(["ollama", "pull", model], check=True)
+        else:
+            model = selected_name.strip()
 
         # Set the model to the selected model
-        interpreter.llm.model = f"ollama/{selected_name}"
-        interpreter.display_message(f"\nUsing Ollama model: `{selected_name}` \n")
-        time.sleep(1)
+        interpreter.llm.model = f"ollama/{model}"
+        interpreter.display_message(f"> Model set to `{model}`")
 
     # If Ollama is not installed or not recognized as a command, prompt the user to download Ollama and try again
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
@@ -309,7 +299,11 @@ Once the server is running, enter the id of the model below, then you can begin 
         ),
     ]
     model_name_answer = inquirer.prompt(model_name_question)
-    jan_model_name = model_name_answer["jan_model_name"] if model_name_answer else None
+
+    if model_name_answer == None:
+        exit()
+
+    jan_model_name = model_name_answer["jan_model_name"]
     interpreter.llm.model = f"jan/{jan_model_name}"
     interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
     time.sleep(1)
@@ -340,21 +334,26 @@ elif selected_model == "Llamafile":
     models = [f for f in os.listdir(models_dir) if f.endswith(".llamafile")]
 
     if not models:
-        print("\nThere are no models currently downloaded. Let's download a new one.\n")
+        print(
+            "\nNo models currently downloaded. Please select a new model to download.\n"
+        )
         model_path = download_model(models_dir, models, interpreter)
     else:
         # Prompt the user to select a downloaded model or download a new one
-        model_choices = models + [" ↓ Download new model"]
+        model_choices = models + ["↓ Download new model"]
         questions = [
             inquirer.List(
                 "model",
-                message="Select a Llamafile model to run or download a new one:",
+                message="Select a model",
                 choices=model_choices,
             )
         ]
         answers = inquirer.prompt(questions)
 
-        if answers["model"] == " ↓ Download new model":
+        if answers == None:
+            exit()
+
+        if answers["model"] == "↓ Download new model":
             model_path = download_model(models_dir, models, interpreter)
         else:
             model_path = os.path.join(models_dir, answers["model"])
@@ -370,11 +369,8 @@ elif selected_model == "Llamafile":
                     text=True,
                 )
 
-                print("Waiting for the model to load...")
                 for line in process.stdout:
                     if "llama server listening at http://127.0.0.1:8080" in line:
-                        print("\nModel loaded \n")
-                        time.sleep(1)
                         break  # Exit the loop once the server is ready
             except Exception as e:
                 process.kill()  # Force kill if not terminated after timeout
@@ -382,13 +378,17 @@ elif selected_model == "Llamafile":
                 print("Model process terminated.")
 
     # Set flags for Llamafile to work with interpreter
-    interpreter.llm.model = "local"
+    interpreter.llm.model = "openai/local"
     interpreter.llm.temperature = 0
     interpreter.llm.api_base = "http://localhost:8080/v1"
     interpreter.llm.supports_functions = False
 
+    model_name = model_path.split("/")[-1]
+    interpreter.display_message(f"> Model set to `{model_name}`")
 
-user_ram = get_ram()
+user_ram = total_ram = psutil.virtual_memory().total / (
+    1024 * 1024 * 1024
+)  # Convert bytes to GB
 # Set context window and max tokens for all local models based on the users available RAM
 if user_ram and user_ram > 9:
     interpreter.llm.max_tokens = 1200
@@ -397,18 +397,15 @@ else:
     interpreter.llm.max_tokens = 1000
     interpreter.llm.context_window = 3000
 
-# Set offline for all local models
-interpreter.offline = True
-interpreter.os = True
-interpreter.llm.supports_vision = True
-# interpreter.shrink_images = True # Faster but less accurate
-interpreter.llm.supports_functions = False
-interpreter.llm.max_tokens = 4096
-interpreter.auto_run = True
-interpreter.force_task_completion = True
-interpreter.sync_computer = True
+# Display intro message
+if interpreter.auto_run == False:
+    interpreter.display_message(
+        "**Open Interpreter** will require approval before running code."
+        + "\n\nUse `interpreter -y` to bypass this."
+        + "\n\nPress `CTRL-C` to exit.\n"
+    )
 
-
+# Set the system message to a minimal version for all local models.
 interpreter.system_message = """
 You are Open Interpreter, a world-class programmer that can execute code on the user's machine.
 First, list all of the information you know related to the user's request.
@@ -423,7 +420,180 @@ In general, try to **make plans** with as few steps as possible. As for actually
 You are capable of **any** task.
 Once you have accomplished the task, ask the user if they are happy with the result and wait for their response. It is very important to get feedback from the user. 
 The user will tell you the next task after you ask them.
+"""
+
+# interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
+
+# User: Open the chrome app.
+# Assistant: On it.
+# ```python
+# import webbrowser
+# webbrowser.open('https://chrome.google.com')
+# ```
+# User: The code you ran produced no output. Was this expected, or are we finished?
+# Assistant: No further action is required; the provided snippet opens Chrome.
+
+# Now, your turn:
+# """
+
+# interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
+interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what's next (if anything, or are we done)?'''
+interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+interpreter.code_output_sender = "user"
+interpreter.max_output = 600
+interpreter.llm.context_window = 8000
+interpreter.force_task_completion = False
+interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Try to use the specialized 'computer' module when you can. Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code."
+
+# Set offline for all local models
+interpreter.offline = True
+
+
+interpreter.llm.context_window = 100000
+
+
+# Set offline for all local models
+interpreter.offline = True
+interpreter.os = True
+interpreter.llm.supports_vision = False
+# interpreter.shrink_images = True # Faster but less accurate
+interpreter.llm.supports_functions = False
+interpreter.llm.max_tokens = 4096
+interpreter.auto_run = True
+interpreter.force_task_completion = False
+interpreter.force_task_completion_message = "Proceed to run code by typing ```, or if you're finished with your response to the user, say exactly '<END>'."
+interpreter.force_task_completion_breakers = ["<END>"]
+interpreter.sync_computer = True
+interpreter.llm.execution_instructions = False
+
+
+interpreter.system_message = """
+
+You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request.
+
+Try to use the following Python functions when you can:
+
+```
+computer.display.view() # Describes the user's screen. **You almost always want to do this first!**
+computer.browser.search(query) # Silently searches Google for the query, returns result. (Does not open a browser!)
+computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
+computer.keyboard.write("hello")
+computer.mouse.click("text onscreen") # This clicks on the UI element with that text. Use this **frequently** and get creative! To click a video, you could pass the *timestamp* (which is usually written on the thumbnail) into this.
+computer.mouse.click(icon="gear icon") # Clicks the icon with that description. Use this very often.
+```
+
+For example:
+
+User: Open the chrome app.
+Assistant: On it. 
+```python
+# Open Spotlight
+computer.keyboard.hotkey(" ", "command")
+# Type Chrome
+computer.keyboard.write("Chrome")
+# Press enter
+computer.keyboard.write("\n")
+```
+User: The code you ran produced no output. Was this expected, or are we finished?
+Assistant: No further action is required; the provided snippet opens Chrome.
+
+---
+
+User: What's on my screen?
+Assistant: Let's check.
+```python
+# Describe the screen.
+computer.display.view()
+```
+User: I executed that code. This was the output: '''A code editor with a terminal window in front of it that says "Open Interpreter" at the top.'''
+What does this output mean (I can't understand it, please help) / what's next (if anything, or are we done)?
+Assistant: It looks like your screen contains a code editor with a terminal window in front of it that says "Open Interpreter" at the top.
+
+Now, your turn:
+
+"""
+
+interpreter.s = """
+You are an AI assistant.
+If the users question must be solved by running Python, write code enclosed in ```.  Otherwise, don't send code. This code will be silently executed, the user will not know about it. Be concise, don't include anything unnecessary. Don't use placeholders, the user can't edit code.
+
+The following Python functions have already been imported:
+```
+computer.display.view() # Shows you the user's screen
+computer.browser.search(query) # Searches Google for your query
+```
+
+At the end of every exchange, say exactly '<END>'. The user will not see your message unless '<END>' is sent.
 """.strip()
+
+interpreter.s = """You are an AI assistant."""
+
+interpreter.s = """
+
+You are the 01, a screenless executive assistant that can complete any task.
+When you execute code, it will be executed on the user's machine. The user has given you full and complete permission to execute any code necessary to complete the task.
+Run any code to achieve the goal, and if at first you don't succeed, try again and again.
+You can install new packages.
+Be concise. Your messages are being read aloud to the user. DO NOT MAKE PLANS. RUN CODE QUICKLY.
+Try to spread complex tasks over multiple code blocks. Don't try to complex tasks in one go.
+Manually summarize text.
+
+DON'T TELL THE USER THE METHOD YOU'LL USE, OR MAKE PLANS. ACT LIKE THIS:
+
+---
+user: Are there any concerts in Seattle?
+assistant: Let me check on that. I'll run Python code to do this.
+```python
+computer.browser.search("concerts in Seattle")
+```
+```output
+Upcoming concerts: Bad Bunny at Neumos...
+```
+It looks like there's a Bad Bunny concert at Neumos. <END>
+---
+
+Act like you can just answer any question, then run code (this is hidden from the user) to answer it.
+THE USER CANNOT SEE CODE BLOCKS.
+Your responses should be very short, no more than 1-2 sentences long.
+DO NOT USE MARKDOWN. ONLY WRITE PLAIN TEXT.
+
+# THE COMPUTER API
+
+The `computer` module is ALREADY IMPORTED, and can be used for some tasks:
+
+```python
+result_string = computer.browser.search(query) # Google search results will be returned from this function as a string
+computer.files.edit(path_to_file, original_text, replacement_text) # Edit a file
+computer.calendar.create_event(title="Meeting", start_date=datetime.datetime.now(), end_date=datetime.datetime.now() + datetime.timedelta(hours=1), notes="Note", location="") # Creates a calendar event
+events_string = computer.calendar.get_events(start_date=datetime.date.today(), end_date=None) # Get events between dates. If end_date is None, only gets events for start_date
+computer.calendar.delete_event(event_title="Meeting", start_date=datetime.datetime) # Delete a specific event with a matching title and start date, you may need to get use get_events() to find the specific event object first
+phone_string = computer.contacts.get_phone_number("John Doe")
+contact_string = computer.contacts.get_email_address("John Doe")
+computer.mail.send("john@email.com", "Meeting Reminder", "Reminder that our meeting is at 3pm today.", ["path/to/attachment.pdf", "path/to/attachment2.pdf"]) # Send an email with a optional attachments
+emails_string = computer.mail.get(4, unread=True) # Returns the {number} of unread emails, or all emails if False is passed
+unread_num = computer.mail.unread_count() # Returns the number of unread emails
+computer.sms.send("555-123-4567", "Hello from the computer!") # Send a text message. MUST be a phone number, so use computer.contacts.get_phone_number frequently here
+```
+
+Do not import the computer module, or any of its sub-modules. They are already imported.
+
+DO NOT use the computer module for ALL tasks. Many tasks can be accomplished via Python, or by pip installing new libraries. Be creative!
+
+# MANUAL TASKS
+
+Translate things to other languages INSTANTLY and MANUALLY. Don't ever try to use a translation tool.
+Summarize things manually. DO NOT use a summarizer tool.
+
+# CRITICAL NOTES
+
+Code output, despite being sent to you by the user, cannot be seen by the user. You NEED to tell the user about the output of some code, even if it's exact. >>The user does not have a screen.<<
+ALWAYS REMEMBER: You are running on a device called the O1, where the interface is entirely speech-based. Make your responses to the user VERY short. DO NOT PLAN. BE CONCISE. WRITE CODE TO RUN IT.
+Try multiple methods before saying the task is impossible. **You can do it!**
+
+If the users question must be solved by running Python, write code enclosed in ```. Otherwise, don't send code and answer like a chatbot. Be concise, don't include anything unnecessary. Don't use placeholders, the user can't edit code.
+At the end of every exchange, say exactly '<END>'. The user will not see your message unless '<END>' is sent!
+
+"""
 
 # Check if required packages are installed
 
@@ -448,8 +618,16 @@ if missing_packages:
         time.sleep(2)
         print("Attempting to start OS control anyway...\n\n")
 
-    for pip_name in ["pip", "pip3"]:
-        command = f"{pip_name} install open-interpreter[os]"
+    for pip_combo in [
+        ["pip", "quotes"],
+        ["pip", "no-quotes"],
+        ["pip3", "quotes"],
+        ["pip", "no-quotes"],
+    ]:
+        if pip_combo[1] == "quotes":
+            command = f'{pip_combo[0]} install "open-interpreter[os]"'
+        else:
+            command = f"{pip_combo[0]} install open-interpreter[os]"
 
         interpreter.computer.run("shell", command, display=True)
 

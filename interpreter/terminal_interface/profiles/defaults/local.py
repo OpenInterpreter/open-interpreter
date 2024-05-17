@@ -3,38 +3,29 @@ import platform
 import subprocess
 import sys
 import time
+
 import inquirer
+import psutil
+import wget
+
 from interpreter import interpreter
 
+model = None
 
-def get_ram():
-    import psutil
 
+def download_model(models_dir, models, interpreter):
+    # Get RAM and disk information
     total_ram = psutil.virtual_memory().total / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
-    return total_ram
-
-def download_model(models_dir, models, interpreter):
-    # For some reason, these imports need to be inside the function
-    import inquirer
-    import psutil
-    import wget
-
-    # Get RAM and disk information
-    total_ram = get_ram()
     free_disk_space = psutil.disk_usage("/").free / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
-
-    time.sleep(1)
 
     # Display the users hardware specs
     interpreter.display_message(
         f"Your machine has `{total_ram:.2f}GB` of RAM, and `{free_disk_space:.2f}GB` of free storage space."
     )
-
-    time.sleep(2)
 
     if total_ram < 10:
         interpreter.display_message(
@@ -49,16 +40,24 @@ def download_model(models_dir, models, interpreter):
             f"\nYour computer should have enough RAM to run any model below.\n"
         )
 
-    time.sleep(1)
-
     interpreter.display_message(
         f"In general, the larger the model, the better the performance, but choose a model that best fits your computer's hardware. \nOnly models you have the storage space to download are shown:\n"
     )
 
-    time.sleep(1)
-
     try:
         model_list = [
+            {
+                "name": "Llama-3-8B-Instruct",
+                "file_name": " Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile",
+                "size": 5.76,
+                "url": "https://huggingface.co/jartine/Meta-Llama-3-8B-Instruct-llamafile/resolve/main/Meta-Llama-3-8B-Instruct.Q5_K_M.llamafile?download=true",
+            },
+            {
+                "name": "Phi-3-mini",
+                "file_name": "Phi-3-mini-4k-instruct.Q5_K_M.llamafile",
+                "size": 2.84,
+                "url": "https://huggingface.co/jartine/Phi-3-mini-4k-instruct-llamafile/resolve/main/Phi-3-mini-4k-instruct.Q5_K_M.llamafile?download=true",
+            },
             {
                 "name": "TinyLlama-1.1B",
                 "file_name": "TinyLlama-1.1B-Chat-v1.0.Q5_K_M.llamafile",
@@ -131,6 +130,9 @@ def download_model(models_dir, models, interpreter):
             ]
             answers = inquirer.prompt(questions)
 
+            if answers == None:
+                exit()
+
             # Get the selected model
             selected_model = next(
                 model
@@ -174,7 +176,7 @@ def download_model(models_dir, models, interpreter):
 
 # START OF LOCAL MODEL PROVIDER LOGIC
 interpreter.display_message(
-    "> Open Interpreter is compatible with several local model providers.\n"
+    "\n**Open Interpreter** supports multiple local model providers.\n"
 )
 
 # Define the choices for local models
@@ -189,12 +191,14 @@ choices = [
 questions = [
     inquirer.List(
         "model",
-        message="What one would you like to use?",
+        message="Select a provider",
         choices=choices,
     ),
 ]
 answers = inquirer.prompt(questions)
 
+if answers == None:
+    exit()
 
 selected_model = answers["model"]
 
@@ -221,58 +225,43 @@ Once the server is running, you can begin your conversation below.
 elif selected_model == "Ollama":
     try:
         # List out all downloaded ollama models. Will fail if ollama isn't installed
-        def list_ollama_models():
-            result = subprocess.run(
-                ["ollama", "list"], capture_output=True, text=True, check=True
-            )
-            lines = result.stdout.split("\n")
-            names = [
-                line.split()[0].replace(":latest", "")
-                for line in lines[1:]
-                if line.strip()
-            ]  # Extract names, trim out ":latest", skip header
-            return names
+        result = subprocess.run(
+            ["ollama", "list"], capture_output=True, text=True, check=True
+        )
+        lines = result.stdout.split("\n")
+        names = [
+            line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
+        ]  # Extract names, trim out ":latest", skip header
 
-        llama3_installed = True
-        names = list_ollama_models()
-        if "llama3" not in names:
-            # If a user has other models installed but not llama3, let's display the correct message
-            if not names:
-                llama3_installed = False
-            names.insert(0, "llama3")
-
-        # If there are models, prompt them to select one
-        time.sleep(1)
-
-        if llama3_installed:
-            interpreter.display_message(
-                f"**{len(names)} Ollama model{'s' if len(names) != 1 else ''} found.** To download a new model, run `ollama run <model-name>`, then start a new interpreter session. \n\n For a full list of downloadable models, check out [https://ollama.com/library](https://ollama.com/library) \n"
-            )
+        for model in ["llama3", "phi3", "wizardlm2"]:
+            if model not in names:
+                names.append("→ Download " + model)
 
         # Create a new inquirer selection from the names
         name_question = [
             inquirer.List(
                 "name",
-                message="Select a downloaded Ollama model:"
-                if llama3_installed
-                else "No models found. Select a model to install:",
+                message="Select a model",
                 choices=names,
             ),
         ]
         name_answer = inquirer.prompt(name_question)
-        selected_name = name_answer["name"] if name_answer else None
 
-        if selected_name is "llama3":
-            # If the user selects llama3, we need to check if it's installed, and if not, install it
-            all_models = list_ollama_models()
-            if "llama3" not in all_models:
-                interpreter.display_message(f"\nDownloading Llama3...\n")
-                subprocess.run(["ollama", "pull", "llama3"], check=True)
+        if name_answer == None:
+            exit()
+
+        selected_name = name_answer["name"]
+
+        if "download" in selected_name.lower():
+            model = selected_name.split(" ")[-1]
+            interpreter.display_message(f"\nDownloading {model}...\n")
+            subprocess.run(["ollama", "pull", model], check=True)
+        else:
+            model = selected_name.strip()
 
         # Set the model to the selected model
-        interpreter.llm.model = f"ollama/{selected_name}"
-        interpreter.display_message(f"\nUsing Ollama model: `{selected_name}` \n")
-        time.sleep(1)
+        interpreter.llm.model = f"ollama/{model}"
+        interpreter.display_message(f"> Model set to `{model}`")
 
     # If Ollama is not installed or not recognized as a command, prompt the user to download Ollama and try again
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
@@ -310,7 +299,11 @@ Once the server is running, enter the id of the model below, then you can begin 
         ),
     ]
     model_name_answer = inquirer.prompt(model_name_question)
-    jan_model_name = model_name_answer["jan_model_name"] if model_name_answer else None
+
+    if model_name_answer == None:
+        exit()
+
+    jan_model_name = model_name_answer["jan_model_name"]
     interpreter.llm.model = f"jan/{jan_model_name}"
     interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
     time.sleep(1)
@@ -341,21 +334,26 @@ elif selected_model == "Llamafile":
     models = [f for f in os.listdir(models_dir) if f.endswith(".llamafile")]
 
     if not models:
-        print("\nThere are no models currently downloaded. Let's download a new one.\n")
+        print(
+            "\nNo models currently downloaded. Please select a new model to download.\n"
+        )
         model_path = download_model(models_dir, models, interpreter)
     else:
         # Prompt the user to select a downloaded model or download a new one
-        model_choices = models + [" ↓ Download new model"]
+        model_choices = models + ["↓ Download new model"]
         questions = [
             inquirer.List(
                 "model",
-                message="Select a Llamafile model to run or download a new one:",
+                message="Select a model",
                 choices=model_choices,
             )
         ]
         answers = inquirer.prompt(questions)
 
-        if answers["model"] == " ↓ Download new model":
+        if answers == None:
+            exit()
+
+        if answers["model"] == "↓ Download new model":
             model_path = download_model(models_dir, models, interpreter)
         else:
             model_path = os.path.join(models_dir, answers["model"])
@@ -371,11 +369,8 @@ elif selected_model == "Llamafile":
                     text=True,
                 )
 
-                print("Waiting for the model to load...")
                 for line in process.stdout:
                     if "llama server listening at http://127.0.0.1:8080" in line:
-                        print("\nModel loaded \n")
-                        time.sleep(1)
                         break  # Exit the loop once the server is ready
             except Exception as e:
                 process.kill()  # Force kill if not terminated after timeout
@@ -383,12 +378,17 @@ elif selected_model == "Llamafile":
                 print("Model process terminated.")
 
     # Set flags for Llamafile to work with interpreter
-    interpreter.llm.model = "local"
+    interpreter.llm.model = "openai/local"
     interpreter.llm.temperature = 0
     interpreter.llm.api_base = "http://localhost:8080/v1"
     interpreter.llm.supports_functions = False
 
-user_ram = get_ram()
+    model_name = model_path.split("/")[-1]
+    interpreter.display_message(f"> Model set to `{model_name}`")
+
+user_ram = total_ram = psutil.virtual_memory().total / (
+    1024 * 1024 * 1024
+)  # Convert bytes to GB
 # Set context window and max tokens for all local models based on the users available RAM
 if user_ram and user_ram > 9:
     interpreter.llm.max_tokens = 1200
@@ -396,6 +396,15 @@ if user_ram and user_ram > 9:
 else:
     interpreter.llm.max_tokens = 1000
     interpreter.llm.context_window = 3000
+
+# Display intro message
+if interpreter.auto_run == False:
+    interpreter.display_message(
+        "**Open Interpreter** will require approval before running code."
+        + "\n\nUse `interpreter -y` to bypass this."
+        + "\n\nPress `CTRL-C` to exit.\n"
+    )
+
 # Set the system message to a minimal version for all local models.
 interpreter.system_message = """
 You are Open Interpreter, a world-class programmer that can execute code on the user's machine.
@@ -412,5 +421,30 @@ You are capable of **any** task.
 Once you have accomplished the task, ask the user if they are happy with the result and wait for their response. It is very important to get feedback from the user. 
 The user will tell you the next task after you ask them.
 """
+
+interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
+
+User: Open the chrome app.
+Assistant: On it. 
+```python
+import webbrowser
+webbrowser.open('https://chrome.google.com')
+```
+User: The code you ran produced no output. Was this expected, or are we finished?
+Assistant: No further action is required; the provided snippet opens Chrome.
+
+Now, your turn:
+"""
+
+# interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
+interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what's next (if anything, or are we done)?'''
+interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+interpreter.code_output_sender = "user"
+interpreter.max_output = 600
+interpreter.llm.context_window = 8000
+interpreter.force_task_completion = False
+interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code."
+interpreter.llm.execution_instructions = False
+
 # Set offline for all local models
 interpreter.offline = True

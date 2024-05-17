@@ -8,6 +8,8 @@ import time
 import litellm
 from prompt_toolkit import prompt
 
+from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic
+
 from .utils.display_markdown_message import display_markdown_message
 
 

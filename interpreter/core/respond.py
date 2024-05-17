@@ -112,10 +112,7 @@ def respond(interpreter):
                     )
             elif interpreter.offline and not interpreter.os:
                 print(traceback.format_exc())
-                raise Exception(
-                    "Error occurred. "
-                    + str(e)
-                )
+                raise Exception("Error occurred. " + str(e))
             else:
                 raise
 
@@ -129,6 +126,11 @@ def respond(interpreter):
                 # What language/code do you want to run?
                 language = interpreter.messages[-1]["format"].lower().strip()
                 code = interpreter.messages[-1]["content"]
+
+                if code.startswith("`\n"):
+                    code = code[2:].strip()
+                    if interpreter.verbose:
+                        print("Removing `\n")
 
                 if language == "text":
                     # It does this sometimes just to take notes. Let it, it's useful.
@@ -186,18 +188,22 @@ def respond(interpreter):
                     )
                     code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
-                    if any(code.split("\n")[-1].startswith(text) for text in [
-                        "computer.display.view",
-                        "computer.display.screenshot",
-                        "computer.view",
-                        "computer.screenshot",
-                    ]):
+                    if any(
+                        code.split("\n")[-1].startswith(text)
+                        for text in [
+                            "computer.display.view",
+                            "computer.display.screenshot",
+                            "computer.view",
+                            "computer.screenshot",
+                        ]
+                    ):
                         code = code + "\npass"
 
                 # sync up some things (is this how we want to do this?)
                 interpreter.computer.verbose = interpreter.verbose
                 interpreter.computer.debug = interpreter.debug
                 interpreter.computer.emit_images = interpreter.llm.supports_vision
+                interpreter.computer.max_output = interpreter.max_output
 
                 # sync up the interpreter's computer with your computer
                 try:
@@ -272,9 +278,9 @@ def respond(interpreter):
             if (
                 interpreter.force_task_completion
                 and interpreter.messages
-                and interpreter.messages[-1].get("role", "").lower() == "assistant"
+                and interpreter.messages[-1].get("role", "") == "assistant"
                 and not any(
-                    task_status in interpreter.messages[-1].get("content", "").lower()
+                    task_status in interpreter.messages[-1].get("content", "")
                     for task_status in force_task_completion_breakers
                 )
             ):

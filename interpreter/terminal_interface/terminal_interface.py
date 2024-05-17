@@ -106,7 +106,7 @@ def terminal_interface(interpreter, message):
                 )
                 continue
 
-            if interpreter.llm.supports_vision:
+            if interpreter.llm.supports_vision or interpreter.llm.vision_renderer != None:
                 # Is the input a path to an image? Like they just dragged it into the terminal?
                 image_path = find_image_path(message)
 
@@ -436,5 +436,6 @@ def terminal_interface(interpreter, message):
             else:
                 break
         except:
-            system_info(interpreter)
+            if interpreter.debug:
+                system_info(interpreter)
             raise

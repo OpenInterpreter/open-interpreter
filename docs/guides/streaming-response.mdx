@@ -17,11 +17,12 @@ for chunk in interpreter.chat("What's 34/24?", stream=True, display=False):
 {"role": "assistant", "type": "code", "format": "python", "content": "24"}
 {"role": "assistant", "type": "code", "format": "python", "end": True}
 
-{"role": "computer", "type": "confirmation", "format": "execution", "content": {"type": "code", "language": "python", "code": "34 / 24"}}
+{"role": "computer", "type": "confirmation", "format": "execution", "content": {"type": "code", "format": "python", "content": "34 / 24"}},
 
 {"role": "computer", "type": "console", "start": True}
 {"role": "computer", "type": "console", "format": "active_line", "content": "1"}
 {"role": "computer", "type": "console", "format": "output", "content": "1.4166666666666667\n"}
+{"role": "computer", "type": "console", "format": "active_line", "content": None},
 {"role": "computer", "type": "console", "end": True}
 
 {"role": "assistant", "type": "message", "start": True}

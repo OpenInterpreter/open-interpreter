@@ -52,10 +52,10 @@ class OpenInterpreter:
         force_task_completion=False,
         force_task_completion_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
         force_task_completion_breakers=[
-            "the task is done.",
-            "the task is impossible.",
-            "let me know what you'd like to do next.",
-            "please provide more information.",
+            "The task is done.",
+            "The task is impossible.",
+            "Let me know what you'd like to do next.",
+            "Please provide more information.",
         ],
         disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true",
         in_terminal_interface=False,
@@ -67,12 +67,17 @@ class OpenInterpreter:
         llm=None,
         system_message=default_system_message,
         custom_instructions="",
+        user_message_template="{content}",
+        code_output_template="Code output: {content}\n\nWhat does this output mean / what's next (if anything, or are we done)?",
+        empty_code_output_template="The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)",
+        code_output_sender="user",
         computer=None,
         sync_computer=False,
         import_computer_api=False,
         skills_path=None,
         import_skills=False,
         multi_line=False,
+        contribute_conversation=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -90,6 +95,7 @@ class OpenInterpreter:
         self.disable_telemetry = disable_telemetry
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
+        self.contribute_conversation = contribute_conversation
 
         # Loop messages
         self.force_task_completion = force_task_completion
@@ -105,13 +111,6 @@ class OpenInterpreter:
         self.os = os
         self.speak_messages = speak_messages
 
-        # LLM
-        self.llm = Llm(self) if llm is None else llm
-
-        # These are LLM related
-        self.system_message = system_message
-        self.custom_instructions = custom_instructions
-
         # Computer
         self.computer = Computer(self) if computer is None else computer
         self.sync_computer = sync_computer
@@ -122,6 +121,17 @@ class OpenInterpreter:
             self.computer.skills.path = skills_path
 
         self.computer.import_skills = import_skills
+
+        # LLM
+        self.llm = Llm(self) if llm is None else llm
+
+        # These are LLM related
+        self.system_message = system_message
+        self.custom_instructions = custom_instructions
+        self.user_message_template = user_message_template
+        self.code_output_template = code_output_template
+        self.empty_code_output_template = empty_code_output_template
+        self.code_output_sender = code_output_sender
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
@@ -135,6 +145,13 @@ class OpenInterpreter:
     @property
     def anonymous_telemetry(self) -> bool:
         return not self.disable_telemetry and not self.offline
+
+    @property
+    def will_contribute(self):
+        overrides = (
+            self.offline or not self.conversation_history or self.disable_telemetry
+        )
+        return self.contribute_conversation and not overrides
 
     def chat(self, message=None, display=True, stream=False, blocking=True):
         try:
@@ -238,7 +255,9 @@ class OpenInterpreter:
                 # If it's the first message, set the conversation name
                 if not self.conversation_filename:
                     first_few_words_list = self.messages[0]["content"][:25].split(" ")
-                    if len(first_few_words_list) >= 2:  # for languages like English with blank between words
+                    if (
+                        len(first_few_words_list) >= 2
+                    ):  # for languages like English with blank between words
                         first_few_words = "_".join(first_few_words_list[:-1])
                     else:  # for languages like Chinese without blank between words
                         first_few_words = self.messages[0]["content"][:15]

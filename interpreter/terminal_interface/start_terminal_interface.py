@@ -4,6 +4,8 @@ import time
 
 import pkg_resources
 
+from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic, contribute_conversations
+
 from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
 from .profiles.profiles import open_storage_dir, profile, reset_profile
@@ -237,6 +239,12 @@ def start_terminal_interface(interpreter):
             "help_text": "get Open Interpreter's version number",
             "type": bool,
         },
+        {
+            "name": "contribute_conversation",
+            "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "contribute_conversation"},
+        }
     ]
 
     # Check for deprecated flags before parsing arguments
@@ -333,14 +341,14 @@ def start_terminal_interface(interpreter):
     if args.vision:
         args.profile = "vision.yaml"
 
-    if args.os and args.local:
-        args.profile = "local-os.py"
-
     if args.os:
         args.profile = "os.py"
 
     if args.local:
         args.profile = "local.py"
+
+    if args.os and args.local:
+        args.profile = "local-os.py"
 
     ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
 
@@ -422,10 +430,12 @@ def start_terminal_interface(interpreter):
     if args.server:
         interpreter.server()
         return
-
+    
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
+
+    contribute_conversation_launch_logic(interpreter)
 
     interpreter.chat()
 
@@ -457,4 +467,8 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
+        if interpreter.will_contribute:
+            contribute_conversations([interpreter.messages])
+            print("Thank you for contributing to our training data!")
         interpreter.computer.terminate()
+
