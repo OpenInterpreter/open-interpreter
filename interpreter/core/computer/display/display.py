@@ -113,7 +113,7 @@ class Display:
                         "assistant",
                     )
                 )
-            return
+            return screenshot  # Still return a PIL image
 
         if quadrant == None:
             if active_app_only:

@@ -9,15 +9,15 @@ To try our experimental installers, open your Terminal with admin priviledges [(
 <CodeGroup>
 
 ```bash Mac
-curl -o oi-mac-installer.sh https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-mac-installer.sh && chmod +x oi-mac-installer.sh && ./oi-mac-installer.sh && rm oi-mac-installer.sh
+curl -sL https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-mac-installer.sh | bash
 ```
 
-```bash Windows
-curl -o oi-windows-installer.ps1 https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 || bitsadmin /transfer "DownloadScript" https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1 %CD%\oi-windows-installer.ps1 && powershell -ExecutionPolicy Bypass -File oi-windows-installer.ps1 && del oi-windows-installer.ps1
+```powershell Windows
+iex "& {$(irm https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-windows-installer.ps1)}"
 ```
 
 ```bash Linux
-curl -o oi-linux-installer.sh https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-linux-installer.sh && chmod +x oi-linux-installer.sh && ./oi-linux-installer.sh && rm oi-linux-installer.sh
+curl -sL https://raw.githubusercontent.com/KillianLucas/open-interpreter/main/installers/oi-linux-installer.sh | bash
 ```
 
 </CodeGroup>
@@ -40,7 +40,12 @@ If you already use Python, we recommend installing Open Interpreter via `pip`:
 pip install open-interpreter
 ```
 
-<Info>**Note:** You'll need Python [3.10](https://www.python.org/downloads/release/python-3100/) or [3.11](https://www.python.org/downloads/release/python-3110/). Run `python --version` to check yours.</Info>
+<Info>
+  **Note:** You'll need Python
+  [3.10](https://www.python.org/downloads/release/python-3100/) or
+  [3.11](https://www.python.org/downloads/release/python-3110/). Run `python
+  --version` to check yours.
+</Info>
 
 ## Python usage
 
