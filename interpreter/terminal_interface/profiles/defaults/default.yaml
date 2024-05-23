@@ -20,6 +20,7 @@ llm:
 # offline: False  # If True, will disable some online features like checking for updates
 # verbose: False  # If True, will print detailed logs
 # multi_line: False # If True, you can input multiple lines starting and ending with ```
+# no_live_response: False # If True, it will perform a one-time rendering after the whole response was finished instead of live rending while receiving response chunks, this will prevent showing duplicate lines in terminal and reduce bandwidth usage and twinkling when using via SSH
 
 # Documentation
 # All options: https://docs.openinterpreter.com/settings

@@ -16,7 +16,7 @@ title: Arguments
 
 **[Options](/docs/usage/terminal/arguments#options)**
 
-`--safe_mode`, `--auto_run`, `--force_task_completion`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`.
+`--safe_mode`, `--auto_run`, `--force_task_completion`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`, `--no_live_response`.
 
 **[Other](/docs/usage/terminal/arguments#other)**
 
@@ -414,6 +414,21 @@ interpreter --multi_line
 
 ```yaml Config
 multi_line: true
+```
+
+</CodeGroup>
+
+#### `--no_live_response`
+
+Perform a one-time rendering after the whole response was finished instead of live rending while receiving response chunks, this will prevent showing duplicate lines in terminal and reduce bandwidth usage and twinkling when using via SSH
+
+<CodeGroup>
+```bash Terminal
+interpreter --no_live_response
+```
+
+```yaml Config
+no_live_response: true
 ```
 
 </CodeGroup>
