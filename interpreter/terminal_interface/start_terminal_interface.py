@@ -244,7 +244,13 @@ def start_terminal_interface(interpreter):
             "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
             "type": bool,
             "attribute": {"object": interpreter, "attr_name": "contribute_conversation"},
-        }
+        },
+        {
+            "name": "no_live_response",
+            "help_text": "perform a one-time rendering after the whole response was finished instead of live rending while receiving response chunks",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "no_live_response"},
+        },
     ]
 
     # Check for deprecated flags before parsing arguments
@@ -430,7 +436,7 @@ def start_terminal_interface(interpreter):
     if args.server:
         interpreter.server()
         return
-    
+
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True

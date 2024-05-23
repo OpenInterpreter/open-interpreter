@@ -12,8 +12,8 @@ class CodeBlock(BaseBlock):
     Code Blocks display code and outputs in different languages. You can also set the active_line!
     """
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, no_live_response: bool = False):
+        super().__init__(no_live_response)
 
         self.type = "code"
 
@@ -33,8 +33,7 @@ class CodeBlock(BaseBlock):
         if not self.code and not self.output:
             return
 
-        # TODO: and live_refresh was turned off
-        if not end:
+        if not end and self.no_live_response:
             self.live.update(self.spinner)
             self.live.refresh()
         else:

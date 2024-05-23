@@ -8,15 +8,14 @@ from .base_block import BaseBlock
 
 
 class MessageBlock(BaseBlock):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, no_live_response: bool = False):
+        super().__init__(no_live_response)
 
         self.type = "message"
         self.message = ""
 
     def refresh(self, cursor=True, end=False):
-        # TODO: and live_refresh was turned off
-        if not end:
+        if not end and self.no_live_response:
             self.live.update(self.spinner)
             self.live.refresh()
         else:
