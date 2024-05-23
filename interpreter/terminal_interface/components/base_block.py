@@ -1,6 +1,7 @@
 from rich.console import Console
 from rich.live import Live
-from rich.spinner import Spinner
+
+from .spinner import OISpinner
 
 
 class BaseBlock:
@@ -13,7 +14,7 @@ class BaseBlock:
             auto_refresh=False, console=Console(), vertical_overflow="visible"
         )
         self.live.start()
-        self.spinner = Spinner(name="dots", text="Generating responses...")
+        self.spinner = OISpinner()
 
     def update_from_message(self, message):
         raise NotImplementedError("Subclasses must implement this method")
