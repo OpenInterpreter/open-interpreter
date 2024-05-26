@@ -59,7 +59,7 @@ def handle_help(self, arguments):
         "%help": "Show this help message.",
         "%info": "Show system and interpreter information",
         "%jupyter": "Export the conversation to a Jupyter notebook file",
-        "%markdown": "Export the conversation to a Markdown file",
+        "%markdown [path]": "Export the conversation to a specified Markdown path. If no path is provided, it will be saved to the Downloads folder with a generated conversation name.",
     }
 
     base_message = ["> **Available Commands:**\n\n"]
