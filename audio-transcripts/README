@@ -1,0 +1,73 @@
+"""
+Transcribes dialog from a low-quality recorded video and improves the audio quality.
+
+This script performs the following steps:
+1. Copies the original video file to the workspace directory.
+2. Installs the required tools (FFmpeg, SpeechRecognition, pydub).
+3. Extracts the audio from the video file in a lossless WAV format.
+4. Enhances the audio quality by adjusting the volume and normalizing the audio.
+5. Transcribes the enhanced audio using the SpeechRecognition library.
+
+The script assumes that the necessary paths and filenames are correctly adjusted to the user's Windows environment. It also suggests manual checks or adjustments if the automated processes do not meet the needed clarity.
+"""
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+Open-Interpreter Desktop Task Prompt for Audio Transcription                                                                     
+                                                                                                                                 
+                     Task Requirement:                                                                                           
+                                                                                                                                 
+Transcribe the dialog from a low-quality recorded video, improve the audio to identify dialog and words.                                                                                            
+                                                                                                                                 
+                           Steps:                                                                                                
+                                                                                                                                 
+1 Copy the Original File:                                                                                                                                                                          
+• Ensure that the directory structure is similar to what's described or adjust the paths accordingly.                                                                                           
+• Copy the video from /path_to/originals/your_video.mp4 to /path_to/oi-workspace/your_video.mp4.                                                                                                
+2 Install Required Tools:                                                                                                                                                                          
+• FFmpeg: This tool is used to extract and manipulate media files.                                                                                                                              
+• Windows installation: Download and set up from https://ffmpeg.org/download.html, make sure to add it to your system PATH.                                                                  
+• Python Packages:                                                                                                                                                                              
+• SpeechRecognition: For converting speech into text.                                                                                                                                        
+• pydub: If any additional manipulations like slicing the audio are needed.                                                                                                                  
+Install the packages using pip:                                                                                                                                                                  
+                                                                                                                                 
+                                                                                                                                 
+pip install SpeechRecognition pydub                                                                                                                                                             
+                                                                                                                                 
+                                                                                                                                 
+3 Extract Audio:                                                                                                                                                                                   
+• Use FFmpeg to extract audio in a lossless format like WAV for better quality manipulation.                                                                                                    
+                                                                                                                                 
+                                                                                                                                 
+ffmpeg -i /path_to/oi-workspace/your_video.mp4 -vn -acodec pcm_s16le -ar 44100 -ac 2 /path_to/oi-workspace/output_audio.wav                                                                     
+                                                                                                                                 
+                                                                                                                                 
+4 Enhance Audio Quality:                                                                                                                                                                           
+• Use FFmpeg for initial volume adjustment and normalization.                                                                                                                                   
+                                                                                                                                 
+                                                                                                                                 
+ffmpeg -i /path_to/oi-workspace/output_audio.wav -filter:a "volume=10.0,loudnorm=I=-16:LRA=11:TP=-1.5" /path_to/oi-workspace/enhanced_audio.wav                                                 
+                                                                                                                                 
+                                                                                                                                 
+5 Transcribe Audio:                                                                                                                                                                                
+• Use Python with the SpeechRecognition library.                                                                                                                                                
+                                                                                                                                 
+                                                                                                                                 
+import speech_recognition as sr                                                                                                                                                                 
+                                                                                                                                 
+recognizer = sr.Recognizer()                                                                                                                                                                    
+audio_file_path = '/path_to/oi-workspace/enhanced_audio.wav'                                                                                                                                    
+with sr.AudioFile(audio_file_path) as source:                                                                                                                                                   
+audio_data = recognizer.record(source)                                                                                                                                                      
+text = recognizer.recognize_google(audio_data)                                                                                                                                              
+print(text)                                                                                                                                                                                     
+                                                                                                                                 
+                                                                                                                                 
+                           Notes:                                                                                                
+                                                                                                                                 
+• Ensure all paths and filenames are correctly adjusted to your Windows environment.                                                                                                               
+• Check the audio quality manually if necessary before running the transcription.                                                                                                                  
+• Consider manual checks or adjustments if automated processes do not meet the needed clarity.                                                                                                     
+                                                                                                                                 
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────  
+Feel free to adjust the paths and installations according to your system specifications.                                                                                                            
+                            
