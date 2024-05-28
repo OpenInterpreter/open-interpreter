@@ -255,6 +255,8 @@ def respond(interpreter):
                     "content": None,
                 }
 
+            except KeyboardInterrupt:
+                break  # It's fine.
             except:
                 yield {
                     "role": "computer",

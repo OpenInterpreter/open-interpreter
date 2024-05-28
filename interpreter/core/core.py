@@ -187,6 +187,9 @@ class OpenInterpreter:
             self.responding = False
             return self.messages[self.last_messages_count :]
 
+        except GeneratorExit:
+            self.responding = False
+            # It's fine
         except Exception as e:
             self.responding = False
             if self.anonymous_telemetry:
