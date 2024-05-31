@@ -113,7 +113,7 @@ class Vision:
                 ), contextlib.redirect_stderr(open(os.devnull, "w")):
                     self.load()
             except ImportError:
-                self.computer.interpreter.display_markdown_message(
+                self.computer.interpreter.display_message(
                     "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
                 )
                 return ""
