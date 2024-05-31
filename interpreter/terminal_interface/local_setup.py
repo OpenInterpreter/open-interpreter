@@ -11,7 +11,7 @@ import psutil
 import wget
 
 
-def local_setup(interpreter):
+def local_setup(interpreter, provider=None, model=None):
     def download_model(models_dir, models, interpreter):
         # Get RAM and disk information
         total_ram = psutil.virtual_memory().total / (
@@ -146,7 +146,8 @@ def local_setup(interpreter):
                 filename = os.path.basename(model_url).split("?")[0]
                 model_path = os.path.join(models_dir, filename)
 
-                time.sleep(1)
+                # time.sleep(0.3)
+
                 print(f"\nDownloading {selected_model['name']}...\n")
                 wget.download(model_url, model_path)
 
@@ -268,7 +269,7 @@ def local_setup(interpreter):
             print("Ollama is not installed or not recognized as a command.")
             time.sleep(1)
             interpreter.display_message(
-                f"\nPlease visit [https://ollama.com/](https://ollama.com/) to download Ollama and try again\n"
+                f"\nPlease visit [https://ollama.com/](https://ollama.com/) to download Ollama and try again.\n"
             )
             time.sleep(2)
             sys.exit(1)
