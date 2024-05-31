@@ -117,6 +117,22 @@ class Ai:
     def __init__(self, computer):
         self.computer = computer
 
+    def chat(self, text):
+        old_messages = self.computer.interpreter.llm.interpreter.messages
+        old_system_message = self.computer.interpreter.llm.interpreter.system_message
+        try:
+            self.computer.interpreter.llm.interpreter.system_message = (
+                "You are an AI assistant."
+            )
+            self.computer.interpreter.llm.interpreter.messages = []
+            response = self.computer.interpreter.llm.interpreter.chat(text)
+        finally:
+            self.computer.interpreter.llm.interpreter.messages = old_messages
+            self.computer.interpreter.llm.interpreter.system_message = (
+                old_system_message
+            )
+            return response[-1].get("content")
+
     def query(self, text, query, custom_reduce_query=None):
         if custom_reduce_query == None:
             custom_reduce_query = query

@@ -8,6 +8,7 @@ import threading
 import time
 from datetime import datetime
 
+from ..terminal_interface.local_setup import local_setup
 from ..terminal_interface.terminal_interface import terminal_interface
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
 from ..terminal_interface.utils.local_storage_path import get_storage_path
@@ -68,6 +69,7 @@ class OpenInterpreter:
         system_message=default_system_message,
         custom_instructions="",
         user_message_template="{content}",
+        always_apply_user_message_template=False,
         code_output_template="Code output: {content}\n\nWhat does this output mean / what's next (if anything, or are we done)?",
         empty_code_output_template="The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)",
         code_output_sender="user",
@@ -129,12 +131,19 @@ class OpenInterpreter:
         self.system_message = system_message
         self.custom_instructions = custom_instructions
         self.user_message_template = user_message_template
+        self.always_apply_user_message_template = always_apply_user_message_template
         self.code_output_template = code_output_template
         self.empty_code_output_template = empty_code_output_template
         self.code_output_sender = code_output_sender
 
     def server(self, *args, **kwargs):
         server(self, *args, **kwargs)
+
+    def local_setup(self):
+        """
+        Opens a wizard that lets terminal users pick a local model.
+        """
+        self = local_setup(self)
 
     def wait(self):
         while self.responding:

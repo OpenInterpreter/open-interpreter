@@ -1,4 +1,7 @@
 def truncate_output(data, max_output_chars=2000):
+    if "@@@DO_NOT_TRUNCATE@@@" in data:
+        return data
+
     needs_truncation = False
 
     message = f"Output truncated. Showing the last {max_output_chars} characters.\n\n"

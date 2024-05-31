@@ -94,26 +94,31 @@ class Display:
         :param screen: specify which display; 0 for primary and 1 and above for secondary.
         :param combine_screens: If True, a collage of all display screens will be returned. Otherwise, a list of display screens will be returned.
         """
-        if not self.computer.emit_images and force_image == False:
-            screenshot = self.screenshot(show=False, force_image=True)
 
-            description = self.computer.vision.query(pil_image=screenshot)
-            print("A DESCRIPTION OF WHAT'S ON THE SCREEN: " + description)
+        # Since Local II, all images sent to local models will be rendered to text with moondream and pytesseract.
+        # So we don't need to do this here— we can just emit images.
+        # We should probably remove self.computer.emit_images for this reason.
 
-            if self.computer.max_output > 600:
-                print("ALL OF THE TEXT ON THE SCREEN: ")
-                text = self.get_text_as_list_of_lists(screenshot=screenshot)
-                pp = pprint.PrettyPrinter(indent=4)
-                pretty_text = pp.pformat(text)  # language models like it pretty!
-                pretty_text = format_to_recipient(pretty_text, "assistant")
-                print(pretty_text)
-                print(
-                    format_to_recipient(
-                        "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
-                        "assistant",
-                    )
-                )
-            return screenshot  # Still return a PIL image
+        # if not self.computer.emit_images and force_image == False:
+        #     screenshot = self.screenshot(show=False, force_image=True)
+
+        #     description = self.computer.vision.query(pil_image=screenshot)
+        #     print("A DESCRIPTION OF WHAT'S ON THE SCREEN: " + description)
+
+        #     if self.computer.max_output > 600:
+        #         print("ALL OF THE TEXT ON THE SCREEN: ")
+        #         text = self.get_text_as_list_of_lists(screenshot=screenshot)
+        #         pp = pprint.PrettyPrinter(indent=4)
+        #         pretty_text = pp.pformat(text)  # language models like it pretty!
+        #         pretty_text = format_to_recipient(pretty_text, "assistant")
+        #         print(pretty_text)
+        #         print(
+        #             format_to_recipient(
+        #                 "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
+        #                 "assistant",
+        #             )
+        #         )
+        #     return screenshot  # Still return a PIL image
 
         if quadrant == None:
             if active_app_only:

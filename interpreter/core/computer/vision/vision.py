@@ -1,9 +1,13 @@
 import base64
+import contextlib
 import io
+import os
+import tempfile
 
 from PIL import Image
 
 from ...utils.lazy_import import lazy_import
+from ..utils.computer_vision import pytesseract_get_text
 
 # transformers = lazy_import("transformers") # Doesn't work for some reason! We import it later.
 
@@ -17,20 +21,78 @@ class Vision:
     def load(self):
         import transformers  # Wait until we use it. Transformers can't be lazy loaded for some reason!
 
-        print(
-            "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
-        )
-        print(
-            "Alternativley, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
-        )
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+        if self.computer.debug:
+            print(
+                "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
+            )
+            print(
+                "Alternativley, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
+            )
         model_id = "vikhyatk/moondream2"
         revision = "2024-04-02"
+        print("loading model")
+
         self.model = transformers.AutoModelForCausalLM.from_pretrained(
             model_id, trust_remote_code=True, revision=revision
         )
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(
             model_id, revision=revision
         )
+
+    def ocr(
+        self,
+        base_64=None,
+        path=None,
+        lmc=None,
+        pil_image=None,
+    ):
+        """
+        Gets OCR of image.
+        """
+
+        if lmc:
+            if "base64" in lmc["format"]:
+                # # Extract the extension from the format, default to 'png' if not specified
+                # if "." in lmc["format"]:
+                #     extension = lmc["format"].split(".")[-1]
+                # else:
+                #     extension = "png"
+                # Save the base64 content as a temporary file
+                img_data = base64.b64decode(lmc["content"])
+                with tempfile.NamedTemporaryFile(
+                    delete=False, suffix=".png"
+                ) as temp_file:
+                    temp_file.write(img_data)
+                    temp_file_path = temp_file.name
+
+                # Set path to the path of the temporary file
+                path = temp_file_path
+
+            elif lmc["format"] == "path":
+                # Convert to base64
+                path = lmc["content"]
+        elif base_64:
+            # Save the base64 content as a temporary file
+            img_data = base64.b64decode(base_64)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                temp_file.write(img_data)
+                temp_file_path = temp_file.name
+
+            # Set path to the path of the temporary file
+            path = temp_file_path
+        elif path:
+            pass
+        elif pil_image:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_file:
+                pil_image.save(temp_file, format="PNG")
+                temp_file_path = temp_file.name
+
+            # Set path to the path of the temporary file
+            path = temp_file_path
+
+        return pytesseract_get_text(path)
 
     def query(
         self,
@@ -45,7 +107,16 @@ class Vision:
         """
 
         if self.model == None and self.tokenizer == None:
-            self.load()
+            try:
+                with contextlib.redirect_stdout(
+                    open(os.devnull, "w")
+                ), contextlib.redirect_stderr(open(os.devnull, "w")):
+                    self.load()
+            except ImportError:
+                self.computer.interpreter.display_markdown_message(
+                    "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
+                )
+                return ""
 
         if lmc:
             if "base64" in lmc["format"]:
@@ -71,5 +142,8 @@ class Vision:
         elif pil_image:
             img = pil_image
 
-        enc_image = self.model.encode_image(img)
-        return self.model.answer_question(enc_image, query, self.tokenizer)
+        with contextlib.redirect_stdout(open(os.devnull, "w")):
+            enc_image = self.model.encode_image(img)
+            answer = self.model.answer_question(enc_image, query, self.tokenizer)
+
+        return answer
