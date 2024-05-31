@@ -10,6 +10,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4"
+setuptools = "*"
 astor = "^0.8.1"
 git-python = "^1.0.3"
 inquirer = "^3.1.3"
