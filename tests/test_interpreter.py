@@ -22,6 +22,7 @@ import pytest
 from websocket import create_connection
 
 
+@pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
 def test_server():
     # Start the server in a new thread
     server_thread = threading.Thread(target=interpreter.server)
