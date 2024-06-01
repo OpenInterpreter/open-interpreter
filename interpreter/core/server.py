@@ -23,11 +23,11 @@ import time
 import traceback
 from typing import Any, Dict, List
 
-import uvicorn
 from fastapi import FastAPI, Header, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 from pydantic import BaseModel
+from uvicorn import Config, Server
 
 # import argparse
 # from profiles.default import interpreter
@@ -63,8 +63,6 @@ class AsyncInterpreter:
         #     engine = OpenAIEngine()
         # self.tts = TextToAudioStream(engine)
 
-        self.active_chat_messages = []
-
         # Clock
         # clock()
 
@@ -82,7 +80,9 @@ class AsyncInterpreter:
             False  # Tracks whether interpreter is trying to use the keyboard
         )
 
-        self.loop = asyncio.get_event_loop()
+        # print("oksskk")
+        # self.loop = asyncio.get_event_loop()
+        # print("okkk")
 
     async def _add_to_queue(self, queue, item):
         print(f"Adding item to output", item)
@@ -134,7 +134,6 @@ class AsyncInterpreter:
         Runs OI on the audio bytes submitted to the input. Will add streaming LMC chunks to the _output_queue.
         """
         print("heyyyy")
-        self.interpreter.messages = self.active_chat_messages
         # interpreter.messages = self.active_chat_messages
         # self.beeper.start()
 
@@ -147,10 +146,8 @@ class AsyncInterpreter:
 
         def generate(message):
             last_lmc_start_flag = self._last_lmc_start_flag
-            self.interpreter.messages = self.active_chat_messages
             # interpreter.messages = self.active_chat_messages
             print("🍀🍀🍀🍀GENERATING, using these messages: ", self.interpreter.messages)
-            print("🍀   🍀   🍀   🍀 active_chat_messages: ", self.active_chat_messages)
             print("passing this in:", message)
             for chunk in self.interpreter.chat(message, display=False, stream=True):
                 print("FROM INTERPRETER. CHUNK:", chunk)
@@ -165,7 +162,10 @@ class AsyncInterpreter:
 
                 # Handle message blocks
                 if chunk.get("type") == "message":
-                    self.add_to_output_queue_sync(chunk)  # To send text, not just audio
+                    self.add_to_output_queue_sync(
+                        chunk.copy()
+                    )  # To send text, not just audio
+                    # ^^^^^^^ MUST be a copy, otherwise the first chunk will get modified by OI >>while<< it's in the queue. Insane
                     if content:
                         # self.beeper.stop()
 
@@ -216,8 +216,7 @@ class AsyncInterpreter:
 
 
 def server(interpreter):
-    interpreter.llm.model = "gpt-4"
-    interpreter = AsyncInterpreter(interpreter)
+    async_interpreter = AsyncInterpreter(interpreter)
 
     app = FastAPI()
     app.add_middleware(
@@ -228,18 +227,12 @@ def server(interpreter):
         allow_headers=["*"],  # Allow all headers
     )
 
-    @app.post("/load")
-    async def load(messages: List[Dict[str, Any]], settings: Settings):
-        # Load messages
-        interpreter.interpreter.messages = messages
-        print("🪼🪼🪼🪼🪼🪼 Messages loaded: ", interpreter.interpreter.messages)
-
-        # Load Settings
-        interpreter.interpreter.llm.model = settings.model
-        interpreter.interpreter.llm.custom_instructions = settings.custom_instructions
-        interpreter.interpreter.auto_run = settings.auto_run
-
-        interpreter.interpreter.llm.api_key = "<openai_key>"
+    @app.post("/settings")
+    async def settings(payload: Dict[str, Any]):
+        for key, value in payload.items():
+            print("Updating interpreter settings with the following:")
+            print(key, value)
+            setattr(async_interpreter.interpreter, key, value)
 
         return {"status": "success"}
 
@@ -253,13 +246,16 @@ def server(interpreter):
                     data = await websocket.receive()
                     print(data)
                     if isinstance(data, bytes):
-                        await interpreter.input(data)
-                    else:
-                        await interpreter.input(data["text"])
+                        await async_interpreter.input(data)
+                    elif "text" in data:
+                        await async_interpreter.input(data["text"])
+                    elif data == {"type": "websocket.disconnect", "code": 1000}:
+                        print("Websocket disconnected with code 1000.")
+                        break
 
             async def send_output():
                 while True:
-                    output = await interpreter.output()
+                    output = await async_interpreter.output()
                     if isinstance(output, bytes):
                         # await websocket.send_bytes(output)
                         # we dont send out bytes rn, no TTS
@@ -306,4 +302,6 @@ def server(interpreter):
             traceback.print_exc()
             return {"error": str(e)}
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    config = Config(app, host="0.0.0.0", port=8000)
+    interpreter.uvicorn_server = Server(config)
+    interpreter.uvicorn_server.run()
