@@ -499,7 +499,44 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
-        if interpreter.will_contribute:
-            contribute_conversations([interpreter.messages])
-            print("Thank you for contributing to our training data!")
-        interpreter.computer.terminate()
+        try:
+            interpreter.computer.terminate()
+
+            if not interpreter.offline and not interpreter.disable_telemetry:
+                feedback = None
+                if len(interpreter.messages) > 3:
+                    feedback = (
+                        input("\n\nWas Open Interpreter helpful? (y/n): ")
+                        .strip()
+                        .lower()
+                    )
+                    if feedback == "y":
+                        feedback = True
+                    elif feedback == "n":
+                        feedback = False
+                    else:
+                        feedback = None
+                    if feedback != None and not interpreter.contribute_conversation:
+                        contribute = (
+                            input(
+                                "\nThanks for your feedback! Would you like to send us this chat so we can improve? (y/n): "
+                            )
+                            .strip()
+                            .lower()
+                        )
+                        if contribute == "y":
+                            interpreter.contribute_conversation = True
+                            print("Thank you for contributing!")
+
+                if interpreter.contribute_conversation and interpreter.messages != []:
+                    conversation_id = (
+                        interpreter.conversation_id
+                        if hasattr(interpreter, "conversation_id")
+                        else None
+                    )
+                    contribute_conversations(
+                        [interpreter.messages], feedback, conversation_id
+                    )
+
+        except KeyboardInterrupt:
+            pass

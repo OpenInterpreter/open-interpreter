@@ -46,8 +46,9 @@ def send_past_conversations(interpreter):
             "We are about to send all previous conversations to Open Interpreter for training an open-source language model. Please make sure these don't contain any private information. Run `interpreter --conversations` to browse them."
         )
         print()
+        time.sleep(2)
         uh = input(
-            "Do we have your permission to send all previous conversations to Open Interpreter? y/n"
+            "Do we have your permission to send all previous conversations to Open Interpreter? (y/n): "
         )
         print()
         if uh == "y":
@@ -165,14 +166,21 @@ def is_list_of_lists(l):
     return isinstance(l, list) and all([isinstance(e, list) for e in l])
 
 
-def contribute_conversations(conversations: List[List]):
+def contribute_conversations(
+    conversations: List[List], feedback=None, conversation_id=None
+):
     if len(conversations) == 0 or len(conversations[0]) == 0:
         return None
 
-    url = "https://api.openinterpreter.com/v0/conversations/contribute/"
+    url = "https://api.openinterpreter.com/v0/contribute/"
     version = pkg_resources.get_distribution("open-interpreter").version
 
-    payload = {"conversations": conversations, "oi_version": version}
+    payload = {
+        "conversation_id": conversation_id,
+        "conversations": conversations,
+        "oi_version": version,
+        "feedback": feedback,
+    }
 
     assert is_list_of_lists(
         payload["conversations"]

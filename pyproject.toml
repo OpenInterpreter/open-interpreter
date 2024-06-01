@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.2.5" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.2.6" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -28,7 +28,6 @@ ipykernel = "^6.26.0"
 jupyter-client = "^8.6.0"
 matplotlib = "^3.8.2"
 toml = "^0.10.2"
-posthog = "^3.1.0"
 tiktoken = "^0.6.0"
 platformdirs = "^4.2.0"
 pydantic = "^2.6.4"

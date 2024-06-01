@@ -32,7 +32,12 @@ def validate_llm_settings(interpreter):
             # Ensure API keys are set as environment variables
 
             # OpenAI
-            if interpreter.llm.model in litellm.open_ai_chat_completion_models:
+            if interpreter.llm.model in [
+                "gpt-4",
+                "gpt-3.5-turbo",
+                "gpt-40",
+                "gpt-4-turbo",
+            ]:
                 if (
                     not os.environ.get("OPENAI_API_KEY")
                     and not interpreter.llm.api_key

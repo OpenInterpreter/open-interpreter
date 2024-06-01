@@ -31,6 +31,13 @@ def respond(interpreter):
         if interpreter.custom_instructions:
             system_message += "\n\n" + interpreter.custom_instructions
 
+        # Add computer API system message
+        if interpreter.computer.import_computer_api:
+            if interpreter.computer.system_message not in system_message:
+                system_message = (
+                    system_message + "\n\n" + interpreter.computer.system_message
+                )
+
         # Storing the messages so they're accessible in the interpreter's computer
         if interpreter.sync_computer:
             output = interpreter.computer.run(

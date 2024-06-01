@@ -1,4 +1,9 @@
 import litellm
+
+litellm.suppress_debug_info = True
+import time
+import uuid
+
 import tokentrim as tt
 
 from ...terminal_interface.utils.display_markdown_message import (
@@ -7,9 +12,6 @@ from ...terminal_interface.utils.display_markdown_message import (
 from .run_function_calling_llm import run_function_calling_llm
 from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
-
-litellm.suppress_debug_info = True
-import time
 
 
 class Llm:
@@ -64,10 +66,20 @@ class Llm:
                 msg["role"] != "system"
             ), "No message after the first can have the role 'system'"
 
+        model = self.model
+        # Setup our model endpoint
+        if model == "i":
+            model = "openai/i"
+            if not hasattr(self.interpreter, "conversation_id"):  # Only do this once
+                self.context_window = 7000
+                self.max_tokens = 1000
+                self.api_base = "https://api.openinterpreter.com/v0"
+                self.interpreter.conversation_id = str(uuid.uuid4())
+
         # Detect function support
         if self.supports_functions == None:
             try:
-                if litellm.supports_function_calling(self.model):
+                if litellm.supports_function_calling(model):
                     self.supports_functions = True
                 else:
                     self.supports_functions = False
@@ -77,19 +89,12 @@ class Llm:
         # Detect vision support
         if self.supports_vision == None:
             try:
-                if litellm.supports_vision(self.model):
+                if litellm.supports_vision(model):
                     self.supports_vision = True
                 else:
                     self.supports_vision = False
             except:
                 self.supports_vision = False
-
-        # Setup our model endpoint
-        if self.model == "i":
-            self.model = "openai/i"
-            self.context_window = 7000
-            self.max_tokens = 1000
-            self.api_base = "https://api.openinterpreter.com/v0"
 
         # Trim image messages if they're there
         image_messages = [msg for msg in messages if msg["type"] == "image"]
@@ -154,7 +159,7 @@ class Llm:
             else:
                 try:
                     messages = tt.trim(
-                        messages, system_message=system_message, model=self.model
+                        messages, system_message=system_message, model=model
                     )
                 except:
                     if len(messages) == 1:
@@ -196,7 +201,7 @@ Continuing...
         ## Start forming the request
 
         params = {
-            "model": self.model,
+            "model": model,
             "messages": messages,
             "stream": True,
         }
@@ -212,6 +217,8 @@ Continuing...
             params["max_tokens"] = self.max_tokens
         if self.temperature:
             params["temperature"] = self.temperature
+        if hasattr(self.interpreter, "conversation_id"):
+            params["conversation_id"] = self.interpreter.conversation_id
 
         # Set some params directly on LiteLLM
         if self.max_budget:
@@ -243,8 +250,15 @@ def fixed_litellm_completions(**params):
     """
 
     if "local" in params.get("model"):
-        # Kinda hacky, but this helps
+        # Kinda hacky, but this helps sometimes
         params["stop"] = ["<|assistant|>", "<|end|>", "<|eot_id|>"]
+
+    if params.get("model") == "i" and "conversation_id" in params:
+        litellm.drop_params = (
+            False  # If we don't do this, litellm will drop this param!
+        )
+    else:
+        litellm.drop_params = True
 
     # Run completion
     first_error = None
