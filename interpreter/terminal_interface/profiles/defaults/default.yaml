@@ -24,7 +24,8 @@ computer:
 # offline: False  # If True, will disable some online features like checking for updates
 # verbose: False  # If True, will print detailed logs
 # multi_line: False # If True, you can input multiple lines starting and ending with ```
-# llm_drop_params: False # If True, litellm.drop_params=True, Drop any unmapped params ```
+# llm_drop_params: False # If True, litellm.drop_params=True, Drop any unmapped params
+# llm_modify_params: False # If True, litellm.drop_params=True, Modify params or messages
 
 # Documentation
 # All options: https://docs.openinterpreter.com/settings

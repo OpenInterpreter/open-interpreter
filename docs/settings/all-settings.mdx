@@ -805,4 +805,45 @@ computer.import_computer_api: True
 ```
 
 </CodeGroup>
-````
+
+### LLM Drop Params
+
+Inform llm to drop unknown params like "functions".
+It supports to easy debug of llm errors.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --llm_drop_params
+```
+
+```python Python
+interpreter.llm_drop_params = True
+```
+
+```yaml Profile
+llm_drop_params: true
+```
+
+</CodeGroup>
+
+### LLM Modify Params
+
+Inform llm to modify params or messages.
+It supports to easy debug of llm errors.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --llm_modify_params
+```
+
+```python Python
+interpreter.llm_modify_params = True
+```
+
+```yaml Profile
+llm_modify_params: true
+```
+
+</CodeGroup>
