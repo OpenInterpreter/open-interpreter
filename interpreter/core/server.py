@@ -1,155 +1,307 @@
+# This is a websocket interpreter, TTS and STT disabled.
+# It makes a websocket on a port that sends/receives LMC messages in *streaming* format.
+
+### You MUST send a start and end flag with each message! For example: ###
+
+"""
+{"role": "user", "type": "message", "start": True})
+{"role": "user", "type": "message", "content": "hi"})
+{"role": "user", "type": "message", "end": True})
+"""
+
 import asyncio
 import json
-from typing import Generator
+import os
+import threading
 
-from .utils.lazy_import import lazy_import
+###
+# from pynput import keyboard
+# from RealtimeTTS import TextToAudioStream, OpenAIEngine, CoquiEngine
+# from RealtimeSTT import AudioToTextRecorder
+# from beeper import Beeper
+import time
+import traceback
+from typing import Any, Dict, List
 
-uvicorn = lazy_import("uvicorn")
-fastapi = lazy_import("fastapi")
+from fastapi import FastAPI, Header, WebSocket
+from fastapi.middleware.cors import CORSMiddleware
+from openai import OpenAI
+from pydantic import BaseModel
+from uvicorn import Config, Server
+
+# import argparse
+# from profiles.default import interpreter
+# from interpreter import interpreter
+
+# Parse command line arguments for port number
+# parser = argparse.ArgumentParser(description="FastAPI server.")
+# parser.add_argument("--port", type=int, default=63863, help="Port to run on.")
+# args = parser.parse_args()
 
 
-def server(interpreter, host="0.0.0.0", port=8000):
-    FastAPI, Request, Response, WebSocket = (
-        fastapi.FastAPI,
-        fastapi.Request,
-        fastapi.Response,
-        fastapi.WebSocket,
-    )
-    PlainTextResponse = fastapi.responses.PlainTextResponse
+# interpreter.tts = "openai"
 
-    app = FastAPI()
 
-    @app.post("/chat")
-    async def stream_endpoint(request: Request) -> Response:
-        async def event_stream() -> Generator[str, None, None]:
-            data = await request.json()
-            for response in interpreter.chat(message=data["message"], stream=True):
-                yield response
+class Settings(BaseModel):
+    auto_run: bool
+    custom_instructions: str
+    model: str
 
-        return Response(event_stream(), media_type="text/event-stream")
 
-    # Post endpoint
-    # @app.post("/iv0", response_class=PlainTextResponse)
-    # async def i_post_endpoint(request: Request):
-    #     message = await request.body()
-    #     message = message.decode("utf-8")  # Convert bytes to string
+class AsyncInterpreter:
+    def __init__(self, interpreter):
+        self.interpreter = interpreter
 
-    #     async def event_stream() -> Generator[str, None, None]:
-    #         for response in interpreter.chat(
-    #             message=message, stream=True, display=False
-    #         ):
-    #             if (
-    #                 response.get("type") == "message"
-    #                 and response["role"] == "assistant"
-    #                 and "content" in response
-    #             ):
-    #                 yield response["content"] + "\n"
-    #             if (
-    #                 response.get("type") == "message"
-    #                 and response["role"] == "assistant"
-    #                 and response.get("end") == True
-    #             ):
-    #                 yield " \n"
+        # STT
+        # self.stt = AudioToTextRecorder(use_microphone=False)
+        # self.stt.stop() # It needs this for some reason
 
-    #     return StreamingResponse(event_stream(), media_type="text/plain")
+        # TTS
+        # if self.interpreter.tts == "coqui":
+        #     engine = CoquiEngine()
+        # elif self.interpreter.tts == "openai":
+        #     engine = OpenAIEngine()
+        # self.tts = TextToAudioStream(engine)
 
-    @app.get("/test")
-    async def test_ui():
-        return PlainTextResponse(
-            """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Chat</title>
-            </head>
-            <body>
-                <form action="" onsubmit="sendMessage(event)">
-                    <textarea id="messageInput" rows="10" cols="50" autocomplete="off"></textarea>
-                    <button>Send</button>
-                </form>
-                <div id="messages"></div>
-                <script>
-                    var ws = new WebSocket("ws://localhost:8000/");
-                    var lastMessageElement = null;
-                    ws.onmessage = function(event) {
-                        if (lastMessageElement == null) {
-                            lastMessageElement = document.createElement('p');
-                            document.getElementById('messages').appendChild(lastMessageElement);
-                        }
-                        lastMessageElement.innerHTML += event.data;
-                    };
-                    function sendMessage(event) {
-                        event.preventDefault();
-                        var input = document.getElementById("messageInput");
-                        var message = input.value;
-                        if (message.startsWith('{') && message.endsWith('}')) {
-                            message = JSON.stringify(JSON.parse(message));
-                        }
-                        ws.send(message);
-                        var userMessageElement = document.createElement('p');
-                        userMessageElement.innerHTML = '<b>' + input.value + '</b><br>';
-                        document.getElementById('messages').appendChild(userMessageElement);
-                        lastMessageElement = document.createElement('p');
-                        document.getElementById('messages').appendChild(lastMessageElement);
-                        input.value = '';
-                    }
-                </script>
-            </body>
-            </html>
-            """,
-            media_type="text/html",
+        # Clock
+        # clock()
+
+        # self.beeper = Beeper()
+
+        # Startup sounds
+        # self.beeper.beep("Blow")
+        # self.tts.feed("Hi, how can I help you?")
+        # self.tts.play_async(on_audio_chunk=self.on_tts_chunk, muted=True)
+
+        self._input_queue = asyncio.Queue()  # Queue that .input will shove things into
+        self._output_queue = asyncio.Queue()  # Queue to put output chunks into
+        self._last_lmc_start_flag = None  # Unix time of last LMC start flag received
+        self._in_keyboard_write_block = (
+            False  # Tracks whether interpreter is trying to use the keyboard
         )
 
+        # print("oksskk")
+        # self.loop = asyncio.get_event_loop()
+        # print("okkk")
+
+    async def _add_to_queue(self, queue, item):
+        print(f"Adding item to output", item)
+        await queue.put(item)
+
+    async def clear_queue(self, queue):
+        while not queue.empty():
+            await queue.get()
+
+    async def clear_input_queue(self):
+        await self.clear_queue(self._input_queue)
+
+    async def clear_output_queue(self):
+        await self.clear_queue(self._output_queue)
+
+    async def input(self, chunk):
+        """
+        Expects a chunk in streaming LMC format.
+        """
+        if isinstance(chunk, bytes):
+            # It's probably a chunk of audio
+            # self.stt.feed_audio(chunk)
+            pass
+        else:
+            try:
+                chunk = json.loads(chunk)
+            except:
+                pass
+
+            if "start" in chunk:
+                # self.stt.start()
+                self._last_lmc_start_flag = time.time()
+                # self.interpreter.computer.terminal.stop() # Stop any code execution... maybe we should make interpreter.stop()?
+            elif "end" in chunk:
+                print("yep")
+                asyncio.create_task(self.run())
+            else:
+                await self._add_to_queue(self._input_queue, chunk)
+
+    def add_to_output_queue_sync(self, chunk):
+        """
+        Synchronous function to add a chunk to the output queue.
+        """
+        print("ADDING TO QUEUE:", chunk)
+        asyncio.create_task(self._add_to_queue(self._output_queue, chunk))
+
+    async def run(self):
+        """
+        Runs OI on the audio bytes submitted to the input. Will add streaming LMC chunks to the _output_queue.
+        """
+        print("heyyyy")
+        # interpreter.messages = self.active_chat_messages
+        # self.beeper.start()
+
+        # self.stt.stop()
+        # message = self.stt.text()
+        # print("THE MESSAGE:", message)
+
+        input_queue = list(self._input_queue._queue)
+        message = [i for i in input_queue if i["type"] == "message"][0]["content"]
+
+        def generate(message):
+            last_lmc_start_flag = self._last_lmc_start_flag
+            # interpreter.messages = self.active_chat_messages
+            print("🍀🍀🍀🍀GENERATING, using these messages: ", self.interpreter.messages)
+            print("passing this in:", message)
+            for chunk in self.interpreter.chat(message, display=False, stream=True):
+                print("FROM INTERPRETER. CHUNK:", chunk)
+
+                if self._last_lmc_start_flag != last_lmc_start_flag:
+                    # self.beeper.stop()
+                    break
+
+                # self.add_to_output_queue_sync(chunk) # To send text, not just audio
+
+                content = chunk.get("content")
+
+                # Handle message blocks
+                if chunk.get("type") == "message":
+                    self.add_to_output_queue_sync(
+                        chunk.copy()
+                    )  # To send text, not just audio
+                    # ^^^^^^^ MUST be a copy, otherwise the first chunk will get modified by OI >>while<< it's in the queue. Insane
+                    if content:
+                        # self.beeper.stop()
+
+                        # Experimental: The AI voice sounds better with replacements like these, but it should happen at the TTS layer
+                        # content = content.replace(". ", ". ... ").replace(", ", ", ... ").replace("!", "! ... ").replace("?", "? ... ")
+
+                        yield content
+
+                # Handle code blocks
+                elif chunk.get("type") == "code":
+                    # if "start" in chunk:
+                    # self.beeper.start()
+
+                    # Experimental: If the AI wants to type, we should type immediately
+                    if (
+                        self.interpreter.messages[-1]
+                        .get("content", "")
+                        .startswith("computer.keyboard.write(")
+                    ):
+                        keyboard.controller.type(content)
+                        self._in_keyboard_write_block = True
+                    if "end" in chunk and self._in_keyboard_write_block:
+                        self._in_keyboard_write_block = False
+                        # (This will make it so it doesn't type twice when the block executes)
+                        if self.interpreter.messages[-1]["content"].startswith(
+                            "computer.keyboard.write("
+                        ):
+                            self.interpreter.messages[-1]["content"] = (
+                                "dummy_variable = ("
+                                + self.interpreter.messages[-1]["content"][
+                                    len("computer.keyboard.write(") :
+                                ]
+                            )
+
+            # Send a completion signal
+            self.add_to_output_queue_sync(
+                {"role": "server", "type": "completion", "content": "DONE"}
+            )
+
+        # Feed generate to RealtimeTTS
+        # self.tts.feed(generate(message))
+        for _ in generate(message):
+            pass
+        # self.tts.play_async(on_audio_chunk=self.on_tts_chunk, muted=True)
+
+    async def output(self):
+        return await self._output_queue.get()
+
+
+def server(interpreter):
+    async_interpreter = AsyncInterpreter(interpreter)
+
+    app = FastAPI()
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+        allow_headers=["*"],  # Allow all headers
+    )
+
+    @app.post("/settings")
+    async def settings(payload: Dict[str, Any]):
+        for key, value in payload.items():
+            print("Updating interpreter settings with the following:")
+            print(key, value)
+            setattr(async_interpreter.interpreter, key, value)
+
+        return {"status": "success"}
+
     @app.websocket("/")
-    async def i_test(websocket: WebSocket):
+    async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
-        while True:
-            data = await websocket.receive_text()
-            while data.strip().lower() != "stop":  # Stop command
-                task = asyncio.create_task(websocket.receive_text())
+        try:
 
-                # This would be terrible for production. Just for testing.
-                try:
-                    data_dict = json.loads(data)
-                    if set(data_dict.keys()) == {"role", "content", "type"} or set(
-                        data_dict.keys()
-                    ) == {"role", "content", "type", "format"}:
-                        data = data_dict
-                except json.JSONDecodeError:
-                    pass
+            async def receive_input():
+                while True:
+                    data = await websocket.receive()
+                    print(data)
+                    if isinstance(data, bytes):
+                        await async_interpreter.input(data)
+                    elif "text" in data:
+                        await async_interpreter.input(data["text"])
+                    elif data == {"type": "websocket.disconnect", "code": 1000}:
+                        print("Websocket disconnected with code 1000.")
+                        break
 
-                for response in interpreter.chat(
-                    message=data, stream=True, display=False
-                ):
-                    if task.done():
-                        data = task.result()  # Get the new message
-                        break  # Break the loop and start processing the new message
-                    # Send out assistant message chunks
-                    if (
-                        response.get("type") == "message"
-                        and response["role"] == "assistant"
-                        and "content" in response
-                    ):
-                        await websocket.send_text(response["content"])
-                        await asyncio.sleep(0.01)  # Add a small delay
-                    if (
-                        response.get("type") == "message"
-                        and response["role"] == "assistant"
-                        and response.get("end") == True
-                    ):
-                        await websocket.send_text("\n")
-                        await asyncio.sleep(0.01)  # Add a small delay
-                if not task.done():
-                    data = (
-                        await task
-                    )  # Wait for the next message if it hasn't arrived yet
+            async def send_output():
+                while True:
+                    output = await async_interpreter.output()
+                    if isinstance(output, bytes):
+                        # await websocket.send_bytes(output)
+                        # we dont send out bytes rn, no TTS
+                        pass
+                    elif isinstance(output, dict):
+                        print("sending:", output)
+                        await websocket.send_text(json.dumps(output))
 
-    print(
-        "\nOpening a simple `interpreter.chat(data)` POST endpoint at http://localhost:8000/chat."
-    )
-    print(
-        "Opening an `i.protocol` compatible WebSocket endpoint at http://localhost:8000/."
-    )
-    print("\nVisit http://localhost:8000/test to test the WebSocket endpoint.\n")
+            await asyncio.gather(receive_input(), send_output())
+        except Exception as e:
+            print(f"WebSocket connection closed with exception: {e}")
+            traceback.print_exc()
+        finally:
+            await websocket.close()
 
-    uvicorn.run(app, host=host, port=port)
+    class Rename(BaseModel):
+        input: str
+
+    @app.post("/rename-chat")
+    async def rename_chat(body_content: Rename, x_api_key: str = Header(None)):
+        print("RENAME CHAT REQUEST in PY 🌙🌙🌙🌙")
+        input_value = body_content.input
+        client = OpenAI(
+            # defaults to os.environ.get("OPENAI_API_KEY")
+            api_key=x_api_key,
+        )
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"Given the following chat snippet, create a unique and descriptive title in less than 8 words. Your answer must not be related to customer service.\n\n{input_value}",
+                    }
+                ],
+                temperature=0.3,
+                stream=False,
+            )
+            print(response)
+            completion = response["choices"][0]["message"]["content"]
+            return {"data": {"content": completion}}
+        except Exception as e:
+            print(f"Error: {e}")
+            traceback.print_exc()
+            return {"error": str(e)}
+
+    config = Config(app, host="0.0.0.0", port=8000)
+    interpreter.uvicorn_server = Server(config)
+    interpreter.uvicorn_server.run()

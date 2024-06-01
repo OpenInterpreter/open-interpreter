@@ -84,6 +84,13 @@ class Llm:
             except:
                 self.supports_vision = False
 
+        # Setup our model endpoint
+        if self.model == "i":
+            self.model = "openai/i"
+            self.context_window = 7000
+            self.max_tokens = 1000
+            self.api_base = "https://api.openinterpreter.com/v0"
+
         # Trim image messages if they're there
         image_messages = [msg for msg in messages if msg["type"] == "image"]
         if self.supports_vision:
@@ -108,6 +115,9 @@ class Llm:
                     img_msg["content"] = (
                         "Imagine I have just shown you an image with this description: "
                         + self.vision_renderer(lmc=img_msg)
+                        + "\n---\nThe image contains the following text exactly, extracted via OCR: '''\n"
+                        + self.interpreter.computer.vision.ocr(lmc=img_msg)
+                        + "\n'''"
                     )
                     img_msg["format"] = "description"
 

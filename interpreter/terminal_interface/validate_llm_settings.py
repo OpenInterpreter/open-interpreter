@@ -8,7 +8,9 @@ import time
 import litellm
 from prompt_toolkit import prompt
 
-from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic
+from interpreter.terminal_interface.contributing_conversations import (
+    contribute_conversation_launch_logic,
+)
 
 from .utils.display_markdown_message import display_markdown_message
 
@@ -31,22 +33,32 @@ def validate_llm_settings(interpreter):
 
             # OpenAI
             if interpreter.llm.model in litellm.open_ai_chat_completion_models:
-                if not os.environ.get("OPENAI_API_KEY") and not interpreter.llm.api_key and not interpreter.llm.api_base:
+                if (
+                    not os.environ.get("OPENAI_API_KEY")
+                    and not interpreter.llm.api_key
+                    and not interpreter.llm.api_base
+                ):
                     display_welcome_message_once()
 
                     display_markdown_message(
                         """---
                     > OpenAI API key not found
 
-                    To use `GPT-4` (highly recommended) please provide an OpenAI API key.
+                    To use `gpt-4o` (recommended) please provide an OpenAI API key.
 
-                    To use another language model, consult the documentation at [docs.openinterpreter.com](https://docs.openinterpreter.com/language-model-setup/).
+                    To use another language model, run `interpreter --local` or consult the documentation at [docs.openinterpreter.com](https://docs.openinterpreter.com/language-model-setup/).
                     
                     ---
                     """
                     )
 
                     response = prompt("OpenAI API key: ", is_password=True)
+
+                    if response == "interpreter --local":
+                        print(
+                            "\nType `interpreter --local` again to use a local language model.\n"
+                        )
+                        exit()
 
                     display_markdown_message(
                         """
@@ -89,6 +101,6 @@ def display_welcome_message_once():
         Welcome to **Open Interpreter**.
         """
         )
-        time.sleep(1.5)
+        time.sleep(1)
 
         display_welcome_message_once._displayed = True

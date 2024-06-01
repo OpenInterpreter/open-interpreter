@@ -4,7 +4,10 @@ import time
 
 import pkg_resources
 
-from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic, contribute_conversations
+from interpreter.terminal_interface.contributing_conversations import (
+    contribute_conversation_launch_logic,
+    contribute_conversations,
+)
 
 from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
@@ -182,7 +185,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "fast",
             "nickname": "f",
-            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
+            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise (shortcut for `interpreter --profile fast`)",
             "type": bool,
         },
         {
@@ -195,19 +198,29 @@ def start_terminal_interface(interpreter):
         {
             "name": "local",
             "nickname": "l",
-            "help_text": "experimentally run the LLM locally via Llamafile (this changes many more settings than `--offline`)",
+            "help_text": "setup a local model (shortcut for `interpreter --profile local`)",
+            "type": bool,
+        },
+        {
+            "name": "codestral",
+            "help_text": "shortcut for `interpreter --profile codestral`",
+            "type": bool,
+        },
+        {
+            "name": "llama3",
+            "help_text": "shortcut for `interpreter --profile llama3`",
             "type": bool,
         },
         {
             "name": "vision",
             "nickname": "vi",
-            "help_text": "experimentally use vision for supported languages",
+            "help_text": "experimentally use vision for supported languages (shortcut for `interpreter --profile vision`)",
             "type": bool,
         },
         {
             "name": "os",
             "nickname": "os",
-            "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
+            "help_text": "experimentally let Open Interpreter control your mouse and keyboard (shortcut for `interpreter --profile os`)",
             "type": bool,
         },
         # Special commands
@@ -243,8 +256,11 @@ def start_terminal_interface(interpreter):
             "name": "contribute_conversation",
             "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "contribute_conversation"},
-        }
+            "attribute": {
+                "object": interpreter,
+                "attr_name": "contribute_conversation",
+            },
+        },
     ]
 
     # Check for deprecated flags before parsing arguments
@@ -347,6 +363,12 @@ def start_terminal_interface(interpreter):
     if args.local:
         args.profile = "local.py"
 
+    if args.codestral:
+        args.profile = "codestral.py"
+
+    if args.llama3:
+        args.profile = "llama3.py"
+
     if args.os and args.local:
         args.profile = "local-os.py"
 
@@ -356,7 +378,10 @@ def start_terminal_interface(interpreter):
 
     ### Apply profile
 
-    interpreter = profile(interpreter, args.profile or get_argument_dictionary(arguments, "profile")["default"])
+    interpreter = profile(
+        interpreter,
+        args.profile or get_argument_dictionary(arguments, "profile")["default"],
+    )
 
     ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
@@ -430,7 +455,7 @@ def start_terminal_interface(interpreter):
     if args.server:
         interpreter.server()
         return
-    
+
     validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
@@ -455,7 +480,14 @@ def set_attributes(args, arguments):
 
 
 def get_argument_dictionary(arguments: list[dict], key: str) -> dict:
-    if len(argument_dictionary_list := list(filter(lambda x: x["name"] == key, arguments))) > 0:
+    if (
+        len(
+            argument_dictionary_list := list(
+                filter(lambda x: x["name"] == key, arguments)
+            )
+        )
+        > 0
+    ):
         return argument_dictionary_list[0]
     return {}
 
@@ -471,4 +503,3 @@ def main():
             contribute_conversations([interpreter.messages])
             print("Thank you for contributing to our training data!")
         interpreter.computer.terminate()
-

@@ -22,6 +22,147 @@ import pytest
 from websocket import create_connection
 
 
+@pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+def test_server():
+    # Start the server in a new thread
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    # Give the server a moment to start
+    time.sleep(2)
+
+    import asyncio
+    import json
+
+    import requests
+    import websockets
+
+    async def test_fastapi_server():
+        import asyncio
+
+        async with websockets.connect("ws://localhost:8000/") as websocket:
+            # Connect to the websocket
+            print("Connected to WebSocket")
+
+            # Sending POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "The secret word is 'crunk'.",
+                    },
+                    {"role": "assistant", "type": "message", "content": "Understood."},
+                ],
+                "custom_instructions": "",
+                "auto_run": True,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's the secret word?",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "completion",
+                    "content": "DONE",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "crunk" in accumulated_content
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "model": "gpt-3.5-turbo",
+                "messages": [
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "The secret word is 'barloney'.",
+                    },
+                    {"role": "assistant", "type": "message", "content": "Understood."},
+                ],
+                "custom_instructions": "",
+                "auto_run": True,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's the secret word?",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "completion",
+                    "content": "DONE",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "barloney" in accumulated_content
+
+    # Get the current event loop and run the test function
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test_fastapi_server())
+
+    # Stop the server
+    interpreter.uvicorn_server.should_exit = True
+
+    # Wait for the server thread to finish
+    server_thread.join(timeout=1)
+
+
 @pytest.mark.skip(reason="Requires open-interpreter[local]")
 def test_localos():
     interpreter.computer.emit_images = False

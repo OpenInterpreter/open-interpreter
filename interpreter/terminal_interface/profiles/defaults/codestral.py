@@ -1,6 +1,6 @@
-from interpreter import interpreter
+import subprocess
 
-interpreter.local_setup()  # Opens a wizard that lets terminal users pick a local model
+from interpreter import interpreter
 
 # Set the system message to a minimal version for all local models.
 interpreter.system_message = """
@@ -185,3 +185,26 @@ interpreter.messages = [
         "content": "Alright, I'll be here. Talk to you soon!",
     },
 ]
+
+try:
+    # List out all downloaded ollama models. Will fail if ollama isn't installed
+    result = subprocess.run(
+        ["ollama", "list"], capture_output=True, text=True, check=True
+    )
+    lines = result.stdout.split("\n")
+    names = [
+        line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
+    ]  # Extract names, trim out ":latest", skip header
+
+    if "codestral" not in names:
+        interpreter.display_message(f"\nDownloading codestral...\n")
+        subprocess.run(["ollama", "pull", "codestral"], check=True)
+
+    # Set the model to codestral
+    interpreter.llm.model = f"ollama/codestral"
+    interpreter.display_message(f"> Model set to `codestral`")
+except:
+    interpreter.display_message(
+        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
+    )
+    exit()
