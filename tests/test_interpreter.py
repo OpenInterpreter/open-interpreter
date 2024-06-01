@@ -28,7 +28,7 @@ def test_server():
     server_thread.start()
 
     # Give the server a moment to start
-    time.sleep(8)
+    time.sleep(2)
 
     import asyncio
     import json
@@ -39,7 +39,7 @@ def test_server():
     async def test_fastapi_server():
         import asyncio
 
-        async with websockets.connect("ws://localhost:8000/ws") as websocket:
+        async with websockets.connect("ws://localhost:8000/") as websocket:
             # Connect to the websocket
             print("Connected to WebSocket")
 
@@ -105,7 +105,7 @@ def test_server():
                     {
                         "role": "user",
                         "type": "message",
-                        "content": "The secret word is 'barlony'.",
+                        "content": "The secret word is 'barloney'.",
                     },
                     {"role": "assistant", "type": "message", "content": "Understood."},
                 ],
@@ -134,6 +134,7 @@ def test_server():
             print("WebSocket chunks sent")
 
             # Wait for a specific response
+            accumulated_content = ""
             while True:
                 message = await websocket.recv()
                 message_data = json.loads(message)
@@ -148,7 +149,7 @@ def test_server():
                     print("Received expected message from server")
                     break
 
-            assert "barlony" in accumulated_content
+            assert "barloney" in accumulated_content
 
     # Get the current event loop and run the test function
     loop = asyncio.get_event_loop()

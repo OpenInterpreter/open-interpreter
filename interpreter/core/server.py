@@ -236,7 +236,7 @@ def server(interpreter):
 
         return {"status": "success"}
 
-    @app.websocket("/ws")
+    @app.websocket("/")
     async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
         try:
