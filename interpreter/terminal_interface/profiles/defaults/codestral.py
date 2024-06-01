@@ -2,6 +2,30 @@ import subprocess
 
 from interpreter import interpreter
 
+try:
+    # List out all downloaded ollama models. Will fail if ollama isn't installed
+    result = subprocess.run(
+        ["ollama", "list"], capture_output=True, text=True, check=True
+    )
+    lines = result.stdout.split("\n")
+    names = [
+        line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
+    ]  # Extract names, trim out ":latest", skip header
+
+    if "codestral" not in names:
+        interpreter.display_message(f"\nDownloading codestral...\n")
+        subprocess.run(["ollama", "pull", "codestral"], check=True)
+
+    # Set the model to codestral
+    interpreter.llm.model = f"ollama/codestral"
+    interpreter.display_message(f"> Model set to `codestral`")
+except:
+    interpreter.display_message(
+        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
+    )
+    exit()
+
+
 # Set the system message to a minimal version for all local models.
 interpreter.system_message = """
 You are Open Interpreter, a world-class programmer that can execute code on the user's machine.
@@ -69,8 +93,7 @@ interpreter.llm.execution_instructions = False
 interpreter.offline = True
 
 
-interpreter.system_message = """You are an AI assistant that returns code snippets that, if run, would answer the user's query. You speak very concisely and quickly, you say nothing irrelevant to the user's request. YOU NEVER USE PLACEHOLDERS, and instead always write code that 'just works' — for example, instead of a <username> placeholder, you put code that determines the user's username."
-# specialized in coding and automation, providing concise code snippets and friendly responses to enhance the user's productivity."""
+interpreter.system_message = """You are an AI assistant that returns code snippets that, if run, would answer the user's query. You speak very concisely and quickly, you say nothing irrelevant to the user's request. YOU NEVER USE PLACEHOLDERS, and instead always write code that 'just works' — for example, instead of a <username> placeholder, you put code that determines the user's username."""
 
 interpreter.messages = [
     {
@@ -116,39 +139,16 @@ interpreter.messages = [
 ]
 
 
-interpreter.llm.supports_functions = False
-
-# interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
-interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what code needs to be run next (if anything, or are we done)? I can't replace any placeholders.'''
-interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
-interpreter.code_output_sender = "user"
-interpreter.max_output = 600
-interpreter.llm.context_window = 8000
-interpreter.force_task_completion = False
-interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code."
-interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work."
-# interpreter.user_message_template = "{content}"
-interpreter.llm.execution_instructions = False
-interpreter.auto_run = True
-
-# Set offline for all local models
-interpreter.offline = True
-
-
-##### FOR LLAMA3
-
-interpreter.system_message = """You are an AI assistant specialized in coding and automation, providing concise code snippets and friendly responses to enhance the user's productivity."""
-
 interpreter.messages = [
     {
         "role": "user",
         "type": "message",
-        "content": "Run a directory listing in the current folder.",
+        "content": "Hello! I'm trying to provide IT support to someone remotely. I can run code on their computer. Here's their first request: 'what's in my cwd?'",
     },
     {
         "role": "assistant",
         "type": "message",
-        "content": "Absolutely, fetching the directory listing now.",
+        "content": "Absolutely, I can help with that. To get the contents of their current working directory (CWD), we'll use the `ls` command in a shell script like this:",
     },
     {"role": "assistant", "type": "code", "format": "shell", "content": "ls -la"},
     {
@@ -172,13 +172,130 @@ interpreter.messages = [
     {
         "role": "assistant",
         "type": "message",
-        "content": "The multiplication of 2380 by 3875 gives you 9222500. Do you need this data for anything else?",
+        "content": "The multiplication of 2380 by 3875 gives you 9222500.",
     },
     {
         "role": "user",
         "type": "message",
-        "content": "Great, I'll talk to you in an hour!",
+        "content": """I just imported these functions: computer.view() — which will show me an image of what's on the user's screen (but only if it's ALONE in a codeblock, like the below)
+
+```python
+computer.view()
+```
+
+and I also imported computer.vision.query(path='path/to/image', query='describe this image.') which queries any image at path in natural language. Can you use these for requests in the future?""",
     },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Yes, I'll be sure to use the `computer.view` and `computer.vision.query` functions for any future requests you have that involve vision or viewing your screen.",
+    },
+]
+
+
+interpreter.llm.supports_functions = False
+
+interpreter.computer.import_computer_api = True
+interpreter.computer.system_message = ""
+
+# interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
+interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what code needs to be run next (if anything, or are we done)? I can't replace any placeholders— please send me code to determine usernames, paths, etc given the request. I'm lazy!'''
+interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+interpreter.code_output_sender = "user"
+interpreter.max_output = 600
+interpreter.llm.context_window = 8000
+interpreter.force_task_completion = False
+interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code. Send code that will determine any placeholders (e.g. determine my username)."
+interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work."
+# interpreter.user_message_template = "{content}"
+interpreter.always_apply_user_message_template = False
+interpreter.llm.execution_instructions = False
+interpreter.auto_run = True
+
+# Set offline for all local models
+interpreter.offline = True
+
+import os
+
+# Get the current user's login name
+username = os.getlogin()
+# Determine the operating system
+operating_system = os.name
+# Find the current working directory
+cwd = os.getcwd()
+
+
+# OS MODE
+
+interpreter.messages = [
+    {
+        "role": "user",
+        "type": "message",
+        "content": "I have someone remotely accessing my computer and they're asking to perform tasks. Can you help me provide support by writing some code?",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Absolutely, I can help with that.",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": "Great, could you provide me with the code to find out the username, operating system, and current working directory on my computer?",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Sure, you can use the following Python script to retrieve the username, operating system, and current working directory of your computer:",
+    },
+    {
+        "role": "assistant",
+        "type": "code",
+        "format": "python",
+        "content": "import os\n# Get the current user's login name\nusername = os.getlogin()\n# Determine the operating system\noperating_system = os.name\n# Find the current working directory\ncwd = os.getcwd()\n# Print all the information\nprint(f'Username: {username}, OS: {operating_system}, Current Working Directory: {cwd}')",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": f"I've executed the script, and here's the output: 'Username: {username}, OS: {operating_system}, Current Working Directory: {cwd}'",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": f"The output indicates that the username is '{username}', the operating system is {operating_system}, and the current working directory is '{cwd}'.",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": "I just imported these functions: computer.view() — which will show me an image of what's on the user's screen when used alone in a code block, and computer.vision.query(path='path/to/image', query='describe this image.') which queries any image at path in natural language. Can you use these for requests in the future instead of like, pyautogui?",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Yes, I can use those functions for future requests.",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": "Okay, what's on my screen right now? I might ask this again later btw, and I'll need you to run it again if I do.",
+    },
+    {
+        "role": "assistant",
+        "type": "code",
+        "format": "python",
+        "content": "computer.view()",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": "Okay, that returned this: 'There is a code editor on the screen, several open tabs, and a debugging console at the bottom.' What does this mean?",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "It looks like there's a code editor open on your screen with multiple tabs and a debugging console visible. This setup is typically used for software development or editing scripts. Can I help with anything else?",
+    },
+    {"role": "user", "type": "message", "content": "Nah. I'll talk to you in an hour!"},
     {
         "role": "assistant",
         "type": "message",
@@ -186,25 +303,54 @@ interpreter.messages = [
     },
 ]
 
-try:
-    # List out all downloaded ollama models. Will fail if ollama isn't installed
-    result = subprocess.run(
-        ["ollama", "list"], capture_output=True, text=True, check=True
-    )
-    lines = result.stdout.split("\n")
-    names = [
-        line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
-    ]  # Extract names, trim out ":latest", skip header
+interpreter.system_message = "You are an AI assistant designed to help users with remote IT support tasks. If the user asks you to use functions, be biased towards using them if possible."
 
-    if "codestral" not in names:
-        interpreter.display_message(f"\nDownloading codestral...\n")
-        subprocess.run(["ollama", "pull", "codestral"], check=True)
 
-    # Set the model to codestral
-    interpreter.llm.model = f"ollama/codestral"
-    interpreter.display_message(f"> Model set to `codestral`")
-except:
-    interpreter.display_message(
-        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
-    )
-    exit()
+# STANDARD MODE
+
+interpreter.messages = [
+    {
+        "role": "user",
+        "type": "message",
+        "content": "I have someone remotely accessing my computer and they're asking to perform tasks. Can you help me provide support by writing some code?",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Absolutely, I can help with that.",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": "Great, could you provide me with the code to find out the username, operating system, and current working directory on my computer?",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Sure, you can use the following Python script to retrieve the username, operating system, and current working directory of your computer:",
+    },
+    {
+        "role": "assistant",
+        "type": "code",
+        "format": "python",
+        "content": "import os\n# Get the current user's login name\nusername = os.getlogin()\n# Determine the operating system\noperating_system = os.name\n# Find the current working directory\ncwd = os.getcwd()\n# Print all the information\nprint(f'Username: {username}, OS: {operating_system}, Current Working Directory: {cwd}')",
+    },
+    {
+        "role": "user",
+        "type": "message",
+        "content": f"I've executed the script, and here's the output: 'Username: {username}, OS: {operating_system}, Current Working Directory: {cwd}'",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": f"The output indicates that the username is '{username}', the operating system is {operating_system}, and the current working directory is '{cwd}'. Can I help with anything else?",
+    },
+    {"role": "user", "type": "message", "content": "Nah. I'll talk to you in an hour!"},
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Alright, I'll be here. Talk to you soon!",
+    },
+]
+
+interpreter.system_message = """You are an AI assistant that writes working markdown code snippets to answer the user's request. You speak concisely and quickly. You say nothing irrelevant to the user's request. YOU NEVER USE PLACEHOLDERS, and instead always send code that 'just works' by figuring out placeholders dynamically. When you send code that fails, you identify the issue, then send new code that doesn't fail."""

@@ -43,7 +43,7 @@ def convert_to_openai_messages(
             ]  # This should never be `computer`, right?
 
             if message["role"] == "user" and (
-                message == messages[-1]
+                message == [m for m in messages if m["role"] == "user"][-1]
                 or interpreter.always_apply_user_message_template
             ):
                 # Only add the template for the last message?

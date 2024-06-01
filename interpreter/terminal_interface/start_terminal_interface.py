@@ -529,7 +529,7 @@ def main():
                             print("Thank you for contributing!")
 
                 if (
-                    interpreter.contribute_conversation or interpreter.model == "i"
+                    interpreter.contribute_conversation or interpreter.llm.model == "i"
                 ) and interpreter.messages != []:
                     conversation_id = (
                         interpreter.conversation_id
