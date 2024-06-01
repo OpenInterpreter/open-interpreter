@@ -528,7 +528,9 @@ def main():
                             interpreter.contribute_conversation = True
                             print("Thank you for contributing!")
 
-                if interpreter.contribute_conversation and interpreter.messages != []:
+                if (
+                    interpreter.contribute_conversation or interpreter.model == "i"
+                ) and interpreter.messages != []:
                     conversation_id = (
                         interpreter.conversation_id
                         if hasattr(interpreter, "conversation_id")

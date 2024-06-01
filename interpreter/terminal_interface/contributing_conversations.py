@@ -187,14 +187,7 @@ def contribute_conversations(
     ), "the contribution payload is not a list of lists!"
 
     try:
-        response = requests.post(url, json=payload)
-        if response.status_code != 200:
-            print(
-                f"Failed to contribute conversation: {response.status_code} {response.text}"
-            )
-            return None
-        else:
-            print(f"Successfully contributed conversations!")
-    except requests.RequestException as e:
-        print(f"Failed to contribute conversation: {e}")
-        return None
+        requests.post(url, json=payload)
+    except:
+        # Non blocking
+        pass
