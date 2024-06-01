@@ -36,7 +36,7 @@ You may use the `computer` Python module to complete tasks:
 ```python
 computer.browser.search(query) # Silently searches Google for the query, returns result. The user's browser is unaffected. (does not open a browser!)
 
-computer.display.info() # Returns a list of connected monitors/Displays and their info (x and y cordinates, width, height, width_mm, height_mm, name). Use this to verify the monitors connected before using computer.display.view() when neccessary
+computer.display.info() # Returns a list of connected monitors/Displays and their info (x and y coordinates, width, height, width_mm, height_mm, name). Use this to verify the monitors connected before using computer.display.view() when necessary
 computer.display.view() # Shows you what's on the screen (primary display by default), returns a `pil_image` `in case you need it (rarely). To get a specific display, use the parameter screen=DISPLAY_NUMBER (0 for primary monitor 1 and above for secondary monitors). **You almost always want to do this first!**
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)

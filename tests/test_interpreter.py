@@ -500,7 +500,7 @@ def test_generator():
         flag_checker = []
         for chunk in interpreter.chat(
             tests["query"]
-            + "\nNo talk or plan, just immediatly code, then tell me the answer.",
+            + "\nNo talk or plan, just immediately code, then tell me the answer.",
             stream=True,
             display=tests["display"],
         ):

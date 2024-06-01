@@ -30,7 +30,7 @@ def scan_code(code, language, interpreter):
     # Run semgrep
     try:
         # HACK: we need to give the subprocess shell access so that the semgrep from our pyproject.toml is available
-        # the global namespace might have semgrep from guarddog installed, but guarddog is currenlty
+        # the global namespace might have semgrep from guarddog installed, but guarddog is currently
         # pinned to an old semgrep version that has issues with reading the semgrep registry
         # while scanning a single file like the temporary one we generate
         # if guarddog solves [#249](https://github.com/DataDog/guarddog/issues/249) we can change this approach a bit

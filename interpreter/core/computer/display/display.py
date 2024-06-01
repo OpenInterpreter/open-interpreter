@@ -65,7 +65,7 @@ class Display:
 
     def info(self):
         """
-        Returns a list of all connected monitor/displays and thir information
+        Returns a list of all connected monitor/displays and their information
         """
         return get_displays()
 
@@ -145,7 +145,7 @@ class Display:
                     screen=screen, combine_screens=combine_screens
                 )  #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
                 message = format_to_recipient(
-                    "Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will recieve it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.",
+                    "Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will receive it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.",
                     "assistant",
                 )
                 print(message)

@@ -119,7 +119,7 @@ matplotlib.use('{backend}')
 
                 if DEBUG_MODE:
                     print("-----------" * 10)
-                    print("Message recieved:", msg["content"])
+                    print("Message received:", msg["content"])
                     print("-----------" * 10)
 
                 if (

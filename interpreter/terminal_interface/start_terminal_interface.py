@@ -75,7 +75,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "llm_supports_vision",
             "nickname": "lsv",
-            "help_text": "inform OI that your model supports vision, and can recieve vision inputs",
+            "help_text": "inform OI that your model supports vision, and can receive vision inputs",
             "type": bool,
             "action": argparse.BooleanOptionalAction,
             "attribute": {"object": interpreter.llm, "attr_name": "supports_vision"},

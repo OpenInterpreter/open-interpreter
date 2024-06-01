@@ -364,7 +364,7 @@ class OpenInterpreter:
 
                 last_flag_base = {"role": chunk["role"], "type": chunk["type"]}
 
-                # Don't add format to type: "console" flags, to accomodate active_line AND output formats
+                # Don't add format to type: "console" flags, to accommodate active_line AND output formats
                 if "format" in chunk and chunk["type"] != "console":
                     last_flag_base["format"] = chunk["format"]
 
