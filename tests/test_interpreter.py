@@ -129,7 +129,7 @@ def test_server():
             # Sending POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-4-turbo",
                 "messages": [
                     {
                         "role": "user",
@@ -183,7 +183,7 @@ def test_server():
             # Send another POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "model": "gpt-3.5-turbo",
+                "model": "gpt-4-turbo",
                 "messages": [
                     {
                         "role": "user",
@@ -267,7 +267,7 @@ def test_m_vision():
     ]
 
     interpreter.llm.supports_vision = False
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o"
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
@@ -304,7 +304,7 @@ def test_skills():
 
     import json
 
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
@@ -558,7 +558,7 @@ def setup_function():
     interpreter.reset()
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o"
     interpreter.llm.context_window = 123000
     interpreter.llm.max_tokens = 4096
     interpreter.llm.supports_functions = True
