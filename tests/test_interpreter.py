@@ -27,6 +27,8 @@ def test_generator():
     Sends two messages, makes sure everything is correct with display both on and off.
     """
 
+    interpreter.llm.model = "gpt-4"
+
     for tests in [
         {"query": "What's 38023*40334? Use Python", "display": True},
         {"query": "What's 2334*34335555? Use Python", "display": True},
@@ -129,7 +131,7 @@ def test_server():
             # Sending POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "model": "gpt-4-turbo",
+                "model": "gpt-4o",
                 "messages": [
                     {
                         "role": "user",
@@ -183,7 +185,7 @@ def test_server():
             # Send another POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "model": "gpt-4-turbo",
+                "model": "gpt-4o",
                 "messages": [
                     {
                         "role": "user",
