@@ -234,9 +234,19 @@ def local_setup(interpreter, provider=None, model=None):
                 if line.strip()
             ]  # Extract names, trim out ":latest", skip header
 
-            for model in ["llama3", "phi3", "wizardlm2"]:
+            if "llama3" in names:
+                names.remove("llama3")
+                names = ["llama3"] + names
+
+            if "codestral" in names:
+                names.remove("codestral")
+                names = ["codestral"] + names
+
+            for model in ["llama3", "phi3", "wizardlm2", "codestral"]:
                 if model not in names:
-                    names.append("→ Download " + model)
+                    names.append("↓ Download " + model)
+
+            names.append("Browse Models ↗")
 
             # Create a new inquirer selection from the names
             name_question = [
@@ -253,15 +263,37 @@ def local_setup(interpreter, provider=None, model=None):
 
             selected_name = name_answer["name"]
 
-            if "download" in selected_name.lower():
+            if "↓ Download " in selected_name:
                 model = selected_name.split(" ")[-1]
                 interpreter.display_message(f"\nDownloading {model}...\n")
                 subprocess.run(["ollama", "pull", model], check=True)
+            elif "Browse Models ↗" in selected_name:
+                interpreter.display_message(
+                    "Opening [ollama.com/library](ollama.com/library)."
+                )
+                import webbrowser
+
+                webbrowser.open("https://ollama.com/library")
+                exit()
             else:
                 model = selected_name.strip()
 
             # Set the model to the selected model
             interpreter.llm.model = f"ollama/{model}"
+
+            # Send a ping, which will actually load the model
+            interpreter.display_message("Loading model...")
+
+            old_max_tokens = interpreter.llm.max_tokens
+            old_context_window = interpreter.llm.context_window
+            interpreter.llm.max_tokens = 1
+            interpreter.llm.context_window = 100
+
+            interpreter.computer.ai.chat("ping")
+
+            interpreter.llm.max_tokens = old_max_tokens
+            interpreter.llm.context_window = old_context_window
+
             interpreter.display_message(f"> Model set to `{model}`")
 
         # If Ollama is not installed or not recognized as a command, prompt the user to download Ollama and try again

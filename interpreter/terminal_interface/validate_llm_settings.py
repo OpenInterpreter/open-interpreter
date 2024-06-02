@@ -6,6 +6,7 @@ import os
 import subprocess
 import time
 
+os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 from prompt_toolkit import prompt
 
@@ -88,23 +89,35 @@ def validate_llm_settings(interpreter):
                     result = subprocess.run(
                         ["ollama", "list"], capture_output=True, text=True, check=True
                     )
-                    lines = result.stdout.split("\n")
-                    names = [
-                        line.split()[0].replace(":latest", "")
-                        for line in lines[1:]
-                        if line.strip()
-                    ]  # Extract names, trim out ":latest", skip header
-
-                    if "codestral" not in names:
-                        interpreter.display_message(f"\nDownloading {model_name}...\n")
-                        subprocess.run(["ollama", "pull", model_name], check=True)
-
-                    interpreter.display_message(f"> Model set to `{model_name}`")
-                except:
+                except Exception as e:
+                    print(str(e))
                     interpreter.display_message(
                         f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
                     )
                     exit()
+
+                lines = result.stdout.split("\n")
+                names = [
+                    line.split()[0].replace(":latest", "")
+                    for line in lines[1:]
+                    if line.strip()
+                ]  # Extract names, trim out ":latest", skip header
+
+                if model_name not in names:
+                    interpreter.display_message(f"\nDownloading {model_name}...\n")
+                    subprocess.run(["ollama", "pull", model_name], check=True)
+
+                # Send a ping, which will actually load the model
+                print("Loading model...")
+
+                old_max_tokens = interpreter.llm.max_tokens
+                interpreter.llm.max_tokens = 1
+                interpreter.computer.ai.chat("ping")
+                interpreter.llm.max_tokens = old_max_tokens
+
+                print("Model loaded.")
+
+                # interpreter.display_message(f"> Model set to `{model_name}`")
 
             # This is a model we don't have checks for yet.
             break
@@ -115,6 +128,11 @@ def validate_llm_settings(interpreter):
     # If offline, it's usually a bogus model name for LiteLLM since LM Studio doesn't require one.
     if not interpreter.auto_run and not interpreter.offline:
         display_markdown_message(f"> Model set to `{interpreter.llm.model}`")
+
+    if interpreter.llm.model == "i":
+        interpreter.display_message(
+            "***Note:*** *Conversations with this model will be used to train our open-source model.*\n"
+        )
     return
 
 

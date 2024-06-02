@@ -5,13 +5,13 @@ from interpreter import interpreter
 interpreter.llm.supports_vision = True
 interpreter.shrink_images = True  # Faster but less accurate
 
-interpreter.llm.model = "gpt-4-vision-preview"
+interpreter.llm.model = "gpt-4o"
 
 interpreter.llm.supports_functions = False
 interpreter.llm.context_window = 110000
 interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True
-
+interpreter.computer.import_computer_api = True
 interpreter.force_task_completion = True
 interpreter.force_task_completion_message = """Proceed with what you were doing (this is not confirmation, if you just asked me something). You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task is done, say exactly 'The task is done.' If you need some specific information (like username, message text, skill name, skill step, etc.) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going. CRITICAL: REMEMBER TO FOLLOW ALL PREVIOUS INSTRUCTIONS. If I'm teaching you something, remember to run the related `computer.skills.new_skill` function."""
 interpreter.force_task_completion_breakers = [

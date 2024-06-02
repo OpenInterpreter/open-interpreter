@@ -1,23 +1,72 @@
 import subprocess
+import time
 
 from interpreter import interpreter
 
+# Check if required packages are installed
+
+# THERE IS AN INCONSISTENCY HERE.
+# We should be testing if they import WITHIN OI's computer, not here.
+
+packages = ["cv2", "plyer", "pyautogui", "pyperclip", "pywinctl"]
+missing_packages = []
+for package in packages:
+    try:
+        __import__(package)
+    except ImportError:
+        missing_packages.append(package)
+
+if missing_packages:
+    interpreter.display_message(
+        f"> **Missing Package(s): {', '.join(['`' + p + '`' for p in missing_packages])}**\n\nThese packages are required for OS Control.\n\nInstall them?\n"
+    )
+    user_input = input("(y/n) > ")
+    if user_input.lower() != "y":
+        print("\nPlease try to install them manually.\n\n")
+        time.sleep(2)
+        print("Attempting to start OS control anyway...\n\n")
+
+    else:
+        for pip_combo in [
+            ["pip", "quotes"],
+            ["pip", "no-quotes"],
+            ["pip3", "quotes"],
+            ["pip", "no-quotes"],
+        ]:
+            if pip_combo[1] == "quotes":
+                command = f'{pip_combo[0]} install "open-interpreter[os]"'
+            else:
+                command = f"{pip_combo[0]} install open-interpreter[os]"
+
+            interpreter.computer.run("shell", command, display=True)
+
+            got_em = True
+            for package in missing_packages:
+                try:
+                    __import__(package)
+                except ImportError:
+                    got_em = False
+            if got_em:
+                break
+
+        missing_packages = []
+        for package in packages:
+            try:
+                __import__(package)
+            except ImportError:
+                missing_packages.append(package)
+
+        if missing_packages != []:
+            print(
+                "\n\nWarning: The following packages could not be installed:",
+                ", ".join(missing_packages),
+            )
+            print("\nPlease try to install them manually.\n\n")
+            time.sleep(2)
+            print("Attempting to start OS control anyway...\n\n")
+
 interpreter.llm.model = "ollama/codestral"
-
-# Send a ping, which will actually load the model
-interpreter.display_message("\nLoading model...")
-
-old_max_tokens = interpreter.llm.max_tokens
-old_context_window = interpreter.llm.context_window
-interpreter.llm.max_tokens = 1
-interpreter.llm.context_window = 100
-
-interpreter.computer.ai.chat("ping")
-
-interpreter.llm.max_tokens = old_max_tokens
-interpreter.llm.context_window = old_context_window
-
-interpreter.display_message("> Model set to `codestral`")
+interpreter.display_message("> Model set to `codestral`\n> `OS Control` enabled\n")
 
 
 # Set the system message to a minimal version for all local models.
@@ -200,7 +249,7 @@ interpreter.max_output = 600
 interpreter.llm.context_window = 8000
 interpreter.force_task_completion = False
 interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code. Send code that will determine any placeholders (e.g. determine my username)."
-interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work. If it's like a simple greeting, just tell me what to say (without code)."
+interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work."
 # interpreter.user_message_template = "{content}"
 interpreter.always_apply_user_message_template = False
 interpreter.llm.execution_instructions = False
@@ -271,7 +320,12 @@ interpreter.messages = [
     {
         "role": "user",
         "type": "message",
-        "content": "Okay, what's on my screen right now? I might ask this again later btw, and I'll need you to run it again if I do.",
+        "content": "Okay, what's on my screen right now? I might ask this again later btw, and I'll need you to tell me how to do this again if I do.",
+    },
+    {
+        "role": "assistant",
+        "type": "message",
+        "content": "Sounds good! Here's how we can view what's on your computer's screen:",
     },
     {
         "role": "assistant",
@@ -289,7 +343,11 @@ interpreter.messages = [
         "type": "message",
         "content": "It looks like there's a code editor open on your screen with multiple tabs and a debugging console visible. This setup is typically used for software development or editing scripts. Can I help with anything else?",
     },
-    {"role": "user", "type": "message", "content": "Nah. I'll talk to you in an hour!"},
+    {
+        "role": "user",
+        "type": "message",
+        "content": "Nah. I'll talk to you in an hour! I might ask you what's on my screen again then.",
+    },
     {
         "role": "assistant",
         "type": "message",
@@ -299,52 +357,5 @@ interpreter.messages = [
 
 interpreter.system_message = "You are an AI assistant designed to help users with remote IT support tasks. If the user asks you to use functions, be biased towards using them if possible."
 
-
-# STANDARD MODE
-
-interpreter.messages = [
-    {
-        "role": "user",
-        "type": "message",
-        "content": "I have someone remotely accessing my computer and they're asking to perform tasks. Can you help me provide support by writing some code?",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Absolutely, I can help with that.",
-    },
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Great, could you provide me with the code to find out the username, operating system, and current working directory on my computer?",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Sure, you can use the following Python script to retrieve the username, operating system, and current working directory of your computer:",
-    },
-    {
-        "role": "assistant",
-        "type": "code",
-        "format": "python",
-        "content": "import os\n# Get the current user's login name\nusername = os.getlogin()\n# Determine the operating system\noperating_system = os.name\n# Find the current working directory\ncwd = os.getcwd()\n# Print all the information\nprint(f'Username: {username}, OS: {operating_system}, Current Working Directory: {cwd}')",
-    },
-    {
-        "role": "user",
-        "type": "message",
-        "content": f"I've executed the script, and here's the output: 'Username: {username}, OS: {operating_system}, Current Working Directory: {cwd}'",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": f"The output indicates that the username is '{username}', the operating system is {operating_system}, and the current working directory is '{cwd}'. Can I help with anything else?",
-    },
-    {"role": "user", "type": "message", "content": "Nah. I'll talk to you in an hour!"},
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Alright, I'll be here. Talk to you soon!",
-    },
-]
-
 interpreter.system_message = """You are an AI assistant that writes working markdown code snippets to answer the user's request. You speak concisely and quickly. You say nothing irrelevant to the user's request. YOU NEVER USE PLACEHOLDERS, and instead always send code that 'just works' by figuring out placeholders dynamically. When you send code that fails, you identify the issue, then send new code that doesn't fail."""
+interpreter.computer.import_computer_api = True

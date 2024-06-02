@@ -118,19 +118,46 @@ class Ai:
         self.computer = computer
 
     def chat(self, text):
+        messages = [
+            {
+                "role": "system",
+                "type": "message",
+                "content": "You are a helpful AI assistant.",
+            },
+            {"role": "user", "type": "message", "content": text},
+        ]
+        response = ""
+        for chunk in self.computer.interpreter.llm.run(messages):
+            if "content" in chunk:
+                response += chunk.get("content")
+        return response
+
+        # Old way
         old_messages = self.computer.interpreter.llm.interpreter.messages
         old_system_message = self.computer.interpreter.llm.interpreter.system_message
+        old_import_computer_api = self.computer.import_computer_api
+        old_execution_instructions = (
+            self.computer.interpreter.llm.execution_instructions
+        )
         try:
             self.computer.interpreter.llm.interpreter.system_message = (
                 "You are an AI assistant."
             )
             self.computer.interpreter.llm.interpreter.messages = []
+            self.computer.import_computer_api = False
+            self.computer.interpreter.llm.execution_instructions = ""
+
             response = self.computer.interpreter.llm.interpreter.chat(text)
         finally:
             self.computer.interpreter.llm.interpreter.messages = old_messages
             self.computer.interpreter.llm.interpreter.system_message = (
                 old_system_message
             )
+            self.computer.import_computer_api = old_import_computer_api
+            self.computer.interpreter.llm.execution_instructions = (
+                old_execution_instructions
+            )
+
             return response[-1].get("content")
 
     def query(self, text, query, custom_reduce_query=None):

@@ -1,3 +1,6 @@
+import os
+
+os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
 litellm.suppress_debug_info = True
@@ -72,6 +75,7 @@ class Llm:
             model = "openai/i"
             if not hasattr(self.interpreter, "conversation_id"):  # Only do this once
                 self.context_window = 7000
+                self.api_key = "x"
                 self.max_tokens = 1000
                 self.api_base = "https://api.openinterpreter.com/v0"
                 self.interpreter.conversation_id = str(uuid.uuid4())
@@ -117,12 +121,25 @@ class Llm:
         elif self.supports_vision == False and self.vision_renderer:
             for img_msg in image_messages:
                 if img_msg["format"] != "description":
+                    self.interpreter.display_message("*Viewing image...*")
+
+                    if img_msg["format"] == "path":
+                        precursor = f"The image I'm referring to ({img_msg['content']}) contains the following: "
+                        if self.interpreter.computer.import_computer_api:
+                            postcursor = f"\nIf you want to ask questions about the image, run `computer.vision.query(path='{img_msg['content']}', query='(ask any question here)')` and a vision AI will answer it."
+                        else:
+                            postcursor = ""
+                    else:
+                        precursor = "Imagine I have just shown you an image with this description: "
+                        postcursor = ""
+
                     img_msg["content"] = (
-                        "Imagine I have just shown you an image with this description: "
+                        precursor
                         + self.vision_renderer(lmc=img_msg)
-                        + "\n---\nThe image contains the following text exactly, extracted via OCR: '''\n"
+                        + "\n---\nThe image contains the following text exactly: '''\n"
                         + self.interpreter.computer.vision.ocr(lmc=img_msg)
                         + "\n'''"
+                        + postcursor
                     )
                     img_msg["format"] = "description"
 

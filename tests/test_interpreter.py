@@ -22,6 +22,10 @@ import pytest
 from websocket import create_connection
 
 
+def test_ai_chat():
+    print(interpreter.computer.ai.chat("hi"))
+
+
 def test_generator():
     """
     Sends two messages, makes sure everything is correct with display both on and off.

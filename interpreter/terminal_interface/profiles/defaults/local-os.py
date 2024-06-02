@@ -64,7 +64,7 @@ interpreter.force_task_completion_message = "Proceed to run code by typing ```, 
 interpreter.force_task_completion_breakers = ["<END>"]
 interpreter.sync_computer = True
 interpreter.llm.execution_instructions = False
-
+interpreter.computer.import_computer_api = True
 
 interpreter.system_message = """
 
