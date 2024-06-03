@@ -655,6 +655,22 @@ interpreter.user_message_template = "{content}. Be concise, don't include anythi
 
 </CodeGroup>
 
+### Always Apply User Message Template
+
+The boolean flag for whether the User Message Template will be applied to every user message. The default is False which means the template is only applied to the last User message.
+
+<CodeGroup>
+
+```python Python
+interpreter.always_apply_user_message_template = False
+```
+
+```python Profile
+interpreter.always_apply_user_message_template = False
+```
+
+</CodeGroup>
+
 # Computer
 
 The `computer` object in `interpreter.computer` is a virtual computer that the AI controls. Its primary interface/function is to execute code and return the output in real-time.
