@@ -686,6 +686,22 @@ interpreter.code_output_template = "Code output: {content}\nWhat code needs to b
 
 </CodeGroup>
 
+### Empty Code Message Template
+
+If the computer does not output anything after code execution, this value will be sent to the language model.
+
+<CodeGroup>
+
+```python Python
+interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next (if anything, or are we done?)"
+```
+
+```python Profile
+interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. what's next?"
+```
+
+</CodeGroup>
+
 # Computer
 
 The `computer` object in `interpreter.computer` is a virtual computer that the AI controls. Its primary interface/function is to execute code and return the output in real-time.
