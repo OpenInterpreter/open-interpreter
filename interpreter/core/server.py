@@ -11,11 +11,9 @@
 
 import asyncio
 import json
-import os
-import threading
 
 ###
-# from pynput import keyboard
+from pynput import keyboard
 # from RealtimeTTS import TextToAudioStream, OpenAIEngine, CoquiEngine
 # from RealtimeSTT import AudioToTextRecorder
 # from beeper import Beeper
@@ -25,22 +23,8 @@ from typing import Any, Dict, List
 
 from fastapi import FastAPI, Header, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from openai import OpenAI
 from pydantic import BaseModel
 from uvicorn import Config, Server
-
-# import argparse
-# from profiles.default import interpreter
-# from interpreter import interpreter
-
-# Parse command line arguments for port number
-# parser = argparse.ArgumentParser(description="FastAPI server.")
-# parser.add_argument("--port", type=int, default=63863, help="Port to run on.")
-# args = parser.parse_args()
-
-
-# interpreter.tts = "openai"
-
 
 class Settings(BaseModel):
     auto_run: bool
@@ -80,12 +64,9 @@ class AsyncInterpreter:
             False  # Tracks whether interpreter is trying to use the keyboard
         )
 
-        # print("oksskk")
         # self.loop = asyncio.get_event_loop()
-        # print("okkk")
 
     async def _add_to_queue(self, queue, item):
-        print(f"Adding item to output", item)
         await queue.put(item)
 
     async def clear_queue(self, queue):
@@ -117,7 +98,6 @@ class AsyncInterpreter:
                 self._last_lmc_start_flag = time.time()
                 # self.interpreter.computer.terminal.stop() # Stop any code execution... maybe we should make interpreter.stop()?
             elif "end" in chunk:
-                print("yep")
                 asyncio.create_task(self.run())
             else:
                 await self._add_to_queue(self._input_queue, chunk)
@@ -126,15 +106,12 @@ class AsyncInterpreter:
         """
         Synchronous function to add a chunk to the output queue.
         """
-        print("ADDING TO QUEUE:", chunk)
         asyncio.create_task(self._add_to_queue(self._output_queue, chunk))
 
     async def run(self):
         """
         Runs OI on the audio bytes submitted to the input. Will add streaming LMC chunks to the _output_queue.
         """
-        print("heyyyy")
-        # interpreter.messages = self.active_chat_messages
         # self.beeper.start()
 
         # self.stt.stop()
@@ -147,10 +124,9 @@ class AsyncInterpreter:
         def generate(message):
             last_lmc_start_flag = self._last_lmc_start_flag
             # interpreter.messages = self.active_chat_messages
-            print("🍀🍀🍀🍀GENERATING, using these messages: ", self.interpreter.messages)
+            # print("🍀🍀🍀🍀GENERATING, using these messages: ", self.interpreter.messages)
             print("passing this in:", message)
             for chunk in self.interpreter.chat(message, display=False, stream=True):
-                print("FROM INTERPRETER. CHUNK:", chunk)
 
                 if self._last_lmc_start_flag != last_lmc_start_flag:
                     # self.beeper.stop()
@@ -215,7 +191,7 @@ class AsyncInterpreter:
         return await self._output_queue.get()
 
 
-def server(interpreter):
+def server(interpreter, port=8000):  # Default port is 8000 if not specified
     async_interpreter = AsyncInterpreter(interpreter)
 
     app = FastAPI()
@@ -226,16 +202,19 @@ def server(interpreter):
         allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
         allow_headers=["*"],  # Allow all headers
     )
-
     @app.post("/settings")
     async def settings(payload: Dict[str, Any]):
         for key, value in payload.items():
             print("Updating interpreter settings with the following:")
             print(key, value)
-            setattr(async_interpreter.interpreter, key, value)
+            if key == "llm" and isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    setattr(async_interpreter.interpreter, sub_key, sub_value)
+            else:
+                setattr(async_interpreter.interpreter, key, value)
 
         return {"status": "success"}
-
+    
     @app.websocket("/")
     async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
@@ -261,7 +240,6 @@ def server(interpreter):
                         # we dont send out bytes rn, no TTS
                         pass
                     elif isinstance(output, dict):
-                        print("sending:", output)
                         await websocket.send_text(json.dumps(output))
 
             await asyncio.gather(receive_input(), send_output())
@@ -271,37 +249,6 @@ def server(interpreter):
         finally:
             await websocket.close()
 
-    class Rename(BaseModel):
-        input: str
-
-    @app.post("/rename-chat")
-    async def rename_chat(body_content: Rename, x_api_key: str = Header(None)):
-        print("RENAME CHAT REQUEST in PY 🌙🌙🌙🌙")
-        input_value = body_content.input
-        client = OpenAI(
-            # defaults to os.environ.get("OPENAI_API_KEY")
-            api_key=x_api_key,
-        )
-        try:
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": f"Given the following chat snippet, create a unique and descriptive title in less than 8 words. Your answer must not be related to customer service.\n\n{input_value}",
-                    }
-                ],
-                temperature=0.3,
-                stream=False,
-            )
-            print(response)
-            completion = response["choices"][0]["message"]["content"]
-            return {"data": {"content": completion}}
-        except Exception as e:
-            print(f"Error: {e}")
-            traceback.print_exc()
-            return {"error": str(e)}
-
-    config = Config(app, host="0.0.0.0", port=8000)
+    config = Config(app, host="0.0.0.0", port=port) 
     interpreter.uvicorn_server = Server(config)
     interpreter.uvicorn_server.run()

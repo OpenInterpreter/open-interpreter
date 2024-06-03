@@ -337,7 +337,7 @@ def local_setup(interpreter, provider=None, model=None):
             exit()
 
         jan_model_name = model_name_answer["jan_model_name"]
-        interpreter.llm.model = f"jan/{jan_model_name}"
+        interpreter.llm.model = jan_model_name
         interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
         time.sleep(1)
 
