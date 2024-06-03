@@ -129,62 +129,27 @@ interpreter.user_message_template = "{content}. If my question must be solved by
 interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work."
 # interpreter.user_message_template = "{content}"
 interpreter.llm.execution_instructions = False
-interpreter.auto_run = True
+interpreter.auto_run = False
 
 # Set offline for all local models
 interpreter.offline = True
 
 
 ##### FOR LLAMA3
+interpreter.messages = []
+interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
 
-interpreter.system_message = """You are an AI assistant specialized in coding and automation, providing concise code snippets and friendly responses to enhance the user's productivity."""
+User: Open the chrome app.
+Assistant: On it. 
+```python
+import webbrowser
+webbrowser.open('https://chrome.google.com')
+```
+User: The code you ran produced no output. Was this expected, or are we finished?
+Assistant: No further action is required; the provided snippet opens Chrome.
 
-interpreter.messages = [
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Run a directory listing in the current folder.",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Absolutely, fetching the directory listing now.",
-    },
-    {"role": "assistant", "type": "code", "format": "shell", "content": "ls -la"},
-    {
-        "role": "computer",
-        "type": "console",
-        "format": "output",
-        "content": "total 48\ndrwxr-xr-x  12 user  staff  384 Jan 12 12:34 .\ndrwxr-xr-x   6 user  staff  192 Jan 12 12:34 ..",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Here's the directory listing:\n\ntotal 48\ndrwxr-xr-x  12 user  staff  384 Jan 12 12:34 .\ndrwxr-xr-x   6 user  staff  192 Jan 12 12:34 ..\n\nWhat's next on your agenda?",
-    },
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Can you multiply 2380 by 3875 for me?",
-    },
-    {"role": "assistant", "type": "code", "format": "python", "content": "2380*3875"},
-    {"role": "computer", "type": "console", "format": "output", "content": "9222500"},
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "The multiplication of 2380 by 3875 gives you 9222500. Do you need this data for anything else?",
-    },
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Great, I'll talk to you in an hour!",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Alright, I'll be here. Talk to you soon!",
-    },
-]
+Now, your turn:"""
+
 
 try:
     # List out all downloaded ollama models. Will fail if ollama isn't installed

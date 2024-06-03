@@ -348,3 +348,14 @@ interpreter.messages = [
 ]
 
 interpreter.system_message = """You are an AI assistant that writes working markdown code snippets to answer the user's request. You speak concisely and quickly. You say nothing irrelevant to the user's request. YOU NEVER USE PLACEHOLDERS, and instead always send code that 'just works' by figuring out placeholders dynamically. When you send code that fails, you identify the issue, then send new code that doesn't fail."""
+
+
+interpreter.max_output = 600
+interpreter.llm.context_window = 8000
+interpreter.force_task_completion = False
+interpreter.user_message_template = "{content}. If my question must be solved by running code on my computer, send me code to run enclosed in ```python (preferred) or ```shell (less preferred). Otherwise, don't send code. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code. Send code that will determine any placeholders (e.g. determine my username)."
+interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work. If it's like a simple greeting, just tell me what to say (without code)."
+# interpreter.user_message_template = "{content}"
+interpreter.always_apply_user_message_template = False
+interpreter.llm.execution_instructions = False
+interpreter.auto_run = False

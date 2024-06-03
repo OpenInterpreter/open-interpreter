@@ -185,3 +185,19 @@ interpreter.messages = [
         "content": "Alright, I'll be here. Talk to you soon!",
     },
 ]
+
+interpreter.messages = []
+interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
+
+User: Open the chrome app.
+Assistant: On it. 
+```python
+import webbrowser
+webbrowser.open('https://chrome.google.com')
+```
+User: The code you ran produced no output. Was this expected, or are we finished?
+Assistant: No further action is required; the provided snippet opens Chrome.
+
+Now, your turn:"""
+
+interpreter.auto_run = False

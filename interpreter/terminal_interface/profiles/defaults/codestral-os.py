@@ -359,3 +359,5 @@ interpreter.system_message = "You are an AI assistant designed to help users wit
 
 interpreter.system_message = """You are an AI assistant that writes working markdown code snippets to answer the user's request. You speak concisely and quickly. You say nothing irrelevant to the user's request. YOU NEVER USE PLACEHOLDERS, and instead always send code that 'just works' by figuring out placeholders dynamically. When you send code that fails, you identify the issue, then send new code that doesn't fail."""
 interpreter.computer.import_computer_api = True
+
+interpreter.auto_run = True

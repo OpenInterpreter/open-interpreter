@@ -275,3 +275,5 @@ if not interpreter.auto_run:
         "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
     )
     print("")  # < - Aesthetic choice
+
+interpreter.auto_run = True

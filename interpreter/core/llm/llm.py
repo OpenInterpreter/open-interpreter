@@ -121,7 +121,7 @@ class Llm:
         elif self.supports_vision == False and self.vision_renderer:
             for img_msg in image_messages:
                 if img_msg["format"] != "description":
-                    self.interpreter.display_message("*Viewing image...*")
+                    self.interpreter.display_message("\n  *Viewing image...*\n")
 
                     if img_msg["format"] == "path":
                         precursor = f"The image I'm referring to ({img_msg['content']}) contains the following: "
@@ -134,9 +134,9 @@ class Llm:
                         postcursor = ""
 
                     img_msg["content"] = (
-                        precursor
-                        + self.vision_renderer(lmc=img_msg)
-                        + "\n---\nThe image contains the following text exactly: '''\n"
+                        # precursor
+                        # + self.vision_renderer(lmc=img_msg) +
+                        "\n---\nThe image contains the following text exactly: '''\n"
                         + self.interpreter.computer.vision.ocr(lmc=img_msg)
                         + "\n'''"
                         + postcursor
