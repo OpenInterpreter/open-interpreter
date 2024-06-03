@@ -91,8 +91,7 @@
           ]
         },
         "language-models/custom-models",
-        "language-models/settings",
-        "language-models/usage"
+        "language-models/settings"
       ]
     },
     {
