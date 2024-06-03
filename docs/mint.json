@@ -20,13 +20,13 @@
   },
   "topbarLinks": [
     {
-      "name": "39K ★ GitHub",
-      "url": "https://github.com/KillianLucas/open-interpreter"
+      "name": "50K ★ GitHub",
+      "url": "https://github.com/OpenInterpreter/open-interpreter"
     }
   ],
   "topbarCtaButton": {
     "name": "Join Discord",
-    "url": "https://discord.com/invite/6p3fD6rBVm"
+    "url": "https://discord.gg/Hvz9Axh84z"
   },
   "navigation": [
     {
@@ -130,6 +130,8 @@
     "suggestEdit": true
   },
   "footerSocials": {
-    "twitter": "https://twitter.com/hellokillian"
+    "twitter": "https://x.com/OpenInterpreter",
+    "youtube": "https://www.youtube.com/@OpenInterpreter",
+    "linkedin": "https://www.linkedin.com/company/openinterpreter"
   }
 }
