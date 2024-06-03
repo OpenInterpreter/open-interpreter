@@ -4,13 +4,38 @@ title: Profiles
 
 Profiles are a powerful way to customize your instance of Open Interpreter.
 
-Profiles can be accessed with `interpreter --profiles`
+Everything from the model to the context window to the message templates can be configured in a profile. This allows you to save multiple variations of Open Interpreter to optimize your specific use-cases.
 
-Profiles can be set with `interpreter --profile name`
+You can access Profiles with `interpreter --profiles`. This will open up the directory where all of your profiles are stored.
 
-### Helpful fields
+To apply a Profile to a session of Open Interpreter, you can run `interpreter --profile <name>`
+
+# Example Profile
+
+```Python
+from interpreter import interpreter
+
+interpreter.os = True
+interpreter.llm.supports_vision = True
+# interpreter.shrink_images = True # Faster but less accurate
+
+interpreter.llm.model = "gpt-4-vision-preview"
+
+interpreter.llm.supports_functions = False
+interpreter.llm.context_window = 110000
+interpreter.llm.max_tokens = 4096
+interpreter.auto_run = True
+interpreter.force_task_completion = True
+```
+
+## Helpful fields for local models
+
+Local models benefit from more coersion and guidance. This can impact the conversational nature of Open Interpreter when the user needs to add extra context to messages. These fields allow templates to be applied to messages to improve the steering of the language model while maintaining the natural conversation.
 
 `interpreter.user_message_template` allows users to have their message wrapped in a template. This can be helpful steering a language model to a desired behaviour without needing the user to add extra context to their message.
+
 `interpreter.always_apply_user_message_template` has all user messages to be wrapped in the template. If False, only the last User message will be wrapped.
+
 `interpreter.code_output_template` wraps the output from the computer after code is run. This can help with nudging the language model to continue working or to explain outputs.
+
 `interpreter.empty_code_output_template` is the message that is sent to the language model if code execution results in no output.

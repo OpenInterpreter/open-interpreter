@@ -239,6 +239,22 @@ llm:
 
 </CodeGroup>
 
+### Execution Instructions
+
+If `llm.supports_functions` is `False`, this value will be added to the system message. This parameter tells language models how to execute code. This can be set to an empty string or to `False` if you don't want to tell the LLM how to do this.
+
+<CodeGroup>
+
+````python Python
+interpreter.llm.execution_instructions = "To execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language."
+````
+
+````python Profile
+interpreter.llm.execution_instructions = "To execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language."
+````
+
+</CodeGroup>
+
 ### LLM Supports Vision
 
 Inform Open Interpreter that the language model you're using supports vision. Defaults to `False`.
@@ -702,6 +718,22 @@ interpreter.empty_code_output_template = "The code above was executed on my mach
 
 </CodeGroup>
 
+### Code Output Sender
+
+This field determines whether the computer / code output messages are sent as the assistant or as the user. The default is user.
+
+<CodeGroup>
+
+```python Python
+interpreter.code_output_sender = "user"
+```
+
+```python Profile
+interpreter.code_output_sender = "assistant"
+```
+
+</CodeGroup>
+
 # Computer
 
 The `computer` object in `interpreter.computer` is a virtual computer that the AI controls. Its primary interface/function is to execute code and return the output in real-time.
@@ -773,3 +805,4 @@ computer.import_computer_api: True
 ```
 
 </CodeGroup>
+````
