@@ -646,7 +646,6 @@ A template applied to the User's message. `{content}` will be replaced with the 
 
 ````python Python
 interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
-
 ````
 
 ```python Profile
@@ -667,6 +666,22 @@ interpreter.always_apply_user_message_template = False
 
 ```python Profile
 interpreter.always_apply_user_message_template = False
+```
+
+</CodeGroup>
+
+### Code Message Template
+
+A template applied to the Computer's output after running code. `{content}` will be replaced with the computer's output, then sent to the language model.
+
+<CodeGroup>
+
+```python Python
+interpreter.code_output_template = "Code output: {content}\nWhat does this output mean / what's next (if anything, or are we done)?"
+```
+
+```python Profile
+interpreter.code_output_template = "Code output: {content}\nWhat code needs to be run next?"
 ```
 
 </CodeGroup>
