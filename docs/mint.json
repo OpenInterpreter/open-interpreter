@@ -38,6 +38,7 @@
       "pages": [
         "guides/basic-usage",
         "guides/running-locally",
+        "guides/profiles",
         "guides/streaming-response",
         "guides/advanced-terminal-usage",
         "guides/multiple-instances",
@@ -46,9 +47,7 @@
     },
     {
       "group": "Settings",
-      "pages": [
-        "settings/all-settings"
-      ]
+      "pages": ["settings/all-settings"]
     },
     {
       "group": "Language Models",

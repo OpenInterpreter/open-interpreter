@@ -638,6 +638,23 @@ interpreter.messages = messages # A list that resembles the one above
 
 </CodeGroup>
 
+### User Message Template
+
+A template applied to the User's message. `{content}` will be replaced with the user's message, then sent to the language model.
+
+<CodeGroup>
+
+````python Python
+interpreter.user_message_template = "{content} Please send me some code that would be able to answer my question, in the form of ```python\n... the code ...\n``` or ```shell\n... the code ...\n```"
+
+````
+
+```python Profile
+interpreter.user_message_template = "{content}. Be concise, don't include anything unnecessary. Don't use placeholders, I can't edit code."
+```
+
+</CodeGroup>
+
 # Computer
 
 The `computer` object in `interpreter.computer` is a virtual computer that the AI controls. Its primary interface/function is to execute code and return the output in real-time.
