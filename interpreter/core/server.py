@@ -11,8 +11,6 @@
 
 import asyncio
 import json
-import os
-import threading
 
 ###
 from pynput import keyboard
@@ -25,7 +23,6 @@ from typing import Any, Dict, List
 
 from fastapi import FastAPI, Header, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
-from openai import OpenAI
 from pydantic import BaseModel
 from uvicorn import Config, Server
 

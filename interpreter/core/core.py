@@ -142,7 +142,10 @@ class OpenInterpreter:
         self.code_output_sender = code_output_sender
 
     def server(self, *args, **kwargs):
-        server(self, *args, **kwargs)
+        try:
+            server(self, *args, **kwargs)
+        except:
+            display_markdown_message("Missing dependencies for the server, please run `pip install open-interpreter[server]` and try again.")
 
     def local_setup(self):
         """
