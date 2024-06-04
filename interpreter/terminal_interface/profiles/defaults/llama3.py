@@ -151,25 +151,40 @@ Assistant: No further action is required; the provided snippet opens Chrome.
 Now, your turn:"""
 
 
+interpreter.llm.model = "ollama/llama3"
+interpreter.llm.max_tokens = 1000
+interpreter.llm.context_window = 7000
+
+# The below should be pushed into interpreter.llm.load()?
+
+model_name = interpreter.llm.model.replace("ollama/", "")
 try:
     # List out all downloaded ollama models. Will fail if ollama isn't installed
     result = subprocess.run(
         ["ollama", "list"], capture_output=True, text=True, check=True
     )
-    lines = result.stdout.split("\n")
-    names = [
-        line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
-    ]  # Extract names, trim out ":latest", skip header
-
-    if "llama3" not in names:
-        interpreter.display_message(f"\nDownloading llama3...\n")
-        subprocess.run(["ollama", "pull", "llama3"], check=True)
-
-    # Set the model to codestral
-    interpreter.llm.model = f"ollama/llama3"
-    interpreter.display_message(f"> Model set to `llama3`")
-except:
+except Exception as e:
+    print(str(e))
     interpreter.display_message(
-        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
+        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `llama3`.\n"
     )
     exit()
+
+lines = result.stdout.split("\n")
+names = [
+    line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
+]  # Extract names, trim out ":latest", skip header
+
+if model_name not in names:
+    interpreter.display_message(f"\nDownloading {model_name}...\n")
+    subprocess.run(["ollama", "pull", model_name], check=True)
+
+# Send a ping, which will actually load the model
+interpreter.display_message("\n*Loading model...*\n")
+
+old_max_tokens = interpreter.llm.max_tokens
+interpreter.llm.max_tokens = 1
+interpreter.computer.ai.chat("ping")
+interpreter.llm.max_tokens = old_max_tokens
+
+interpreter.display_message("> Model set to `llama3`")

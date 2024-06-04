@@ -1,5 +1,6 @@
 """
 I do not like this and I want to get rid of it lol. Like, what is it doing..?
+I guess it's setting up the model. So maybe this should be like, interpreter.llm.load() soon
 """
 
 import os
@@ -92,7 +93,7 @@ def validate_llm_settings(interpreter):
                 except Exception as e:
                     print(str(e))
                     interpreter.display_message(
-                        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
+                        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `{model_name}`.\n"
                     )
                     exit()
 
@@ -108,14 +109,12 @@ def validate_llm_settings(interpreter):
                     subprocess.run(["ollama", "pull", model_name], check=True)
 
                 # Send a ping, which will actually load the model
-                print("Loading model...")
+                interpreter.display_message("\n*Loading model...*\n")
 
                 old_max_tokens = interpreter.llm.max_tokens
                 interpreter.llm.max_tokens = 1
                 interpreter.computer.ai.chat("ping")
                 interpreter.llm.max_tokens = old_max_tokens
-
-                print("Model loaded.")
 
                 # interpreter.display_message(f"> Model set to `{model_name}`")
 
