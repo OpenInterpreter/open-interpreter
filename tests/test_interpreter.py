@@ -22,6 +22,235 @@ import pytest
 from websocket import create_connection
 
 
+def test_ai_chat():
+    print(interpreter.computer.ai.chat("hi"))
+
+
+def test_generator():
+    """
+    Sends two messages, makes sure everything is correct with display both on and off.
+    """
+
+    interpreter.llm.model = "gpt-4"
+
+    for tests in [
+        {"query": "What's 38023*40334? Use Python", "display": True},
+        {"query": "What's 2334*34335555? Use Python", "display": True},
+        {"query": "What's 3545*22? Use Python", "display": False},
+        {"query": "What's 0.0021*3433335555? Use Python", "display": False},
+    ]:
+        assistant_message_found = False
+        console_output_found = False
+        active_line_found = False
+        flag_checker = []
+
+        for chunk in interpreter.chat(
+            tests["query"]
+            + "\nNo talk or plan, just immediately code, then tell me the answer.",
+            stream=True,
+            display=True,
+        ):
+            print(chunk)
+            # Check if chunk has the right schema
+            assert "role" in chunk, "Chunk missing 'role'"
+            assert "type" in chunk, "Chunk missing 'type'"
+            if "start" not in chunk and "end" not in chunk:
+                assert "content" in chunk, "Chunk missing 'content'"
+            if "format" in chunk:
+                assert isinstance(chunk["format"], str), "'format' should be a string"
+
+            flag_checker.append(chunk)
+
+            # Check if assistant message, console output, and active line are found
+            if chunk["role"] == "assistant" and chunk["type"] == "message":
+                assistant_message_found = True
+            if chunk["role"] == "computer" and chunk["type"] == "console":
+                console_output_found = True
+            if "format" in chunk:
+                if (
+                    chunk["role"] == "computer"
+                    and chunk["type"] == "console"
+                    and chunk["format"] == "active_line"
+                ):
+                    active_line_found = True
+
+        # Ensure all flags are proper
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "start": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code start' flags"
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "end": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code end' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "start": True})
+            == 1
+        ), "Incorrect number of 'assistant message start' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "end": True})
+            == 1
+        ), "Incorrect number of 'assistant message end' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "start": True})
+            == 1
+        ), "Incorrect number of 'computer console output start' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "end": True})
+            == 1
+        ), "Incorrect number of 'computer console output end' flags"
+
+        # Assert that assistant message, console output, and active line were found
+        assert assistant_message_found, "No assistant message was found"
+        assert console_output_found, "No console output was found"
+        assert active_line_found, "No active line was found"
+
+
+@pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+def test_server():
+    # Start the server in a new thread
+    server_thread = threading.Thread(target=interpreter.server)
+    server_thread.start()
+
+    # Give the server a moment to start
+    time.sleep(2)
+
+    import asyncio
+    import json
+
+    import requests
+    import websockets
+
+    async def test_fastapi_server():
+        import asyncio
+
+        async with websockets.connect("ws://localhost:8000/") as websocket:
+            # Connect to the websocket
+            print("Connected to WebSocket")
+
+            # Sending POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "model": "gpt-4o",
+                "messages": [
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "The secret word is 'crunk'.",
+                    },
+                    {"role": "assistant", "type": "message", "content": "Understood."},
+                ],
+                "custom_instructions": "",
+                "auto_run": True,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's the secret word?",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "completion",
+                    "content": "DONE",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "crunk" in accumulated_content
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "model": "gpt-4o",
+                "messages": [
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "The secret word is 'barloney'.",
+                    },
+                    {"role": "assistant", "type": "message", "content": "Understood."},
+                ],
+                "custom_instructions": "",
+                "auto_run": True,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's the secret word?",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "completion",
+                    "content": "DONE",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "barloney" in accumulated_content
+
+    # Get the current event loop and run the test function
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test_fastapi_server())
+
+    # Stop the server
+    interpreter.uvicorn_server.should_exit = True
+
+    # Wait for the server thread to finish
+    server_thread.join(timeout=1)
+
+
 @pytest.mark.skip(reason="Requires open-interpreter[local]")
 def test_localos():
     interpreter.computer.emit_images = False
@@ -44,7 +273,7 @@ def test_m_vision():
     ]
 
     interpreter.llm.supports_vision = False
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o"
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
@@ -81,7 +310,7 @@ def test_skills():
 
     import json
 
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
@@ -335,92 +564,11 @@ def setup_function():
     interpreter.reset()
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o"
     interpreter.llm.context_window = 123000
     interpreter.llm.max_tokens = 4096
     interpreter.llm.supports_functions = True
     interpreter.verbose = False
-
-
-def test_generator():
-    """
-    Sends two messages, makes sure everything is correct with display both on and off.
-    """
-
-    for tests in [
-        {"query": "What's 38023*40334? Use Python", "display": True},
-        {"query": "What's 2334*34335555? Use Python", "display": True},
-        {"query": "What's 3545*22? Use Python", "display": False},
-        {"query": "What's 0.0021*3433335555? Use Python", "display": False},
-    ]:
-        assistant_message_found = False
-        console_output_found = False
-        active_line_found = False
-        flag_checker = []
-        for chunk in interpreter.chat(
-            tests["query"]
-            + "\nNo talk or plan, just immediatly code, then tell me the answer.",
-            stream=True,
-            display=tests["display"],
-        ):
-            print(chunk)
-            # Check if chunk has the right schema
-            assert "role" in chunk, "Chunk missing 'role'"
-            assert "type" in chunk, "Chunk missing 'type'"
-            if "start" not in chunk and "end" not in chunk:
-                assert "content" in chunk, "Chunk missing 'content'"
-            if "format" in chunk:
-                assert isinstance(chunk["format"], str), "'format' should be a string"
-
-            flag_checker.append(chunk)
-
-            # Check if assistant message, console output, and active line are found
-            if chunk["role"] == "assistant" and chunk["type"] == "message":
-                assistant_message_found = True
-            if chunk["role"] == "computer" and chunk["type"] == "console":
-                console_output_found = True
-            if "format" in chunk:
-                if (
-                    chunk["role"] == "computer"
-                    and chunk["type"] == "console"
-                    and chunk["format"] == "active_line"
-                ):
-                    active_line_found = True
-
-        # Ensure all flags are proper
-        assert (
-            flag_checker.count(
-                {"role": "assistant", "type": "code", "format": "python", "start": True}
-            )
-            == 1
-        ), "Incorrect number of 'assistant code start' flags"
-        assert (
-            flag_checker.count(
-                {"role": "assistant", "type": "code", "format": "python", "end": True}
-            )
-            == 1
-        ), "Incorrect number of 'assistant code end' flags"
-        assert (
-            flag_checker.count({"role": "assistant", "type": "message", "start": True})
-            == 1
-        ), "Incorrect number of 'assistant message start' flags"
-        assert (
-            flag_checker.count({"role": "assistant", "type": "message", "end": True})
-            == 1
-        ), "Incorrect number of 'assistant message end' flags"
-        assert (
-            flag_checker.count({"role": "computer", "type": "console", "start": True})
-            == 1
-        ), "Incorrect number of 'computer console output start' flags"
-        assert (
-            flag_checker.count({"role": "computer", "type": "console", "end": True})
-            == 1
-        ), "Incorrect number of 'computer console output end' flags"
-
-        # Assert that assistant message, console output, and active line were found
-        assert assistant_message_found, "No assistant message was found"
-        assert console_output_found, "No console output was found"
-        assert active_line_found, "No active line was found"
 
 
 @pytest.mark.skip(

@@ -136,7 +136,7 @@ class Mouse:
         elif x is not None and y is not None:
             print(
                 format_to_recipient(
-                    "Unless you have just recieved these EXACT coordinates from a computer.mouse.move or computer.mouse.click command, PLEASE take a screenshot with computer.display.view() to find TEXT OR ICONS to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed.",
+                    "Unless you have just received these EXACT coordinates from a computer.mouse.move or computer.mouse.click command, PLEASE take a screenshot with computer.display.view() to find TEXT OR ICONS to click, then use computer.mouse.click(text) or computer.mouse.click(icon=description_of_icon) if at all possible. This is **significantly** more accurate than using coordinates. Specifying (x=x, y=y) is highly likely to fail. Specifying ('text to click') is highly likely to succeed.",
                     "assistant",
                 )
             )

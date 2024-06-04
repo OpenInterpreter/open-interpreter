@@ -5,12 +5,16 @@ import string
 
 from html2image import Html2Image
 
+from ....core.utils.lazy_import import lazy_import
+
+html2image = lazy_import("html2image")
+
 from ....terminal_interface.utils.local_storage_path import get_storage_path
 
 
 def html_to_png_base64(code):
     # Convert the HTML into an image using html2image
-    hti = Html2Image()
+    hti = html2image.Html2Image()
 
     # Generate a random filename for the temporary image
     temp_filename = "".join(random.choices(string.digits, k=10)) + ".png"

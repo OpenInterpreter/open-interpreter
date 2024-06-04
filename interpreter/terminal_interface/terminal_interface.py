@@ -45,7 +45,7 @@ except:
 
 
 def terminal_interface(interpreter, message):
-    # Auto run and offline (this.. this isnt right) don't display messages.
+    # Auto run and offline (this.. this isn't right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
         interpreter_intro_message = [

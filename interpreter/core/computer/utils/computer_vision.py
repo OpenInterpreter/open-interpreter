@@ -11,16 +11,7 @@ pytesseract = lazy_import("pytesseract")
 
 
 def pytesseract_get_text(img):
-    # Convert PIL Image to NumPy array
-    img_array = np.array(img)
-
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
-
-    # Use pytesseract to get the text from the image
-    text = pytesseract.image_to_string(gray)
-
-    return text
+    return pytesseract.image_to_string(img)
 
 
 def pytesseract_get_text_bounding_boxes(img):

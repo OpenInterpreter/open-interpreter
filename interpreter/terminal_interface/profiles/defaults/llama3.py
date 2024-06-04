@@ -1,6 +1,6 @@
-from interpreter import interpreter
+import subprocess
 
-interpreter.local_setup()  # Opens a wizard that lets terminal users pick a local model
+from interpreter import interpreter
 
 # Set the system message to a minimal version for all local models.
 interpreter.system_message = """
@@ -129,63 +129,13 @@ interpreter.user_message_template = "{content}. If my question must be solved by
 interpreter.user_message_template = "I'm trying to help someone use their computer. Here's the last thing they said: '{content}'. What is some code that might be able to answer that question / what should I say to them? DONT USE PLACEHOLDERS! It needs to just work."
 # interpreter.user_message_template = "{content}"
 interpreter.llm.execution_instructions = False
-interpreter.auto_run = True
+interpreter.auto_run = False
 
 # Set offline for all local models
 interpreter.offline = True
 
 
 ##### FOR LLAMA3
-
-interpreter.system_message = """You are an AI assistant specialized in coding and automation, providing concise code snippets and friendly responses to enhance the user's productivity."""
-
-interpreter.messages = [
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Run a directory listing in the current folder.",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Absolutely, fetching the directory listing now.",
-    },
-    {"role": "assistant", "type": "code", "format": "shell", "content": "ls -la"},
-    {
-        "role": "computer",
-        "type": "console",
-        "format": "output",
-        "content": "total 48\ndrwxr-xr-x  12 user  staff  384 Jan 12 12:34 .\ndrwxr-xr-x   6 user  staff  192 Jan 12 12:34 ..",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Here's the directory listing:\n\ntotal 48\ndrwxr-xr-x  12 user  staff  384 Jan 12 12:34 .\ndrwxr-xr-x   6 user  staff  192 Jan 12 12:34 ..\n\nWhat's next on your agenda?",
-    },
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Can you multiply 2380 by 3875 for me?",
-    },
-    {"role": "assistant", "type": "code", "format": "python", "content": "2380*3875"},
-    {"role": "computer", "type": "console", "format": "output", "content": "9222500"},
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "The multiplication of 2380 by 3875 gives you 9222500. Do you need this data for anything else?",
-    },
-    {
-        "role": "user",
-        "type": "message",
-        "content": "Great, I'll talk to you in an hour!",
-    },
-    {
-        "role": "assistant",
-        "type": "message",
-        "content": "Alright, I'll be here. Talk to you soon!",
-    },
-]
-
 interpreter.messages = []
 interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
 
@@ -200,4 +150,26 @@ Assistant: No further action is required; the provided snippet opens Chrome.
 
 Now, your turn:"""
 
-interpreter.auto_run = False
+
+try:
+    # List out all downloaded ollama models. Will fail if ollama isn't installed
+    result = subprocess.run(
+        ["ollama", "list"], capture_output=True, text=True, check=True
+    )
+    lines = result.stdout.split("\n")
+    names = [
+        line.split()[0].replace(":latest", "") for line in lines[1:] if line.strip()
+    ]  # Extract names, trim out ":latest", skip header
+
+    if "llama3" not in names:
+        interpreter.display_message(f"\nDownloading llama3...\n")
+        subprocess.run(["ollama", "pull", "llama3"], check=True)
+
+    # Set the model to codestral
+    interpreter.llm.model = f"ollama/llama3"
+    interpreter.display_message(f"> Model set to `llama3`")
+except:
+    interpreter.display_message(
+        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `codestral`.\n"
+    )
+    exit()

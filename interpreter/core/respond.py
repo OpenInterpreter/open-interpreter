@@ -1,7 +1,9 @@
 import json
+import os
 import re
 import traceback
 
+os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
 from ..terminal_interface.utils.display_markdown_message import display_markdown_message
@@ -31,6 +33,13 @@ def respond(interpreter):
         if interpreter.custom_instructions:
             system_message += "\n\n" + interpreter.custom_instructions
 
+        # Add computer API system message
+        if interpreter.computer.import_computer_api:
+            if interpreter.computer.system_message not in system_message:
+                system_message = (
+                    system_message + "\n\n" + interpreter.computer.system_message
+                )
+
         # Storing the messages so they're accessible in the interpreter's computer
         if interpreter.sync_computer:
             output = interpreter.computer.run(
@@ -59,7 +68,7 @@ def respond(interpreter):
                     "content": force_task_completion_message,
                 }
             )
-            # Yield two newlines to seperate the LLMs reply from previous messages.
+            # Yield two newlines to separate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
             insert_force_task_completion_message = False
 
@@ -255,6 +264,8 @@ def respond(interpreter):
                     "content": None,
                 }
 
+            except KeyboardInterrupt:
+                break  # It's fine.
             except:
                 yield {
                     "role": "computer",

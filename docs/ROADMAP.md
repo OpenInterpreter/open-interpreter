@@ -48,14 +48,14 @@
 
 # What's in our scope?
 
-Open Interpreter contains two projects which support eachother, whose scopes are as follows:
+Open Interpreter contains two projects which support each other, whose scopes are as follows:
 
 1. `core`, which is dedicated to figuring out how to get LLMs to safely control a computer. Right now, this means creating a real-time code execution environment that language models can operate.
 2. `terminal_interface`, a text-only way for users to direct the code-running LLM running inside `core`. This includes functions for connecting the `core` to various local and hosted LLMs (which the `core` itself should not know about).
 
 # What's not in our scope?
 
-Our guiding philosphy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
+Our guiding philosophy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
 
 1. Additional functions in `core` beyond running code.
 2. More complex interactions with the LLM in `terminal_interface` beyond text (but file paths to more complex inputs, like images or video, can be included in that text).
