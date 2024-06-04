@@ -82,10 +82,10 @@
         {
           "group": "Local Providers",
           "pages": [
-            "language-models/local-models/lm-studio",
+            "language-models/local-models/ollama",
             "language-models/local-models/llamafile",
             "language-models/local-models/janai",
-            "language-models/local-models/ollama",
+            "language-models/local-models/lm-studio",
             "language-models/local-models/custom-endpoint",
             "language-models/local-models/best-practices"
           ]
