@@ -4,25 +4,52 @@ title: Running Locally
 
 Open Interpreter can be run fully locally.
 
-Users need to install software to run local LLMs. Open Interpreter supports multiple local model providers such as [Ollama](https://www.ollama.com/), [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [LM Studio](https://lmstudio.ai/), and [Jan](https://jan.ai/).
-
-## Local Setup Menu
-
-A Local Setup Menu was created to simplify the process of using OI locally. To access this menu, run the command `interpreter --local`.
-
-### Provider
-
-Select your chosen local model provider from the list of options.
-
-It is possible to use a provider other than the ones listed. Instead of running `--local` you will set the `--api_base` flag to set a [custom endpoint](/language-models/local-models/custom-endpoint).
-
-### Model
-
-Most providers will require the user to state the model they are using. There are Provider specific instructions shown to the user.
-
-It is possible to set the model without going through the Local Setup Menu by setting the `--model` flag to select a [model](/settings/all-settings#model-selection).
+Users need to install software to run local LLMs. Open Interpreter supports multiple local model providers such as [Ollama](https://www.ollama.com/), [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Jan](https://jan.ai/), and [LM Studio](https://lmstudio.ai/).
 
 <Tip>
   Local models perform better with extra guidance and direction. You can improve
   performance for your use-case by creating a new [Profile](/guides/profiles).
 </Tip>
+
+## Terminal Usage
+
+### Local Setup Menu
+
+A Local Setup Menu was created to simplify the process of using OI locally. To access this menu, run the command `interpreter --local`.
+
+Select your chosen local model provider from the list of options.
+
+Most providers will require the user to state the model they are using. Provider specific instructions are shown to the user in the menu.
+
+### Custom Local
+
+If you want to use a provider other than the ones listed, you will set the `--api_base` flag to set a [custom endpoint](/language-models/local-models/custom-endpoint).
+
+You will also need to set the model by passing in the `--model` flag to select a [model](/settings/all-settings#model-selection).
+
+```python
+interpreter --api_base "http://localhost:11434" --model ollama/codestral
+```
+
+<Info>
+  Other terminal flags are explained in [Settings](/settings/all-settings).
+</Info>
+
+## Python Usage
+
+In order to have a Python script use Open Interpreter locally, some fields need to be set
+
+```python
+from interpreter import interpreter
+
+interpreter.offline = True
+interpreter.llm.model = "ollama/codestral"
+interpreter.llm.api_base = "http://localhost:11434"
+
+interpreter.chat("how many files are on my desktop?")
+```
+
+<Info>
+  Other congifuration settings are explained in
+  [Settings](/settings/all-settings).
+</Info>
