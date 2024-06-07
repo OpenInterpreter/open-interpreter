@@ -18,12 +18,7 @@ interpreter.chat()
 
 </CodeGroup>
 
-This will default to `gpt-4`, which is the most capable publicly available model for code interpretation (Open Interpreter was designed to be used with `gpt-4`).
-
-<Info>
-  Trouble accessing `gpt-4`? Read our [gpt-4 setup
-  article](/language-model-setup/hosted-models/gpt-4-setup).
-</Info>
+This will default to `gpt-4-turbo`, which is the most capable publicly available model for code interpretation (Open Interpreter was designed to be used with `gpt-4`).
 
 To run a specific model from OpenAI, set the `model` flag:
 
@@ -49,17 +44,11 @@ We support any model on [OpenAI's models page:](https://platform.openai.com/docs
 <CodeGroup>
 
 ```bash Terminal
-interpreter --model gpt-4
-interpreter --model gpt-4-32k
-interpreter --model gpt-3.5-turbo
-interpreter --model gpt-3.5-turbo-16k
+interpreter --model gpt-4o
 ```
 
 ```python Python
-interpreter.llm.model = "gpt-4"
-interpreter.llm.model = "gpt-4-32k"
-interpreter.llm.model = "gpt-3.5-turbo"
-interpreter.llm.model = "gpt-3.5-turbo-16k"
+interpreter.llm.model = "gpt-4o"
 ```
 
 </CodeGroup>
