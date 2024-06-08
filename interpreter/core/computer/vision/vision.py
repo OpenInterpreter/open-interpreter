@@ -19,7 +19,7 @@ class Vision:
         self.tokenizer = None  # Will load upon first use
 
     def load(self):
-        print("\n  *Loading Moondream model...*\n")
+        print("\nLoading Moondream (vision)...\n")
         try:
             with contextlib.redirect_stdout(
                 open(os.devnull, "w")

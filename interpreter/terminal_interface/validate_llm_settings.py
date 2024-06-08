@@ -1,6 +1,6 @@
 """
 I do not like this and I want to get rid of it lol. Like, what is it doing..?
-I guess it's setting up the model. So maybe this should be like, interpreter.llm.load() soon
+I guess it's setting up the model. So maybe this should be like, interpreter.llm.load() soon!!!!!!!
 """
 
 import os
@@ -82,41 +82,6 @@ def validate_llm_settings(interpreter):
                     interpreter.llm.api_key = response
                     time.sleep(2)
                     break
-
-            elif interpreter.llm.model.startswith("ollama/"):
-                model_name = interpreter.llm.model.replace("ollama/", "")
-                try:
-                    # List out all downloaded ollama models. Will fail if ollama isn't installed
-                    result = subprocess.run(
-                        ["ollama", "list"], capture_output=True, text=True, check=True
-                    )
-                except Exception as e:
-                    print(str(e))
-                    interpreter.display_message(
-                        f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `{model_name}`.\n"
-                    )
-                    exit()
-
-                lines = result.stdout.split("\n")
-                names = [
-                    line.split()[0].replace(":latest", "")
-                    for line in lines[1:]
-                    if line.strip()
-                ]  # Extract names, trim out ":latest", skip header
-
-                if model_name not in names:
-                    interpreter.display_message(f"\nDownloading {model_name}...\n")
-                    subprocess.run(["ollama", "pull", model_name], check=True)
-
-                # Send a ping, which will actually load the model
-                interpreter.display_message("\n*Loading model...*\n")
-
-                old_max_tokens = interpreter.llm.max_tokens
-                interpreter.llm.max_tokens = 1
-                interpreter.computer.ai.chat("ping")
-                interpreter.llm.max_tokens = old_max_tokens
-
-                # interpreter.display_message(f"> Model set to `{model_name}`")
 
             # This is a model we don't have checks for yet.
             break

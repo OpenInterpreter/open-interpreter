@@ -6,9 +6,6 @@ Images sent to the model will be described with `moondream`. The model will be i
 
 from interpreter import interpreter
 
-# Local setup
-interpreter.local_setup()
-
 interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
 
 User: Open the chrome app.
@@ -68,6 +65,14 @@ interpreter.code_output_template = '''I executed that code. This was the output:
 interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. What's next (if anything, or are we done?)"
 interpreter.code_output_sender = "user"
 
+# LLM settings
+interpreter.llm.model = "ollama/llama3"
+interpreter.llm.supports_functions = False
+interpreter.llm.execution_instructions = False
+interpreter.llm.max_tokens = 1000
+interpreter.llm.context_window = 7000
+interpreter.llm.load()  # Loads Ollama models
+
 # Computer settings
 interpreter.computer.import_computer_api = True
 interpreter.computer.system_message = ""  # The default will explain how to use the full Computer API, and append this to the system message. For local models, we want more control, so we set this to "". The system message will ONLY be what's above ^
@@ -81,8 +86,6 @@ interpreter.display_message(
     "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
 )
 interpreter.display_message(
-    "\n**Note:** Codestral is a relatively weak model, so OS mode is highly experimental. Try using a more powerful model for OS mode with `interpreter --os`."
+    "\n**Note:** Llama-3 is a relatively weak model, so OS mode is highly experimental. Try using a more powerful model for OS mode with `interpreter --os`."
 )
-interpreter.display_message(
-    f"> Model set to `{interpreter.llm.model}`, experimental OS control enabled"
-)
+interpreter.display_message("> Model set to `llama3`, experimental OS control enabled")

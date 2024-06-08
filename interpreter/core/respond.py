@@ -198,7 +198,7 @@ def respond(interpreter):
                     code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
                     if any(
-                        code.split("\n")[-1].startswith(text)
+                        code.strip().split("\n")[-1].startswith(text)
                         for text in [
                             "computer.display.view",
                             "computer.display.screenshot",

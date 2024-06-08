@@ -242,9 +242,9 @@ if not interpreter.auto_run:
 #     if chunk.get("format") != "active_line":
 #         print(chunk.get("content"))
 
+interpreter.auto_run = True
 
-if not interpreter.auto_run:
-    interpreter.display_message(
-        "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
-    )
-    print("")  # < - Aesthetic choice
+interpreter.display_message(
+    "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+)
+print("")  # < - Aesthetic choice
