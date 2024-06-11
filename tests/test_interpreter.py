@@ -580,7 +580,7 @@ def test_long_message():
             "role": "user",
             "type": "message",
             "content": "ALKI" * 20000
-            + "\nwhat are the four characters I just sent you? dont run ANY code, just tell me the characters. DO NOT RUN CODE. DO NOT PLAN. JUST TELL ME THE CHARACTERS RIGHT NOW. ONLY respond with the 4 characters, NOTHING else. The first 4 characters of your response should be the 4 characters I sent you.",
+            + "\nwhat are the four characters I just sent you? don't run ANY code, just tell me the characters. DO NOT RUN CODE. DO NOT PLAN. JUST TELL ME THE CHARACTERS RIGHT NOW. ONLY respond with the 4 characters, NOTHING else. The first 4 characters of your response should be the 4 characters I sent you.",
         }
     ]
     interpreter.llm.context_window = 300

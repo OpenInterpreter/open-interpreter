@@ -205,7 +205,7 @@ def local_setup(interpreter, provider=None, model=None):
     if selected_model == "LM Studio":
         interpreter.display_message(
             """
-    To use use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
+    To use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
 
     1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/), then start it.
     2. Select a language model then click **Download**.
@@ -309,7 +309,7 @@ def local_setup(interpreter, provider=None, model=None):
     elif selected_model == "Jan":
         interpreter.display_message(
             """
-    To use use Open Interpreter with **Jan**, you will need to run **Jan** in the background.
+    To use Open Interpreter with **Jan**, you will need to run **Jan** in the background.
 
     1. Download **Jan** from [https://jan.ai/](https://jan.ai/), then start it.
     2. Select a language model from the "Hub" tab, then click **Download**.
