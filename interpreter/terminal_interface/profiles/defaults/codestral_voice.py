@@ -5,6 +5,7 @@ Images sent to the model will be described with `moondream`.
 """
 
 from dimits import Dimits
+import threading
 
 from interpreter import interpreter
 
@@ -79,11 +80,18 @@ interpreter.display_message(
 # Initialize Dimits with the desired voice model
 dt = Dimits('en_US-amy-medium', verbose=False)      
 
+# Function to handle text-to-speech in a separate thread
+def text_to_speech_non_blocking(text):
+    dt.text_2_speech(text, engine="aplay")
+
 # Run the interpreter
 for chunk in interpreter.chat(display=True, stream=True):
     if chunk["type"] == "message":
         if "end" in chunk:
             text = interpreter.messages[-1]["content"].strip()
 
+            # Convert text to audio in a non-blocking way
+            tts_thread = threading.Thread(target=text_to_speech_non_blocking, args=(text,))
+            tts_thread.start()
             # Convert text to audio and play it using the aplay engine
-            dt.text_2_speech(text, engine="aplay")
+            #dt.text_2_speech(text, engine="aplay")
