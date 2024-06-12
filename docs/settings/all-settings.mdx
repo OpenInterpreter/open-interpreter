@@ -299,7 +299,7 @@ If you use `plt.show()`, the resulting image will be sent to you. However, if yo
 ```
 
 ```yaml Profile
-force_task_completion: True
+loop: True
 
 llm:
   model: "gpt-4-vision-preview"
@@ -400,15 +400,15 @@ Runs Open Interpreter in a loop, requiring it to admit to completing or failing 
 <CodeGroup>
 
 ```bash Terminal
-interpreter --force_task_completion
+interpreter --loop
 ```
 
 ```python Python
-interpreter.force_task_completion = True
+interpreter.loop = True
 ```
 
 ```yaml Profile
-force_task_completion: true
+loop: true
 ```
 
 </CodeGroup>

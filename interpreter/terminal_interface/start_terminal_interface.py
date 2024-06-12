@@ -138,11 +138,10 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "max_output"},
         },
         {
-            "name": "force_task_completion",
-            "nickname": "fc",
+            "name": "loop",
             "help_text": "runs OI in a loop, requiring it to admit to completing/failing task",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "force_task_completion"},
+            "attribute": {"object": interpreter, "attr_name": "loop"},
         },
         {
             "name": "disable_telemetry",

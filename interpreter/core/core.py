@@ -55,9 +55,9 @@ class OpenInterpreter:
         max_output=2800,
         safe_mode="off",
         shrink_images=False,
-        force_task_completion=False,
-        force_task_completion_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
-        force_task_completion_breakers=[
+        loop=False,
+        loop_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
+        loop_breakers=[
             "The task is done.",
             "The task is impossible.",
             "Let me know what you'd like to do next.",
@@ -105,9 +105,9 @@ class OpenInterpreter:
         self.contribute_conversation = contribute_conversation
 
         # Loop messages
-        self.force_task_completion = force_task_completion
-        self.force_task_completion_message = force_task_completion_message
-        self.force_task_completion_breakers = force_task_completion_breakers
+        self.loop = loop
+        self.loop_message = loop_message
+        self.loop_breakers = loop_breakers
 
         # Conversation history
         self.conversation_history = conversation_history
@@ -145,7 +145,9 @@ class OpenInterpreter:
         try:
             server(self, *args, **kwargs)
         except:
-            display_markdown_message("Missing dependencies for the server, please run `pip install open-interpreter[server]` and try again.")
+            display_markdown_message(
+                "Missing dependencies for the server, please run `pip install open-interpreter[server]` and try again."
+            )
 
     def local_setup(self):
         """

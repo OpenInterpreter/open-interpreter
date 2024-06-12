@@ -277,11 +277,11 @@ def test_m_vision():
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
-    interpreter.force_task_completion = True
+    interpreter.loop = True
 
     interpreter.chat(messages)
 
-    interpreter.force_task_completion = False
+    interpreter.loop = False
     import time
 
     time.sleep(10)
@@ -632,11 +632,11 @@ def test_vision():
     interpreter.llm.supports_functions = False
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
-    interpreter.force_task_completion = True
+    interpreter.loop = True
 
     interpreter.chat(messages)
 
-    interpreter.force_task_completion = False
+    interpreter.loop = False
 
 
 def test_multiple_instances():
