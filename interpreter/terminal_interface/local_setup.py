@@ -219,7 +219,7 @@ def local_setup(interpreter, provider=None, model=None):
         )
         interpreter.llm.supports_functions = False
         interpreter.llm.api_base = "http://localhost:1234/v1"
-        interpreter.llm.api_key = "x"
+        interpreter.llm.api_key = "dummy"
 
     elif selected_model == "Ollama":
         try:
@@ -322,7 +322,7 @@ def local_setup(interpreter, provider=None, model=None):
     """
         )
         interpreter.llm.api_base = "http://localhost:1337/v1"
-        time.sleep(1)
+        # time.sleep(1)
 
         # Prompt the user to enter the name of the model running on Jan
         model_name_question = [
@@ -338,8 +338,9 @@ def local_setup(interpreter, provider=None, model=None):
 
         jan_model_name = model_name_answer["jan_model_name"]
         interpreter.llm.model = jan_model_name
+        interpreter.llm.api_key = "dummy"
         interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
-        time.sleep(1)
+        # time.sleep(1)
 
     elif selected_model == "Llamafile":
         if platform.system() == "Darwin":  # Check if the system is MacOS
@@ -411,6 +412,7 @@ def local_setup(interpreter, provider=None, model=None):
 
         # Set flags for Llamafile to work with interpreter
         interpreter.llm.model = "openai/local"
+        interpreter.llm.api_key = "dummy"
         interpreter.llm.temperature = 0
         interpreter.llm.api_base = "http://localhost:8080/v1"
         interpreter.llm.supports_functions = False
