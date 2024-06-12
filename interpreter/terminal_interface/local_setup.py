@@ -8,6 +8,7 @@ import time
 
 import inquirer
 import psutil
+import requests
 import wget
 
 
@@ -324,11 +325,20 @@ def local_setup(interpreter, provider=None, model=None):
         interpreter.llm.api_base = "http://localhost:1337/v1"
         # time.sleep(1)
 
-        # Prompt the user to enter the name of the model running on Jan
+        # Send a GET request to the Jan API to get the list of models
+        response = requests.get(f"{interpreter.llm.api_base}/models")
+        models = response.json()["data"]
+
+        # Extract the model ids from the response
+        model_ids = [model["id"] for model in models]
+        model_ids.insert(0, ">> Type Custom Model ID")
+
+        # Prompt the user to select a model from the list
         model_name_question = [
-            inquirer.Text(
+            inquirer.List(
                 "jan_model_name",
-                message="Enter the id of the model you have running on Jan",
+                message="Select the model you have running on Jan",
+                choices=model_ids,
             ),
         ]
         model_name_answer = inquirer.prompt(model_name_question)
@@ -337,6 +347,9 @@ def local_setup(interpreter, provider=None, model=None):
             exit()
 
         jan_model_name = model_name_answer["jan_model_name"]
+        if jan_model_name == ">> Type Custom Model ID":
+            jan_model_name = input("Enter the custom model ID: ")
+
         interpreter.llm.model = jan_model_name
         interpreter.llm.api_key = "dummy"
         interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
