@@ -1,12 +1,10 @@
 """
-This is an Open Interpreter profile. It configures Open Interpreter to run `llama3` using Ollama.
-
-Images sent to the model will be described with `moondream`. The model will be instructed how to control your mouse and keyboard.
+This is an Open Interpreter profile. It configures Open Interpreter to act like an assistant.
 """
 
 from interpreter import interpreter
 
-interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
+interpreter.system_message = """You are an AI assistant that writes short markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. You send code blocks for individual steps— not the entire task. For example:
 
 User: Open the chrome app.
 Assistant: On it. 
@@ -55,8 +53,8 @@ computer.files.edit("/path/to/file.txt", "original text", "new text")
 ```python
 # Create a calendar event
 computer.calendar.create_event(title="Meeting", start_date=datetime.datetime.now(), notes="Discuss project")
-# Get events for today
-computer.calendar.get_events(datetime.date.today())
+# Get events for today as a string
+print(computer.calendar.get_events(datetime.date.today()))
 # Delete a specific event
 computer.calendar.delete_event("Meeting", datetime.datetime.now())
 ```
@@ -104,14 +102,6 @@ interpreter.code_output_template = '''I executed that code. This was the output:
 interpreter.empty_code_output_template = "The code above was executed on my machine. It produced no text output. What's next (if anything, or are we done?)"
 interpreter.code_output_sender = "user"
 
-# LLM settings
-interpreter.llm.model = "ollama/codestral"
-interpreter.llm.supports_functions = False
-interpreter.llm.execution_instructions = False
-interpreter.llm.max_tokens = 1000
-interpreter.llm.context_window = 7000
-interpreter.llm.load()  # Loads Ollama models
-
 # Computer settings
 interpreter.computer.import_computer_api = True
 interpreter.computer.system_message = ""  # The default will explain how to use the full Computer API, and append this to the system message. For local models, we want more control, so we set this to "". The system message will ONLY be what's above ^
@@ -121,12 +111,4 @@ interpreter.auto_run = True
 interpreter.offline = True
 
 # Final message
-interpreter.display_message(
-    "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
-)
-interpreter.display_message(
-    "\n**Note:** Codestral is a relatively weak model, so assistant mode is highly experimental. Try using a more powerful model for OS mode with `interpreter --os`."
-)
-interpreter.display_message(
-    "> Model set to `codestral`, experimental assistant mode enabled"
-)
+interpreter.display_message("> Assistant mode enabled")

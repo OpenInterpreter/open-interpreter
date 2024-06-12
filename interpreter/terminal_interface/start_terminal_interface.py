@@ -206,6 +206,11 @@ def start_terminal_interface(interpreter):
             "type": bool,
         },
         {
+            "name": "assistant",
+            "help_text": "shortcut for `interpreter --profile assistant.py`",
+            "type": bool,
+        },
+        {
             "name": "llama3",
             "help_text": "shortcut for `interpreter --profile llama3`",
             "type": bool,
@@ -373,6 +378,9 @@ def start_terminal_interface(interpreter):
             args.profile = "codestral-vision.py"
         if args.os:
             args.profile = "codestral-os.py"
+
+    if args.assistant:
+        args.profile = "assistant.py"
 
     if args.llama3:
         args.profile = "llama3.py"
