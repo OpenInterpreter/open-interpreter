@@ -47,7 +47,7 @@ class Vision:
                 )
                 return True
         except ImportError:
-            self.computer.interpreter.display_message(
+            print(
                 "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
             )
             return False
