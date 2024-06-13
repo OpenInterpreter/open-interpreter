@@ -4,123 +4,112 @@ import whisper
 import time
 import threading
 
-# Load Whisper model
-model = whisper.load_model("base.en")
+class LiveTranscriber:
+    def __init__(self, model_name="base", rate=16000, chunk=1024, buffer_seconds=5, silence_threshold=500, silence_duration=3):
+        self.model = whisper.load_model(model_name)
+        self.rate = rate
+        self.chunk = chunk
+        self.buffer_seconds = buffer_seconds
+        self.silence_threshold = silence_threshold
+        self.silence_duration = silence_duration
+        self.buffer = []
+        self.pause_event = threading.Event()
+        self.stop_event = threading.Event()
+        self.buffer_lock = threading.Lock()
+        self.p = pyaudio.PyAudio()
+        self.stream = self.p.open(format=pyaudio.paInt16,
+                                  channels=1,
+                                  rate=self.rate,
+                                  input=True,
+                                  frames_per_buffer=self.chunk)
+        self.recording_thread = threading.Thread(target=self.record_audio)
+        self.transcribing_thread = threading.Thread(target=self.transcribe_audio)
+        self.transcription_generator = self._transcription_generator()
 
-# Parameters for recording
-CHUNK = 256  # Buffer size
-FORMAT = pyaudio.paInt16  # Audio format
-CHANNELS = 1  # Number of audio channels
-RATE = 16000  # Sample rate
-BUFFER_SECONDS = 5  # Duration of audio to buffer for each transcription
-SILENCE_THRESHOLD = 500  # Threshold for considering silence
-SILENCE_DURATION = 3  # Duration of silence to trigger pause
+    def start(self):
+        self.recording_thread.start()
+        self.transcribing_thread.start()
 
-# Initialize PyAudio
-p = pyaudio.PyAudio()
+    def stop(self):
+        self.stop_event.set()
+        self.recording_thread.join()
+        self.transcribing_thread.join()
+        self.stream.stop_stream()
+        self.stream.close()
+        self.p.terminate()
+        print("Stopped successfully.")
 
-# Open a stream
-stream = p.open(format=FORMAT,
-                channels=CHANNELS,
-                rate=RATE,
-                input=True,
-                frames_per_buffer=CHUNK)
+    def record_audio(self):
+        print("Recording...")
+        try:
+            while not self.stop_event.is_set():
+                if self.pause_event.is_set():
+                    time.sleep(0.1)
+                    continue
 
-# Thread-safe buffer for audio data
-buffer = []
-pause_event = threading.Event()  # Event to control pausing
-buffer_lock = threading.Lock()
+                data = self.stream.read(self.chunk, exception_on_overflow=False)
+                with self.buffer_lock:
+                    self.buffer.append(data)
 
-def record_audio():
-    global buffer
-    print("Recording...")
-    silence_start = None
-    try:
-        while True:
-            if pause_event.is_set():
+                if len(self.buffer) > int(self.rate / self.chunk * self.buffer_seconds):
+                    with self.buffer_lock:
+                        self.buffer = self.buffer[-int(self.rate / self.chunk * self.buffer_seconds):]
+
+        except Exception as e:
+            print(f"Recording error: {e}")
+        finally:
+            self.stop_event.set()
+
+    def transcribe_audio(self):
+        try:
+            for transcription in self.transcription_generator:
+                yield transcription
+                #print("Transcription:", transcription)
+        except Exception as e:
+            print(f"Transcription error: {e}")
+        finally:
+            self.stop_event.set()
+
+    def _transcription_generator(self):
+        while not self.stop_event.is_set():
+            if self.pause_event.is_set():
                 time.sleep(0.1)
                 continue
 
-            data = stream.read(CHUNK)
-            audio_chunk = np.frombuffer(data, dtype=np.int16)
-            with buffer_lock:
-                buffer.append(data)
+            time.sleep(self.buffer_seconds)
+            with self.buffer_lock:
+                if self.buffer:
+                    audio_data = np.frombuffer(b''.join(self.buffer), dtype=np.int16).astype(np.float32) / 32768.0
+                    self.buffer = []
 
-            # Detect silence
-            if np.max(audio_chunk) < SILENCE_THRESHOLD:
-                if silence_start is None:
-                    silence_start = time.time()
-                elif time.time() - silence_start >= SILENCE_DURATION:
-                    print("Silence detected, pausing transcription.")
-                    pause_event.set()
-            else:
-                silence_start = None
+            if len(audio_data) > 0:
+                result = self.model.transcribe(audio_data)
+                if result["text"].strip():
+                    yield result["text"]
 
-            # Limit buffer size to BUFFER_SECONDS of audio
-            if len(buffer) > int(RATE / CHUNK * BUFFER_SECONDS):
-                with buffer_lock:
-                    buffer = buffer[-int(RATE / CHUNK * BUFFER_SECONDS):]
-
-    except KeyboardInterrupt:
-        print("Stopping...")
-
-def transcribe_audio():
-    global buffer
-    while True:
-        if pause_event.is_set():
-            time.sleep(0.1)
-            continue
-
-        time.sleep(BUFFER_SECONDS)
-        with buffer_lock:
-            if buffer:
-                audio_data = np.frombuffer(b''.join(buffer), dtype=np.int16).astype(np.float32) / 32768.0
-                buffer = []
-
-        if len(audio_data) > 0:
-            result = model.transcribe(audio_data)
-            yield result["text"]
-
-def manual_pause_resume():
-    if pause_event.is_set():
-        print("Resuming transcription.")
-        pause_event.clear()
-    else:
+    def toggle_pause_resume(self):
+        if self.pause_event.is_set():
+            print("Resuming transcription.")
+            self.pause_event.clear()
+        else:
+            print("Pausing transcription.")
+            self.pause_event.set()
+    
+    def pause(self):
         print("Pausing transcription.")
-        pause_event.set()
-
-# Start recording and transcribing threads
-recording_thread = threading.Thread(target=record_audio)
-recording_thread.start()
-
-def main():
-    transcription_generator = transcribe_audio()
-    while True:
-        try:
-            transcription = next(transcription_generator)
-            print("Transcription:", transcription)
-        except StopIteration:
-            break
-        except KeyboardInterrupt:
-            print("Exiting...")
-            break
-
-    # Close the stream
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
+        self.pause_event.set()
+    
+    def resume(self):
+        print("Resuming transcription.")
+        self.pause_event.clear()
 
 if __name__ == "__main__":
-    main()
+    live_transcriber = LiveTranscriber()
+    live_transcriber.start()
 
-# Example manual pause/resume usage
-try:
-    while True:
-        command = input("Enter 'pause' to pause, 'resume' to resume: ")
-        if command == 'pause' or command == 'resume':
-            manual_pause_resume()
-except KeyboardInterrupt:
-    print("Exiting...")
+    for text in live_transcriber._transcription_generator():
+        print(text)
 
-# Join threads to main thread
-recording_thread.join()
+    # Manual pause and resume control
+    #live_transcriber.manual_pause_resume()  # Toggle pause/resume
+
