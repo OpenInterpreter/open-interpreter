@@ -95,3 +95,6 @@ for chunk in interpreter.chat(display=True, stream=True):
             tts_thread.start()
             # Convert text to audio and play it using the aplay engine
             #dt.text_2_speech(text, engine="aplay")
+    if chunk["type"] == "confirmation":
+        print(chunk)
+    
