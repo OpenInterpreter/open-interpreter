@@ -59,6 +59,6 @@ def send_telemetry(event_name, properties=None):
             "properties": properties,
             "distinct_id": user_id,
         }
-        response = requests.post(url, headers=headers, data=json.dumps(data))
-    except BaseException as e:
-        print("Exception", e)
+        requests.post(url, headers=headers, data=json.dumps(data))
+    except:
+        pass
