@@ -64,5 +64,4 @@ def send_telemetry(event_name, properties=None):
             }
             response = requests.post(url, headers=headers, data=json.dumps(data))
         except BaseException as e:
-            print("Exception")
-            raise
+            print("Exception", e)
