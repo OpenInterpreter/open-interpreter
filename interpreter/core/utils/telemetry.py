@@ -50,15 +50,15 @@ def send_telemetry(event_name, properties=None):
     properties["oi_version"] = pkg_resources.get_distribution(
         "open-interpreter"
     ).version
-    with open(os.devnull, "w") as f, contextlib.redirect_stdout(
-        f
-    ), contextlib.redirect_stderr(f):
-        url = "https://app.posthog.com/capture"
-        headers = {"Content-Type": "application/json"}
-        data = {
-            "api_key": "phc_6cmXy4MEbLfNGezqGjuUTY8abLu0sAwtGzZFpQW97lc",
-            "event": event_name,
-            "properties": properties,
-            "distinct_id": user_id,
-        }
-        response = requests.post(url, headers=headers, data=json.dumps(data))
+    # with open(os.devnull, "w") as f, contextlib.redirect_stdout(
+    #     f
+    # ), contextlib.redirect_stderr(f):
+    url = "https://app.posthog.com/capture"
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "api_key": "phc_6cmXy4MEbLfNGezqGjuUTY8abLu0sAwtGzZFpQW97lc",
+        "event": event_name,
+        "properties": properties,
+        "distinct_id": user_id,
+    }
+    response = requests.post(url, headers=headers, data=json.dumps(data))
