@@ -1,5 +1,5 @@
 import os
-from pyAudioAnalysis import audioBasicIO, MidTermFeatures, audioSegmentation, audioFeatureExtraction, audioVisualization
+from pyAudioAnalysis import audioBasicIO, MidTermFeatures, audioSegmentation, audioFeatureExtraction, audioVisualization as aV
 
 # Load the Audio File
 audio_path = "oi-audio/original-audio/20240430-1508.wav"
@@ -9,7 +9,7 @@ audio_path = "oi-audio/original-audio/20240430-1508.wav"
 [mtFeatures, stFeatures] = MidTermFeatures.mid_feature_extraction(x, Fs, 1.0*Fs, 1.0*Fs, 0.050*Fs, 0.050*Fs)
 
 # Visualize the Audio Signal
-audioVisualization.plotWAV(x, Fs)
+aV.plotWAV(x, Fs)
 
 # Apply Noise Reduction
 segments = audioSegmentation.silence_removal(x, Fs, 0.020, 0.020, smoothWindow=1.0, Weight=0.3, plot=False)
@@ -21,7 +21,7 @@ speech_features = audioFeatureExtraction.stFeatureExtraction(x, Fs, 0.050*Fs, 0.
 psd_features = audioFeatureExtraction.stFeatureExtraction(x, Fs, 0.050*Fs, 0.050*Fs)
 
 # Generate Enhanced Spectrogram
-audioVisualization.plotSpectrogram(x, Fs, 0.050*Fs, 0.050*Fs)
+aV.plotSpectrogram(x, Fs, 0.050*Fs, 0.050*Fs)
 
 # Save and Document Results
 output_dir = "oi-audio/original-audio/metadata"
