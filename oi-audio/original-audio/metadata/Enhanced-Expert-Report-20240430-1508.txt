@@ -39,3 +39,36 @@ The higher resolution spectrogram provides more precise and distinct frequency c
    - Use high-resolution data to more accurately boost speech-related frequencies.
 3. **Frequency Analysis and Balancing**:
    - Perform detailed PSD analysis to balance lower and higher frequencies for clear audio output.
+
+### Steps to Use Methods from `pyaudioanalysis.pdf` for Enhanced Analysis:
+1. **Load the Audio File**:
+   - Use the `audioBasicIO` module to read the audio file.
+   - Example: `[Fs, x] = audioBasicIO.readAudioFile("20240430-1508.wav")`
+
+2. **Extract Audio Features**:
+   - Use the `MidTermFeatures` module to extract mid-term features.
+   - Example: `[mtFeatures, stFeatures] = MidTermFeatures.mid_feature_extraction(x, Fs, 1.0*Fs, 1.0*Fs, 0.050*Fs, 0.050*Fs)`
+
+3. **Visualize the Audio Signal**:
+   - Use the `audioVisualization` module to plot the waveform and spectrogram.
+   - Example: `audioVisualization.plotWAV(x, Fs)`
+
+4. **Apply Noise Reduction**:
+   - Use the `audioSegmentation` module to segment the audio and apply noise reduction techniques.
+   - Example: `segments = audioSegmentation.silence_removal(x, Fs, 0.020, 0.020, smoothWindow=1.0, Weight=0.3, plot=False)`
+
+5. **Enhance Dialogue**:
+   - Use the `audioFeatureExtraction` module to enhance speech-related frequencies.
+   - Example: `speech_features = audioFeatureExtraction.stFeatureExtraction(x, Fs, 0.050*Fs, 0.050*Fs)`
+
+6. **Perform Detailed Frequency Analysis**:
+   - Use the `audioFeatureExtraction` module to perform a detailed PSD analysis.
+   - Example: `psd_features = audioFeatureExtraction.stFeatureExtraction(x, Fs, 0.050*Fs, 0.050*Fs)`
+
+7. **Generate Enhanced Spectrogram**:
+   - Use the `audioVisualization` module to generate a high-resolution spectrogram.
+   - Example: `audioVisualization.plotSpectrogram(x, Fs, 0.050*Fs, 0.050*Fs)`
+
+8. **Save and Document Results**:
+   - Save the processed audio and visualizations.
+   - Document the steps and results in the report for future reference.
