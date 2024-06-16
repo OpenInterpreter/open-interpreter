@@ -3,7 +3,7 @@ from pyAudioAnalysis import audioBasicIO, MidTermFeatures, audioSegmentation, au
 
 # Load the Audio File
 audio_path = "oi-audio/original-audio/20240430-1508.wav"
-[Fs, x] = audioBasicIO.readAudioFile(audio_path)
+[Fs, x] = audioBasicIO.readAudioFile(audio_path, format="PCM_32")
 
 # Extract Audio Features
 [mtFeatures, stFeatures] = MidTermFeatures.mid_feature_extraction(x, Fs, 1.0*Fs, 1.0*Fs, 0.050*Fs, 0.050*Fs)
