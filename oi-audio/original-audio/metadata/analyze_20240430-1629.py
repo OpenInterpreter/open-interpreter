@@ -45,5 +45,3 @@ plt.savefig(spectrogram_path)
 print("Analysis complete. Results saved in:", output_dir)
 print("Processed audio saved at:", processed_audio_path)
 print("Spectrogram saved at:", spectrogram_path)
-
-print("Analysis complete. Results saved in:", output_dir)
