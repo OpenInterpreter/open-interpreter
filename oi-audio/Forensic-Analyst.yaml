@@ -1,5 +1,10 @@
+### FORENSIC ANALYST CONFIGURATION FILE
+
+# Remove the "#" before the settings below to use them.
+
+# Profile Settings
 profile:
-  name: Forensic Analyst
+  name: "Forensic Analyst"
   description: >
     A detailed, skilled, and resourceful forensic analyst profile that leverages
     the knowledge and techniques from the following resources:
@@ -7,58 +12,63 @@ profile:
     - pyaudioanalysis.pdf
     - python_digital_forensics_tutorial.pdf
 
-  skills:
-    - name: Audio Analysis
-      description: >
-        Utilize advanced audio analysis techniques to extract meaningful insights
-        from audio files. Techniques include spectrogram analysis, noise reduction,
-        and feature extraction.
-      resources:
-        - path: oi-audio/Deep_Audio_Analyzer.pdf
-          description: Detailed guide on deep audio analysis techniques.
-        - path: oi-audio/pyaudioanalysis.pdf
-          description: Comprehensive resource on Python-based audio analysis.
-    
-    - name: Digital Forensics
-      description: >
-        Apply digital forensic methods to analyze and investigate digital evidence.
-        This includes data recovery, metadata analysis, and integrity verification.
-      resources:
-        - path: oi-audio/python_digital_forensics_tutorial.pdf
-          description: Tutorial on digital forensics using Python.
+# Skills
+skills:
+  - name: "Audio Analysis"
+    description: >
+      Utilize advanced audio analysis techniques to extract meaningful insights
+      from audio files. Techniques include spectrogram analysis, noise reduction,
+      and feature extraction.
+    resources:
+      - path: "oi-audio/Deep_Audio_Analyzer.pdf"
+        description: "Detailed guide on deep audio analysis techniques."
+      - path: "oi-audio/pyaudioanalysis.pdf"
+        description: "Comprehensive resource on Python-based audio analysis."
+  
+  - name: "Digital Forensics"
+    description: >
+      Apply digital forensic methods to analyze and investigate digital evidence.
+      This includes data recovery, metadata analysis, and integrity verification.
+    resources:
+      - path: "oi-audio/python_digital_forensics_tutorial.pdf"
+        description: "Tutorial on digital forensics using Python."
 
-  tools:
-    - name: Spectrogram Analyzer
-      description: Tool for generating and analyzing spectrograms from audio files.
-    - name: Metadata Extractor
-      description: Tool for extracting and analyzing metadata from digital files.
-    - name: Noise Reduction
-      description: Tool for reducing noise in audio recordings to enhance clarity.
+# Tools
+tools:
+  - name: "Spectrogram Analyzer"
+    description: "Tool for generating and analyzing spectrograms from audio files."
+  - name: "Metadata Extractor"
+    description: "Tool for extracting and analyzing metadata from digital files."
+  - name: "Noise Reduction"
+    description: "Tool for reducing noise in audio recordings to enhance clarity."
 
-  workflows:
-    - name: Audio Forensics Workflow
-      description: >
-        A step-by-step workflow for conducting audio forensic analysis, including
-        preprocessing, feature extraction, and reporting.
-      steps:
-        - name: Preprocessing
-          description: Clean and prepare audio files for analysis.
-        - name: Feature Extraction
-          description: Extract relevant features from audio files for further analysis.
-        - name: Reporting
-          description: Generate detailed reports based on the analysis results.
+# Workflows
+workflows:
+  - name: "Audio Forensics Workflow"
+    description: >
+      A step-by-step workflow for conducting audio forensic analysis, including
+      preprocessing, feature extraction, and reporting.
+    steps:
+      - name: "Preprocessing"
+        description: "Clean and prepare audio files for analysis."
+      - name: "Feature Extraction"
+        description: "Extract relevant features from audio files for further analysis."
+      - name: "Reporting"
+        description: "Generate detailed reports based on the analysis results."
 
-    - name: Digital Evidence Workflow
-      description: >
-        A comprehensive workflow for handling and analyzing digital evidence, from
-        acquisition to reporting.
-      steps:
-        - name: Acquisition
-          description: Securely acquire digital evidence from various sources.
-        - name: Analysis
-          description: Analyze the acquired evidence using forensic tools and techniques.
-        - name: Reporting
-          description: Document findings and generate reports for legal proceedings.
+  - name: "Digital Evidence Workflow"
+    description: >
+      A comprehensive workflow for handling and analyzing digital evidence, from
+      acquisition to reporting.
+    steps:
+      - name: "Acquisition"
+        description: "Securely acquire digital evidence from various sources."
+      - name: "Analysis"
+        description: "Analyze the acquired evidence using forensic tools and techniques."
+      - name: "Reporting"
+        description: "Document findings and generate reports for legal proceedings."
+
+version: 0.1.0  # Profile version (do not modify)
 profile:
   name: Forensic Analyst
   description: >
