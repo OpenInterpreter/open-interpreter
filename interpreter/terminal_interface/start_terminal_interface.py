@@ -138,11 +138,10 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "max_output"},
         },
         {
-            "name": "force_task_completion",
-            "nickname": "fc",
+            "name": "loop",
             "help_text": "runs OI in a loop, requiring it to admit to completing/failing task",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "force_task_completion"},
+            "attribute": {"object": interpreter, "attr_name": "loop"},
         },
         {
             "name": "disable_telemetry",
@@ -204,6 +203,11 @@ def start_terminal_interface(interpreter):
         {
             "name": "codestral",
             "help_text": "shortcut for `interpreter --profile codestral`",
+            "type": bool,
+        },
+        {
+            "name": "assistant",
+            "help_text": "shortcut for `interpreter --profile assistant.py`",
             "type": bool,
         },
         {
@@ -365,36 +369,25 @@ def start_terminal_interface(interpreter):
         if args.vision:
             # This is local vision, set up moondream!
             interpreter.computer.vision.load()
+        if args.os:
+            args.profile = "local-os.py"
 
     if args.codestral:
         args.profile = "codestral.py"
         if args.vision:
-            # This is local vision, set up moondream!
-            interpreter.computer.vision.load()
+            args.profile = "codestral-vision.py"
+        if args.os:
+            args.profile = "codestral-os.py"
+
+    if args.assistant:
+        args.profile = "assistant.py"
 
     if args.llama3:
         args.profile = "llama3.py"
         if args.vision:
-            # This is local vision, set up moondream!
-            interpreter.computer.vision.load()
-
-    if args.os and args.local:
-        args.profile = "local-os.py"
-        if args.vision:
-            # This is local vision, set up moondream!
-            interpreter.computer.vision.load()
-
-    if args.codestral and args.os:
-        args.profile = "codestral-os.py"
-        if args.vision:
-            # This is local vision, set up moondream!
-            interpreter.computer.vision.load()
-
-    if args.llama3 and args.os:
-        args.profile = "llama3-os.py"
-        if args.vision:
-            # This is local vision, set up moondream!
-            interpreter.computer.vision.load()
+            args.profile = "llama3-vision.py"
+        if args.os:
+            args.profile = "llama3-os.py"
 
     ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
 

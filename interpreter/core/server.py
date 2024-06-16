@@ -237,7 +237,7 @@ def server(interpreter, port=8000):  # Default port is 8000 if not specified
                     output = await async_interpreter.output()
                     if isinstance(output, bytes):
                         # await websocket.send_bytes(output)
-                        # we dont send out bytes rn, no TTS
+                        # we don't send out bytes rn, no TTS
                         pass
                     elif isinstance(output, dict):
                         await websocket.send_text(json.dumps(output))

@@ -14,7 +14,7 @@ interpreter.llm.supports_functions = False
 interpreter.llm.context_window = 110000
 interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True
-interpreter.force_task_completion = True
+interpreter.loop = True
 interpreter.sync_computer = True
 
 interpreter.system_message = r"""
@@ -242,9 +242,9 @@ if not interpreter.auto_run:
 #     if chunk.get("format") != "active_line":
 #         print(chunk.get("content"))
 
+interpreter.auto_run = True
 
-if not interpreter.auto_run:
-    interpreter.display_message(
-        "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
-    )
-    print("")  # < - Aesthetic choice
+interpreter.display_message(
+    "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
+)
+print("")  # < - Aesthetic choice

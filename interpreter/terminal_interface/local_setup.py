@@ -8,6 +8,7 @@ import time
 
 import inquirer
 import psutil
+import requests
 import wget
 
 
@@ -205,7 +206,7 @@ def local_setup(interpreter, provider=None, model=None):
     if selected_model == "LM Studio":
         interpreter.display_message(
             """
-    To use use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
+    To use Open Interpreter with **LM Studio**, you will need to run **LM Studio** in the background.
 
     1. Download **LM Studio** from [https://lmstudio.ai/](https://lmstudio.ai/), then start it.
     2. Select a language model then click **Download**.
@@ -219,7 +220,7 @@ def local_setup(interpreter, provider=None, model=None):
         )
         interpreter.llm.supports_functions = False
         interpreter.llm.api_base = "http://localhost:1234/v1"
-        interpreter.llm.api_key = "x"
+        interpreter.llm.api_key = "dummy"
 
     elif selected_model == "Ollama":
         try:
@@ -309,7 +310,7 @@ def local_setup(interpreter, provider=None, model=None):
     elif selected_model == "Jan":
         interpreter.display_message(
             """
-    To use use Open Interpreter with **Jan**, you will need to run **Jan** in the background.
+    To use Open Interpreter with **Jan**, you will need to run **Jan** in the background.
 
     1. Download **Jan** from [https://jan.ai/](https://jan.ai/), then start it.
     2. Select a language model from the "Hub" tab, then click **Download**.
@@ -322,13 +323,22 @@ def local_setup(interpreter, provider=None, model=None):
     """
         )
         interpreter.llm.api_base = "http://localhost:1337/v1"
-        time.sleep(1)
+        # time.sleep(1)
 
-        # Prompt the user to enter the name of the model running on Jan
+        # Send a GET request to the Jan API to get the list of models
+        response = requests.get(f"{interpreter.llm.api_base}/models")
+        models = response.json()["data"]
+
+        # Extract the model ids from the response
+        model_ids = [model["id"] for model in models]
+        model_ids.insert(0, ">> Type Custom Model ID")
+
+        # Prompt the user to select a model from the list
         model_name_question = [
-            inquirer.Text(
+            inquirer.List(
                 "jan_model_name",
-                message="Enter the id of the model you have running on Jan",
+                message="Select the model you have running on Jan",
+                choices=model_ids,
             ),
         ]
         model_name_answer = inquirer.prompt(model_name_question)
@@ -337,9 +347,13 @@ def local_setup(interpreter, provider=None, model=None):
             exit()
 
         jan_model_name = model_name_answer["jan_model_name"]
+        if jan_model_name == ">> Type Custom Model ID":
+            jan_model_name = input("Enter the custom model ID: ")
+
         interpreter.llm.model = jan_model_name
+        interpreter.llm.api_key = "dummy"
         interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
-        time.sleep(1)
+        # time.sleep(1)
 
     elif selected_model == "Llamafile":
         if platform.system() == "Darwin":  # Check if the system is MacOS
@@ -411,6 +425,7 @@ def local_setup(interpreter, provider=None, model=None):
 
         # Set flags for Llamafile to work with interpreter
         interpreter.llm.model = "openai/local"
+        interpreter.llm.api_key = "dummy"
         interpreter.llm.temperature = 0
         interpreter.llm.api_base = "http://localhost:8080/v1"
         interpreter.llm.supports_functions = False

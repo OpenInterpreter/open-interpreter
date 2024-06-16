@@ -1,6 +1,6 @@
 ### OPEN INTERPRETER CONFIGURATION FILE
 
-force_task_completion: True
+loop: True
 
 llm:
   model: "gpt-4-vision-preview"

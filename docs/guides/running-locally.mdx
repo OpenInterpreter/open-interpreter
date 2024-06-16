@@ -2,40 +2,54 @@
 title: Running Locally
 ---
 
-In this video, Mike Bird goes over three different methods for running Open Interpreter with a local language model:
+Open Interpreter can be run fully locally.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/CEs51hGWuGU?si=cN7f6QhfT4edfG5H" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+Users need to install software to run local LLMs. Open Interpreter supports multiple local model providers such as [Ollama](https://www.ollama.com/), [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Jan](https://jan.ai/), and [LM Studio](https://lmstudio.ai/).
 
-## How to Use Open Interpreter Locally
+<Tip>
+  Local models perform better with extra guidance and direction. You can improve
+  performance for your use-case by creating a new [Profile](/guides/profiles).
+</Tip>
 
-### Ollama
+## Terminal Usage
 
-1. Download Ollama from https://ollama.ai/download
-2. Run the command:  
-`ollama run dolphin-mixtral:8x7b-v2.6`
-3. Execute the Open Interpreter:  
-`interpreter --model ollama/dolphin-mixtral:8x7b-v2.6`
+### Local Explorer
 
-### Jan.ai
+A Local Explorer was created to simplify the process of using OI locally. To access this menu, run the command `interpreter --local`.
 
-1. Download Jan from http://jan.ai
-2. Download the model from the Hub
-3. Enable API server:
-   1. Go to Settings
-   2. Navigate to Advanced
-   3. Enable API server
-4. Select the model to use
-5. Run the Open Interpreter with the specified API base:  
-`interpreter --api_base http://localhost:1337/v1 --model mixtral-8x7b-instruct`
+Select your chosen local model provider from the list of options.
 
-### Llamafile
+Most providers will require the user to state the model they are using. Provider specific instructions are shown to the user in the menu.
 
-⚠ Ensure that Xcode is installed for Apple Silicon
+### Custom Local
 
-1. Download or create a llamafile from https://github.com/Mozilla-Ocho/llamafile
-2. Make the llamafile executable:  
-`chmod +x mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile`
-3. Execute the llamafile:  
-`./mixtral-8x7b-instruct-v0.1.Q5_K_M.llamafile`
-4. Run the interpreter with the specified API base:  
-`interpreter --api_base https://localhost:8080/v1`
+If you want to use a provider other than the ones listed, you will set the `--api_base` flag to set a [custom endpoint](/language-models/local-models/custom-endpoint).
+
+You will also need to set the model by passing in the `--model` flag to select a [model](/settings/all-settings#model-selection).
+
+```python
+interpreter --api_base "http://localhost:11434" --model ollama/codestral
+```
+
+<Info>
+  Other terminal flags are explained in [Settings](/settings/all-settings).
+</Info>
+
+## Python Usage
+
+In order to have a Python script use Open Interpreter locally, some fields need to be set
+
+```python
+from interpreter import interpreter
+
+interpreter.offline = True
+interpreter.llm.model = "ollama/codestral"
+interpreter.llm.api_base = "http://localhost:11434"
+
+interpreter.chat("how many files are on my desktop?")
+```
+
+<Info>
+  Other configuration settings are explained in
+  [Settings](/settings/all-settings).
+</Info>

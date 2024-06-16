@@ -16,8 +16,11 @@ webbrowser.open('https://chrome.google.com')
 ```
 User: The code you ran produced no output. Was this expected, or are we finished?
 Assistant: No further action is required; the provided snippet opens Chrome.
-User: How large are all the files on my desktop combined?
-Assistant: I will sum up the file sizes of every file on your desktop.
+
+You have access to ONE special function called `computer.vision.query(query="Describe this image.", path="image.jpg")`. This will ask a vision AI model the query, regarding the image at path. For example:
+
+User: Rename the images on my desktop to something more descriptive.
+Assistant: Viewing and renaming images.
 ```python
 import os
 import string
@@ -29,21 +32,29 @@ home_dir = Path.home()
 # Define the path to the desktop
 desktop_dir = home_dir / 'Desktop'
 
-# Initialize a variable to store the total size
-total_size = 0
-
 # Loop through all files on the desktop
 for file in desktop_dir.iterdir():
-    # Add the file size to the total
-    total_size += file.stat().st_size
-
-# Print the total size
-print(f"The total size of all files on the desktop is {total_size} bytes.")
+    # Check if the file is an image
+    if file.suffix in ['.jpg', '.png', '.jpeg', '.gif', '.bmp']:
+        # Get a description of the image
+        description = computer.vision.query(query="Describe this image in 4 words.", path=str(file))
+        
+        # Remove punctuation from the description
+        description = description.translate(str.maketrans('', '', string.punctuation))
+        
+        # Replace spaces with underscores
+        description = description.replace(' ', '_')
+        
+        # Form the new filename
+        new_filename = f"{description}{file.suffix}"
+        
+        # Rename the file
+        file.rename(desktop_dir / new_filename)
 ```
-User: I executed that code. This was the output: \"\"\"The total size of all files on the desktop is 103840 bytes.\"\"\"\n\nWhat does this output mean (I can't understand it, please help) / what code needs to be run next (if anything, or are we done)? I can't replace any placeholders.
-Assistant: The output indicates that the total size of all files on your desktop is 103840 bytes, which is approximately 101.4 KB or 0.1 MB. We are finished.
+User: The code you ran produced no output. Was this expected, or are we finished?
+Assistant: We are finished.
 
-NEVER use placeholders, NEVER say "path/to/desktop", NEVER say "path/to/file". Always specify exact paths, and use cross-platform ways of determining the desktop, documents, cwd, etc. folders.
+NEVER use placeholders. Always specify exact paths, and use cross-platform ways of determining the desktop, documents, etc. folders.
 
 Now, your turn:"""
 
@@ -54,20 +65,19 @@ interpreter.code_output_sender = "user"
 
 # LLM settings
 interpreter.llm.model = "ollama/codestral"
+interpreter.llm.load()  # Loads Ollama models
 interpreter.llm.supports_functions = False
 interpreter.llm.execution_instructions = False
 interpreter.llm.max_tokens = 1000
 interpreter.llm.context_window = 7000
-interpreter.llm.load()  # Loads Ollama models
 
 # Computer settings
-interpreter.computer.import_computer_api = False
+interpreter.computer.import_computer_api = True
+interpreter.computer.system_message = ""  # The default will explain how to use the full Computer API, and append this to the system message. For local models, we want more control, so we set this to "". The system message will ONLY be what's above ^
 
 # Misc settings
 interpreter.auto_run = False
 interpreter.offline = True
 
 # Final message
-interpreter.display_message(
-    "> Model set to `codestral`\n\n**Open Interpreter** will require approval before running code.\n\nUse `interpreter -y` to bypass this.\n\nPress `CTRL-C` to exit.\n"
-)
+interpreter.display_message("> Model set to `codestral`, vision enabled")

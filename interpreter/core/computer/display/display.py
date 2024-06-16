@@ -114,7 +114,7 @@ class Display:
         #         print(pretty_text)
         #         print(
         #             format_to_recipient(
-        #                 "To recieve the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
+        #                 "To receive the text above as a Python object, run computer.display.get_text_as_list_of_lists()",
         #                 "assistant",
         #             )
         #         )

@@ -16,7 +16,7 @@ title: Arguments
 
 **[Options](/docs/usage/terminal/arguments#options)**
 
-`--safe_mode`, `--auto_run`, `--force_task_completion`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`.
+`--safe_mode`, `--auto_run`, `--loop`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`.
 
 **[Other](/docs/usage/terminal/arguments#other)**
 
@@ -341,17 +341,17 @@ auto_run: true
 
 </CodeGroup>
 
-#### `--force_task_completion` or `-fc`
+#### `--loop`
 
 Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
 
 <CodeGroup>
 ```bash Terminal
-interpreter --force_task_completion
+interpreter --loop
 ```
 
 ```yaml Config
-force_task_completion: true
+loop: true
 ```
 
 </CodeGroup>
