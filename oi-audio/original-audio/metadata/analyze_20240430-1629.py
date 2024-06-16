@@ -29,8 +29,21 @@ if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 
 # Save the processed audio and visualizations
-# (Assuming the necessary functions to save the processed data are available)
-# Example: save_processed_audio(x, Fs, os.path.join(output_dir, "20240430-1629_processed.wav"))
-# Example: save_visualization(spectrogram, os.path.join(output_dir, "20240430-1629_spectrogram.png"))
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy.io.wavfile import write
+
+# Save the processed audio
+processed_audio_path = os.path.join(output_dir, "20240430-1629_processed.wav")
+write(processed_audio_path, Fs, x.astype(np.float32))
+
+# Save the spectrogram
+spectrogram_path = os.path.join(output_dir, "20240430-1629_spectrogram.png")
+plt.specgram(x, Fs=Fs)
+plt.savefig(spectrogram_path)
+
+print("Analysis complete. Results saved in:", output_dir)
+print("Processed audio saved at:", processed_audio_path)
+print("Spectrogram saved at:", spectrogram_path)
 
 print("Analysis complete. Results saved in:", output_dir)
