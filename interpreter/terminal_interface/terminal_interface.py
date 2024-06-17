@@ -3,14 +3,7 @@ The terminal interface is just a view. Just handles the very top layer.
 If you were to build a frontend this would be a way to do it.
 """
 
-try:
-    import readline
-except ImportError:
-    pass
-
-import os
 import platform
-import random
 import re
 import subprocess
 import time
@@ -27,21 +20,7 @@ from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
 from .utils.cli_input import cli_input
 
-# Add examples to the readline history
-examples = [
-    "How many files are on my desktop?",
-    "What time is it in Seattle?",
-    "Make me a simple Pomodoro app.",
-    "Open Chrome and go to YouTube.",
-    "Can you set my system to light mode?",
-]
-random.shuffle(examples)
-try:
-    for example in examples:
-        readline.add_history(example)
-except:
-    # If they don't have readline, that's fine
-    pass
+from .utils.history import history_autosaver
 
 
 def terminal_interface(interpreter, message):
@@ -72,17 +51,12 @@ def terminal_interface(interpreter, message):
     active_block = None
     voice_subprocess = None
 
+    history = history_autosaver()  # Will stop when goes out of context
     while True:
         if interactive:
             ### This is the primary input for Open Interpreter.
-            message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
-
-            try:
-                # This lets users hit the up arrow key for past messages
-                readline.add_history(message)
-            except:
-                # If the user doesn't have readline (may be the case on windows), that's fine
-                pass
+            message = cli_input("> ", interpreter.multi_line).strip()
+            history.add(message)  # Maybe move this in cli_input?
 
         if isinstance(message, str):
             # This is for the terminal interface being used as a CLI — messages are strings.

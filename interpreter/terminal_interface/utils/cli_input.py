@@ -1,4 +1,6 @@
-def cli_input(prompt: str = "") -> str:
+def cli_input(prompt: str = "", multi_line=False) -> str:
+    if not multi_line:
+        return input(prompt)
     start_marker = "```"
     end_marker = "```"
     message = input(prompt)
