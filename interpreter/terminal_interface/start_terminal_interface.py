@@ -345,7 +345,7 @@ def start_terminal_interface(interpreter):
 
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
-        update_name = "New Computer Update"  # Change this with each major update
+        update_name = "Local III"  # Change this with each major update
         print(f"Open Interpreter {version} {update_name}")
         return
 
@@ -354,6 +354,14 @@ def start_terminal_interface(interpreter):
         interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
     ):
         setattr(interpreter, "auto_run", False)
+
+    ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
+
+    set_attributes(args, arguments)
+
+    ### Apply profile
+
+    # Profile shortcuts, which should probably not exist:
 
     if args.fast:
         args.profile = "fast.yaml"
@@ -388,12 +396,6 @@ def start_terminal_interface(interpreter):
             args.profile = "llama3-vision.py"
         if args.os:
             args.profile = "llama3-os.py"
-
-    ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
-
-    set_attributes(args, arguments)
-
-    ### Apply profile
 
     interpreter = profile(
         interpreter,
@@ -473,7 +475,9 @@ def start_terminal_interface(interpreter):
         interpreter.server()
         return
 
-    validate_llm_settings(interpreter)
+    validate_llm_settings(
+        interpreter
+    )  # This should actually just run interpreter.llm.load() once that's == to validate_llm_settings
 
     interpreter.in_terminal_interface = True
 
@@ -515,8 +519,6 @@ def main():
     try:
         start_terminal_interface(interpreter)
     except KeyboardInterrupt:
-        pass
-    finally:
         try:
             interpreter.computer.terminate()
 
@@ -563,3 +565,5 @@ def main():
 
         except KeyboardInterrupt:
             pass
+    finally:
+        interpreter.computer.terminate()

@@ -1,13 +1,17 @@
 import time
 import warnings
 
+from IPython.display import display
+from PIL import Image
+
 from ...utils.lazy_import import lazy_import
 from ..utils.recipient_utils import format_to_recipient
 
 # Lazy import of optional packages
-cv2 = lazy_import(
-    "cv2",
-)
+try:
+    cv2 = lazy_import("cv2")
+except:
+    cv2 = None  # Fixes colab error
 np = lazy_import("numpy")
 pyautogui = lazy_import("pyautogui")
 plt = lazy_import("matplotlib.pyplot")
@@ -103,10 +107,8 @@ class Mouse:
                             cv2.LINE_AA,
                         )
 
-                    plt.imshow(img_draw)
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        plt.show()
+                    img_pil = Image.fromarray(img_draw)
+                    display(img_pil)
 
                 coordinates = [
                     f"{i}: ({int(item['coordinates'][0]*self.computer.display.width)}, {int(item['coordinates'][1]*self.computer.display.height)}) "

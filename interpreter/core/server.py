@@ -13,7 +13,6 @@ import asyncio
 import json
 
 ###
-from pynput import keyboard
 # from RealtimeTTS import TextToAudioStream, OpenAIEngine, CoquiEngine
 # from RealtimeSTT import AudioToTextRecorder
 # from beeper import Beeper
@@ -25,6 +24,7 @@ from fastapi import FastAPI, Header, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from uvicorn import Config, Server
+
 
 class Settings(BaseModel):
     auto_run: bool
@@ -96,7 +96,8 @@ class AsyncInterpreter:
             if "start" in chunk:
                 # self.stt.start()
                 self._last_lmc_start_flag = time.time()
-                # self.interpreter.computer.terminal.stop() # Stop any code execution... maybe we should make interpreter.stop()?
+                self.interpreter.computer.terminate()
+                # Stop any code execution... maybe we should make interpreter.stop()?
             elif "end" in chunk:
                 asyncio.create_task(self.run())
             else:
@@ -127,7 +128,6 @@ class AsyncInterpreter:
             # print("🍀🍀🍀🍀GENERATING, using these messages: ", self.interpreter.messages)
             print("passing this in:", message)
             for chunk in self.interpreter.chat(message, display=False, stream=True):
-
                 if self._last_lmc_start_flag != last_lmc_start_flag:
                     # self.beeper.stop()
                     break
@@ -152,29 +152,30 @@ class AsyncInterpreter:
 
                 # Handle code blocks
                 elif chunk.get("type") == "code":
+                    pass
                     # if "start" in chunk:
                     # self.beeper.start()
 
                     # Experimental: If the AI wants to type, we should type immediately
-                    if (
-                        self.interpreter.messages[-1]
-                        .get("content", "")
-                        .startswith("computer.keyboard.write(")
-                    ):
-                        keyboard.controller.type(content)
-                        self._in_keyboard_write_block = True
-                    if "end" in chunk and self._in_keyboard_write_block:
-                        self._in_keyboard_write_block = False
-                        # (This will make it so it doesn't type twice when the block executes)
-                        if self.interpreter.messages[-1]["content"].startswith(
-                            "computer.keyboard.write("
-                        ):
-                            self.interpreter.messages[-1]["content"] = (
-                                "dummy_variable = ("
-                                + self.interpreter.messages[-1]["content"][
-                                    len("computer.keyboard.write(") :
-                                ]
-                            )
+                    # if (
+                    #     self.interpreter.messages[-1]
+                    #     .get("content", "")
+                    #     .startswith("computer.keyboard.write(")
+                    # ):
+                    #     keyboard.controller.type(content)
+                    #     self._in_keyboard_write_block = True
+                    # if "end" in chunk and self._in_keyboard_write_block:
+                    #     self._in_keyboard_write_block = False
+                    #     # (This will make it so it doesn't type twice when the block executes)
+                    #     if self.interpreter.messages[-1]["content"].startswith(
+                    #         "computer.keyboard.write("
+                    #     ):
+                    #         self.interpreter.messages[-1]["content"] = (
+                    #             "dummy_variable = ("
+                    #             + self.interpreter.messages[-1]["content"][
+                    #                 len("computer.keyboard.write(") :
+                    #             ]
+                    #         )
 
             # Send a completion signal
             self.add_to_output_queue_sync(
@@ -202,6 +203,7 @@ def server(interpreter, port=8000):  # Default port is 8000 if not specified
         allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
         allow_headers=["*"],  # Allow all headers
     )
+
     @app.post("/settings")
     async def settings(payload: Dict[str, Any]):
         for key, value in payload.items():
@@ -214,7 +216,7 @@ def server(interpreter, port=8000):  # Default port is 8000 if not specified
                 setattr(async_interpreter.interpreter, key, value)
 
         return {"status": "success"}
-    
+
     @app.websocket("/")
     async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
@@ -249,6 +251,6 @@ def server(interpreter, port=8000):  # Default port is 8000 if not specified
         finally:
             await websocket.close()
 
-    config = Config(app, host="0.0.0.0", port=port) 
+    config = Config(app, host="0.0.0.0", port=port)
     interpreter.uvicorn_server = Server(config)
     interpreter.uvicorn_server.run()

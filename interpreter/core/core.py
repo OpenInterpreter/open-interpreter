@@ -143,8 +143,8 @@ class OpenInterpreter:
 
     def server(self, *args, **kwargs):
         try:
-            server(self, *args, **kwargs)
-        except:
+            server(self)
+        except ImportError:
             display_markdown_message(
                 "Missing dependencies for the server, please run `pip install open-interpreter[server]` and try again."
             )

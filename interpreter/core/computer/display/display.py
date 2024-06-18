@@ -10,6 +10,7 @@ from contextlib import redirect_stdout
 from io import BytesIO
 
 import requests
+from IPython.display import display
 from PIL import Image
 
 from ...utils.lazy_import import lazy_import
@@ -19,7 +20,11 @@ from ..utils.recipient_utils import format_to_recipient
 # from utils.get_active_window import get_active_window
 
 # Lazy import of optional packages
-cv2 = lazy_import("cv2")
+try:
+    cv2 = lazy_import("cv2")
+except:
+    cv2 = None  # Fixes colab error
+
 pyautogui = lazy_import("pyautogui")
 np = lazy_import("numpy")
 plt = lazy_import("matplotlib.pyplot")
@@ -86,7 +91,6 @@ class Display:
         show=True,
         quadrant=None,
         active_app_only=True,
-        force_image=False,
         combine_screens=True,
     ):
         """
@@ -133,7 +137,7 @@ class Display:
                         )
                     )
                     message = format_to_recipient(
-                        "Taking a screenshot of the active app (recommended). To take a screenshot of the entire screen (uncommon), use computer.display.view(active_app_only=False).",
+                        "Taking a screenshot of the active app. To take a screenshot of the entire screen (uncommon), use computer.view(active_app_only=False).",
                         "assistant",
                     )
                     print(message)
@@ -145,7 +149,7 @@ class Display:
                     screen=screen, combine_screens=combine_screens
                 )  #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
                 message = format_to_recipient(
-                    "Taking a screenshot of the entire screen. This is not recommended. You (the language model assistant) will receive it with low resolution.\n\nTo maximize performance, use computer.display.view(active_app_only=True). This will produce an ultra high quality image of the active application.",
+                    "Taking a screenshot of the entire screen.\n\nTo focus on the active app, use computer.view(active_app_only=True).",
                     "assistant",
                 )
                 print(message)
@@ -181,18 +185,12 @@ class Display:
             screenshot = screenshot.convert("RGB")
 
         if show:
-            # Show the image using matplotlib
+            # Show the image using IPython display
             if isinstance(screenshot, list):
                 for img in screenshot:
-                    plt.imshow(np.array(img))
-                    plt.show()
+                    display(img)
             else:
-                plt.imshow(np.array(screenshot))
-
-            with warnings.catch_warnings():
-                # It displays an annoying message about Agg not being able to display something or WHATEVER
-                warnings.simplefilter("ignore")
-                plt.show()
+                display(screenshot)
 
         return screenshot  # this will be a list of combine_screens == False
 

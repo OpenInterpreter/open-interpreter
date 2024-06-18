@@ -22,6 +22,21 @@ import pytest
 from websocket import create_connection
 
 
+@pytest.mark.skip(reason="Mac only")
+def test_sms():
+    sms = interpreter.computer.sms
+
+    # Get the last 5 messages
+    messages = sms.get(limit=5)
+    print(messages)
+
+    # Search messages for a substring
+    search_results = sms.get(substring="i love you", limit=100)
+    print(search_results)
+
+    assert False
+
+
 def test_ai_chat():
     print(interpreter.computer.ai.chat("hi"))
 

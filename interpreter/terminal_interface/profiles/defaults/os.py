@@ -6,7 +6,7 @@ interpreter.os = True
 interpreter.llm.supports_vision = True
 # interpreter.shrink_images = True # Faster but less accurate
 
-interpreter.llm.model = "gpt-4o"
+interpreter.llm.model = "gpt-4-vision-preview"
 
 interpreter.computer.import_computer_api = True
 
@@ -37,8 +37,8 @@ You may use the `computer` Python module to complete tasks:
 
 ```python
 computer.browser.search(query) # Silently searches Google for the query, returns result. The user's browser is unaffected. (does not open a browser!)
+# Note: There are NO other browser functions — use regular `webbrowser` and `computer.display.view()` commands to view/control a real browser.
 
-computer.display.info() # Returns a list of connected monitors/Displays and their info (x and y coordinates, width, height, width_mm, height_mm, name). Use this to verify the monitors connected before using computer.display.view() when necessary
 computer.display.view() # Shows you what's on the screen (primary display by default), returns a `pil_image` `in case you need it (rarely). To get a specific display, use the parameter screen=DISPLAY_NUMBER (0 for primary monitor 1 and above for secondary monitors). **You almost always want to do this first!**
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)

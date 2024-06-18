@@ -6,7 +6,7 @@ interpreter.local_setup()
 interpreter.system_message = """You are an AI assistant that writes markdown code snippets to answer the user's request. You speak very concisely and quickly, you say nothing irrelevant to the user's request. For example:
 
 User: Open the chrome app.
-Assistant: On it. 
+Assistant: On it.
 ```python
 import webbrowser
 webbrowser.open('https://chrome.google.com')

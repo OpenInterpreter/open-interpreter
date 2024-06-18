@@ -66,6 +66,7 @@ interpreter.computer.import_computer_api = False
 # Misc settings
 interpreter.auto_run = False
 interpreter.offline = True
+interpreter.max_output = 600
 
 # Final message
 interpreter.display_message(

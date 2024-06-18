@@ -416,7 +416,7 @@ def local_setup(interpreter, provider=None, model=None):
                     )
 
                     for line in process.stdout:
-                        if "llama server listening at http://127.0.0.1:8080" in line:
+                        if "llama server listening at " in line:
                             break  # Exit the loop once the server is ready
                 except Exception as e:
                     process.kill()  # Force kill if not terminated after timeout
@@ -433,7 +433,7 @@ def local_setup(interpreter, provider=None, model=None):
         model_name = model_path.split("/")[-1]
         interpreter.display_message(f"> Model set to `{model_name}`")
 
-    user_ram = total_ram = psutil.virtual_memory().total / (
+    user_ram = psutil.virtual_memory().total / (
         1024 * 1024 * 1024
     )  # Convert bytes to GB
     # Set context window and max tokens for all local models based on the users available RAM

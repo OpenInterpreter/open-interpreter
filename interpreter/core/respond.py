@@ -41,10 +41,11 @@ def respond(interpreter):
                 )
 
         # Storing the messages so they're accessible in the interpreter's computer
-        if interpreter.sync_computer:
-            output = interpreter.computer.run(
-                "python", f"messages={interpreter.messages}"
-            )
+        # no... this is a huge time sink.....
+        # if interpreter.sync_computer:
+        #     output = interpreter.computer.run(
+        #         "python", f"messages={interpreter.messages}"
+        #     )
 
         ## Rendering ↓
         rendered_system_message = render_message(interpreter, system_message)

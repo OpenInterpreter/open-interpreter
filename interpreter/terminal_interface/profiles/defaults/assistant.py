@@ -41,8 +41,8 @@ computer.keyboard.write("hello")
 
 4. Searching the web:
 ```python
-# Performs a Google search
-computer.browser.search("example query")
+# Performs a Google search. Use this for ANY internet tasks
+computer.browser.search("What's the weather in Seattle?")
 ```
 
 5. Editing a text file:
@@ -70,10 +70,14 @@ computer.mail.send("john@email.com", "Hello", "This is a test email.")
 # Get unread emails
 computer.mail.get(4, unread=True)
 # Send a text message
-computer.sms.send("555-123-4567", "Hello from the computer!")
+computer.sms.send(to=computer.contacts.get_phone_number("John Doe"), message="Hello from the computer!")
+# Get the last 5 text messages
+messages = computer.sms.get(limit=5)
+# Search text messages from a contact
+search_results = computer.sms.get(contact=computer.contacts.get_phone_number("Paige"), substring="i love you", limit=100)
 ```
 
-Use these functions in your scripts to interact with and manage applications and data efficiently. For example:
+Use these functions in your scripts. For example:
 
 User: Can you find the latest news on the next big space exploration event and send the details to Jane Doe? Oh also, update my calendar with that info.
 Assistant: On it. I will first search for the latest news on space exploration.
