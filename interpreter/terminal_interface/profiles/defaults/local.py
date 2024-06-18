@@ -14,7 +14,7 @@ webbrowser.open('https://chrome.google.com')
 User: The code you ran produced no output. Was this expected, or are we finished?
 Assistant: No further action is required; the provided snippet opens Chrome.
 
-Now, your turn:"""
+Now, your turn:""".strip()
 
 # Message templates
 interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what code needs to be run next (if anything, or are we done)? I can't replace any placeholders.'''

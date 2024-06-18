@@ -17,7 +17,7 @@ webbrowser.open('https://chrome.google.com')
 User: The code you ran produced no output. Was this expected, or are we finished?
 Assistant: No further action is required; the provided snippet opens Chrome.
 
-Now, your turn:"""
+Now, your turn:""".strip()
 
 # Message templates
 interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what code needs to be run next (if anything, or are we done)? I can't replace any placeholders.'''
@@ -25,7 +25,7 @@ interpreter.empty_code_output_template = "The code above was executed on my mach
 interpreter.code_output_sender = "user"
 
 # LLM settings
-interpreter.llm.model = "ollama/codestral"
+interpreter.llm.model = "ollama/llama3"
 interpreter.llm.supports_functions = False
 interpreter.llm.execution_instructions = False
 interpreter.llm.max_tokens = 1000

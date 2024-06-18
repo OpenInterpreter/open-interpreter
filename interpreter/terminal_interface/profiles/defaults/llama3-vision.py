@@ -56,7 +56,7 @@ Assistant: We are finished.
 
 NEVER use placeholders. Always specify exact paths, and use cross-platform ways of determining the desktop, documents, etc. folders.
 
-Now, your turn:"""
+Now, your turn:""".strip()
 
 # Message templates
 interpreter.code_output_template = '''I executed that code. This was the output: """{content}"""\n\nWhat does this output mean (I can't understand it, please help) / what code needs to be run next (if anything, or are we done)? I can't replace any placeholders.'''

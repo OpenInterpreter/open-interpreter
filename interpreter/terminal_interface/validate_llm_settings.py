@@ -97,6 +97,8 @@ def validate_llm_settings(interpreter):
         interpreter.display_message(
             "***Note:*** *Conversations with this model will be used to train our open-source model.*\n"
         )
+    if "ollama" in interpreter.llm.model:
+        interpreter.llm.load()
     return
 
 
