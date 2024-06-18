@@ -3,22 +3,33 @@ import os
 import plistlib
 import sqlite3
 import subprocess
+import sys
 import time
 
 
 class SMS:
     def __init__(self, computer):
         self.computer = computer
-        self.database_path = self.resolve_database_path()
+        if sys.platform.lower() == "darwin":  # Only if macOS
+            self.database_path = self.resolve_database_path()
+        else:
+            self.database_path = None
 
     def resolve_database_path(self):
-        if os.geteuid() == 0:  # Running as root
-            home_directory = os.path.expanduser(f"~{os.environ.get('SUDO_USER')}")
-        else:
+        try:
+            if os.geteuid() == 0:  # Running as root
+                home_directory = os.path.expanduser(f"~{os.environ.get('SUDO_USER')}")
+            else:
+                home_directory = os.path.expanduser("~")
+            return f"{home_directory}/Library/Messages/chat.db"
+        except:
             home_directory = os.path.expanduser("~")
-        return f"{home_directory}/Library/Messages/chat.db"
+            return f"{home_directory}/Library/Messages/chat.db"
 
     def send(self, to, message):
+        if sys.platform.lower() != "darwin":
+            print("Only supported on Mac.")
+            return
         message_escaped = message.replace('"', '\\"').replace("\\", "\\\\")
         script = f"""
         tell application "Messages"
@@ -30,6 +41,9 @@ class SMS:
         return "Message sent successfully"
 
     def get(self, contact=None, limit=10, substring=None):
+        if sys.platform.lower() != "darwin":
+            print("Only supported on Mac.")
+            return
         if not self.can_access_database():
             self.prompt_full_disk_access()
 
