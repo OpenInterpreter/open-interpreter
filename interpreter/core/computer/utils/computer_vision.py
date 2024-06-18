@@ -14,11 +14,9 @@ pytesseract = lazy_import("pytesseract")
 
 
 def pytesseract_get_text(img):
-    try:
-        return pytesseract.image_to_string(img)
-    except ImportError:
-        print("\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n")
-        return ""
+    import pytesseract
+
+    return pytesseract.image_to_string(img)
 
 
 def pytesseract_get_text_bounding_boxes(img):

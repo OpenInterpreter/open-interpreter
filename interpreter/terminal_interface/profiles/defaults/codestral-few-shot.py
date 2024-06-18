@@ -2,6 +2,8 @@
 EXPERIMENTAL
 """
 
+print("Remember to `pip install open-interpreter[local]`.")
+
 import subprocess
 
 from interpreter import interpreter

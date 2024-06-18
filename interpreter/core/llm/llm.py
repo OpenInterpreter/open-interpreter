@@ -134,19 +134,28 @@ class Llm:
                         precursor = "Imagine I have just shown you an image with this description: "
                         postcursor = ""
 
-                    image_description = self.vision_renderer(lmc=img_msg)
+                    try:
+                        image_description = self.vision_renderer(lmc=img_msg)
+                        ocr = self.interpreter.computer.vision.ocr(lmc=img_msg)
 
-                    # It would be nice to format this as a message to the user and display it like: "I see: image_description"
+                        # It would be nice to format this as a message to the user and display it like: "I see: image_description"
 
-                    img_msg["content"] = (
-                        precursor
-                        + image_description
-                        + "\n---\nThe image contains the following text exactly, which may or may not be relevant (if it's not relevant, ignore this): '''\n"
-                        + self.interpreter.computer.vision.ocr(lmc=img_msg)
-                        + "\n'''"
-                        + postcursor
-                    )
-                    img_msg["format"] = "description"
+                        img_msg["content"] = (
+                            precursor
+                            + image_description
+                            + "\n---\nThe image contains the following text exactly, which may or may not be relevant (if it's not relevant, ignore this): '''\n"
+                            + ocr
+                            + "\n'''"
+                            + postcursor
+                        )
+                        img_msg["format"] = "description"
+
+                    except ImportError:
+                        print(
+                            "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
+                        )
+                        img_msg["format"] = "description"
+                        img_msg["content"] = ""
 
         # Convert to OpenAI messages format
         messages = convert_to_openai_messages(

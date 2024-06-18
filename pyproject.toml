@@ -3,7 +3,7 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
 ]
-version = "0.2.6" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.3.0" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"

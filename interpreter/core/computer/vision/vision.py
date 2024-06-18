@@ -20,37 +20,32 @@ class Vision:
 
     def load(self):
         print("\nLoading Moondream (vision)...\n")
-        try:
-            with contextlib.redirect_stdout(
-                open(os.devnull, "w")
-            ), contextlib.redirect_stderr(open(os.devnull, "w")):
-                import transformers  # Wait until we use it. Transformers can't be lazy loaded for some reason!
 
-                os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        with contextlib.redirect_stdout(
+            open(os.devnull, "w")
+        ), contextlib.redirect_stderr(open(os.devnull, "w")):
+            import transformers  # Wait until we use it. Transformers can't be lazy loaded for some reason!
 
-                if self.computer.debug:
-                    print(
-                        "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
-                    )
-                    print(
-                        "Alternatively, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
-                    )
-                model_id = "vikhyatk/moondream2"
-                revision = "2024-04-02"
-                print("loading model")
+            os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
-                self.model = transformers.AutoModelForCausalLM.from_pretrained(
-                    model_id, trust_remote_code=True, revision=revision
+            if self.computer.debug:
+                print(
+                    "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
                 )
-                self.tokenizer = transformers.AutoTokenizer.from_pretrained(
-                    model_id, revision=revision
+                print(
+                    "Alternatively, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
                 )
-                return True
-        except ImportError:
-            print(
-                "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
+            model_id = "vikhyatk/moondream2"
+            revision = "2024-04-02"
+            print("loading model")
+
+            self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                model_id, trust_remote_code=True, revision=revision
             )
-            return False
+            self.tokenizer = transformers.AutoTokenizer.from_pretrained(
+                model_id, revision=revision
+            )
+            return True
 
     def ocr(
         self,
@@ -103,7 +98,13 @@ class Vision:
             # Set path to the path of the temporary file
             path = temp_file_path
 
-        return pytesseract_get_text(path)
+        try:
+            return pytesseract_get_text(path)
+        except ImportError:
+            print(
+                "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
+            )
+            return ""
 
     def query(
         self,
