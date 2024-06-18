@@ -80,6 +80,7 @@ interpreter.computer.system_message = ""  # The default will explain how to use 
 # Misc settings
 interpreter.auto_run = True
 interpreter.offline = True
+interpreter.os = True
 
 # Final message
 interpreter.display_message(

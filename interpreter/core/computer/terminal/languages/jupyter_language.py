@@ -50,6 +50,13 @@ class JupyterLanguage(BaseLanguage):
 import matplotlib
 matplotlib.use('{backend}')
         """.strip()
+
+        # Use Inline actually, it's better I think
+        code = """
+%matplotlib inline
+import matplotlib.pyplot as plt
+""".strip()
+
         for _ in self.run(code):
             pass
 
