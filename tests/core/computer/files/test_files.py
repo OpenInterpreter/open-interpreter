@@ -45,7 +45,7 @@ class TestFiles(unittest.TestCase):
 
         # Assert
         mock_open.assert_any_call("example/filepath/file", "r")
-        self.assertEquals(
+        self.assertEqual(
             str(context_manager.exception),
             "Original text not found. Did you mean one of these? foobar",
         )
