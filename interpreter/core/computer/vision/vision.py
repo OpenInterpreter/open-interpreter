@@ -132,7 +132,13 @@ class Vision:
         """
 
         if self.model == None and self.tokenizer == None:
-            success = self.load(load_easyocr=False).strip()
+            try:
+                success = self.load(load_easyocr=False)
+            except ImportError:
+                print(
+                    "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
+                )
+                return ""
             if not success:
                 return ""
 
