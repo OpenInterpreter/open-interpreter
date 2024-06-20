@@ -48,6 +48,7 @@ class Llm:
         self.api_base = None
         self.api_key = None
         self.api_version = None
+        self._is_loaded = False
 
         # Budget manager powered by LiteLLM
         self.max_budget = None
@@ -143,7 +144,7 @@ class Llm:
                         img_msg["content"] = (
                             precursor
                             + image_description
-                            + "\n---\nThe image contains the following text exactly, which may or may not be relevant (if it's not relevant, ignore this): '''\n"
+                            + "\n---\nI've OCR'd the image, this is the result (this may or may not be relevant. If it's not relevant, ignore this): '''\n"
                             + ocr
                             + "\n'''"
                             + postcursor
@@ -273,7 +274,20 @@ Continuing...
         else:
             yield from run_text_llm(self, params)
 
+    # If you change model, set _is_loaded to false
+    @property
+    def model(self):
+        return self._model
+
+    @model.setter
+    def model(self, value):
+        self._model = value
+        self._is_loaded = False
+
     def load(self):
+        if self._is_loaded:
+            return
+
         if self.model.startswith("ollama/"):
             # WOAH we should also hit up ollama and set max_tokens and context_window based on the LLM. I think they let u do that
 
@@ -302,7 +316,7 @@ Continuing...
                 subprocess.run(["ollama", "pull", model_name], check=True)
 
             # Send a ping, which will actually load the model
-            print(f"\nLoading {model_name}...\n")
+            # print(f"\nLoading {model_name}...\n")
 
             old_max_tokens = self.max_tokens
             self.max_tokens = 1
@@ -312,6 +326,9 @@ Continuing...
             # self.interpreter.display_message("\n*Model loaded.*\n")
 
         # Validate LLM should be moved here!!
+
+        self._is_loaded = True
+        return
 
 
 def fixed_litellm_completions(**params):

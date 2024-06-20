@@ -82,7 +82,10 @@ def handle_verbose(self, arguments=None):
         print("\n\nCurrent messages:\n")
         for message in self.messages:
             message = message.copy()
-            if message["type"] == "image" and message.get("format") != "path":
+            if message["type"] == "image" and message.get("format") not in [
+                "path",
+                "description",
+            ]:
                 message["content"] = (
                     message["content"][:30] + "..." + message["content"][-30:]
                 )
@@ -102,7 +105,10 @@ def handle_debug(self, arguments=None):
         print("\n\nCurrent messages:\n")
         for message in self.messages:
             message = message.copy()
-            if message["type"] == "image" and message.get("format") != "path":
+            if message["type"] == "image" and message.get("format") not in [
+                "path",
+                "description",
+            ]:
                 message["content"] = (
                     message["content"][:30] + "..." + message["content"][-30:]
                 )

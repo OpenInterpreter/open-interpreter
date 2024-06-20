@@ -37,6 +37,25 @@ def test_sms():
     assert False
 
 
+@pytest.mark.skip(reason="Mac only")
+def test_pytes():
+    import os
+
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+    files_on_desktop = [f for f in os.listdir(desktop_path) if f.endswith(".png")]
+    if files_on_desktop:
+        first_file = files_on_desktop[0]
+        first_file_path = os.path.join(desktop_path, first_file)
+        print(first_file_path)
+        ocr = interpreter.computer.vision.ocr(path=first_file_path)
+        print(ocr)
+        print("what")
+    else:
+        print("No files found on Desktop.")
+
+    assert False
+
+
 def test_ai_chat():
     print(interpreter.computer.ai.chat("hi"))
 

@@ -9,14 +9,17 @@ try:
 except:
     cv2 = None  # Fixes colab error
 PIL = lazy_import("PIL")
-# pytesseract is very very optional, we don't even recommend it unless the api has failed
 pytesseract = lazy_import("pytesseract")
 
 
 def pytesseract_get_text(img):
-    import pytesseract
+    # List the attributes of pytesseract, which will trigger lazy loading of it
+    attributes = dir(pytesseract)
+    if pytesseract == None:
+        raise ImportError("The pytesseract module could not be imported.")
 
-    return pytesseract.image_to_string(img)
+    result = pytesseract.image_to_string(img)
+    return result
 
 
 def pytesseract_get_text_bounding_boxes(img):

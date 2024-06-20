@@ -113,6 +113,9 @@ interpreter.auto_run = True
 interpreter.offline = True
 interpreter.os = True
 
+# Vision setup
+interpreter.computer.vision.load()
+
 # Final message
 interpreter.display_message(
     "**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Be ready to close your terminal."
@@ -120,6 +123,4 @@ interpreter.display_message(
 interpreter.display_message(
     "\n**Note:** Codestral is a relatively weak model, so OS mode is highly experimental. Try using a more powerful model for OS mode with `interpreter --os`."
 )
-interpreter.display_message(
-    "> Model set to `codestral`, experimental OS control enabled"
-)
+interpreter.display_message("> Experimental OS control enabled.")

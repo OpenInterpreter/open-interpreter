@@ -86,9 +86,9 @@ def interpreter_info(interpreter):
         for message in interpreter.messages:
             message = message.copy()
             try:
-                if len(message["content"]) > 600:
+                if len(message["content"]) > 5000:
                     message["content"] = (
-                        message["content"][:300] + "..." + message["content"][-300:]
+                        message["content"][:800] + "..." + message["content"][-800:]
                     )
             except Exception as e:
                 print(str(e), "for message:", message)

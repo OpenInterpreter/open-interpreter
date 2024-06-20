@@ -17,35 +17,44 @@ class Vision:
         self.computer = computer
         self.model = None  # Will load upon first use
         self.tokenizer = None  # Will load upon first use
+        self.easyocr = None
 
-    def load(self):
-        print("\nLoading Moondream (vision)...\n")
+    def load(self, load_moondream=True, load_easyocr=True):
+        # print("Loading vision models (Moondream, EasyOCR)...\n")
 
         with contextlib.redirect_stdout(
             open(os.devnull, "w")
         ), contextlib.redirect_stderr(open(os.devnull, "w")):
-            import transformers  # Wait until we use it. Transformers can't be lazy loaded for some reason!
+            if self.easyocr == None and load_easyocr:
+                import easyocr
 
-            os.environ["TOKENIZERS_PARALLELISM"] = "false"
+                self.easyocr = easyocr.Reader(
+                    ["en"]
+                )  # this needs to run only once to load the model into memory
 
-            if self.computer.debug:
-                print(
-                    "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
+            if self.model == None and load_moondream:
+                import transformers  # Wait until we use it. Transformers can't be lazy loaded for some reason!
+
+                os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+                if self.computer.debug:
+                    print(
+                        "Open Interpreter will use Moondream (tiny vision model) to describe images to the language model. Set `interpreter.llm.vision_renderer = None` to disable this behavior."
+                    )
+                    print(
+                        "Alternatively, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
+                    )
+                model_id = "vikhyatk/moondream2"
+                revision = "2024-04-02"
+                print("loading model")
+
+                self.model = transformers.AutoModelForCausalLM.from_pretrained(
+                    model_id, trust_remote_code=True, revision=revision
                 )
-                print(
-                    "Alternatively, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
+                self.tokenizer = transformers.AutoTokenizer.from_pretrained(
+                    model_id, revision=revision
                 )
-            model_id = "vikhyatk/moondream2"
-            revision = "2024-04-02"
-            print("loading model")
-
-            self.model = transformers.AutoModelForCausalLM.from_pretrained(
-                model_id, trust_remote_code=True, revision=revision
-            )
-            self.tokenizer = transformers.AutoTokenizer.from_pretrained(
-                model_id, revision=revision
-            )
-            return True
+                return True
 
     def ocr(
         self,
@@ -99,7 +108,11 @@ class Vision:
             path = temp_file_path
 
         try:
-            return pytesseract_get_text(path)
+            if not self.easyocr:
+                self.load(load_moondream=False)
+            result = self.easyocr.readtext(path)
+            text = " ".join([item[1] for item in result])
+            return text.strip()
         except ImportError:
             print(
                 "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
@@ -108,7 +121,7 @@ class Vision:
 
     def query(
         self,
-        query="Describe this image.",
+        query="Describe this image. Also tell me what text is in the image, if any.",
         base_64=None,
         path=None,
         lmc=None,
@@ -119,7 +132,7 @@ class Vision:
         """
 
         if self.model == None and self.tokenizer == None:
-            success = self.load()
+            success = self.load(load_easyocr=False).strip()
             if not success:
                 return ""
 
@@ -149,6 +162,8 @@ class Vision:
 
         with contextlib.redirect_stdout(open(os.devnull, "w")):
             enc_image = self.model.encode_image(img)
-            answer = self.model.answer_question(enc_image, query, self.tokenizer)
+            answer = self.model.answer_question(
+                enc_image, query, self.tokenizer, max_length=400
+            )
 
         return answer
