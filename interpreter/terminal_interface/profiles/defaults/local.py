@@ -27,8 +27,3 @@ interpreter.computer.import_computer_api = False
 # Misc settings
 interpreter.auto_run = False
 interpreter.offline = True
-
-# Final message
-interpreter.display_message(
-    f"> Model set to `{interpreter.llm.model}`\n\n**Open Interpreter** will require approval before running code.\n\nUse `interpreter -y` to bypass this.\n\nPress `CTRL-C` to exit.\n"
-)

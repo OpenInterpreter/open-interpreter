@@ -20,12 +20,6 @@ from .respond import respond
 from .utils.telemetry import send_telemetry
 from .utils.truncate_output import truncate_output
 
-try:
-    from .server import server
-except:
-    # Dependencies for server are not generally required
-    pass
-
 
 class OpenInterpreter:
     """
@@ -140,14 +134,6 @@ class OpenInterpreter:
         self.code_output_template = code_output_template
         self.empty_code_output_template = empty_code_output_template
         self.code_output_sender = code_output_sender
-
-    def server(self, *args, **kwargs):
-        try:
-            server(self)
-        except ImportError:
-            display_markdown_message(
-                "Missing dependencies for the server, please run `pip install open-interpreter[server]` and try again."
-            )
 
     def local_setup(self):
         """
@@ -313,6 +299,7 @@ class OpenInterpreter:
         Pulls from the respond stream, adding delimiters. Some things, like active_line, console, confirmation... these act specially.
         Also assembles new messages and adds them to `self.messages`.
         """
+        self.verbose = False
 
         # Utility function
         def is_active_line_chunk(chunk):
@@ -321,6 +308,10 @@ class OpenInterpreter:
         last_flag_base = None
 
         for chunk in respond(self):
+            # For async usage
+            if hasattr(self, "stop_event") and self.stop_event.is_set():
+                break
+
             if chunk["content"] == "":
                 continue
 
@@ -330,7 +321,10 @@ class OpenInterpreter:
                 if last_flag_base:
                     yield {**last_flag_base, "end": True}
                     last_flag_base = None
-                yield chunk
+
+                if self.auto_run == False:
+                    yield chunk
+
                 # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
                 # ... rethink this though.
                 self.messages.append(

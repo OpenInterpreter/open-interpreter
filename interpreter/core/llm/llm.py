@@ -4,10 +4,12 @@ os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
 litellm.suppress_debug_info = True
+import json
 import subprocess
 import time
 import uuid
 
+import requests
 import tokentrim as tt
 
 from ...terminal_interface.utils.display_markdown_message import (
@@ -289,8 +291,6 @@ Continuing...
             return
 
         if self.model.startswith("ollama/"):
-            # WOAH we should also hit up ollama and set max_tokens and context_window based on the LLM. I think they let u do that
-
             model_name = self.model.replace("ollama/", "")
             try:
                 # List out all downloaded ollama models. Will fail if ollama isn't installed
@@ -315,20 +315,36 @@ Continuing...
                 self.interpreter.display_message(f"\nDownloading {model_name}...\n")
                 subprocess.run(["ollama", "pull", model_name], check=True)
 
+            # Get context window if not set
+            if self.context_window == None:
+                response = requests.post(
+                    "http://localhost:11434/api/show", json={"name": model_name}
+                )
+                model_info = response.json().get("model_info", {})
+                context_length = None
+                for key in model_info:
+                    if "context_length" in key:
+                        context_length = model_info[key]
+                        break
+                if context_length is not None:
+                    self.context_window = context_length
+            if self.max_tokens == None:
+                if self.context_window != None:
+                    self.max_tokens = int(self.context_window * 0.8)
+
             # Send a ping, which will actually load the model
-            # print(f"\nLoading {model_name}...\n")
+            print(f"Loading {model_name}...\n")
 
             old_max_tokens = self.max_tokens
             self.max_tokens = 1
             self.interpreter.computer.ai.chat("ping")
             self.max_tokens = old_max_tokens
 
-            # self.interpreter.display_message("\n*Model loaded.*\n")
+            self.interpreter.display_message("*Model loaded.*\n")
 
         # Validate LLM should be moved here!!
 
         self._is_loaded = True
-        return
 
 
 def fixed_litellm_completions(**params):

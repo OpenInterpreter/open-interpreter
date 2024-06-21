@@ -57,14 +57,14 @@ easyocr = { version = "^1.7.1", optional = true }
 
 # Optional [server] dependencies
 fastapi = { version = "^0.111.0", optional = true }
-pynput = { version = "^1.7.7", optional = true }
 uvicorn = { version = "^0.30.1", optional = true }
+janus = { version = "^1.0.0", optional = true }
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm", "screeninfo"]
 safe = ["semgrep", "yaspin"]
 local = ["opencv-python", "pytesseract", "torch", "transformers", "einops", "torchvision", "easyocr"]
-server = ["fastapi", "pynput", "uvicorn"]
+server = ["fastapi", "janus", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
