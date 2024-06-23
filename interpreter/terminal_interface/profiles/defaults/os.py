@@ -6,11 +6,11 @@ interpreter.os = True
 interpreter.llm.supports_vision = True
 # interpreter.shrink_images = True # Faster but less accurate
 
-interpreter.llm.model = "gpt-4-vision-preview"
+interpreter.llm.model = "gpt-4o"
 
 interpreter.computer.import_computer_api = True
 
-interpreter.llm.supports_functions = False
+interpreter.llm.supports_functions = True
 interpreter.llm.context_window = 110000
 interpreter.llm.max_tokens = 4096
 interpreter.auto_run = True

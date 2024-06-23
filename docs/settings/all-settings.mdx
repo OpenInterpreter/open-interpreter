@@ -280,7 +280,7 @@ llm:
 
 ### Vision Mode
 
-Enables vision mode, which adds some special instructions to the prompt and switches to `gpt-4-vision-preview`.
+Enables vision mode, which adds some special instructions to the prompt and switches to `gpt-4o`.
 
 <CodeGroup>
 ```bash Terminal
@@ -288,9 +288,9 @@ interpreter --vision
 ```
 
 ```python Python
-interpreter.llm.model = "gpt-4-vision-preview" # Any vision supporting model
+interpreter.llm.model = "gpt-4o" # Any vision supporting model
 interpreter.llm.supports_vision = True
-interpreter.llm.supports_functions = False # If model doesn't support functions, which is the case with gpt-4-vision.
+interpreter.llm.supports_functions = True
 
 interpreter.custom_instructions = """The user will show you an image of the code you write. You can view images directly.
 For HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.
@@ -302,10 +302,10 @@ If you use `plt.show()`, the resulting image will be sent to you. However, if yo
 loop: True
 
 llm:
-  model: "gpt-4-vision-preview"
+  model: "gpt-4o"
   temperature: 0
   supports_vision: True
-  supports_functions: False
+  supports_functions: True
   context_window: 110000
   max_tokens: 4096
   custom_instructions: >
