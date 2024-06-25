@@ -2,6 +2,7 @@
 This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
+
 import json
 import os
 import threading
@@ -79,6 +80,7 @@ class OpenInterpreter:
         import_skills=False,
         multi_line=False,
         contribute_conversation=False,
+        optimize=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -134,6 +136,7 @@ class OpenInterpreter:
         self.code_output_template = code_output_template
         self.empty_code_output_template = empty_code_output_template
         self.code_output_sender = code_output_sender
+        self.optimize = optimize
 
     def local_setup(self):
         """
