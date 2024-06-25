@@ -1,12 +1,12 @@
 ### OPEN INTERPRETER CONFIGURATION FILE
 
-force_task_completion: True
+loop: True
 
 llm:
-  model: "gpt-4-vision-preview"
+  model: "gpt-4o"
   temperature: 0
   supports_vision: True
-  supports_functions: False
+  supports_functions: True
   context_window: 110000
   max_tokens: 4096
   custom_instructions: >

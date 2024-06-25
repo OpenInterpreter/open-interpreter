@@ -9,17 +9,17 @@
     <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
     <a href="https://github.com/OpenInterpreter/open-interpreter/blob/main/LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br>
-    <br>
     <br><a href="https://0ggfznkwh4j.typeform.com/to/G21i9lJ2">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
 <br>
 
-![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
+<img alt="local_explorer" src="https://github.com/OpenInterpreter/open-interpreter/assets/63927363/d941c3b4-b5ad-4642-992c-40edf31e2e7a">
 
 <br>
+<br>
 <p align="center">
-<strong>The New Computer Update</strong> introduced <strong><code>--os</code></strong> and a new <strong>Computer API</strong>. <a href="https://changes.openinterpreter.com/log/the-new-computer-update">Read On →</a>
+This week we launched <strong>Local III</strong>, which introduces the Local Explorer via <strong><code>--local</code></strong>. <a href="https://changes.openinterpreter.com/log/local-iii">Read On →</a>
 </p>
 <br>
 

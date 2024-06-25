@@ -4,13 +4,13 @@ Gotta split this out, generalize it, and move all the python additions to python
 """
 
 import ast
+import logging
 import os
 import queue
 import re
 import threading
 import time
 import traceback
-import logging
 
 from jupyter_client import KernelManager
 
@@ -26,7 +26,7 @@ class JupyterLanguage(BaseLanguage):
 
     def __init__(self, computer):
         self.computer = computer
-            
+
         self.km = KernelManager(kernel_name="python3")
         self.km.start_kernel()
         self.kc = self.km.client()
@@ -50,6 +50,13 @@ class JupyterLanguage(BaseLanguage):
 import matplotlib
 matplotlib.use('{backend}')
         """.strip()
+
+        # Use Inline actually, it's better I think
+        code = """
+%matplotlib inline
+import matplotlib.pyplot as plt
+""".strip()
+
         for _ in self.run(code):
             pass
 
@@ -66,6 +73,9 @@ matplotlib.use('{backend}')
         self.km.shutdown_kernel()
 
     def run(self, code):
+        while not self.kc.is_alive():
+            time.sleep(0.1)
+
         ################################################################
         ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
         ################################################################
@@ -119,7 +129,7 @@ matplotlib.use('{backend}')
 
                 if DEBUG_MODE:
                     print("-----------" * 10)
-                    print("Message recieved:", msg["content"])
+                    print("Message received:", msg["content"])
                     print("-----------" * 10)
 
                 if (
@@ -226,6 +236,13 @@ matplotlib.use('{backend}')
 
     def _capture_output(self, message_queue):
         while True:
+            # For async usage
+            if (
+                hasattr(self.computer.interpreter, "stop_event")
+                and self.computer.interpreter.stop_event.is_set()
+            ):
+                break
+
             if self.listener_thread:
                 try:
                     output = message_queue.get(timeout=0.1)

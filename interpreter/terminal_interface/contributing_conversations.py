@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import time
 from typing import List, TypedDict
 
@@ -7,8 +7,9 @@ import pkg_resources
 import requests
 
 from interpreter.terminal_interface.profiles.profiles import write_key_to_profile
-from interpreter.terminal_interface.utils.display_markdown_message import display_markdown_message
-
+from interpreter.terminal_interface.utils.display_markdown_message import (
+    display_markdown_message,
+)
 
 contribute_cache_path = os.path.join(
     os.path.expanduser("~"), ".cache", "open-interpreter", "contribute.json"
@@ -17,13 +18,12 @@ contribute_cache_path = os.path.join(
 
 def display_contribution_message():
     display_markdown_message(
-"""
+        """
 ---
-> We're training an open-source language model!
+> We're training an open-source language model.
 
-You can help us train it with your past, current, or future conversations by:
-1. Closing out of OpenInterpreter,
-2. Running `interpreter --contribute_conversation`.
+Want to contribute? Run `interpreter --model i` to use our free, hosted model. Conversations with this `i` model will be used for training.
+
 """
     )
     time.sleep(1)
@@ -31,9 +31,9 @@ You can help us train it with your past, current, or future conversations by:
 
 def display_contributing_current_message():
     display_markdown_message(
-f"""
+        f"""
 ---
-> This conversation will be used to train OpenInterpreter's language model.
+> This conversation will be used to train Open Interpreter's open-source language model.
 """
     )
 
@@ -42,30 +42,40 @@ def send_past_conversations(interpreter):
     past_conversations = get_all_conversations(interpreter)
     if len(past_conversations) > 0:
         print()
-        print("Sending all previous conversations to OpenInterpreter...")
-        contribute_conversations(past_conversations)
+        print(
+            "We are about to send all previous conversations to Open Interpreter for training an open-source language model. Please make sure these don't contain any private information. Run `interpreter --conversations` to browse them."
+        )
         print()
+        time.sleep(2)
+        uh = input(
+            "Do we have your permission to send all previous conversations to Open Interpreter? (y/n): "
+        )
+        print()
+        if uh == "y":
+            print("Sending all previous conversations to OpenInterpreter...")
+            contribute_conversations(past_conversations)
+            print()
 
 
 def set_send_future_conversations(interpreter, should_send_future):
     write_key_to_profile("contribute_conversation", should_send_future)
     display_markdown_message(
-"""
-> OpenInterpreter will contribute all your conversations from now on.
+        """
+> Open Interpreter will contribute conversations from now on. Thank you for your help!
 
-To change this, consult the documentation at [https://unassuminglink.com](https://www.readthefuckingmanual.com).
+To change this, run `interpreter --profiles` and edit the `default.yaml` profile so "contribute_conversation" = False.
 """
     )
 
 
 def user_wants_to_contribute_past():
-    print("Would you like to contribute all past conversations?")
+    print("\nWould you like to contribute all past conversations?\n")
     response = input("(y/n) ")
     return response.lower() == "y"
 
 
 def user_wants_to_contribute_future():
-    print("Would you like to contribute all future conversations?")
+    print("\nWould you like to contribute all future conversations?\n")
     response = input("(y/n) ")
     return response.lower() == "y"
 
@@ -139,7 +149,9 @@ def get_all_conversations(interpreter) -> List[List]:
 
     history_path = interpreter.conversation_history_path
     all_conversations: List[List] = []
-    conversation_files = os.listdir(history_path) if os.path.exists(history_path) else []
+    conversation_files = (
+        os.listdir(history_path) if os.path.exists(history_path) else []
+    )
     for mpath in conversation_files:
         if not is_conversation_path(mpath):
             continue
@@ -154,26 +166,28 @@ def is_list_of_lists(l):
     return isinstance(l, list) and all([isinstance(e, list) for e in l])
 
 
-def contribute_conversations(conversations: List[List]):
+def contribute_conversations(
+    conversations: List[List], feedback=None, conversation_id=None
+):
     if len(conversations) == 0 or len(conversations[0]) == 0:
         return None
 
-    url = "https://api.openinterpreter.com/v0/conversations/contribute/"
+    url = "https://api.openinterpreter.com/v0/contribute/"
     version = pkg_resources.get_distribution("open-interpreter").version
 
-    payload = {"conversations": conversations, "oi_version": version}
+    payload = {
+        "conversation_id": conversation_id,
+        "conversations": conversations,
+        "oi_version": version,
+        "feedback": feedback,
+    }
 
-    assert is_list_of_lists(payload["conversations"]), "the contribution payload is not a list of lists!"
+    assert is_list_of_lists(
+        payload["conversations"]
+    ), "the contribution payload is not a list of lists!"
 
     try:
-        response = requests.post(url, json=payload)
-        if response.status_code != 200:
-            print(
-                f"Failed to contribute conversation: {response.status_code} {response.text}"
-            )
-            return None
-        else:
-            print(f"Successfully contributed conversations!")
-    except requests.RequestException as e:
-        print(f"Failed to contribute conversation: {e}")
-        return None
+        requests.post(url, json=payload)
+    except:
+        # Non blocking
+        pass

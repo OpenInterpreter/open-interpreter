@@ -1,10 +1,10 @@
 import json
 import os
 import subprocess
-import time
 import sys
-
+import time
 from datetime import datetime
+
 from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
 from .utils.display_markdown_message import display_markdown_message
@@ -54,7 +54,7 @@ def handle_help(self, arguments):
         "%undo": "Remove previous messages and its response from the message history.",
         "%save_message [path]": "Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
         "%load_message [path]": "Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.",
-        "%tokens [prompt]": "EXPERIMENTAL: Calculate the tokens used by the next request based on the current conversation's messages and estimate the cost of that request; optionally provide a prompt to also calulate the tokens used by that prompt and the total amount of tokens that will be sent with the next request",
+        "%tokens [prompt]": "EXPERIMENTAL: Calculate the tokens used by the next request based on the current conversation's messages and estimate the cost of that request; optionally provide a prompt to also calculate the tokens used by that prompt and the total amount of tokens that will be sent with the next request",
         "%help": "Show this help message.",
         "%info": "Show system and interpreter information",
         "%jupyter": "Export the conversation to a Jupyter notebook file",
@@ -82,7 +82,10 @@ def handle_verbose(self, arguments=None):
         print("\n\nCurrent messages:\n")
         for message in self.messages:
             message = message.copy()
-            if message["type"] == "image" and message.get("format") != "path":
+            if message["type"] == "image" and message.get("format") not in [
+                "path",
+                "description",
+            ]:
                 message["content"] = (
                     message["content"][:30] + "..." + message["content"][-30:]
                 )
@@ -94,6 +97,40 @@ def handle_verbose(self, arguments=None):
         self.verbose = False
     else:
         display_markdown_message("> Unknown argument to verbose command.")
+
+
+def handle_debug(self, arguments=None):
+    if arguments == "" or arguments == "true":
+        display_markdown_message("> Entered debug mode")
+        print("\n\nCurrent messages:\n")
+        for message in self.messages:
+            message = message.copy()
+            if message["type"] == "image" and message.get("format") not in [
+                "path",
+                "description",
+            ]:
+                message["content"] = (
+                    message["content"][:30] + "..." + message["content"][-30:]
+                )
+            print(message, "\n")
+        print("\n")
+        self.debug = True
+    elif arguments == "false":
+        display_markdown_message("> Exited verbose mode")
+        self.debug = False
+    else:
+        display_markdown_message("> Unknown argument to debug command.")
+
+
+def handle_auto_run(self, arguments=None):
+    if arguments == "" or arguments == "true":
+        display_markdown_message("> Entered auto_run mode")
+        self.auto_run = True
+    elif arguments == "false":
+        display_markdown_message("> Exited auto_run mode")
+        self.auto_run = False
+    else:
+        display_markdown_message("> Unknown argument to auto_run command.")
 
 
 def handle_info(self, arguments):
@@ -175,14 +212,16 @@ def handle_count_tokens(self, prompt):
 
     display_markdown_message("\n".join(outputs))
 
+
 def get_downloads_path():
-    if os.name == 'nt':
+    if os.name == "nt":
         # For Windows
-        downloads = os.path.join(os.environ['USERPROFILE'], 'Downloads')
+        downloads = os.path.join(os.environ["USERPROFILE"], "Downloads")
     else:
         # For MacOS and Linux
-        downloads = os.path.join(os.path.expanduser('~'), 'Downloads')
+        downloads = os.path.join(os.path.expanduser("~"), "Downloads")
     return downloads
+
 
 def install_and_import(package):
     try:
@@ -193,29 +232,32 @@ def install_and_import(package):
             print("")
             print(f"Installing {package}...")
             print("")
-            subprocess.check_call([sys.executable, "-m", "pip", "install", package],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+            subprocess.check_call(
+                [sys.executable, "-m", "pip", "install", package],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
             module = __import__(package)
         except subprocess.CalledProcessError:
             # If pip fails, try pip3
             try:
-                subprocess.check_call([sys.executable, "-m", "pip3", "install", package],
+                subprocess.check_call(
+                    [sys.executable, "-m", "pip3", "install", package],
                     stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
+                    stderr=subprocess.DEVNULL,
                 )
             except subprocess.CalledProcessError:
                 print(f"Failed to install package {package}.")
                 return
     finally:
         globals()[package] = module
-    return module 
+    return module
+
 
 def jupyter(self, arguments):
     # Dynamically install nbformat if not already installed
-    nbformat = install_and_import('nbformat') 
-    from nbformat.v4 import new_notebook, new_code_cell, new_markdown_cell
+    nbformat = install_and_import("nbformat")
+    from nbformat.v4 import new_code_cell, new_markdown_cell, new_notebook
 
     downloads = get_downloads_path()
     current_time = datetime.now()
@@ -224,31 +266,33 @@ def jupyter(self, arguments):
     notebook_path = os.path.join(downloads, filename)
     nb = new_notebook()
     cells = []
-    
+
     for msg in self.messages:
-            if msg['role'] == 'user' and msg['type'] == 'message':
-                # Prefix user messages with '>' to render them as block quotes, so they stand out
-                content = f"> {msg['content']}"
-                cells.append(new_markdown_cell(content))
-            elif msg['role'] == 'assistant' and msg['type'] == 'message':
-                cells.append(new_markdown_cell(msg['content']))
-            elif msg['type'] == 'code':
-                # Handle the language of the code cell
-                if 'format' in msg and msg['format']:
-                    language = msg['format']
-                else:
-                    language = 'python'  # Default to Python if no format specified
-                code_cell = new_code_cell(msg['content'])
-                code_cell.metadata.update({"language": language})
-                cells.append(code_cell)
-    
-    nb['cells'] = cells
-    
-    with open(notebook_path, 'w', encoding='utf-8') as f:
+        if msg["role"] == "user" and msg["type"] == "message":
+            # Prefix user messages with '>' to render them as block quotes, so they stand out
+            content = f"> {msg['content']}"
+            cells.append(new_markdown_cell(content))
+        elif msg["role"] == "assistant" and msg["type"] == "message":
+            cells.append(new_markdown_cell(msg["content"]))
+        elif msg["type"] == "code":
+            # Handle the language of the code cell
+            if "format" in msg and msg["format"]:
+                language = msg["format"]
+            else:
+                language = "python"  # Default to Python if no format specified
+            code_cell = new_code_cell(msg["content"])
+            code_cell.metadata.update({"language": language})
+            cells.append(code_cell)
+
+    nb["cells"] = cells
+
+    with open(notebook_path, "w", encoding="utf-8") as f:
         nbformat.write(nb, f)
-    
+
     print("")
-    display_markdown_message(f"Jupyter notebook file exported to {os.path.abspath(notebook_path)}")
+    display_markdown_message(
+        f"Jupyter notebook file exported to {os.path.abspath(notebook_path)}"
+    )
 
 
 def handle_magic_command(self, user_input):
@@ -263,6 +307,8 @@ def handle_magic_command(self, user_input):
     switch = {
         "help": handle_help,
         "verbose": handle_verbose,
+        "debug": handle_debug,
+        "auto_run": handle_auto_run,
         "reset": handle_reset,
         "save_message": handle_save_message,
         "load_message": handle_load_message,

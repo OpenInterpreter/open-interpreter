@@ -4,23 +4,22 @@ from ...utils.lazy_import import lazy_import
 
 # Lazy import of optional packages
 np = lazy_import("numpy")
-cv2 = lazy_import("cv2")
+try:
+    cv2 = lazy_import("cv2")
+except:
+    cv2 = None  # Fixes colab error
 PIL = lazy_import("PIL")
-# pytesseract is very very optional, we don't even recommend it unless the api has failed
 pytesseract = lazy_import("pytesseract")
 
 
 def pytesseract_get_text(img):
-    # Convert PIL Image to NumPy array
-    img_array = np.array(img)
+    # List the attributes of pytesseract, which will trigger lazy loading of it
+    attributes = dir(pytesseract)
+    if pytesseract == None:
+        raise ImportError("The pytesseract module could not be imported.")
 
-    # Convert the image to grayscale
-    gray = cv2.cvtColor(img_array, cv2.COLOR_BGR2GRAY)
-
-    # Use pytesseract to get the text from the image
-    text = pytesseract.image_to_string(gray)
-
-    return text
+    result = pytesseract.image_to_string(img)
+    return result
 
 
 def pytesseract_get_text_bounding_boxes(img):

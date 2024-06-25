@@ -1,3 +1,5 @@
+import time
+
 from ..utils.recipient_utils import parse_for_recipient
 from .languages.applescript import AppleScript
 from .languages.html import HTML
@@ -31,19 +33,25 @@ class Terminal:
     def get_language(self, language):
         for lang in self.languages:
             if language.lower() == lang.name.lower() or (
-                hasattr(lang, "aliases") and language.lower() in (alias.lower() for alias in lang.aliases)
+                hasattr(lang, "aliases")
+                and language.lower() in (alias.lower() for alias in lang.aliases)
             ):
                 return lang
         return None
 
     def run(self, language, code, stream=False, display=False):
         if language == "python":
-            if self.computer.import_computer_api and not self.computer._has_imported_computer_api and "computer" in code:
+            if (
+                self.computer.import_computer_api
+                and not self.computer._has_imported_computer_api
+                and "computer" in code
+            ):
                 self.computer._has_imported_computer_api = True
                 # Give it access to the computer via Python
+                time.sleep(0.5)
                 self.computer.run(
                     language="python",
-                    code="import time\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
+                    code="import time\nimport datetime\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
                     display=self.computer.verbose,
                 )
 

@@ -24,10 +24,10 @@ from .components.code_block import CodeBlock
 from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
 from .utils.check_for_package import check_for_package
+from .utils.cli_input import cli_input
 from .utils.display_markdown_message import display_markdown_message
 from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
-from .utils.cli_input import cli_input
 
 # Add examples to the readline history
 examples = [
@@ -46,7 +46,7 @@ except:
     pass
 
 def terminal_interface(interpreter, message):
-    # Auto run and offline (this.. this isnt right) don't display messages.
+    # Auto run and offline (this.. this isn't right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
     if not interpreter.auto_run and not interpreter.offline:
         interpreter_intro_message = [
@@ -76,7 +76,11 @@ def terminal_interface(interpreter, message):
     while True:
         if interactive:
             ### This is the primary input for Open Interpreter.
-            message = cli_input("> ").strip() if interpreter.multi_line else input("> ").strip()
+            message = (
+                cli_input("> ").strip()
+                if interpreter.multi_line
+                else input("> ").strip()
+            )
 
             try:
                 # This lets users hit the up arrow key for past messages
@@ -107,7 +111,10 @@ def terminal_interface(interpreter, message):
                 )
                 continue
 
-            if interpreter.llm.supports_vision or interpreter.llm.vision_renderer != None:
+            if (
+                interpreter.llm.supports_vision
+                or interpreter.llm.vision_renderer != None
+            ):
                 # Is the input a path to an image? Like they just dragged it into the terminal?
                 image_path = find_image_path(message)
 
@@ -194,8 +201,7 @@ def terminal_interface(interpreter, message):
                         )
 
                         # Display notification in OS mode
-                        if interpreter.os:
-                            interpreter.computer.os.notify(sanitized_message)
+                        interpreter.computer.os.notify(sanitized_message)
 
                         # Speak message aloud
                         def speak_text(text):
@@ -288,7 +294,7 @@ def terminal_interface(interpreter, message):
                         or ("format" in chunk and chunk["format"] == "javascript")
                     )
                 ):
-                    if interpreter.os and interpreter.verbose == False:
+                    if (interpreter.os == True) and (interpreter.verbose == False):
                         # We don't display things to the user in OS control mode, since we use vision to communicate the screen to the LLM so much.
                         # But if verbose is true, we do display it!
                         continue
@@ -365,12 +371,15 @@ def terminal_interface(interpreter, message):
                                 # (unless we figure out how to do this AFTER taking the screenshot)
                                 # otherwise it will try to click this notification!
 
-                                if any(action.startswith(text) for text in [
-                                    "computer.screenshot",
-                                    "computer.display.screenshot",
-                                    "computer.display.view",
-                                    "computer.view"
-                                ]):
+                                if any(
+                                    action.startswith(text)
+                                    for text in [
+                                        "computer.screenshot",
+                                        "computer.display.screenshot",
+                                        "computer.display.view",
+                                        "computer.view",
+                                    ]
+                                ):
                                     description = "Viewing screen..."
                                 elif action == "computer.mouse.click()":
                                     description = "Clicking..."
