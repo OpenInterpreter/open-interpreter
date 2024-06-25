@@ -259,6 +259,10 @@ Continuing...
             litellm.max_budget = self.max_budget
         if self.interpreter.verbose:
             litellm.set_verbose = True
+        if self.interpreter.llm_drop_params:
+            litellm.drop_params = True
+        if self.interpreter.llm_modify_params:
+            litellm.modify_params = True
 
         if self.interpreter.debug:
             print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")

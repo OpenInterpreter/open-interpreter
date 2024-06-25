@@ -265,6 +265,20 @@ def start_terminal_interface(interpreter):
                 "attr_name": "contribute_conversation",
             },
         },
+        {
+            "name": "llm_drop_params",
+            "nickname": "ldp",
+            "help_text": "set litellm.drop_params=True, Drop any unmapped params",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "llm_drop_params"},
+        },
+        {
+            "name": "llm_modify_params",
+            "nickname": "lmp",
+            "help_text": "set litellm.modify_params=True, Modify params or messages",
+            "type": bool,
+            "attribute": {"object": interpreter, "attr_name": "llm_modify_params"},
+        },
     ]
 
     # Check for deprecated flags before parsing arguments
