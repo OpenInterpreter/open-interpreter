@@ -45,8 +45,8 @@ class Java(SubprocessLanguage):
             class_name = match.group(1)
             file_name = f"{class_name}.java"
 
-            # Write the Java code to a file
-            with open(file_name, "w") as file:
+            # Write the Java code to a file, preserving newlines
+            with open(file_name, "w", newline='\n') as file:
                 file.write(code)
 
             # Compile the Java code
