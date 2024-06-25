@@ -265,6 +265,15 @@ def start_terminal_interface(interpreter):
                 "attr_name": "contribute_conversation",
             },
         },
+        {
+            "name": "optimize",
+            "help_text": "optimize the system prompt - experimentation",
+            "type": bool,
+            "attribute": {
+                "object": interpreter,
+                "attr_name": "optimize",
+            },
+        },
     ]
 
     # Check for deprecated flags before parsing arguments
