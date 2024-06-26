@@ -187,4 +187,4 @@ class Server:
         )
 
     def run(self):
-        uvicorn.run(self.app, host=self.host, port=self.port)
+        self.uvicorn_server.run()

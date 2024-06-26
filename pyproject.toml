@@ -80,6 +80,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 i = "interpreter.terminal_interface.start_terminal_interface:main"
+ibench = "benchmarks.simple:main"
 
 [tool.black]
 target-version = ['py311']

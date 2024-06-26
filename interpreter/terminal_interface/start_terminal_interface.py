@@ -9,7 +9,6 @@ from interpreter.terminal_interface.contributing_conversations import (
     contribute_conversations,
 )
 
-from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
 from .profiles.profiles import open_storage_dir, profile, reset_profile
 from .utils.check_for_update import check_for_update
@@ -320,6 +319,12 @@ def start_terminal_interface(interpreter):
 
     args, unknown_args = parser.parse_known_args()
 
+    if args.server:
+        # Instead use an async interpreter, which has a server. Set settings on that
+        from interpreter import AsyncInterpreter
+
+        interpreter = AsyncInterpreter()
+
     # handle unknown arguments
     if unknown_args:
         print(f"\nUnrecognized argument(s): {unknown_args}")
@@ -471,13 +476,13 @@ def start_terminal_interface(interpreter):
         conversation_navigator(interpreter)
         return
 
-    if args.server:
-        interpreter.server()
-        return
-
     validate_llm_settings(
         interpreter
     )  # This should actually just run interpreter.llm.load() once that's == to validate_llm_settings
+
+    if args.server:
+        interpreter.server.run()
+        return
 
     interpreter.in_terminal_interface = True
 
