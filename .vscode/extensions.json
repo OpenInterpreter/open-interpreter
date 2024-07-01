@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "davidanson.vscode-markdownlint",
+    "unifiedjs.vscode-mdx",
+    "ms-python.python",
+    "ms-python.debugpy",
+    "tamasfe.even-better-toml",
+    "redhat.vscode-yaml",
+    "dunstontc.vscode-gitignore-syntax",
+    "timonwong.shellcheck",
+    "mads-hartmann.bash-ide-vscode",
+    "bierner.markdown-checkbox",
+    "github.vscode-github-actions"
+  ]
+}
