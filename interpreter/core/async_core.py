@@ -68,7 +68,7 @@ class AsyncInterpreter(OpenInterpreter):
 
     def respond(self):
         for chunk in self._respond_and_store():
-            if chunk["type"] == "code":
+            if chunk["type"] in ["code", "output"]:
                 if "start" in chunk:
                     print("\n\n```" + chunk["format"], flush=True)
                 if "end" in chunk:
