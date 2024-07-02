@@ -342,8 +342,10 @@ def terminal_interface(interpreter, message):
 
                         # Truncate output
                         active_block.output = truncate_output(
-                            active_block.output, interpreter.max_output
-                        )
+                            active_block.output,
+                            interpreter.max_output,
+                            add_scrollbars=False,
+                        )  # ^ Notice that this doesn't add the "scrollbars" line, which I think is fine
                     if "format" in chunk and chunk["format"] == "active_line":
                         active_block.active_line = chunk["content"]
 

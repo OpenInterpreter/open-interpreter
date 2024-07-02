@@ -379,7 +379,9 @@ class OpenInterpreter:
             # Truncate output if it's console output
             if chunk["type"] == "console" and chunk["format"] == "output":
                 self.messages[-1]["content"] = truncate_output(
-                    self.messages[-1]["content"], self.max_output
+                    self.messages[-1]["content"],
+                    self.max_output,
+                    add_scrollbars=self.computer.import_computer_api,  # I consider scrollbars to be a computer API thing
                 )
 
         # Yield a final end flag

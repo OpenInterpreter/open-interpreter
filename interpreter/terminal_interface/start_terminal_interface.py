@@ -546,7 +546,7 @@ def main():
                             contribute = "y"
                         else:
                             print(
-                                "Thanks for your feedback! Would you like to send us this chat so we can improve?\n"
+                                "\nThanks for your feedback! Would you like to send us this chat so we can improve?\n"
                             )
                             contribute = input("(y/n): ").strip().lower()
 

@@ -1,7 +1,9 @@
 import asyncio
 import json
+import os
 import threading
 import traceback
+from datetime import datetime
 from typing import Any, Dict
 
 from .core import OpenInterpreter
@@ -22,6 +24,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.respond_thread = None
         self.stop_event = threading.Event()
         self.output_queue = None
+        self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
 
         self.server = Server(self)
 
@@ -41,8 +44,20 @@ class AsyncInterpreter(OpenInterpreter):
             self.accumulate(chunk)
         elif "end" in chunk:
             # If the user is done talking, the interpreter should respond.
+
+            # But first, process any client messages.
+            if self.messages[-1]["role"] == "client":
+                command = self.messages[-1]["content"]
+                self.messages = self.messages[:-1]
+
+                if command == "stop":
+                    return
+                if command == "go":
+                    # This is to approve code.
+                    # We do nothing, as self.respond will run the last code block if the last message is one.
+                    pass
+
             self.stop_event.clear()
-            print("Responding.")
             self.respond_thread = threading.Thread(target=self.respond)
             self.respond_thread.start()
 
@@ -53,7 +68,7 @@ class AsyncInterpreter(OpenInterpreter):
 
     def respond(self):
         for chunk in self._respond_and_store():
-            print(chunk.get("content", ""), end="")
+            print(chunk.get("content", ""), end="", flush=True)
             if self.stop_event.is_set():
                 return
             self.output_queue.sync_q.put(chunk)
@@ -160,8 +175,18 @@ def create_router(async_interpreter):
         finally:
             await websocket.close()
 
+    @router.post("/run")
+    async def run_code(payload: Dict[str, Any]):
+        language, code = payload.get("language"), payload.get("code")
+        if not (language and code):
+            return {"error": "Both 'language' and 'code' are required."}, 400
+        try:
+            return {"output": async_interpreter.computer.run(language, code)}
+        except Exception as e:
+            return {"error": str(e)}, 500
+
     @router.post("/settings")
-    async def settings(payload: Dict[str, Any]):
+    async def set_settings(payload: Dict[str, Any]):
         for key, value in payload.items():
             print(f"Updating settings: {key} = {value}")
             if key in ["llm", "computer"] and isinstance(value, dict):
@@ -171,6 +196,17 @@ def create_router(async_interpreter):
                 setattr(async_interpreter, key, value)
 
         return {"status": "success"}
+
+    @router.get("/interpreter/{setting}")
+    async def get_setting(setting: str):
+        if hasattr(async_interpreter, setting):
+            setting_value = getattr(async_interpreter, setting)
+            try:
+                return json.dumps({setting: setting_value})
+            except TypeError:
+                return {"error": "Failed to serialize the setting value"}, 500
+        else:
+            return json.dumps({"error": "Setting not found"}), 404
 
     return router
 

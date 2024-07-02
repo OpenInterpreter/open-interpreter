@@ -64,6 +64,16 @@ class Llm:
         And then processing its output, whether it's a function or non function calling model, into LMC format.
         """
 
+        if (
+            self.max_tokens is not None
+            and self.context_window is not None
+            and self.max_tokens > self.context_window
+        ):
+            print(
+                "Warning: max_tokens is larger than context_window. Setting max_tokens to be 0.2 times the context_window."
+            )
+            self.max_tokens = int(0.2 * self.context_window)
+
         # Assertions
         assert (
             messages[0]["role"] == "system"
@@ -200,7 +210,7 @@ class Llm:
                         if self.interpreter.in_terminal_interface:
                             display_markdown_message(
                                 """
-**We were unable to determine the context window of this model.** Defaulting to 3000.
+**We were unable to determine the context window of this model.** Defaulting to 8000.
 
 If your model can handle more, run `interpreter --context_window {token limit} --max_tokens {max tokens per response}`.
 
@@ -210,7 +220,7 @@ Continuing...
                         else:
                             display_markdown_message(
                                 """
-**We were unable to determine the context window of this model.** Defaulting to 3000.
+**We were unable to determine the context window of this model.** Defaulting to 8000.
 
 If your model can handle more, run `self.context_window = {token limit}`.
 
@@ -220,7 +230,7 @@ Continuing...
                             """
                             )
                     messages = tt.trim(
-                        messages, system_message=system_message, max_tokens=3000
+                        messages, system_message=system_message, max_tokens=8000
                     )
         except:
             # If we're trimming messages, this won't work.
@@ -330,7 +340,7 @@ Continuing...
                     self.context_window = context_length
             if self.max_tokens == None:
                 if self.context_window != None:
-                    self.max_tokens = int(self.context_window * 0.8)
+                    self.max_tokens = int(self.context_window * 0.2)
 
             # Send a ping, which will actually load the model
             print(f"Loading {model_name}...\n")
