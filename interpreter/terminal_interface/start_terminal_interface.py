@@ -476,9 +476,12 @@ def start_terminal_interface(interpreter):
         conversation_navigator(interpreter)
         return
 
-    validate_llm_settings(
-        interpreter
-    )  # This should actually just run interpreter.llm.load() once that's == to validate_llm_settings
+    if not args.server:
+        # This SHOULD RUN WHEN THE SERVER STARTS. But it can't rn because
+        # if you don't have an API key, a prompt shows up, breaking the whole thing.
+        validate_llm_settings(
+            interpreter
+        )  # This should actually just run interpreter.llm.load() once that's == to validate_llm_settings
 
     if args.server:
         interpreter.server.run()

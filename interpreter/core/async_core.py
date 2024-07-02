@@ -68,6 +68,11 @@ class AsyncInterpreter(OpenInterpreter):
 
     def respond(self):
         for chunk in self._respond_and_store():
+            if chunk["type"] == "code":
+                if "start" in chunk:
+                    print("\n\n```" + chunk["format"], flush=True)
+                if "end" in chunk:
+                    print("\n```", flush=True)
             print(chunk.get("content", ""), end="", flush=True)
             if self.stop_event.is_set():
                 return
@@ -223,4 +228,10 @@ class Server:
         )
 
     def run(self):
-        self.uvicorn_server.run()
+        try:
+            self.uvicorn_server.run()
+        except ImportError as e:
+            raise ImportError(
+                str(e)
+                + """\n\nPlease ensure you have run `pip install "open-interpreter[server]"` to install server dependencies."""
+            )
