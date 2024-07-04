@@ -122,7 +122,7 @@ def test_server():
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
                 if message_data == {
-                    "role": "assistant",
+                    "role": "server",
                     "type": "status",
                     "content": "complete",
                 }:
@@ -176,7 +176,7 @@ def test_server():
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
                 if message_data == {
-                    "role": "assistant",
+                    "role": "server",
                     "type": "status",
                     "content": "complete",
                 }:
@@ -223,7 +223,7 @@ def test_server():
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
                 if message_data == {
-                    "role": "assistant",
+                    "role": "server",
                     "type": "status",
                     "content": "complete",
                 }:
@@ -272,7 +272,7 @@ def test_server():
                     if type(message_data.get("content")) == str:
                         accumulated_content += message_data.get("content")
                 if message_data == {
-                    "role": "assistant",
+                    "role": "server",
                     "type": "status",
                     "content": "complete",
                 }:

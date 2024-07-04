@@ -89,9 +89,11 @@ class AsyncInterpreter(OpenInterpreter):
                 return
 
             if self.print:
+                if "start" in chunk:
+                    print("\n")
                 if chunk["type"] in ["code", "console"] and "format" in chunk:
                     if "start" in chunk:
-                        print("\n\n------------\n\n```" + chunk["format"], flush=True)
+                        print("\n------------\n\n```" + chunk["format"], flush=True)
                     if "end" in chunk:
                         print("\n```\n\n------------\n\n", flush=True)
                 print(chunk.get("content", ""), end="", flush=True)
@@ -99,7 +101,7 @@ class AsyncInterpreter(OpenInterpreter):
             self.output_queue.sync_q.put(chunk)
 
         self.output_queue.sync_q.put(
-            {"role": "assistant", "type": "status", "content": "complete"}
+            {"role": "server", "type": "status", "content": "complete"}
         )
 
     def accumulate(self, chunk):
