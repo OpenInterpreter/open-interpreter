@@ -234,12 +234,12 @@ interpreter.auto_run = True
 # Set offline for all local models
 interpreter.offline = True
 
-import os
+import os, platform
 
 # Get the current user's login name
 username = os.getlogin()
 # Determine the operating system
-operating_system = os.name
+operating_system = platform.system()
 # Find the current working directory
 cwd = os.getcwd()
 
