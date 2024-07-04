@@ -871,6 +871,16 @@ dnspython = ">=2.0.0"
 idna = ">=2.0.0"
 
 [[package]]
+name = "evdev"
+version = "1.7.1"
+description = "Bindings to the Linux input handling subsystem"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "evdev-1.7.1.tar.gz", hash = "sha256:0c72c370bda29d857e188d931019c32651a9c1ea977c08c8d939b1ced1637fde"},
+]
+
+[[package]]
 name = "ewmhlib"
 version = "0.2"
 description = "Extended Window Manager Hints implementation in Python 3"
@@ -3534,6 +3544,23 @@ files = [
 ]
 
 [[package]]
+name = "pynput"
+version = "1.7.7"
+description = "Monitor and control user input devices"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pynput-1.7.7-py2.py3-none-any.whl", hash = "sha256:afc43f651684c98818de048abc76adf9f2d3d797083cb07c1f82be764a2d44cb"},
+]
+
+[package.dependencies]
+evdev = {version = ">=1.3", markers = "sys_platform in \"linux\""}
+pyobjc-framework-ApplicationServices = {version = ">=8.0", markers = "sys_platform == \"darwin\""}
+pyobjc-framework-Quartz = {version = ">=8.0", markers = "sys_platform == \"darwin\""}
+python-xlib = {version = ">=0.17", markers = "sys_platform in \"linux\""}
+six = "*"
+
+[[package]]
 name = "pyobjc"
 version = "10.3.1"
 description = "Python<->ObjC Interoperability Module"
@@ -3707,7 +3734,7 @@ allbindings = ["pyobjc-core (==10.3.1)", "pyobjc-framework-AVFoundation (==10.3.
 name = "pyobjc-core"
 version = "10.3.1"
 description = "Python<->ObjC Interoperability Module"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_core-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:ea46d2cda17921e417085ac6286d43ae448113158afcf39e0abe484c58fb3d78"},
@@ -3836,7 +3863,7 @@ pyobjc-framework-Cocoa = ">=10.3.1"
 name = "pyobjc-framework-applicationservices"
 version = "10.3.1"
 description = "Wrappers for the framework ApplicationServices on macOS"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_framework_ApplicationServices-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:b694260d423c470cb90c3a7009cfde93e332ea6fb4b9b9526ad3acbd33460e3d"},
@@ -4163,7 +4190,7 @@ pyobjc-framework-CoreLocation = ">=10.3.1"
 name = "pyobjc-framework-cocoa"
 version = "10.3.1"
 description = "Wrappers for the Cocoa frameworks on macOS"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_framework_Cocoa-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:4cb4f8491ab4d9b59f5187e42383f819f7a46306a4fa25b84f126776305291d1"},
@@ -4492,7 +4519,7 @@ pyobjc-framework-Cocoa = ">=10.3.1"
 name = "pyobjc-framework-coretext"
 version = "10.3.1"
 description = "Wrappers for the framework CoreText on macOS"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_framework_CoreText-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:dd6123cfccc38e32be884d1a13fb62bd636ecb192b9e8ae2b8011c977dec229e"},
@@ -5731,7 +5758,7 @@ pyobjc-framework-Cocoa = ">=10.3.1"
 name = "pyobjc-framework-quartz"
 version = "10.3.1"
 description = "Wrappers for the Quartz frameworks on macOS"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_framework_Quartz-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:5ef4fd315ed2bc42ef77fdeb2bae28a88ec986bd7b8079a87ba3b3475348f96e"},
@@ -6401,7 +6428,7 @@ diagrams = ["jinja2", "railroad-diagrams"]
 name = "pyperclip"
 version = "1.9.0"
 description = "A cross-platform clipboard module for Python. (Only handles plain text for now.)"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "pyperclip-1.9.0.tar.gz", hash = "sha256:b7de0142ddc81bfc5c7507eea19da920b92252b548b96186caf94a5e2527d310"},
@@ -6541,7 +6568,7 @@ dev = ["atomicwrites (==1.4.1)", "attrs (==23.2.0)", "coverage (==7.4.1)", "hatc
 name = "python-xlib"
 version = "0.33"
 description = "Python X Library"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "python-xlib-0.33.tar.gz", hash = "sha256:55af7906a2c75ce6cb280a584776080602444f75815a7aff4d287bb2d7018b32"},
@@ -7706,7 +7733,7 @@ files = [
 name = "termcolor"
 version = "2.3.0"
 description = "ANSI color formatting for output in terminal"
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "termcolor-2.3.0-py3-none-any.whl", hash = "sha256:3afb05607b89aed0ffe25202399ee0867ad4d3cb4180d98aaf8eefa6a5f7d475"},
@@ -8783,7 +8810,7 @@ multidict = ">=4.0"
 name = "yaspin"
 version = "3.0.2"
 description = "Yet Another Terminal Spinner"
-optional = true
+optional = false
 python-versions = "<4.0,>=3.9"
 files = [
     {file = "yaspin-3.0.2-py3-none-any.whl", hash = "sha256:5c9b6549b84c8aa7f92426272b670e1302941d72f0275caf32d2ea7db3c269f9"},
@@ -8811,10 +8838,10 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [extras]
 local = ["easyocr", "einops", "opencv-python", "pytesseract", "torch", "torchvision", "transformers"]
 os = ["ipywidgets", "opencv-python", "plyer", "pyautogui", "pytesseract", "pywinctl", "screeninfo", "sentence-transformers", "timm", "torch"]
-safe = ["semgrep", "yaspin"]
+safe = ["semgrep"]
 server = ["fastapi", "janus", "uvicorn"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "16e8df9cb940800ebdba632364f4d8c3aa345a8555c53bb686109ad27368428c"
+content-hash = "b2994c9e342d27a231f3b53c3d07ba6f64394678ad70545d3e14f222fd886074"
