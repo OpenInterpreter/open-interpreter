@@ -24,8 +24,10 @@ from websocket import create_connection
 
 @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
 def test_server():
+    # os.system("pip install 'open-interpreter[server]'")
     # Start the server in a new thread
     async_interpreter = AsyncInterpreter()
+    async_interpreter.print = False
     server_thread = threading.Thread(target=async_interpreter.server.run)
     server_thread.start()
 
@@ -90,7 +92,7 @@ def test_server():
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
                 if message_data == {
-                    "role": "server",
+                    "role": "assistant",
                     "type": "status",
                     "content": "complete",
                 }:
@@ -144,7 +146,7 @@ def test_server():
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
                 if message_data == {
-                    "role": "server",
+                    "role": "assistant",
                     "type": "status",
                     "content": "complete",
                 }:
@@ -152,6 +154,102 @@ def test_server():
                     break
 
             assert "barloney" in accumulated_content
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "messages": [],
+                "custom_instructions": "",
+                "auto_run": False,
+                "verbose": False,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's 239023*79043? Use Python.",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "assistant",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            time.sleep(5)
+
+            # Send a GET request to /settings/messages
+            get_url = "http://localhost:8000/settings/messages"
+            response = requests.get(get_url)
+            print("GET request sent, response:", response.json())
+
+            # Assert that the last message has a type of 'code'
+            response_json = response.json()
+            if isinstance(response_json, str):
+                response_json = json.loads(response_json)
+            messages = response_json["messages"] if "messages" in response_json else []
+            assert messages[-1]["type"] == "code"
+            assert "18893094989" not in accumulated_content.replace(",", "")
+
+            # Send go message
+            await websocket.send(
+                json.dumps({"role": "user", "type": "command", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "command",
+                        "content": "go",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "command", "end": True})
+            )
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    if type(message_data.get("content")) == str:
+                        accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "assistant",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "18893094989" in accumulated_content.replace(",", "")
 
     # Get the current event loop and run the test function
     loop = asyncio.get_event_loop()

@@ -146,6 +146,18 @@ def respond(interpreter):
                     code = code[2:].strip()
                     if interpreter.verbose:
                         print("Removing `\n")
+                    interpreter.messages[-1]["content"] = code  # So the LLM can see it.
+
+                # A common hallucination
+                if code.startswith("functions.execute("):
+                    code = code.replace("functions.execute(", "").rstrip(")")
+                    code_dict = json.loads(code)
+                    language = code_dict.get("language", language)
+                    code = code_dict.get("code", code)
+                    interpreter.messages[-1]["content"] = code  # So the LLM can see it.
+                    interpreter.messages[-1][
+                        "format"
+                    ] = language  # So the LLM can see it.
 
                 if language == "text" or language == "markdown":
                     # It does this sometimes just to take notes. Let it, it's useful.

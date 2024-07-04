@@ -25,6 +25,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.stop_event = threading.Event()
         self.output_queue = None
         self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
+        self.print = True  # Will print output
 
         self.server = Server(self)
 
@@ -45,20 +46,27 @@ class AsyncInterpreter(OpenInterpreter):
         elif "end" in chunk:
             # If the user is done talking, the interpreter should respond.
 
-            # But first, process any client messages.
-            if self.messages[-1]["role"] == "client":
+            run_code = None  # Will later default to auto_run unless the user makes a command here
+
+            # But first, process any commands.
+            if self.messages[-1]["type"] == "command":
                 command = self.messages[-1]["content"]
                 self.messages = self.messages[:-1]
 
                 if command == "stop":
+                    # Any start flag would have stopped it a moment ago, but to be sure:
+                    self.stop_event.set()
+                    self.respond_thread.join()
                     return
                 if command == "go":
                     # This is to approve code.
-                    # We do nothing, as self.respond will run the last code block if the last message is one.
+                    run_code = True
                     pass
 
             self.stop_event.clear()
-            self.respond_thread = threading.Thread(target=self.respond)
+            self.respond_thread = threading.Thread(
+                target=self.respond, args=(run_code,)
+            )
             self.respond_thread.start()
 
     async def output(self):
@@ -66,20 +74,32 @@ class AsyncInterpreter(OpenInterpreter):
             self.output_queue = janus.Queue()
         return await self.output_queue.async_q.get()
 
-    def respond(self):
+    def respond(self, run_code=None):
+        if run_code == None:
+            run_code = self.auto_run
+
         for chunk in self._respond_and_store():
-            if chunk["type"] in ["code", "output"]:
-                if "start" in chunk:
-                    print("\n\n```" + chunk["format"], flush=True)
-                if "end" in chunk:
-                    print("\n```", flush=True)
-            print(chunk.get("content", ""), end="", flush=True)
+            if chunk["type"] == "confirmation":
+                if run_code:
+                    continue  # We don't need to send out confirmation chunks on the server. I don't even like them.
+                else:
+                    break
+
             if self.stop_event.is_set():
                 return
+
+            if self.print:
+                if chunk["type"] in ["code", "output"]:
+                    if "start" in chunk:
+                        print("\n\n```" + chunk["format"], flush=True)
+                    if "end" in chunk:
+                        print("\n```", flush=True)
+                print(chunk.get("content", ""), end="", flush=True)
+
             self.output_queue.sync_q.put(chunk)
 
         self.output_queue.sync_q.put(
-            {"role": "server", "type": "status", "content": "complete"}
+            {"role": "assistant", "type": "status", "content": "complete"}
         )
 
     def accumulate(self, chunk):
@@ -202,7 +222,7 @@ def create_router(async_interpreter):
 
         return {"status": "success"}
 
-    @router.get("/interpreter/{setting}")
+    @router.get("/settings/{setting}")
     async def get_setting(setting: str):
         if hasattr(async_interpreter, setting):
             setting_value = getattr(async_interpreter, setting)
