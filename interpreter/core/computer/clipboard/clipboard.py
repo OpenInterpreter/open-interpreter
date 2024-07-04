@@ -1,4 +1,4 @@
-import os
+import platform
 from ...utils.lazy_import import lazy_import
 
 # Lazy import of optional packages
@@ -8,7 +8,7 @@ class Clipboard:
     def __init__(self, computer):
         self.computer = computer
 
-        if os.name == "nt":
+        if platform.system() == "Windows" or platform.system() == "Linux":
             self.modifier_key = "ctrl"
         else:
             self.modifier_key = "command"
