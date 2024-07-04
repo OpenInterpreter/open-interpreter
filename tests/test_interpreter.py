@@ -22,6 +22,36 @@ import pytest
 from websocket import create_connection
 
 
+def test_hallucinations():
+    # We should be resiliant to common hallucinations.
+
+    code = """{                                                                             
+    "language": "python",                                                        
+    "code": "10+12"                                                        
+  }"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+    code = """functions.execute({                                                                             
+    "language": "python",                                                        
+    "code": "10+12"                                                        
+  })"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+
 @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
 def test_server():
     # os.system("pip install 'open-interpreter[server]'")
