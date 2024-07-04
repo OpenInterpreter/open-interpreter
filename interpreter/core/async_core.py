@@ -89,11 +89,11 @@ class AsyncInterpreter(OpenInterpreter):
                 return
 
             if self.print:
-                if chunk["type"] in ["code", "output"]:
+                if chunk["type"] in ["code", "console"]:
                     if "start" in chunk:
-                        print("\n\n```" + chunk["format"], flush=True)
+                        print("\n\n------------\n\n```" + chunk["format"], flush=True)
                     if "end" in chunk:
-                        print("\n```", flush=True)
+                        print("\n```\n\n------------\n\n", flush=True)
                 print(chunk.get("content", ""), end="", flush=True)
 
             self.output_queue.sync_q.put(chunk)
