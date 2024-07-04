@@ -89,7 +89,7 @@ class AsyncInterpreter(OpenInterpreter):
                 return
 
             if self.print:
-                if chunk["type"] in ["code", "console"]:
+                if chunk["type"] in ["code", "console"] and "format" in chunk:
                     if "start" in chunk:
                         print("\n\n------------\n\n```" + chunk["format"], flush=True)
                     if "end" in chunk:
