@@ -11,6 +11,7 @@ from .languages.r import R
 from .languages.react import React
 from .languages.ruby import Ruby
 from .languages.shell import Shell
+from .languages.java import Java
 
 # Should this be renamed to OS or System?
 
@@ -28,6 +29,7 @@ class Terminal:
             R,
             PowerShell,
             React,
+            Java,
         ]
         self._active_languages = {}
 
