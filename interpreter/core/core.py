@@ -77,7 +77,7 @@ class OpenInterpreter:
         import_computer_api=False,
         skills_path=None,
         import_skills=False,
-        multi_line=False,
+        multi_line=True,
         contribute_conversation=False,
     ):
         # State

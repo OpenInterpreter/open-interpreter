@@ -7,7 +7,9 @@ import os
 import platform
 import time
 
+import platformdirs
 import pyperclip
+import yaml
 from pynput.keyboard import Controller, Key
 
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
@@ -21,7 +23,7 @@ You are a fast, efficient AI assistant specialized in analyzing terminal history
 1. Quickly scan the provided terminal history.
 2. Identify the most recent error or issue.
 3. Determine the most likely solution or debugging step.
-4. Respond with a brief explanation followed by a markdown code block containing a shell command to address the issue.
+4. Respond with a VERY brief explanation followed by a markdown code block containing a shell command to address the issue.
 
 Rules:
 - Provide a single shell command in your code block, using line continuation characters (\\ for Unix-like systems, ^ for Windows) for multiline commands.
@@ -31,6 +33,7 @@ Rules:
 - Place explanatory text before the code block.
 - NEVER USE COMMENTS IN YOUR CODE.
 - Focus on the most recent error, ignoring earlier unrelated commands.
+- The error may be as simple as a spelling error, or as complex as requiring tests to be run. You may even need to suggest a command that edits text in a file to fix some code.
 - Prioritize speed and conciseness in your response. Don't use markdown headings. Don't say more than a sentence or two. Be incredibly concise.
 
 User's System: {platform.system()}
@@ -107,6 +110,18 @@ def main():
         {"role": "user", "content": history},
     ]
 
+    # Get LLM model from profile
+    default_profile_path = os.path.join(
+        platformdirs.user_config_dir("open-interpreter"), "profiles", "default.yaml"
+    )
+
+    try:
+        with open(default_profile_path, "r") as file:
+            profile = yaml.safe_load(file)
+            model = profile.get("llm", {}).get("model", "gpt-3.5-turbo")
+    except:
+        model = "gpt-3.5-turbo"
+
     # Process LLM response
     in_code = False
     backtick_count = 0
@@ -115,7 +130,7 @@ def main():
     started = False
 
     for chunk in litellm.completion(
-        model="gpt-3.5-turbo", messages=messages, temperature=0, stream=True
+        model=model, messages=messages, temperature=0, stream=True
     ):
         if not started:
             started = True
