@@ -78,7 +78,7 @@ def main():
     pyperclip.copy(clipboard)
 
     # Trim history
-    history = "Terminal: " + history[-10000:].strip()
+    history = history[-9000:].strip()
 
     # Remove any trailing spinner commands
     spinner_commands = [
@@ -138,6 +138,9 @@ def main():
         line_number = int(line_number)
         lines = get_lines_from_file(filename, line_number)
         result.append({"filename": filename, "text": "\n".join(lines)})
+
+    if result != []:
+        history = "Terminal: " + history
 
     # Add context
     for entry in result:
