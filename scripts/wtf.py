@@ -118,7 +118,11 @@ def main():
     try:
         with open(default_profile_path, "r") as file:
             profile = yaml.safe_load(file)
-            model = profile.get("llm", {}).get("model", "gpt-3.5-turbo")
+            wtf_model = profile.get("wtf", {}).get("model")
+            if wtf_model:
+                model = wtf_model
+            else:
+                model = profile.get("llm", {}).get("model", "gpt-3.5-turbo")
     except:
         model = "gpt-3.5-turbo"
 

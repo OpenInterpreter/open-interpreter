@@ -25,5 +25,9 @@ computer:
 # verbose: False  # If True, will print detailed logs
 # multi_line: False # If True, you can input multiple lines starting and ending with ```
 
+# To use a separate model for the `wtf` command:
+# wtf:
+#   model: "gpt-3.5-turbo"
+
 # Documentation
 # All options: https://docs.openinterpreter.com/settings
