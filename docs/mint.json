@@ -112,10 +112,6 @@
       "pages": ["integrations/e2b", "integrations/docker"]
     },
     {
-      "group": "Server",
-      "pages": ["server/usage"]
-    },
-    {
       "group": "Safety",
       "pages": [
         "safety/introduction",
