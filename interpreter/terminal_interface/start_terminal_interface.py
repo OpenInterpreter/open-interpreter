@@ -266,6 +266,13 @@ def start_terminal_interface(interpreter):
         },
     ]
 
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        message = " ".join(sys.argv[1:])
+        interpreter.messages.append(
+            {"role": "user", "type": "message", "content": "I " + message}
+        )
+        sys.argv = sys.argv[:1]
+
     # Check for deprecated flags before parsing arguments
     deprecated_flags = {
         "--debug_mode": "--verbose",
@@ -566,7 +573,7 @@ def main():
                         if contribute == "y":
                             interpreter.contribute_conversation = True
                             interpreter.display_message(
-                                "\n*Thank you for contributing!*"
+                                "\n*Thank you for contributing!*\n"
                             )
 
                 if (

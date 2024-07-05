@@ -47,7 +47,12 @@ except:
 def terminal_interface(interpreter, message):
     # Auto run and offline (this.. this isn't right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
-    if not interpreter.auto_run and not interpreter.offline:
+    # If (len(interpreter.messages) == 1), they probably used the advanced "i {command}" entry, so no message should be displayed.
+    if (
+        not interpreter.auto_run
+        and not interpreter.offline
+        and not (len(interpreter.messages) == 1)
+    ):
         interpreter_intro_message = [
             "**Open Interpreter** will require approval before running code."
         ]
@@ -74,12 +79,21 @@ def terminal_interface(interpreter, message):
 
     while True:
         if interactive:
-            ### This is the primary input for Open Interpreter.
-            message = (
-                cli_input("> ").strip()
-                if interpreter.multi_line
-                else input("> ").strip()
-            )
+            if (
+                len(interpreter.messages) == 1
+                and interpreter.messages[-1]["role"] == "user"
+                and interpreter.messages[-1]["type"] == "message"
+            ):
+                # They passed in a message already, probably via "i {command}"!
+                message = interpreter.messages[-1]["content"]
+                interpreter.messages = interpreter.messages[:-1]
+            else:
+                ### This is the primary input for Open Interpreter.
+                message = (
+                    cli_input("> ").strip()
+                    if interpreter.multi_line
+                    else input("> ").strip()
+                )
 
             try:
                 # This lets users hit the up arrow key for past messages
