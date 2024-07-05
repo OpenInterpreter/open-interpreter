@@ -5,6 +5,7 @@ spinner.start()
 
 import os
 import platform
+import re
 import time
 
 import platformdirs
@@ -16,13 +17,11 @@ os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
 SYSTEM_MESSAGE = f"""
-# Terminal History Analysis Prompt
+You are a fast, efficient AI assistant specialized in analyzing terminal history and providing solutions. You are summoned via the wtf command. Your task is to:
 
-You are a fast, efficient AI assistant specialized in analyzing terminal history and providing quick solutions. Your task is to:
-
-1. Quickly scan the provided terminal history.
+1. Scan the provided terminal history.
 2. Identify the most recent error or issue.
-3. Determine the most likely solution or debugging step.
+3. Take a deep breath, and thoughtfully, carefully determine the most likely solution or debugging step.
 4. Respond with a VERY brief explanation followed by a markdown code block containing a shell command to address the issue.
 
 Rules:
@@ -32,8 +31,13 @@ Rules:
 - Keep any explanatory text extremely brief and concise.
 - Place explanatory text before the code block.
 - NEVER USE COMMENTS IN YOUR CODE.
+- Construct the command with proper escaping: e.g. use sed with correctly escaped quotes to ensure the shell interprets the command correctly. This involves:
+	•	Using double quotes around the sed expression to handle single quotes within the command.
+	•	Combining single and double quotes to properly escape characters within the shell command.
+- If previous commands attempted to fix the issue and failed, learn from them by proposing a DIFFERENT command.
 - Focus on the most recent error, ignoring earlier unrelated commands.
-- The error may be as simple as a spelling error, or as complex as requiring tests to be run. You may even need to suggest a command that edits text in a file to fix some code.
+- If you need more information to confidently fix the problem, ask the user to run wtf again in a moment, then write a command like grep to learn more about the problem.
+- The error may be as simple as a spelling error, or as complex as requiring tests to be run, or code to be find-and-replaced.
 - Prioritize speed and conciseness in your response. Don't use markdown headings. Don't say more than a sentence or two. Be incredibly concise.
 
 User's System: {platform.system()}
@@ -74,7 +78,7 @@ def main():
     pyperclip.copy(clipboard)
 
     # Trim history
-    history = "..." + history[-3000:].strip()
+    history = "Terminal: " + history[-10000:].strip()
 
     # Remove any trailing spinner commands
     spinner_commands = [
@@ -103,6 +107,45 @@ def main():
         if history.endswith(command):
             history = history[: -len(command)].strip()
             break
+
+    # Get error context
+
+    # Regex pattern to extract filename and line number
+    pattern = r'File "([^"]+)", line (\d+)'
+    matches = re.findall(pattern, history)
+
+    # Only keep the last X matches
+    matches = matches[-1:]  # Just the last match, change -1 to get more
+
+    # Function to get specified lines from a file
+    def get_lines_from_file(filename, line_number):
+        lines = []
+        try:
+            with open(filename, "r") as file:
+                all_lines = file.readlines()
+                start_line = max(0, line_number - 3)  # Preceding lines
+                end_line = min(len(all_lines), line_number + 2)  # Following lines
+                for i in range(start_line, end_line + 1):
+                    lines.append(f"Line {i+1}: " + all_lines[i].rstrip())
+        except Exception as e:
+            lines.append(f"Error reading file: {e}")
+        return lines
+
+    # Create the dictionary with filename, line number, and text
+    result = []
+    for match in matches:
+        filename, line_number = match
+        line_number = int(line_number)
+        lines = get_lines_from_file(filename, line_number)
+        result.append({"filename": filename, "text": "\n".join(lines)})
+
+    # Add context
+    for entry in result:
+        history = f"""File: {entry["filename"]}\n{entry["text"]}\n\n""" + history
+
+    # print(history)
+    # print("---")
+    # time.sleep(10)
 
     # Prepare messages for LLM
     messages = [
