@@ -179,6 +179,24 @@ def respond(interpreter):
                     except:
                         pass
 
+                if code.replace("\n", "").replace(" ", "").startswith("{language:"):
+                    try:
+                        code = code.replace("language: ", "'language': ").replace(
+                            "code: ", "'code': "
+                        )
+                        code_dict = json.loads(code)
+                        if set(code_dict.keys()) == {"language", "code"}:
+                            language = code_dict["language"]
+                            code = code_dict["code"]
+                            interpreter.messages[-1][
+                                "content"
+                            ] = code  # So the LLM can see it.
+                            interpreter.messages[-1][
+                                "format"
+                            ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
                 if language == "text" or language == "markdown":
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
