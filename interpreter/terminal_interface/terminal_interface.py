@@ -13,6 +13,7 @@ import platform
 import random
 import re
 import subprocess
+import tempfile
 import time
 
 from ..core.utils.scan_code import scan_code
@@ -282,6 +283,31 @@ def terminal_interface(interpreter, message):
                         if response.strip().lower() == "y":
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
+                            active_block = CodeBlock()
+                            active_block.margin_top = False  # <- Aesthetic choice
+                            active_block.language = language
+                            active_block.code = code
+                        elif response.strip().lower() == "e":
+                            # Edit
+
+                            # Create a temporary file
+                            with tempfile.NamedTemporaryFile(
+                                suffix=".tmp", delete=False
+                            ) as tf:
+                                tf.write(code.encode())
+                                tf.flush()
+
+                            # Open the temporary file with the default editor
+                            subprocess.call([os.environ.get("EDITOR", "vim"), tf.name])
+
+                            # Read the modified code
+                            with open(tf.name, "r") as tf:
+                                code = tf.read()
+
+                            interpreter.messages[-1]["content"] = code  # Give it code
+
+                            # Delete the temporary file
+                            os.unlink(tf.name)
                             active_block = CodeBlock()
                             active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = language

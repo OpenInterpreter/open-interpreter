@@ -75,34 +75,42 @@ class AsyncInterpreter(OpenInterpreter):
         return await self.output_queue.async_q.get()
 
     def respond(self, run_code=None):
-        if run_code == None:
-            run_code = self.auto_run
+        try:
+            if run_code == None:
+                run_code = self.auto_run
 
-        for chunk in self._respond_and_store():
-            if chunk["type"] == "confirmation":
-                if run_code:
-                    continue  # We don't need to send out confirmation chunks on the server. I don't even like them.
-                else:
-                    break
+            for chunk in self._respond_and_store():
+                if chunk["type"] == "confirmation":
+                    if run_code:
+                        continue  # We don't need to send out confirmation chunks on the server. I don't even like them.
+                    else:
+                        break
 
-            if self.stop_event.is_set():
-                return
+                if self.stop_event.is_set():
+                    return
 
-            if self.print:
-                if "start" in chunk:
-                    print("\n")
-                if chunk["type"] in ["code", "console"] and "format" in chunk:
+                if self.print:
                     if "start" in chunk:
-                        print("\n------------\n\n```" + chunk["format"], flush=True)
-                    if "end" in chunk:
-                        print("\n```\n\n------------\n\n", flush=True)
-                print(chunk.get("content", ""), end="", flush=True)
+                        print("\n")
+                    if chunk["type"] in ["code", "console"] and "format" in chunk:
+                        if "start" in chunk:
+                            print("\n------------\n\n```" + chunk["format"], flush=True)
+                        if "end" in chunk:
+                            print("\n```\n\n------------\n\n", flush=True)
+                    print(chunk.get("content", ""), end="", flush=True)
 
-            self.output_queue.sync_q.put(chunk)
+                self.output_queue.sync_q.put(chunk)
 
-        self.output_queue.sync_q.put(
-            {"role": "server", "type": "status", "content": "complete"}
-        )
+            self.output_queue.sync_q.put(
+                {"role": "server", "type": "status", "content": "complete"}
+            )
+        except Exception as e:
+            error_message = {
+                "role": "server",
+                "type": "error",
+                "content": traceback.format_exc() + "\n" + str(e),
+            }
+            self.output_queue.sync_q.put(error_message)
 
     def accumulate(self, chunk):
         """
@@ -202,13 +210,29 @@ def create_router(async_interpreter):
         finally:
             await websocket.close()
 
+    # TODO
+    @router.post("/")
+    async def post_input(payload: Dict[str, Any]):
+        # This doesn't work, but something like this should exist
+        query = payload.get("query")
+        if not query:
+            return {"error": "Query is required."}, 400
+        try:
+            async_interpreter.input.put(query)
+            return {"status": "success"}
+        except Exception as e:
+            return {"error": str(e)}, 500
+
     @router.post("/run")
     async def run_code(payload: Dict[str, Any]):
         language, code = payload.get("language"), payload.get("code")
         if not (language and code):
             return {"error": "Both 'language' and 'code' are required."}, 400
         try:
-            return {"output": async_interpreter.computer.run(language, code)}
+            print(f"Running {language}:", code)
+            output = async_interpreter.computer.run(language, code)
+            print("Output:", output)
+            return {"output": output}
         except Exception as e:
             return {"error": str(e)}, 500
 
@@ -217,10 +241,20 @@ def create_router(async_interpreter):
         for key, value in payload.items():
             print(f"Updating settings: {key} = {value}")
             if key in ["llm", "computer"] and isinstance(value, dict):
-                for sub_key, sub_value in value.items():
-                    setattr(getattr(async_interpreter, key), sub_key, sub_value)
-            else:
+                if hasattr(async_interpreter, key):
+                    for sub_key, sub_value in value.items():
+                        if hasattr(getattr(async_interpreter, key), sub_key):
+                            setattr(getattr(async_interpreter, key), sub_key, sub_value)
+                        else:
+                            return {
+                                "error": f"Sub-setting {sub_key} not found in {key}"
+                            }, 404
+                else:
+                    return {"error": f"Setting {key} not found"}, 404
+            elif hasattr(async_interpreter, key):
                 setattr(async_interpreter, key, value)
+            else:
+                return {"error": f"Setting {key} not found"}, 404
 
         return {"status": "success"}
 
@@ -238,8 +272,14 @@ def create_router(async_interpreter):
     return router
 
 
+host = os.getenv(
+    "HOST", "127.0.0.1"
+)  # IP address for localhost, used for local testing
+port = int(os.getenv("PORT", 8000))  # Default port is 8000
+
+
 class Server:
-    def __init__(self, async_interpreter, host="0.0.0.0", port=8000):
+    def __init__(self, async_interpreter, host=host, port=port):
         self.app = FastAPI()
         router = create_router(async_interpreter)
         self.app.include_router(router)

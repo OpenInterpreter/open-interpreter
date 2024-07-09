@@ -378,25 +378,29 @@ def fixed_litellm_completions(**params):
         litellm.drop_params = True
 
     # Run completion
+    attempts = 4
     first_error = None
-    try:
-        yield from litellm.completion(**params)
-    except Exception as e:
-        # Store the first error
-        first_error = e
-        # LiteLLM can fail if there's no API key,
-        # even though some models (like local ones) don't require it.
 
-        if "api key" in str(first_error).lower() and "api_key" not in params:
-            print(
-                "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
-            )
-
-        # So, let's try one more time with a dummy API key:
-        params["api_key"] = "x"
-
+    for attempt in range(attempts):
         try:
             yield from litellm.completion(**params)
-        except:
-            # If the second attempt also fails, raise the first error
-            raise first_error
+            return  # If the completion is successful, exit the function
+        except Exception as e:
+            if attempt == 0:
+                # Store the first error
+                first_error = e
+            if (
+                isinstance(e, litellm.exceptions.AuthenticationError)
+                and "api_key" not in params
+            ):
+                print(
+                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
+                )
+                # So, let's try one more time with a dummy API key:
+                params["api_key"] = "x"
+            if attempt == 1:
+                # Try turning up the temperature?
+                params["temperature"] = params.get("temperature", 0.0) + 0.1
+
+    if first_error is not None:
+        raise first_error  # If all attempts fail, raise the first error

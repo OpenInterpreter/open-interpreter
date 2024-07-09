@@ -107,7 +107,7 @@ Example:
 import requests
 
 settings = {
-    "model": "gpt-4",
+    "llm": {"model": "gpt-4"},
     "custom_instructions": "You only write Python code.",
     "auto_run": True,
 }
@@ -120,9 +120,9 @@ To get current settings, send a GET request to `http://localhost:8000/settings/{
 
 Example:
 ```python
-response = requests.get("http://localhost:8000/settings/model")
+response = requests.get("http://localhost:8000/settings/custom_instructions")
 print(response.json())
-# Output: {"model": "gpt-4"}
+# Output: {"custom_instructions": "You only write react."}
 ```
 
 ## Advanced Usage: Accessing the FastAPI App Directly

@@ -219,6 +219,9 @@ def respond(interpreter):
                     # We need to tell python what we (the generator) should do if they exit
                     break
 
+                # They may have edited the code! Grab it again
+                code = interpreter.messages[-1]["content"]
+
                 # don't let it import computer — we handle that!
                 if interpreter.computer.import_computer_api and language == "python":
                     code = code.replace("import computer\n", "pass\n")
