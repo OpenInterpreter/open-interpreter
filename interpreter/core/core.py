@@ -389,7 +389,7 @@ class OpenInterpreter:
             if last_flag_base:
                 yield {**last_flag_base, "end": True}
         except GeneratorExit:
-            pass  # It's fine
+            raise  # gotta pass this up!
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages
