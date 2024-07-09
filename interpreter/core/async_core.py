@@ -294,9 +294,9 @@ class Server:
             config=uvicorn.Config(app=self.app, host=self.host, port=self.port)
         )
 
-    def run(self):
+    def run(self, *args, **kwargs):
         try:
-            self.uvicorn_server.run()
+            self.uvicorn_server.run(*args, **kwargs)
         except ImportError as e:
             raise ImportError(
                 str(e)
