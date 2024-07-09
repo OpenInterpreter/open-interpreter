@@ -80,11 +80,12 @@ class AsyncInterpreter(OpenInterpreter):
                 run_code = self.auto_run
 
             for chunk in self._respond_and_store():
-                if chunk["type"] == "confirmation":
-                    if run_code:
-                        continue  # We don't need to send out confirmation chunks on the server. I don't even like them.
-                    else:
-                        break
+                # To preserve confirmation chunks, we add this to the bottom instead
+                # if chunk["type"] == "confirmation":
+                #     if run_code:
+                #         continue
+                #     else:
+                #         break
 
                 if self.stop_event.is_set():
                     return
@@ -100,6 +101,10 @@ class AsyncInterpreter(OpenInterpreter):
                     print(chunk.get("content", ""), end="", flush=True)
 
                 self.output_queue.sync_q.put(chunk)
+
+                if chunk["type"] == "confirmation":
+                    if not run_code:
+                        break
 
             self.output_queue.sync_q.put(
                 {"role": "server", "type": "status", "content": "complete"}
