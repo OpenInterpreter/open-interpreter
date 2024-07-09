@@ -294,11 +294,21 @@ class Server:
             config=uvicorn.Config(app=self.app, host=self.host, port=self.port)
         )
 
-    def run(self, *args, **kwargs):
-        try:
-            self.uvicorn_server.run(*args, **kwargs)
-        except ImportError as e:
-            raise ImportError(
-                str(e)
-                + """\n\nPlease ensure you have run `pip install "open-interpreter[server]"` to install server dependencies."""
-            )
+    def run(self, retries=5, *args, **kwargs):
+        print("SERVER STARTING")
+        for _ in range(retries):
+            try:
+                self.uvicorn_server.run(*args, **kwargs)
+                break
+            except KeyboardInterrupt:
+                break
+            except ImportError as e:
+                if _ == 4:  # If this is the last attempt
+                    raise ImportError(
+                        str(e)
+                        + """\n\nPlease ensure you have run `pip install "open-interpreter[server]"` to install server dependencies."""
+                    )
+            except:
+                print("An unexpected error occurred:", traceback.format_exc())
+                print("SERVER RESTARTING")
+        print("SERVER SHUTDOWN")
