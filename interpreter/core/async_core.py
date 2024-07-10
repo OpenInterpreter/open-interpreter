@@ -310,30 +310,21 @@ class Server:
         self.app.include_router(router)
         self.host = host
         self.port = port
-        self.uvicorn_server = uvicorn.Server(
-            config=uvicorn.Config(app=self.app, host=self.host, port=self.port)
-        )
 
     def run(self, retries=5, *args, **kwargs):
         print("SERVER STARTING")
 
         if "host" in kwargs:
-            host = kwargs["host"]
-        else:
-            host = self.host
+            self.host = kwargs["host"]
 
-        if host == "0.0.0.0":
-            print(
-                "Warning: Using host `0.0.0.0` will expose Open Interpreter over your local network."
-            )
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            s.connect(("8.8.8.8", 80))  # Google's public DNS server
-            print(f"Server is running at http://{s.getsockname()[0]}:{self.port}")
-            s.close()
+        if "port" in kwargs:
+            self.port = kwargs["port"]
 
         for _ in range(retries):
             try:
-                self.uvicorn_server.run(*args, **kwargs)
+                uvicorn.run(
+                    app=self.app, host=self.host, port=self.port, *args, **kwargs
+                )
                 break
             except KeyboardInterrupt:
                 break
