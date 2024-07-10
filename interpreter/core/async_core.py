@@ -315,10 +315,20 @@ class Server:
         print("SERVER STARTING")
 
         if "host" in kwargs:
-            self.host = kwargs["host"]
-
+            self.host = kwargs.pop("host")
         if "port" in kwargs:
-            self.port = kwargs["port"]
+            self.port = kwargs.pop("port")
+        if "app" in kwargs:
+            self.app = kwargs.pop("app")
+
+        if self.host == "0.0.0.0":
+            print(
+                "Warning: Using host `0.0.0.0` will expose Open Interpreter over your local network."
+            )
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))  # Google's public DNS server
+            print(f"Server is running at http://{s.getsockname()[0]}:{self.port}")
+            s.close()
 
         for _ in range(retries):
             try:
