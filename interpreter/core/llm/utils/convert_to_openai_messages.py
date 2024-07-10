@@ -80,6 +80,8 @@ def convert_to_openai_messages(
             if function_calling:
                 new_message["role"] = "function"
                 new_message["name"] = "execute"
+                if "content" not in message:
+                    print("What is this??", content)
                 if message["content"].strip() == "":
                     new_message[
                         "content"

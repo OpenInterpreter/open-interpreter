@@ -8,7 +8,7 @@ FROM python:3.11.8
 # Set environment variables
 # ENV OPENAI_API_KEY ...
 
-ENV HOST 0.0.0.0 
+ENV HOST 0.0.0.0
 # ^ Sets the server host to 0.0.0.0, Required for the server to be accessible outside the container
 
 # Copy required files into container

@@ -1,7 +1,9 @@
 import asyncio
 import json
 import os
+import socket
 import threading
+import time
 import traceback
 from datetime import datetime
 from typing import Any, Dict
@@ -34,6 +36,8 @@ class AsyncInterpreter(OpenInterpreter):
         Accumulates LMC chunks onto interpreter.messages.
         When it hits an "end" flag, calls interpreter.respond().
         """
+
+        print("Received:", chunk)
 
         if "start" in chunk:
             # If the user is starting something, the interpreter should stop.
@@ -79,13 +83,17 @@ class AsyncInterpreter(OpenInterpreter):
             if run_code == None:
                 run_code = self.auto_run
 
-            for chunk in self._respond_and_store():
-                # To preserve confirmation chunks, we add this to the bottom instead
-                # if chunk["type"] == "confirmation":
-                #     if run_code:
-                #         continue
-                #     else:
-                #         break
+            for chunk_og in self._respond_and_store():
+                chunk = (
+                    chunk_og.copy()
+                )  # This fixes weird double token chunks. Probably a deeper problem?
+
+                if chunk["type"] == "confirmation":
+                    if run_code:
+                        run_code = False
+                        continue
+                    else:
+                        break
 
                 if self.stop_event.is_set():
                     return
@@ -102,20 +110,20 @@ class AsyncInterpreter(OpenInterpreter):
 
                 self.output_queue.sync_q.put(chunk)
 
-                if chunk["type"] == "confirmation":
-                    if not run_code:
-                        break
-
             self.output_queue.sync_q.put(
                 {"role": "server", "type": "status", "content": "complete"}
             )
         except Exception as e:
+            error = traceback.format_exc() + "\n" + str(e)
             error_message = {
                 "role": "server",
                 "type": "error",
                 "content": traceback.format_exc() + "\n" + str(e),
             }
             self.output_queue.sync_q.put(error_message)
+            print("\n\n--- SENT ERROR: ---\n\n")
+            print(error)
+            print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
 
     def accumulate(self, chunk):
         """
@@ -163,10 +171,7 @@ def create_router(async_interpreter):
                         if data.get("type") == "websocket.receive" and "text" in data:
                             data = json.loads(data["text"])
                             await async_interpreter.input(data)
-                        elif (
-                            data.get("type") == "websocket.disconnect"
-                            and data.get("code") == 1000
-                        ):
+                        elif data.get("type") == "websocket.disconnect":
                             print("Disconnecting.")
                             return
                         else:
@@ -174,41 +179,53 @@ def create_router(async_interpreter):
                             continue
 
                     except Exception as e:
+                        error = traceback.format_exc() + "\n" + str(e)
                         error_message = {
                             "role": "server",
                             "type": "error",
                             "content": traceback.format_exc() + "\n" + str(e),
                         }
                         await websocket.send_text(json.dumps(error_message))
+                        print("\n\n--- SENT ERROR: ---\n\n")
+                        print(error)
+                        print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
 
             async def send_output():
                 while True:
                     try:
                         output = await async_interpreter.output()
 
+                        print("SENDING", output)
+
                         if isinstance(output, bytes):
                             await websocket.send_bytes(output)
                         else:
                             await websocket.send_text(json.dumps(output))
                     except Exception as e:
-                        traceback.print_exc()
+                        error = traceback.format_exc() + "\n" + str(e)
                         error_message = {
                             "role": "server",
                             "type": "error",
                             "content": traceback.format_exc() + "\n" + str(e),
                         }
                         await websocket.send_text(json.dumps(error_message))
+                        print("\n\n--- SENT ERROR: ---\n\n")
+                        print(error)
+                        print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
 
             await asyncio.gather(receive_input(), send_output())
         except Exception as e:
-            traceback.print_exc()
             try:
+                error = traceback.format_exc() + "\n" + str(e)
                 error_message = {
                     "role": "server",
                     "type": "error",
                     "content": traceback.format_exc() + "\n" + str(e),
                 }
                 await websocket.send_text(json.dumps(error_message))
+                print("\n\n--- SENT ERROR: ---\n\n")
+                print(error)
+                print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
             except:
                 # If we can't send it, that's fine.
                 pass
@@ -279,8 +296,11 @@ def create_router(async_interpreter):
 
 host = os.getenv(
     "HOST", "127.0.0.1"
-)  # IP address for localhost, used for local testing
+)  # IP address for localhost, used for local testing. To expose to local network, use 0.0.0.0
 port = int(os.getenv("PORT", 8000))  # Default port is 8000
+
+# FOR TESTING ONLY
+# host = "0.0.0.0"
 
 
 class Server:
@@ -296,6 +316,21 @@ class Server:
 
     def run(self, retries=5, *args, **kwargs):
         print("SERVER STARTING")
+
+        if "host" in kwargs:
+            host = kwargs["host"]
+        else:
+            host = self.host
+
+        if host == "0.0.0.0":
+            print(
+                "Warning: Using host `0.0.0.0` will expose Open Interpreter over your local network."
+            )
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))  # Google's public DNS server
+            print(f"Server is running at http://{s.getsockname()[0]}:{self.port}")
+            s.close()
+
         for _ in range(retries):
             try:
                 self.uvicorn_server.run(*args, **kwargs)

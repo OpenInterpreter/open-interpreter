@@ -238,7 +238,9 @@ def respond(interpreter):
                     break
 
                 # They may have edited the code! Grab it again
-                code = interpreter.messages[-1]["content"]
+                code = [m for m in interpreter.messages if m["type"] == "code"][-1][
+                    "content"
+                ]
 
                 # don't let it import computer — we handle that!
                 if interpreter.computer.import_computer_api and language == "python":
