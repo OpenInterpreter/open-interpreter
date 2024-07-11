@@ -428,7 +428,7 @@ host = os.getenv(
 port = int(os.getenv("PORT", 8000))  # Default port is 8000
 
 # FOR TESTING ONLY
-host = "0.0.0.0"
+# host = "0.0.0.0"
 
 
 class Server:
