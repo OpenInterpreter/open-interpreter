@@ -66,6 +66,9 @@ class Llm:
         And then processing its output, whether it's a function or non function calling model, into LMC format.
         """
 
+        if not self._is_loaded:
+            self.load()
+
         if (
             self.max_tokens is not None
             and self.context_window is not None
@@ -356,6 +359,17 @@ Continuing...
             self.interpreter.display_message("*Model loaded.*\n")
 
         # Validate LLM should be moved here!!
+
+        if self.context_window == None:
+            try:
+                model_info = litellm.get_model_info(model=self.model)
+                self.context_window = model_info["max_input_tokens"]
+                if self.max_tokens == None:
+                    self.max_tokens = min(
+                        int(self.context_window * 0.2), model_info["max_output_tokens"]
+                    )
+            except:
+                pass
 
         self._is_loaded = True
 
