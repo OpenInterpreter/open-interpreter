@@ -5,6 +5,7 @@ Gotta split this out, generalize it, and move all the python additions to python
 
 import ast
 import logging
+import sys
 import os
 import queue
 import re
@@ -19,6 +20,18 @@ from ..base_language import BaseLanguage
 DEBUG_MODE = False
 
 
+# Handling the case where the script is called as a kernel
+if 'ipykernel_launcher' in sys.argv:
+    if sys.path[0] == '':
+        del sys.path[0]
+
+    from ipykernel import kernelapp as app
+
+    app.launch_new_instance()
+    sys.exit(0)
+
+
+# Rest of your Open Interpreter code
 class JupyterLanguage(BaseLanguage):
     file_extension = "py"
     name = "Python"
