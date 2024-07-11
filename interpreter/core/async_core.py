@@ -28,7 +28,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.stop_event = threading.Event()
         self.output_queue = None
         self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
-        self.print = False  # Will print output
+        self.print = True  # Will print output
 
         self.server = Server(self)
 
@@ -37,8 +37,6 @@ class AsyncInterpreter(OpenInterpreter):
         Accumulates LMC chunks onto interpreter.messages.
         When it hits an "end" flag, calls interpreter.respond().
         """
-
-        print("Received:", chunk)
 
         if "start" in chunk:
             # If the user is starting something, the interpreter should stop.
@@ -107,7 +105,8 @@ class AsyncInterpreter(OpenInterpreter):
                             print("\n------------\n\n```" + chunk["format"], flush=True)
                         if "end" in chunk:
                             print("\n```\n\n------------\n\n", flush=True)
-                    print(chunk.get("content", ""), end="", flush=True)
+                    if chunk.get("format") != "active_line":
+                        print(chunk.get("content", ""), end="", flush=True)
 
                 self.output_queue.sync_q.put(chunk)
 
@@ -176,6 +175,7 @@ def create_router(async_interpreter):
                     <textarea id="messageInput" rows="10" cols="50" autocomplete="off"></textarea>
                     <button>Send</button>
                 </form>
+                <button id="approveCodeButton">Approve Code</button>
                 <div id="messages"></div>
                 <script>
                     var ws = new WebSocket("ws://"""
@@ -191,47 +191,13 @@ def create_router(async_interpreter):
                             lastMessageElement.innerHTML = "<br>"
                         }
                         var eventData = JSON.parse(event.data);
-                        if (eventData.role == "assistant") {
-                            if (eventData.type == "message") {
-                                if (eventData.start) {
-                                    lastMessageElement = document.createElement('p');
-                                    document.getElementById('messages').appendChild(lastMessageElement);
-                                    lastMessageElement.innerHTML = "<br>";
-                                }
-                                if (eventData.content) {
-                                    lastMessageElement.innerHTML += eventData.content;
-                                }
-                                if (eventData.end) {
-                                    lastMessageElement.innerHTML += "<br>";
-                                }
-                            } else if (eventData.type == "code") {
-                                if (eventData.start) {
-                                    lastMessageElement = document.createElement('p');
-                                    document.getElementById('messages').appendChild(lastMessageElement);
-                                    lastMessageElement.innerHTML = "<br><br>```" + eventData.format + "<br>";
-                                }
-                                if (eventData.content) {
-                                    lastMessageElement.innerHTML += eventData.content;
-                                }
-                                if (eventData.end) {
-                                    lastMessageElement.innerHTML += "<br>```<br><br>";
-                                }
-                            }
-                        else if (eventData.role == "computer" && eventData.type == "console") {
-                            if (eventData.start) {
-                                lastMessageElement = document.createElement('p');
-                                document.getElementById('messages').appendChild(lastMessageElement);
-                                lastMessageElement.innerHTML = "<br><br>------<br><br>";
-                            }
-                            if (eventData.content && eventData.format == "output") {
-                                lastMessageElement.innerHTML += eventData.content;
-                            }
-                            if (eventData.end) {
-                                lastMessageElement.innerHTML += "<br><br>------<br><br>";
-                            }
-                        }
+
+                        if ((eventData.role == "assistant" && eventData.type == "message" && eventData.content) ||
+                            (eventData.role == "computer" && eventData.type == "console" && eventData.format == "output" && eventData.content) ||
+                            (eventData.role == "assistant" && eventData.type == "code" && eventData.content)) {
+                            lastMessageElement.innerHTML += eventData.content;
                         } else {
-                            lastMessageElement.innerHTML += "<br>" + JSON.stringify(eventData) + "<br>";
+                            lastMessageElement.innerHTML += "<br><br>" + JSON.stringify(eventData) + "<br><br>";
                         }
                     };
                     function sendMessage(event) {
@@ -270,6 +236,30 @@ def create_router(async_interpreter):
                         document.getElementById('messages').appendChild(lastMessageElement);
                         input.value = '';
                     }
+                function approveCode() {
+                    var startCommandBlock = {
+                        "role": "user",
+                        "type": "command",
+                        "start": true
+                    };
+                    ws.send(JSON.stringify(startCommandBlock));
+
+                    var commandBlock = {
+                        "role": "user",
+                        "type": "command",
+                        "content": "go"
+                    };
+                    ws.send(JSON.stringify(commandBlock));
+
+                    var endCommandBlock = {
+                        "role": "user",
+                        "type": "command",
+                        "end": true
+                    };
+                    ws.send(JSON.stringify(endCommandBlock));
+                }
+
+                document.getElementById("approveCodeButton").addEventListener("click", approveCode);
                 </script>
             </body>
             </html>
@@ -287,7 +277,7 @@ def create_router(async_interpreter):
                     try:
                         data = await websocket.receive()
 
-                        print("RECIEVED:", data)
+                        print("Received:", data)
 
                         if data.get("type") == "websocket.receive" and "text" in data:
                             data = json.loads(data["text"])
@@ -315,14 +305,30 @@ def create_router(async_interpreter):
                 while True:
                     try:
                         output = await async_interpreter.output()
+                        # print("Attempting to send the following output:", output)
 
-                        print("SENDING", output)
-
-                        if isinstance(output, bytes):
-                            await websocket.send_bytes(output)
+                        for attempt in range(100):
+                            try:
+                                if isinstance(output, bytes):
+                                    await websocket.send_bytes(output)
+                                else:
+                                    await websocket.send_text(json.dumps(output))
+                                # print("Output sent successfully. Output was:", output)
+                                break
+                            except Exception as e:
+                                print(
+                                    "Failed to send output on attempt number:",
+                                    attempt + 1,
+                                    ". Output was:",
+                                    output,
+                                )
+                                print("Error:", str(e))
+                                await asyncio.sleep(0.05)
                         else:
-                            # output["time"] = time.time()
-                            await websocket.send_text(json.dumps(output))
+                            raise Exception(
+                                "Failed to send after 100 attempts. Output was:",
+                                str(output),
+                            )
                     except Exception as e:
                         error = traceback.format_exc() + "\n" + str(e)
                         error_message = {
@@ -422,7 +428,7 @@ host = os.getenv(
 port = int(os.getenv("PORT", 8000))  # Default port is 8000
 
 # FOR TESTING ONLY
-# host = "0.0.0.0"
+host = "0.0.0.0"
 
 
 class Server:
