@@ -72,8 +72,8 @@ def validate_llm_settings(interpreter):
                         """
 
                     **Tip:** To save this key for later, run one of the following and then restart your terminal. 
-                    MacOS: `echo '\\nexport OPENAI_API_KEY=your_api_key' >> ~/.zshrc`
-                    Linux: `echo '\\nexport OPENAI_API_KEY=your_api_key' >> ~/.bashrc`
+                    MacOS: `echo 'export OPENAI_API_KEY=your_api_key' >> ~/.zshrc`
+                    Linux: `echo 'export OPENAI_API_KEY=your_api_key' >> ~/.bashrc`
                     Windows: `setx OPENAI_API_KEY your_api_key`
                     
                     ---"""
