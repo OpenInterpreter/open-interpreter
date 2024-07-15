@@ -279,8 +279,11 @@ def create_router(async_interpreter):
 
                         print("Received:", data)
 
-                        if data.get("type") == "websocket.receive" and "text" in data:
-                            data = json.loads(data["text"])
+                        if data.get("type") == "websocket.receive":
+                            if "text" in data:
+                                data = json.loads(data["text"])
+                            elif "bytes" in data:
+                                data = data["bytes"]
                             await async_interpreter.input(data)
                         elif data.get("type") == "websocket.disconnect":
                             print("Disconnecting.")
