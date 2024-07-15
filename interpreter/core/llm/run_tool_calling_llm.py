@@ -1,34 +1,40 @@
 from .utils.merge_deltas import merge_deltas
 from .utils.parse_partial_json import parse_partial_json
 
-function_schema = {
-    "name": "execute",
-    "description": "Executes code on the user's machine **in the users local environment** and returns the output",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "language": {
-                "type": "string",
-                "description": "The programming language (required parameter to the `execute` function)",
-                "enum": [
-                    # This will be filled dynamically with the languages OI has access to.
-                ],
+tool_schema = {
+    "type": "function",
+    "function": {
+        "name": "execute",
+        "description": "Executes code on the user's machine **in the users local environment** and returns the output",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "language": {
+                    "type": "string",
+                    "description": "The programming language (required parameter to the `execute` function)",
+                    "enum": [
+                        # This will be filled dynamically with the languages OI has access to.
+                    ],
+                },
+                "code": {
+                    "type": "string",
+                    "description": "The code to execute (required)",
+                },
             },
-            "code": {"type": "string", "description": "The code to execute (required)"},
+            "required": ["language", "code"],
         },
-        "required": ["language", "code"],
     },
 }
 
 
-def run_function_calling_llm(llm, request_params):
+def run_tool_calling_llm(llm, request_params):
     ## Setup
 
     # Add languages OI has access to
-    function_schema["parameters"]["properties"]["language"]["enum"] = [
+    tool_schema["function"]["parameters"]["properties"]["language"]["enum"] = [
         i.name.lower() for i in llm.interpreter.computer.terminal.languages
     ]
-    request_params["functions"] = [function_schema]
+    request_params["tools"] = [tool_schema]
 
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
@@ -47,6 +53,14 @@ def run_function_calling_llm(llm, request_params):
             continue
 
         delta = chunk["choices"][0]["delta"]
+
+        # Convert tool call into function call, which we have great parsing logic for below
+        if "tool_calls" in delta:
+            if (
+                len(delta["tool_calls"]) > 0
+                and "function_call" in delta["tool_calls"][0]
+            ):
+                delta["function_call"] = delta["tool_calls"][0]["function_call"]
 
         # Accumulate deltas
         accumulated_deltas = merge_deltas(accumulated_deltas, delta)

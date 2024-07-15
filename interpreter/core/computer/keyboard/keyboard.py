@@ -1,10 +1,12 @@
 import os
 import platform
 import time
+
 from ...utils.lazy_import import lazy_import
 
 # Lazy import of pyautogui
-pyautogui = lazy_import('pyautogui')
+pyautogui = lazy_import("pyautogui")
+
 
 class Keyboard:
     """A class to simulate keyboard inputs"""
@@ -12,11 +14,11 @@ class Keyboard:
     def __init__(self, computer):
         self.computer = computer
 
-    def write(self, text, interval=None, **kwargs):
+    def write(self, text, interval=None, delay=0.30, **kwargs):
         """
-        Type out a string of characters. 
+        Type out a string of characters with some realistic delay.
         """
-        time.sleep(0.15)
+        time.sleep(delay / 2)
 
         if interval:
             pyautogui.write(text, interval=interval)
@@ -52,7 +54,7 @@ class Keyboard:
             except:
                 pass
 
-        time.sleep(0.15)
+        time.sleep(delay / 2)
 
     def press(self, *args, presses=1, interval=0.1):
         keys = args

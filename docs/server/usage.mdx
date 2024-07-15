@@ -1,0 +1,171 @@
+---
+title: Server Usage
+---
+
+## Starting the Server
+
+### From Command Line
+To start the server from the command line, use:
+
+```bash
+interpreter --server
+```
+
+### From Python
+To start the server from within a Python script:
+
+```python
+from interpreter import AsyncInterpreter
+
+async_interpreter = AsyncInterpreter()
+async_interpreter.server.run(port=8000)  # Default port is 8000, but you can customize it
+```
+
+## WebSocket API
+
+### Establishing a Connection
+Connect to the WebSocket server at `ws://localhost:8000/`.
+
+### Message Format
+Messages must follow the LMC format with start and end flags. For detailed specifications, see the [LMC messages documentation](https://docs.openinterpreter.com/protocols/lmc-messages).
+
+Basic message structure:
+```json
+{"role": "user", "type": "message", "start": true}
+{"role": "user", "type": "message", "content": "Your message here"}
+{"role": "user", "type": "message", "end": true}
+```
+
+### Control Commands
+To control the server's behavior, send the following commands:
+
+1. Stop execution:
+   ```json
+   {"role": "user", "type": "command", "content": "stop"}
+   ```
+   This stops all execution and message processing.
+
+2. Execute code block:
+   ```json
+   {"role": "user", "type": "command", "content": "go"}
+   ```
+   This executes a generated code block and allows the agent to proceed.
+
+   **Important**: If `auto_run` is set to `False`, the agent will pause after generating code blocks. You must send the "go" command to continue execution.
+
+### Completion Status
+The server indicates completion with the following message:
+```json
+{"role": "server", "type": "status", "content": "complete"}
+```
+Ensure your client watches for this message to determine when the interaction is finished.
+
+### Error Handling
+If an error occurs, the server will send an error message in the following format:
+```json
+{"role": "server", "type": "error", "content": "Error traceback information"}
+```
+Your client should be prepared to handle these error messages appropriately.
+
+### Example WebSocket Interaction
+Here's a simple example demonstrating the WebSocket interaction:
+
+```python
+import websockets
+import json
+import asyncio
+
+async def websocket_interaction():
+    async with websockets.connect("ws://localhost:8000/") as websocket:
+        # Send a message
+        await websocket.send(json.dumps({"role": "user", "type": "message", "start": True}))
+        await websocket.send(json.dumps({"role": "user", "type": "message", "content": "What's 2 + 2?"}))
+        await websocket.send(json.dumps({"role": "user", "type": "message", "end": True}))
+
+        # Receive and process messages
+        while True:
+            message = await websocket.recv()
+            data = json.loads(message)
+            
+            if data.get("type") == "message":
+                print(data.get("content", ""), end="", flush=True)
+            elif data.get("type") == "error":
+                print(f"Error: {data.get('content')}")
+            elif data == {"role": "assistant", "type": "status", "content": "complete"}:
+                break
+
+asyncio.run(websocket_interaction())
+```
+
+## HTTP API
+
+### Modifying Settings
+To change server settings, send a POST request to `http://localhost:8000/settings`. The payload should conform to [the interpreter object's settings](https://docs.openinterpreter.com/settings/all-settings).
+
+Example:
+```python
+import requests
+
+settings = {
+    "llm": {"model": "gpt-4"},
+    "custom_instructions": "You only write Python code.",
+    "auto_run": True,
+}
+response = requests.post("http://localhost:8000/settings", json=settings)
+print(response.status_code)
+```
+
+### Retrieving Settings
+To get current settings, send a GET request to `http://localhost:8000/settings/{property}`.
+
+Example:
+```python
+response = requests.get("http://localhost:8000/settings/custom_instructions")
+print(response.json())
+# Output: {"custom_instructions": "You only write react."}
+```
+
+## Advanced Usage: Accessing the FastAPI App Directly
+
+The FastAPI app is exposed at `async_interpreter.server.app`. This allows you to add custom routes or host the app using Uvicorn directly.
+
+Example of adding a custom route and hosting with Uvicorn:
+
+```python
+from interpreter import AsyncInterpreter
+from fastapi import FastAPI
+import uvicorn
+
+async_interpreter = AsyncInterpreter()
+app = async_interpreter.server.app
+
+@app.get("/custom")
+async def custom_route():
+    return {"message": "This is a custom route"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+## Using Docker
+
+You can also run the server using Docker. First, build the Docker image from the root of the repository:
+
+```bash
+docker build -t open-interpreter .
+```
+
+Then, run the container:
+
+```bash
+docker run -p 8000:8000 open-interpreter
+```
+
+This will expose the server on port 8000 of your host machine.
+
+## Best Practices
+1. Always handle the "complete" status message to ensure your client knows when the server has finished processing.
+2. If `auto_run` is set to `False`, remember to send the "go" command to execute code blocks and continue the interaction.
+3. Implement proper error handling in your client to manage potential connection issues, unexpected server responses, or server-sent error messages.
+4. Use the AsyncInterpreter class when working with the server in Python to ensure compatibility with asynchronous operations.
+5. When deploying in production, consider using the Docker container for easier setup and consistent environment across different machines.

@@ -75,56 +75,61 @@ def respond(interpreter):
 
         ### RUN THE LLM ###
 
-        try:
-            for chunk in interpreter.llm.run(messages_for_llm):
-                yield {"role": "assistant", **chunk}
+        if (
+            interpreter.messages[-1]["type"] != "code"
+        ):  # If it is, we should run the code (we do below)
+            try:
+                for chunk in interpreter.llm.run(messages_for_llm):
+                    yield {"role": "assistant", **chunk}
 
-        except litellm.exceptions.BudgetExceededError:
-            display_markdown_message(
-                f"""> Max budget exceeded
+            except litellm.exceptions.BudgetExceededError:
+                display_markdown_message(
+                    f"""> Max budget exceeded
 
-                **Session spend:** ${litellm._current_cost}
-                **Max budget:** ${interpreter.max_budget}
+                    **Session spend:** ${litellm._current_cost}
+                    **Max budget:** ${interpreter.max_budget}
 
-                Press CTRL-C then run `interpreter --max_budget [higher USD amount]` to proceed.
-            """
-            )
-            break
-        # Provide extra information on how to change API keys, if we encounter that error
-        # (Many people writing GitHub issues were struggling with this)
-        except Exception as e:
-            if (
-                interpreter.offline == False
-                and "auth" in str(e).lower()
-                or "api key" in str(e).lower()
-            ):
-                output = traceback.format_exc()
-                raise Exception(
-                    f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here'. Update your ~/.zshrc on MacOS or ~/.bashrc on Linux with the new key if it has already been persisted there.,\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
+                    Press CTRL-C then run `interpreter --max_budget [higher USD amount]` to proceed.
+                """
                 )
-            elif interpreter.offline == False and "not have access" in str(e).lower():
-                response = input(
-                    f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
-                )
-                print("")  # <- Aesthetic choice
-
-                if response.strip().lower() == "y":
-                    interpreter.llm.model = "gpt-3.5-turbo-1106"
-                    interpreter.llm.context_window = 16000
-                    interpreter.llm.max_tokens = 4096
-                    interpreter.llm.supports_functions = True
-                    display_markdown_message(
-                        f"> Model set to `{interpreter.llm.model}`"
-                    )
-                else:
+                break
+            # Provide extra information on how to change API keys, if we encounter that error
+            # (Many people writing GitHub issues were struggling with this)
+            except Exception as e:
+                if (
+                    interpreter.offline == False
+                    and "auth" in str(e).lower()
+                    or "api key" in str(e).lower()
+                ):
+                    output = traceback.format_exc()
                     raise Exception(
-                        "\n\nYou will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use GPT-4.\n\nhttps://platform.openai.com/account/billing/overview"
+                        f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here'. Update your ~/.zshrc on MacOS or ~/.bashrc on Linux with the new key if it has already been persisted there.,\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
                     )
-            elif interpreter.offline and not interpreter.os:
-                print(traceback.format_exc())
-                raise Exception("Error occurred. " + str(e))
-            else:
-                raise
+                elif (
+                    interpreter.offline == False and "not have access" in str(e).lower()
+                ):
+                    response = input(
+                        f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
+                    )
+                    print("")  # <- Aesthetic choice
+
+                    if response.strip().lower() == "y":
+                        interpreter.llm.model = "gpt-3.5-turbo-1106"
+                        interpreter.llm.context_window = 16000
+                        interpreter.llm.max_tokens = 4096
+                        interpreter.llm.supports_functions = True
+                        display_markdown_message(
+                            f"> Model set to `{interpreter.llm.model}`"
+                        )
+                    else:
+                        raise Exception(
+                            "\n\nYou will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use GPT-4.\n\nhttps://platform.openai.com/account/billing/overview"
+                        )
+                elif interpreter.offline and not interpreter.os:
+                    print(traceback.format_exc())
+                    raise Exception("Error occurred. " + str(e))
+                else:
+                    raise
 
         ### RUN CODE (if it's there) ###
 
@@ -141,8 +146,58 @@ def respond(interpreter):
                     code = code[2:].strip()
                     if interpreter.verbose:
                         print("Removing `\n")
+                    interpreter.messages[-1]["content"] = code  # So the LLM can see it.
 
-                if language == "text":
+                # A common hallucination
+                if code.startswith("functions.execute("):
+                    edited_code = code.replace("functions.execute(", "").rstrip(")")
+                    try:
+                        code_dict = json.loads(edited_code)
+                        language = code_dict.get("language", language)
+                        code = code_dict.get("code", code)
+                        interpreter.messages[-1][
+                            "content"
+                        ] = code  # So the LLM can see it.
+                        interpreter.messages[-1][
+                            "format"
+                        ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
+                if code.replace("\n", "").replace(" ", "").startswith('{"language":'):
+                    try:
+                        code_dict = json.loads(code)
+                        if set(code_dict.keys()) == {"language", "code"}:
+                            language = code_dict["language"]
+                            code = code_dict["code"]
+                            interpreter.messages[-1][
+                                "content"
+                            ] = code  # So the LLM can see it.
+                            interpreter.messages[-1][
+                                "format"
+                            ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
+                if code.replace("\n", "").replace(" ", "").startswith("{language:"):
+                    try:
+                        code = code.replace("language: ", "'language': ").replace(
+                            "code: ", "'code': "
+                        )
+                        code_dict = json.loads(code)
+                        if set(code_dict.keys()) == {"language", "code"}:
+                            language = code_dict["language"]
+                            code = code_dict["code"]
+                            interpreter.messages[-1][
+                                "content"
+                            ] = code  # So the LLM can see it.
+                            interpreter.messages[-1][
+                                "format"
+                            ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
+                if language == "text" or language == "markdown":
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
                     continue
@@ -181,6 +236,11 @@ def respond(interpreter):
                     # The user might exit here.
                     # We need to tell python what we (the generator) should do if they exit
                     break
+
+                # They may have edited the code! Grab it again
+                code = [m for m in interpreter.messages if m["type"] == "code"][-1][
+                    "content"
+                ]
 
                 # don't let it import computer — we handle that!
                 if interpreter.computer.import_computer_api and language == "python":

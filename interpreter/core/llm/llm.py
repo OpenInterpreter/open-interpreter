@@ -16,6 +16,8 @@ from ...terminal_interface.utils.display_markdown_message import (
     display_markdown_message,
 )
 from .run_function_calling_llm import run_function_calling_llm
+
+# from .run_tool_calling_llm import run_tool_calling_llm
 from .run_text_llm import run_text_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
@@ -63,6 +65,19 @@ class Llm:
 
         And then processing its output, whether it's a function or non function calling model, into LMC format.
         """
+
+        if not self._is_loaded:
+            self.load()
+
+        if (
+            self.max_tokens is not None
+            and self.context_window is not None
+            and self.max_tokens > self.context_window
+        ):
+            print(
+                "Warning: max_tokens is larger than context_window. Setting max_tokens to be 0.2 times the context_window."
+            )
+            self.max_tokens = int(0.2 * self.context_window)
 
         # Assertions
         assert (
@@ -200,7 +215,7 @@ class Llm:
                         if self.interpreter.in_terminal_interface:
                             display_markdown_message(
                                 """
-**We were unable to determine the context window of this model.** Defaulting to 3000.
+**We were unable to determine the context window of this model.** Defaulting to 8000.
 
 If your model can handle more, run `interpreter --context_window {token limit} --max_tokens {max tokens per response}`.
 
@@ -210,7 +225,7 @@ Continuing...
                         else:
                             display_markdown_message(
                                 """
-**We were unable to determine the context window of this model.** Defaulting to 3000.
+**We were unable to determine the context window of this model.** Defaulting to 8000.
 
 If your model can handle more, run `self.context_window = {token limit}`.
 
@@ -220,7 +235,7 @@ Continuing...
                             """
                             )
                     messages = tt.trim(
-                        messages, system_message=system_message, max_tokens=3000
+                        messages, system_message=system_message, max_tokens=8000
                     )
         except:
             # If we're trimming messages, this won't work.
@@ -273,6 +288,7 @@ Continuing...
 
         if self.supports_functions:
             yield from run_function_calling_llm(self, params)
+            # yield from run_tool_calling_llm(self, params)
         else:
             yield from run_text_llm(self, params)
 
@@ -330,7 +346,7 @@ Continuing...
                     self.context_window = context_length
             if self.max_tokens == None:
                 if self.context_window != None:
-                    self.max_tokens = int(self.context_window * 0.8)
+                    self.max_tokens = int(self.context_window * 0.2)
 
             # Send a ping, which will actually load the model
             print(f"Loading {model_name}...\n")
@@ -343,6 +359,17 @@ Continuing...
             self.interpreter.display_message("*Model loaded.*\n")
 
         # Validate LLM should be moved here!!
+
+        if self.context_window == None:
+            try:
+                model_info = litellm.get_model_info(model=self.model)
+                self.context_window = model_info["max_input_tokens"]
+                if self.max_tokens == None:
+                    self.max_tokens = min(
+                        int(self.context_window * 0.2), model_info["max_output_tokens"]
+                    )
+            except:
+                pass
 
         self._is_loaded = True
 
@@ -365,25 +392,29 @@ def fixed_litellm_completions(**params):
         litellm.drop_params = True
 
     # Run completion
+    attempts = 4
     first_error = None
-    try:
-        yield from litellm.completion(**params)
-    except Exception as e:
-        # Store the first error
-        first_error = e
-        # LiteLLM can fail if there's no API key,
-        # even though some models (like local ones) don't require it.
 
-        if "api key" in str(first_error).lower() and "api_key" not in params:
-            print(
-                "LiteLLM requires an API key. Please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
-            )
-
-        # So, let's try one more time with a dummy API key:
-        params["api_key"] = "x"
-
+    for attempt in range(attempts):
         try:
             yield from litellm.completion(**params)
-        except:
-            # If the second attempt also fails, raise the first error
-            raise first_error
+            return  # If the completion is successful, exit the function
+        except Exception as e:
+            if attempt == 0:
+                # Store the first error
+                first_error = e
+            if (
+                isinstance(e, litellm.exceptions.AuthenticationError)
+                and "api_key" not in params
+            ):
+                print(
+                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
+                )
+                # So, let's try one more time with a dummy API key:
+                params["api_key"] = "x"
+            if attempt == 1:
+                # Try turning up the temperature?
+                params["temperature"] = params.get("temperature", 0.0) + 0.1
+
+    if first_error is not None:
+        raise first_error  # If all attempts fail, raise the first error

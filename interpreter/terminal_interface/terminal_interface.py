@@ -13,6 +13,7 @@ import platform
 import random
 import re
 import subprocess
+import tempfile
 import time
 
 from ..core.utils.scan_code import scan_code
@@ -47,7 +48,12 @@ except:
 def terminal_interface(interpreter, message):
     # Auto run and offline (this.. this isn't right) don't display messages.
     # Probably worth abstracting this to something like "debug_cli" at some point.
-    if not interpreter.auto_run and not interpreter.offline:
+    # If (len(interpreter.messages) == 1), they probably used the advanced "i {command}" entry, so no message should be displayed.
+    if (
+        not interpreter.auto_run
+        and not interpreter.offline
+        and not (len(interpreter.messages) == 1)
+    ):
         interpreter_intro_message = [
             "**Open Interpreter** will require approval before running code."
         ]
@@ -74,12 +80,21 @@ def terminal_interface(interpreter, message):
 
     while True:
         if interactive:
-            ### This is the primary input for Open Interpreter.
-            message = (
-                cli_input("> ").strip()
-                if interpreter.multi_line
-                else input("> ").strip()
-            )
+            if (
+                len(interpreter.messages) == 1
+                and interpreter.messages[-1]["role"] == "user"
+                and interpreter.messages[-1]["type"] == "message"
+            ):
+                # They passed in a message already, probably via "i {command}"!
+                message = interpreter.messages[-1]["content"]
+                interpreter.messages = interpreter.messages[:-1]
+            else:
+                ### This is the primary input for Open Interpreter.
+                message = (
+                    cli_input("> ").strip()
+                    if interpreter.multi_line
+                    else input("> ").strip()
+                )
 
             try:
                 # This lets users hit the up arrow key for past messages
@@ -272,6 +287,31 @@ def terminal_interface(interpreter, message):
                             active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = language
                             active_block.code = code
+                        elif response.strip().lower() == "e":
+                            # Edit
+
+                            # Create a temporary file
+                            with tempfile.NamedTemporaryFile(
+                                suffix=".tmp", delete=False
+                            ) as tf:
+                                tf.write(code.encode())
+                                tf.flush()
+
+                            # Open the temporary file with the default editor
+                            subprocess.call([os.environ.get("EDITOR", "vim"), tf.name])
+
+                            # Read the modified code
+                            with open(tf.name, "r") as tf:
+                                code = tf.read()
+
+                            interpreter.messages[-1]["content"] = code  # Give it code
+
+                            # Delete the temporary file
+                            os.unlink(tf.name)
+                            active_block = CodeBlock()
+                            active_block.margin_top = False  # <- Aesthetic choice
+                            active_block.language = language
+                            active_block.code = code
                         else:
                             # User declined to run code.
                             interpreter.messages.append(
@@ -342,8 +382,10 @@ def terminal_interface(interpreter, message):
 
                         # Truncate output
                         active_block.output = truncate_output(
-                            active_block.output, interpreter.max_output
-                        )
+                            active_block.output,
+                            interpreter.max_output,
+                            add_scrollbars=False,
+                        )  # ^ Notice that this doesn't add the "scrollbars" line, which I think is fine
                     if "format" in chunk and chunk["format"] == "active_line":
                         active_block.active_line = chunk["content"]
 

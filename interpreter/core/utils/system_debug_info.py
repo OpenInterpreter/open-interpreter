@@ -103,6 +103,7 @@ def interpreter_info(interpreter):
         Function calling: {interpreter.llm.supports_functions}
         Context window: {interpreter.llm.context_window}
         Max tokens: {interpreter.llm.max_tokens}
+        Computer API: {interpreter.computer.import_computer_api}
 
         Auto run: {interpreter.auto_run}
         API base: {interpreter.llm.api_base}

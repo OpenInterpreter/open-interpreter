@@ -50,7 +50,7 @@ class OpenInterpreter:
         safe_mode="off",
         shrink_images=False,
         loop=False,
-        loop_message="""Proceed. You CAN run code on my machine. If you want to run code, start your message with "```"! If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
+        loop_message="""Proceed. You CAN run code on my machine. If the entire task I asked for is done, say exactly 'The task is done.' If you need some specific information (like username or password) say EXACTLY 'Please provide more information.' If it's impossible, say 'The task is impossible.' (If I haven't provided a task, say exactly 'Let me know what you'd like to do next.') Otherwise keep going.""",
         loop_breakers=[
             "The task is done.",
             "The task is impossible.",
@@ -77,7 +77,7 @@ class OpenInterpreter:
         import_computer_api=False,
         skills_path=None,
         import_skills=False,
-        multi_line=False,
+        multi_line=True,
         contribute_conversation=False,
     ):
         # State
@@ -307,84 +307,89 @@ class OpenInterpreter:
 
         last_flag_base = None
 
-        for chunk in respond(self):
-            # For async usage
-            if hasattr(self, "stop_event") and self.stop_event.is_set():
-                break
+        try:
+            for chunk in respond(self):
+                # For async usage
+                if hasattr(self, "stop_event") and self.stop_event.is_set():
+                    break
 
-            if chunk["content"] == "":
-                continue
+                if chunk["content"] == "":
+                    continue
 
-            # Handle the special "confirmation" chunk, which neither triggers a flag or creates a message
-            if chunk["type"] == "confirmation":
-                # Emit a end flag for the last message type, and reset last_flag_base
-                if last_flag_base:
-                    yield {**last_flag_base, "end": True}
-                    last_flag_base = None
+                # Handle the special "confirmation" chunk, which neither triggers a flag or creates a message
+                if chunk["type"] == "confirmation":
+                    # Emit a end flag for the last message type, and reset last_flag_base
+                    if last_flag_base:
+                        yield {**last_flag_base, "end": True}
+                        last_flag_base = None
 
-                if self.auto_run == False:
-                    yield chunk
+                    if self.auto_run == False:
+                        yield chunk
 
-                # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
-                # ... rethink this though.
-                self.messages.append(
-                    {
-                        "role": "computer",
-                        "type": "console",
-                        "format": "output",
-                        "content": "",
-                    }
-                )
-                continue
-
-            # Check if the chunk's role, type, and format (if present) match the last_flag_base
-            if (
-                last_flag_base
-                and "role" in chunk
-                and "type" in chunk
-                and last_flag_base["role"] == chunk["role"]
-                and last_flag_base["type"] == chunk["type"]
-                and (
-                    "format" not in last_flag_base
-                    or (
-                        "format" in chunk
-                        and chunk["format"] == last_flag_base["format"]
+                    # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
+                    # ... rethink this though.
+                    self.messages.append(
+                        {
+                            "role": "computer",
+                            "type": "console",
+                            "format": "output",
+                            "content": "",
+                        }
                     )
-                )
-            ):
-                # If they match, append the chunk's content to the current message's content
-                # (Except active_line, which shouldn't be stored)
-                if not is_active_line_chunk(chunk):
-                    self.messages[-1]["content"] += chunk["content"]
-            else:
-                # If they don't match, yield a end message for the last message type and a start message for the new one
-                if last_flag_base:
-                    yield {**last_flag_base, "end": True}
+                    continue
 
-                last_flag_base = {"role": chunk["role"], "type": chunk["type"]}
+                # Check if the chunk's role, type, and format (if present) match the last_flag_base
+                if (
+                    last_flag_base
+                    and "role" in chunk
+                    and "type" in chunk
+                    and last_flag_base["role"] == chunk["role"]
+                    and last_flag_base["type"] == chunk["type"]
+                    and (
+                        "format" not in last_flag_base
+                        or (
+                            "format" in chunk
+                            and chunk["format"] == last_flag_base["format"]
+                        )
+                    )
+                ):
+                    # If they match, append the chunk's content to the current message's content
+                    # (Except active_line, which shouldn't be stored)
+                    if not is_active_line_chunk(chunk):
+                        self.messages[-1]["content"] += chunk["content"]
+                else:
+                    # If they don't match, yield a end message for the last message type and a start message for the new one
+                    if last_flag_base:
+                        yield {**last_flag_base, "end": True}
 
-                # Don't add format to type: "console" flags, to accommodate active_line AND output formats
-                if "format" in chunk and chunk["type"] != "console":
-                    last_flag_base["format"] = chunk["format"]
+                    last_flag_base = {"role": chunk["role"], "type": chunk["type"]}
 
-                yield {**last_flag_base, "start": True}
+                    # Don't add format to type: "console" flags, to accommodate active_line AND output formats
+                    if "format" in chunk and chunk["type"] != "console":
+                        last_flag_base["format"] = chunk["format"]
 
-                # Add the chunk as a new message
-                if not is_active_line_chunk(chunk):
-                    self.messages.append(chunk)
+                    yield {**last_flag_base, "start": True}
 
-            # Yield the chunk itself
-            yield chunk
+                    # Add the chunk as a new message
+                    if not is_active_line_chunk(chunk):
+                        self.messages.append(chunk)
 
-            # Truncate output if it's console output
-            if chunk["type"] == "console" and chunk["format"] == "output":
-                self.messages[-1]["content"] = truncate_output(
-                    self.messages[-1]["content"], self.max_output
-                )
+                # Yield the chunk itself
+                yield chunk
 
-        # Yield a final end flag
-        if last_flag_base:
-            yield {**last_flag_base, "end": True}
+                # Truncate output if it's console output
+                if chunk["type"] == "console" and chunk["format"] == "output":
+                    self.messages[-1]["content"] = truncate_output(
+                        self.messages[-1]["content"],
+                        self.max_output,
+                        add_scrollbars=self.computer.import_computer_api,  # I consider scrollbars to be a computer API thing
+                    )
+
+            # Yield a final end flag
+            if last_flag_base:
+                yield {**last_flag_base, "end": True}
+        except GeneratorExit:
+            raise  # gotta pass this up!
 
     def reset(self):
         self.computer.terminate()  # Terminates all languages

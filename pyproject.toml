@@ -2,13 +2,43 @@
 name = "open-interpreter"
 packages = [
     {include = "interpreter"},
+    {include = "scripts"},
 ]
-version = "0.3.3" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.3.4" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
+
+# Optional [os] dependencies
+opencv-python = { version = "^4.8.1.78", optional = true }
+pyautogui = { version = "^0.9.54", optional = true }
+plyer = { version = "^2.1.0", optional = true }
+pywinctl = { version = "^0.3", optional = true }
+pytesseract = { version = "^0.3.10", optional = true }
+sentence-transformers = { version = "^2.5.1", optional = true }
+nltk = { version = "^3.8.1", optional = true }
+ipywidgets = { version = "^8.1.2", optional = true }
+torch = { version = "^2.2.1", optional = true }
+timm = { version = "^0.9.16", optional = true }
+screeninfo = { version = "^0.8.1", optional = true }
+
+# Optional [safe] dependencies
+semgrep = { version = "^1.52.0", optional = true }
+
+# Optional [local] dependencies
+transformers = { version = "^4.40.1", optional = true }
+einops = { version = "^0.8.0", optional = true }
+torchvision = { version = "^0.18.0", optional = true }
+easyocr = { version = "^1.7.1", optional = true }
+
+# Optional [server] dependencies
+fastapi = { version = "^0.111.0", optional = true }
+uvicorn = { version = "^0.30.1", optional = true }
+janus = { version = "^1.0.0", optional = true }
+
+# Required dependencies
 python = ">=3.9,<4"
 setuptools = "*"
 astor = "^0.8.1"
@@ -31,38 +61,14 @@ toml = "^0.10.2"
 tiktoken = "^0.6.0"
 platformdirs = "^4.2.0"
 pydantic = "^2.6.4"
-
-# Optional [os] dependencies
-opencv-python = { version = "^4.8.1.78", optional = true }
-pyautogui = { version = "^0.9.54", optional = true }
-plyer = { version = "^2.1.0", optional = true }
-pywinctl = { version = "^0.3", optional = true }
-pytesseract = { version = "^0.3.10", optional = true }
-sentence-transformers = { version = "^2.5.1", optional = true }
-nltk = { version = "^3.8.1", optional = true }
-ipywidgets = { version = "^8.1.2", optional = true }
-torch = { version = "^2.2.1", optional = true }
-timm = { version = "^0.9.16", optional = true }
-screeninfo = { version = "^0.8.1", optional = true }
-
-# Optional [safe] dependencies
-semgrep = { version = "^1.52.0", optional = true }
-yaspin = { version = "^3.0.1", optional = true }
-
-# Optional [local] dependencies
-transformers = { version = "^4.40.1", optional = true }
-einops = { version = "^0.8.0", optional = true }
-torchvision = { version = "^0.18.0", optional = true }
-easyocr = { version = "^1.7.1", optional = true }
-
-# Optional [server] dependencies
-fastapi = { version = "^0.111.0", optional = true }
-uvicorn = { version = "^0.30.1", optional = true }
-janus = { version = "^1.0.0", optional = true }
+google-generativeai = "^0.7.1"
+pynput = "^1.7.7"
+pyperclip = "^1.9.0"
+yaspin = "^3.0.2"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm", "screeninfo"]
-safe = ["semgrep", "yaspin"]
+safe = ["semgrep"]
 local = ["opencv-python", "pytesseract", "torch", "transformers", "einops", "torchvision", "easyocr"]
 server = ["fastapi", "janus", "uvicorn"]
 
@@ -80,7 +86,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 i = "interpreter.terminal_interface.start_terminal_interface:main"
-ibench = "benchmarks.simple:main"
+wtf = "scripts.wtf:main"
 
 [tool.black]
 target-version = ['py311']

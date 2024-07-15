@@ -563,9 +563,14 @@ version: {OI_VERSION}  # Profile version (do not modify)
 def apply_profile_to_object(obj, profile):
     for key, value in profile.items():
         if isinstance(value, dict):
+            if (
+                key == "wtf"
+            ):  # The wtf command has a special part of the profile, not used here
+                continue
             apply_profile_to_object(getattr(obj, key), value)
         else:
             setattr(obj, key, value)
+
 
 def open_storage_dir(directory):
     dir = os.path.join(oi_dir, directory)
@@ -763,9 +768,9 @@ def migrate_user_app_directory():
 
 def write_key_to_profile(key, value):
     try:
-        with open(user_default_profile_path, 'r') as file:
+        with open(user_default_profile_path, "r") as file:
             lines = file.readlines()
-        
+
         version_line_index = None
         new_lines = []
         for index, line in enumerate(lines):
@@ -773,15 +778,17 @@ def write_key_to_profile(key, value):
                 version_line_index = index
                 break
             new_lines.append(line)
-        
+
         # Insert the new key-value pair before the version line
         if version_line_index is not None:
             if f"{key}: {value}\n" not in new_lines:
-                new_lines.append(f"{key}: {value}\n\n")  # Adding a newline for separation
+                new_lines.append(
+                    f"{key}: {value}\n\n"
+                )  # Adding a newline for separation
             # Append the version line and all subsequent lines
             new_lines.extend(lines[version_line_index:])
-        
-        with open(user_default_profile_path, 'w') as file:
+
+        with open(user_default_profile_path, "w") as file:
             file.writelines(new_lines)
     except Exception:
-        pass # Fail silently
+        pass  # Fail silently
