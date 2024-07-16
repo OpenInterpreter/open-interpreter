@@ -277,7 +277,8 @@ def create_router(async_interpreter):
                     try:
                         data = await websocket.receive()
 
-                        print("Received:", data)
+                        if False:
+                            print("Received:", data)
 
                         if data.get("type") == "websocket.receive":
                             if "text" in data:
