@@ -306,6 +306,8 @@ Continuing...
         if self._is_loaded:
             return
 
+        self._is_loaded = True
+
         if self.model.startswith("ollama/"):
             model_name = self.model.replace("ollama/", "")
             try:
@@ -370,8 +372,6 @@ Continuing...
                     )
             except:
                 pass
-
-        self._is_loaded = True
 
 
 def fixed_litellm_completions(**params):
