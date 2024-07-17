@@ -2,17 +2,18 @@
 
 This directory contains various examples demonstrating how to use Open Interpreter in different scenarios and configurations. Each example is designed to provide a practical guide to integrating and leveraging Open Interpreter's capabilities in your projects.
 
-## Overview
-
-- **Terminal Usage**: Examples of how to use Open Interpreter directly from your terminal.
-- **Python Integration**: How to integrate Open Interpreter into your Python scripts for more complex workflows.
-- **Custom Profiles**: Examples of using YAML files for setting default behaviors and configurations.
-
 ## Colab Notebooks
 
 [Google Colab](https://colab.google/) provides a sandboxed development environment for you to run code in. Here are some Jupyter Notebooks on Colab that you can try:
 
-Local 3: [![Local 3](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jWKKwVCQneCTB5VNQNWO0Wxqg1vG_E1T#scrollTo=13ISLtY9_v7g)
-Interactive Demo: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+### Local 3
 
-Voice Interface: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1jWKKwVCQneCTB5VNQNWO0Wxqg1vG_E1T#scrollTo=13ISLtY9_v7g)
+
+### Interactive Demo
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing)
+
+### Voice Interface
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK)
