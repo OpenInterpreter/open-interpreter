@@ -367,12 +367,8 @@ def create_router(async_interpreter):
     # TODO
     @router.post("/")
     async def post_input(payload: Dict[str, Any]):
-        # This doesn't work, but something like this should exist
-        query = payload.get("query")
-        if not query:
-            return {"error": "Query is required."}, 400
         try:
-            async_interpreter.input.put(query)
+            async_interpreter.input(payload)
             return {"status": "success"}
         except Exception as e:
             return {"error": str(e)}, 500

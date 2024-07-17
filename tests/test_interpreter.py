@@ -51,6 +51,16 @@ def test_hallucinations():
             assert chunk.get("content") == "22"
             break
 
+    code = """{language: "python", code: "print('hello')" }"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content").strip() == "hello"
+            break
+
 
 @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
 def test_server():

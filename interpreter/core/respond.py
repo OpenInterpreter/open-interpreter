@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import time
 import traceback
 
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
@@ -181,8 +182,8 @@ def respond(interpreter):
 
                 if code.replace("\n", "").replace(" ", "").startswith("{language:"):
                     try:
-                        code = code.replace("language: ", "'language': ").replace(
-                            "code: ", "'code': "
+                        code = code.replace("language: ", '"language": ').replace(
+                            "code: ", '"code": '
                         )
                         code_dict = json.loads(code)
                         if set(code_dict.keys()) == {"language", "code"}:
@@ -197,9 +198,19 @@ def respond(interpreter):
                     except:
                         pass
 
-                if language == "text" or language == "markdown":
+                if (
+                    language == "text"
+                    or language == "markdown"
+                    or language == "plaintext"
+                ):
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
+                    real_content = interpreter.messages[-1]["content"]
+                    interpreter.messages[-1] = {
+                        "role": "assistant",
+                        "type": "message",
+                        "content": f"```\n{real_content}\n```",
+                    }
                     continue
 
                 # Is this language enabled/supported?

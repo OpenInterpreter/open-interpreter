@@ -41,13 +41,17 @@ To control the server's behavior, send the following commands:
 
 1. Stop execution:
    ```json
+   {"role": "user", "type": "command", "start": True},
    {"role": "user", "type": "command", "content": "stop"}
+   {"role": "user", "type": "command", "end": True}
    ```
    This stops all execution and message processing.
 
 2. Execute code block:
    ```json
+   {"role": "user", "type": "command", "start": True},
    {"role": "user", "type": "command", "content": "go"}
+   {"role": "user", "type": "command", "end": True}
    ```
    This executes a generated code block and allows the agent to proceed.
 
