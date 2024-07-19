@@ -49,6 +49,18 @@ interpreter.llm.api_base = "http://localhost:11434"
 interpreter.chat("how many files are on my desktop?")
 ```
 
+## Helpful settings for local models
+
+Local models benefit from more coercion and guidance. This verbosity of adding extra context to messages can impact the conversational experience of Open Interpreter. The following settings allow templates to be applied to messages to improve the steering of the language model while maintaining the natural flow of conversation.
+
+`interpreter.user_message_template` allows users to have their message wrapped in a template. This can be helpful steering a language model to a desired behaviour without needing the user to add extra context to their message.
+
+`interpreter.always_apply_user_message_template` has all user messages to be wrapped in the template. If False, only the last User message will be wrapped.
+
+`interpreter.code_output_template` wraps the output from the computer after code is run. This can help with nudging the language model to continue working or to explain outputs.
+
+`interpreter.empty_code_output_template` is the message that is sent to the language model if code execution results in no output.
+
 <Info>
   Other configuration settings are explained in
   [Settings](/settings/all-settings).
