@@ -137,7 +137,11 @@ class AsyncInterpreter(OpenInterpreter):
                 # We don't do anything with these.
                 pass
 
-            elif "start" in chunk:
+            elif (
+                "start" in chunk
+                or chunk["type"] != self.messages[-1]["type"]
+                or chunk.get("format") != self.messages[-1].get("format")
+            ):
                 chunk_copy = (
                     chunk.copy()
                 )  # So we don't modify the original chunk, which feels wrong.
@@ -277,10 +281,14 @@ def create_router(async_interpreter):
                     try:
                         data = await websocket.receive()
 
-                        print("Received:", data)
+                        if False:
+                            print("Received:", data)
 
-                        if data.get("type") == "websocket.receive" and "text" in data:
-                            data = json.loads(data["text"])
+                        if data.get("type") == "websocket.receive":
+                            if "text" in data:
+                                data = json.loads(data["text"])
+                            elif "bytes" in data:
+                                data = data["bytes"]
                             await async_interpreter.input(data)
                         elif data.get("type") == "websocket.disconnect":
                             print("Disconnecting.")
@@ -363,12 +371,8 @@ def create_router(async_interpreter):
     # TODO
     @router.post("/")
     async def post_input(payload: Dict[str, Any]):
-        # This doesn't work, but something like this should exist
-        query = payload.get("query")
-        if not query:
-            return {"error": "Query is required."}, 400
         try:
-            async_interpreter.input.put(query)
+            async_interpreter.input(payload)
             return {"status": "success"}
         except Exception as e:
             return {"error": str(e)}, 500

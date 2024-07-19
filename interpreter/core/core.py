@@ -303,7 +303,11 @@ class OpenInterpreter:
 
         # Utility function
         def is_active_line_chunk(chunk):
-            return "format" in chunk and chunk["format"] == "active_line"
+            if "format" in chunk and chunk["format"] == "active_line":
+                return True
+            if chunk["type"] == "review":
+                return True
+            return False
 
         last_flag_base = None
 

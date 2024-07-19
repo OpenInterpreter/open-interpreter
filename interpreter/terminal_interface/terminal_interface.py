@@ -243,6 +243,10 @@ def terminal_interface(interpreter, message):
                     if "content" in chunk:
                         active_block.code += chunk["content"]
 
+                if chunk["type"] == "review" and chunk.get("content"):
+                    # Specialized models can emit a code review.
+                    print(chunk.get("content"), end="", flush=True)
+
                 # Execution notice
                 if chunk["type"] == "confirmation":
                     if not interpreter.auto_run:
