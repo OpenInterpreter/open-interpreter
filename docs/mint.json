@@ -97,10 +97,10 @@
     {
       "group": "Code Execution",
       "pages": [
-        "code-execution/settings",
         "code-execution/usage",
         "code-execution/computer-api",
-        "code-execution/custom-languages"
+        "code-execution/custom-languages",
+        "code-execution/settings"
       ]
     },
     {
