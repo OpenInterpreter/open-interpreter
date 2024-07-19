@@ -137,7 +137,11 @@ class AsyncInterpreter(OpenInterpreter):
                 # We don't do anything with these.
                 pass
 
-            elif "start" in chunk:
+            elif (
+                "start" in chunk
+                or chunk["type"] != self.messages[-1]["type"]
+                or chunk.get("format") != self.messages[-1].get("format")
+            ):
                 chunk_copy = (
                     chunk.copy()
                 )  # So we don't modify the original chunk, which feels wrong.
