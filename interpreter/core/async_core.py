@@ -6,7 +6,10 @@ import threading
 import time
 import traceback
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
+
+import shortuuid
+from pydantic import BaseModel
 
 from .core import OpenInterpreter
 
@@ -14,7 +17,7 @@ try:
     import janus
     import uvicorn
     from fastapi import APIRouter, FastAPI, WebSocket
-    from fastapi.responses import PlainTextResponse
+    from fastapi.responses import PlainTextResponse, StreamingResponse
 except:
     # Server dependencies are not required by the main package.
     pass
@@ -29,6 +32,11 @@ class AsyncInterpreter(OpenInterpreter):
         self.output_queue = None
         self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
         self.print = True  # Will print output
+
+        self.require_acknowledge = (
+            os.getenv("INTERPRETER_REQUIRE_ACKNOWLEDGE", "False").lower() == "true"
+        )
+        self.acknowledged_outputs = []
 
         self.server = Server(self)
 
@@ -189,12 +197,30 @@ def create_router(async_interpreter):
             + """/");
                     var lastMessageElement = null;
                     ws.onmessage = function(event) {
+
+                        var eventData = JSON.parse(event.data);
+
+                        """
+            + (
+                """
+                        
+                        // Acknowledge receipt
+                        var acknowledge_message = {
+                            "ack": eventData.id
+                        };
+                        ws.send(JSON.stringify(acknowledge_message));
+
+                        """
+                if async_interpreter.require_acknowledge
+                else ""
+            )
+            + """
+
                         if (lastMessageElement == null) {
                             lastMessageElement = document.createElement('p');
                             document.getElementById('messages').appendChild(lastMessageElement);
                             lastMessageElement.innerHTML = "<br>"
                         }
-                        var eventData = JSON.parse(event.data);
 
                         if ((eventData.role == "assistant" && eventData.type == "message" && eventData.content) ||
                             (eventData.role == "computer" && eventData.type == "console" && eventData.format == "output" && eventData.content) ||
@@ -281,12 +307,17 @@ def create_router(async_interpreter):
                     try:
                         data = await websocket.receive()
 
-                        if False:
-                            print("Received:", data)
-
                         if data.get("type") == "websocket.receive":
                             if "text" in data:
                                 data = json.loads(data["text"])
+                                if (
+                                    async_interpreter.require_acknowledge
+                                    and "ack" in data
+                                ):
+                                    async_interpreter.acknowledged_outputs.append(
+                                        data["ack"]
+                                    )
+                                    continue
                             elif "bytes" in data:
                                 data = data["bytes"]
                             await async_interpreter.input(data)
@@ -315,14 +346,42 @@ def create_router(async_interpreter):
                         output = await async_interpreter.output()
                         # print("Attempting to send the following output:", output)
 
+                        id = shortuuid.uuid()
+
                         for attempt in range(100):
                             try:
                                 if isinstance(output, bytes):
                                     await websocket.send_bytes(output)
                                 else:
+                                    if async_interpreter.require_acknowledge:
+                                        output["id"] = id
+
                                     await websocket.send_text(json.dumps(output))
-                                # print("Output sent successfully. Output was:", output)
-                                break
+
+                                    if async_interpreter.require_acknowledge:
+                                        acknowledged = False
+                                        for _ in range(1000):
+                                            # print(async_interpreter.acknowledged_outputs)
+                                            if (
+                                                id
+                                                in async_interpreter.acknowledged_outputs
+                                            ):
+                                                async_interpreter.acknowledged_outputs.remove(
+                                                    id
+                                                )
+                                                acknowledged = True
+                                                break
+                                            await asyncio.sleep(0.0001)
+
+                                        if acknowledged:
+                                            break
+                                        else:
+                                            raise Exception(
+                                                "Acknowledgement not received."
+                                            )
+                                    else:
+                                        break
+
                             except Exception as e:
                                 print(
                                     "Failed to send output on attempt number:",
@@ -423,6 +482,63 @@ def create_router(async_interpreter):
         else:
             return json.dumps({"error": "Setting not found"}), 404
 
+    ### OPENAI COMPATIBLE ENDPOINT
+
+    class ChatMessage(BaseModel):
+        role: str
+        content: str
+
+    class ChatCompletionRequest(BaseModel):
+        model: str = "default-model"
+        messages: List[ChatMessage]
+        max_tokens: Optional[int] = None
+        temperature: Optional[float] = None
+        stream: Optional[bool] = False
+
+    async def openai_compatible_generator(message: str):
+        for i, chunk in enumerate(
+            async_interpreter.chat(message, stream=True, display=True)
+        ):
+            output_content = None
+
+            if chunk["type"] == "message" and "content" in chunk:
+                output_content = chunk["content"]
+            if chunk["type"] == "code" and "start" in chunk:
+                output_content = " "
+
+            if output_content:
+                await asyncio.sleep(0)
+                output_chunk = {
+                    "id": i,
+                    "object": "chat.completion.chunk",
+                    "created": time.time(),
+                    "model": "open-interpreter",
+                    "choices": [{"delta": {"content": output_content}}],
+                }
+                yield f"data: {json.dumps(output_chunk)}\n\n"
+
+    @router.post("/openai/chat/completions")
+    async def chat_completion(request: ChatCompletionRequest):
+        assert request.messages[-1].role == "user"
+        message = request.messages[-1].content
+
+        if request.stream:
+            return StreamingResponse(
+                openai_compatible_generator(message), media_type="application/x-ndjson"
+            )
+        else:
+            messages = async_interpreter.chat(
+                message=message, stream=False, display=False
+            )
+            content = messages[-1]["content"]
+            return {
+                "id": "200",
+                "object": "chat.completion",
+                "created": time.time(),
+                "model": request.model,
+                "choices": [{"message": {"role": "assistant", "content": content}}],
+            }
+
     return router
 
 
@@ -444,8 +560,6 @@ class Server:
         self.port = port
 
     def run(self, retries=5, *args, **kwargs):
-        print("SERVER STARTING")
-
         if "host" in kwargs:
             self.host = kwargs.pop("host")
         if "port" in kwargs:
@@ -478,5 +592,4 @@ class Server:
                     )
             except:
                 print("An unexpected error occurred:", traceback.format_exc())
-                print("SERVER RESTARTING")
-        print("SERVER SHUTDOWN")
+                print("Server restarting.")

@@ -25,7 +25,7 @@ async_interpreter.server.run(port=8000)  # Default port is 8000, but you can cus
 Connect to the WebSocket server at `ws://localhost:8000/`.
 
 ### Message Format
-The server uses an extended message format that allows for rich, multi-part messages. Here's the basic structure:
+Open Interpreter uses an extended version of OpenAI's message format called [LMC messages](https://docs.openinterpreter.com/protocols/lmc-messages) that allow for rich, multi-part messages. **Messages must be sent between start and end flags.** Here's the basic structure:
 
 ```json
 {"role": "user", "start": true}
@@ -154,7 +154,7 @@ asyncio.run(websocket_interaction())
 ## HTTP API
 
 ### Modifying Settings
-To change server settings, send a POST request to `http://localhost:8000/settings`. The payload should conform to the interpreter object's settings.
+To change server settings, send a POST request to `http://localhost:8000/settings`. The payload should conform to [the interpreter object's settings](https://docs.openinterpreter.com/settings/all-settings).
 
 Example:
 ```python
@@ -216,15 +216,21 @@ When using this endpoint:
 - The `model` parameter is required but ignored.
 - The `api_key` is required by the OpenAI library but not used by the server.
 
-## Best Practices
+## Using Docker
 
-1. Always handle the "complete" status message to ensure your client knows when the server has finished processing.
-2. If `auto_run` is set to `False`, remember to send the "go" command to execute code blocks and continue the interaction.
-3. Implement proper error handling in your client to manage potential connection issues, unexpected server responses, or server-sent error messages.
-4. Use the AsyncInterpreter class when working with the server in Python to ensure compatibility with asynchronous operations.
-5. Pay attention to the code execution review messages for important safety and operational information.
-6. Utilize the multi-part user message structure for complex inputs, including file paths and images.
-7. When sending file paths or image paths, ensure they are accessible to the server.
+You can also run the server using Docker. First, build the Docker image from the root of the repository:
+
+```bash
+docker build -t open-interpreter .
+```
+
+Then, run the container:
+
+```bash
+docker run -p 8000:8000 open-interpreter
+```
+
+This will expose the server on port 8000 of your host machine.
 
 ## Advanced Usage: Accessing the FastAPI App Directly
 
@@ -248,4 +254,12 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-This guide covers all aspects of using the server, including the WebSocket API, HTTP API, OpenAI-compatible endpoint, code execution review, and various features. It provides clear explanations and examples for users to understand how to interact with the server effectively.
+## Best Practices
+
+1. Always handle the "complete" status message to ensure your client knows when the server has finished processing.
+2. If `auto_run` is set to `False`, remember to send the "go" command to execute code blocks and continue the interaction.
+3. Implement proper error handling in your client to manage potential connection issues, unexpected server responses, or server-sent error messages.
+4. Use the AsyncInterpreter class when working with the server in Python to ensure compatibility with asynchronous operations.
+5. Pay attention to the code execution review messages for important safety and operational information.
+6. Utilize the multi-part user message structure for complex inputs, including file paths and images.
+7. When sending file paths or image paths, ensure they are accessible to the server.
