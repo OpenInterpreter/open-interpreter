@@ -224,9 +224,6 @@ class OpenInterpreter:
 
         # One-off message
         if message or message == "":
-            if message == "":
-                message = "No entry from user - please suggest something to enter."
-
             ## We support multiple formats for the incoming message:
             # Dict (these are passed directly in)
             if isinstance(message, dict):

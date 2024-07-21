@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import shortuuid
 from pydantic import BaseModel
@@ -486,7 +486,7 @@ def create_router(async_interpreter):
 
     class ChatMessage(BaseModel):
         role: str
-        content: str
+        content: Union[str, List[Dict[str, Any]]]
 
     class ChatCompletionRequest(BaseModel):
         model: str = "default-model"
@@ -495,10 +495,8 @@ def create_router(async_interpreter):
         temperature: Optional[float] = None
         stream: Optional[bool] = False
 
-    async def openai_compatible_generator(message: str):
-        for i, chunk in enumerate(
-            async_interpreter.chat(message, stream=True, display=True)
-        ):
+    async def openai_compatible_generator():
+        for i, chunk in enumerate(async_interpreter._respond_and_store()):
             output_content = None
 
             if chunk["type"] == "message" and "content" in chunk:
@@ -519,17 +517,56 @@ def create_router(async_interpreter):
 
     @router.post("/openai/chat/completions")
     async def chat_completion(request: ChatCompletionRequest):
-        assert request.messages[-1].role == "user"
-        message = request.messages[-1].content
+        # Convert to LMC
+
+        user_messages = []
+        for message in reversed(request.messages):
+            if message.role == "user":
+                user_messages.append(message)
+            else:
+                break
+        user_messages.reverse()
+
+        for message in user_messages:
+            if type(message.content) == str:
+                async_interpreter.messages.append(
+                    {"role": "user", "type": "message", "content": message.content}
+                )
+            if type(message.content) == list:
+                for content in message.content:
+                    if content["type"] == "text":
+                        async_interpreter.messages.append(
+                            {"role": "user", "type": "message", "content": content}
+                        )
+                    elif content["type"] == "image_url":
+                        if "url" not in content["image_url"]:
+                            raise Exception("`url` must be in `image_url`.")
+                        url = content["image_url"]["url"]
+                        print(url[:100])
+                        if "base64," not in url:
+                            raise Exception(
+                                '''Image must be in the format: "data:image/jpeg;base64,{base64_image}"'''
+                            )
+
+                        # data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA6oA...
+
+                        data = url.split("base64,")[1]
+                        format = "base64." + url.split(";")[0].split("/")[1]
+                        async_interpreter.messages.append(
+                            {
+                                "role": "user",
+                                "type": "image",
+                                "format": format,
+                                "content": data,
+                            }
+                        )
 
         if request.stream:
             return StreamingResponse(
-                openai_compatible_generator(message), media_type="application/x-ndjson"
+                openai_compatible_generator(), media_type="application/x-ndjson"
             )
         else:
-            messages = async_interpreter.chat(
-                message=message, stream=False, display=False
-            )
+            messages = async_interpreter.chat(message="", stream=False, display=True)
             content = messages[-1]["content"]
             return {
                 "id": "200",
