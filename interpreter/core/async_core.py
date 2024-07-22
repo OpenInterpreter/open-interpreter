@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import shutil
 import socket
 import threading
 import time
@@ -16,7 +17,7 @@ from .core import OpenInterpreter
 try:
     import janus
     import uvicorn
-    from fastapi import APIRouter, FastAPI, WebSocket
+    from fastapi import APIRouter, FastAPI, File, Form, UploadFile, WebSocket
     from fastapi.responses import PlainTextResponse, StreamingResponse
 except:
     # Server dependencies are not required by the main package.
@@ -60,7 +61,7 @@ class AsyncInterpreter(OpenInterpreter):
             run_code = None  # Will later default to auto_run unless the user makes a command here
 
             # But first, process any commands.
-            if self.messages[-1]["type"] == "command":
+            if self.messages[-1].get("type") == "command":
                 command = self.messages[-1]["content"]
                 self.messages = self.messages[:-1]
 
@@ -145,20 +146,61 @@ class AsyncInterpreter(OpenInterpreter):
                 # We don't do anything with these.
                 pass
 
-            elif (
-                "start" in chunk
-                or chunk["type"] != self.messages[-1]["type"]
-                or chunk.get("format") != self.messages[-1].get("format")
+            elif "content" in chunk and not (
+                len(self.messages) > 0
+                and (
+                    (
+                        "type" in self.messages[-1]
+                        and chunk.get("type") != self.messages[-1].get("type")
+                    )
+                    or (
+                        "format" in self.messages[-1]
+                        and chunk.get("format") != self.messages[-1].get("format")
+                    )
+                )
             ):
+                if len(self.messages) == 0:
+                    raise Exception(
+                        "You must send a 'start: True' chunk first to create this message."
+                    )
+                # Append to an existing message
+                if (
+                    "type" not in self.messages[-1]
+                ):  # It was created with a type-less start message
+                    self.messages[-1]["type"] = chunk["type"]
+                if (
+                    chunk.get("format") and "format" not in self.messages[-1]
+                ):  # It was created with a type-less start message
+                    self.messages[-1]["format"] = chunk["format"]
+                if "content" not in self.messages[-1]:
+                    self.messages[-1]["content"] = chunk["content"]
+                else:
+                    self.messages[-1]["content"] += chunk["content"]
+
+            # elif "content" in chunk and (len(self.messages) > 0 and self.messages[-1] == {'role': 'user', 'start': True}):
+            #     # Last message was {'role': 'user', 'start': True}. Just populate that with this chunk
+            #     self.messages[-1] = chunk.copy()
+
+            elif "start" in chunk or (
+                len(self.messages) > 0
+                and (
+                    chunk.get("type") != self.messages[-1].get("type")
+                    or chunk.get("format") != self.messages[-1].get("format")
+                )
+            ):
+                # Create a new message
                 chunk_copy = (
                     chunk.copy()
                 )  # So we don't modify the original chunk, which feels wrong.
-                chunk_copy.pop("start")
-                chunk_copy["content"] = ""
+                if "start" in chunk_copy:
+                    chunk_copy.pop("start")
+                if "content" not in chunk_copy:
+                    chunk_copy["content"] = ""
                 self.messages.append(chunk_copy)
 
-            elif "content" in chunk:
-                self.messages[-1]["content"] += chunk["content"]
+            print("ADDED CHUNK:", chunk)
+            print("MESSAGES IS NOW:", self.messages)
+            # time.sleep(5)
 
         elif type(chunk) == bytes:
             if self.messages[-1]["content"] == "":  # We initialize as an empty string ^
@@ -481,6 +523,24 @@ def create_router(async_interpreter):
                 return {"error": "Failed to serialize the setting value"}, 500
         else:
             return json.dumps({"error": "Setting not found"}), 404
+
+    @router.post("/upload")
+    async def upload_file(file: UploadFile = File(...), path: str = Form(...)):
+        try:
+            with open(path, "wb") as output_file:
+                shutil.copyfileobj(file.file, output_file)
+            return {"status": "success"}
+        except Exception as e:
+            return {"error": str(e)}, 500
+
+    @router.get("/download/{filename}")
+    async def download_file(filename: str):
+        try:
+            return StreamingResponse(
+                open(filename, "rb"), media_type="application/octet-stream"
+            )
+        except Exception as e:
+            return {"error": str(e)}, 500
 
     ### OPENAI COMPATIBLE ENDPOINT
 

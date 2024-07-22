@@ -88,8 +88,10 @@ def test_server():
             while True:
                 message = await websocket.recv()
                 message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
                 print("Received from WebSocket:", message_data)
-                if message_data.get("content"):
+                if type(message_data.get("content")) == str:
                     accumulated_content += message_data.get("content")
                 if message_data == {
                     "role": "server",
@@ -142,6 +144,8 @@ def test_server():
             while True:
                 message = await websocket.recv()
                 message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
                 print("Received from WebSocket:", message_data)
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
@@ -189,6 +193,8 @@ def test_server():
             while True:
                 message = await websocket.recv()
                 message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
                 print("Received from WebSocket:", message_data)
                 if message_data.get("content"):
                     accumulated_content += message_data.get("content")
@@ -237,6 +243,8 @@ def test_server():
             while True:
                 message = await websocket.recv()
                 message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
                 print("Received from WebSocket:", message_data)
                 if message_data.get("content"):
                     if type(message_data.get("content")) == str:
@@ -250,6 +258,88 @@ def test_server():
                     break
 
             assert "18893094989" in accumulated_content.replace(",", "")
+
+            #### TEST FILE ####
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {"messages": [], "auto_run": True}
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(json.dumps({"role": "user", "start": True}))
+            print("sent", json.dumps({"role": "user", "start": True}))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "Does this file exist?",
+                    }
+                )
+            )
+            print(
+                "sent",
+                {
+                    "role": "user",
+                    "type": "message",
+                    "content": "Does this file exist?",
+                },
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "file",
+                        "format": "path",
+                        "content": "/something.txt",
+                    }
+                )
+            )
+            print(
+                "sent",
+                {
+                    "role": "user",
+                    "type": "file",
+                    "format": "path",
+                    "content": "/something.txt",
+                },
+            )
+            await websocket.send(json.dumps({"role": "user", "end": True}))
+            print("WebSocket chunks sent")
+
+            # Wait for response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if type(message_data.get("content")) == str:
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            # Get messages
+            get_url = "http://localhost:8000/settings/messages"
+            response_json = requests.get(get_url).json()
+            print("GET request sent, response:", response_json)
+            if isinstance(response_json, str):
+                response_json = json.loads(response_json)
+            messages = response_json["messages"]
+
+            response = async_interpreter.computer.ai.chat(
+                str(messages)
+                + "\n\nIn the conversation above, does the assistant think the file exists? Yes or no? Only reply with one word— 'yes' or 'no'."
+            )
+            assert response.strip(" \n.").lower() == "no"
 
             # Sending POST request to /run endpoint with code to kill a thread in Python
             # actually wait i dont think this will work..? will just kill the python interpreter
