@@ -25,12 +25,6 @@ from websocket import create_connection
 
 # @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
 def test_server():
-    try:
-        import janus
-    except:
-        os.system(
-            'pip install "git+https://github.com/OpenInterpreter/open-interpreter.git#egg=open-interpreter[server]"'
-        )
     # Start the server in a new thread
     async_interpreter = AsyncInterpreter()
     async_interpreter.print = False
