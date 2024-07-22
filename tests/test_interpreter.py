@@ -1,5 +1,6 @@
 import os
 import platform
+import signal
 import time
 from random import randint
 
@@ -22,49 +23,14 @@ import pytest
 from websocket import create_connection
 
 
-def test_hallucinations():
-    # We should be resiliant to common hallucinations.
-
-    code = """{                                                                             
-    "language": "python",                                                        
-    "code": "10+12"                                                        
-  }"""
-
-    interpreter.messages = [
-        {"role": "assistant", "type": "code", "format": "python", "content": code}
-    ]
-    for chunk in interpreter._respond_and_store():
-        if chunk.get("format") == "output":
-            assert chunk.get("content") == "22"
-            break
-
-    code = """functions.execute({                                                                             
-    "language": "python",                                                        
-    "code": "10+12"                                                        
-  })"""
-
-    interpreter.messages = [
-        {"role": "assistant", "type": "code", "format": "python", "content": code}
-    ]
-    for chunk in interpreter._respond_and_store():
-        if chunk.get("format") == "output":
-            assert chunk.get("content") == "22"
-            break
-
-    code = """{language: "python", code: "print('hello')" }"""
-
-    interpreter.messages = [
-        {"role": "assistant", "type": "code", "format": "python", "content": code}
-    ]
-    for chunk in interpreter._respond_and_store():
-        if chunk.get("format") == "output":
-            assert chunk.get("content").strip() == "hello"
-            break
-
-
-@pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
 def test_server():
-    # os.system("pip install 'open-interpreter[server]'")
+    try:
+        import janus
+    except:
+        os.system(
+            'pip install "git+https://github.com/OpenInterpreter/open-interpreter.git#egg=open-interpreter[server]"'
+        )
     # Start the server in a new thread
     async_interpreter = AsyncInterpreter()
     async_interpreter.print = False
@@ -90,7 +56,7 @@ def test_server():
             # Sending POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "model": "gpt-4o",
+                "llm": {"model": "gpt-4o"},
                 "messages": [
                     {
                         "role": "user",
@@ -144,7 +110,7 @@ def test_server():
             # Send another POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "model": "gpt-4o",
+                "llm": {"model": "gpt-4o"},
                 "messages": [
                     {
                         "role": "user",
@@ -291,15 +257,62 @@ def test_server():
 
             assert "18893094989" in accumulated_content.replace(",", "")
 
+            # Sending POST request to /run endpoint with code to kill a thread in Python
+            # actually wait i dont think this will work..? will just kill the python interpreter
+            post_url = "http://localhost:8000/run"
+            code_data = {
+                "code": "import os, signal; os.kill(os.getpid(), signal.SIGINT)",
+                "language": "python",
+            }
+            response = requests.post(post_url, json=code_data)
+            print("POST request sent, response:", response.json())
+
     # Get the current event loop and run the test function
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test_fastapi_server())
 
-    # Stop the server
-    async_interpreter.server.uvicorn_server.should_exit = True
-
     # Wait for the server thread to finish
     server_thread.join(timeout=1)
+
+
+def test_hallucinations():
+    # We should be resiliant to common hallucinations.
+
+    code = """{                                                                             
+    "language": "python",                                                        
+    "code": "10+12"                                                        
+  }"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+    code = """functions.execute({                                                                             
+    "language": "python",                                                        
+    "code": "10+12"                                                        
+  })"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+    code = """{language: "python", code: "print('hello')" }"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content").strip() == "hello"
+            break
 
 
 @pytest.mark.skip(reason="Mac only")

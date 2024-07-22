@@ -610,7 +610,7 @@ class Server:
             )
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))  # Google's public DNS server
-            print(f"Server is running at http://{s.getsockname()[0]}:{self.port}")
+            print(f"Server will run at http://{s.getsockname()[0]}:{self.port}")
             s.close()
 
         for _ in range(retries):
