@@ -355,8 +355,10 @@ def test_server():
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test_fastapi_server())
 
+    async_interpreter.server.uvicorn_server.should_exit = True
+
     # Wait for the server thread to finish
-    server_thread.join(timeout=1)
+    server_thread.join(timeout=3)
 
 
 def test_hallucinations():
