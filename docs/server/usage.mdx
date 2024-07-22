@@ -232,6 +232,79 @@ docker run -p 8000:8000 open-interpreter
 
 This will expose the server on port 8000 of your host machine.
 
+## Acknowledgment Feature
+
+When the `INTERPRETER_REQUIRE_ACKNOWLEDGE` environment variable is set to `"True"`, the server requires clients to acknowledge each message received. This feature ensures reliable message delivery in environments where network stability might be a concern.
+
+### How it works
+
+1. When this feature is enabled, each message sent by the server will include an `id` field.
+2. The client must send an acknowledgment message back to the server for each received message.
+3. The server will wait for this acknowledgment before sending the next message.
+
+### Client Implementation
+
+To implement this on the client side:
+
+1. Check if each received message contains an `id` field.
+2. If an `id` is present, send an acknowledgment message back to the server.
+
+Here's an example of how to handle this in your WebSocket client:
+
+```python
+import json
+import websockets
+
+async def handle_messages(websocket):
+    async for message in websocket:
+        data = json.loads(message)
+        
+        # Process the message as usual
+        print(f"Received: {data}")
+
+        # Check if the message has an ID that needs to be acknowledged
+        if "id" in data:
+            ack_message = {
+                "ack": data["id"]
+            }
+            await websocket.send(json.dumps(ack_message))
+            print(f"Sent acknowledgment for message {data['id']}")
+
+async def main():
+    uri = "ws://localhost:8000"
+    async with websockets.connect(uri) as websocket:
+        await handle_messages(websocket)
+
+# Run the async function
+import asyncio
+asyncio.run(main())
+```
+
+### Server Behavior
+
+- If the server doesn't receive an acknowledgment within a certain timeframe, it will attempt to resend the message.
+- The server will make multiple attempts to send a message before considering it failed.
+
+### Enabling the Feature
+
+To enable this feature, set the `INTERPRETER_REQUIRE_ACKNOWLEDGE` environment variable to `"True"` before starting the server:
+
+```bash
+export INTERPRETER_REQUIRE_ACKNOWLEDGE="True"
+interpreter --server
+```
+
+Or in Python:
+
+```python
+import os
+os.environ["INTERPRETER_REQUIRE_ACKNOWLEDGE"] = "True"
+
+from interpreter import AsyncInterpreter
+async_interpreter = AsyncInterpreter()
+async_interpreter.server.run()
+```
+
 ## Advanced Usage: Accessing the FastAPI App Directly
 
 The FastAPI app is exposed at `async_interpreter.server.app`. This allows you to add custom routes or host the app using Uvicorn directly.
