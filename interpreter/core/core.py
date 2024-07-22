@@ -79,6 +79,7 @@ class OpenInterpreter:
         import_skills=False,
         multi_line=True,
         contribute_conversation=False,
+        plain_text_display=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -97,6 +98,7 @@ class OpenInterpreter:
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
         self.contribute_conversation = contribute_conversation
+        self.plain_text_display = plain_text_display
 
         # Loop messages
         self.loop = loop
@@ -222,9 +224,6 @@ class OpenInterpreter:
 
         # One-off message
         if message or message == "":
-            if message == "":
-                message = "No entry from user - please suggest something to enter."
-
             ## We support multiple formats for the incoming message:
             # Dict (these are passed directly in)
             if isinstance(message, dict):
