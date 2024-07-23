@@ -16,6 +16,7 @@ from interpreter.terminal_interface.utils.count_tokens import (
 interpreter = OpenInterpreter()
 #####
 
+import multiprocessing
 import threading
 import time
 
@@ -23,13 +24,18 @@ import pytest
 from websocket import create_connection
 
 
-# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
-def test_server():
-    # Start the server in a new thread
+def run_server():
     async_interpreter = AsyncInterpreter()
     async_interpreter.print = False
-    server_thread = threading.Thread(target=async_interpreter.server.run)
-    server_thread.start()
+    async_interpreter.server.run()
+
+
+# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+def test_server():
+    # Start the server in a new process
+
+    process = multiprocessing.Process(target=run_server)
+    process.start()
 
     # Give the server a moment to start
     time.sleep(2)
@@ -50,7 +56,7 @@ def test_server():
             # Sending POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "llm": {"model": "gpt-4o"},
+                "llm": {"model": "gpt-4o-mini"},
                 "messages": [
                     {
                         "role": "user",
@@ -106,7 +112,7 @@ def test_server():
             # Send another POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "llm": {"model": "gpt-4o"},
+                "llm": {"model": "gpt-4o-mini"},
                 "messages": [
                     {
                         "role": "user",
@@ -335,11 +341,88 @@ def test_server():
                 response_json = json.loads(response_json)
             messages = response_json["messages"]
 
-            response = async_interpreter.computer.ai.chat(
+            response = interpreter.computer.ai.chat(
                 str(messages)
                 + "\n\nIn the conversation above, does the assistant think the file exists? Yes or no? Only reply with one word— 'yes' or 'no'."
             )
             assert response.strip(" \n.").lower() == "no"
+
+            #### TEST IMAGES ####
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {"messages": [], "auto_run": True}
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            base64png = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC"
+
+            # Sending messages via WebSocket
+            await websocket.send(json.dumps({"role": "user", "start": True}))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "describe this image",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "image",
+                        "format": "base64.png",
+                        "content": base64png,
+                    }
+                )
+            )
+            # await websocket.send(
+            #     json.dumps(
+            #         {
+            #             "role": "user",
+            #             "type": "image",
+            #             "format": "path",
+            #             "content": "/Users/killianlucas/Documents/GitHub/open-interpreter/screen.png",
+            #         }
+            #     )
+            # )
+
+            await websocket.send(json.dumps({"role": "user", "end": True}))
+            print("WebSocket chunks sent")
+
+            # Wait for response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if type(message_data.get("content")) == str:
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            # Get messages
+            get_url = "http://localhost:8000/settings/messages"
+            response_json = requests.get(get_url).json()
+            print("GET request sent, response:", response_json)
+            if isinstance(response_json, str):
+                response_json = json.loads(response_json)
+            messages = response_json["messages"]
+
+            response = interpreter.computer.ai.chat(
+                str(messages)
+                + "\n\nIn the conversation above, does the assistant appear to be able to describe the image of a gradient? Yes or no? Only reply with one word— 'yes' or 'no'."
+            )
+            assert response.strip(" \n.").lower() == "yes"
 
             # Sending POST request to /run endpoint with code to kill a thread in Python
             # actually wait i dont think this will work..? will just kill the python interpreter
@@ -354,9 +437,10 @@ def test_server():
     # Get the current event loop and run the test function
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test_fastapi_server())
-
-    # Wait for the server thread to finish
-    server_thread.join(timeout=1)
+    # Kill server process
+    process.terminate()
+    os.kill(process.pid, signal.SIGKILL)  # Send SIGKILL signal
+    process.join()
 
 
 def test_hallucinations():
@@ -442,7 +526,7 @@ def test_generator():
     Sends two messages, makes sure everything is correct with display both on and off.
     """
 
-    interpreter.llm.model = "gpt-4"
+    interpreter.llm.model = "gpt-4o-mini"
 
     for tests in [
         {"query": "What's 38023*40334? Use Python", "display": True},
@@ -543,7 +627,7 @@ def test_m_vision():
     ]
 
     interpreter.llm.supports_vision = False
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
@@ -580,7 +664,7 @@ def test_skills():
 
     import json
 
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
@@ -834,7 +918,7 @@ def setup_function():
     interpreter.reset()
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.llm.context_window = 123000
     interpreter.llm.max_tokens = 4096
     interpreter.llm.supports_functions = True
@@ -897,7 +981,7 @@ def test_vision():
     ]
 
     interpreter.llm.supports_vision = True
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000

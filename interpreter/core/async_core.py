@@ -198,10 +198,6 @@ class AsyncInterpreter(OpenInterpreter):
                     chunk_copy["content"] = ""
                 self.messages.append(chunk_copy)
 
-            print("ADDED CHUNK:", chunk)
-            print("MESSAGES IS NOW:", self.messages)
-            # time.sleep(5)
-
         elif type(chunk) == bytes:
             if self.messages[-1]["content"] == "":  # We initialize as an empty string ^
                 self.messages[-1]["content"] = b""  # But it actually should be bytes
@@ -282,7 +278,7 @@ def create_router(async_interpreter):
                         } else {
                             var startMessageBlock = {
                                 "role": "user",
-                                "type": "message",
+                                //"type": "message",
                                 "start": true
                             };
                             ws.send(JSON.stringify(startMessageBlock));
@@ -296,7 +292,7 @@ def create_router(async_interpreter):
 
                             var endMessageBlock = {
                                 "role": "user",
-                                "type": "message",
+                                //"type": "message",
                                 "end": true
                             };
                             ws.send(JSON.stringify(endMessageBlock));
@@ -649,21 +645,38 @@ port = int(os.getenv("PORT", 8000))  # Default port is 8000
 
 
 class Server:
-    def __init__(self, async_interpreter, host=host, port=port):
+    def __init__(self, async_interpreter, host="127.0.0.1", port=8000):
         self.app = FastAPI()
         router = create_router(async_interpreter)
         self.app.include_router(router)
-        self.host = host
-        self.port = port
+        self.config = uvicorn.Config(app=self.app, host=host, port=port)
+        self.uvicorn_server = uvicorn.Server(self.config)
 
-    def run(self, retries=5, *args, **kwargs):
-        if "host" in kwargs:
-            self.host = kwargs.pop("host")
-        if "port" in kwargs:
-            self.port = kwargs.pop("port")
-        if "app" in kwargs:
-            self.app = kwargs.pop("app")
+    @property
+    def host(self):
+        return self.config.host
 
+    @host.setter
+    def host(self, value):
+        self.config.host = value
+        self.uvicorn_server = uvicorn.Server(self.config)
+
+    @property
+    def port(self):
+        return self.config.port
+
+    @port.setter
+    def port(self, value):
+        self.config.port = value
+        self.uvicorn_server = uvicorn.Server(self.config)
+
+    def run(self, host=None, port=None, retries=5):
+        if host is not None:
+            self.host = host
+        if port is not None:
+            self.port = port
+
+        # Print server information
         if self.host == "0.0.0.0":
             print(
                 "Warning: Using host `0.0.0.0` will expose Open Interpreter over your local network."
@@ -672,12 +685,12 @@ class Server:
             s.connect(("8.8.8.8", 80))  # Google's public DNS server
             print(f"Server will run at http://{s.getsockname()[0]}:{self.port}")
             s.close()
+        else:
+            print(f"Server will run at http://{self.host}:{self.port}")
 
         for _ in range(retries):
             try:
-                uvicorn.run(
-                    app=self.app, host=self.host, port=self.port, *args, **kwargs
-                )
+                self.uvicorn_server.run()
                 break
             except KeyboardInterrupt:
                 break
