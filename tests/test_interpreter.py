@@ -16,6 +16,7 @@ from interpreter.terminal_interface.utils.count_tokens import (
 interpreter = OpenInterpreter()
 #####
 
+import multiprocessing
 import threading
 import time
 
@@ -23,13 +24,18 @@ import pytest
 from websocket import create_connection
 
 
-# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
-def test_server():
-    # Start the server in a new thread
+def run_server():
     async_interpreter = AsyncInterpreter()
     async_interpreter.print = False
-    server_thread = threading.Thread(target=async_interpreter.server.run)
-    server_thread.start()
+    async_interpreter.server.run()
+
+
+# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+def test_server():
+    # Start the server in a new process
+
+    process = multiprocessing.Process(target=run_server)
+    process.start()
 
     # Give the server a moment to start
     time.sleep(2)
@@ -50,7 +56,7 @@ def test_server():
             # Sending POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "llm": {"model": "gpt-4o"},
+                "llm": {"model": "gpt-4o-mini"},
                 "messages": [
                     {
                         "role": "user",
@@ -106,7 +112,7 @@ def test_server():
             # Send another POST request
             post_url = "http://localhost:8000/settings"
             settings = {
-                "llm": {"model": "gpt-4o"},
+                "llm": {"model": "gpt-4o-mini"},
                 "messages": [
                     {
                         "role": "user",
@@ -335,7 +341,7 @@ def test_server():
                 response_json = json.loads(response_json)
             messages = response_json["messages"]
 
-            response = async_interpreter.computer.ai.chat(
+            response = interpreter.computer.ai.chat(
                 str(messages)
                 + "\n\nIn the conversation above, does the assistant think the file exists? Yes or no? Only reply with one word— 'yes' or 'no'."
             )
@@ -358,7 +364,7 @@ def test_server():
                     {
                         "role": "user",
                         "type": "message",
-                        "content": "describe these images",
+                        "content": "describe this image",
                     }
                 )
             )
@@ -412,9 +418,9 @@ def test_server():
                 response_json = json.loads(response_json)
             messages = response_json["messages"]
 
-            response = async_interpreter.computer.ai.chat(
+            response = interpreter.computer.ai.chat(
                 str(messages)
-                + "\n\nIn the conversation above, does the assistant appear to be able to describe the images? Yes or no? Only reply with one word— 'yes' or 'no'."
+                + "\n\nIn the conversation above, does the assistant appear to be able to describe the image of a gradient? Yes or no? Only reply with one word— 'yes' or 'no'."
             )
             assert response.strip(" \n.").lower() == "yes"
 
@@ -431,11 +437,10 @@ def test_server():
     # Get the current event loop and run the test function
     loop = asyncio.get_event_loop()
     loop.run_until_complete(test_fastapi_server())
-
-    async_interpreter.server.uvicorn_server.should_exit = True
-
-    # Wait for the server thread to finish
-    server_thread.join(timeout=3)
+    # Kill server process
+    process.terminate()
+    os.kill(process.pid, signal.SIGKILL)  # Send SIGKILL signal
+    process.join()
 
 
 def test_hallucinations():
@@ -521,7 +526,7 @@ def test_generator():
     Sends two messages, makes sure everything is correct with display both on and off.
     """
 
-    interpreter.llm.model = "gpt-4"
+    interpreter.llm.model = "gpt-4o-mini"
 
     for tests in [
         {"query": "What's 38023*40334? Use Python", "display": True},
@@ -622,7 +627,7 @@ def test_m_vision():
     ]
 
     interpreter.llm.supports_vision = False
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
@@ -659,7 +664,7 @@ def test_skills():
 
     import json
 
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
@@ -913,7 +918,7 @@ def setup_function():
     interpreter.reset()
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.llm.context_window = 123000
     interpreter.llm.max_tokens = 4096
     interpreter.llm.supports_functions = True
@@ -976,7 +981,7 @@ def test_vision():
     ]
 
     interpreter.llm.supports_vision = True
-    interpreter.llm.model = "gpt-4o"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
