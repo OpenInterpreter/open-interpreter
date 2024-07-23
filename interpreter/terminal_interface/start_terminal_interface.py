@@ -15,6 +15,9 @@ from .utils.check_for_update import check_for_update
 from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
 
+EXPORT_ARG = None  # This is a global variable that we store the export argument in so that we can use it outsid eof start_terminal_interfae.
+# IDK if this is the best way to do it, but it works for now.
+
 
 def start_terminal_interface(interpreter):
     """
@@ -149,6 +152,15 @@ def start_terminal_interface(interpreter):
             "type": bool,
             "default": False,
             "attribute": {"object": interpreter, "attr_name": "disable_telemetry"},
+        },
+        {
+            "name": "export",
+            "nickname": "e",
+            "help_text": "export the conversation to a markdown file. Optionally specify a filename.",
+            "type": str,
+            "nargs": "?",
+            "const": "default",  # This allows the argument to be specified without a value
+            "default": None,
         },
         {
             "name": "offline",
@@ -361,6 +373,15 @@ Use """ to write multi-line messages.
         )
         sys.exit(1)
 
+    # Set the export argument to the global variable
+    if args.export:
+        global EXPORT_ARG
+        global EXPORT_ARG
+        if args.export.startswith("xport="):
+            EXPORT_ARG = args.export[len("xport=") :]
+        else:
+            EXPORT_ARG = args.export
+
     if args.profiles:
         open_storage_dir("profiles")
         return
@@ -555,6 +576,14 @@ def main():
         start_terminal_interface(interpreter)
     except KeyboardInterrupt:
         try:
+            if EXPORT_ARG:
+                if (
+                    EXPORT_ARG == "default" or EXPORT_ARG == "xport"
+                ):  # for some reason the export argument is being set to "xport" when it's not set
+                    interpreter.export_to_markdown()
+                else:
+                    interpreter.export_to_markdown(EXPORT_ARG)
+
             interpreter.computer.terminate()
 
             if not interpreter.offline and not interpreter.disable_telemetry:
