@@ -4,6 +4,7 @@ import time
 from ..utils.recipient_utils import parse_for_recipient
 from .languages.applescript import AppleScript
 from .languages.html import HTML
+from .languages.java import Java
 from .languages.javascript import JavaScript
 from .languages.powershell import PowerShell
 from .languages.python import Python
@@ -11,7 +12,6 @@ from .languages.r import R
 from .languages.react import React
 from .languages.ruby import Ruby
 from .languages.shell import Shell
-from .languages.java import Java
 
 # Should this be renamed to OS or System?
 
