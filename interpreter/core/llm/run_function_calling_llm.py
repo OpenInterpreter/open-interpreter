@@ -54,6 +54,7 @@ def run_function_calling_llm(llm, request_params):
         if "content" in delta and delta["content"]:
             if function_call_detected:
                 # More content after a code block? This is a code review by a judge layer.
+                # print("Code safety review:", delta["content"])
                 if delta["content"].strip() == "<SAFE>":
                     yield {"type": "review", "format": "safe", "content": ""}
                 elif "<UNSAFE>" in delta["content"]:
