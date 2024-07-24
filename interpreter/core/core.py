@@ -301,7 +301,10 @@ class OpenInterpreter:
         self.verbose = False
 
         # Utility function
-        def is_active_line_chunk(chunk):
+        def is_ephemeral(chunk):
+            """
+            Ephemeral = this chunk doesn't contribute to a message we want to save.
+            """
             if "format" in chunk and chunk["format"] == "active_line":
                 return True
             if chunk["type"] == "review":
@@ -358,7 +361,7 @@ class OpenInterpreter:
                 ):
                     # If they match, append the chunk's content to the current message's content
                     # (Except active_line, which shouldn't be stored)
-                    if not is_active_line_chunk(chunk):
+                    if not is_ephemeral(chunk):
                         self.messages[-1]["content"] += chunk["content"]
                 else:
                     # If they don't match, yield a end message for the last message type and a start message for the new one
@@ -374,7 +377,7 @@ class OpenInterpreter:
                     yield {**last_flag_base, "start": True}
 
                     # Add the chunk as a new message
-                    if not is_active_line_chunk(chunk):
+                    if not is_ephemeral(chunk):
                         self.messages.append(chunk)
 
                 # Yield the chunk itself
