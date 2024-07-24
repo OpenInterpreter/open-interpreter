@@ -53,6 +53,9 @@ def test_server():
             # Connect to the websocket
             print("Connected to WebSocket")
 
+            # Sending message via WebSocket
+            await websocket.send(json.dumps({"auth": "dummy-api-key"}))
+
             # Sending POST request
             post_url = "http://localhost:8000/settings"
             settings = {

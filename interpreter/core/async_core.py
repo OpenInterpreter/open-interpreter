@@ -17,8 +17,18 @@ from .core import OpenInterpreter
 try:
     import janus
     import uvicorn
-    from fastapi import APIRouter, FastAPI, File, Form, UploadFile, WebSocket
-    from fastapi.responses import PlainTextResponse, StreamingResponse
+    from fastapi import (
+        APIRouter,
+        FastAPI,
+        File,
+        Form,
+        HTTPException,
+        Request,
+        UploadFile,
+        WebSocket,
+    )
+    from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+    from starlette.status import HTTP_403_FORBIDDEN
 except:
     # Server dependencies are not required by the main package.
     pass
@@ -204,6 +214,24 @@ class AsyncInterpreter(OpenInterpreter):
             self.messages[-1]["content"] += chunk
 
 
+def authenticate_function(key):
+    """
+    This function checks if the provided key is valid for authentication.
+
+    Returns True if the key is valid, False otherwise.
+    """
+    # Fetch the API key from the environment variables. If it's not set, return True.
+    api_key = os.getenv("INTERPRETER_API_KEY", None)
+
+    # If the API key is not set in the environment variables, return True.
+    # Otherwise, check if the provided key matches the fetched API key.
+    # Return True if they match, False otherwise.
+    if api_key is None:
+        return True
+    else:
+        return key == api_key
+
+
 def create_router(async_interpreter):
     router = APIRouter()
 
@@ -226,6 +254,7 @@ def create_router(async_interpreter):
                     <button>Send</button>
                 </form>
                 <button id="approveCodeButton">Approve Code</button>
+                <button id="authButton">Send Auth</button>
                 <div id="messages"></div>
                 <script>
                     var ws = new WebSocket("ws://"""
@@ -234,6 +263,7 @@ def create_router(async_interpreter):
             + str(async_interpreter.server.port)
             + """/");
                     var lastMessageElement = null;
+
                     ws.onmessage = function(event) {
 
                         var eventData = JSON.parse(event.data);
@@ -326,8 +356,15 @@ def create_router(async_interpreter):
                     };
                     ws.send(JSON.stringify(endCommandBlock));
                 }
+                function authenticate() {
+                    var authBlock = {
+                        "auth": "dummy-api-key"
+                    };
+                    ws.send(JSON.stringify(authBlock));
+                }
 
                 document.getElementById("approveCodeButton").addEventListener("click", approveCode);
+                document.getElementById("authButton").addEventListener("click", authenticate);
                 </script>
             </body>
             </html>
@@ -338,12 +375,29 @@ def create_router(async_interpreter):
     @router.websocket("/")
     async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
+
         try:
 
             async def receive_input():
+                authenticated = False
                 while True:
                     try:
                         data = await websocket.receive()
+
+                        if not authenticated:
+                            if "text" in data:
+                                data = json.loads(data["text"])
+                                if "auth" in data:
+                                    if async_interpreter.server.authenticate(
+                                        data["auth"]
+                                    ):
+                                        authenticated = True
+                                        await websocket.send_text(
+                                            json.dumps({"auth": True})
+                                        )
+                            if not authenticated:
+                                await websocket.send_text(json.dumps({"auth": False}))
+                            continue
 
                         if data.get("type") == "websocket.receive":
                             if "text" in data:
@@ -474,19 +528,6 @@ def create_router(async_interpreter):
         except Exception as e:
             return {"error": str(e)}, 500
 
-    @router.post("/run")
-    async def run_code(payload: Dict[str, Any]):
-        language, code = payload.get("language"), payload.get("code")
-        if not (language and code):
-            return {"error": "Both 'language' and 'code' are required."}, 400
-        try:
-            print(f"Running {language}:", code)
-            output = async_interpreter.computer.run(language, code)
-            print("Output:", output)
-            return {"output": output}
-        except Exception as e:
-            return {"error": str(e)}, 500
-
     @router.post("/settings")
     async def set_settings(payload: Dict[str, Any]):
         for key, value in payload.items():
@@ -520,23 +561,38 @@ def create_router(async_interpreter):
         else:
             return json.dumps({"error": "Setting not found"}), 404
 
-    @router.post("/upload")
-    async def upload_file(file: UploadFile = File(...), path: str = Form(...)):
-        try:
-            with open(path, "wb") as output_file:
-                shutil.copyfileobj(file.file, output_file)
-            return {"status": "success"}
-        except Exception as e:
-            return {"error": str(e)}, 500
+    if os.getenv("INTERPRETER_INSECURE_ROUTES", "").lower() == "true":
 
-    @router.get("/download/{filename}")
-    async def download_file(filename: str):
-        try:
-            return StreamingResponse(
-                open(filename, "rb"), media_type="application/octet-stream"
-            )
-        except Exception as e:
-            return {"error": str(e)}, 500
+        @router.post("/run")
+        async def run_code(payload: Dict[str, Any]):
+            language, code = payload.get("language"), payload.get("code")
+            if not (language and code):
+                return {"error": "Both 'language' and 'code' are required."}, 400
+            try:
+                print(f"Running {language}:", code)
+                output = async_interpreter.computer.run(language, code)
+                print("Output:", output)
+                return {"output": output}
+            except Exception as e:
+                return {"error": str(e)}, 500
+
+        @router.post("/upload")
+        async def upload_file(file: UploadFile = File(...), path: str = Form(...)):
+            try:
+                with open(path, "wb") as output_file:
+                    shutil.copyfileobj(file.file, output_file)
+                return {"status": "success"}
+            except Exception as e:
+                return {"error": str(e)}, 500
+
+        @router.get("/download/{filename}")
+        async def download_file(filename: str):
+            try:
+                return StreamingResponse(
+                    open(filename, "rb"), media_type="application/octet-stream"
+                )
+            except Exception as e:
+                return {"error": str(e)}, 500
 
     ### OPENAI COMPATIBLE ENDPOINT
 
@@ -648,6 +704,21 @@ class Server:
     def __init__(self, async_interpreter, host="127.0.0.1", port=8000):
         self.app = FastAPI()
         router = create_router(async_interpreter)
+        self.authenticate = authenticate_function
+
+        # Add authentication middleware
+        @self.app.middleware("http")
+        async def validate_api_key(request: Request, call_next):
+            api_key = request.headers.get("X-API-KEY")
+            if self.authenticate(api_key):
+                response = await call_next(request)
+                return response
+            else:
+                return JSONResponse(
+                    status_code=HTTP_403_FORBIDDEN,
+                    content={"detail": "Authentication failed"},
+                )
+
         self.app.include_router(router)
         self.config = uvicorn.Config(app=self.app, host=host, port=port)
         self.uvicorn_server = uvicorn.Server(self.config)
