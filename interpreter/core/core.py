@@ -99,6 +99,7 @@ class OpenInterpreter:
         self.multi_line = multi_line
         self.contribute_conversation = contribute_conversation
         self.plain_text_display = plain_text_display
+        self.highlight_active_line = True  # additional setting to toggle active line highlighting. Defaults to True
 
         # Loop messages
         self.loop = loop

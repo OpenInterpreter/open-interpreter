@@ -51,6 +51,14 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "auto_run"},
         },
         {
+            "name": "no_highlight_active_line",
+            "nickname": "nhl",
+            "help_text": "turn off active line highlighting in code blocks",
+            "type": bool,
+            "action": "store_true",
+            "default": False,  # Default to False, meaning highlighting is on by default
+        },
+        {
             "name": "verbose",
             "nickname": "v",
             "help_text": "print detailed logs",
@@ -380,6 +388,9 @@ Use """ to write multi-line messages.
         update_name = "Local III"  # Change this with each major update
         print(f"Open Interpreter {version} {update_name}")
         return
+
+    if args.no_highlight_active_line:
+        interpreter.highlight_active_line = False
 
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
     if interpreter.auto_run and (
