@@ -42,6 +42,9 @@ def run_function_calling_llm(llm, request_params):
     code = ""
     function_call_detected = False
 
+    accumulated_review = ""
+    review_category = None
+
     for chunk in llm.completions(**request_params):
         if "choices" not in chunk or len(chunk["choices"]) == 0:
             # This happens sometimes
@@ -55,22 +58,22 @@ def run_function_calling_llm(llm, request_params):
             if function_call_detected:
                 # More content after a code block? This is a code review by a judge layer.
                 # print("Code safety review:", delta["content"])
-                if delta["content"].strip() == "<SAFE>":
-                    yield {"type": "review", "format": "safe", "content": ""}
-                elif "<UNSAFE>" in delta["content"]:
-                    content = (
-                        delta["content"]
-                        .replace("<UNSAFE>", "")
-                        .replace("</UNSAFE>", "")
-                    )
-                    yield {"type": "review", "format": "unsafe", "content": content}
-                else:
-                    content = (
-                        delta["content"]
-                        .replace("<WARNING>", "")
-                        .replace("</WARNING>", "")
-                    )
-                    yield {"type": "review", "format": "warning", "content": content}
+                accumulated_review += delta["content"]
+
+                if review_category == None:
+                    if "<UNSAFE>" in accumulated_review:
+                        review_category = "unsafe"
+                    if "<WARNING>" in accumulated_review:
+                        review_category = "warning"
+                    if "<SAFE>" in accumulated_review:
+                        review_category = "safe"
+
+                if review_category != None:
+                    yield {
+                        "type": "review",
+                        "format": review_category,
+                        "content": delta["content"],
+                    }
 
             else:
                 yield {"type": "message", "content": delta["content"]}
