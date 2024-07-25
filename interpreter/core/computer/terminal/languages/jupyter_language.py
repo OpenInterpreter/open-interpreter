@@ -19,8 +19,8 @@ from ..base_language import BaseLanguage
 
 DEBUG_MODE = False
 
-
-# Handling the case where the script is called as a kernel
+# When running from an executable, ipykernel calls itself infinitely
+# This is a workaround to detect it and launch it manually
 if 'ipykernel_launcher' in sys.argv:
     if sys.path[0] == '':
         del sys.path[0]
@@ -31,7 +31,6 @@ if 'ipykernel_launcher' in sys.argv:
     sys.exit(0)
 
 
-# Rest of your Open Interpreter code
 class JupyterLanguage(BaseLanguage):
     file_extension = "py"
     name = "Python"
