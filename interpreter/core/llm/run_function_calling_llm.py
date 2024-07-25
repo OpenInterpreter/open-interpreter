@@ -57,18 +57,30 @@ def run_function_calling_llm(llm, request_params):
         if "content" in delta and delta["content"]:
             if function_call_detected:
                 # More content after a code block? This is a code review by a judge layer.
+
                 # print("Code safety review:", delta["content"])
-                accumulated_review += delta["content"]
 
                 if review_category == None:
-                    if "<UNSAFE>" in accumulated_review:
+                    accumulated_review += delta["content"]
+
+                    if "<unsafe>" in accumulated_review:
                         review_category = "unsafe"
-                    if "<WARNING>" in accumulated_review:
+                    if "<warning>" in accumulated_review:
                         review_category = "warning"
-                    if "<SAFE>" in accumulated_review:
+                    if "<safe>" in accumulated_review:
                         review_category = "safe"
 
                 if review_category != None:
+                    for tag in [
+                        "<safe>",
+                        "</safe>",
+                        "<warning>",
+                        "</warning>",
+                        "<unsafe>",
+                        "</unsafe>",
+                    ]:
+                        delta["content"] = delta["content"].replace(tag, "")
+
                     yield {
                         "type": "review",
                         "format": review_category,

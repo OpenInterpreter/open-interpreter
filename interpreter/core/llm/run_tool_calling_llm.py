@@ -63,6 +63,7 @@ def run_tool_calling_llm(llm, request_params):
     accumulated_deltas = {}
     language = None
     code = ""
+    function_call_detected = False
 
     for chunk in llm.completions(**request_params):
         if "choices" not in chunk or len(chunk["choices"]) == 0:
@@ -73,6 +74,8 @@ def run_tool_calling_llm(llm, request_params):
 
         # Convert tool call into function call, which we have great parsing logic for below
         if "tool_calls" in delta and delta["tool_calls"]:
+            function_call_detected = True
+
             # import pdb; pdb.set_trace()
             if len(delta["tool_calls"]) > 0 and delta["tool_calls"][0].function:
                 delta = {
@@ -87,7 +90,40 @@ def run_tool_calling_llm(llm, request_params):
         accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
         if "content" in delta and delta["content"]:
-            yield {"type": "message", "content": delta["content"]}
+            if function_call_detected:
+                # More content after a code block? This is a code review by a judge layer.
+
+                # print("Code safety review:", delta["content"])
+
+                if review_category == None:
+                    accumulated_review += delta["content"]
+
+                    if "<unsafe>" in accumulated_review:
+                        review_category = "unsafe"
+                    if "<warning>" in accumulated_review:
+                        review_category = "warning"
+                    if "<safe>" in accumulated_review:
+                        review_category = "safe"
+
+                if review_category != None:
+                    for tag in [
+                        "<safe>",
+                        "</safe>",
+                        "<warning>",
+                        "</warning>",
+                        "<unsafe>",
+                        "</unsafe>",
+                    ]:
+                        delta["content"] = delta["content"].replace(tag, "")
+
+                    yield {
+                        "type": "review",
+                        "format": review_category,
+                        "content": delta["content"],
+                    }
+
+            else:
+                yield {"type": "message", "content": delta["content"]}
 
         if (
             accumulated_deltas.get("function_call")
