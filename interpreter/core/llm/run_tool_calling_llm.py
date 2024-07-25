@@ -64,6 +64,8 @@ def run_tool_calling_llm(llm, request_params):
     language = None
     code = ""
     function_call_detected = False
+    accumulated_review = ""
+    review_category = None
 
     for chunk in llm.completions(**request_params):
         if "choices" not in chunk or len(chunk["choices"]) == 0:
