@@ -39,6 +39,7 @@ def run_tool_calling_llm(llm, request_params):
     last_tool_id = 0
     for i, message in enumerate(request_params["messages"]):
         if "function_call" in message:
+            last_tool_id += 1
             function = message.pop("function_call")
             message["tool_calls"] = [
                 {
@@ -54,8 +55,6 @@ def run_tool_calling_llm(llm, request_params):
             else:
                 message["role"] = "tool"
                 message["tool_call_id"] = "toolu_" + str(last_tool_id)
-
-                last_tool_id += 1
 
     request_params["messages"] = [m for m in request_params["messages"] if m != None]
 
