@@ -36,6 +36,23 @@ def run_tool_calling_llm(llm, request_params):
     ]
     request_params["tools"] = [tool_schema]
 
+    last_tool_id = 0
+    for message in request_params["messages"]:
+        if "function_call" in message:
+            function = message.pop("function_call")
+            message["tool_calls"] = [
+                {
+                    "id": "toolu_" + str(last_tool_id),
+                    "type": "function",
+                    "function": function,
+                }
+            ]
+        if message["role"] == "function":
+            message["role"] = "tool"
+            message["tool_call_id"] = "toolu_" + str(last_tool_id)
+
+            last_tool_id += 1
+
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
     #     "content"
@@ -55,12 +72,16 @@ def run_tool_calling_llm(llm, request_params):
         delta = chunk["choices"][0]["delta"]
 
         # Convert tool call into function call, which we have great parsing logic for below
-        if "tool_calls" in delta:
-            if (
-                len(delta["tool_calls"]) > 0
-                and "function_call" in delta["tool_calls"][0]
-            ):
-                delta["function_call"] = delta["tool_calls"][0]["function_call"]
+        if "tool_calls" in delta and delta["tool_calls"]:
+            # import pdb; pdb.set_trace()
+            if len(delta["tool_calls"]) > 0 and delta["tool_calls"][0].function:
+                delta = {
+                    # "id": delta["tool_calls"][0],
+                    "function_call": {
+                        "name": delta["tool_calls"][0].function.name,
+                        "arguments": delta["tool_calls"][0].function.arguments,
+                    }
+                }
 
         # Accumulate deltas
         accumulated_deltas = merge_deltas(accumulated_deltas, delta)
