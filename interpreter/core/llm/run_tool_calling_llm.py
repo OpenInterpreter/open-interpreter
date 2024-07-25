@@ -37,7 +37,7 @@ def run_tool_calling_llm(llm, request_params):
     request_params["tools"] = [tool_schema]
 
     last_tool_id = 0
-    for message in request_params["messages"]:
+    for i, message in enumerate(request_params["messages"]):
         if "function_call" in message:
             function = message.pop("function_call")
             message["tool_calls"] = [
@@ -48,10 +48,16 @@ def run_tool_calling_llm(llm, request_params):
                 }
             ]
         if message["role"] == "function":
-            message["role"] = "tool"
-            message["tool_call_id"] = "toolu_" + str(last_tool_id)
+            if i != 0 and request_params["messages"][i - 1]["role"] == "tool":
+                request_params["messages"][i]["content"] += message["content"]
+                message = None
+            else:
+                message["role"] = "tool"
+                message["tool_call_id"] = "toolu_" + str(last_tool_id)
 
-            last_tool_id += 1
+                last_tool_id += 1
+
+    request_params["messages"] = [m for m in request_params["messages"] if m != None]
 
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
