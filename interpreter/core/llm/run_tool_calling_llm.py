@@ -36,6 +36,28 @@ def run_tool_calling_llm(llm, request_params):
     ]
     request_params["tools"] = [tool_schema]
 
+    last_tool_id = 0
+    for i, message in enumerate(request_params["messages"]):
+        if "function_call" in message:
+            last_tool_id += 1
+            function = message.pop("function_call")
+            message["tool_calls"] = [
+                {
+                    "id": "toolu_" + str(last_tool_id),
+                    "type": "function",
+                    "function": function,
+                }
+            ]
+        if message["role"] == "function":
+            if i != 0 and request_params["messages"][i - 1]["role"] == "tool":
+                request_params["messages"][i]["content"] += message["content"]
+                message = None
+            else:
+                message["role"] = "tool"
+                message["tool_call_id"] = "toolu_" + str(last_tool_id)
+
+    request_params["messages"] = [m for m in request_params["messages"] if m != None]
+
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
     #     "content"
@@ -46,6 +68,9 @@ def run_tool_calling_llm(llm, request_params):
     accumulated_deltas = {}
     language = None
     code = ""
+    function_call_detected = False
+    accumulated_review = ""
+    review_category = None
 
     for chunk in llm.completions(**request_params):
         if "choices" not in chunk or len(chunk["choices"]) == 0:
@@ -55,18 +80,57 @@ def run_tool_calling_llm(llm, request_params):
         delta = chunk["choices"][0]["delta"]
 
         # Convert tool call into function call, which we have great parsing logic for below
-        if "tool_calls" in delta:
-            if (
-                len(delta["tool_calls"]) > 0
-                and "function_call" in delta["tool_calls"][0]
-            ):
-                delta["function_call"] = delta["tool_calls"][0]["function_call"]
+        if "tool_calls" in delta and delta["tool_calls"]:
+            function_call_detected = True
+
+            # import pdb; pdb.set_trace()
+            if len(delta["tool_calls"]) > 0 and delta["tool_calls"][0].function:
+                delta = {
+                    # "id": delta["tool_calls"][0],
+                    "function_call": {
+                        "name": delta["tool_calls"][0].function.name,
+                        "arguments": delta["tool_calls"][0].function.arguments,
+                    }
+                }
 
         # Accumulate deltas
         accumulated_deltas = merge_deltas(accumulated_deltas, delta)
 
         if "content" in delta and delta["content"]:
-            yield {"type": "message", "content": delta["content"]}
+            if function_call_detected:
+                # More content after a code block? This is a code review by a judge layer.
+
+                # print("Code safety review:", delta["content"])
+
+                if review_category == None:
+                    accumulated_review += delta["content"]
+
+                    if "<unsafe>" in accumulated_review:
+                        review_category = "unsafe"
+                    if "<warning>" in accumulated_review:
+                        review_category = "warning"
+                    if "<safe>" in accumulated_review:
+                        review_category = "safe"
+
+                if review_category != None:
+                    for tag in [
+                        "<safe>",
+                        "</safe>",
+                        "<warning>",
+                        "</warning>",
+                        "<unsafe>",
+                        "</unsafe>",
+                    ]:
+                        delta["content"] = delta["content"].replace(tag, "")
+
+                    yield {
+                        "type": "review",
+                        "format": review_category,
+                        "content": delta["content"],
+                    }
+
+            else:
+                yield {"type": "message", "content": delta["content"]}
 
         if (
             accumulated_deltas.get("function_call")
