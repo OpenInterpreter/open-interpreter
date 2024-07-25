@@ -172,6 +172,108 @@ def terminal_interface(interpreter, message):
                         print("Fail-safe triggered (mouse in one of the four corners).")
                         break
 
+                if chunk["type"] == "review" and chunk.get("content"):
+                    # Specialized models can emit a code review.
+                    print(chunk.get("content"), end="", flush=True)
+
+                # Execution notice
+                if chunk["type"] == "confirmation":
+                    if not interpreter.auto_run:
+                        # OI is about to execute code. The user wants to approve this
+
+                        # End the active code block so you can run input() below it
+                        if active_block and not interpreter.plain_text_display:
+                            active_block.refresh(cursor=False)
+                            active_block.end()
+                            active_block = None
+
+                        code_to_run = chunk["content"]
+                        language = code_to_run["format"]
+                        code = code_to_run["content"]
+
+                        should_scan_code = False
+
+                        if not interpreter.safe_mode == "off":
+                            if interpreter.safe_mode == "auto":
+                                should_scan_code = True
+                            elif interpreter.safe_mode == "ask":
+                                response = input(
+                                    "  Would you like to scan this code? (y/n)\n\n  "
+                                )
+                                print("")  # <- Aesthetic choice
+
+                                if response.strip().lower() == "y":
+                                    should_scan_code = True
+
+                        if should_scan_code:
+                            scan_code(code, language, interpreter)
+
+                        if interpreter.plain_text_display:
+                            response = input(
+                                "Would you like to run this code? (y/n)\n\n"
+                            )
+                        else:
+                            response = input(
+                                "  Would you like to run this code? (y/n)\n\n  "
+                            )
+                        print("")  # <- Aesthetic choice
+
+                        if response.strip().lower() == "y":
+                            # Create a new, identical block where the code will actually be run
+                            # Conveniently, the chunk includes everything we need to do this:
+                            active_block = CodeBlock()
+                            active_block.margin_top = False  # <- Aesthetic choice
+                            active_block.language = language
+                            active_block.code = code
+                        elif response.strip().lower() == "e":
+                            # Edit
+
+                            # Create a temporary file
+                            with tempfile.NamedTemporaryFile(
+                                suffix=".tmp", delete=False
+                            ) as tf:
+                                tf.write(code.encode())
+                                tf.flush()
+
+                            # Open the temporary file with the default editor
+                            subprocess.call([os.environ.get("EDITOR", "vim"), tf.name])
+
+                            # Read the modified code
+                            with open(tf.name, "r") as tf:
+                                code = tf.read()
+
+                            interpreter.messages[-1]["content"] = code  # Give it code
+
+                            # Delete the temporary file
+                            os.unlink(tf.name)
+                            active_block = CodeBlock()
+                            active_block.margin_top = False  # <- Aesthetic choice
+                            active_block.language = language
+                            active_block.code = code
+                        else:
+                            # User declined to run code.
+                            interpreter.messages.append(
+                                {
+                                    "role": "user",
+                                    "type": "message",
+                                    "content": "I have declined to run this code.",
+                                }
+                            )
+                            break
+
+                # Plain text mode
+                if interpreter.plain_text_display:
+                    if "start" in chunk or "end" in chunk:
+                        print("\n")
+                    if chunk["type"] in ["code", "console"] and "format" in chunk:
+                        if "start" in chunk:
+                            print("\n---\n\n```" + chunk["format"], flush=True)
+                        if "end" in chunk:
+                            print("\n```\n\n---\n\n", flush=True)
+                    if chunk.get("format") != "active_line":
+                        print(chunk.get("content", ""), end="", flush=True)
+                    continue
+
                 if "end" in chunk and active_block:
                     active_block.refresh(cursor=False)
 
@@ -242,86 +344,6 @@ def terminal_interface(interpreter, message):
 
                     if "content" in chunk:
                         active_block.code += chunk["content"]
-
-                # Execution notice
-                if chunk["type"] == "confirmation":
-                    if not interpreter.auto_run:
-                        # OI is about to execute code. The user wants to approve this
-
-                        # End the active code block so you can run input() below it
-                        if active_block:
-                            active_block.refresh(cursor=False)
-                            active_block.end()
-                            active_block = None
-
-                        code_to_run = chunk["content"]
-                        language = code_to_run["format"]
-                        code = code_to_run["content"]
-
-                        should_scan_code = False
-
-                        if not interpreter.safe_mode == "off":
-                            if interpreter.safe_mode == "auto":
-                                should_scan_code = True
-                            elif interpreter.safe_mode == "ask":
-                                response = input(
-                                    "  Would you like to scan this code? (y/n)\n\n  "
-                                )
-                                print("")  # <- Aesthetic choice
-
-                                if response.strip().lower() == "y":
-                                    should_scan_code = True
-
-                        if should_scan_code:
-                            scan_code(code, language, interpreter)
-
-                        response = input(
-                            "  Would you like to run this code? (y/n)\n\n  "
-                        )
-                        print("")  # <- Aesthetic choice
-
-                        if response.strip().lower() == "y":
-                            # Create a new, identical block where the code will actually be run
-                            # Conveniently, the chunk includes everything we need to do this:
-                            active_block = CodeBlock()
-                            active_block.margin_top = False  # <- Aesthetic choice
-                            active_block.language = language
-                            active_block.code = code
-                        elif response.strip().lower() == "e":
-                            # Edit
-
-                            # Create a temporary file
-                            with tempfile.NamedTemporaryFile(
-                                suffix=".tmp", delete=False
-                            ) as tf:
-                                tf.write(code.encode())
-                                tf.flush()
-
-                            # Open the temporary file with the default editor
-                            subprocess.call([os.environ.get("EDITOR", "vim"), tf.name])
-
-                            # Read the modified code
-                            with open(tf.name, "r") as tf:
-                                code = tf.read()
-
-                            interpreter.messages[-1]["content"] = code  # Give it code
-
-                            # Delete the temporary file
-                            os.unlink(tf.name)
-                            active_block = CodeBlock()
-                            active_block.margin_top = False  # <- Aesthetic choice
-                            active_block.language = language
-                            active_block.code = code
-                        else:
-                            # User declined to run code.
-                            interpreter.messages.append(
-                                {
-                                    "role": "user",
-                                    "type": "message",
-                                    "content": "I have declined to run this code.",
-                                }
-                            )
-                            break
 
                 # Computer can display visual types to user,
                 # Which sometimes creates more computer output (e.g. HTML errors, eventually)

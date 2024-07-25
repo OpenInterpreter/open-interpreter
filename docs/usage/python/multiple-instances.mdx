@@ -24,7 +24,7 @@ def swap_roles(messages):
 agents = [agent_1, agent_2]
 
 # Kick off the conversation
-messages = [{"role": "user", "message": "Hello!"}]
+messages = [{"role": "user", "type": "message", "content": "Hello!"}]
 
 while True:
     for agent in agents:

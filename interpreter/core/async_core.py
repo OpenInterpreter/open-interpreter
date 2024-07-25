@@ -1,20 +1,34 @@
 import asyncio
 import json
 import os
+import shutil
 import socket
 import threading
 import time
 import traceback
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, Union
+
+import shortuuid
+from pydantic import BaseModel
 
 from .core import OpenInterpreter
 
 try:
     import janus
     import uvicorn
-    from fastapi import APIRouter, FastAPI, WebSocket
-    from fastapi.responses import PlainTextResponse
+    from fastapi import (
+        APIRouter,
+        FastAPI,
+        File,
+        Form,
+        HTTPException,
+        Request,
+        UploadFile,
+        WebSocket,
+    )
+    from fastapi.responses import JSONResponse, PlainTextResponse, StreamingResponse
+    from starlette.status import HTTP_403_FORBIDDEN
 except:
     # Server dependencies are not required by the main package.
     pass
@@ -29,6 +43,11 @@ class AsyncInterpreter(OpenInterpreter):
         self.output_queue = None
         self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
         self.print = True  # Will print output
+
+        self.require_acknowledge = (
+            os.getenv("INTERPRETER_REQUIRE_ACKNOWLEDGE", "False").lower() == "true"
+        )
+        self.acknowledged_outputs = []
 
         self.server = Server(self)
 
@@ -52,7 +71,7 @@ class AsyncInterpreter(OpenInterpreter):
             run_code = None  # Will later default to auto_run unless the user makes a command here
 
             # But first, process any commands.
-            if self.messages[-1]["type"] == "command":
+            if self.messages[-1].get("type") == "command":
                 command = self.messages[-1]["content"]
                 self.messages = self.messages[:-1]
 
@@ -137,21 +156,80 @@ class AsyncInterpreter(OpenInterpreter):
                 # We don't do anything with these.
                 pass
 
-            elif "start" in chunk:
+            elif "content" in chunk and not (
+                len(self.messages) > 0
+                and (
+                    (
+                        "type" in self.messages[-1]
+                        and chunk.get("type") != self.messages[-1].get("type")
+                    )
+                    or (
+                        "format" in self.messages[-1]
+                        and chunk.get("format") != self.messages[-1].get("format")
+                    )
+                )
+            ):
+                if len(self.messages) == 0:
+                    raise Exception(
+                        "You must send a 'start: True' chunk first to create this message."
+                    )
+                # Append to an existing message
+                if (
+                    "type" not in self.messages[-1]
+                ):  # It was created with a type-less start message
+                    self.messages[-1]["type"] = chunk["type"]
+                if (
+                    chunk.get("format") and "format" not in self.messages[-1]
+                ):  # It was created with a type-less start message
+                    self.messages[-1]["format"] = chunk["format"]
+                if "content" not in self.messages[-1]:
+                    self.messages[-1]["content"] = chunk["content"]
+                else:
+                    self.messages[-1]["content"] += chunk["content"]
+
+            # elif "content" in chunk and (len(self.messages) > 0 and self.messages[-1] == {'role': 'user', 'start': True}):
+            #     # Last message was {'role': 'user', 'start': True}. Just populate that with this chunk
+            #     self.messages[-1] = chunk.copy()
+
+            elif "start" in chunk or (
+                len(self.messages) > 0
+                and (
+                    chunk.get("type") != self.messages[-1].get("type")
+                    or chunk.get("format") != self.messages[-1].get("format")
+                )
+            ):
+                # Create a new message
                 chunk_copy = (
                     chunk.copy()
                 )  # So we don't modify the original chunk, which feels wrong.
-                chunk_copy.pop("start")
-                chunk_copy["content"] = ""
+                if "start" in chunk_copy:
+                    chunk_copy.pop("start")
+                if "content" not in chunk_copy:
+                    chunk_copy["content"] = ""
                 self.messages.append(chunk_copy)
-
-            elif "content" in chunk:
-                self.messages[-1]["content"] += chunk["content"]
 
         elif type(chunk) == bytes:
             if self.messages[-1]["content"] == "":  # We initialize as an empty string ^
                 self.messages[-1]["content"] = b""  # But it actually should be bytes
             self.messages[-1]["content"] += chunk
+
+
+def authenticate_function(key):
+    """
+    This function checks if the provided key is valid for authentication.
+
+    Returns True if the key is valid, False otherwise.
+    """
+    # Fetch the API key from the environment variables. If it's not set, return True.
+    api_key = os.getenv("INTERPRETER_API_KEY", None)
+
+    # If the API key is not set in the environment variables, return True.
+    # Otherwise, check if the provided key matches the fetched API key.
+    # Return True if they match, False otherwise.
+    if api_key is None:
+        return True
+    else:
+        return key == api_key
 
 
 def create_router(async_interpreter):
@@ -176,6 +254,7 @@ def create_router(async_interpreter):
                     <button>Send</button>
                 </form>
                 <button id="approveCodeButton">Approve Code</button>
+                <button id="authButton">Send Auth</button>
                 <div id="messages"></div>
                 <script>
                     var ws = new WebSocket("ws://"""
@@ -184,13 +263,32 @@ def create_router(async_interpreter):
             + str(async_interpreter.server.port)
             + """/");
                     var lastMessageElement = null;
+
                     ws.onmessage = function(event) {
+
+                        var eventData = JSON.parse(event.data);
+
+                        """
+            + (
+                """
+                        
+                        // Acknowledge receipt
+                        var acknowledge_message = {
+                            "ack": eventData.id
+                        };
+                        ws.send(JSON.stringify(acknowledge_message));
+
+                        """
+                if async_interpreter.require_acknowledge
+                else ""
+            )
+            + """
+
                         if (lastMessageElement == null) {
                             lastMessageElement = document.createElement('p');
                             document.getElementById('messages').appendChild(lastMessageElement);
                             lastMessageElement.innerHTML = "<br>"
                         }
-                        var eventData = JSON.parse(event.data);
 
                         if ((eventData.role == "assistant" && eventData.type == "message" && eventData.content) ||
                             (eventData.role == "computer" && eventData.type == "console" && eventData.format == "output" && eventData.content) ||
@@ -210,7 +308,7 @@ def create_router(async_interpreter):
                         } else {
                             var startMessageBlock = {
                                 "role": "user",
-                                "type": "message",
+                                //"type": "message",
                                 "start": true
                             };
                             ws.send(JSON.stringify(startMessageBlock));
@@ -224,7 +322,7 @@ def create_router(async_interpreter):
 
                             var endMessageBlock = {
                                 "role": "user",
-                                "type": "message",
+                                //"type": "message",
                                 "end": true
                             };
                             ws.send(JSON.stringify(endMessageBlock));
@@ -258,8 +356,15 @@ def create_router(async_interpreter):
                     };
                     ws.send(JSON.stringify(endCommandBlock));
                 }
+                function authenticate() {
+                    var authBlock = {
+                        "auth": "dummy-api-key"
+                    };
+                    ws.send(JSON.stringify(authBlock));
+                }
 
                 document.getElementById("approveCodeButton").addEventListener("click", approveCode);
+                document.getElementById("authButton").addEventListener("click", authenticate);
                 </script>
             </body>
             </html>
@@ -270,17 +375,43 @@ def create_router(async_interpreter):
     @router.websocket("/")
     async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
+
         try:
 
             async def receive_input():
+                authenticated = False
                 while True:
                     try:
                         data = await websocket.receive()
 
-                        print("Received:", data)
+                        if not authenticated:
+                            if "text" in data:
+                                data = json.loads(data["text"])
+                                if "auth" in data:
+                                    if async_interpreter.server.authenticate(
+                                        data["auth"]
+                                    ):
+                                        authenticated = True
+                                        await websocket.send_text(
+                                            json.dumps({"auth": True})
+                                        )
+                            if not authenticated:
+                                await websocket.send_text(json.dumps({"auth": False}))
+                            continue
 
-                        if data.get("type") == "websocket.receive" and "text" in data:
-                            data = json.loads(data["text"])
+                        if data.get("type") == "websocket.receive":
+                            if "text" in data:
+                                data = json.loads(data["text"])
+                                if (
+                                    async_interpreter.require_acknowledge
+                                    and "ack" in data
+                                ):
+                                    async_interpreter.acknowledged_outputs.append(
+                                        data["ack"]
+                                    )
+                                    continue
+                            elif "bytes" in data:
+                                data = data["bytes"]
                             await async_interpreter.input(data)
                         elif data.get("type") == "websocket.disconnect":
                             print("Disconnecting.")
@@ -307,14 +438,42 @@ def create_router(async_interpreter):
                         output = await async_interpreter.output()
                         # print("Attempting to send the following output:", output)
 
+                        id = shortuuid.uuid()
+
                         for attempt in range(100):
                             try:
                                 if isinstance(output, bytes):
                                     await websocket.send_bytes(output)
                                 else:
+                                    if async_interpreter.require_acknowledge:
+                                        output["id"] = id
+
                                     await websocket.send_text(json.dumps(output))
-                                # print("Output sent successfully. Output was:", output)
-                                break
+
+                                    if async_interpreter.require_acknowledge:
+                                        acknowledged = False
+                                        for _ in range(1000):
+                                            # print(async_interpreter.acknowledged_outputs)
+                                            if (
+                                                id
+                                                in async_interpreter.acknowledged_outputs
+                                            ):
+                                                async_interpreter.acknowledged_outputs.remove(
+                                                    id
+                                                )
+                                                acknowledged = True
+                                                break
+                                            await asyncio.sleep(0.0001)
+
+                                        if acknowledged:
+                                            break
+                                        else:
+                                            raise Exception(
+                                                "Acknowledgement not received."
+                                            )
+                                    else:
+                                        break
+
                             except Exception as e:
                                 print(
                                     "Failed to send output on attempt number:",
@@ -363,26 +522,9 @@ def create_router(async_interpreter):
     # TODO
     @router.post("/")
     async def post_input(payload: Dict[str, Any]):
-        # This doesn't work, but something like this should exist
-        query = payload.get("query")
-        if not query:
-            return {"error": "Query is required."}, 400
         try:
-            async_interpreter.input.put(query)
+            async_interpreter.input(payload)
             return {"status": "success"}
-        except Exception as e:
-            return {"error": str(e)}, 500
-
-    @router.post("/run")
-    async def run_code(payload: Dict[str, Any]):
-        language, code = payload.get("language"), payload.get("code")
-        if not (language and code):
-            return {"error": "Both 'language' and 'code' are required."}, 400
-        try:
-            print(f"Running {language}:", code)
-            output = async_interpreter.computer.run(language, code)
-            print("Output:", output)
-            return {"output": output}
         except Exception as e:
             return {"error": str(e)}, 500
 
@@ -419,6 +561,133 @@ def create_router(async_interpreter):
         else:
             return json.dumps({"error": "Setting not found"}), 404
 
+    if os.getenv("INTERPRETER_INSECURE_ROUTES", "").lower() == "true":
+
+        @router.post("/run")
+        async def run_code(payload: Dict[str, Any]):
+            language, code = payload.get("language"), payload.get("code")
+            if not (language and code):
+                return {"error": "Both 'language' and 'code' are required."}, 400
+            try:
+                print(f"Running {language}:", code)
+                output = async_interpreter.computer.run(language, code)
+                print("Output:", output)
+                return {"output": output}
+            except Exception as e:
+                return {"error": str(e)}, 500
+
+        @router.post("/upload")
+        async def upload_file(file: UploadFile = File(...), path: str = Form(...)):
+            try:
+                with open(path, "wb") as output_file:
+                    shutil.copyfileobj(file.file, output_file)
+                return {"status": "success"}
+            except Exception as e:
+                return {"error": str(e)}, 500
+
+        @router.get("/download/{filename}")
+        async def download_file(filename: str):
+            try:
+                return StreamingResponse(
+                    open(filename, "rb"), media_type="application/octet-stream"
+                )
+            except Exception as e:
+                return {"error": str(e)}, 500
+
+    ### OPENAI COMPATIBLE ENDPOINT
+
+    class ChatMessage(BaseModel):
+        role: str
+        content: Union[str, List[Dict[str, Any]]]
+
+    class ChatCompletionRequest(BaseModel):
+        model: str = "default-model"
+        messages: List[ChatMessage]
+        max_tokens: Optional[int] = None
+        temperature: Optional[float] = None
+        stream: Optional[bool] = False
+
+    async def openai_compatible_generator():
+        for i, chunk in enumerate(async_interpreter._respond_and_store()):
+            output_content = None
+
+            if chunk["type"] == "message" and "content" in chunk:
+                output_content = chunk["content"]
+            if chunk["type"] == "code" and "start" in chunk:
+                output_content = " "
+
+            if output_content:
+                await asyncio.sleep(0)
+                output_chunk = {
+                    "id": i,
+                    "object": "chat.completion.chunk",
+                    "created": time.time(),
+                    "model": "open-interpreter",
+                    "choices": [{"delta": {"content": output_content}}],
+                }
+                yield f"data: {json.dumps(output_chunk)}\n\n"
+
+    @router.post("/openai/chat/completions")
+    async def chat_completion(request: ChatCompletionRequest):
+        # Convert to LMC
+
+        user_messages = []
+        for message in reversed(request.messages):
+            if message.role == "user":
+                user_messages.append(message)
+            else:
+                break
+        user_messages.reverse()
+
+        for message in user_messages:
+            if type(message.content) == str:
+                async_interpreter.messages.append(
+                    {"role": "user", "type": "message", "content": message.content}
+                )
+            if type(message.content) == list:
+                for content in message.content:
+                    if content["type"] == "text":
+                        async_interpreter.messages.append(
+                            {"role": "user", "type": "message", "content": content}
+                        )
+                    elif content["type"] == "image_url":
+                        if "url" not in content["image_url"]:
+                            raise Exception("`url` must be in `image_url`.")
+                        url = content["image_url"]["url"]
+                        print(url[:100])
+                        if "base64," not in url:
+                            raise Exception(
+                                '''Image must be in the format: "data:image/jpeg;base64,{base64_image}"'''
+                            )
+
+                        # data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA6oA...
+
+                        data = url.split("base64,")[1]
+                        format = "base64." + url.split(";")[0].split("/")[1]
+                        async_interpreter.messages.append(
+                            {
+                                "role": "user",
+                                "type": "image",
+                                "format": format,
+                                "content": data,
+                            }
+                        )
+
+        if request.stream:
+            return StreamingResponse(
+                openai_compatible_generator(), media_type="application/x-ndjson"
+            )
+        else:
+            messages = async_interpreter.chat(message="", stream=False, display=True)
+            content = messages[-1]["content"]
+            return {
+                "id": "200",
+                "object": "chat.completion",
+                "created": time.time(),
+                "model": request.model,
+                "choices": [{"message": {"role": "assistant", "content": content}}],
+            }
+
     return router
 
 
@@ -432,37 +701,67 @@ port = int(os.getenv("PORT", 8000))  # Default port is 8000
 
 
 class Server:
-    def __init__(self, async_interpreter, host=host, port=port):
+    def __init__(self, async_interpreter, host="127.0.0.1", port=8000):
         self.app = FastAPI()
         router = create_router(async_interpreter)
+        self.authenticate = authenticate_function
+
+        # Add authentication middleware
+        @self.app.middleware("http")
+        async def validate_api_key(request: Request, call_next):
+            api_key = request.headers.get("X-API-KEY")
+            if self.authenticate(api_key):
+                response = await call_next(request)
+                return response
+            else:
+                return JSONResponse(
+                    status_code=HTTP_403_FORBIDDEN,
+                    content={"detail": "Authentication failed"},
+                )
+
         self.app.include_router(router)
-        self.host = host
-        self.port = port
+        self.config = uvicorn.Config(app=self.app, host=host, port=port)
+        self.uvicorn_server = uvicorn.Server(self.config)
 
-    def run(self, retries=5, *args, **kwargs):
-        print("SERVER STARTING")
+    @property
+    def host(self):
+        return self.config.host
 
-        if "host" in kwargs:
-            self.host = kwargs.pop("host")
-        if "port" in kwargs:
-            self.port = kwargs.pop("port")
-        if "app" in kwargs:
-            self.app = kwargs.pop("app")
+    @host.setter
+    def host(self, value):
+        self.config.host = value
+        self.uvicorn_server = uvicorn.Server(self.config)
 
+    @property
+    def port(self):
+        return self.config.port
+
+    @port.setter
+    def port(self, value):
+        self.config.port = value
+        self.uvicorn_server = uvicorn.Server(self.config)
+
+    def run(self, host=None, port=None, retries=5):
+        if host is not None:
+            self.host = host
+        if port is not None:
+            self.port = port
+
+        # Print server information
         if self.host == "0.0.0.0":
             print(
                 "Warning: Using host `0.0.0.0` will expose Open Interpreter over your local network."
             )
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             s.connect(("8.8.8.8", 80))  # Google's public DNS server
-            print(f"Server is running at http://{s.getsockname()[0]}:{self.port}")
+            print(f"Server will run at http://{s.getsockname()[0]}:{self.port}")
             s.close()
+        else:
+            print(f"Server will run at http://{self.host}:{self.port}")
 
         for _ in range(retries):
             try:
-                uvicorn.run(
-                    app=self.app, host=self.host, port=self.port, *args, **kwargs
-                )
+                self.uvicorn_server.run()
                 break
             except KeyboardInterrupt:
                 break
@@ -474,5 +773,4 @@ class Server:
                     )
             except:
                 print("An unexpected error occurred:", traceback.format_exc())
-                print("SERVER RESTARTING")
-        print("SERVER SHUTDOWN")
+                print("Server restarting.")

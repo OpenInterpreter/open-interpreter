@@ -264,6 +264,16 @@ def start_terminal_interface(interpreter):
                 "attr_name": "contribute_conversation",
             },
         },
+        {
+            "name": "plain",
+            "nickname": "pl",
+            "help_text": "set output to plain text",
+            "type": bool,
+            "attribute": {
+                "object": interpreter,
+                "attr_name": "plain_text_display",
+            },
+        },
     ]
 
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):

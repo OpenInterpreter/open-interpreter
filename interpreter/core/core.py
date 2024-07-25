@@ -79,6 +79,7 @@ class OpenInterpreter:
         import_skills=False,
         multi_line=True,
         contribute_conversation=False,
+        plain_text_display=False,
     ):
         # State
         self.messages = [] if messages is None else messages
@@ -97,6 +98,7 @@ class OpenInterpreter:
         self.in_terminal_interface = in_terminal_interface
         self.multi_line = multi_line
         self.contribute_conversation = contribute_conversation
+        self.plain_text_display = plain_text_display
 
         # Loop messages
         self.loop = loop
@@ -222,9 +224,6 @@ class OpenInterpreter:
 
         # One-off message
         if message or message == "":
-            if message == "":
-                message = "No entry from user - please suggest something to enter."
-
             ## We support multiple formats for the incoming message:
             # Dict (these are passed directly in)
             if isinstance(message, dict):
@@ -302,8 +301,15 @@ class OpenInterpreter:
         self.verbose = False
 
         # Utility function
-        def is_active_line_chunk(chunk):
-            return "format" in chunk and chunk["format"] == "active_line"
+        def is_ephemeral(chunk):
+            """
+            Ephemeral = this chunk doesn't contribute to a message we want to save.
+            """
+            if "format" in chunk and chunk["format"] == "active_line":
+                return True
+            if chunk["type"] == "review":
+                return True
+            return False
 
         last_flag_base = None
 
@@ -355,7 +361,7 @@ class OpenInterpreter:
                 ):
                     # If they match, append the chunk's content to the current message's content
                     # (Except active_line, which shouldn't be stored)
-                    if not is_active_line_chunk(chunk):
+                    if not is_ephemeral(chunk):
                         self.messages[-1]["content"] += chunk["content"]
                 else:
                     # If they don't match, yield a end message for the last message type and a start message for the new one
@@ -371,7 +377,7 @@ class OpenInterpreter:
                     yield {**last_flag_base, "start": True}
 
                     # Add the chunk as a new message
-                    if not is_active_line_chunk(chunk):
+                    if not is_ephemeral(chunk):
                         self.messages.append(chunk)
 
                 # Yield the chunk itself
