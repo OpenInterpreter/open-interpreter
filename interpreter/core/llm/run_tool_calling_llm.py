@@ -104,14 +104,6 @@ def run_tool_calling_llm(llm, request_params):
     ]
     request_params["tools"] = [tool_schema]
 
-    import pprint
-
-    pprint.pprint(
-        [str(m)[:600] if len(str(m)) > 1000 else m for m in request_params["messages"]]
-    )
-
-    print("PROCESSING")
-
     request_params["messages"] = process_messages(request_params["messages"])
 
     # # This makes any role: tool have the ID of the last tool call
@@ -164,12 +156,6 @@ def run_tool_calling_llm(llm, request_params):
     #         messages.insert(j, image_message)
     #         del messages[i]
     # request_params["messages"] = messages
-
-    import pprint
-
-    pprint.pprint(
-        [str(m)[:600] if len(str(m)) > 1000 else m for m in request_params["messages"]]
-    )
 
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
