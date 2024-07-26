@@ -322,6 +322,22 @@ class OpenInterpreter:
                 if chunk["content"] == "":
                     continue
 
+                # If active_line is None, we finished running code.
+                if (
+                    chunk.get("format") == "active_line"
+                    and chunk.get("content", "") == None
+                ):
+                    # If output wasn't yet produced, add an empty output
+                    if self.messages[-1]["role"] != "computer":
+                        self.messages.append(
+                            {
+                                "role": "computer",
+                                "type": "console",
+                                "format": "output",
+                                "content": "",
+                            }
+                        )
+
                 # Handle the special "confirmation" chunk, which neither triggers a flag or creates a message
                 if chunk["type"] == "confirmation":
                     # Emit a end flag for the last message type, and reset last_flag_base
@@ -334,14 +350,14 @@ class OpenInterpreter:
 
                     # We want to append this now, so even if content is never filled, we know that the execution didn't produce output.
                     # ... rethink this though.
-                    self.messages.append(
-                        {
-                            "role": "computer",
-                            "type": "console",
-                            "format": "output",
-                            "content": "",
-                        }
-                    )
+                    # self.messages.append(
+                    #     {
+                    #         "role": "computer",
+                    #         "type": "console",
+                    #         "format": "output",
+                    #         "content": "",
+                    #     }
+                    # )
                     continue
 
                 # Check if the chunk's role, type, and format (if present) match the last_flag_base
@@ -362,7 +378,19 @@ class OpenInterpreter:
                     # If they match, append the chunk's content to the current message's content
                     # (Except active_line, which shouldn't be stored)
                     if not is_ephemeral(chunk):
-                        self.messages[-1]["content"] += chunk["content"]
+                        if any(
+                            [
+                                (property in self.messages[-1])
+                                and (
+                                    self.messages[-1].get(property)
+                                    != chunk.get(property)
+                                )
+                                for property in ["role", "type", "format"]
+                            ]
+                        ):
+                            self.messages.append(chunk)
+                        else:
+                            self.messages[-1]["content"] += chunk["content"]
                 else:
                     # If they don't match, yield a end message for the last message type and a start message for the new one
                     if last_flag_base:

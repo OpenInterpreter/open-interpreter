@@ -27,6 +27,74 @@ tool_schema = {
 }
 
 
+def process_messages(messages):
+    processed_messages = []
+    last_tool_id = 0
+
+    i = 0
+    while i < len(messages):
+        message = messages[i]
+
+        if message.get("function_call"):
+            last_tool_id += 1
+            tool_id = f"toolu_{last_tool_id}"
+
+            # Convert function_call to tool_calls
+            function = message.pop("function_call")
+            message["tool_calls"] = [
+                {"id": tool_id, "type": "function", "function": function}
+            ]
+            processed_messages.append(message)
+
+            # Process the next message if it's a function response
+            if i + 1 < len(messages) and messages[i + 1].get("role") == "function":
+                next_message = messages[i + 1].copy()
+                next_message["role"] = "tool"
+                next_message["tool_call_id"] = tool_id
+                processed_messages.append(next_message)
+                i += 1  # Skip the next message as we've already processed it
+            else:
+                # Add an empty tool response if there isn't one
+                processed_messages.append(
+                    {"role": "tool", "tool_call_id": tool_id, "content": ""}
+                )
+
+        elif message.get("role") == "function":
+            # This handles orphaned function responses
+            last_tool_id += 1
+            tool_id = f"toolu_{last_tool_id}"
+
+            # Add a tool call before this orphaned tool response
+            processed_messages.append(
+                {
+                    "role": "assistant",
+                    "tool_calls": [
+                        {
+                            "id": tool_id,
+                            "type": "function",
+                            "function": {
+                                "name": "execute",
+                                "arguments": "# Automated tool call to fetch more output, triggered by the user.",
+                            },
+                        }
+                    ],
+                }
+            )
+
+            # Process the function response
+            message["role"] = "tool"
+            message["tool_call_id"] = tool_id
+            processed_messages.append(message)
+
+        else:
+            # For non-tool-related messages, just add them as is
+            processed_messages.append(message)
+
+        i += 1
+
+    return processed_messages
+
+
 def run_tool_calling_llm(llm, request_params):
     ## Setup
 
@@ -36,43 +104,72 @@ def run_tool_calling_llm(llm, request_params):
     ]
     request_params["tools"] = [tool_schema]
 
-    last_tool_id = 0
-    for i, message in enumerate(request_params["messages"]):
-        if "function_call" in message:
-            last_tool_id += 1
-            function = message.pop("function_call")
-            message["tool_calls"] = [
-                {
-                    "id": "toolu_" + str(last_tool_id),
-                    "type": "function",
-                    "function": function,
-                }
-            ]
-        if message["role"] == "function":
-            if i != 0 and request_params["messages"][i - 1]["role"] == "tool":
-                request_params["messages"][i]["content"] += message["content"]
-                message = None
-            else:
-                message["role"] = "tool"
-                message["tool_call_id"] = "toolu_" + str(last_tool_id)
+    import pprint
 
-    request_params["messages"] = [m for m in request_params["messages"] if m != None]
+    pprint.pprint(
+        [str(m)[:600] if len(str(m)) > 1000 else m for m in request_params["messages"]]
+    )
 
-    new_messages = []
-    for i, message in enumerate(request_params["messages"]):
-        new_messages.append(message)
-        if "tool_calls" in message:
-            tool_call_id = message["tool_calls"][0]["id"]
-            if not any(
-                m
-                for m in request_params["messages"]
-                if m.get("role") == "tool" and m.get("tool_call_id") == tool_call_id
-            ):
-                new_messages.append(
-                    {"role": "tool", "tool_call_id": tool_call_id, "content": ""}
-                )
+    print("PROCESSING")
 
-    request_params["messages"] = new_messages
+    request_params["messages"] = process_messages(request_params["messages"])
+
+    # # This makes any role: tool have the ID of the last tool call
+    # last_tool_id = 0
+    # for i, message in enumerate(request_params["messages"]):
+    #     if "function_call" in message:
+    #         last_tool_id += 1
+    #         function = message.pop("function_call")
+    #         message["tool_calls"] = [
+    #             {
+    #                 "id": "toolu_" + str(last_tool_id),
+    #                 "type": "function",
+    #                 "function": function,
+    #             }
+    #         ]
+    #     if message["role"] == "function":
+    #         if i != 0 and request_params["messages"][i - 1]["role"] == "tool":
+    #             request_params["messages"][i]["content"] += message["content"]
+    #             message = None
+    #         else:
+    #             message["role"] = "tool"
+    #             message["tool_call_id"] = "toolu_" + str(last_tool_id)
+    # request_params["messages"] = [m for m in request_params["messages"] if m != None]
+
+    # This adds an empty tool response for any tool call without a tool response
+    # new_messages = []
+    # for i, message in enumerate(request_params["messages"]):
+    #     new_messages.append(message)
+    #     if "tool_calls" in message:
+    #         tool_call_id = message["tool_calls"][0]["id"]
+    #         if not any(
+    #             m
+    #             for m in request_params["messages"]
+    #             if m.get("role") == "tool" and m.get("tool_call_id") == tool_call_id
+    #         ):
+    #             new_messages.append(
+    #                 {"role": "tool", "tool_call_id": tool_call_id, "content": ""}
+    #             )
+    # request_params["messages"] = new_messages
+
+    # messages = request_params["messages"]
+    # for i in range(len(messages)):
+    #     if messages[i]["role"] == "user" and isinstance(messages[i]["content"], list):
+    #         # Found an image from the user
+    #         image_message = messages[i]
+    #         j = i + 1
+    #         while j < len(messages) and messages[j]["role"] == "tool":
+    #             # Move the image down until it's after all the role: tools
+    #             j += 1
+    #         messages.insert(j, image_message)
+    #         del messages[i]
+    # request_params["messages"] = messages
+
+    import pprint
+
+    pprint.pprint(
+        [str(m)[:600] if len(str(m)) > 1000 else m for m in request_params["messages"]]
+    )
 
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
