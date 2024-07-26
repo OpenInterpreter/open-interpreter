@@ -66,7 +66,7 @@ def run_tool_calling_llm(llm, request_params):
             if not any(
                 m
                 for m in request_params["messages"]
-                if m.get("role") == "function" and m.get("tool_call_id") == tool_call_id
+                if m.get("role") == "tool" and m.get("tool_call_id") == tool_call_id
             ):
                 new_messages.append(
                     {"role": "tool", "tool_call_id": tool_call_id, "content": ""}
