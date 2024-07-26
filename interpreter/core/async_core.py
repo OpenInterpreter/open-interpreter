@@ -700,17 +700,11 @@ def create_router(async_interpreter):
     return router
 
 
-host = os.getenv(
-    "HOST", "127.0.0.1"
-)  # IP address for localhost, used for local testing. To expose to local network, use 0.0.0.0
-port = int(os.getenv("PORT", 8000))  # Default port is 8000
-
-# FOR TESTING ONLY
-# host = "0.0.0.0"
-
-
 class Server:
-    def __init__(self, async_interpreter, host="127.0.0.1", port=8000):
+    DEFAULT_HOST = "127.0.0.1"
+    DEFAULT_PORT = 8000
+
+    def __init__(self, async_interpreter, host=None, port=None):
         self.app = FastAPI()
         router = create_router(async_interpreter)
         self.authenticate = authenticate_function
@@ -729,7 +723,9 @@ class Server:
                 )
 
         self.app.include_router(router)
-        self.config = uvicorn.Config(app=self.app, host=host, port=port)
+        h = host or os.getenv("HOST", Server.DEFAULT_HOST)
+        p = port or int(os.getenv("PORT", Server.DEFAULT_PORT))
+        self.config = uvicorn.Config(app=self.app, host=h, port=p)
         self.uvicorn_server = uvicorn.Server(self.config)
 
     @property
