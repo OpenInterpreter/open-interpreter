@@ -12,10 +12,13 @@ class CodeBlock(BaseBlock):
     Code Blocks display code and outputs in different languages. You can also set the active_line!
     """
 
-    def __init__(self):
+    def __init__(self, interpreter=None):
         super().__init__()
 
         self.type = "code"
+        self.highlight_active_line = (
+            interpreter.highlight_active_line if interpreter else None
+        )
 
         # Define these for IDE auto-completion
         self.language = ""
@@ -42,14 +45,22 @@ class CodeBlock(BaseBlock):
         )
         code_table.add_column()
 
-        # Add cursor
-        if cursor:
+        # Add cursor only if active line highliting is true
+        if cursor and (
+            self.highlight_active_line
+            if self.highlight_active_line is not None
+            else True
+        ):
             code += "●"
 
         # Add each line of code to the table
         code_lines = code.strip().split("\n")
         for i, line in enumerate(code_lines, start=1):
-            if i == self.active_line:
+            if i == self.active_line and (
+                self.highlight_active_line
+                if self.highlight_active_line is not None
+                else True
+            ):
                 # This is the active line, print it with a white background
                 syntax = Syntax(
                     line, self.language, theme="bw", line_numbers=False, word_wrap=True
