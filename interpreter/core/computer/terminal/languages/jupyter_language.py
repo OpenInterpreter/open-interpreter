@@ -5,6 +5,7 @@ Gotta split this out, generalize it, and move all the python additions to python
 
 import ast
 import logging
+import sys
 import os
 import queue
 import re
@@ -17,6 +18,17 @@ from jupyter_client import KernelManager
 from ..base_language import BaseLanguage
 
 DEBUG_MODE = False
+
+# When running from an executable, ipykernel calls itself infinitely
+# This is a workaround to detect it and launch it manually
+if 'ipykernel_launcher' in sys.argv:
+    if sys.path[0] == '':
+        del sys.path[0]
+
+    from ipykernel import kernelapp as app
+
+    app.launch_new_instance()
+    sys.exit(0)
 
 
 class JupyterLanguage(BaseLanguage):
