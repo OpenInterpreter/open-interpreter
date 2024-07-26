@@ -8,6 +8,7 @@ from datetime import datetime
 from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
 from .utils.display_markdown_message import display_markdown_message
+from .utils.export_to_markdown import export_to_markdown
 
 
 def handle_undo(self, arguments):
@@ -58,6 +59,7 @@ def handle_help(self, arguments):
         "%help": "Show this help message.",
         "%info": "Show system and interpreter information",
         "%jupyter": "Export the conversation to a Jupyter notebook file",
+        "%markdown [path]": "Export the conversation to a specified Markdown path. If no path is provided, it will be saved to the Downloads folder with a generated conversation name.",
     }
 
     base_message = ["> **Available Commands:**\n\n"]
@@ -220,6 +222,9 @@ def get_downloads_path():
     else:
         # For MacOS and Linux
         downloads = os.path.join(os.path.expanduser("~"), "Downloads")
+        # For some GNU/Linux distros, there's no '~/Downloads' dir by default
+        if not os.path.exists(downloads):
+            os.makedirs(downloads)
     return downloads
 
 
@@ -295,6 +300,19 @@ def jupyter(self, arguments):
     )
 
 
+def markdown(self, export_path: str):
+    # If it's an empty conversations
+    if len(self.messages) == 0:
+        print("No messages to export.")
+        return
+
+    # If user doesn't specify the export path, then save the exported PDF in '~/Downloads'
+    if not export_path:
+        export_path = get_downloads_path() + f"/{self.conversation_filename[:-4]}md"
+
+    export_to_markdown(self.messages, export_path)
+
+
 def handle_magic_command(self, user_input):
     # Handle shell
     if user_input.startswith("%%"):
@@ -316,6 +334,7 @@ def handle_magic_command(self, user_input):
         "tokens": handle_count_tokens,
         "info": handle_info,
         "jupyter": jupyter,
+        "markdown": markdown,
     }
 
     user_input = user_input[1:].strip()  # Capture the part after the `%`
