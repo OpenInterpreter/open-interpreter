@@ -34,6 +34,9 @@ except:
     pass
 
 
+complete_message = {"role": "server", "type": "status", "content": "complete"}
+
+
 class AsyncInterpreter(OpenInterpreter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -129,9 +132,7 @@ class AsyncInterpreter(OpenInterpreter):
 
                 self.output_queue.sync_q.put(chunk)
 
-            self.output_queue.sync_q.put(
-                {"role": "server", "type": "status", "content": "complete"}
-            )
+            self.output_queue.sync_q.put(complete_message)
         except Exception as e:
             error = traceback.format_exc() + "\n" + str(e)
             error_message = {
@@ -140,6 +141,7 @@ class AsyncInterpreter(OpenInterpreter):
                 "content": traceback.format_exc() + "\n" + str(e),
             }
             self.output_queue.sync_q.put(error_message)
+            self.output_queue.sync_q.put(complete_message)
             print("\n\n--- SENT ERROR: ---\n\n")
             print(error)
             print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
@@ -428,6 +430,7 @@ def create_router(async_interpreter):
                             "content": traceback.format_exc() + "\n" + str(e),
                         }
                         await websocket.send_text(json.dumps(error_message))
+                        await websocket.send_text(json.dumps(complete_message))
                         print("\n\n--- SENT ERROR: ---\n\n")
                         print(error)
                         print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
@@ -496,6 +499,7 @@ def create_router(async_interpreter):
                             "content": traceback.format_exc() + "\n" + str(e),
                         }
                         await websocket.send_text(json.dumps(error_message))
+                        await websocket.send_text(json.dumps(complete_message))
                         print("\n\n--- SENT ERROR: ---\n\n")
                         print(error)
                         print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
@@ -510,6 +514,7 @@ def create_router(async_interpreter):
                     "content": traceback.format_exc() + "\n" + str(e),
                 }
                 await websocket.send_text(json.dumps(error_message))
+                await websocket.send_text(json.dumps(complete_message))
                 print("\n\n--- SENT ERROR: ---\n\n")
                 print(error)
                 print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")

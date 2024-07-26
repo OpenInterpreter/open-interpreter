@@ -155,6 +155,58 @@ def convert_to_openai_messages(
                             # print("Failed to shrink image. Proceeding with original image size.")
                             pass
 
+                    # Must be less than 5mb
+                    # Calculate the size of the original binary data in bytes
+                    content_size_bytes = len(message["content"]) * 3 / 4
+
+                    # Convert the size to MB
+                    content_size_mb = content_size_bytes / (1024 * 1024)
+
+                    # If the content size is greater than 5 MB, resize the image
+                    if content_size_mb > 5:
+                        try:
+                            # Decode the base64 image
+                            img_data = base64.b64decode(message["content"])
+                            img = Image.open(io.BytesIO(img_data))
+
+                            # Calculate the size of the original binary data in bytes
+                            content_size_bytes = len(img_data)
+
+                            # Convert the size to MB
+                            content_size_mb = content_size_bytes / (1024 * 1024)
+
+                            # Run in a loop to make SURE it's less than 5mb
+                            while content_size_mb > 5:
+                                # Calculate the scale factor needed to reduce the image size to 5 MB
+                                scale_factor = (5 / content_size_mb) ** 0.5
+
+                                # Calculate the new dimensions
+                                new_width = int(img.width * scale_factor)
+                                new_height = int(img.height * scale_factor)
+
+                                # Resize the image
+                                img = img.resize((new_width, new_height))
+
+                                # Convert the image back to base64
+                                buffered = io.BytesIO()
+                                img.save(buffered, format=extension)
+                                img_str = base64.b64encode(buffered.getvalue()).decode(
+                                    "utf-8"
+                                )
+
+                                # Set the content
+                                content = f"data:image/{extension};base64,{img_str}"
+
+                                # Recalculate the size of the content in bytes
+                                content_size_bytes = len(content) * 3 / 4
+
+                                # Convert the size to MB
+                                content_size_mb = content_size_bytes / (1024 * 1024)
+                        except:
+                            # This should be non blocking. It's not required
+                            # print("Failed to shrink image. Proceeding with original image size.")
+                            pass
+
                 elif message["format"] == "path":
                     # Convert to base64
                     image_path = message["content"]
@@ -197,6 +249,33 @@ def convert_to_openai_messages(
                         }
                     ],
                 }
+
+                if message["role"] == "computer":
+                    new_message["content"].append(
+                        {
+                            "type": "text",
+                            "text": "This image is the result of the last tool output. What does it mean / are we done?",
+                        }
+                    )
+                if message.get("format") == "path":
+                    if any(
+                        content.get("type") == "text"
+                        for content in new_message["content"]
+                    ):
+                        for content in new_message["content"]:
+                            if content.get("type") == "text":
+                                content["text"] += (
+                                    "\nThis image is at this path: "
+                                    + message["content"]
+                                )
+                    else:
+                        new_message["content"].append(
+                            {
+                                "type": "text",
+                                "text": "This image is at this path: "
+                                + message["content"],
+                            }
+                        )
 
         elif message["type"] == "file":
             new_message = {"role": "user", "content": message["content"]}
