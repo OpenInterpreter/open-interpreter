@@ -58,6 +58,22 @@ def run_tool_calling_llm(llm, request_params):
 
     request_params["messages"] = [m for m in request_params["messages"] if m != None]
 
+    new_messages = []
+    for i, message in enumerate(request_params["messages"]):
+        new_messages.append(message)
+        if "tool_calls" in message:
+            tool_call_id = message["tool_calls"][0]["id"]
+            if not any(
+                m
+                for m in request_params["messages"]
+                if m.get("role") == "function" and m.get("tool_call_id") == tool_call_id
+            ):
+                new_messages.append(
+                    {"role": "tool", "tool_call_id": tool_call_id, "content": ""}
+                )
+
+    request_params["messages"] = new_messages
+
     # Add OpenAI's recommended function message
     # request_params["messages"][0][
     #     "content"
