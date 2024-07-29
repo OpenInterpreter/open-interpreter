@@ -296,15 +296,16 @@ def respond(interpreter):
                         computer_dict = interpreter.computer.to_dict()
                         if "_hashes" in computer_dict:
                             computer_dict.pop("_hashes")
-                        if computer_dict:
-                            computer_json = json.dumps(computer_dict)
-                            sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
-                            interpreter.computer.run("python", sync_code)
+                        if "system_message" in computer_dict:
+                            computer_dict.pop("system_message")
+                        computer_json = json.dumps(computer_dict)
+                        sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
+                        interpreter.computer.run("python", sync_code)
                 except Exception as e:
                     if interpreter.debug:
                         raise
                     print(str(e))
-                    print("Continuing...")
+                    print("Failed to sync iComputer with your Computer. Continuing...")
 
                 ## ↓ CODE IS RUN HERE
 
@@ -319,7 +320,15 @@ def respond(interpreter):
                         # sync up the interpreter's computer with your computer
                         result = interpreter.computer.run(
                             "python",
-                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  if '_hashes' in computer_dict:\n    computer_dict.pop('_hashes')\n  print(json.dumps(computer_dict))",
+                            """
+                            import json
+                            computer_dict = computer.to_dict()
+                            if '_hashes' in computer_dict:
+                                computer_dict.pop('_hashes')
+                            if "system_message" in computer_dict:
+                                computer_dict.pop("system_message")
+                            print(json.dumps(computer_dict))
+                            """,
                         )
                         result = result[-1]["content"]
                         interpreter.computer.load_dict(
@@ -329,7 +338,7 @@ def respond(interpreter):
                     if interpreter.debug:
                         raise
                     print(str(e))
-                    print("Continuing.")
+                    print("Failed to sync your Computer with iComputer. Continuing.")
 
                 # yield final "active_line" message, as if to say, no more code is running. unlightlight active lines
                 # (is this a good idea? is this our responsibility? i think so — we're saying what line of code is running! ...?)
