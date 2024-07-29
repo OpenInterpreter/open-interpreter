@@ -76,6 +76,10 @@ def respond(interpreter):
 
         ### RUN THE LLM ###
 
+        assert (
+            len(interpreter.messages) > 0
+        ), "User message was not passed in. You need to pass in at least one message."
+
         if (
             interpreter.messages[-1]["type"] != "code"
         ):  # If it is, we should run the code (we do below)

@@ -1,6 +1,6 @@
 def truncate_output(data, max_output_chars=2800, add_scrollbars=False):
-    if "@@@DO_NOT_TRUNCATE@@@" in data:
-        return data
+    # if "@@@DO_NOT_TRUNCATE@@@" in data:
+    #     return data
 
     needs_truncation = False
 

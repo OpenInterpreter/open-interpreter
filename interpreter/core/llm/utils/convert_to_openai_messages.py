@@ -102,16 +102,10 @@ def convert_to_openai_messages(
                     new_message["role"] = "user"
                     new_message["content"] = content
                 elif interpreter.code_output_sender == "assistant":
-                    if "@@@SEND_MESSAGE_AS_USER@@@" in message["content"]:
-                        new_message["role"] = "user"
-                        new_message["content"] = message["content"].replace(
-                            "@@@SEND_MESSAGE_AS_USER@@@", ""
-                        )
-                    else:
-                        new_message["role"] = "assistant"
-                        new_message["content"] = (
-                            "\n```output\n" + message["content"] + "\n```"
-                        )
+                    new_message["role"] = "assistant"
+                    new_message["content"] = (
+                        "\n```output\n" + message["content"] + "\n```"
+                    )
 
         elif message["type"] == "image":
             if message.get("format") == "description":

@@ -128,7 +128,10 @@ class AsyncInterpreter(OpenInterpreter):
                         if "end" in chunk:
                             print("\n```\n\n------------\n\n", flush=True)
                     if chunk.get("format") != "active_line":
-                        print(chunk.get("content", ""), end="", flush=True)
+                        if "format" in chunk and "base64" in chunk["format"]:
+                            print("\n[An image was produced]")
+                        else:
+                            print(chunk.get("content", ""), end="", flush=True)
 
                 self.output_queue.sync_q.put(chunk)
 
