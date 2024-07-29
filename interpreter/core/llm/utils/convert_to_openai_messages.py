@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import sys
 
 from PIL import Image
 
@@ -151,7 +152,7 @@ def convert_to_openai_messages(
                     # Shrink to less than 5mb
 
                     # Calculate size
-                    content_size_bytes = len(content) * 3 / 4
+                    content_size_bytes = sys.getsizeof(str(content))
 
                     # Convert the size to MB
                     content_size_mb = content_size_bytes / (1024 * 1024)
@@ -161,12 +162,6 @@ def convert_to_openai_messages(
                         # Decode the base64 image
                         img_data = base64.b64decode(encoded_string)
                         img = Image.open(io.BytesIO(img_data))
-
-                        # Calculate the size of the original binary data in bytes
-                        content_size_bytes = len(img_data)
-
-                        # Convert the size to MB
-                        content_size_mb = content_size_bytes / (1024 * 1024)
 
                         # Run in a loop to make SURE it's less than 5mb
                         for _ in range(10):
@@ -191,10 +186,13 @@ def convert_to_openai_messages(
                             content = f"data:image/{extension};base64,{encoded_string}"
 
                             # Recalculate the size of the content in bytes
-                            content_size_bytes = len(content) * 3 / 4
+                            content_size_bytes = sys.getsizeof(str(content))
 
                             # Convert the size to MB
                             content_size_mb = content_size_bytes / (1024 * 1024)
+
+                            if content_size_mb < 5:
+                                break
                         else:
                             print(
                                 "Attempted to shrink the image but failed. Sending to the LLM anyway."
