@@ -4,7 +4,6 @@ from interpreter import interpreter
 
 interpreter.os = True
 interpreter.llm.supports_vision = True
-# interpreter.shrink_images = True # Faster but less accurate
 
 interpreter.llm.model = "gpt-4o"
 
