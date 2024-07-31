@@ -6,6 +6,7 @@ import socket
 import threading
 import time
 import traceback
+from collections import deque
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
@@ -36,6 +37,8 @@ except:
 
 complete_message = {"role": "server", "type": "status", "content": "complete"}
 
+os.environ["INTERPRETER_REQUIRE_ACKNOWLEDGE"] = "True"
+
 
 class AsyncInterpreter(OpenInterpreter):
     def __init__(self, *args, **kwargs):
@@ -44,6 +47,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.respond_thread = None
         self.stop_event = threading.Event()
         self.output_queue = None
+        self.unsent_messages = deque()
         self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
         self.print = True  # Will print output
 
@@ -441,91 +445,101 @@ def create_router(async_interpreter):
             async def send_output():
                 while True:
                     try:
-                        output = await async_interpreter.output()
-                        # print("Attempting to send the following output:", output)
-
-                        id = shortuuid.uuid()
-
-                        for attempt in range(100):
+                        # First, try to send any unsent messages
+                        while async_interpreter.unsent_messages:
+                            output = async_interpreter.unsent_messages[0]
                             try:
-                                if isinstance(output, bytes):
-                                    await websocket.send_bytes(output)
-                                else:
-                                    if async_interpreter.require_acknowledge:
-                                        output["id"] = id
+                                await send_message(output)
+                                async_interpreter.unsent_messages.popleft()
+                            except Exception:
+                                # If we can't send, break and try again later
+                                break
 
-                                    await websocket.send_text(json.dumps(output))
+                        # If we've sent all unsent messages, get a new output
+                        if not async_interpreter.unsent_messages:
+                            output = await async_interpreter.output()
+                            await send_message(output)
 
-                                    if async_interpreter.require_acknowledge:
-                                        acknowledged = False
-                                        for _ in range(1000):
-                                            # print(async_interpreter.acknowledged_outputs)
-                                            if (
-                                                id
-                                                in async_interpreter.acknowledged_outputs
-                                            ):
-                                                async_interpreter.acknowledged_outputs.remove(
-                                                    id
-                                                )
-                                                acknowledged = True
-                                                break
-                                            await asyncio.sleep(0.0001)
-
-                                        if acknowledged:
-                                            break
-                                        else:
-                                            raise Exception(
-                                                "Acknowledgement not received."
-                                            )
-                                    else:
-                                        break
-
-                            except Exception as e:
-                                print(
-                                    "Failed to send output on attempt number:",
-                                    attempt + 1,
-                                    ". Output was:",
-                                    output,
-                                )
-                                print("Error:", str(e))
-                                await asyncio.sleep(0.05)
-                        else:
-                            raise Exception(
-                                "Failed to send after 100 attempts. Output was:",
-                                str(output),
-                            )
                     except Exception as e:
                         error = traceback.format_exc() + "\n" + str(e)
                         error_message = {
                             "role": "server",
                             "type": "error",
-                            "content": traceback.format_exc() + "\n" + str(e),
+                            "content": error,
                         }
-                        await websocket.send_text(json.dumps(error_message))
-                        await websocket.send_text(json.dumps(complete_message))
-                        print("\n\n--- SENT ERROR: ---\n\n")
+                        async_interpreter.unsent_messages.append(error_message)
+                        async_interpreter.unsent_messages.append(complete_message)
+                        print("\n\n--- ERROR (will be sent when possible): ---\n\n")
                         print(error)
-                        print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
+                        print(
+                            "\n\n--- (ERROR ABOVE WILL BE SENT WHEN POSSIBLE) ---\n\n"
+                        )
+
+            async def send_message(output):
+                if isinstance(output, dict) and "id" in output:
+                    id = output["id"]
+                else:
+                    id = shortuuid.uuid()
+                    if (
+                        isinstance(output, dict)
+                        and async_interpreter.require_acknowledge
+                    ):
+                        output["id"] = id
+
+                for attempt in range(100):
+                    if websocket.client_state == 3:  # 3 represents 'CLOSED' state
+                        break
+                    try:
+                        if isinstance(output, bytes):
+                            await websocket.send_bytes(output)
+                        else:
+                            if async_interpreter.require_acknowledge:
+                                output["id"] = id
+                            await websocket.send_text(json.dumps(output))
+
+                        if async_interpreter.require_acknowledge:
+                            acknowledged = False
+                            for _ in range(1000):
+                                if id in async_interpreter.acknowledged_outputs:
+                                    async_interpreter.acknowledged_outputs.remove(id)
+                                    acknowledged = True
+                                    break
+                                await asyncio.sleep(0.0001)
+
+                            if acknowledged:
+                                return
+                            else:
+                                raise Exception("Acknowledgement not received.")
+                        else:
+                            return
+
+                    except Exception as e:
+                        print(
+                            f"Failed to send output on attempt number: {attempt + 1}. Output was: {output}"
+                        )
+                        print(f"Error: {str(e)}")
+                        await asyncio.sleep(0.05)
+
+                # If we've reached this point, we've failed to send after 100 attempts
+                async_interpreter.unsent_messages.append(output)
+                print(
+                    f"Added message to unsent_messages queue after failed attempts: {output}"
+                )
 
             await asyncio.gather(receive_input(), send_output())
+
         except Exception as e:
-            try:
-                error = traceback.format_exc() + "\n" + str(e)
-                error_message = {
-                    "role": "server",
-                    "type": "error",
-                    "content": traceback.format_exc() + "\n" + str(e),
-                }
-                await websocket.send_text(json.dumps(error_message))
-                await websocket.send_text(json.dumps(complete_message))
-                print("\n\n--- SENT ERROR: ---\n\n")
-                print(error)
-                print("\n\n--- (ERROR ABOVE WAS SENT) ---\n\n")
-            except:
-                # If we can't send it, that's fine.
-                pass
-        finally:
-            await websocket.close()
+            error = traceback.format_exc() + "\n" + str(e)
+            error_message = {
+                "role": "server",
+                "type": "error",
+                "content": error,
+            }
+            async_interpreter.unsent_messages.append(error_message)
+            async_interpreter.unsent_messages.append(complete_message)
+            print("\n\n--- ERROR (will be sent when possible): ---\n\n")
+            print(error)
+            print("\n\n--- (ERROR ABOVE WILL BE SENT WHEN POSSIBLE) ---\n\n")
 
     # TODO
     @router.post("/")
