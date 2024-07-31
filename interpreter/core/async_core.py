@@ -37,8 +37,6 @@ except:
 
 complete_message = {"role": "server", "type": "status", "content": "complete"}
 
-os.environ["INTERPRETER_REQUIRE_ACKNOWLEDGE"] = "True"
-
 
 class AsyncInterpreter(OpenInterpreter):
     def __init__(self, *args, **kwargs):
