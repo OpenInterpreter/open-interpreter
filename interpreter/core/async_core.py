@@ -779,18 +779,20 @@ class Server:
         else:
             print(f"Server will run at http://{self.host}:{self.port}")
 
-        for _ in range(retries):
-            try:
-                self.uvicorn_server.run()
-                break
-            except KeyboardInterrupt:
-                break
-            except ImportError as e:
-                if _ == 4:  # If this is the last attempt
-                    raise ImportError(
-                        str(e)
-                        + """\n\nPlease ensure you have run `pip install "open-interpreter[server]"` to install server dependencies."""
-                    )
-            except:
-                print("An unexpected error occurred:", traceback.format_exc())
-                print("Server restarting.")
+        self.uvicorn_server.run()
+
+        # for _ in range(retries):
+        #     try:
+        #         self.uvicorn_server.run()
+        #         break
+        #     except KeyboardInterrupt:
+        #         break
+        #     except ImportError as e:
+        #         if _ == 4:  # If this is the last attempt
+        #             raise ImportError(
+        #                 str(e)
+        #                 + """\n\nPlease ensure you have run `pip install "open-interpreter[server]"` to install server dependencies."""
+        #             )
+        #     except:
+        #         print("An unexpected error occurred:", traceback.format_exc())
+        #         print("Server restarting.")
