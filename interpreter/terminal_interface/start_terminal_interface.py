@@ -223,6 +223,11 @@ def start_terminal_interface(interpreter):
             "type": bool,
         },
         {
+            "name": "groq",
+            "help_text": "shortcut for `interpreter --profile groq`",
+            "type": bool,
+        },
+        {
             "name": "vision",
             "nickname": "vi",
             "help_text": "experimentally use vision for supported languages (shortcut for `interpreter --profile vision`)",
@@ -439,6 +444,9 @@ Use """ to write multi-line messages.
             args.profile = "llama3-vision.py"
         if args.os:
             args.profile = "llama3-os.py"
+
+    if args.groq:
+        args.profile = "groq.py"
 
     interpreter = profile(
         interpreter,
