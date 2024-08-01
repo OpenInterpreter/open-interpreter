@@ -28,17 +28,19 @@ title: Basic Usage
 
 ### Interactive Chat
 
-To start an interactive chat in your terminal, either run `interpreter` from the command line:
+To start an interactive chat in your terminal, either run `interpreter` from the command line or `interpreter.chat()` from a .py file.
 
-```shell
+<CodeGroup>
+
+```shell Terminal
 interpreter
 ```
 
-Or `interpreter.chat()` from a .py file:
-
-```python
+```python Python
 interpreter.chat()
 ```
+
+</CodeGroup>
 
 ---
 
@@ -60,17 +62,21 @@ interpreter.chat("These look great but can you make the subtitles bigger?")
 
 ### Start a New Chat
 
-In your terminal, Open Interpreter behaves like ChatGPT and will not remember previous conversations. Simply run `interpreter` to start a new chat:
+In your terminal, Open Interpreter behaves like ChatGPT and will not remember previous conversations. Simply run `interpreter` to start a new chat.
 
-```shell
+In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it.
+
+<CodeGroup>
+
+```shell Terminal
 interpreter
 ```
 
-In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it:
-
-```python
+```python Python
 interpreter.messages = []
 ```
+
+</CodeGroup>
 
 ---
 
@@ -80,13 +86,15 @@ In your terminal, Open Interpreter will save previous conversations to `<your ap
 
 You can resume any of them by running `--conversations`. Use your arrow keys to select one , then press `ENTER` to resume it.
 
-```shell
+In Python, `interpreter.chat()` returns a List of messages, which can be used to resume a conversation with `interpreter.messages = messages`.
+
+<CodeGroup>
+
+```shell Terminal
 interpreter --conversations
 ```
 
-In Python, `interpreter.chat()` returns a List of messages, which can be used to resume a conversation with `interpreter.messages = messages`:
-
-```python
+```python Python
 # Save messages to 'messages'
 messages = interpreter.chat("My name is Killian.")
 
@@ -96,6 +104,8 @@ interpreter.messages = []
 # Resume chat from 'messages' ("Killian" will be remembered)
 interpreter.messages = messages
 ```
+
+</CodeGroup>
 
 ---
 

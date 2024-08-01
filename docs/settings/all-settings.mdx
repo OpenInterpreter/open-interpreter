@@ -393,7 +393,7 @@ interpreter --help
 
 </CodeGroup>
 
-### Force Task Completion
+### Loop (Force Task Completion)
 
 Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
 
@@ -622,8 +622,6 @@ This property holds a list of `messages` between the user and the interpreter.
 
 You can use it to restore a conversation:
 
-<CodeGroup>
-
 ```python
 interpreter.chat("Hi! Can you print hello world?")
 
@@ -651,8 +649,6 @@ print(interpreter.messages)
 #You can use this to restore `interpreter` to a previous conversation.
 interpreter.messages = messages # A list that resembles the one above
 ```
-
-</CodeGroup>
 
 ### User Message Template
 
