@@ -101,10 +101,11 @@ def respond(interpreter):
             # Provide extra information on how to change API keys, if we encounter that error
             # (Many people writing GitHub issues were struggling with this)
             except Exception as e:
+                error_message = str(e).lower()
                 if (
                     interpreter.offline == False
-                    and "auth" in str(e).lower()
-                    or "api key" in str(e).lower()
+                    and "auth" in error_message
+                    or "api key" in error_message
                 ):
                     output = traceback.format_exc()
                     raise Exception(
@@ -113,9 +114,20 @@ def respond(interpreter):
                 elif (
                     interpreter.offline == False and "not have access" in str(e).lower()
                 ):
-                    response = input(
-                        f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
-                    )
+                    """
+                    Check for invalid model in error message and then fallback to groq, then OpenAI.
+                    """
+                    if (
+                        "invalid model" in error_message
+                        or "model does not exist" in error_message
+                    ):
+                        provider_message = f"  The model '{interpreter.llm.model}' does not exist or is invalid. Please check the model name and try again.\n\nWould you like to try an alternative model instead? (y/n)\n\n  "
+                    elif "groq" in error_message:
+                        provider_message = f"  You do not have access to {interpreter.llm.model}. Please check with Groq for more details.\n\nWould you like to try an alternative model instead? (y/n)\n\n  "
+                    else:
+                        provider_message = f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
+
+                    response = input(provider_message)
                     print("")  # <- Aesthetic choice
 
                     if response.strip().lower() == "y":
