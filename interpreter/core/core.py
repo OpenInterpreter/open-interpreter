@@ -2,8 +2,10 @@
 This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
+
 import json
 import os
+import platform
 import threading
 import time
 from datetime import datetime
@@ -213,6 +215,62 @@ class OpenInterpreter:
                 )
 
             raise
+
+    def get_default_export_dir(self):
+        """
+        Get the default directory for exporting conversations based on the operating system.
+        """
+        system = platform.system()
+        home = os.path.expanduser("~")
+
+        if system == "Windows":
+            return os.path.join(home, "AppData", "Local", "OpenInterpreter", "Exports")
+        elif system == "Darwin":  # macOS
+            return os.path.join(
+                home,
+                "Library",
+                "Application\\ Support",
+                "OpenInterpreter",
+                "Exports",
+            )
+        else:  # Linux and other Unix-like systems
+            return os.path.join(home, ".local", "share", "OpenInterpreter", "Exports")
+
+    def export_to_markdown(self, filename=None):
+        """
+        Export the conversation history to a markdown file in the default export directory.
+
+        :param filename: The name of the file to save the conversation to. If None, a default name will be used.
+        """
+        export_dir = self.get_default_export_dir()
+        os.makedirs(export_dir, exist_ok=True)
+        if filename is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"conversation_{timestamp}.md"
+
+        filepath = os.path.join(export_dir, filename)
+
+        with open(filepath, "w", encoding="utf-8") as f:
+            for message in self.messages:
+                role = message.get("role", "")
+                content = message.get("content", "")
+
+                if role == "system":
+                    continue  # Skip system messages
+
+                f.write(f"## {role.capitalize()}\n\n")
+
+                if message.get("type") == "code":
+                    language = message.get("format", "")
+                    f.write(f"```{language}\n{content}\n```\n\n")
+                else:
+                    f.write(f"{content}\n\n")
+
+                if message.get("type") == "console":
+                    output = message.get("content", "")
+                    f.write(f"```\n{output}\n```\n\n")
+
+        display_markdown_message(f"""Conversation exported to {filepath}""")
 
     def _streaming_chat(self, message=None, display=True):
         # Sometimes a little more code -> a much better experience!
