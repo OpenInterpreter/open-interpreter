@@ -109,7 +109,7 @@ def local_setup(interpreter, provider=None, model=None):
                 {
                     "name": "WizardCoder-Python-34B",
                     "file_name": "wizardcoder-python-34b-v1.0.Q4_K_M.llamafile",
-                    "size": 20.2,
+                    "size": 20.22,
                     "url": "https://huggingface.co/Mozilla/WizardCoder-Python-34B-V1.0-llamafile/resolve/main/wizardcoder-python-34b-v1.0.Q4_K_M.llamafile?download=true",
                 },
                 {
