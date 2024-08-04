@@ -310,11 +310,19 @@ Continuing...
 
         if self.model.startswith("ollama/"):
             model_name = self.model.replace("ollama/", "")
+            api_base = getattr(self, 'api_base', None) or "http://localhost:11434"
+            names = []
             try:
                 # List out all downloaded ollama models. Will fail if ollama isn't installed
-                result = subprocess.run(
-                    ["ollama", "list"], capture_output=True, text=True, check=True
-                )
+                response = requests.get(f"{api_base}/api/tags")
+                if response.ok:
+                    data = response.json()
+                    names = [
+                        model['name'].replace(":latest", "")
+                        for model in data['models']
+                        if 'name' in model and model['name']
+                    ]
+
             except Exception as e:
                 print(str(e))
                 self.interpreter.display_message(
@@ -322,22 +330,14 @@ Continuing...
                 )
                 exit()
 
-            lines = result.stdout.split("\n")
-            names = [
-                line.split()[0].replace(":latest", "")
-                for line in lines[1:]
-                if line.strip()
-            ]  # Extract names, trim out ":latest", skip header
-
+            # Download model if not already installed
             if model_name not in names:
                 self.interpreter.display_message(f"\nDownloading {model_name}...\n")
-                subprocess.run(["ollama", "pull", model_name], check=True)
+                requests.post(f"{api_base}/api/pull", json={"name": model_name})
 
             # Get context window if not set
             if self.context_window == None:
-                response = requests.post(
-                    "http://localhost:11434/api/show", json={"name": model_name}
-                )
+                response = requests.post(f"{api_base}/api/show", json={"name": model_name})
                 model_info = response.json().get("model_info", {})
                 context_length = None
                 for key in model_info:
