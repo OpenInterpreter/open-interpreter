@@ -1,19 +1,34 @@
-import speech_recognition as sr
+#import speech_recognition as sr
 import time
+import sys
 
 speech_mode = False
 
 
 class SpeechRecognizer:
     def __init__(self, wake_word="jarvis"):
+        global sr
+        self.import_library()
         self.r = sr.Recognizer()
         self.mic = sr.Microphone()
         self.wake_word = wake_word
+
+    def import_library(self):
+        """Check if the required libraries are installed."""
+        global sr
+        try:
+            import speech_recognition as sr
+        except ImportError:
+            print("Please install the SpeechRecognition and pyaudio libraries.")
+            if sys.platform == "darwin":
+                print("On Mac, install portaudio with: brew install portaudio") 
+            print("pip install SpeechRecognition pyaudio")
 
     def listen_for_speech(self):
         """Listens for speech and returns the transcribed text."""
         with self.mic as source:
             print("Listening...")
+            # This might be good. More testing needed. Seemed to work better without it.
             #            self.r.adjust_for_ambient_noise(source)
             audio = self.r.listen(source)
 
