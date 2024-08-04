@@ -213,9 +213,22 @@ def terminal_interface(interpreter, message):
                                 "Would you like to run this code? (y/n)\n\n"
                             )
                         else:
-                            response = input(
-                                "  Would you like to run this code? (y/n)\n\n  "
-                            )
+                            print("  Would you like to run this code? (yes/no)\n\n  ")
+                            # response = input(
+                            #     "  666Would you like to run this code? (y/n)\n\n  "
+                            # )
+                            response = cli_input().strip().lower()
+
+                        print(f"-->{response}<--")
+
+                        if response == 'yes':
+                            response = 'y'
+                        if response == 'edit':
+                            response = 'e'
+                        if response == 'no':
+                            response = 'n'
+                            
+
                         print("")  # <- Aesthetic choice
 
                         if response.strip().lower() == "y":
