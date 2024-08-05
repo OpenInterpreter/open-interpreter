@@ -212,11 +212,8 @@ def terminal_interface(interpreter, message):
                             response = input(
                                 "Would you like to run this code? (y/n)\n\n"
                             )
+                            response = response.strip().lower()
                         else:
-                            # print("  Would you like to run this code? (yes/no)\n\n  ")
-                            # response = input(
-                            #     "  666Would you like to run this code? (y/n)\n\n  "
-                            # )
                             # edit isn't in original prompt, but there's a branch for it just below here. Wonder what it's for.
                             response = (
                                 cli_input(
@@ -234,14 +231,14 @@ def terminal_interface(interpreter, message):
 
                         print("")  # <- Aesthetic choice
 
-                        if response.strip().lower() == "y":
+                        if response == "y":
                             # Create a new, identical block where the code will actually be run
                             # Conveniently, the chunk includes everything we need to do this:
                             active_block = CodeBlock(interpreter)
                             active_block.margin_top = False  # <- Aesthetic choice
                             active_block.language = language
                             active_block.code = code
-                        elif response.strip().lower() == "e":
+                        elif response == "e":
                             # Edit
 
                             # Create a temporary file
