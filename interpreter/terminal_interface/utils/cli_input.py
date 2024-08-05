@@ -61,7 +61,7 @@ class SpeechRecognizer:
             text = (
                 text[text.find(" ") + 1 :] if " " in text else text
             )  # Get rid of activation word
-            print(f"\rYou said: {text}")
+            print(f"\rYou said: {text}" + " " * 30)
             return text
         except self.sr.UnknownValueError:
             print("\rCould not understand audio." + " " * 30 + "\r", end='', flush=True)
