@@ -213,21 +213,24 @@ def terminal_interface(interpreter, message):
                                 "Would you like to run this code? (y/n)\n\n"
                             )
                         else:
-                            print("  Would you like to run this code? (yes/no)\n\n  ")
+                            # print("  Would you like to run this code? (yes/no)\n\n  ")
                             # response = input(
                             #     "  666Would you like to run this code? (y/n)\n\n  "
                             # )
-                            response = cli_input().strip().lower()
-
-                        print(f"-->{response}<--")
-
-                        if response == 'yes':
-                            response = 'y'
-                        if response == 'edit':
-                            response = 'e'
-                        if response == 'no':
-                            response = 'n'
-                            
+                            # edit isn't in original prompt, but there's a branch for it just below here. Wonder what it's for.
+                            response = (
+                                cli_input(
+                                    "  Would you like to run this code? (yes/no)\n\n  "
+                                )
+                                .strip()
+                                .lower()
+                            )
+                        if response == "yes":
+                            response = "y"
+                        if response == "edit":
+                            response = "e"
+                        if response == "no":
+                            response = "n"
 
                         print("")  # <- Aesthetic choice
 
