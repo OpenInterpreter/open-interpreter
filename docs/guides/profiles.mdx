@@ -8,9 +8,115 @@ Profiles are Python files that configure Open Interpreter. A wide range of field
 
 You can access your Profiles by running `interpreter --profiles`. This will open the directory where all of your Profiles are stored.
 
-To apply a Profile to an Open Interpreter session, you can run `interpreter --profile <name>`
+To apply a Profile to an Open Interpreter session, you can run `interpreter --profile <name>`. This must follow a specific schema, better to inspect the examples below. I would suggest the YAML configuration, so I will address it first.
 
-# Example Profile
+# Example Profiles
+
+For example, if you take a look at "All settings," you will see that each setting has three tabs: Terminal, Python, and Profile. All these tabs expect different inputs for the same configuration. 
+
+## Profile (YAML)
+
+First, we want to know where the interpreter stores the profiles on the current machine. For this, we use the command:
+
+```shell
+interpreter --profiles
+```
+On macOS, this will open a new Finder window where (after your initial setup), you will see a single configuration named `default.yaml`. Now, let's duplicate this file and name it, for example, deepseek.yaml. 
+
+```shell
+ls -al ~/Library/Application\ Support/open-interpreter/profiles
+total 16
+drwxr-xr-x  4 justme  staff   128 Jun 20 19:38 .
+drwxr-xr-x  5 justme  staff   160 Jun 20 19:36 ..
+-rw-r--r--  1 justme  staff  1280 Jun 20 20:06 deepseek.yaml
+-rw-r--r--  1 justme  staff  1280 Jun 20 19:42 default.yaml
+```
+Now, let's edit this file `deepseek.yaml` to our liking :)
+
+```shell
+# LLM Settings
+llm:
+  model: "deepseek-coder"
+  temperature: 0
+  api_key: "sk-..." # Your API key, if the API requires it
+  api_base: "https://api.deepseek.com/v1" # The URL where an OpenAI-compatible server is running to handle LLM API requests
+  max_output: 2500 # The maximum characters of code output visible to the LLM
+
+# Computer Settings
+computer:
+  import_computer_api: True # Gives OI a helpful Computer API designed for code interpreting language models
+  verbose: True
+  emit_images: True
+
+# Custom Instructions
+# custom_instructions: "After starting do crie for help" # This will be appended to the system message
+
+# General Configuration
+auto_run: True # If True, code will run without asking for confirmation
+safe_mode: "ask" # The safety mode for the LLM — one of "off", "ask", "auto"
+multi_line: True # If True, you can input multiple lines starting and ending with ```
+
+# Documentation
+# All options: https://docs.openinterpreter.com/settings
+
+version: 0.2.5 # Profile version (do not modify)
+```
+
+At this point you should be able to run your new profile configuration, via:
+
+```shell
+interpreter --profile deepseek.yaml
+```
+
+Now you can torture deepseeker :)
+
+```shell
+> Who are you?
+                                                                                                                        
+  I am Open Interpreter, a world-class programmer designed to assist you by executing code to achieve any goal. How     
+  can I assist you today?                                                                                               
+                                                                                                                        
+> Which llm.model?
+                                                                                                                        
+  I am an intelligent assistant developed by DeepSeek company, named DeepSeek Coder.                                    
+                                                                                                                        
+> Oh, Jesus, that's fantastic.
+                                                                                                                        
+  Thank you for your praise! If you have any questions or need help, please feel free to tell me. 
+```
+
+## Terminal
+
+If you want to start a slightly more complex configuration via the terminal, you won't want to enter it every time. Instead, create an alias in your shell configuration, such as in a Z-Shell (~/.zshrc):
+
+```shell
+export DEEPSEEK_API_KEY=sk-......
+alias deepseek='conda activate deepseek-env && \
+interpreter --api_base "https://api.deepseek.com/v1" --api_key "$DEEPSEEK_API_KEY" \
+--model "deepseek-coder" --context_window 128000 -y -ml'
+```
+We have assumed that Python environment management is handled with Conda. You can read more about it here: [https://docs.conda.io/en/latest/](https://docs.conda.io/en/latest/).
+
+Conda is not required, of course. You could also start the Open-Interpreter directly in the terminal (see the All Settings section for the keys used), with a slight modification since we want to read the api_key from the environment variable. (So it makes sense to set the key as an environment variable first):
+
+```shell
+# Set the environment variable and add it to .zshrc (e.g. Z-Shell on MacOS)
+echo 'export DEEPSEEK_API_KEY="sk-......"' >> ~/.zshrc
+```
+Re-load Z-Shell:
+
+```shell
+zsh -l
+```
+
+Then start open-interpreter
+
+```shell
+interpreter --api_base "https://api.deepseek.com/v1" --api_key "$DEEPSEEK_API_KEY" \
+--model "deepseek-coder" --context_window 128000 -y -ml
+```
+
+## Python
 
 ```Python
 from interpreter import interpreter
