@@ -217,7 +217,7 @@ def terminal_interface(interpreter, message):
                             # edit isn't in original prompt, but there's a branch for it just below here. Wonder what it's for.
                             response = (
                                 cli_input(
-                                    "  Would you like to run this code? (yes/no)\n\n  "
+                                    "  Would you like to run this code? (yes/no)  "
                                 )
                                 .strip()
                                 .lower()

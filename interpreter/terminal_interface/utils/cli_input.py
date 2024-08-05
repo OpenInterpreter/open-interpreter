@@ -1,4 +1,5 @@
 import sys
+import time
 
 """Return input from keyboard or speech recognition."""
 
@@ -40,13 +41,17 @@ class SpeechRecognizer:
             )
             if sys.platform == "darwin":
                 print("brew install portaudio")
+            if sys.platform == "linux":
+                print("sudo apt install python3-pyaudio")
+                print("If that doesn't work, you may need to install portaudio19 from source:")
+                print("https://www.portaudio.com/ then ./configure && make && make install.")
             print("pip install SpeechRecognition pyaudio")
             return False
 
-    def listen_for_speech(self) -> str:
+    def listen(self) -> str:
         """Listens for speech and returns the transcribed text."""
         with self.mic as source:
-            print("Listening...")
+            print("Listening...", end='', flush=True)
             # This might be good. More testing needed. Might work better without it.
             self.r.adjust_for_ambient_noise(source)
             audio = self.r.listen(source)
@@ -56,14 +61,16 @@ class SpeechRecognizer:
             text = (
                 text[text.find(" ") + 1 :] if " " in text else text
             )  # Get rid of activation word
-            print(f"You said: {text}")
+            print(f"\rYou said: {text}")
             return text
         except self.sr.UnknownValueError:
-            print("Could not understand audio")
+            print("\rCould not understand audio." + " " * 30 + "\r", end='', flush=True)
+            time.sleep(2)
+            print("\r" + " " * 30 + "\r", end='', flush=True)  # Clear the line
             return ""
         except self.sr.RequestError as e:
             print(
-                f"Could not request results from Google Speech Recognition service; {e}"
+                f"\rCould not request results from Google Speech Recognition service; {e}"
             )
             return ""
 
@@ -79,13 +86,15 @@ def cli_input(prompt: str = "") -> str:
 
     while True:
         if recognizer.speak():
-            print(prompt)
-            text = recognizer.listen_for_speech()
+            print(prompt, end='', flush=True)
+            text = recognizer.listen()
             if text == "exit":
-                print("Exiting speech recognition mode.")
+                print("\rExiting speech recognition mode.")
                 recognizer.speak(False)
             elif text:
                 return text
+            else:
+                print("\r" + " " * 30 + "\r", end='', flush=True)  # Clear the line
         else:
             message = input(prompt)
             # Speech recognition trigger
