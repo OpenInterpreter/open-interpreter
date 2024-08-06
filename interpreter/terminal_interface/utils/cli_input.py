@@ -11,10 +11,9 @@ class SpeechRecognizer:
     """Create project. Go to APIs and services -> Library. Search for speech. Enable Speech API."""
     """Go to API manager -> Credentials and create an API key."""
 
-    def __init__(self, wake_word="jarvis"):
+    def __init__(self):
         self.speech_mode = False
         self.imported = False
-        self.wake_word = wake_word
 
     def speak(self, val=None) -> bool:
         """Set speech mode. Called with no argument, return current value. Called with an argument, sets value."""
@@ -58,9 +57,6 @@ class SpeechRecognizer:
 
         try:
             text = self.r.recognize_google(audio)
-            text = (
-                text[text.find(" ") + 1 :] if " " in text else text
-            )  # Get rid of activation word
             print(f"\rYou said: {text}" + " " * 30)
             return text
         except self.sr.UnknownValueError:
