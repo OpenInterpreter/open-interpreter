@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 import time
 
@@ -289,12 +290,23 @@ def start_terminal_interface(interpreter):
         },
     ]
 
+    # i shortcut
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
         message = " ".join(sys.argv[1:])
         interpreter.messages.append(
             {"role": "user", "type": "message", "content": "I " + message}
         )
         sys.argv = sys.argv[:1]
+
+        interpreter.custom_instructions = "UPDATED INSTRUCTIONS: You are in ULTRA FAST, ULTRA CERTAIN mode. Do not ask the user any questions or run code to gathet information. Go as quickly as you can. Run code quickly. Do not plan out loud, simply start doing the best thing. The user expects speed. Trust that the user knows best. Just interpret their ambiguous command as quickly and certainly as possible and try to fulfill it IN ONE COMMAND, assuming they have the right information. If they tell you do to something, just do it quickly in one command, DO NOT try to get more information (for example by running `cat` to get a file's infomration— this is probably unecessary!). DIRECTLY DO THINGS AS FAST AS POSSIBLE."
+
+        files_in_directory = os.listdir()[:100]
+        interpreter.custom_instructions += (
+            "\nThe files in CWD, which THE USER MAY BE REFERRING TO, are: "
+            + ", ".join(files_in_directory)
+        )
+
+        # interpreter.debug = True
 
     # Check for deprecated flags before parsing arguments
     deprecated_flags = {
