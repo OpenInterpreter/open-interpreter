@@ -1,3 +1,5 @@
+import re
+
 from .utils.merge_deltas import merge_deltas
 from .utils.parse_partial_json import parse_partial_json
 
@@ -170,6 +172,7 @@ def run_tool_calling_llm(llm, request_params):
     function_call_detected = False
     accumulated_review = ""
     review_category = None
+    buffer = ""
 
     for chunk in llm.completions(**request_params):
         if "choices" not in chunk or len(chunk["choices"]) == 0:
@@ -222,11 +225,23 @@ def run_tool_calling_llm(llm, request_params):
                     ]:
                         delta["content"] = delta["content"].replace(tag, "")
 
-                    yield {
-                        "type": "review",
-                        "format": review_category,
-                        "content": delta["content"],
-                    }
+                    if re.search("</.*>$", accumulated_review):
+                        buffer += delta["content"]
+                        continue
+                    elif buffer:
+                        yield {
+                            "type": "review",
+                            "format": review_category,
+                            "content": buffer + delta["content"],
+                        }
+                        buffer = ""
+                    else:
+                        yield {
+                            "type": "review",
+                            "format": review_category,
+                            "content": delta["content"],
+                        }
+                        buffer = ""
 
             else:
                 yield {"type": "message", "content": delta["content"]}
