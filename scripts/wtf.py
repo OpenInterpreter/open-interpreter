@@ -6,6 +6,7 @@ spinner.start()
 import os
 import platform
 import re
+import subprocess
 import time
 
 import platformdirs
@@ -49,33 +50,176 @@ CWD: {os.getcwd()}
 
 def main():
     keyboard = Controller()
+    history = None
 
-    # Save clipboard
-    clipboard = pyperclip.paste()
+    ## SELECT ALL AND COPY METHOD
 
-    # Select all text
-    shortcut_key = Key.cmd if platform.system() == "Darwin" else Key.ctrl
-    with keyboard.pressed(shortcut_key):
-        keyboard.press("a")
-        keyboard.release("a")
+    if True:
+        # Save clipboard
+        clipboard = pyperclip.paste()
 
-    # Copy selected text
-    with keyboard.pressed(shortcut_key):
-        keyboard.press("c")
-        keyboard.release("c")
+        # Select all text
+        shortcut_key = Key.cmd if platform.system() == "Darwin" else Key.ctrl
+        with keyboard.pressed(shortcut_key):
+            keyboard.press("a")
+            keyboard.release("a")
 
-    # Deselect
-    keyboard.press(Key.backspace)
-    keyboard.release(Key.backspace)
+        # Copy selected text
+        with keyboard.pressed(shortcut_key):
+            keyboard.press("c")
+            keyboard.release("c")
 
-    # Wait for the clipboard to update
-    time.sleep(0.1)
+        # Deselect
+        keyboard.press(Key.backspace)
+        keyboard.release(Key.backspace)
 
-    # Get terminal history from clipboard
-    history = pyperclip.paste()
+        # Wait for the clipboard to update
+        time.sleep(0.1)
 
-    # Reset clipboard to stored one
-    pyperclip.copy(clipboard)
+        # Get terminal history from clipboard
+        history = pyperclip.paste()
+
+        # Reset clipboard to stored one
+        pyperclip.copy(clipboard)
+
+    ## OCR SCREENSHOT METHOD
+
+    if not history:
+        try:
+            import pytesseract
+            from PIL import ImageGrab
+
+            # Get active window coordinates using platform-specific methods
+            platform_name = platform.system()
+            if platform_name == "Windows":
+                import win32gui
+
+                window = win32gui.GetForegroundWindow()
+                left, top, right, bottom = win32gui.GetWindowRect(window)
+            elif platform_name == "Darwin":
+                from Quartz import (
+                    CGWindowListCopyWindowInfo,
+                    kCGNullWindowID,
+                    kCGWindowListOptionOnScreenOnly,
+                )
+
+                window_info = CGWindowListCopyWindowInfo(
+                    kCGWindowListOptionOnScreenOnly, kCGNullWindowID
+                )
+                for window in window_info:
+                    if window["kCGWindowLayer"] == 0:
+                        window_geometry = window["kCGWindowBounds"]
+                        left = window_geometry["X"]
+                        top = window_geometry["Y"]
+                        right = int(left + window_geometry["Width"])
+                        bottom = int(top + window_geometry["Height"])
+                        break
+            else:  # Assume it's a Linux-based system
+                root = subprocess.Popen(
+                    ["xprop", "-root", "_NET_ACTIVE_WINDOW"], stdout=subprocess.PIPE
+                )
+                stdout, stderr = root.communicate()
+                m = re.search(b"^_NET_ACTIVE_WINDOW.* ([\\w]+)$", stdout)
+                if m is not None:
+                    window_id = m.group(1)
+                    window = subprocess.Popen(
+                        ["xwininfo", "-id", window_id], stdout=subprocess.PIPE
+                    )
+                    stdout, stderr = window.communicate()
+                    match = re.search(
+                        rb"Absolute upper-left X:\s*(\d+).*Absolute upper-left Y:\s*(\d+).*Width:\s*(\d+).*Height:\s*(\d+)",
+                        stdout,
+                        re.DOTALL,
+                    )
+                    if match is not None:
+                        left, top, width, height = map(int, match.groups())
+                        right = left + width
+                        bottom = top + height
+
+            # spinner.stop()
+            # print("\nPermission to capture terminal commands via screenshot -> OCR?")
+            # permission = input("(y/n) > ")
+            # print("")
+            # if permission.lower() != 'y':
+            #     print("Exiting...")
+            #     exit()
+            # spinner.start()
+
+            # Take screenshot of the active window
+            screenshot = ImageGrab.grab(
+                bbox=(int(left), int(top), int(right), int(bottom))
+            )
+
+            # OCR the screenshot to get the text
+            text = pytesseract.image_to_string(screenshot)
+
+            history = text
+
+            if "wtf" in history:
+                last_wtf_index = history.rindex("wtf")
+                history = history[:last_wtf_index]
+        except ImportError:
+            spinner.stop()
+            print(
+                "To use OCR to capture terminal output (recommended) run `pip install pytesseract` or `pip3 install pytesseract`."
+            )
+            spinner.start()
+
+    ## TERMINAL HISTORY METHOD
+
+    if not history:
+        try:
+            shell = os.environ.get("SHELL", "/bin/bash")
+            command = [shell, "-ic", "fc -ln -10"]  # Get just the last command
+
+            output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode(
+                "utf-8"
+            )
+
+            # Split the output into lines
+            lines = output.strip().split("\n")
+
+            # Filter out lines that look like the "saving session" message
+            history = [
+                line
+                for line in lines
+                if not line.startswith("...")
+                and "saving" not in line
+                and "Saving session..." not in line
+            ]
+            history = [l.strip() for l in history if l.strip()][-10:]
+
+            # Split the history into individual commands
+
+            # Get the last command
+            last_command = history[-1]
+            spinner.start()
+            print(
+                f"\nRunning the last command again to collect its output: {last_command}\n"
+            )
+            spinner.stop()
+            # Run the last command and collect its output
+            try:
+                last_command_output = subprocess.check_output(
+                    last_command, shell=True, stderr=subprocess.STDOUT
+                ).decode("utf-8")
+            except subprocess.CalledProcessError as e:
+                last_command_output = e.output.decode("utf-8")
+            except Exception as e:
+                last_command_output = str(e)
+
+            # Format the history
+            history = "The user tried to run the following commands:\n" + "\n".join(
+                history
+            )
+            history += f"\nThe last command, {last_command}, resulted in this output:\n{last_command_output}"
+
+        except Exception as e:
+            raise
+            print(
+                "Failed to retrieve and run the last command from terminal history. Exiting."
+            )
+            return
 
     # Trim history
     history = history[-9000:].strip()
