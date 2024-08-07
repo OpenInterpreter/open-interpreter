@@ -47,7 +47,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.output_queue = None
         self.unsent_messages = deque()
         self.id = os.getenv("INTERPRETER_ID", datetime.now().timestamp())
-        self.print = True  # Will print output
+        self.print = False  # Will print output
 
         self.require_acknowledge = (
             os.getenv("INTERPRETER_REQUIRE_ACKNOWLEDGE", "False").lower() == "true"
@@ -121,7 +121,7 @@ class AsyncInterpreter(OpenInterpreter):
                 if self.stop_event.is_set():
                     return
 
-                if self.print:
+                if self.print or self.debug:
                     if "start" in chunk:
                         print("\n")
                     if chunk["type"] in ["code", "console"] and "format" in chunk:
@@ -133,7 +133,11 @@ class AsyncInterpreter(OpenInterpreter):
                         if "format" in chunk and "base64" in chunk["format"]:
                             print("\n[An image was produced]")
                         else:
-                            print(chunk.get("content", ""), end="", flush=True)
+                            content = chunk.get("content", "")
+                            content = (
+                                str(content).encode("ascii", "ignore").decode("ascii")
+                            )
+                            print(content, end="", flush=True)
 
                 self.output_queue.sync_q.put(chunk)
 
