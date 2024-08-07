@@ -121,7 +121,7 @@ class AsyncInterpreter(OpenInterpreter):
                 if self.stop_event.is_set():
                     return
 
-                if self.print:
+                if self.print or self.debug:
                     if "start" in chunk:
                         print("\n")
                     if chunk["type"] in ["code", "console"] and "format" in chunk:
