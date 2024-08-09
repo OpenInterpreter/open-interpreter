@@ -72,7 +72,7 @@ def local_setup(interpreter, provider=None, model=None):
                 },
                 {
                     "name": "Mistral-7B-Instruct",
-                    "file_name": "Mistral-7B-Instruct-v0.3.Q5_K_M.llamafile",
+                    "file_name": "Mistral-7B-Instruct-v0.3.Q4_K_M.llamafile",
                     "size": 4.40,
                     "url": "https://huggingface.co/Mozilla/Mistral-7B-Instruct-v0.3-llamafile/resolve/main/Mistral-7B-Instruct-v0.3.Q4_K_M.llamafile?download=true",
                 },
@@ -241,19 +241,21 @@ def local_setup(interpreter, provider=None, model=None):
                 ["ollama", "list"], capture_output=True, text=True, check=True
             )
             lines = result.stdout.split("\n")
+
             names = [
                 line.split()[0].replace(":latest", "")
-                for line in lines[1:]
-                if line.strip()
+                for line in lines
+                if line.strip() and not line.startswith("failed") and not line.startswith("NAME")
             ]  # Extract names, trim out ":latest", skip header
 
-            if "llama3" in names:
-                names.remove("llama3")
-                names = ["llama3"] + names
-
-            if "codestral" in names:
-                names.remove("codestral")
-                names = ["codestral"] + names
+            # Models whose name contain one of these keywords will be moved to the front of the list
+            priority_models=["llama3","codestral"]
+            priority_models_found=[]
+            for word in priority_models:
+                models_to_move=[name for name in names if word.lower() in name.lower()]
+                priority_models_found.extend(models_to_move)
+            names=[name for name in names if not any(word.lower() in name.lower() for word in priority_models)]
+            names=priority_models_found+names
 
             for model in ["llama3", "phi3", "wizardlm2", "codestral"]:
                 if model not in names:
