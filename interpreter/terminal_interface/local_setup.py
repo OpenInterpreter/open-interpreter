@@ -245,7 +245,7 @@ def local_setup(interpreter, provider=None, model=None):
             names = [
                 line.split()[0].replace(":latest", "")
                 for line in lines
-                if line.strip() and not line.startswith("failed to get console mode") and not line.startswith("NAME")
+                if line.strip() and not line.startswith("failed") and not line.startswith("NAME")
             ]  # Extract names, trim out ":latest", skip header
 
             if "llama3" in names:
