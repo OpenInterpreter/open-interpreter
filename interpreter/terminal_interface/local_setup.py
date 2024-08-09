@@ -248,13 +248,14 @@ def local_setup(interpreter, provider=None, model=None):
                 if line.strip() and not line.startswith("failed") and not line.startswith("NAME")
             ]  # Extract names, trim out ":latest", skip header
 
-            if "llama3" in names:
-                names.remove("llama3")
-                names = ["llama3"] + names
-
-            if "codestral" in names:
-                names.remove("codestral")
-                names = ["codestral"] + names
+            # Models whose name start with one of these prefixes will be moved to the front of the list
+            priority_models=["llama3","codestral"]
+            priority_models_found=[]
+            for prefix in priority_models:
+                models_to_move=[name for name in names if name.startswith(prefix)]
+                priority_models_found.extend(models_to_move)
+            names=[name for name in names if not any(name.startswith(prefix) for prefix in priority_models)]
+            names=priority_models_found+names
 
             for model in ["llama3", "phi3", "wizardlm2", "codestral"]:
                 if model not in names:
