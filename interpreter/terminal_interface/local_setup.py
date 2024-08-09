@@ -252,9 +252,9 @@ def local_setup(interpreter, provider=None, model=None):
             priority_models=["llama3","codestral"]
             priority_models_found=[]
             for word in priority_models:
-                models_to_move=[name for name in names if word in name]
+                models_to_move=[name for name in names if word.lower() in name.lower()]
                 priority_models_found.extend(models_to_move)
-            names=[name for name in names if not any(word in name for word in priority_models)]
+            names=[name for name in names if not any(word.lower() in name.lower() for word in priority_models)]
             names=priority_models_found+names
 
             for model in ["llama3", "phi3", "wizardlm2", "codestral"]:
