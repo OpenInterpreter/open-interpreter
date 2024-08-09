@@ -72,7 +72,7 @@ def local_setup(interpreter, provider=None, model=None):
                 },
                 {
                     "name": "Mistral-7B-Instruct",
-                    "file_name": "Mistral-7B-Instruct-v0.3.Q5_K_M.llamafile",
+                    "file_name": "Mistral-7B-Instruct-v0.3.Q4_K_M.llamafile",
                     "size": 4.40,
                     "url": "https://huggingface.co/Mozilla/Mistral-7B-Instruct-v0.3-llamafile/resolve/main/Mistral-7B-Instruct-v0.3.Q4_K_M.llamafile?download=true",
                 },
@@ -241,10 +241,11 @@ def local_setup(interpreter, provider=None, model=None):
                 ["ollama", "list"], capture_output=True, text=True, check=True
             )
             lines = result.stdout.split("\n")
+
             names = [
                 line.split()[0].replace(":latest", "")
-                for line in lines[1:]
-                if line.strip()
+                for line in lines
+                if line.strip() and not line.startswith("failed to get console mode") and not line.startswith("NAME")
             ]  # Extract names, trim out ":latest", skip header
 
             if "llama3" in names:
