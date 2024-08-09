@@ -181,6 +181,21 @@ def respond(interpreter):
                     except:
                         pass
 
+                if code.endswith("executeexecute"):
+                    edited_code = code.replace("executeexecute", "")
+                    try:
+                        code_dict = json.loads(edited_code)
+                        language = code_dict.get("language", language)
+                        code = code_dict.get("code", code)
+                        interpreter.messages[-1][
+                            "content"
+                        ] = code  # So the LLM can see it.
+                        interpreter.messages[-1][
+                            "format"
+                        ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
                 if code.replace("\n", "").replace(" ", "").startswith('{"language":'):
                     try:
                         code_dict = json.loads(code)
