@@ -6,8 +6,9 @@
     <a href="README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
     <a href="docs/README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="README_UK.md"><img src="https://img.shields.io/badge/Українська-white.svg" alt="UK doc"/></a>
     <a href="docs/README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=white&style=flat" alt="License"/>
+    <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br>
     <br>
     <b>chạy mô hình ngôn ngữ trí tuệ nhân tạo trên máy tính của bạn.</b><br>
@@ -200,13 +201,13 @@ Open Interpreter có thể sử dụng máy chủ tương thích với OpenAI đ
 
 Chỉ cần chạy `interpreter` với URL api_base của máy chủ suy luận của bạn (đối với LM studio, nó là `http://localhost:1234/v1` theo mặc định):
 
-``` vỏ
+```vỏ
 trình thông dịch --api_base "http://localhost:1234/v1" --api_key "fake_key"
 ```
 
 Ngoài ra, bạn có thể sử dụng Llamafile mà không cần cài đặt bất kỳ phần mềm bên thứ ba nào chỉ bằng cách chạy
 
-``` vỏ
+```vỏ
 thông dịch viên --local
 ```
 
@@ -220,7 +221,6 @@ thông dịch viên --local
 4. Chọn mô hình của bạn ở phía trên, rồi nhấn chạy **Start Server**.
 
 Một khi server chạy, bạn có thể bắt đầu trò chuyện với Open Interpreter.
-
 
 > **Lưu ý:** Chế độ cục bộ chỉnh `context_window` của bạn tới 3000, và `max_tokens` của bạn tới 600. Nếu mô hình của bạn có các yêu cầu khác, thì hãy chỉnh các tham số thủ công (xem bên dưới).
 
