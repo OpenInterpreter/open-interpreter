@@ -731,6 +731,10 @@ class Server:
         # Add authentication middleware
         @self.app.middleware("http")
         async def validate_api_key(request: Request, call_next):
+            # Ignore authentication for the /heartbeat route
+            if request.url.path == "/heartbeat":
+                return await call_next(request)
+
             api_key = request.headers.get("X-API-KEY")
             if self.authenticate(api_key):
                 response = await call_next(request)
