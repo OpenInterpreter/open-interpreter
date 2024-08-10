@@ -262,6 +262,16 @@ def respond(interpreter):
                     else:
                         break
 
+                # Is there any code at all?
+                if code.strip() == "":
+                    yield {
+                        "role": "computer",
+                        "type": "console",
+                        "format": "output",
+                        "content": "Code block was empty. Please try again, be sure to write code before executing.",
+                    }
+                    continue
+
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
                     yield {
