@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import shortuuid
 from pydantic import BaseModel
+from starlette.websockets import WebSocketState
 
 from .core import OpenInterpreter
 
@@ -387,12 +388,14 @@ def create_router(async_interpreter):
     async def websocket_endpoint(websocket: WebSocket):
         await websocket.accept()
 
-        try:
+        try:  # solving it ;)/ # killian super wrote this
 
             async def receive_input():
                 authenticated = False
                 while True:
                     try:
+                        if websocket.client_state != WebSocketState.CONNECTED:
+                            return
                         data = await websocket.receive()
 
                         if not authenticated:
@@ -425,7 +428,7 @@ def create_router(async_interpreter):
                                 data = data["bytes"]
                             await async_interpreter.input(data)
                         elif data.get("type") == "websocket.disconnect":
-                            print("Disconnecting.")
+                            print("Client wants to disconnect, that's fine..")
                             return
                         else:
                             print("Invalid data:", data)
@@ -446,6 +449,8 @@ def create_router(async_interpreter):
 
             async def send_output():
                 while True:
+                    if websocket.client_state != WebSocketState.CONNECTED:
+                        return
                     try:
                         # First, try to send any unsent messages
                         while async_interpreter.unsent_messages:
@@ -488,9 +493,12 @@ def create_router(async_interpreter):
                     ):
                         output["id"] = id
 
-                for attempt in range(100):
-                    if websocket.client_state == 3:  # 3 represents 'CLOSED' state
+                for attempt in range(20):
+                    # time.sleep(0.5)
+
+                    if websocket.client_state != WebSocketState.CONNECTED:
                         break
+
                     try:
                         if isinstance(output, bytes):
                             await websocket.send_bytes(output)
@@ -501,7 +509,7 @@ def create_router(async_interpreter):
 
                         if async_interpreter.require_acknowledge:
                             acknowledged = False
-                            for _ in range(1000):
+                            for _ in range(100):
                                 if id in async_interpreter.acknowledged_outputs:
                                     async_interpreter.acknowledged_outputs.remove(id)
                                     acknowledged = True
@@ -523,10 +531,13 @@ def create_router(async_interpreter):
                         await asyncio.sleep(0.05)
 
                 # If we've reached this point, we've failed to send after 100 attempts
-                async_interpreter.unsent_messages.append(output)
-                print(
-                    f"Added message to unsent_messages queue after failed attempts: {output}"
-                )
+                if output not in async_interpreter.unsent_messages:
+                    async_interpreter.unsent_messages.append(output)
+                    print(
+                        f"Added message to unsent_messages queue after failed attempts: {output}"
+                    )
+                else:
+                    print("Why was this already in unsent_messages?", output)
 
             await asyncio.gather(receive_input(), send_output())
 
@@ -731,6 +742,10 @@ class Server:
         # Add authentication middleware
         @self.app.middleware("http")
         async def validate_api_key(request: Request, call_next):
+            # Ignore authentication for the /heartbeat route
+            if request.url.path == "/heartbeat":
+                return await call_next(request)
+
             api_key = request.headers.get("X-API-KEY")
             if self.authenticate(api_key):
                 response = await call_next(request)

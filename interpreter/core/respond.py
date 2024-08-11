@@ -181,6 +181,21 @@ def respond(interpreter):
                     except:
                         pass
 
+                if code.strip().endswith("executeexecute"):
+                    edited_code = code.replace("executeexecute", "")
+                    try:
+                        code_dict = json.loads(edited_code)
+                        language = code_dict.get("language", language)
+                        code = code_dict.get("code", code)
+                        interpreter.messages[-1][
+                            "content"
+                        ] = code  # So the LLM can see it.
+                        interpreter.messages[-1][
+                            "format"
+                        ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
                 if code.replace("\n", "").replace(" ", "").startswith('{"language":'):
                     try:
                         code_dict = json.loads(code)
@@ -246,6 +261,16 @@ def respond(interpreter):
                         continue
                     else:
                         break
+
+                # Is there any code at all?
+                if code.strip() == "":
+                    yield {
+                        "role": "computer",
+                        "type": "console",
+                        "format": "output",
+                        "content": "Code block was empty. Please try again, be sure to write code before executing.",
+                    }
+                    continue
 
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
