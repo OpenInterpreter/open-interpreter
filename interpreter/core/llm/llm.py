@@ -1,6 +1,8 @@
 import os
 
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
+import sys
+
 import litellm
 
 litellm.suppress_debug_info = True
@@ -310,7 +312,7 @@ Continuing...
 
         if self.model.startswith("ollama/"):
             model_name = self.model.replace("ollama/", "")
-            api_base = getattr(self, 'api_base', None) or "http://localhost:11434"
+            api_base = getattr(self, "api_base", None) or "http://localhost:11434"
             names = []
             try:
                 # List out all downloaded ollama models. Will fail if ollama isn't installed
@@ -318,9 +320,9 @@ Continuing...
                 if response.ok:
                     data = response.json()
                     names = [
-                        model['name'].replace(":latest", "")
-                        for model in data['models']
-                        if 'name' in model and model['name']
+                        model["name"].replace(":latest", "")
+                        for model in data["models"]
+                        if "name" in model and model["name"]
                     ]
 
             except Exception as e:
@@ -337,7 +339,9 @@ Continuing...
 
             # Get context window if not set
             if self.context_window == None:
-                response = requests.post(f"{api_base}/api/show", json={"name": model_name})
+                response = requests.post(
+                    f"{api_base}/api/show", json={"name": model_name}
+                )
                 model_info = response.json().get("model_info", {})
                 context_length = None
                 for key in model_info:
@@ -399,6 +403,9 @@ def fixed_litellm_completions(**params):
         try:
             yield from litellm.completion(**params)
             return  # If the completion is successful, exit the function
+        except KeyboardInterrupt:
+            print("Exiting...")
+            sys.exit(0)
         except Exception as e:
             if attempt == 0:
                 # Store the first error
