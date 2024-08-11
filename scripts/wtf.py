@@ -1,5 +1,6 @@
 from yaspin import yaspin
 
+# Start spinner
 spinner = yaspin()
 spinner.start()
 
@@ -7,6 +8,7 @@ import os
 import platform
 import re
 import subprocess
+import sys
 import time
 
 import platformdirs
@@ -14,11 +16,13 @@ import pyperclip
 import yaml
 from pynput.keyboard import Controller, Key
 
+# Don't let litellm go online here, this slows it down
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
+# Define system messages
 SYSTEM_MESSAGE = f"""
-You are a fast, efficient AI assistant specialized in analyzing terminal history and providing solutions. You are summoned via the wtf command. Your task is to:
+You are a fast, efficient terminal assistant. Your task is to:
 
 1. Scan the provided terminal history.
 2. Identify the most recent error or issue.
@@ -36,7 +40,7 @@ Rules:
 	•	Using double quotes around the sed expression to handle single quotes within the command.
 	•	Combining single and double quotes to properly escape characters within the shell command.
 - If previous commands attempted to fix the issue and failed, learn from them by proposing a DIFFERENT command.
-- Focus on the most recent error, ignoring earlier unrelated commands.
+- Focus on the most recent error, ignoring earlier unrelated commands. If the user included a message at the end, focus on helping them.
 - If you need more information to confidently fix the problem, ask the user to run wtf again in a moment, then write a command like grep to learn more about the problem.
 - The error may be as simple as a spelling error, or as complex as requiring tests to be run, or code to be find-and-replaced.
 - Prioritize speed and conciseness in your response. Don't use markdown headings. Don't say more than a sentence or two. Be incredibly concise.
@@ -47,8 +51,70 @@ CWD: {os.getcwd()}
 
 """
 
+CUSTOM_MESSAGE_SYSTEM_MESSAGE = f"""
+
+You are a fast, efficient AI assistant for terminal and coding tasks. When summoned, you will:
+
+1. Review the provided terminal history (which may or may not be relevant) and final user query.
+2. Determine the most appropriate solution or debugging step to resolve the user's final query.
+3. Respond with a brief explanation and a single shell command in a markdown code block.
+
+Rules:
+- Provide one logical command (use \ or ^ for multiline).
+- Keep explanations concise and place them before the code block.
+- Use proper command escaping (e.g., sed with correct quotes).
+- Avoid comments in the code block.
+- If more info is needed, provide a command to gather it (e.g., grep).
+- Focus on the user's FINAL query and ADDRESS NOTHING ELSE, using terminal history for context if relevant.
+- For multi-step solutions, explain briefly and provide the first or combined command.
+- Prioritize addressing the user's specific request (at the END, after "wtf") efficiently.
+
+User's System: {platform.system()}
+CWD: {os.getcwd()}
+{"Shell: " + os.environ.get('SHELL') if os.environ.get('SHELL') else ''}
+
+"""
+
+LOCAL_SYSTEM_MESSAGE = f"""
+You're a fast AI assistant for terminal issues. You must:
+
+1. Scan terminal history
+2. Identify latest error
+3. Determine best solution
+4. Reply with brief explanation + single shell command in markdown
+
+Rules:
+- One logical command (use \ or ^ for multiline)
+- Explain briefly, then provide command
+- No comments in code
+- Proper escaping (e.g., sed with correct quotes)
+- If unsure, get more info with a command like grep
+- Prioritize speed and conciseness
+
+Example response:
+
+We need to fix the file permissions on config.yml.
+```bash
+chmod 644 config.yml
+```
+
+User's System: {platform.system()}
+CWD: {os.getcwd()}
+{"Shell: " + os.environ.get('SHELL') if os.environ.get('SHELL') else ''}
+
+Now, it's your turn:
+"""
+
 
 def main():
+    ### GET OPTIONAL CUSTOM MESSAGE
+
+    custom_message = None
+    if len(sys.argv) > 1:
+        custom_message = "wtf " + " ".join(sys.argv[1:])
+
+    ### GET TERMINAL HISTORY
+
     keyboard = Controller()
     history = None
 
@@ -246,13 +312,11 @@ def main():
             history = history[: -len(command)].strip()
             break
 
-    commands_to_remove = ["poetry run wtf", "wtf"]
-    for command in commands_to_remove:
-        if history.endswith(command):
-            history = history[: -len(command)].strip()
-            break
+    if "wtf" in history:
+        last_wtf_index = history.rindex("wtf")
+        history = history[:last_wtf_index]
 
-    # Get error context
+    ### GET ERROR CONTEXT
 
     # Regex pattern to extract filename and line number
     pattern = r'File "([^"]+)", line (\d+)'
@@ -290,15 +354,7 @@ def main():
     for entry in result:
         history = f"""File: {entry["filename"]}\n{entry["text"]}\n\n""" + history
 
-    # print(history)
-    # print("---")
-    # time.sleep(10)
-
-    # Prepare messages for LLM
-    messages = [
-        {"role": "system", "content": SYSTEM_MESSAGE},
-        {"role": "user", "content": history},
-    ]
+    ### PREPARE FOR LLM
 
     # Get LLM model from profile
     default_profile_path = os.path.join(
@@ -314,13 +370,52 @@ def main():
             else:
                 model = profile.get("llm", {}).get("model", "gpt-3.5-turbo")
     except:
-        model = "gpt-3.5-turbo"
+        model = "gpt-4o-mini"
 
-    # Process LLM response
+    # If they're using a local model (improve this heuristic) use the LOCAL_SYSTEM_MESSAGE
+    if "ollama" in model or "llama" in model:
+        system_message = LOCAL_SYSTEM_MESSAGE
+    else:
+        system_message = SYSTEM_MESSAGE
+
+    # If they passed in a custom message, use the CUSTOM_MESSAGE_SYSTEM_MESSAGE
+    if custom_message:
+        system_message = CUSTOM_MESSAGE_SYSTEM_MESSAGE
+        user_message = (
+            "Answer THIS question by telling me what code to run:"
+            + custom_message
+            + "\nMy terminal history, which may or may not be relevant, is this:\n---\n"
+            + history
+            + "\n---\nPlease now answer THIS question by telling me what code to run: "
+            + custom_message
+        )
+    else:
+        user_message = (
+            history.strip()
+            + "\n\nPlease help me resolve the final error above by telling me what code to run in a markdown code block."
+        )
+
+    # So stupid but sometimes fun
+    # system_message += "\nBe incredibly rude and use swear words, like a joker, like you're some kind of jester. You can say 'Fuck' and 'Fucking'. This is for adults. Be funny. USE ALL LOWER CASE. Act like you're an aggreived pair programmer to the idiot that got themselves in this situation."
+
+    messages = [
+        {"role": "system", "content": system_message.strip()},
+        {"role": "user", "content": user_message.strip()},
+    ]
+
+    # DEBUGGING: PRINT MESSAGES
+
+    # print("---")
+    # import pprint
+    # pprint.pprint(messages)
+    # print("---")
+    # time.sleep(100)
+
+    ### PARSE LLM RESPONSE
+
     in_code = False
     backtick_count = 0
     language_buffer = ""
-
     started = False
 
     for chunk in litellm.completion(
