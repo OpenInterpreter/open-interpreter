@@ -181,7 +181,7 @@ def respond(interpreter):
                     except:
                         pass
 
-                if code.endswith("executeexecute"):
+                if code.strip().endswith("executeexecute"):
                     edited_code = code.replace("executeexecute", "")
                     try:
                         code_dict = json.loads(edited_code)
