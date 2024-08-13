@@ -9,8 +9,7 @@ $desktopPath = [System.IO.Path]::Combine([System.Environment]::GetFolderPath('De
 $condaExePath = "$condaPath\Scripts\conda.exe"
 
 # URL of the .ico file
-# $icoUrl = "https://raw.githubusercontent.com/OpenInterpreter/open-interpreter/main/docs/assets/favicon.ico"
-$icoUrl = "https://raw.githubusercontent.com/CyanideByte/open-interpreter/conda-installer/docs/assets/favicon.ico"
+$icoUrl = "https://raw.githubusercontent.com/OpenInterpreter/open-interpreter/main/docs/assets/favicon.ico"
 $icoPath = "$env:TEMP\open-interpreter.ico"
 
 # Function to download a file with progress
