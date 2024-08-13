@@ -237,7 +237,9 @@ def convert_to_openai_messages(
 
         elif message["type"] == "file":
             new_message = {"role": "user", "content": message["content"]}
-
+        elif message["type"] == "error":
+            print("Ignoring 'type' == 'error' messages.")
+            continue
         else:
             raise Exception(f"Unable to convert this message type: {message}")
 

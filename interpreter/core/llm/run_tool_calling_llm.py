@@ -1,3 +1,4 @@
+import os
 import re
 
 from .utils.merge_deltas import merge_deltas
@@ -284,6 +285,7 @@ def run_tool_calling_llm(llm, request_params):
                     if llm.interpreter.verbose:
                         print("Arguments not a dict.")
 
+            # THESE NEED TO BE UPDATED FOR TOOL CALLING!!!!
             # Common hallucinations
             elif "name" in accumulated_deltas["function_call"] and (
                 accumulated_deltas["function_call"]["name"] == "python"
@@ -310,11 +312,21 @@ def run_tool_calling_llm(llm, request_params):
                         }
 
             else:
+                raise (Exception("Can't parse tool output: " + str(accumulated_deltas)))
                 # If name exists and it's not "execute" or "python" or "functions", who knows what's going on.
                 if "name" in accumulated_deltas["function_call"]:
-                    # yield {
-                    #     "type": "code",
-                    #     "format": "python",
-                    #     "content": str(delta),
-                    # }
+                    yield {
+                        "type": "code",
+                        "format": "python",
+                        "content": "ERROR",
+                    }
                     return
+
+    if os.getenv("INTERPRETER_REQUIRE_AUTHENTICATION", "False").lower() == "true":
+        print("function_call_detected", function_call_detected)
+        print("accumulated_review", accumulated_review)
+        if function_call_detected and not accumulated_review:
+            print("WTF!!!!!!!!!")
+            # import pdb
+            # pdb.set_trace()
+            raise Exception("Judge layer required but did not run.")
