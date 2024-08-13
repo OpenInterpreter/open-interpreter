@@ -312,9 +312,9 @@ def run_tool_calling_llm(llm, request_params):
             else:
                 # If name exists and it's not "execute" or "python" or "functions", who knows what's going on.
                 if "name" in accumulated_deltas["function_call"]:
-                    yield {
-                        "type": "code",
-                        "format": "python",
-                        "content": accumulated_deltas["function_call"]["name"],
-                    }
+                    # yield {
+                    #     "type": "code",
+                    #     "format": "python",
+                    #     "content": str(delta),
+                    # }
                     return

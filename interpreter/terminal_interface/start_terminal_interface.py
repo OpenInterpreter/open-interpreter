@@ -22,6 +22,12 @@ def start_terminal_interface(interpreter):
     Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
     """
 
+    # Instead use an async interpreter, which has a server. Set settings on that
+    if "--server" in sys.argv:
+        from interpreter import AsyncInterpreter
+
+        interpreter = AsyncInterpreter()
+
     arguments = [
         {
             "name": "profile",
@@ -370,12 +376,6 @@ Use """ to write multi-line messages.
             )
 
     args, unknown_args = parser.parse_known_args()
-
-    if args.server:
-        # Instead use an async interpreter, which has a server. Set settings on that
-        from interpreter import AsyncInterpreter
-
-        interpreter = AsyncInterpreter()
 
     # handle unknown arguments
     if unknown_args:

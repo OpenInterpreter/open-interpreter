@@ -286,7 +286,6 @@ Continuing...
                     print(message)
                 print("\n")
             print("\n\n\n")
-            time.sleep(5)
 
         if self.supports_functions:
             # yield from run_function_calling_llm(self, params)

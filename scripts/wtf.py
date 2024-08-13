@@ -14,7 +14,12 @@ import time
 import platformdirs
 import pyperclip
 import yaml
-from pynput.keyboard import Controller, Key
+
+try:
+    from pynput.keyboard import Controller, Key
+except ImportError:
+    print("Please run `pip install pynput` to use the `wtf` command.")
+    exit()
 
 # Don't let litellm go online here, this slows it down
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
