@@ -143,6 +143,10 @@ class AsyncInterpreter(OpenInterpreter):
                 self.output_queue.sync_q.put(chunk)
 
             self.output_queue.sync_q.put(complete_message)
+
+            if self.print or self.debug:
+                print("Server response complete.")
+
         except Exception as e:
             error = traceback.format_exc() + "\n" + str(e)
             error_message = {
@@ -505,6 +509,8 @@ def create_router(async_interpreter):
                         break
 
                     try:
+                        # print("sending:", output)
+
                         if isinstance(output, bytes):
                             await websocket.send_bytes(output)
                         else:

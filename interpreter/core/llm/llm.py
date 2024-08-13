@@ -6,6 +6,8 @@ import sys
 import litellm
 
 litellm.suppress_debug_info = True
+litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
+
 import json
 import subprocess
 import time
