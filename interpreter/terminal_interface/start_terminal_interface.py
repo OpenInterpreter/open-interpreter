@@ -402,7 +402,9 @@ Use """ to write multi-line messages.
 
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
-        update_name = "Local III"  # Change this with each major update
+        update_name = (
+            "The Beginning (Ty and Victor)"  # Change this with each major update
+        )
         print(f"Open Interpreter {version} {update_name}")
         return
 
