@@ -279,8 +279,10 @@ Continuing...
         if self.interpreter.verbose:
             litellm.set_verbose = True
 
-        if self.interpreter.debug:
-            print("\n\n\nOPENAI COMPATIBLE MESSAGES\n\n\n")
+        if (
+            self.interpreter.debug == True
+        ):  # debug will equal "server" if we're debugging the server specifically
+            print("\n\n\nOPENAI COMPATIBLE MESSAGES:\n\n\n")
             for message in messages:
                 if len(str(message)) > 5000:
                     print(str(message)[:200] + "...")
@@ -399,6 +401,8 @@ def fixed_litellm_completions(**params):
     # Run completion
     attempts = 4
     first_error = None
+
+    params["num_retries"] = 0
 
     for attempt in range(attempts):
         try:
