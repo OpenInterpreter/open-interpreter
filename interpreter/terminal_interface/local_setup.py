@@ -257,7 +257,7 @@ def local_setup(interpreter, provider=None, model=None):
             names=[name for name in names if not any(word.lower() in name.lower() for word in priority_models)]
             names=priority_models_found+names
 
-            for model in ["llama3", "phi3", "wizardlm2", "codestral"]:
+            for model in ["llama3.1", "phi3", "mistral-nemo", "gemma2", "codestral"]:
                 if model not in names:
                     names.append("↓ Download " + model)
 
