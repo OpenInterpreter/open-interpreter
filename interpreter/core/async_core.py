@@ -122,7 +122,7 @@ class AsyncInterpreter(OpenInterpreter):
                 if self.stop_event.is_set():
                     return
 
-                if self.print or self.debug:
+                if self.print:
                     if "start" in chunk:
                         print("\n")
                     if chunk["type"] in ["code", "console"] and "format" in chunk:
@@ -140,12 +140,15 @@ class AsyncInterpreter(OpenInterpreter):
                             )
                             print(content, end="", flush=True)
 
+                if self.debug:
+                    print("Interpreter produced this chunk:", chunk)
+
                 self.output_queue.sync_q.put(chunk)
 
             self.output_queue.sync_q.put(complete_message)
 
             if self.print or self.debug:
-                print("Server response complete.")
+                print("\nServer response complete.\n")
 
         except Exception as e:
             error = traceback.format_exc() + "\n" + str(e)
@@ -464,17 +467,23 @@ def create_router(async_interpreter):
                         # First, try to send any unsent messages
                         while async_interpreter.unsent_messages:
                             output = async_interpreter.unsent_messages[0]
-                            try:
-                                await send_message(output)
+                            if async_interpreter.debug:
+                                print("This was unsent, sending it again:", output)
+
+                            success = await send_message(output)
+                            if success:
                                 async_interpreter.unsent_messages.popleft()
-                            except Exception:
-                                # If we can't send, break and try again later
-                                break
 
                         # If we've sent all unsent messages, get a new output
                         if not async_interpreter.unsent_messages:
                             output = await async_interpreter.output()
-                            await send_message(output)
+                            success = await send_message(output)
+                            if not success:
+                                async_interpreter.unsent_messages.append(output)
+                                if async_interpreter.debug:
+                                    print(
+                                        f"Added message to unsent_messages queue after failed attempts: {output}"
+                                    )
 
                     except Exception as e:
                         error = traceback.format_exc() + "\n" + str(e)
@@ -506,16 +515,19 @@ def create_router(async_interpreter):
                     # time.sleep(0.5)
 
                     if websocket.client_state != WebSocketState.CONNECTED:
-                        break
+                        return False
 
                     try:
                         # print("sending:", output)
 
                         if isinstance(output, bytes):
                             await websocket.send_bytes(output)
+                            return True  # Haven't set up ack for this
                         else:
                             if async_interpreter.require_acknowledge:
                                 output["id"] = id
+                            if async_interpreter.debug:
+                                print("Sending this over the websocket:", output)
                             await websocket.send_text(json.dumps(output))
 
                         if async_interpreter.require_acknowledge:
@@ -524,31 +536,38 @@ def create_router(async_interpreter):
                                 if id in async_interpreter.acknowledged_outputs:
                                     async_interpreter.acknowledged_outputs.remove(id)
                                     acknowledged = True
+                                    if async_interpreter.debug:
+                                        print("This output was acknowledged:", output)
                                     break
                                 await asyncio.sleep(0.0001)
 
                             if acknowledged:
-                                return
+                                return True
                             else:
-                                raise Exception("Acknowledgement not received.")
+                                if async_interpreter.debug:
+                                    print("Acknowledgement not received for:", output)
+                                return False
                         else:
-                            return
+                            return True
 
                     except Exception as e:
                         print(
                             f"Failed to send output on attempt number: {attempt + 1}. Output was: {output}"
                         )
                         print(f"Error: {str(e)}")
-                        await asyncio.sleep(0.05)
+                        traceback.print_exc()
+                        await asyncio.sleep(0.01)
 
                 # If we've reached this point, we've failed to send after 100 attempts
                 if output not in async_interpreter.unsent_messages:
-                    async_interpreter.unsent_messages.append(output)
-                    print(
-                        f"Added message to unsent_messages queue after failed attempts: {output}"
-                    )
+                    print("Failed to send message:", output)
                 else:
-                    print("Why was this already in unsent_messages?", output)
+                    print(
+                        "Failed to send message, also it was already in unsent queue???:",
+                        output,
+                    )
+
+                return False
 
             await asyncio.gather(receive_input(), send_output())
 
@@ -577,7 +596,8 @@ def create_router(async_interpreter):
     @router.post("/settings")
     async def set_settings(payload: Dict[str, Any]):
         for key, value in payload.items():
-            print(f"Updating settings: {key} = {value}")
+            print("Updating settings...")
+            # print(f"Updating settings: {key} = {value}")
             if key in ["llm", "computer"] and isinstance(value, dict):
                 if key == "auto_run":
                     return {

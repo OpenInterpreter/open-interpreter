@@ -6,8 +6,9 @@
     <a href="README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="../README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="README_UK.md"><img src="https://img.shields.io/badge/Українська-white.svg" alt="UK doc"/></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
+    <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br>
     <br>
     <b>自然言語で指示するだけでコードを書いて実行までしてくれる。</b><br>
@@ -216,7 +217,7 @@ interpreter --local
 
 より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
 
-**LM Studioをバックグラウンドで使用する方法**
+**LM Studio をバックグラウンドで使用する方法**
 
 1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
 2. モデルを選択し、**↓ ダウンロード** をクリックします。

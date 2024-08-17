@@ -4,10 +4,11 @@
     <a href="https://discord.gg/Hvz9Axh84z">
         <img alt="Discord" src="https://img.shields.io/discord/1146610656779440188?logo=discord&style=flat&logoColor=white"/></a>
     <a href="../README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
-    <a href="docs/README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
-    <a href="docs/README_ZH.md"> <img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
-    <a href="docs/README_IN.md"> <img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=licencia&message=AGPL&color=white&style=flat" alt="License"/>
+    <a href="README_JA.md"><img src="https://img.shields.io/badge/ドキュメント-日本語-white.svg" alt="JA doc"/></a>
+    <a href="README_ZH.md"> <img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="README_UK.md"><img src="https://img.shields.io/badge/Українська-white.svg" alt="UK doc"/></a>
+    <a href="README_IN.md"> <img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
+    <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br>
     <br>
     <br><a href="https://0ggfznkwh4j.typeform.com/to/G21i9lJ2">Obtenga acceso temprano a la aplicación de escritorio</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentación</a><br>
@@ -279,7 +280,7 @@ En el modo interactivo, puede utilizar los siguientes comandos para mejorar su e
 **Comandos Disponibles:**
 
 - `%verbose [true/false]`: Activa o desactiva el modo detallado. Sin parámetros o con `true` entra en modo detallado.
-Con `false` sale del modo verbose.
+  Con `false` sale del modo verbose.
 - `%reset`: Reinicia la sesión actual de conversación.
 - `%undo`: Elimina el mensaje de usuario previo y la respuesta del AI del historial de mensajes.
 - `%tokens [prompt]`: (_Experimental_) Calcula los tokens que se enviarán con el próximo prompt como contexto y estima su costo. Opcionalmente, calcule los tokens y el costo estimado de un `prompt` si se proporciona. Depende de [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) para costos estimados.
