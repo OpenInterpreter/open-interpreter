@@ -25,6 +25,17 @@ from .run_text_llm import run_text_llm
 from .run_tool_calling_llm import run_tool_calling_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
+import logging
+
+# Create or get the logger
+logger = logging.getLogger('LiteLLM')
+
+class SuppressDebugFilter(logging.Filter):
+    def filter(self, record):
+        # Suppress only the specific message containing the keywords
+        if "cost map" in record.getMessage():
+            return False  # Suppress this log message
+        return True  # Allow all other messages
 
 class Llm:
     """
@@ -32,6 +43,9 @@ class Llm:
     """
 
     def __init__(self, interpreter):
+        # Add the filter to the logger
+        logger.addFilter(SuppressDebugFilter())
+
         # Store a reference to parent interpreter
         self.interpreter = interpreter
 
