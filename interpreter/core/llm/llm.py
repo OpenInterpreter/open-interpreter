@@ -311,6 +311,9 @@ Continuing...
         if self._is_loaded:
             return
 
+        if self.model.startswith("ollama/") and not ":" in self.model:
+            self.model = self.model + ":latest"
+
         self._is_loaded = True
 
         if self.model.startswith("ollama/"):
@@ -323,7 +326,7 @@ Continuing...
                 if response.ok:
                     data = response.json()
                     names = [
-                        model["name"].replace(":latest", "")
+                        model["name"]
                         for model in data["models"]
                         if "name" in model and model["name"]
                     ]
@@ -358,6 +361,7 @@ Continuing...
                     self.max_tokens = int(self.context_window * 0.2)
 
             # Send a ping, which will actually load the model
+            model_name = model_name.replace(":latest", "")
             print(f"Loading {model_name}...\n")
 
             old_max_tokens = self.max_tokens
@@ -397,6 +401,8 @@ def fixed_litellm_completions(**params):
         )
     else:
         litellm.drop_params = True
+
+    params["model"] = params["model"].replace(":latest", "")
 
     # Run completion
     attempts = 4
