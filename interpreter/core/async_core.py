@@ -712,13 +712,17 @@ def create_router(async_interpreter):
 
         if type(last_message.content) == str:
             async_interpreter.messages.append(
-                {"role": "user", "type": "message", "content": last_message.content}
+                {
+                    "role": "user",
+                    "type": "message",
+                    "content": str(last_message.content),
+                }
             )
         if type(last_message.content) == list:
             for content in last_message.content:
                 if content["type"] == "text":
                     async_interpreter.messages.append(
-                        {"role": "user", "type": "message", "content": content}
+                        {"role": "user", "type": "message", "content": str(content)}
                     )
                 elif content["type"] == "image_url":
                     if "url" not in content["image_url"]:
@@ -742,6 +746,13 @@ def create_router(async_interpreter):
                             "content": data,
                         }
                     )
+
+        if os.getenv("INTERPRETER_SERVER_REQUIRE_START", False):
+            if last_message.content != "{START}":
+                return
+            if async_interpreter.messages[-1]["content"] == "{START}":
+                # Remove that {START} message that would have just been added
+                async_interpreter.messages = async_interpreter.messages[:-1]
 
         if request.stream:
             return StreamingResponse(
