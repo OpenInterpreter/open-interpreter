@@ -339,7 +339,9 @@ Continuing...
 
         if self.model.startswith("ollama/"):
             model_name = self.model.replace("ollama/", "")
-            api_base = getattr(self, "api_base", None) or "http://localhost:11434"
+            api_base = getattr(self, "api_base", None) or os.getenv(
+                "OLLAMA_HOST", "http://localhost:11434"
+            )
             names = []
             try:
                 # List out all downloaded ollama models. Will fail if ollama isn't installed
