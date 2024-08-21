@@ -711,7 +711,9 @@ def create_router(async_interpreter):
             return
 
         if type(last_message.content) == str:
-            async_interpreter.messages.append(last_message)
+            async_interpreter.messages.append(
+                {"role": "user", "type": "message", "content": last_message.content}
+            )
         if type(last_message.content) == list:
             for content in last_message.content:
                 if content["type"] == "text":
