@@ -1,9 +1,11 @@
 import json
+import os
 import time
 
 from ..utils.recipient_utils import parse_for_recipient
 from .languages.applescript import AppleScript
 from .languages.html import HTML
+from .languages.java import Java
 from .languages.javascript import JavaScript
 from .languages.powershell import PowerShell
 from .languages.python import Python
@@ -11,9 +13,19 @@ from .languages.r import R
 from .languages.react import React
 from .languages.ruby import Ruby
 from .languages.shell import Shell
-from .languages.java import Java
 
 # Should this be renamed to OS or System?
+
+import_computer_api_code = """
+import os
+os.environ["INTERPRETER_COMPUTER_API"] = "False" # To prevent infinite recurring import of the computer API
+
+import time
+import datetime
+from interpreter import interpreter
+
+computer = interpreter.computer
+""".strip()
 
 
 class Terminal:
@@ -48,13 +60,14 @@ class Terminal:
                 self.computer.import_computer_api
                 and not self.computer._has_imported_computer_api
                 and "computer" in code
+                and os.getenv("INTERPRETER_COMPUTER_API", "True") != "False"
             ):
                 self.computer._has_imported_computer_api = True
                 # Give it access to the computer via Python
                 time.sleep(0.5)
                 self.computer.run(
                     language="python",
-                    code="import time\nimport datetime\nfrom interpreter import interpreter\ncomputer = interpreter.computer",  # We ask it to use time, so
+                    code=import_computer_api_code,
                     display=self.computer.verbose,
                 )
 

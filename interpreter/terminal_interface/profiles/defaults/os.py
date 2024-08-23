@@ -39,6 +39,7 @@ computer.browser.search(query) # Silently searches Google for the query, returns
 # Note: There are NO other browser functions — use regular `webbrowser` and `computer.display.view()` commands to view/control a real browser.
 
 computer.display.view() # Shows you what's on the screen (primary display by default), returns a `pil_image` `in case you need it (rarely). To get a specific display, use the parameter screen=DISPLAY_NUMBER (0 for primary monitor 1 and above for secondary monitors). **You almost always want to do this first!**
+# NOTE: YOU MUST NEVER RUN image.show() AFTER computer.display.view. IT WILL AUTOMATICALLY SHOW YOU THE IMAGE. DO NOT RUN image.show().
 
 computer.keyboard.hotkey(" ", "command") # Opens spotlight (very useful)
 computer.keyboard.write("hello")
