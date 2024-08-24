@@ -294,6 +294,11 @@ def start_terminal_interface(interpreter):
                 "attr_name": "plain_text_display",
             },
         },
+        {
+            "name": "stdin",
+            "help_text": "Run OI in stdin mode",
+            "type": bool,
+        },
     ]
 
     # i shortcut
@@ -508,7 +513,7 @@ Use """ to write multi-line messages.
     ### Check for update
 
     try:
-        if not interpreter.offline:
+        if not interpreter.offline and not args.stdin:
             # This message should actually be pushed into the utility
             if check_for_update():
                 display_markdown_message(
@@ -551,7 +556,13 @@ Use """ to write multi-line messages.
 
     contribute_conversation_launch_logic(interpreter)
 
-    interpreter.chat()
+    # Standard in mode
+    if args.stdin:
+        stdin_input = input()
+        interpreter.plain_text_display = True
+        interpreter.chat(stdin_input)
+    else:
+        interpreter.chat()
 
 
 def set_attributes(args, arguments):
