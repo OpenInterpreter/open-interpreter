@@ -301,7 +301,7 @@ Continuing...
             litellm.set_verbose = True
 
         if (
-            self.interpreter.debug == True
+            self.interpreter.debug == True and False  # DISABLED
         ):  # debug will equal "server" if we're debugging the server specifically
             print("\n\n\nOPENAI COMPATIBLE MESSAGES:\n\n\n")
             for message in messages:

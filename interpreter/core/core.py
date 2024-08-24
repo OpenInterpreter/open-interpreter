@@ -318,6 +318,7 @@ class OpenInterpreter:
             for chunk in respond(self):
                 # For async usage
                 if hasattr(self, "stop_event") and self.stop_event.is_set():
+                    print("Open Interpreter stopping.")
                     break
 
                 if chunk["content"] == "":
