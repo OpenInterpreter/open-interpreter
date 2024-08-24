@@ -24,7 +24,6 @@ from .components.message_block import MessageBlock
 from .magic_commands import handle_magic_command
 from .utils.check_for_package import check_for_package
 from .utils.cli_input import cli_input
-from .utils.display_markdown_message import display_markdown_message
 from .utils.display_output import display_output
 from .utils.find_image_path import find_image_path
 
@@ -66,9 +65,12 @@ def terminal_interface(interpreter, message):
         else:
             interpreter_intro_message.append("Use `interpreter -y` to bypass this.")
 
-        interpreter_intro_message.append("Press `CTRL-C` to exit.")
+        if (
+            not interpreter.plain_text_display
+        ):  # A proxy/heuristic for standard in mode, which isn't tracked (but prob should be)
+            interpreter_intro_message.append("Press `CTRL-C` to exit.")
 
-        display_markdown_message("\n\n".join(interpreter_intro_message) + "\n")
+        interpreter.display_message("\n\n".join(interpreter_intro_message) + "\n")
 
     if message:
         interactive = False
@@ -264,12 +266,12 @@ def terminal_interface(interpreter, message):
                 # Plain text mode
                 if interpreter.plain_text_display:
                     if "start" in chunk or "end" in chunk:
-                        print("\n")
+                        print("")
                     if chunk["type"] in ["code", "console"] and "format" in chunk:
                         if "start" in chunk:
-                            print("\n---\n\n```" + chunk["format"], flush=True)
+                            print("```" + chunk["format"], flush=True)
                         if "end" in chunk:
-                            print("\n```\n\n---\n\n", flush=True)
+                            print("```", flush=True)
                     if chunk.get("format") != "active_line":
                         print(chunk.get("content", ""), end="", flush=True)
                     continue

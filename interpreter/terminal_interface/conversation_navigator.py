@@ -10,7 +10,6 @@ import subprocess
 import inquirer
 
 from .render_past_conversation import render_past_conversation
-from .utils.display_markdown_message import display_markdown_message
 from .utils.local_storage_path import get_storage_path
 
 
@@ -19,7 +18,7 @@ def conversation_navigator(interpreter):
 
     conversations_dir = get_storage_path("conversations")
 
-    display_markdown_message(
+    interpreter.display_message(
         f"""> Conversations are stored in "`{conversations_dir}`".
     
     Select a conversation to resume.

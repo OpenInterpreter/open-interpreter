@@ -15,8 +15,6 @@ from interpreter.terminal_interface.contributing_conversations import (
     contribute_conversation_launch_logic,
 )
 
-from .utils.display_markdown_message import display_markdown_message
-
 
 def validate_llm_settings(interpreter):
     """
@@ -48,7 +46,7 @@ def validate_llm_settings(interpreter):
                 ):
                     display_welcome_message_once()
 
-                    display_markdown_message(
+                    interpreter.display_message(
                         """---
                     > OpenAI API key not found
 
@@ -68,7 +66,7 @@ def validate_llm_settings(interpreter):
                         )
                         exit()
 
-                    display_markdown_message(
+                    interpreter.display_message(
                         """
 
                     **Tip:** To save this key for later, run one of the following and then restart your terminal. 
@@ -96,10 +94,10 @@ def validate_llm_settings(interpreter):
         and not interpreter.offline
         and not (len(interpreter.messages) == 1)
     ):
-        display_markdown_message(f"> Model set to `{interpreter.llm.model}`")
+        interpreter.display_message(f"> Model set to `{interpreter.llm.model}`")
     if len(interpreter.messages) == 1:
         # Special message for "i {command}" usage
-        # display_markdown_message(f"\n*{interpreter.llm.model} via Open Interpreter:*")
+        # interpreter.display_message(f"\n*{interpreter.llm.model} via Open Interpreter:*")
         pass
 
     if interpreter.llm.model == "i":
@@ -118,7 +116,7 @@ def display_welcome_message_once():
     (Uses an internal attribute `_displayed` to track its state.)
     """
     if not hasattr(display_welcome_message_once, "_displayed"):
-        display_markdown_message(
+        interpreter.display_message(
             """
         ●
 

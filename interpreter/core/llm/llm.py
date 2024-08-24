@@ -17,9 +17,6 @@ import uuid
 import requests
 import tokentrim as tt
 
-from ...terminal_interface.utils.display_markdown_message import (
-    display_markdown_message,
-)
 from .run_text_llm import run_text_llm
 
 # from .run_function_calling_llm import run_function_calling_llm
@@ -232,7 +229,7 @@ class Llm:
                 except:
                     if len(messages) == 1:
                         if self.interpreter.in_terminal_interface:
-                            display_markdown_message(
+                            self.interpreter.display_message(
                                 """
 **We were unable to determine the context window of this model.** Defaulting to 8000.
 
@@ -242,7 +239,7 @@ Continuing...
                             """
                             )
                         else:
-                            display_markdown_message(
+                            self.interpreter.display_message(
                                 """
 **We were unable to determine the context window of this model.** Defaulting to 8000.
 
