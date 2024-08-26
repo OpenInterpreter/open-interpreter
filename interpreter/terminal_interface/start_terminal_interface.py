@@ -197,7 +197,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "fast",
             "nickname": "f",
-            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise (shortcut for `interpreter --profile fast`)",
+            "help_text": "runs `interpreter --model gpt-4o-mini` and asks OI to be extremely concise (shortcut for `interpreter --profile fast`)",
             "type": bool,
         },
         {

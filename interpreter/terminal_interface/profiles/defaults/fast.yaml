@@ -3,7 +3,7 @@
 # Remove the "#" before the settings below to use them.
 
 llm:
-  model: "gpt-3.5-turbo"
+  model: "gpt-4o-mini"
   temperature: 0
   # api_key: ...  # Your API key, if the API requires it
   # api_base: ...  # The URL where an OpenAI-compatible server is running to handle LLM API requests
@@ -23,4 +23,4 @@ custom_instructions: "The user has set you to FAST mode. **No talk, just code.**
 
 # All options: https://docs.openinterpreter.com/settings
 
-version: 0.2.1 # Configuration file version (do not modify)
+version: 0.2.5 # Configuration file version (do not modify)
