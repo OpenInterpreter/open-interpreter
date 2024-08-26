@@ -544,6 +544,14 @@ Use """ to write multi-line messages.
         conversation_navigator(interpreter)
         return
 
+    if interpreter.llm.model in [
+        "claude-3.5",
+        "claude-3-5",
+        "claude-3.5-sonnet",
+        "claude-3-5-sonnet",
+    ]:
+        interpreter.llm.model = "claude-3-5-sonnet-20240620"
+
     if not args.server:
         # This SHOULD RUN WHEN THE SERVER STARTS. But it can't rn because
         # if you don't have an API key, a prompt shows up, breaking the whole thing.

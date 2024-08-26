@@ -105,6 +105,14 @@ class Llm:
             ), "No message after the first can have the role 'system'"
 
         model = self.model
+        if model in [
+            "claude-3.5",
+            "claude-3-5",
+            "claude-3.5-sonnet",
+            "claude-3-5-sonnet",
+        ]:
+            model = "claude-3-5-sonnet-20240620"
+            self.model = "claude-3-5-sonnet-20240620"
         # Setup our model endpoint
         if model == "i":
             model = "openai/i"
@@ -446,7 +454,7 @@ def fixed_litellm_completions(**params):
                 and "api_key" not in params
             ):
                 print(
-                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
+                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, if this fixes it, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
                 )
                 # So, let's try one more time with a dummy API key:
                 params["api_key"] = "x"

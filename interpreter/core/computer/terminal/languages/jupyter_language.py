@@ -135,6 +135,14 @@ import matplotlib.pyplot as plt
                         print("interrupting kernel!!!!!")
                     self.km.interrupt_kernel()
                     return
+                # For async usage
+                if (
+                    hasattr(self.computer.interpreter, "stop_event")
+                    and self.computer.interpreter.stop_event.is_set()
+                ):
+                    self.km.interrupt_kernel()
+                    self.finish_flag = True
+                    return
                 try:
                     msg = self.kc.iopub_channel.get_msg(timeout=0.05)
                 except queue.Empty:
@@ -262,6 +270,7 @@ import matplotlib.pyplot as plt
                 hasattr(self.computer.interpreter, "stop_event")
                 and self.computer.interpreter.stop_event.is_set()
             ):
+                self.finish_flag = True
                 break
 
             if self.listener_thread:

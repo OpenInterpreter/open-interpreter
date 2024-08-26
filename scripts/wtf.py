@@ -18,6 +18,7 @@ import yaml
 try:
     from pynput.keyboard import Controller, Key
 except ImportError:
+    spinner.stop()
     print("Please run `pip install pynput` to use the `wtf` command.")
     exit()
 
