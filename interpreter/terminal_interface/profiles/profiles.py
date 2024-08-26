@@ -13,7 +13,6 @@ import requests
 import send2trash
 import yaml
 
-from ..utils.display_markdown_message import display_markdown_message
 from ..utils.oi_dir import oi_dir
 from .historical_profiles import historical_profiles
 
@@ -194,11 +193,11 @@ def apply_profile(interpreter, profile, profile_path):
             return interpreter
 
     if "system_message" in profile:
-        display_markdown_message(
+        interpreter.display_message(
             "\n**FYI:** A `system_message` was found in your profile.\n\nBecause we frequently improve our default system message, we highly recommend removing the `system_message` parameter in your profile (which overrides the default system message) or simply resetting your profile.\n\n**To reset your profile, run `interpreter --reset_profile`.**\n"
         )
         time.sleep(2)
-        display_markdown_message("---")
+        interpreter.display_message("---")
 
     if "computer" in profile and "languages" in profile["computer"]:
         # this is handled specially

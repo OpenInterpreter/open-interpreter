@@ -7,7 +7,6 @@ import traceback
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
-from ..terminal_interface.utils.display_markdown_message import display_markdown_message
 from .render_message import render_message
 
 
@@ -88,7 +87,7 @@ def respond(interpreter):
                     yield {"role": "assistant", **chunk}
 
             except litellm.exceptions.BudgetExceededError:
-                display_markdown_message(
+                interpreter.display_message(
                     f"""> Max budget exceeded
 
                     **Session spend:** ${litellm._current_cost}
@@ -136,8 +135,8 @@ def respond(interpreter):
 
                     if response.strip().lower() == "y":
                         interpreter.llm.model = "i"
-                        display_markdown_message(f"> Model set to `i`")
-                        display_markdown_message(
+                        interpreter.display_message(f"> Model set to `i`")
+                        interpreter.display_message(
                             "***Note:*** *Conversations with this model will be used to train our open-source model.*\n"
                         )
 

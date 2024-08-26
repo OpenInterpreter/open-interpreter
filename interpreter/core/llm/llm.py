@@ -17,9 +17,6 @@ import uuid
 import requests
 import tokentrim as tt
 
-from ...terminal_interface.utils.display_markdown_message import (
-    display_markdown_message,
-)
 from .run_text_llm import run_text_llm
 
 # from .run_function_calling_llm import run_function_calling_llm
@@ -108,6 +105,14 @@ class Llm:
             ), "No message after the first can have the role 'system'"
 
         model = self.model
+        if model in [
+            "claude-3.5",
+            "claude-3-5",
+            "claude-3.5-sonnet",
+            "claude-3-5-sonnet",
+        ]:
+            model = "claude-3-5-sonnet-20240620"
+            self.model = "claude-3-5-sonnet-20240620"
         # Setup our model endpoint
         if model == "i":
             model = "openai/i"
@@ -232,7 +237,7 @@ class Llm:
                 except:
                     if len(messages) == 1:
                         if self.interpreter.in_terminal_interface:
-                            display_markdown_message(
+                            self.interpreter.display_message(
                                 """
 **We were unable to determine the context window of this model.** Defaulting to 8000.
 
@@ -242,7 +247,7 @@ Continuing...
                             """
                             )
                         else:
-                            display_markdown_message(
+                            self.interpreter.display_message(
                                 """
 **We were unable to determine the context window of this model.** Defaulting to 8000.
 
@@ -301,7 +306,7 @@ Continuing...
             litellm.set_verbose = True
 
         if (
-            self.interpreter.debug == True
+            self.interpreter.debug == True and False  # DISABLED
         ):  # debug will equal "server" if we're debugging the server specifically
             print("\n\n\nOPENAI COMPATIBLE MESSAGES:\n\n\n")
             for message in messages:
@@ -339,7 +344,9 @@ Continuing...
 
         if self.model.startswith("ollama/"):
             model_name = self.model.replace("ollama/", "")
-            api_base = getattr(self, "api_base", None) or "http://localhost:11434"
+            api_base = getattr(self, "api_base", None) or os.getenv(
+                "OLLAMA_HOST", "http://localhost:11434"
+            )
             names = []
             try:
                 # List out all downloaded ollama models. Will fail if ollama isn't installed
@@ -447,7 +454,7 @@ def fixed_litellm_completions(**params):
                 and "api_key" not in params
             ):
                 print(
-                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
+                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, if this fixes it, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
                 )
                 # So, let's try one more time with a dummy API key:
                 params["api_key"] = "x"

@@ -84,12 +84,10 @@ def interpreter_info(interpreter):
 
         messages_to_display = []
         for message in interpreter.messages:
-            message = message.copy()
+            message = str(message.copy())
             try:
-                if len(message["content"]) > 5000:
-                    message["content"] = (
-                        message["content"][:800] + "..." + message["content"][-800:]
-                    )
+                if len(message) > 2000:
+                    message = message[:1000]
             except Exception as e:
                 print(str(e), "for message:", message)
             messages_to_display.append(message)

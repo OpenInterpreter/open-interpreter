@@ -1,15 +1,23 @@
 import glob
 import inspect
+import json
 import os
 import re
+import subprocess
 from pathlib import Path
 
 from ....terminal_interface.utils.oi_dir import oi_dir
 from ...utils.lazy_import import lazy_import
 from ..utils.recipient_utils import format_to_recipient
 
-# Lazy import of aifs, imported when needed to speed up start time
+# Lazy import, imported when needed to speed up start time
 aifs = lazy_import("aifs")
+pyautogui = lazy_import("pyautogui")
+pynput = lazy_import("pynput")
+
+element = None
+element_box = None
+icon_dimensions = None
 
 
 class Skills:
@@ -18,6 +26,18 @@ class Skills:
         self.path = str(Path(oi_dir) / "skills")
         self.new_skill = NewSkill()
         self.new_skill.path = self.path
+
+    def list(self):
+        return [
+            file.replace(".py", "()")
+            for file in os.listdir(self.path)
+            if file.endswith(".py")
+        ]
+
+    def run(self, skill):
+        print(
+            "To run a skill, run its name as a function name (it is already imported)."
+        )
 
     def search(self, query):
         return aifs.search(query, self.path, python_docstrings_only=True)
@@ -56,6 +76,7 @@ class Skills:
                     code_to_run = f.read() + "\n"
 
                 if self.computer.interpreter.debug:
+                    print(self.path)
                     print("IMPORTING SKILL:\n", code_to_run)
 
                 output = self.computer.run("python", code_to_run)
@@ -77,18 +98,11 @@ class NewSkill:
         self._name = "Untitled"
         print(
             """
-@@@SEND_MESSAGE_AS_USER@@@
+
 INSTRUCTIONS
 You are creating a new skill. Follow these steps exactly to get me to tell you its name:
 1. Ask me what the name of this skill is.
-2. After I explicitly tell you the name of the skill (I may tell you to proceed which is not the name— if I do say that, you probably need more information from me, so tell me that), after you get the proper name, write the following (including the markdown code block):
-
----
-Got it. Give me one second.
-```python
-computer.skills.new_skill.name = "{INSERT THE SKILL NAME FROM QUESTION #1^}"`.
-```
----
+2. After I explicitly tell you the name of the skill (I may tell you to proceed which is not the name— if I do say that, you probably need more information from me, so tell me that), after you get the proper name, execute `computer.skills.new_skill.name = "{INSERT THE SKILL NAME FROM QUESTION #1}"`.
         
         """.strip()
         )
@@ -102,11 +116,11 @@ computer.skills.new_skill.name = "{INSERT THE SKILL NAME FROM QUESTION #1^}"`.
         self._name = value
         print(
             """
-@@@SEND_MESSAGE_AS_USER@@@
+
 Skill named. Now, follow these next INSTRUCTIONS exactly:
 
 1. Ask me what the first step is.
-2. When I reply, execute code to accomplish that step.
+2. When I reply, execute code to accomplish that step. Write comments explaining your reasoning before each line.
 3. Ask me if you completed the step correctly.
     a. (!!!!!!!!!!!! >>>>>> THIS IS CRITICAL. DO NOT FORGET THIS.) IF you completed it correctly, run `computer.skills.new_skill.add_step(step, code)` where step is a generalized, natural language description of the step, and code is the code you ran to complete it.
     b. IF you did not complete it correctly, try to fix your code and ask me again.
@@ -121,7 +135,7 @@ YOU MUST FOLLOW THESE 4 INSTRUCTIONS **EXACTLY**. I WILL TIP YOU $200.
         self.steps.append(step + "\n\n```python\n" + code + "\n```")
         print(
             """
-@@@SEND_MESSAGE_AS_USER@@@
+
 Step added. Now, follow these next INSTRUCTIONS exactly:
 
 1. Ask me what the next step is.
@@ -138,29 +152,39 @@ YOU MUST FOLLOW THESE 4 INSTRUCTIONS **EXACTLY**. I WILL TIP YOU $200.
 
     def save(self):
         normalized_name = re.sub("[^0-9a-zA-Z]+", "_", self.name.lower())
-        steps_string = "\n".join(
-            [f"Step {i+1}:\n{step}\n" for i, step in enumerate(self.steps)]
-        )
-        steps_string = steps_string.replace('"""', "'''")
+
         skill_string = f'''
-        
-def {normalized_name}():
-    """
-    {normalized_name}
-    """
+import json
 
-    print("To complete this task / run this skill, flexibly follow the following tutorial, swapping out parts as necessary to fulfill the user's task:")
+def {normalized_name}(step=0):
+    """
+    Run this function to {normalized_name}. Pass in step=0 to see the first step, step=1 to see the next step, etc.
+    """
+    steps = {self.steps}
 
-    print("""{steps_string}""")
-        
-        '''.strip()
+    print("")
+
+    if step < len(steps):
+        if isinstance(steps[step], str):
+            print("To complete this task / run this skill, flexibly complete the following step, swapping out parts as necessary to fulfill the user's task. You will need to run the following code yourself, it hasn't run yet!")
+            print("Step " + str(step + 1) + ": " + steps[step])
+        else:
+            computer.mouse.click(steps[step]["element"], icon_dimensions=steps[step]["icon_dimensions"]) # Instructed click
+        if step + 1 < len(steps):
+            print("After completing the above, I need you to run {normalized_name}(step=" + str(step + 1) + ") immediatly.")
+        else:
+            print("You have completed all the steps, the task/skill has been run!")
+    else:
+        print("The specified step number exceeds the available steps. Please run with a valid step number.")
+'''.strip()
 
         if not os.path.exists(self.path):
             os.makedirs(self.path)
-        with open(f"{self.path}/{normalized_name}.py", "w") as file:
+        with open(self.path + "/" + normalized_name + ".py", "w") as file:
             file.write(skill_string)
 
         print("SKILL SAVED:", self.name.upper())
+
         print(
             "Teaching session finished. Tell the user that the skill above has been saved. Great work!"
         )

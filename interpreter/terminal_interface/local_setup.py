@@ -245,17 +245,25 @@ def local_setup(interpreter, provider=None, model=None):
             names = [
                 line.split()[0].replace(":latest", "")
                 for line in lines
-                if line.strip() and not line.startswith("failed") and not line.startswith("NAME")
+                if line.strip()
+                and not line.startswith("failed")
+                and not line.startswith("NAME")
             ]  # Extract names, trim out ":latest", skip header
 
             # Models whose name contain one of these keywords will be moved to the front of the list
-            priority_models=["llama3","codestral"]
-            priority_models_found=[]
+            priority_models = ["llama3", "codestral"]
+            priority_models_found = []
             for word in priority_models:
-                models_to_move=[name for name in names if word.lower() in name.lower()]
+                models_to_move = [
+                    name for name in names if word.lower() in name.lower()
+                ]
                 priority_models_found.extend(models_to_move)
-            names=[name for name in names if not any(word.lower() in name.lower() for word in priority_models)]
-            names=priority_models_found+names
+            names = [
+                name
+                for name in names
+                if not any(word.lower() in name.lower() for word in priority_models)
+            ]
+            names = priority_models_found + names
 
             for model in ["llama3.1", "phi3", "mistral-nemo", "gemma2", "codestral"]:
                 if model not in names:
@@ -297,7 +305,6 @@ def local_setup(interpreter, provider=None, model=None):
             interpreter.llm.model = f"ollama/{model}"
 
             # Send a ping, which will actually load the model
-            interpreter.display_message("Loading model...")
 
             old_max_tokens = interpreter.llm.max_tokens
             old_context_window = interpreter.llm.context_window

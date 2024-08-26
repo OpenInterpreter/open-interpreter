@@ -13,7 +13,6 @@ from interpreter.terminal_interface.contributing_conversations import (
 from .conversation_navigator import conversation_navigator
 from .profiles.profiles import open_storage_dir, profile, reset_profile
 from .utils.check_for_update import check_for_update
-from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
 
 
@@ -45,7 +44,7 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "system_message",
-            "nickname": "s",
+            "nickname": "sm",
             "help_text": "(we don't recommend changing this) base prompt for the language model",
             "type": str,
             "attribute": {"object": interpreter, "attr_name": "system_message"},
@@ -174,7 +173,7 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "speak_messages",
-            "nickname": "sm",
+            "nickname": "sp",
             "help_text": "(Mac only, experimental) use the applescript `say` command to read messages aloud",
             "type": bool,
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
@@ -294,7 +293,16 @@ def start_terminal_interface(interpreter):
                 "attr_name": "plain_text_display",
             },
         },
+        {
+            "name": "stdin",
+            "nickname": "s",
+            "help_text": "Run OI in stdin mode",
+            "type": bool,
+        },
     ]
+
+    if "--stdin" in sys.argv and "--plain" not in sys.argv:
+        sys.argv += ["--plain"]
 
     # i shortcut
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
@@ -508,10 +516,10 @@ Use """ to write multi-line messages.
     ### Check for update
 
     try:
-        if not interpreter.offline:
+        if not interpreter.offline and not args.stdin:
             # This message should actually be pushed into the utility
             if check_for_update():
-                display_markdown_message(
+                interpreter.display_message(
                     "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
                 )
     except:
@@ -536,6 +544,14 @@ Use """ to write multi-line messages.
         conversation_navigator(interpreter)
         return
 
+    if interpreter.llm.model in [
+        "claude-3.5",
+        "claude-3-5",
+        "claude-3.5-sonnet",
+        "claude-3-5-sonnet",
+    ]:
+        interpreter.llm.model = "claude-3-5-sonnet-20240620"
+
     if not args.server:
         # This SHOULD RUN WHEN THE SERVER STARTS. But it can't rn because
         # if you don't have an API key, a prompt shows up, breaking the whole thing.
@@ -551,7 +567,13 @@ Use """ to write multi-line messages.
 
     contribute_conversation_launch_logic(interpreter)
 
-    interpreter.chat()
+    # Standard in mode
+    if args.stdin:
+        stdin_input = input()
+        interpreter.plain_text_display = True
+        interpreter.chat(stdin_input)
+    else:
+        interpreter.chat()
 
 
 def set_attributes(args, arguments):
