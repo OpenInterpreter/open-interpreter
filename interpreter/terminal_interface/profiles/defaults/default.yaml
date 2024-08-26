@@ -4,7 +4,7 @@
 
 # LLM Settings
 llm:
-  model: "gpt-4-turbo"
+  model: "gpt-4o"
   temperature: 0
   # api_key: ...  # Your API key, if the API requires it
   # api_base: ...  # The URL where an OpenAI-compatible server is running to handle LLM API requests
@@ -26,7 +26,7 @@ computer:
 
 # To use a separate model for the `wtf` command:
 # wtf:
-#   model: "gpt-3.5-turbo"
+#   model: "gpt-4o-mini"
 
 # Documentation
 # All options: https://docs.openinterpreter.com/settings

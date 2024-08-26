@@ -51,7 +51,7 @@ class Llm:
         self.completions = fixed_litellm_completions
 
         # Settings
-        self.model = "gpt-4-turbo"
+        self.model = "gpt-4o"
         self.temperature = 0
 
         self.supports_vision = None  # Will try to auto-detect
