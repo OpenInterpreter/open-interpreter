@@ -16,7 +16,7 @@
 
 <br>
 
-![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
+![poster](https://github.com/OpenInterpreter/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 <p align="center">
@@ -51,7 +51,7 @@ interpreter
 
 ## Demo
 
-https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
+https://github.com/OpenInterpreter/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
 #### Інтерактивна демонстрація також доступна на Google Colab:
 
@@ -400,11 +400,11 @@ mintlify dev
 
 # Дорожня карта
 
-Відвідайте [нашу дорожню карту](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md), щоб переглянути майбутнє Open Interpreter.
+Відвідайте [нашу дорожню карту](https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/ROADMAP.md), щоб переглянути майбутнє Open Interpreter.
 
 **Примітка**: це програмне забезпечення не пов’язане з OpenAI.
 
-![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
+![thumbnail-ncu](https://github.com/OpenInterpreter/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
 
 > Маючи доступ до джуніора, який працює зі швидкістю ваших пальців ... ви можете зробити нові робочі процеси легкими та ефективними, а також відкрити переваги програмування новій аудиторії.
 >

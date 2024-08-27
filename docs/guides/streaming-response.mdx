@@ -61,7 +61,7 @@ In this example, the LLM decided to start writing code first. It could have deci
 
 Every streamed chunk of type "code" has a format key that specifies the language. In this case it decided to write `python`.
 
-This can be any language defined in [our languages directory.](https://github.com/KillianLucas/open-interpreter/tree/main/interpreter/core/computer/terminal/languages)
+This can be any language defined in [our languages directory.](https://github.com/OpenInterpreter/open-interpreter/tree/main/interpreter/core/computer/terminal/languages)
 
 ```
 
@@ -156,4 +156,4 @@ Finally, the LLM decided to write a message. This is streamed token-by-token as 
 {"role": "assistant", "type": "message", "end": True}
 ```
 
-For an example in JavaScript on how you might process these streamed chunks, see the [migration guide](https://github.com/KillianLucas/open-interpreter/blob/main/docs/NCU_MIGRATION_GUIDE.md)
+For an example in JavaScript on how you might process these streamed chunks, see the [migration guide](https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/NCU_MIGRATION_GUIDE.md)
