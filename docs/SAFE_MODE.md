@@ -23,7 +23,7 @@ pip install semgrep
 
 ## Enabling Safe Mode
 
-You can enable safe mode by passing the `--safe` flag when invoking `interpreter` or by configuring `safe_mode` in your [config file](https://github.com/KillianLucas/open-interpreter#configuration).
+You can enable safe mode by passing the `--safe` flag when invoking `interpreter` or by configuring `safe_mode` in your [config file](https://github.com/OpenInterpreter/open-interpreter#configuration).
 
 The safe mode setting has three options:
 
@@ -48,7 +48,7 @@ Some upcoming features that enable even more safety:
 
 ## Tips & Tricks
 
-You can adjust the `system_message` in your [config file](https://github.com/KillianLucas/open-interpreter#configuration) to include instructions for the model to scan packages with [`guarddog`]() before installing them.
+You can adjust the `system_message` in your [config file](https://github.com/OpenInterpreter/open-interpreter#configuration) to include instructions for the model to scan packages with [`guarddog`]() before installing them.
 
 ```yaml
 model: gpt-4
