@@ -443,7 +443,10 @@ def create_router(async_interpreter):
                             return
                         data = await websocket.receive()
 
-                        if not authenticated:
+                        if (
+                            not authenticated
+                            and os.getenv("INTERPRETER_REQUIRE_AUTH") != "False"
+                        ):
                             if "text" in data:
                                 data = json.loads(data["text"])
                                 if "auth" in data:
