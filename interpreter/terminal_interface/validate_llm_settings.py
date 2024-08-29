@@ -45,7 +45,7 @@ def validate_llm_settings(interpreter):
                     and not interpreter.llm.api_key
                     and not interpreter.llm.api_base
                 ):
-                    display_welcome_message_once()
+                    display_welcome_message_once(interpreter)
 
                     interpreter.display_message(
                         """---
@@ -110,7 +110,7 @@ def validate_llm_settings(interpreter):
     return
 
 
-def display_welcome_message_once():
+def display_welcome_message_once(interpreter):
     """
     Displays a welcome message only on its first call.
 
