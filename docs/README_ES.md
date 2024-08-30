@@ -16,7 +16,7 @@
 
 <br>
 
-![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
+![poster](https://github.com/OpenInterpreter/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 <p align="center">
@@ -51,7 +51,7 @@ Esto proporciona una interfaz de lenguaje natural para las capacidades generales
 
 ## Demo
 
-https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
+https://github.com/OpenInterpreter/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
 #### También hay disponible una demo interactiva en Google Colab:
 
@@ -401,11 +401,11 @@ Por favor, consulte nuestras [directrices de contribución](docs/CONTRIBUTING.md
 
 # Roadmap
 
-Visite [nuestro roadmap](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md) para ver el futuro de Intérprete Abierto.
+Visite [nuestro roadmap](https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/ROADMAP.md) para ver el futuro de Intérprete Abierto.
 
 **Nota:** Este software no está afiliado con OpenAI.
 
-![thumbnail-ncu](https://github.com/KillianLucas/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
+![thumbnail-ncu](https://github.com/OpenInterpreter/open-interpreter/assets/63927363/1b19a5db-b486-41fd-a7a1-fe2028031686)
 
 > Tener acceso a un programador junior trabajando a la velocidad de su dedos... puede hacer que los nuevos flujos de trabajo sean sencillos y eficientes, además de abrir los beneficios de la programación a nuevas audiencias.
 >

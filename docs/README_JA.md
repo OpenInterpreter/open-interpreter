@@ -18,7 +18,7 @@
 
 <br>
 
-![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
+![poster](https://github.com/OpenInterpreter/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 
@@ -51,7 +51,7 @@ interpreter
 
 ## デモ
 
-https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
+https://github.com/OpenInterpreter/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
 #### Google Colab でも対話形式のデモを利用できます:
 
@@ -388,7 +388,7 @@ Open Interpreter は、[関数が呼び出せる言語モデル](https://platfor
 
 # ロードマップ
 
-Open Interpreter の未来を一足先に見るために、[私たちのロードマップ](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md)をご覧ください。
+Open Interpreter の未来を一足先に見るために、[私たちのロードマップ](https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/ROADMAP.md)をご覧ください。
 
 **注意**: このソフトウェアは OpenAI とは関連していません。
 
