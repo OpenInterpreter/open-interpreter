@@ -57,6 +57,9 @@ class AsyncInterpreter(OpenInterpreter):
 
         self.server = Server(self)
 
+        # For the 01. This lets the OAI compatible server accumulate context before responding.
+        self.context_mode = False
+
     async def input(self, chunk):
         """
         Accumulates LMC chunks onto interpreter.messages.
@@ -773,6 +776,14 @@ def create_router(async_interpreter):
             # Handle special STOP token
             return
 
+        if last_message.content == "{CONTEXT_MODE_ON}":
+            async_interpreter.context_mode = True
+            return
+
+        if last_message.content == "{CONTEXT_MODE_OFF}":
+            async_interpreter.context_mode = False
+            return
+
         if type(last_message.content) == str:
             async_interpreter.messages.append(
                 {
@@ -812,7 +823,9 @@ def create_router(async_interpreter):
                         }
                     )
 
-        if os.getenv("INTERPRETER_SERVER_REQUIRE_START", False):
+        if async_interpreter.context_mode:
+            # In context mode, we only respond if we recieved a {START} message
+            # Otherwise, we're just accumulating context
             if last_message.content != "{START}":
                 return
             if async_interpreter.messages[-1]["content"] == "{START}":
