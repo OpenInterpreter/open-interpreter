@@ -92,21 +92,21 @@ import matplotlib.pyplot as plt
         ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
         ################################################################
 
-        try:
-            functions = string_to_python(code)
-        except:
-            # Non blocking
-            functions = {}
+        # try:
+        #     functions = string_to_python(code)
+        # except:
+        #     # Non blocking
+        #     functions = {}
 
-        if self.computer.save_skills and functions:
-            skill_library_path = self.computer.skills.path
+        # if self.computer.save_skills and functions:
+        #     skill_library_path = self.computer.skills.path
 
-            if not os.path.exists(skill_library_path):
-                os.makedirs(skill_library_path)
+        #     if not os.path.exists(skill_library_path):
+        #         os.makedirs(skill_library_path)
 
-            for filename, function_code in functions.items():
-                with open(f"{skill_library_path}/{filename}.py", "w") as file:
-                    file.write(function_code)
+        #     for filename, function_code in functions.items():
+        #         with open(f"{skill_library_path}/{filename}.py", "w") as file:
+        #             file.write(function_code)
 
         self.finish_flag = False
         try:

@@ -40,7 +40,14 @@ class Skills:
         )
 
     def search(self, query):
-        return aifs.search(query, self.path, python_docstrings_only=True)
+        """
+        This just lists all for now.
+        """
+        return [
+            file.replace(".py", "()")
+            for file in os.listdir(self.path)
+            if file.endswith(".py")
+        ]
 
     def import_skills(self):
         previous_save_skills_setting = self.computer.save_skills
