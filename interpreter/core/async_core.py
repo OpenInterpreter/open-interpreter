@@ -16,6 +16,8 @@ from starlette.websockets import WebSocketState
 
 from .core import OpenInterpreter
 
+last_start_time = 0
+
 try:
     import janus
     import uvicorn
@@ -56,6 +58,9 @@ class AsyncInterpreter(OpenInterpreter):
         self.acknowledged_outputs = []
 
         self.server = Server(self)
+
+        # For the 01. This lets the OAI compatible server accumulate context before responding.
+        self.context_mode = False
 
     async def input(self, chunk):
         """
@@ -760,10 +765,9 @@ def create_router(async_interpreter):
 
     @router.post("/openai/chat/completions")
     async def chat_completion(request: ChatCompletionRequest):
+        global last_start_time
+
         # Convert to LMC
-
-        async_interpreter.stop_event.set()
-
         last_message = request.messages[-1]
 
         if last_message.role != "user":
@@ -771,6 +775,14 @@ def create_router(async_interpreter):
 
         if last_message.content == "{STOP}":
             # Handle special STOP token
+            return
+
+        if last_message.content in ["{CONTEXT_MODE_ON}", "{REQUIRE_START_ON}"]:
+            async_interpreter.context_mode = True
+            return
+
+        if last_message.content in ["{CONTEXT_MODE_OFF}", "{REQUIRE_START_OFF}"]:
+            async_interpreter.context_mode = False
             return
 
         if type(last_message.content) == str:
@@ -812,13 +824,33 @@ def create_router(async_interpreter):
                         }
                     )
 
-        if os.getenv("INTERPRETER_SERVER_REQUIRE_START", False):
-            if last_message.content != "{START}":
-                return
-            if async_interpreter.messages[-1]["content"] == "{START}":
+        if async_interpreter.context_mode:
+            # In context mode, we only respond if we recieved a {START} message
+            # Otherwise, we're just accumulating context
+            if last_message.content == "{START}":
+                if async_interpreter.messages[-1]["content"] == "{START}":
+                    # Remove that {START} message that would have just been added
+                    async_interpreter.messages = async_interpreter.messages[:-1]
+                last_start_time = time.time()
+            else:
+                # Check if we're within 6 seconds of last_start_time
+                current_time = time.time()
+                if current_time - last_start_time <= 6:
+                    # Continue processing
+                    pass
+                else:
+                    # More than 6 seconds have passed, so return
+                    return
+
+        else:
+            if last_message.content == "{START}":
+                # This just sometimes happens I guess
                 # Remove that {START} message that would have just been added
                 async_interpreter.messages = async_interpreter.messages[:-1]
+                return
 
+        async_interpreter.stop_event.set()
+        time.sleep(0.1)
         async_interpreter.stop_event.clear()
 
         if request.stream:

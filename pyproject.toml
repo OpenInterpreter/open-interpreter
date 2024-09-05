@@ -4,7 +4,7 @@ packages = [
     {include = "interpreter"},
     {include = "scripts"},
 ]
-version = "0.3.10" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.3.12" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -67,6 +67,9 @@ shortuuid = "^1.0.13"
 litellm = "^1.41.26"
 starlette = "^0.37.2"
 typer = "^0.12.4"
+html2text = "^2024.2.26"
+selenium = "^4.24.0"
+webdriver-manager = "^4.0.2"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm", "screeninfo"]

@@ -12,7 +12,7 @@
 - [x] Let people turn off the active line highlighting
 - [ ] Add a --plain flag which doesn't use rich, just prints stuff in plain text
 - [ ] Use iPython stuff to track the active line, instead of inserting print statements, which makes debugging weird (From ChatGPT: For deeper insights into what's happening behind the scenes, including which line of code is being executed, you can increase the logging level of the IPython kernel. You can configure the kernel's logger to a more verbose setting, which logs each execution request. However, this requires modifying the kernel's startup settings, which might involve changing logging configurations in the IPython kernel source or when launching the kernel.)
-- [ ] Let people edit the code OI writes. Could just open it in the user's preferred editor. Simple. [Full description of how to implement this here.](https://github.com/KillianLucas/open-interpreter/pull/830#issuecomment-1854989795)
+- [ ] Let people edit the code OI writes. Could just open it in the user's preferred editor. Simple. [Full description of how to implement this here.](https://github.com/OpenInterpreter/open-interpreter/pull/830#issuecomment-1854989795)
 - [ ] Display images in the terminal interface
 - [ ] There should be a function that just renders messages to the terminal, so we can revive conversation navigator, and let people look at their conversations
 - [ ] ^ This function should also render the last like 5 messages once input() is about to be run, so we don't get those weird stuttering `rich` artifacts

@@ -237,7 +237,7 @@ if not interpreter.auto_run:
 # # Install Open Interpreter from GitHub
 # for chunk in interpreter.computer.run(
 #     "shell",
-#     "pip install git+https://github.com/KillianLucas/open-interpreter.git",
+#     "pip install git+https://github.com/OpenInterpreter/open-interpreter.git",
 # ):
 #     if chunk.get("format") != "active_line":
 #         print(chunk.get("content"))

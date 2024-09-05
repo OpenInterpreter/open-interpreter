@@ -363,6 +363,26 @@ def terminal_interface(interpreter, message):
                         # But if verbose is true, we do display it!
                         continue
 
+                    assistant_code_blocks = [
+                        m
+                        for m in interpreter.messages
+                        if m.get("role") == "assistant" and m.get("type") == "code"
+                    ]
+                    if assistant_code_blocks:
+                        code = assistant_code_blocks[-1].get("content")
+                        if any(
+                            text in code
+                            for text in [
+                                "computer.display.view",
+                                "computer.display.screenshot",
+                                "computer.view",
+                                "computer.screenshot",
+                            ]
+                        ):
+                            # If the last line of the code is a computer.view command, don't display it.
+                            # The LLM is going to see it, the user doesn't need to.
+                            continue
+
                     # Display and give extra output back to the LLM
                     extra_computer_output = display_output(chunk)
 
