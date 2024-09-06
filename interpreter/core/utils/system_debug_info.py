@@ -49,8 +49,8 @@ def get_ram_info():
 def get_package_mismatches(file_path="pyproject.toml"):
     with open(file_path, "r") as file:
         pyproject = toml.load(file)
-    dependencies = pyproject["tool"]["poetry"]["dependencies"]
-    dev_dependencies = pyproject["tool"]["poetry"]["group"]["dev"]["dependencies"]
+    dependencies = pyproject["dependencies"]
+    dev_dependencies = pyproject["project"]["optional-dependencies"]
     dependencies.update(dev_dependencies)
 
     installed_packages = {pkg.key: pkg.version for pkg in pkg_resources.working_set}

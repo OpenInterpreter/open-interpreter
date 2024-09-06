@@ -1,94 +1,68 @@
-[tool.poetry]
+[project]
 name = "open-interpreter"
-packages = [
-    {include = "interpreter"},
-    {include = "scripts"},
-]
 version = "0.3.10" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
-authors = ["Killian Lucas <killian@openinterpreter.com>"]
+authors = [{ name= "Killian Lucas", email= "killian@openinterpreter.com"}]
 readme = "README.md"
+requires-python = ">=3.9, <3.14"
 
-[tool.poetry.dependencies]
+dependencies = [
+    "open-interpreter>=0.3.8",
+    "fastapi>=0.112.2",
+    "uvicorn>=0.30.6",
+    "websockets<13.0",
+    "setuptools",
+    "astor>=0.8.1",
+    "git-python>=1.0.3",
+    "inquirer>=3.1.3",
+    "pyyaml>=6.0.1",
+    "rich>=13.4.2",
+    "six>=1.16.0",
+    "tokentrim>=0.1.13",
+    "wget>=3.2",
+    "psutil>=5.9.6",
+    "pyreadline3>=3.4.1; sys_platform == 'win32'",
+    "html2image>=2.0.4.3",
+    "send2trash>=1.8.2",
+    "ipykernel>=6.26.0",
+    "jupyter-client>=8.6.0",
+    "matplotlib>=3.8.2",
+    "toml>=0.10.2",
+    "tiktoken>=0.7.0",
+    "platformdirs>=4.2.0",
+    "pydantic>=2.6.4",
+    "google-generativeai>=0.7.1",
+    "pyperclip>=1.9.0",
+    "yaspin>=3.0.2",
+    "shortuuid>=1.0.13",
+    "litellm>=1.41.26",
+    "starlette>=0.37.2",
+    "typer>=0.12.4"
+]
 
-# Optional [os] dependencies
-opencv-python = { version = "^4.8.1.78", optional = true }
-pyautogui = { version = "^0.9.54", optional = true }
-plyer = { version = "^2.1.0", optional = true }
-pywinctl = { version = "^0.3", optional = true }
-pytesseract = { version = "^0.3.10", optional = true }
-sentence-transformers = { version = "^2.5.1", optional = true }
-nltk = { version = "^3.8.1", optional = true }
-ipywidgets = { version = "^8.1.2", optional = true }
-torch = { version = "^2.2.1", optional = true }
-timm = { version = "^0.9.16", optional = true }
-screeninfo = { version = "^0.8.1", optional = true }
+[project.optional-dependencies]
+os = ["opencv-python>=4.8.1.78", "pyautogui>=0.9.54", "plyer>=2.1.0", "pywinctl>=0.3", "pytesseract>=0.3.10", "sentence-transformers>=2.5.1", "ipywidgets>=8.1.2", "torch>=2.2.1", "timm>=0.9.16", "screeninfo>=0.8.1", "nltk>=3.8.1"]
+safe = ["semgrep>=1.52.0"]
+local = ["opencv-python>=4.8.1.78", "pytesseract", "torch>=2.2.1", "transformers==4.41.2", "einops>=0.8.0", "torchvision>=0.18.0", "easyocr>=1.7.1"]
+server = ["fastapi>=0.111.0", "janus>=1.0.0", "uvicorn>=0.30.1"]
 
-# Optional [safe] dependencies
-semgrep = { version = "^1.52.0", optional = true }
 
-# Optional [local] dependencies
-transformers = { version = "4.41.2", optional = true }
-einops = { version = "^0.8.0", optional = true }
-torchvision = { version = "^0.18.0", optional = true }
-easyocr = { version = "^1.7.1", optional = true }
-
-# Optional [server] dependencies
-fastapi = { version = "^0.111.0", optional = true }
-uvicorn = { version = "^0.30.1", optional = true }
-janus = { version = "^1.0.0", optional = true }
-
-# Required dependencies
-python = ">=3.9,<4"
-setuptools = "*"
-astor = "^0.8.1"
-git-python = "^1.0.3"
-inquirer = "^3.1.3"
-pyyaml = "^6.0.1"
-rich = "^13.4.2"
-six = "^1.16.0"
-tokentrim = "^0.1.13"
-wget = "^3.2"
-psutil = "^5.9.6"
-pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
-html2image = "^2.0.4.3"
-send2trash = "^1.8.2"
-ipykernel = "^6.26.0"
-jupyter-client = "^8.6.0"
-matplotlib = "^3.8.2"
-toml = "^0.10.2"
-tiktoken = "^0.7.0"
-platformdirs = "^4.2.0"
-pydantic = "^2.6.4"
-google-generativeai = "^0.7.1"
-pyperclip = "^1.9.0"
-yaspin = "^3.0.2"
-shortuuid = "^1.0.13"
-litellm = "^1.41.26"
-starlette = "^0.37.2"
-typer = "^0.12.4"
-
-[tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm", "screeninfo"]
-safe = ["semgrep"]
-local = ["opencv-python", "pytesseract", "torch", "transformers", "einops", "torchvision", "easyocr"]
-server = ["fastapi", "janus", "uvicorn"]
-
-[tool.poetry.group.dev.dependencies]
-black = "^23.10.1"
-isort = "^5.12.0"
-pre-commit = "^3.5.0"
-pytest = "^7.4.0"
-sniffio = "^1.3.0"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
+[project.scripts]
 interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 i = "interpreter.terminal_interface.start_terminal_interface:main"
 wtf = "scripts.wtf:main"
+
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.4.0",
+    # TODO: remove this comment before merging
+    # use "ruff", not "black", for formatting, wayyyy faster ??
+    "black>=23.10.1",
+    "pre-commit>=3.5.0",
+    "isort>=5.12.0",
+    "sniffio>=1.3.0",
+]
 
 [tool.black]
 target-version = ['py311']
@@ -97,3 +71,10 @@ target-version = ['py311']
 profile = "black"
 multi_line_output = 3
 include_trailing_comma = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["interpreter"]

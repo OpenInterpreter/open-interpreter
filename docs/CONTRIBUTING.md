@@ -29,32 +29,31 @@ We will review PRs when possible and work with you to integrate your contributio
 
 ## Running Your Local Fork
 
-**Note: for anyone testing the new `--local`, `--os`, and `--local --os` modes: When you run `poetry install` you aren't installing the optional dependencies and it'll throw errors. To test `--local` mode, run `poetry install -E local`. To test `--os` mode, run `poetry install -E os`. To test `--local --os` mode, run `poetry install -E local -E os`. You can edit the system messages for these modes in `interpreter/terminal_interface/profiles/defaults`.**
+**Note: for anyone testing the new `--local`, `--os`, and `--local --os` modes: When you run `uv pip install` you aren't installing the optional dependencies and it'll throw errors. To test `--local` mode, run `uv pip install ".[local]"`. To test `--os` mode, run `uv pip install ".[os]"`. To test `--local --os` mode, run `uv pip install ".[local,os]"`. You can edit the system messages for these modes in `interpreter/terminal_interface/profiles/defaults`.**
 
 Once you've forked the code and created a new branch for your work, you can run the fork in CLI mode by following these steps:
 
-1. CD into the project folder by running `cd open-interpreter`.
-2. Install `poetry` [according to their documentation](https://python-poetry.org/docs/#installing-with-pipx), which will create a virtual environment for development + handle dependencies.
-3. Install dependencies by running `poetry install`.
-4. Run the program with `poetry run interpreter`. Run tests with `poetry run pytest -s -x`.
+1. Install `uv` [according to their documentation](https://docs.astral.sh/uv/#highlights), which will create a virtual environment for development + handle dependencies.
+2. Install python if you don't have it already. `uv python install 3.11.8`
+3. Run the program with `uv run interpreter`. Run tests with `uv run pytest -s -x -k test_`.
 
 **Note**: This project uses [`black`](https://black.readthedocs.io/en/stable/index.html) and [`isort`](https://pypi.org/project/isort/) via a [`pre-commit`](https://pre-commit.com/) hook to ensure consistent code style. If you need to bypass it for some reason, you can `git commit` with the `--no-verify` flag.
 
 ### Installing New Dependencies
 
-If you wish to install new dependencies into the project, please use `poetry add package-name`.
+If you wish to install new dependencies into the project, please use `uv add package-name`.
 
 ### Installing Developer Dependencies
 
-If you need to install dependencies specific to development, like testing tools, formatting tools, etc. please use `poetry add package-name --group dev`.
+If you need to install dependencies specific to development, like testing tools, formatting tools, etc. please use `uv sync --dev`.
 
 ### Known Issues
 
-For some, `poetry install` might hang on some dependencies. As a first step, try to run the following command in your terminal:
+For some machines, `uv install` errors out with `OSError: [Errno 24] Too many open files`. As a first step, try to run the following command in your terminal:
 
-`export PYTHON_KEYRING_BACKEND=keyring.backends.fail.Keyring`
+`ulimit -n 16000`
 
-Then run `poetry install` again. If this doesn't work, please join our [Discord community](https://discord.gg/6p3fD6rBVm) for help.
+Then run `uv pip install` or `uv run interpreter` again. If this doesn't work, please join our [Discord community](https://discord.gg/6p3fD6rBVm) for help.
 
 ## Code Formatting and Linting
 
