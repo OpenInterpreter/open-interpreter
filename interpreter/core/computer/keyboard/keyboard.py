@@ -68,6 +68,14 @@ class Keyboard:
         pyautogui.press(keys, presses=presses, interval=interval)
         time.sleep(0.15)
 
+    def press_and_release(self, *args, presses=1, interval=0.1):
+        """
+        Press and release a key or a sequence of keys.
+
+        This method is a perfect proxy for the press method.
+        """
+        return self.press(*args, presses=presses, interval=interval)
+
     def hotkey(self, *args, interval=0.1):
         """
         Press a sequence of keys in the order they are provided, and then release them in reverse order.

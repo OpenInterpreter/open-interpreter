@@ -7,7 +7,6 @@ from datetime import datetime
 
 from ..core.utils.system_debug_info import system_info
 from .utils.count_tokens import count_messages_tokens
-from .utils.display_markdown_message import display_markdown_message
 from .utils.export_to_markdown import export_to_markdown
 
 
@@ -36,11 +35,11 @@ def handle_undo(self, arguments):
     # Print out a preview of what messages were removed.
     for message in removed_messages:
         if "content" in message and message["content"] != None:
-            display_markdown_message(
+            self.display_message(
                 f"**Removed message:** `\"{message['content'][:30]}...\"`"
             )
         elif "function_call" in message:
-            display_markdown_message(
+            self.display_message(
                 f"**Removed codeblock**"
             )  # TODO: Could add preview of code removed here.
 
@@ -75,12 +74,12 @@ def handle_help(self, arguments):
     # Combine the base message with the additional info
     full_message = base_message + additional_info
 
-    display_markdown_message("".join(full_message))
+    self.display_message("".join(full_message))
 
 
 def handle_verbose(self, arguments=None):
     if arguments == "" or arguments == "true":
-        display_markdown_message("> Entered verbose mode")
+        self.display_message("> Entered verbose mode")
         print("\n\nCurrent messages:\n")
         for message in self.messages:
             message = message.copy()
@@ -95,15 +94,15 @@ def handle_verbose(self, arguments=None):
         print("\n")
         self.verbose = True
     elif arguments == "false":
-        display_markdown_message("> Exited verbose mode")
+        self.display_message("> Exited verbose mode")
         self.verbose = False
     else:
-        display_markdown_message("> Unknown argument to verbose command.")
+        self.display_message("> Unknown argument to verbose command.")
 
 
 def handle_debug(self, arguments=None):
     if arguments == "" or arguments == "true":
-        display_markdown_message("> Entered debug mode")
+        self.display_message("> Entered debug mode")
         print("\n\nCurrent messages:\n")
         for message in self.messages:
             message = message.copy()
@@ -118,21 +117,21 @@ def handle_debug(self, arguments=None):
         print("\n")
         self.debug = True
     elif arguments == "false":
-        display_markdown_message("> Exited verbose mode")
+        self.display_message("> Exited verbose mode")
         self.debug = False
     else:
-        display_markdown_message("> Unknown argument to debug command.")
+        self.display_message("> Unknown argument to debug command.")
 
 
 def handle_auto_run(self, arguments=None):
     if arguments == "" or arguments == "true":
-        display_markdown_message("> Entered auto_run mode")
+        self.display_message("> Entered auto_run mode")
         self.auto_run = True
     elif arguments == "false":
-        display_markdown_message("> Exited auto_run mode")
+        self.display_message("> Exited auto_run mode")
         self.auto_run = False
     else:
-        display_markdown_message("> Unknown argument to auto_run command.")
+        self.display_message("> Unknown argument to auto_run command.")
 
 
 def handle_info(self, arguments):
@@ -141,11 +140,11 @@ def handle_info(self, arguments):
 
 def handle_reset(self, arguments):
     self.reset()
-    display_markdown_message("> Reset Done")
+    self.display_message("> Reset Done")
 
 
 def default_handle(self, arguments):
-    display_markdown_message("> Unknown command")
+    self.display_message("> Unknown command")
     handle_help(self, arguments)
 
 
@@ -157,7 +156,7 @@ def handle_save_message(self, json_path):
     with open(json_path, "w") as f:
         json.dump(self.messages, f, indent=2)
 
-    display_markdown_message(f"> messages json export to {os.path.abspath(json_path)}")
+    self.display_message(f"> messages json export to {os.path.abspath(json_path)}")
 
 
 def handle_load_message(self, json_path):
@@ -168,9 +167,7 @@ def handle_load_message(self, json_path):
     with open(json_path, "r") as f:
         self.messages = json.load(f)
 
-    display_markdown_message(
-        f"> messages json loaded from {os.path.abspath(json_path)}"
-    )
+    self.display_message(f"> messages json loaded from {os.path.abspath(json_path)}")
 
 
 def handle_count_tokens(self, prompt):
@@ -209,10 +206,10 @@ def handle_count_tokens(self, prompt):
         )
 
     outputs.append(
-        f"**Note**: This functionality is currently experimental and may not be accurate. Please report any issues you find to the [Open Interpreter GitHub repository](https://github.com/KillianLucas/open-interpreter)."
+        f"**Note**: This functionality is currently experimental and may not be accurate. Please report any issues you find to the [Open Interpreter GitHub repository](https://github.com/OpenInterpreter/open-interpreter)."
     )
 
-    display_markdown_message("\n".join(outputs))
+    self.display_message("\n".join(outputs))
 
 
 def get_downloads_path():
@@ -295,7 +292,7 @@ def jupyter(self, arguments):
         nbformat.write(nb, f)
 
     print("")
-    display_markdown_message(
+    self.display_message(
         f"Jupyter notebook file exported to {os.path.abspath(notebook_path)}"
     )
 

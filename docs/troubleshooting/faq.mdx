@@ -1,0 +1,16 @@
+---
+title: "FAQ"
+description: "Frequently Asked Questions"
+---
+
+<Accordion title="Does Open Interpreter ensure that my data doesn't leave my computer?">
+  As long as you're using a local language model, your messages / personal info
+  won't leave your computer. If you use a cloud model, we send your messages +
+  custom instructions to the model. We also have a basic telemetry
+  [function](https://github.com/OpenInterpreter/open-interpreter/blob/main/interpreter/core/core.py#L167)
+  (copied over from ChromaDB's telemetry) that anonymously tracks usage. This
+  only lets us know if a message was sent, includes no PII. OI errors will also
+  be reported here which includes the exception string. Detailed docs on all
+  this is [here](/telemetry/telemetry), and you can opt out by running
+  `--local`, `--offline`, or `--disable_telemetry`.
+</Accordion>

@@ -92,21 +92,21 @@ import matplotlib.pyplot as plt
         ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
         ################################################################
 
-        try:
-            functions = string_to_python(code)
-        except:
-            # Non blocking
-            functions = {}
+        # try:
+        #     functions = string_to_python(code)
+        # except:
+        #     # Non blocking
+        #     functions = {}
 
-        if self.computer.save_skills and functions:
-            skill_library_path = self.computer.skills.path
+        # if self.computer.save_skills and functions:
+        #     skill_library_path = self.computer.skills.path
 
-            if not os.path.exists(skill_library_path):
-                os.makedirs(skill_library_path)
+        #     if not os.path.exists(skill_library_path):
+        #         os.makedirs(skill_library_path)
 
-            for filename, function_code in functions.items():
-                with open(f"{skill_library_path}/{filename}.py", "w") as file:
-                    file.write(function_code)
+        #     for filename, function_code in functions.items():
+        #         with open(f"{skill_library_path}/{filename}.py", "w") as file:
+        #             file.write(function_code)
 
         self.finish_flag = False
         try:
@@ -134,6 +134,14 @@ import matplotlib.pyplot as plt
                     if DEBUG_MODE:
                         print("interrupting kernel!!!!!")
                     self.km.interrupt_kernel()
+                    return
+                # For async usage
+                if (
+                    hasattr(self.computer.interpreter, "stop_event")
+                    and self.computer.interpreter.stop_event.is_set()
+                ):
+                    self.km.interrupt_kernel()
+                    self.finish_flag = True
                     return
                 try:
                     msg = self.kc.iopub_channel.get_msg(timeout=0.05)
@@ -262,6 +270,7 @@ import matplotlib.pyplot as plt
                 hasattr(self.computer.interpreter, "stop_event")
                 and self.computer.interpreter.stop_event.is_set()
             ):
+                self.finish_flag = True
                 break
 
             if self.listener_thread:

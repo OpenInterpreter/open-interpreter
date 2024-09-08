@@ -35,7 +35,7 @@ def render_message(interpreter, message):
     rendered_message = "".join(parts).strip()
 
     if (
-        interpreter.debug == True
+        interpreter.debug == True and False  # DISABLED
     ):  # debug will equal "server" if we're debugging the server specifically
         print("\n\n\nSYSTEM MESSAGE\n\n\n")
         print(rendered_message)

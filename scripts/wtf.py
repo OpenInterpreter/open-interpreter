@@ -18,6 +18,7 @@ import yaml
 try:
     from pynput.keyboard import Controller, Key
 except ImportError:
+    spinner.stop()
     print("Please run `pip install pynput` to use the `wtf` command.")
     exit()
 
@@ -373,7 +374,7 @@ def main():
             if wtf_model:
                 model = wtf_model
             else:
-                model = profile.get("llm", {}).get("model", "gpt-3.5-turbo")
+                model = profile.get("llm", {}).get("model", "gpt-4o-mini")
     except:
         model = "gpt-4o-mini"
 

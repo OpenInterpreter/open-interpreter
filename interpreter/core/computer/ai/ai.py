@@ -117,7 +117,7 @@ class Ai:
     def __init__(self, computer):
         self.computer = computer
 
-    def chat(self, text):
+    def chat(self, text, base64=None):
         messages = [
             {
                 "role": "system",
@@ -126,6 +126,10 @@ class Ai:
             },
             {"role": "user", "type": "message", "content": text},
         ]
+        if base64:
+            messages.append(
+                {"role": "user", "type": "image", "format": "base64", "content": base64}
+            )
         response = ""
         for chunk in self.computer.interpreter.llm.run(messages):
             if "content" in chunk:

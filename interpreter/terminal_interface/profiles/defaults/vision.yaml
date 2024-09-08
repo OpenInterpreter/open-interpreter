@@ -17,5 +17,5 @@ llm:
 
 # All options: https://docs.openinterpreter.com/usage/terminal/settings
 
-version: 0.2.1 # Configuration file version (do not modify)
+version: 0.2.5 # Configuration file version (do not modify)
 

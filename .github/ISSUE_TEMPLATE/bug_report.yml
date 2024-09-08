@@ -8,7 +8,7 @@ body:
       value: |
         Your issue may have already been reported. Please check the following link for common issues and solutions.
 
-        [Commonly faced issues and their solutions](https://github.com/KillianLucas/open-interpreter/issues/164)
+        [Commonly faced issues and their solutions](https://github.com/OpenInterpreter/open-interpreter/issues/164)
   - type: textarea
     id: description
     attributes:

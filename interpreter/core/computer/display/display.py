@@ -74,12 +74,23 @@ class Display:
         """
         return get_displays()
 
-    def view(self, show=True, quadrant=None, screen=0, combine_screens=True):
+    def view(
+        self,
+        show=True,
+        quadrant=None,
+        screen=0,
+        combine_screens=True,
+        active_app_only=True,
+    ):
         """
         Redirects to self.screenshot
         """
         return self.screenshot(
-            screen=screen, show=show, quadrant=quadrant, combine_screens=combine_screens
+            screen=screen,
+            show=show,
+            quadrant=quadrant,
+            combine_screens=combine_screens,
+            active_app_only=active_app_only,
         )
 
     # def get_active_window(self):
@@ -149,7 +160,7 @@ class Display:
                     screen=screen, combine_screens=combine_screens
                 )  #  this function uses pyautogui.screenshot which works fine for all OS (mac, linux and windows)
                 message = format_to_recipient(
-                    "Taking a screenshot of the entire screen.\n\nTo focus on the active app, use computer.view(active_app_only=True).",
+                    "Taking a screenshot of the entire screen.\n\nTo focus on the active app, use computer.display.view(active_app_only=True).",
                     "assistant",
                 )
                 print(message)

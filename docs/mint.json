@@ -31,7 +31,10 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["getting-started/introduction", "getting-started/setup"]
+      "pages": [
+        "getting-started/introduction",
+        "getting-started/setup"
+      ]
     },
     {
       "group": "Guides",
@@ -47,7 +50,9 @@
     },
     {
       "group": "Settings",
-      "pages": ["settings/all-settings"]
+      "pages": [
+        "settings/all-settings"
+      ]
     },
     {
       "group": "Language Models",
@@ -105,11 +110,16 @@
     },
     {
       "group": "Protocols",
-      "pages": ["protocols/lmc-messages"]
+      "pages": [
+        "protocols/lmc-messages"
+      ]
     },
     {
       "group": "Integrations",
-      "pages": ["integrations/e2b", "integrations/docker"]
+      "pages": [
+        "integrations/e2b",
+        "integrations/docker"
+      ]
     },
     {
       "group": "Safety",
@@ -121,8 +131,16 @@
       ]
     },
     {
+      "group": "Troubleshooting",
+      "pages": [
+        "troubleshooting/faq"
+      ]
+    },
+    {
       "group": "Telemetry",
-      "pages": ["telemetry/telemetry"]
+      "pages": [
+        "telemetry/telemetry"
+      ]
     }
   ],
   "feedback": {
