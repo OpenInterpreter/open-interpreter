@@ -72,7 +72,7 @@ selenium = "^4.24.0"
 webdriver-manager = "^4.0.2"
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm", "screeninfo"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "timm", "screeninfo"]
 safe = ["semgrep"]
 local = ["opencv-python", "pytesseract", "torch", "transformers", "einops", "torchvision", "easyocr"]
 server = ["fastapi", "janus", "uvicorn"]
