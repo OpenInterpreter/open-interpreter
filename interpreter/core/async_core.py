@@ -60,7 +60,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.server = Server(self)
 
         # For the 01. This lets the OAI compatible server accumulate context before responding.
-        self.context_mode = False
+        self.context_mode = True
 
     async def input(self, chunk):
         """
@@ -737,6 +737,7 @@ def create_router(async_interpreter):
             for i, chunk in enumerate(
                 async_interpreter.chat(message=message, stream=True, display=True)
             ):
+                await asyncio.sleep(0)  # Yield control to the event loop
                 made_chunk = True
 
                 if async_interpreter.stop_event.is_set():
@@ -832,6 +833,11 @@ def create_router(async_interpreter):
                     # Remove that {START} message that would have just been added
                     async_interpreter.messages = async_interpreter.messages[:-1]
                 last_start_time = time.time()
+                if (
+                    async_interpreter.messages
+                    and async_interpreter.messages[-1].get("role") != "user"
+                ):
+                    return
             else:
                 # Check if we're within 6 seconds of last_start_time
                 current_time = time.time()
