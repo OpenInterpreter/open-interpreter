@@ -60,7 +60,7 @@ class AsyncInterpreter(OpenInterpreter):
         self.server = Server(self)
 
         # For the 01. This lets the OAI compatible server accumulate context before responding.
-        self.context_mode = True
+        self.context_mode = False
 
     async def input(self, chunk):
         """
@@ -723,7 +723,39 @@ def create_router(async_interpreter):
         temperature: Optional[float] = None
         stream: Optional[bool] = False
 
-    async def openai_compatible_generator():
+    async def openai_compatible_generator(run_code):
+        if run_code:
+            print("Running code.\n")
+            for i, chunk in enumerate(async_interpreter._respond_and_store()):
+                if "content" in chunk:
+                    print(chunk["content"], end="")  # Sorry! Shitty display for now
+                if "start" in chunk:
+                    print("\n")
+
+                output_content = None
+
+                if chunk["type"] == "message" and "content" in chunk:
+                    output_content = chunk["content"]
+                if chunk["type"] == "code" and "start" in chunk:
+                    output_content = " "
+                if chunk["type"] == "code" and "content" in chunk:
+                    output_content = (
+                        f"""<unvoiced code="{chunk["content"]}"></unvoiced>"""
+                    )
+
+                if output_content:
+                    await asyncio.sleep(0)
+                    output_chunk = {
+                        "id": i,
+                        "object": "chat.completion.chunk",
+                        "created": time.time(),
+                        "model": "open-interpreter",
+                        "choices": [{"delta": {"content": output_content}}],
+                    }
+                    yield f"data: {json.dumps(output_chunk)}\n\n"
+
+            return
+
         made_chunk = False
 
         for message in [
@@ -740,6 +772,12 @@ def create_router(async_interpreter):
                 await asyncio.sleep(0)  # Yield control to the event loop
                 made_chunk = True
 
+                if (
+                    chunk["type"] == "confirmation"
+                    and async_interpreter.auto_run == False
+                ):
+                    break
+
                 if async_interpreter.stop_event.is_set():
                     break
 
@@ -749,6 +787,10 @@ def create_router(async_interpreter):
                     output_content = chunk["content"]
                 if chunk["type"] == "code" and "start" in chunk:
                     output_content = " "
+                if chunk["type"] == "code" and "content" in chunk:
+                    output_content = (
+                        f"""<unvoiced code="{chunk["content"]}"></unvoiced>"""
+                    )
 
                 if output_content:
                     await asyncio.sleep(0)
@@ -764,6 +806,18 @@ def create_router(async_interpreter):
             if made_chunk:
                 break
 
+            if async_interpreter.messages[-1]["type"] == "code":
+                await asyncio.sleep(0)
+                output_content = "{CODE_FINISHED}"
+                output_chunk = {
+                    "id": i,
+                    "object": "chat.completion.chunk",
+                    "created": time.time(),
+                    "model": "open-interpreter",
+                    "choices": [{"delta": {"content": output_content}}],
+                }
+                yield f"data: {json.dumps(output_chunk)}\n\n"
+
     @router.post("/openai/chat/completions")
     async def chat_completion(request: ChatCompletionRequest):
         global last_start_time
@@ -776,6 +830,9 @@ def create_router(async_interpreter):
 
         if last_message.content == "{STOP}":
             # Handle special STOP token
+            async_interpreter.stop_event.set()
+            time.sleep(5)
+            async_interpreter.stop_event.clear()
             return
 
         if last_message.content in ["{CONTEXT_MODE_ON}", "{REQUIRE_START_ON}"]:
@@ -784,6 +841,14 @@ def create_router(async_interpreter):
 
         if last_message.content in ["{CONTEXT_MODE_OFF}", "{REQUIRE_START_OFF}"]:
             async_interpreter.context_mode = False
+            return
+
+        if last_message.content == "{AUTO_RUN_ON}":
+            async_interpreter.auto_run = True
+            return
+
+        if last_message.content == "{AUTO_RUN_OFF}":
+            async_interpreter.auto_run = False
             return
 
         if type(last_message.content) == str:
@@ -825,35 +890,41 @@ def create_router(async_interpreter):
                         }
                     )
 
-        if async_interpreter.context_mode:
-            # In context mode, we only respond if we recieved a {START} message
-            # Otherwise, we're just accumulating context
-            if last_message.content == "{START}":
-                if async_interpreter.messages[-1]["content"] == "{START}":
+        run_code = False
+        if last_message.content == "{RUN}":
+            run_code = True
+            # Remove that {RUN} message that would have just been added
+            async_interpreter.messages = async_interpreter.messages[:-1]
+        else:
+            if async_interpreter.context_mode:
+                # In context mode, we only respond if we recieved a {START} message
+                # Otherwise, we're just accumulating context
+                if last_message.content == "{START}":
+                    if async_interpreter.messages[-1]["content"] == "{START}":
+                        # Remove that {START} message that would have just been added
+                        async_interpreter.messages = async_interpreter.messages[:-1]
+                    last_start_time = time.time()
+                    if (
+                        async_interpreter.messages
+                        and async_interpreter.messages[-1].get("role") != "user"
+                    ):
+                        return
+                else:
+                    # Check if we're within 6 seconds of last_start_time
+                    current_time = time.time()
+                    if current_time - last_start_time <= 6:
+                        # Continue processing
+                        pass
+                    else:
+                        # More than 6 seconds have passed, so return
+                        return
+
+            else:
+                if last_message.content == "{START}":
+                    # This just sometimes happens I guess
                     # Remove that {START} message that would have just been added
                     async_interpreter.messages = async_interpreter.messages[:-1]
-                last_start_time = time.time()
-                if (
-                    async_interpreter.messages
-                    and async_interpreter.messages[-1].get("role") != "user"
-                ):
                     return
-            else:
-                # Check if we're within 6 seconds of last_start_time
-                current_time = time.time()
-                if current_time - last_start_time <= 6:
-                    # Continue processing
-                    pass
-                else:
-                    # More than 6 seconds have passed, so return
-                    return
-
-        else:
-            if last_message.content == "{START}":
-                # This just sometimes happens I guess
-                # Remove that {START} message that would have just been added
-                async_interpreter.messages = async_interpreter.messages[:-1]
-                return
 
         async_interpreter.stop_event.set()
         time.sleep(0.1)
@@ -861,7 +932,7 @@ def create_router(async_interpreter):
 
         if request.stream:
             return StreamingResponse(
-                openai_compatible_generator(), media_type="application/x-ndjson"
+                openai_compatible_generator(run_code), media_type="application/x-ndjson"
             )
         else:
             messages = async_interpreter.chat(message=".", stream=False, display=True)
