@@ -1,3 +1,4 @@
+import threading
 import time
 
 import html2text
@@ -34,6 +35,33 @@ class Browser:
         )
         return response.json()["result"]
 
+    def fast_search(self, query):
+        """
+        Searches the web for the specified query and returns the results.
+        """
+
+        # Start the request in a separate thread
+        response_thread = threading.Thread(
+            target=lambda: setattr(
+                threading.current_thread(),
+                "response",
+                requests.get(
+                    f'{self.computer.api_base.strip("/")}/browser/search',
+                    params={"query": query},
+                ),
+            )
+        )
+        response_thread.start()
+
+        # Perform the Google search
+        self.search_google(query, delays=False)
+
+        # Wait for the request to complete and get the result
+        response_thread.join()
+        response = response_thread.response
+
+        return response.json()["result"]
+
     def setup(self):
         self.service = Service(ChromeDriverManager().install())
         self.options = webdriver.ChromeOptions()
@@ -42,9 +70,9 @@ class Browser:
     def go_to_url(self, url):
         """Navigate to a URL"""
         self.driver.get(url)
-        time.sleep(3)
+        time.sleep(1)
 
-    def search_google(self, query):
+    def search_google(self, query, delays=True):
         """Perform a Google search"""
         self.driver.get("https://www.perplexity.ai")
         # search_box = self.driver.find_element(By.NAME, 'q')
@@ -56,12 +84,15 @@ class Browser:
         active_element = self.driver.switch_to.active_element
         active_element.send_keys(query)
         active_element.send_keys(Keys.RETURN)
-        time.sleep(5)
+        if delays:
+            time.sleep(3)
 
     def analyze_page(self, intent):
         """Extract HTML, list interactive elements, and analyze with AI"""
         html_content = self.driver.page_source
         text_content = html2text.html2text(html_content)
+
+        # text_content = text_content[:len(text_content)//2]
 
         elements = (
             self.driver.find_elements(By.TAG_NAME, "a")
