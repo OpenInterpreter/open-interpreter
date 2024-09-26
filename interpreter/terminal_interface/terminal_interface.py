@@ -92,11 +92,16 @@ def terminal_interface(interpreter, message):
                 interpreter.messages = interpreter.messages[:-1]
             else:
                 ### This is the primary input for Open Interpreter.
-                message = (
-                    cli_input("> ").strip()
-                    if interpreter.multi_line
-                    else input("> ").strip()
-                )
+                try:
+                    message = (
+                        cli_input("> ").strip()
+                        if interpreter.multi_line
+                        else input("> ").strip()
+                    )
+                except (KeyboardInterrupt, EOFError):
+                    # Treat Ctrl-D on an empty line the same as Ctrl-C by exiting gracefully
+                    interpreter.display_message("\n\n`Exiting...`")
+                    raise KeyboardInterrupt
 
             try:
                 # This lets users hit the up arrow key for past messages

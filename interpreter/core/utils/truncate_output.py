@@ -4,7 +4,7 @@ def truncate_output(data, max_output_chars=2800, add_scrollbars=False):
 
     needs_truncation = False
 
-    message = f"Output truncated. Showing the last {max_output_chars} characters.\n\n"
+    message = f"Output truncated. Showing the last {max_output_chars} characters. You should try again and use computer.ai.summarize(output) over the output, or break it down into smaller steps.\n\n"
 
     # This won't work because truncated code is stored in interpreter.messages :/
     # If the full code was stored, we could do this:
