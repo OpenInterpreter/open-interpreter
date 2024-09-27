@@ -149,9 +149,12 @@ import matplotlib.pyplot as plt
                     self.finish_flag = True
                     return
                 try:
+                    input_patience = int(
+                        os.environ.get("INTERPRETER_TERMINAL_INPUT_PATIENCE", 15)
+                    )
                     if (
-                        time.time() - self.last_output_time > 15
-                        and time.time() - self.last_output_message_time > 15
+                        time.time() - self.last_output_time > input_patience
+                        and time.time() - self.last_output_message_time > input_patience
                     ):
                         self.last_output_message_time = time.time()
 
@@ -364,7 +367,11 @@ def preprocess_python(code):
 
     # Add print commands that tell us what the active line is
     # but don't do this if any line starts with ! or %
-    if not any(line.strip().startswith(("!", "%")) for line in code.split("\n")):
+    if (
+        not any(line.strip().startswith(("!", "%")) for line in code.split("\n"))
+        and os.environ.get("INTERPRETER_ACTIVE_LINE_DETECTION", "True").lower()
+        == "true"
+    ):
         code = add_active_line_prints(code)
 
     # Wrap in a try except (DISABLED)

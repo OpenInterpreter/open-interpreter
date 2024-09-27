@@ -478,6 +478,7 @@ Use """ to write multi-line messages.
     ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
     set_attributes(args, arguments)
+    interpreter.disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true" or args.disable_telemetry
 
     ### Set some helpful settings we know are likely to be true
 
