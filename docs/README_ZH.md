@@ -54,7 +54,12 @@ interpreter
 
 ## 演示
 
+### 英文版原视频
 https://github.com/OpenInterpreter/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
+
+### 中文版视频
+
+[![Open Interpreter 中文版非官方演示视频](https://res.cloudinary.com/marcomontalbano/image/upload/v1727494759/video_to_markdown/images/youtube--hRwZfZ5oqjA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/hRwZfZ5oqjA "Open Interpreter 中文版非官方演示视频")
 
 #### Google Colab 上也提供了交互式演示：
 
