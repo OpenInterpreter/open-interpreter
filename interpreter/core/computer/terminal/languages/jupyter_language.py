@@ -13,6 +13,8 @@ import threading
 import time
 import traceback
 
+os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
+import litellm
 from jupyter_client import KernelManager
 
 from ..base_language import BaseLanguage
@@ -88,6 +90,9 @@ import matplotlib.pyplot as plt
         while not self.kc.is_alive():
             time.sleep(0.1)
 
+        self.last_output_time = time.time()
+        self.last_output_message_time = time.time()
+
         ################################################################
         ### OFFICIAL OPEN INTERPRETER GOVERNMENT ISSUE SKILL LIBRARY ###
         ################################################################
@@ -144,7 +149,55 @@ import matplotlib.pyplot as plt
                     self.finish_flag = True
                     return
                 try:
+                    input_patience = int(
+                        os.environ.get("INTERPRETER_TERMINAL_INPUT_PATIENCE", 15)
+                    )
+                    if (
+                        time.time() - self.last_output_time > input_patience
+                        and time.time() - self.last_output_message_time > input_patience
+                    ):
+                        self.last_output_message_time = time.time()
+
+                        text = f"{self.computer.interpreter.messages}\n\nThe program above has been running for over 15 seconds. It might require user input. Are there keystrokes that the user should type in, to proceed after the last command?"
+                        if time.time() - self.last_output_time > 500:
+                            text += f" If you think the process is frozen, or that the user wasn't expect it to run for this long (it has been {time.time() - self.last_output_time} seconds since last output) then say <input>CTRL-C</input>."
+
+                        messages = [
+                            {
+                                "role": "system",
+                                "type": "message",
+                                "content": "You are an expert programming assistant. You will help the user determine if they should enter input into the terminal, per the user's requests. If you think the user would want you to type something into stdin, enclose it in <input></input> XML tags, like <input>y</input> to type 'y'.",
+                            },
+                            {"role": "user", "type": "message", "content": text},
+                        ]
+                        params = {
+                            "messages": messages,
+                            "model": self.computer.interpreter.llm.model,
+                            "stream": True,
+                            "temperature": 0,
+                        }
+                        if self.computer.interpreter.llm.api_key:
+                            params["api_key"] = self.computer.interpreter.llm.api_key
+
+                        response = ""
+                        for chunk in litellm.completion(**params):
+                            content = chunk.choices[0].delta.content
+                            if type(content) == str:
+                                response += content
+
+                        # Parse the response for input tags
+                        input_match = re.search(r"<input>(.*?)</input>", response)
+                        if input_match:
+                            user_input = input_match.group(1)
+                            # Check if the user input is CTRL-C
+                            self.finish_flag = True
+                            if user_input.upper() == "CTRL-C":
+                                self.finish_flag = True
+                            else:
+                                self.kc.input(user_input)
+
                     msg = self.kc.iopub_channel.get_msg(timeout=0.05)
+                    self.last_output_time = time.time()
                 except queue.Empty:
                     continue
                 except Exception as e:
@@ -255,7 +308,10 @@ import matplotlib.pyplot as plt
             # Split the line by "##active_line" and grab the last element
             last_active_line = line.split("##active_line")[-1]
             # Split the last active line by "##" and grab the first element
-            active_line = int(last_active_line.split("##")[0])
+            try:
+                active_line = int(last_active_line.split("##")[0])
+            except:
+                active_line = 0
             # Remove all ##active_line{number}##\n
             line = re.sub(r"##active_line\d+##\n", "", line)
             return line, active_line
@@ -279,6 +335,7 @@ import matplotlib.pyplot as plt
                     if DEBUG_MODE:
                         print(output)
                     yield output
+
                 except queue.Empty:
                     if self.finish_flag:
                         time.sleep(0.1)
@@ -310,7 +367,11 @@ def preprocess_python(code):
 
     # Add print commands that tell us what the active line is
     # but don't do this if any line starts with ! or %
-    if not any(line.strip().startswith(("!", "%")) for line in code.split("\n")):
+    if (
+        not any(line.strip().startswith(("!", "%")) for line in code.split("\n"))
+        and os.environ.get("INTERPRETER_ACTIVE_LINE_DETECTION", "True").lower()
+        == "true"
+    ):
         code = add_active_line_prints(code)
 
     # Wrap in a try except (DISABLED)

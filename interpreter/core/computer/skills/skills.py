@@ -24,8 +24,7 @@ class Skills:
     def __init__(self, computer):
         self.computer = computer
         self.path = str(Path(oi_dir) / "skills")
-        self.new_skill = NewSkill()
-        self.new_skill.path = self.path
+        self.new_skill = NewSkill(self)
 
     def list(self):
         return [
@@ -97,8 +96,9 @@ class Skills:
 
 
 class NewSkill:
-    def __init__(self):
+    def __init__(self, skills):
         self.path = ""
+        self.skills = skills
 
     def create(self):
         self.steps = []
@@ -180,18 +180,27 @@ def {normalized_name}(step=0):
         if step + 1 < len(steps):
             print("After completing the above, I need you to run {normalized_name}(step=" + str(step + 1) + ") immediatly.")
         else:
-            print("You have completed all the steps, the task/skill has been run!")
+            print("After executing the code, you have completed all the steps, the task/skill has been run!")
     else:
         print("The specified step number exceeds the available steps. Please run with a valid step number.")
 '''.strip()
 
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
-        with open(self.path + "/" + normalized_name + ".py", "w") as file:
+        skill_file_path = os.path.join(self.skills.path, f"{normalized_name}.py")
+
+        if not os.path.exists(self.skills.path):
+            os.makedirs(self.skills.path)
+
+        with open(skill_file_path, "w") as file:
             file.write(skill_string)
 
-        print("SKILL SAVED:", self.name.upper())
+        # Execute the code in skill_string to define the function
+        exec(skill_string)
 
-        print(
-            "Teaching session finished. Tell the user that the skill above has been saved. Great work!"
-        )
+        # Verify that the file was written
+        if os.path.exists(skill_file_path):
+            print("SKILL SAVED:", self.name.upper())
+            print(
+                "Teaching session finished. Tell the user that the skill above has been saved. Great work!"
+            )
+        else:
+            print(f"Error: Failed to write skill file to {skill_file_path}")
