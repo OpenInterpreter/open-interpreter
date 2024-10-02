@@ -285,6 +285,7 @@ In the interactive mode, you can use the below commands to enhance your experien
 - `%undo`: Removes the previous user message and the AI's response from the message history.
 - `%tokens [prompt]`: (_Experimental_) Calculate the tokens that will be sent with the next prompt as context and estimate their cost. Optionally calculate the tokens and estimated cost of a `prompt` if one is provided. Relies on [LiteLLM's `cost_per_token()` method](https://docs.litellm.ai/docs/completion/token_usage#2-cost_per_token) for estimated costs.
 - `%help`: Show the help message.
+- `>`: Start speech recognition mode using google's speech recognition API. Saying `exit` returns to text mode. Requires an internet connection and enabling the [speech library](https://nerdvittles.com/creating-an-api-key-for-google-speech-recognition/).
 
 ### Configuration / Profiles
 
