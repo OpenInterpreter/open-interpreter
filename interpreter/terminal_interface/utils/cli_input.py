@@ -1,6 +1,6 @@
 def cli_input(prompt: str = "") -> str:
-    start_marker = "```"
-    end_marker = "```"
+    start_marker = '"""'
+    end_marker = '"""'
     message = input(prompt)
 
     # Multi-line input mode

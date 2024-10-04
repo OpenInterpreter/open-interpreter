@@ -1,12 +1,13 @@
 import os
 import platform
+import signal
 import time
 from random import randint
 
 import pytest
 
 #####
-from interpreter import OpenInterpreter
+from interpreter import AsyncInterpreter, OpenInterpreter
 from interpreter.terminal_interface.utils.count_tokens import (
     count_messages_tokens,
     count_tokens,
@@ -15,11 +16,762 @@ from interpreter.terminal_interface.utils.count_tokens import (
 interpreter = OpenInterpreter()
 #####
 
+import multiprocessing
 import threading
 import time
 
 import pytest
 from websocket import create_connection
+
+
+def test_hallucinations():
+    # We should be resiliant to common hallucinations.
+
+    code = """10+12executeexecute\n"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+    code = """{                                                                             
+    "language": "python",                                                        
+    "code": "10+12"                                                        
+  }"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+    code = """functions.execute({                                                                             
+    "language": "python",                                                        
+    "code": "10+12"                                                        
+  })"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content") == "22"
+            break
+
+    code = """{language: "python", code: "print('hello')" }"""
+
+    interpreter.messages = [
+        {"role": "assistant", "type": "code", "format": "python", "content": code}
+    ]
+    for chunk in interpreter._respond_and_store():
+        if chunk.get("format") == "output":
+            assert chunk.get("content").strip() == "hello"
+            break
+
+
+def run_auth_server():
+    os.environ["INTERPRETER_REQUIRE_ACKNOWLEDGE"] = "True"
+    os.environ["INTERPRETER_API_KEY"] = "testing"
+    async_interpreter = AsyncInterpreter()
+    async_interpreter.print = False
+    async_interpreter.server.run()
+
+
+# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+def test_authenticated_acknowledging_breaking_server():
+    """
+    Test the server when we have authentication and acknowledging one.
+
+    I know this is bad, just trying to test quickly!
+    """
+
+    # Start the server in a new process
+
+    process = multiprocessing.Process(target=run_auth_server)
+    process.start()
+
+    # Give the server a moment to start
+    time.sleep(2)
+
+    import asyncio
+    import json
+
+    import requests
+    import websockets
+
+    async def test_fastapi_server():
+        import asyncio
+
+        async with websockets.connect("ws://localhost:8000/") as websocket:
+            # Connect to the websocket
+            print("Connected to WebSocket")
+
+            # Sending message via WebSocket
+            await websocket.send(json.dumps({"auth": "testing"}))
+
+            # Sending POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "llm": {
+                    "model": "gpt-4o",
+                    "execution_instructions": "",
+                    "supports_functions": False,
+                },
+                "system_message": "You are a poem writing bot. Do not do anything but respond with a poem.",
+                "auto_run": True,
+            }
+            response = requests.post(
+                post_url, json=settings, headers={"X-API-KEY": "testing"}
+            )
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "Write a short poem about Seattle.",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            max_chunks = 5
+
+            poem = ""
+            while True:
+                max_chunks -= 1
+                if max_chunks == 0:
+                    break
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "id" in message_data:
+                    await websocket.send(json.dumps({"ack": message_data["id"]}))
+                if "error" in message_data:
+                    raise Exception(str(message_data))
+                print("Received from WebSocket:", message_data)
+                if type(message_data.get("content")) == str:
+                    poem += message_data.get("content")
+                    print(message_data.get("content"), end="", flush=True)
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    raise (
+                        Exception(
+                            "It shouldn't have finished this soon, accumulated_content is: "
+                            + accumulated_content
+                        )
+                    )
+
+            await websocket.close()
+            print("Disconnected from WebSocket")
+
+        time.sleep(3)
+
+        # Now let's hilariously keep going
+        print("RESUMING")
+
+        async with websockets.connect("ws://localhost:8000/") as websocket:
+            # Connect to the websocket
+            print("Connected to WebSocket")
+
+            # Sending message via WebSocket
+            await websocket.send(json.dumps({"auth": "testing"}))
+
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "id" in message_data:
+                    await websocket.send(json.dumps({"ack": message_data["id"]}))
+                if "error" in message_data:
+                    raise Exception(str(message_data))
+                print("Received from WebSocket:", message_data)
+                message_data.pop("id", "")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    break
+                if type(message_data.get("content")) == str:
+                    poem += message_data.get("content")
+                    print(message_data.get("content"), end="", flush=True)
+
+            time.sleep(1)
+            print("Is this a normal poem?")
+            print(poem)
+            time.sleep(1)
+
+    # Get the current event loop and run the test function
+    loop = asyncio.get_event_loop()
+    try:
+        loop.run_until_complete(test_fastapi_server())
+    finally:
+        # Kill server process
+        process.terminate()
+        os.kill(process.pid, signal.SIGKILL)  # Send SIGKILL signal
+        process.join()
+
+
+def run_server():
+    os.environ["INTERPRETER_REQUIRE_ACKNOWLEDGE"] = "False"
+    if "INTERPRETER_API_KEY" in os.environ:
+        del os.environ["INTERPRETER_API_KEY"]
+    async_interpreter = AsyncInterpreter()
+    async_interpreter.print = False
+    async_interpreter.server.run()
+
+
+# @pytest.mark.skip(reason="Requires uvicorn, which we don't require by default")
+def test_server():
+    # Start the server in a new process
+
+    process = multiprocessing.Process(target=run_server)
+    process.start()
+
+    # Give the server a moment to start
+    time.sleep(2)
+
+    import asyncio
+    import json
+
+    import requests
+    import websockets
+
+    async def test_fastapi_server():
+        import asyncio
+
+        async with websockets.connect("ws://localhost:8000/") as websocket:
+            # Connect to the websocket
+            print("Connected to WebSocket")
+
+            # Sending message via WebSocket
+            await websocket.send(json.dumps({"auth": "dummy-api-key"}))
+
+            # Sending POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "llm": {"model": "gpt-4o-mini"},
+                "messages": [
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "The secret word is 'crunk'.",
+                    },
+                    {"role": "assistant", "type": "message", "content": "Understood."},
+                ],
+                "custom_instructions": "",
+                "auto_run": True,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's the secret word?",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if type(message_data.get("content")) == str:
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "crunk" in accumulated_content
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "llm": {"model": "gpt-4o-mini"},
+                "messages": [
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "The secret word is 'barloney'.",
+                    },
+                    {"role": "assistant", "type": "message", "content": "Understood."},
+                ],
+                "custom_instructions": "",
+                "auto_run": True,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's the secret word?",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "barloney" in accumulated_content
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {
+                "messages": [],
+                "custom_instructions": "",
+                "auto_run": False,
+                "verbose": False,
+            }
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "What's 239023*79043? Use Python.",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "message", "end": True})
+            )
+            print("WebSocket chunks sent")
+
+            # Wait for response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            time.sleep(5)
+
+            # Send a GET request to /settings/messages
+            get_url = "http://localhost:8000/settings/messages"
+            response = requests.get(get_url)
+            print("GET request sent, response:", response.json())
+
+            # Assert that the last message has a type of 'code'
+            response_json = response.json()
+            if isinstance(response_json, str):
+                response_json = json.loads(response_json)
+            messages = response_json["messages"] if "messages" in response_json else []
+            assert messages[-1]["type"] == "code"
+            assert "18893094989" not in accumulated_content.replace(",", "")
+
+            # Send go message
+            await websocket.send(
+                json.dumps({"role": "user", "type": "command", "start": True})
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "command",
+                        "content": "go",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps({"role": "user", "type": "command", "end": True})
+            )
+
+            # Wait for a specific response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if message_data.get("content"):
+                    if type(message_data.get("content")) == str:
+                        accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            assert "18893094989" in accumulated_content.replace(",", "")
+
+            #### TEST FILE ####
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {"messages": [], "auto_run": True}
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            # Sending messages via WebSocket
+            await websocket.send(json.dumps({"role": "user", "start": True}))
+            print("sent", json.dumps({"role": "user", "start": True}))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "Does this file exist?",
+                    }
+                )
+            )
+            print(
+                "sent",
+                {
+                    "role": "user",
+                    "type": "message",
+                    "content": "Does this file exist?",
+                },
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "file",
+                        "format": "path",
+                        "content": "/something.txt",
+                    }
+                )
+            )
+            print(
+                "sent",
+                {
+                    "role": "user",
+                    "type": "file",
+                    "format": "path",
+                    "content": "/something.txt",
+                },
+            )
+            await websocket.send(json.dumps({"role": "user", "end": True}))
+            print("WebSocket chunks sent")
+
+            # Wait for response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if type(message_data.get("content")) == str:
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            # Get messages
+            get_url = "http://localhost:8000/settings/messages"
+            response_json = requests.get(get_url).json()
+            print("GET request sent, response:", response_json)
+            if isinstance(response_json, str):
+                response_json = json.loads(response_json)
+            messages = response_json["messages"]
+
+            response = interpreter.computer.ai.chat(
+                str(messages)
+                + "\n\nIn the conversation above, does the assistant think the file exists? Yes or no? Only reply with one word— 'yes' or 'no'."
+            )
+            assert response.strip(" \n.").lower() == "no"
+
+            #### TEST IMAGES ####
+
+            # Send another POST request
+            post_url = "http://localhost:8000/settings"
+            settings = {"messages": [], "auto_run": True}
+            response = requests.post(post_url, json=settings)
+            print("POST request sent, response:", response.json())
+
+            base64png = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC"
+
+            # Sending messages via WebSocket
+            await websocket.send(json.dumps({"role": "user", "start": True}))
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "message",
+                        "content": "describe this image",
+                    }
+                )
+            )
+            await websocket.send(
+                json.dumps(
+                    {
+                        "role": "user",
+                        "type": "image",
+                        "format": "base64.png",
+                        "content": base64png,
+                    }
+                )
+            )
+            # await websocket.send(
+            #     json.dumps(
+            #         {
+            #             "role": "user",
+            #             "type": "image",
+            #             "format": "path",
+            #             "content": "/Users/killianlucas/Documents/GitHub/open-interpreter/screen.png",
+            #         }
+            #     )
+            # )
+
+            await websocket.send(json.dumps({"role": "user", "end": True}))
+            print("WebSocket chunks sent")
+
+            # Wait for response
+            accumulated_content = ""
+            while True:
+                message = await websocket.recv()
+                message_data = json.loads(message)
+                if "error" in message_data:
+                    raise Exception(message_data["content"])
+                print("Received from WebSocket:", message_data)
+                if type(message_data.get("content")) == str:
+                    accumulated_content += message_data.get("content")
+                if message_data == {
+                    "role": "server",
+                    "type": "status",
+                    "content": "complete",
+                }:
+                    print("Received expected message from server")
+                    break
+
+            # Get messages
+            get_url = "http://localhost:8000/settings/messages"
+            response_json = requests.get(get_url).json()
+            print("GET request sent, response:", response_json)
+            if isinstance(response_json, str):
+                response_json = json.loads(response_json)
+            messages = response_json["messages"]
+
+            response = interpreter.computer.ai.chat(
+                str(messages)
+                + "\n\nIn the conversation above, does the assistant appear to be able to describe the image of a gradient? Yes or no? Only reply with one word— 'yes' or 'no'."
+            )
+            assert response.strip(" \n.").lower() == "yes"
+
+            # Sending POST request to /run endpoint with code to kill a thread in Python
+            # actually wait i dont think this will work..? will just kill the python interpreter
+            post_url = "http://localhost:8000/run"
+            code_data = {
+                "code": "import os, signal; os.kill(os.getpid(), signal.SIGINT)",
+                "language": "python",
+            }
+            response = requests.post(post_url, json=code_data)
+            print("POST request sent, response:", response.json())
+
+    # Get the current event loop and run the test function
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(test_fastapi_server())
+    # Kill server process
+    process.terminate()
+    os.kill(process.pid, signal.SIGKILL)  # Send SIGKILL signal
+    process.join()
+
+
+@pytest.mark.skip(reason="Mac only")
+def test_sms():
+    sms = interpreter.computer.sms
+
+    # Get the last 5 messages
+    messages = sms.get(limit=5)
+    print(messages)
+
+    # Search messages for a substring
+    search_results = sms.get(substring="i love you", limit=100)
+    print(search_results)
+
+    assert False
+
+
+@pytest.mark.skip(reason="Mac only")
+def test_pytes():
+    import os
+
+    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
+    files_on_desktop = [f for f in os.listdir(desktop_path) if f.endswith(".png")]
+    if files_on_desktop:
+        first_file = files_on_desktop[0]
+        first_file_path = os.path.join(desktop_path, first_file)
+        print(first_file_path)
+        ocr = interpreter.computer.vision.ocr(path=first_file_path)
+        print(ocr)
+        print("what")
+    else:
+        print("No files found on Desktop.")
+
+    assert False
+
+
+def test_ai_chat():
+    print(interpreter.computer.ai.chat("hi"))
+
+
+def test_generator():
+    """
+    Sends two messages, makes sure everything is correct with display both on and off.
+    """
+
+    interpreter.llm.model = "gpt-4o-mini"
+
+    for tests in [
+        {"query": "What's 38023*40334? Use Python", "display": True},
+        {"query": "What's 2334*34335555? Use Python", "display": True},
+        {"query": "What's 3545*22? Use Python", "display": False},
+        {"query": "What's 0.0021*3433335555? Use Python", "display": False},
+    ]:
+        assistant_message_found = False
+        console_output_found = False
+        active_line_found = False
+        flag_checker = []
+
+        for chunk in interpreter.chat(
+            tests["query"]
+            + "\nNo talk or plan, just immediately code, then tell me the answer.",
+            stream=True,
+            display=True,
+        ):
+            print(chunk)
+            # Check if chunk has the right schema
+            assert "role" in chunk, "Chunk missing 'role'"
+            assert "type" in chunk, "Chunk missing 'type'"
+            if "start" not in chunk and "end" not in chunk:
+                assert "content" in chunk, "Chunk missing 'content'"
+            if "format" in chunk:
+                assert isinstance(chunk["format"], str), "'format' should be a string"
+
+            flag_checker.append(chunk)
+
+            # Check if assistant message, console output, and active line are found
+            if chunk["role"] == "assistant" and chunk["type"] == "message":
+                assistant_message_found = True
+            if chunk["role"] == "computer" and chunk["type"] == "console":
+                console_output_found = True
+            if "format" in chunk:
+                if (
+                    chunk["role"] == "computer"
+                    and chunk["type"] == "console"
+                    and chunk["format"] == "active_line"
+                ):
+                    active_line_found = True
+
+        # Ensure all flags are proper
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "start": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code start' flags"
+        assert (
+            flag_checker.count(
+                {"role": "assistant", "type": "code", "format": "python", "end": True}
+            )
+            == 1
+        ), "Incorrect number of 'assistant code end' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "start": True})
+            == 1
+        ), "Incorrect number of 'assistant message start' flags"
+        assert (
+            flag_checker.count({"role": "assistant", "type": "message", "end": True})
+            == 1
+        ), "Incorrect number of 'assistant message end' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "start": True})
+            == 1
+        ), "Incorrect number of 'computer console output start' flags"
+        assert (
+            flag_checker.count({"role": "computer", "type": "console", "end": True})
+            == 1
+        ), "Incorrect number of 'computer console output end' flags"
+
+        # Assert that assistant message, console output, and active line were found
+        assert assistant_message_found, "No assistant message was found"
+        assert console_output_found, "No console output was found"
+        assert active_line_found, "No active line was found"
 
 
 @pytest.mark.skip(reason="Requires open-interpreter[local]")
@@ -44,15 +796,15 @@ def test_m_vision():
     ]
 
     interpreter.llm.supports_vision = False
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
-    interpreter.force_task_completion = True
+    interpreter.loop = True
 
     interpreter.chat(messages)
 
-    interpreter.force_task_completion = False
+    interpreter.loop = False
     import time
 
     time.sleep(10)
@@ -81,7 +833,7 @@ def test_skills():
 
     import json
 
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o-mini"
 
     messages = ["USER: Hey can you search the web for me?\nAI: Sure!"]
 
@@ -335,92 +1087,11 @@ def setup_function():
     interpreter.reset()
     interpreter.llm.temperature = 0
     interpreter.auto_run = True
-    interpreter.llm.model = "gpt-4-turbo"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.llm.context_window = 123000
     interpreter.llm.max_tokens = 4096
     interpreter.llm.supports_functions = True
     interpreter.verbose = False
-
-
-def test_generator():
-    """
-    Sends two messages, makes sure everything is correct with display both on and off.
-    """
-
-    for tests in [
-        {"query": "What's 38023*40334? Use Python", "display": True},
-        {"query": "What's 2334*34335555? Use Python", "display": True},
-        {"query": "What's 3545*22? Use Python", "display": False},
-        {"query": "What's 0.0021*3433335555? Use Python", "display": False},
-    ]:
-        assistant_message_found = False
-        console_output_found = False
-        active_line_found = False
-        flag_checker = []
-        for chunk in interpreter.chat(
-            tests["query"]
-            + "\nNo talk or plan, just immediatly code, then tell me the answer.",
-            stream=True,
-            display=tests["display"],
-        ):
-            print(chunk)
-            # Check if chunk has the right schema
-            assert "role" in chunk, "Chunk missing 'role'"
-            assert "type" in chunk, "Chunk missing 'type'"
-            if "start" not in chunk and "end" not in chunk:
-                assert "content" in chunk, "Chunk missing 'content'"
-            if "format" in chunk:
-                assert isinstance(chunk["format"], str), "'format' should be a string"
-
-            flag_checker.append(chunk)
-
-            # Check if assistant message, console output, and active line are found
-            if chunk["role"] == "assistant" and chunk["type"] == "message":
-                assistant_message_found = True
-            if chunk["role"] == "computer" and chunk["type"] == "console":
-                console_output_found = True
-            if "format" in chunk:
-                if (
-                    chunk["role"] == "computer"
-                    and chunk["type"] == "console"
-                    and chunk["format"] == "active_line"
-                ):
-                    active_line_found = True
-
-        # Ensure all flags are proper
-        assert (
-            flag_checker.count(
-                {"role": "assistant", "type": "code", "format": "python", "start": True}
-            )
-            == 1
-        ), "Incorrect number of 'assistant code start' flags"
-        assert (
-            flag_checker.count(
-                {"role": "assistant", "type": "code", "format": "python", "end": True}
-            )
-            == 1
-        ), "Incorrect number of 'assistant code end' flags"
-        assert (
-            flag_checker.count({"role": "assistant", "type": "message", "start": True})
-            == 1
-        ), "Incorrect number of 'assistant message start' flags"
-        assert (
-            flag_checker.count({"role": "assistant", "type": "message", "end": True})
-            == 1
-        ), "Incorrect number of 'assistant message end' flags"
-        assert (
-            flag_checker.count({"role": "computer", "type": "console", "start": True})
-            == 1
-        ), "Incorrect number of 'computer console output start' flags"
-        assert (
-            flag_checker.count({"role": "computer", "type": "console", "end": True})
-            == 1
-        ), "Incorrect number of 'computer console output end' flags"
-
-        # Assert that assistant message, console output, and active line were found
-        assert assistant_message_found, "No assistant message was found"
-        assert console_output_found, "No console output was found"
-        assert active_line_found, "No active line was found"
 
 
 @pytest.mark.skip(
@@ -432,7 +1103,7 @@ def test_long_message():
             "role": "user",
             "type": "message",
             "content": "ALKI" * 20000
-            + "\nwhat are the four characters I just sent you? dont run ANY code, just tell me the characters. DO NOT RUN CODE. DO NOT PLAN. JUST TELL ME THE CHARACTERS RIGHT NOW. ONLY respond with the 4 characters, NOTHING else. The first 4 characters of your response should be the 4 characters I sent you.",
+            + "\nwhat are the four characters I just sent you? don't run ANY code, just tell me the characters. DO NOT RUN CODE. DO NOT PLAN. JUST TELL ME THE CHARACTERS RIGHT NOW. ONLY respond with the 4 characters, NOTHING else. The first 4 characters of your response should be the 4 characters I sent you.",
         }
     ]
     interpreter.llm.context_window = 300
@@ -479,16 +1150,16 @@ def test_vision():
     ]
 
     interpreter.llm.supports_vision = True
-    interpreter.llm.model = "gpt-4-vision-preview"
+    interpreter.llm.model = "gpt-4o-mini"
     interpreter.system_message += "\nThe user will show you an image of the code you write. You can view images directly.\n\nFor HTML: This will be run STATELESSLY. You may NEVER write '<!-- previous code here... --!>' or `<!-- header will go here -->` or anything like that. It is CRITICAL TO NEVER WRITE PLACEHOLDERS. Placeholders will BREAK it. You must write the FULL HTML CODE EVERY TIME. Therefore you cannot write HTML piecemeal—write all the HTML, CSS, and possibly Javascript **in one step, in one code block**. The user will help you review it visually.\nIf the user submits a filepath, you will also see the image. The filepath and user image will both be in the user's message.\n\nIf you use `plt.show()`, the resulting image will be sent to you. However, if you use `PIL.Image.show()`, the resulting image will NOT be sent to you."
-    interpreter.llm.supports_functions = False
+    interpreter.llm.supports_functions = True
     interpreter.llm.context_window = 110000
     interpreter.llm.max_tokens = 4096
-    interpreter.force_task_completion = True
+    interpreter.loop = True
 
     interpreter.chat(messages)
 
-    interpreter.force_task_completion = False
+    interpreter.loop = False
 
 
 def test_multiple_instances():

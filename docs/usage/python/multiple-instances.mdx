@@ -4,13 +4,13 @@ To create multiple instances, use the base class, `OpenInterpreter`:
 from interpreter import OpenInterpreter
 
 agent_1 = OpenInterpreter()
-agent_1.system_message = "This is a seperate instance."
+agent_1.system_message = "This is a separate instance."
 
 agent_2 = OpenInterpreter()
 agent_2.system_message = "This is yet another instance."
 ```
 
-For fun, you could make these instances talk to eachother:
+For fun, you could make these instances talk to each other:
 
 ```python
 def swap_roles(messages):
@@ -24,7 +24,7 @@ def swap_roles(messages):
 agents = [agent_1, agent_2]
 
 # Kick off the conversation
-messages = [{"role": "user", "message": "Hello!"}]
+messages = [{"role": "user", "type": "message", "content": "Hello!"}]
 
 while True:
     for agent in agents:

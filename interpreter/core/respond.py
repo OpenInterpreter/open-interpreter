@@ -1,10 +1,12 @@
 import json
+import os
 import re
+import time
 import traceback
 
+os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
-from ..terminal_interface.utils.display_markdown_message import display_markdown_message
 from .render_message import render_message
 
 
@@ -15,7 +17,7 @@ def respond(interpreter):
     """
 
     last_unsupported_code = ""
-    insert_force_task_completion_message = False
+    insert_loop_message = False
 
     while True:
         ## RENDER SYSTEM MESSAGE ##
@@ -31,11 +33,19 @@ def respond(interpreter):
         if interpreter.custom_instructions:
             system_message += "\n\n" + interpreter.custom_instructions
 
+        # Add computer API system message
+        if interpreter.computer.import_computer_api:
+            if interpreter.computer.system_message not in system_message:
+                system_message = (
+                    system_message + "\n\n" + interpreter.computer.system_message
+                )
+
         # Storing the messages so they're accessible in the interpreter's computer
-        if interpreter.sync_computer:
-            output = interpreter.computer.run(
-                "python", f"messages={interpreter.messages}"
-            )
+        # no... this is a huge time sink.....
+        # if interpreter.sync_computer:
+        #     output = interpreter.computer.run(
+        #         "python", f"messages={interpreter.messages}"
+        #     )
 
         ## Rendering ↓
         rendered_system_message = render_message(interpreter, system_message)
@@ -51,70 +61,91 @@ def respond(interpreter):
         messages_for_llm = interpreter.messages.copy()
         messages_for_llm = [rendered_system_message] + messages_for_llm
 
-        if insert_force_task_completion_message:
+        if insert_loop_message:
             messages_for_llm.append(
                 {
                     "role": "user",
                     "type": "message",
-                    "content": force_task_completion_message,
+                    "content": loop_message,
                 }
             )
-            # Yield two newlines to seperate the LLMs reply from previous messages.
+            # Yield two newlines to separate the LLMs reply from previous messages.
             yield {"role": "assistant", "type": "message", "content": "\n\n"}
-            insert_force_task_completion_message = False
+            insert_loop_message = False
 
         ### RUN THE LLM ###
 
-        try:
-            for chunk in interpreter.llm.run(messages_for_llm):
-                yield {"role": "assistant", **chunk}
+        assert (
+            len(interpreter.messages) > 0
+        ), "User message was not passed in. You need to pass in at least one message."
 
-        except litellm.exceptions.BudgetExceededError:
-            display_markdown_message(
-                f"""> Max budget exceeded
+        if (
+            interpreter.messages[-1]["type"] != "code"
+        ):  # If it is, we should run the code (we do below)
+            try:
+                for chunk in interpreter.llm.run(messages_for_llm):
+                    yield {"role": "assistant", **chunk}
 
-                **Session spend:** ${litellm._current_cost}
-                **Max budget:** ${interpreter.max_budget}
+            except litellm.exceptions.BudgetExceededError:
+                interpreter.display_message(
+                    f"""> Max budget exceeded
 
-                Press CTRL-C then run `interpreter --max_budget [higher USD amount]` to proceed.
-            """
-            )
-            break
-        # Provide extra information on how to change API keys, if we encounter that error
-        # (Many people writing GitHub issues were struggling with this)
-        except Exception as e:
-            if (
-                interpreter.offline == False
-                and "auth" in str(e).lower()
-                or "api key" in str(e).lower()
-            ):
-                output = traceback.format_exc()
-                raise Exception(
-                    f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here'. Update your ~/.zshrc on MacOS or ~/.bashrc on Linux with the new key if it has already been persisted there.,\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
+                    **Session spend:** ${litellm._current_cost}
+                    **Max budget:** ${interpreter.max_budget}
+
+                    Press CTRL-C then run `interpreter --max_budget [higher USD amount]` to proceed.
+                """
                 )
-            elif interpreter.offline == False and "not have access" in str(e).lower():
-                response = input(
-                    f"  You do not have access to {interpreter.llm.model}. You will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use `GPT-4`.\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try GPT-3.5-TURBO instead? (y/n)\n\n  "
-                )
-                print("")  # <- Aesthetic choice
+                break
 
-                if response.strip().lower() == "y":
-                    interpreter.llm.model = "gpt-3.5-turbo-1106"
-                    interpreter.llm.context_window = 16000
-                    interpreter.llm.max_tokens = 4096
-                    interpreter.llm.supports_functions = True
-                    display_markdown_message(
-                        f"> Model set to `{interpreter.llm.model}`"
-                    )
-                else:
+                # Provide extra information on how to change API keys, if we encounter that error
+                # (Many people writing GitHub issues were struggling with this)
+
+            except Exception as e:
+                error_message = str(e).lower()
+                if (
+                    interpreter.offline == False
+                    and "auth" in error_message
+                    or "api key" in error_message
+                ):
+                    output = traceback.format_exc()
                     raise Exception(
-                        "\n\nYou will need to add a payment method and purchase credits for the OpenAI API billing page (different from ChatGPT) to use GPT-4.\n\nhttps://platform.openai.com/account/billing/overview"
+                        f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here'. Update your ~/.zshrc on MacOS or ~/.bashrc on Linux with the new key if it has already been persisted there.,\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
                     )
-            elif interpreter.offline and not interpreter.os:
-                print(traceback.format_exc())
-                raise Exception("Error occurred. " + str(e))
-            else:
-                raise
+                elif (
+                    interpreter.offline == False and "not have access" in str(e).lower()
+                ):
+                    """
+                    Check for invalid model in error message and then fallback.
+                    """
+                    if (
+                        "invalid model" in error_message
+                        or "model does not exist" in error_message
+                    ):
+                        provider_message = f"\n\nThe model '{interpreter.llm.model}' does not exist or is invalid. Please check the model name and try again.\n\nWould you like to try Open Interpreter's hosted `i` model instead? (y/n)\n\n  "
+                    elif "groq" in error_message:
+                        provider_message = f"\n\nYou do not have access to {interpreter.llm.model}. Please check with Groq for more details.\n\nWould you like to try Open Interpreter's hosted `i` model instead? (y/n)\n\n  "
+                    else:
+                        provider_message = f"\n\nYou do not have access to {interpreter.llm.model}. If you are using an OpenAI model, you may need to add a payment method and purchase credits for the OpenAI API billing page (this is different from ChatGPT Plus).\n\nhttps://platform.openai.com/account/billing/overview\n\nWould you like to try Open Interpreter's hosted `i` model instead? (y/n)\n\n"
+
+                    print(provider_message)
+
+                    response = input()
+                    print("")  # <- Aesthetic choice
+
+                    if response.strip().lower() == "y":
+                        interpreter.llm.model = "i"
+                        interpreter.display_message(f"> Model set to `i`")
+                        interpreter.display_message(
+                            "***Note:*** *Conversations with this model will be used to train our open-source model.*\n"
+                        )
+
+                    else:
+                        raise
+                elif interpreter.offline and not interpreter.os:
+                    raise
+                else:
+                    raise
 
         ### RUN CODE (if it's there) ###
 
@@ -131,10 +162,83 @@ def respond(interpreter):
                     code = code[2:].strip()
                     if interpreter.verbose:
                         print("Removing `\n")
+                    interpreter.messages[-1]["content"] = code  # So the LLM can see it.
 
-                if language == "text":
+                # A common hallucination
+                if code.startswith("functions.execute("):
+                    edited_code = code.replace("functions.execute(", "").rstrip(")")
+                    try:
+                        code_dict = json.loads(edited_code)
+                        language = code_dict.get("language", language)
+                        code = code_dict.get("code", code)
+                        interpreter.messages[-1][
+                            "content"
+                        ] = code  # So the LLM can see it.
+                        interpreter.messages[-1][
+                            "format"
+                        ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
+                # print(code)
+                # print("---")
+                # time.sleep(2)
+
+                if code.strip().endswith("executeexecute"):
+                    code = code.replace("executeexecute", "")
+                    try:
+                        interpreter.messages[-1][
+                            "content"
+                        ] = code  # So the LLM can see it.
+                    except:
+                        pass
+
+                if code.replace("\n", "").replace(" ", "").startswith('{"language":'):
+                    try:
+                        code_dict = json.loads(code)
+                        if set(code_dict.keys()) == {"language", "code"}:
+                            language = code_dict["language"]
+                            code = code_dict["code"]
+                            interpreter.messages[-1][
+                                "content"
+                            ] = code  # So the LLM can see it.
+                            interpreter.messages[-1][
+                                "format"
+                            ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
+                if code.replace("\n", "").replace(" ", "").startswith("{language:"):
+                    try:
+                        code = code.replace("language: ", '"language": ').replace(
+                            "code: ", '"code": '
+                        )
+                        code_dict = json.loads(code)
+                        if set(code_dict.keys()) == {"language", "code"}:
+                            language = code_dict["language"]
+                            code = code_dict["code"]
+                            interpreter.messages[-1][
+                                "content"
+                            ] = code  # So the LLM can see it.
+                            interpreter.messages[-1][
+                                "format"
+                            ] = language  # So the LLM can see it.
+                    except:
+                        pass
+
+                if (
+                    language == "text"
+                    or language == "markdown"
+                    or language == "plaintext"
+                ):
                     # It does this sometimes just to take notes. Let it, it's useful.
                     # In the future we should probably not detect this behavior as code at all.
+                    real_content = interpreter.messages[-1]["content"]
+                    interpreter.messages[-1] = {
+                        "role": "assistant",
+                        "type": "message",
+                        "content": f"```\n{real_content}\n```",
+                    }
                     continue
 
                 # Is this language enabled/supported?
@@ -155,6 +259,16 @@ def respond(interpreter):
                     else:
                         break
 
+                # Is there any code at all?
+                if code.strip() == "":
+                    yield {
+                        "role": "computer",
+                        "type": "console",
+                        "format": "output",
+                        "content": "Code block was empty. Please try again, be sure to write code before executing.",
+                    }
+                    continue
+
                 # Yield a message, such that the user can stop code execution if they want to
                 try:
                     yield {
@@ -171,6 +285,11 @@ def respond(interpreter):
                     # The user might exit here.
                     # We need to tell python what we (the generator) should do if they exit
                     break
+
+                # They may have edited the code! Grab it again
+                code = [m for m in interpreter.messages if m["type"] == "code"][-1][
+                    "content"
+                ]
 
                 # don't let it import computer — we handle that!
                 if interpreter.computer.import_computer_api and language == "python":
@@ -189,12 +308,14 @@ def respond(interpreter):
                     code = re.sub(r"import computer\.\w+\n", "pass\n", code)
                     # If it does this it sees the screenshot twice (which is expected jupyter behavior)
                     if any(
-                        code.split("\n")[-1].startswith(text)
-                        for text in [
-                            "computer.display.view",
-                            "computer.display.screenshot",
-                            "computer.view",
-                            "computer.screenshot",
+                        [
+                            code.strip().split("\n")[-1].startswith(text)
+                            for text in [
+                                "computer.display.view",
+                                "computer.display.screenshot",
+                                "computer.view",
+                                "computer.screenshot",
+                            ]
                         ]
                     ):
                         code = code + "\npass"
@@ -211,15 +332,16 @@ def respond(interpreter):
                         computer_dict = interpreter.computer.to_dict()
                         if "_hashes" in computer_dict:
                             computer_dict.pop("_hashes")
-                        if computer_dict:
-                            computer_json = json.dumps(computer_dict)
-                            sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
-                            interpreter.computer.run("python", sync_code)
+                        if "system_message" in computer_dict:
+                            computer_dict.pop("system_message")
+                        computer_json = json.dumps(computer_dict)
+                        sync_code = f"""import json\ncomputer.load_dict(json.loads('''{computer_json}'''))"""
+                        interpreter.computer.run("python", sync_code)
                 except Exception as e:
                     if interpreter.debug:
                         raise
                     print(str(e))
-                    print("Continuing...")
+                    print("Failed to sync iComputer with your Computer. Continuing...")
 
                 ## ↓ CODE IS RUN HERE
 
@@ -234,7 +356,15 @@ def respond(interpreter):
                         # sync up the interpreter's computer with your computer
                         result = interpreter.computer.run(
                             "python",
-                            "import json\ncomputer_dict = computer.to_dict()\nif computer_dict:\n  if '_hashes' in computer_dict:\n    computer_dict.pop('_hashes')\n  print(json.dumps(computer_dict))",
+                            """
+                            import json
+                            computer_dict = computer.to_dict()
+                            if '_hashes' in computer_dict:
+                                computer_dict.pop('_hashes')
+                            if "system_message" in computer_dict:
+                                computer_dict.pop("system_message")
+                            print(json.dumps(computer_dict))
+                            """,
                         )
                         result = result[-1]["content"]
                         interpreter.computer.load_dict(
@@ -244,7 +374,7 @@ def respond(interpreter):
                     if interpreter.debug:
                         raise
                     print(str(e))
-                    print("Continuing.")
+                    print("Failed to sync your Computer with iComputer. Continuing.")
 
                 # yield final "active_line" message, as if to say, no more code is running. unlightlight active lines
                 # (is this a good idea? is this our responsibility? i think so — we're saying what line of code is running! ...?)
@@ -269,28 +399,28 @@ def respond(interpreter):
             ## LOOP MESSAGE
             # This makes it utter specific phrases if it doesn't want to be told to "Proceed."
 
-            force_task_completion_message = interpreter.force_task_completion_message
+            loop_message = interpreter.loop_message
             if interpreter.os:
-                force_task_completion_message = force_task_completion_message.replace(
+                loop_message = loop_message.replace(
                     "If the entire task I asked for is done,",
                     "If the entire task I asked for is done, take a screenshot to verify it's complete, or if you've already taken a screenshot and verified it's complete,",
                 )
-            force_task_completion_breakers = interpreter.force_task_completion_breakers
+            loop_breakers = interpreter.loop_breakers
 
             if (
-                interpreter.force_task_completion
+                interpreter.loop
                 and interpreter.messages
                 and interpreter.messages[-1].get("role", "") == "assistant"
                 and not any(
                     task_status in interpreter.messages[-1].get("content", "")
-                    for task_status in force_task_completion_breakers
+                    for task_status in loop_breakers
                 )
             ):
-                # Remove past force_task_completion_message messages
+                # Remove past loop_message messages
                 interpreter.messages = [
                     message
                     for message in interpreter.messages
-                    if message.get("content", "") != force_task_completion_message
+                    if message.get("content", "") != loop_message
                 ]
                 # Combine adjacent assistant messages, so hopefully it learns to just keep going!
                 combined_messages = []
@@ -307,8 +437,8 @@ def respond(interpreter):
                         combined_messages.append(message)
                 interpreter.messages = combined_messages
 
-                # Send model the force_task_completion_message:
-                insert_force_task_completion_message = True
+                # Send model the loop_message:
+                insert_loop_message = True
 
                 continue
 

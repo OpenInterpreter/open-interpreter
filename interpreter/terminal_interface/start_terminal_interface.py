@@ -1,16 +1,18 @@
 import argparse
+import os
 import sys
 import time
 
 import pkg_resources
 
-from interpreter.terminal_interface.contributing_conversations import contribute_conversation_launch_logic, contribute_conversations
+from interpreter.terminal_interface.contributing_conversations import (
+    contribute_conversation_launch_logic,
+    contribute_conversations,
+)
 
-from ..core.core import OpenInterpreter
 from .conversation_navigator import conversation_navigator
 from .profiles.profiles import open_storage_dir, profile, reset_profile
 from .utils.check_for_update import check_for_update
-from .utils.display_markdown_message import display_markdown_message
 from .validate_llm_settings import validate_llm_settings
 
 
@@ -18,6 +20,12 @@ def start_terminal_interface(interpreter):
     """
     Meant to be used from the command line. Parses arguments, starts OI's terminal interface.
     """
+
+    # Instead use an async interpreter, which has a server. Set settings on that
+    if "--server" in sys.argv:
+        from interpreter import AsyncInterpreter
+
+        interpreter = AsyncInterpreter()
 
     arguments = [
         {
@@ -36,7 +44,7 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "system_message",
-            "nickname": "s",
+            "nickname": "sm",
             "help_text": "(we don't recommend changing this) base prompt for the language model",
             "type": str,
             "attribute": {"object": interpreter, "attr_name": "system_message"},
@@ -47,6 +55,14 @@ def start_terminal_interface(interpreter):
             "help_text": "automatically run generated code",
             "type": bool,
             "attribute": {"object": interpreter, "attr_name": "auto_run"},
+        },
+        {
+            "name": "no_highlight_active_line",
+            "nickname": "nhl",
+            "help_text": "turn off active line highlighting in code blocks",
+            "type": bool,
+            "action": "store_true",
+            "default": False,  # Default to False, meaning highlighting is on by default
         },
         {
             "name": "verbose",
@@ -72,7 +88,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "llm_supports_vision",
             "nickname": "lsv",
-            "help_text": "inform OI that your model supports vision, and can recieve vision inputs",
+            "help_text": "inform OI that your model supports vision, and can receive vision inputs",
             "type": bool,
             "action": argparse.BooleanOptionalAction,
             "attribute": {"object": interpreter.llm, "attr_name": "supports_vision"},
@@ -135,11 +151,10 @@ def start_terminal_interface(interpreter):
             "attribute": {"object": interpreter, "attr_name": "max_output"},
         },
         {
-            "name": "force_task_completion",
-            "nickname": "fc",
+            "name": "loop",
             "help_text": "runs OI in a loop, requiring it to admit to completing/failing task",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "force_task_completion"},
+            "attribute": {"object": interpreter, "attr_name": "loop"},
         },
         {
             "name": "disable_telemetry",
@@ -158,7 +173,7 @@ def start_terminal_interface(interpreter):
         },
         {
             "name": "speak_messages",
-            "nickname": "sm",
+            "nickname": "sp",
             "help_text": "(Mac only, experimental) use the applescript `say` command to read messages aloud",
             "type": bool,
             "attribute": {"object": interpreter, "attr_name": "speak_messages"},
@@ -182,7 +197,7 @@ def start_terminal_interface(interpreter):
         {
             "name": "fast",
             "nickname": "f",
-            "help_text": "runs `interpreter --model gpt-3.5-turbo` and asks OI to be extremely concise",
+            "help_text": "runs `interpreter --model gpt-4o-mini` and asks OI to be extremely concise (shortcut for `interpreter --profile fast`)",
             "type": bool,
         },
         {
@@ -195,19 +210,39 @@ def start_terminal_interface(interpreter):
         {
             "name": "local",
             "nickname": "l",
-            "help_text": "experimentally run the LLM locally via Llamafile (this changes many more settings than `--offline`)",
+            "help_text": "setup a local model (shortcut for `interpreter --profile local`)",
+            "type": bool,
+        },
+        {
+            "name": "codestral",
+            "help_text": "shortcut for `interpreter --profile codestral`",
+            "type": bool,
+        },
+        {
+            "name": "assistant",
+            "help_text": "shortcut for `interpreter --profile assistant.py`",
+            "type": bool,
+        },
+        {
+            "name": "llama3",
+            "help_text": "shortcut for `interpreter --profile llama3`",
+            "type": bool,
+        },
+        {
+            "name": "groq",
+            "help_text": "shortcut for `interpreter --profile groq`",
             "type": bool,
         },
         {
             "name": "vision",
             "nickname": "vi",
-            "help_text": "experimentally use vision for supported languages",
+            "help_text": "experimentally use vision for supported languages (shortcut for `interpreter --profile vision`)",
             "type": bool,
         },
         {
             "name": "os",
             "nickname": "os",
-            "help_text": "experimentally let Open Interpreter control your mouse and keyboard",
+            "help_text": "experimentally let Open Interpreter control your mouse and keyboard (shortcut for `interpreter --profile os`)",
             "type": bool,
         },
         # Special commands
@@ -243,9 +278,49 @@ def start_terminal_interface(interpreter):
             "name": "contribute_conversation",
             "help_text": "let Open Interpreter use the current conversation to train an Open-Source LLM",
             "type": bool,
-            "attribute": {"object": interpreter, "attr_name": "contribute_conversation"},
-        }
+            "attribute": {
+                "object": interpreter,
+                "attr_name": "contribute_conversation",
+            },
+        },
+        {
+            "name": "plain",
+            "nickname": "pl",
+            "help_text": "set output to plain text",
+            "type": bool,
+            "attribute": {
+                "object": interpreter,
+                "attr_name": "plain_text_display",
+            },
+        },
+        {
+            "name": "stdin",
+            "nickname": "s",
+            "help_text": "Run OI in stdin mode",
+            "type": bool,
+        },
     ]
+
+    if "--stdin" in sys.argv and "--plain" not in sys.argv:
+        sys.argv += ["--plain"]
+
+    # i shortcut
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        message = " ".join(sys.argv[1:])
+        interpreter.messages.append(
+            {"role": "user", "type": "message", "content": "I " + message}
+        )
+        sys.argv = sys.argv[:1]
+
+        interpreter.custom_instructions = "UPDATED INSTRUCTIONS: You are in ULTRA FAST, ULTRA CERTAIN mode. Do not ask the user any questions or run code to gathet information. Go as quickly as you can. Run code quickly. Do not plan out loud, simply start doing the best thing. The user expects speed. Trust that the user knows best. Just interpret their ambiguous command as quickly and certainly as possible and try to fulfill it IN ONE COMMAND, assuming they have the right information. If they tell you do to something, just do it quickly in one command, DO NOT try to get more information (for example by running `cat` to get a file's infomration— this is probably unecessary!). DIRECTLY DO THINGS AS FAST AS POSSIBLE."
+
+        files_in_directory = os.listdir()[:100]
+        interpreter.custom_instructions += (
+            "\nThe files in CWD, which THE USER MAY BE REFERRING TO, are: "
+            + ", ".join(files_in_directory)
+        )
+
+        # interpreter.debug = True
 
     # Check for deprecated flags before parsing arguments
     deprecated_flags = {
@@ -259,7 +334,17 @@ def start_terminal_interface(interpreter):
             sys.argv.remove(old_flag)
             sys.argv.append(new_flag)
 
-    parser = argparse.ArgumentParser(
+    class CustomHelpParser(argparse.ArgumentParser):
+        def print_help(self, *args, **kwargs):
+            super().print_help(*args, **kwargs)
+            special_help_message = '''
+Open Interpreter, 2024
+
+Use """ to write multi-line messages.
+            '''
+            print(special_help_message)
+
+    parser = CustomHelpParser(
         description="Open Interpreter", usage="%(prog)s [options]"
     )
 
@@ -325,15 +410,28 @@ def start_terminal_interface(interpreter):
 
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
-        update_name = "New Computer Update"  # Change this with each major update
+        update_name = (
+            "The Beginning (Ty and Victor)"  # Change this with each major update
+        )
         print(f"Open Interpreter {version} {update_name}")
         return
+
+    if args.no_highlight_active_line:
+        interpreter.highlight_active_line = False
 
     # if safe_mode and auto_run are enabled, safe_mode disables auto_run
     if interpreter.auto_run and (
         interpreter.safe_mode == "ask" or interpreter.safe_mode == "auto"
     ):
         setattr(interpreter, "auto_run", False)
+
+    ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
+
+    set_attributes(args, arguments)
+
+    ### Apply profile
+
+    # Profile shortcuts, which should probably not exist:
 
     if args.fast:
         args.profile = "fast.yaml"
@@ -346,21 +444,41 @@ def start_terminal_interface(interpreter):
 
     if args.local:
         args.profile = "local.py"
+        if args.vision:
+            # This is local vision, set up moondream!
+            interpreter.computer.vision.load()
+        if args.os:
+            args.profile = "local-os.py"
 
-    if args.os and args.local:
-        args.profile = "local-os.py"
+    if args.codestral:
+        args.profile = "codestral.py"
+        if args.vision:
+            args.profile = "codestral-vision.py"
+        if args.os:
+            args.profile = "codestral-os.py"
 
-    ### Set attributes on interpreter, so that a profile script can read the arguments passed in via the CLI
+    if args.assistant:
+        args.profile = "assistant.py"
 
-    set_attributes(args, arguments)
+    if args.llama3:
+        args.profile = "llama3.py"
+        if args.vision:
+            args.profile = "llama3-vision.py"
+        if args.os:
+            args.profile = "llama3-os.py"
 
-    ### Apply profile
+    if args.groq:
+        args.profile = "groq.py"
 
-    interpreter = profile(interpreter, args.profile or get_argument_dictionary(arguments, "profile")["default"])
+    interpreter = profile(
+        interpreter,
+        args.profile or get_argument_dictionary(arguments, "profile")["default"],
+    )
 
     ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
     set_attributes(args, arguments)
+    interpreter.disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true" or args.disable_telemetry
 
     ### Set some helpful settings we know are likely to be true
 
@@ -399,10 +517,10 @@ def start_terminal_interface(interpreter):
     ### Check for update
 
     try:
-        if not interpreter.offline:
+        if not interpreter.offline and not args.stdin:
             # This message should actually be pushed into the utility
             if check_for_update():
-                display_markdown_message(
+                interpreter.display_message(
                     "> **A new version of Open Interpreter is available.**\n>Please run: `pip install --upgrade open-interpreter`\n\n---"
                 )
     except:
@@ -427,17 +545,36 @@ def start_terminal_interface(interpreter):
         conversation_navigator(interpreter)
         return
 
+    if interpreter.llm.model in [
+        "claude-3.5",
+        "claude-3-5",
+        "claude-3.5-sonnet",
+        "claude-3-5-sonnet",
+    ]:
+        interpreter.llm.model = "claude-3-5-sonnet-20240620"
+
+    if not args.server:
+        # This SHOULD RUN WHEN THE SERVER STARTS. But it can't rn because
+        # if you don't have an API key, a prompt shows up, breaking the whole thing.
+        validate_llm_settings(
+            interpreter
+        )  # This should actually just run interpreter.llm.load() once that's == to validate_llm_settings
+
     if args.server:
-        interpreter.server()
+        interpreter.server.run()
         return
-    
-    validate_llm_settings(interpreter)
 
     interpreter.in_terminal_interface = True
 
     contribute_conversation_launch_logic(interpreter)
 
-    interpreter.chat()
+    # Standard in mode
+    if args.stdin:
+        stdin_input = input()
+        interpreter.plain_text_display = True
+        interpreter.chat(stdin_input)
+    else:
+        interpreter.chat()
 
 
 def set_attributes(args, arguments):
@@ -455,20 +592,69 @@ def set_attributes(args, arguments):
 
 
 def get_argument_dictionary(arguments: list[dict], key: str) -> dict:
-    if len(argument_dictionary_list := list(filter(lambda x: x["name"] == key, arguments))) > 0:
+    if (
+        len(
+            argument_dictionary_list := list(
+                filter(lambda x: x["name"] == key, arguments)
+            )
+        )
+        > 0
+    ):
         return argument_dictionary_list[0]
     return {}
 
 
 def main():
-    interpreter = OpenInterpreter(import_computer_api=True)
+    from interpreter import interpreter
+
     try:
         start_terminal_interface(interpreter)
     except KeyboardInterrupt:
-        pass
-    finally:
-        if interpreter.will_contribute:
-            contribute_conversations([interpreter.messages])
-            print("Thank you for contributing to our training data!")
-        interpreter.computer.terminate()
+        try:
+            interpreter.computer.terminate()
 
+            if not interpreter.offline and not interpreter.disable_telemetry:
+                feedback = None
+                if len(interpreter.messages) > 3:
+                    feedback = (
+                        input("\n\nWas Open Interpreter helpful? (y/n): ")
+                        .strip()
+                        .lower()
+                    )
+                    if feedback == "y":
+                        feedback = True
+                    elif feedback == "n":
+                        feedback = False
+                    else:
+                        feedback = None
+                    if feedback != None and not interpreter.contribute_conversation:
+                        if interpreter.llm.model == "i":
+                            contribute = "y"
+                        else:
+                            print(
+                                "\nThanks for your feedback! Would you like to send us this chat so we can improve?\n"
+                            )
+                            contribute = input("(y/n): ").strip().lower()
+
+                        if contribute == "y":
+                            interpreter.contribute_conversation = True
+                            interpreter.display_message(
+                                "\n*Thank you for contributing!*\n"
+                            )
+
+                if (
+                    interpreter.contribute_conversation or interpreter.llm.model == "i"
+                ) and interpreter.messages != []:
+                    conversation_id = (
+                        interpreter.conversation_id
+                        if hasattr(interpreter, "conversation_id")
+                        else None
+                    )
+                    contribute_conversations(
+                        [interpreter.messages], feedback, conversation_id
+                    )
+
+        except KeyboardInterrupt:
+            pass
+    finally:
+        interpreter.computer.terminate()

@@ -84,12 +84,10 @@ def interpreter_info(interpreter):
 
         messages_to_display = []
         for message in interpreter.messages:
-            message = message.copy()
+            message = str(message.copy())
             try:
-                if len(message["content"]) > 600:
-                    message["content"] = (
-                        message["content"][:300] + "..." + message["content"][-300:]
-                    )
+                if len(message) > 2000:
+                    message = message[:1000]
             except Exception as e:
                 print(str(e), "for message:", message)
             messages_to_display.append(message)
@@ -103,6 +101,7 @@ def interpreter_info(interpreter):
         Function calling: {interpreter.llm.supports_functions}
         Context window: {interpreter.llm.context_window}
         Max tokens: {interpreter.llm.max_tokens}
+        Computer API: {interpreter.computer.import_computer_api}
 
         Auto run: {interpreter.auto_run}
         API base: {interpreter.llm.api_base}

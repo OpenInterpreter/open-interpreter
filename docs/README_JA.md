@@ -6,8 +6,9 @@
     <a href="README_ES.md"> <img src="https://img.shields.io/badge/Español-white.svg" alt="ES doc"/></a>
     <a href="../README.md"><img src="https://img.shields.io/badge/english-document-white.svg" alt="EN doc"></a>
     <a href="README_ZH.md"><img src="https://img.shields.io/badge/文档-中文版-white.svg" alt="ZH doc"/></a>
+    <a href="README_UK.md"><img src="https://img.shields.io/badge/Українська-white.svg" alt="UK doc"/></a>
     <a href="README_IN.md"><img src="https://img.shields.io/badge/Hindi-white.svg" alt="IN doc"/></a>
-    <img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/>
+    <a href="../LICENSE"><img src="https://img.shields.io/static/v1?label=license&message=AGPL&color=white&style=flat" alt="License"/></a>
     <br>
     <br>
     <b>自然言語で指示するだけでコードを書いて実行までしてくれる。</b><br>
@@ -17,7 +18,7 @@
 
 <br>
 
-![poster](https://github.com/KillianLucas/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
+![poster](https://github.com/OpenInterpreter/open-interpreter/assets/63927363/08f0d493-956b-4d49-982e-67d4b20c4b56)
 
 <br>
 
@@ -50,7 +51,7 @@ interpreter
 
 ## デモ
 
-https://github.com/KillianLucas/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
+https://github.com/OpenInterpreter/open-interpreter/assets/63927363/37152071-680d-4423-9af3-64836a6f7b60
 
 #### Google Colab でも対話形式のデモを利用できます:
 
@@ -216,7 +217,7 @@ interpreter --local
 
 より詳細なガイドについては、[Mike Bird によるこのビデオ](https://www.youtube.com/watch?v=CEs51hGWuGU?si=cN7f6QhfT4edfG5H) をご覧ください。
 
-**LM Studioをバックグラウンドで使用する方法**
+**LM Studio をバックグラウンドで使用する方法**
 
 1. [https://lmstudio.ai/](https://lmstudio.ai/)からダウンロードして起動します。
 2. モデルを選択し、**↓ ダウンロード** をクリックします。
@@ -387,7 +388,7 @@ Open Interpreter は、[関数が呼び出せる言語モデル](https://platfor
 
 # ロードマップ
 
-Open Interpreter の未来を一足先に見るために、[私たちのロードマップ](https://github.com/KillianLucas/open-interpreter/blob/main/docs/ROADMAP.md)をご覧ください。
+Open Interpreter の未来を一足先に見るために、[私たちのロードマップ](https://github.com/OpenInterpreter/open-interpreter/blob/main/docs/ROADMAP.md)をご覧ください。
 
 **注意**: このソフトウェアは OpenAI とは関連していません。
 

@@ -23,7 +23,7 @@ end makeDate
 class Calendar:
     def __init__(self, computer):
         self.computer = computer
-        # In the future, we might consider a way to use a different calender app. For now its Calendar
+        # In the future, we might consider a way to use a different calendar app. For now its Calendar
         self.calendar_app = "Calendar"
 
     def get_events(self, start_date=datetime.date.today(), end_date=None):

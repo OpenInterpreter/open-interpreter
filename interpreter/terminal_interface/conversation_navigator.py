@@ -10,7 +10,6 @@ import subprocess
 import inquirer
 
 from .render_past_conversation import render_past_conversation
-from .utils.display_markdown_message import display_markdown_message
 from .utils.local_storage_path import get_storage_path
 
 
@@ -19,7 +18,7 @@ def conversation_navigator(interpreter):
 
     conversations_dir = get_storage_path("conversations")
 
-    display_markdown_message(
+    interpreter.display_message(
         f"""> Conversations are stored in "`{conversations_dir}`".
     
     Select a conversation to resume.
@@ -51,14 +50,17 @@ def conversation_navigator(interpreter):
         readable_names_and_filenames[name] = filename
 
     # Add the option to open the folder. This doesn't map to a filename, we'll catch it
-    readable_names_and_filenames["> Open folder"] = None
+    readable_names_and_filenames_list = list(readable_names_and_filenames.keys())
+    readable_names_and_filenames_list = [
+        "Open Folder →"
+    ] + readable_names_and_filenames_list
 
     # Use inquirer to let the user select a file
     questions = [
         inquirer.List(
             "name",
             message="",
-            choices=readable_names_and_filenames.keys(),
+            choices=readable_names_and_filenames_list,
         ),
     ]
     answers = inquirer.prompt(questions)
@@ -68,7 +70,7 @@ def conversation_navigator(interpreter):
         return
 
     # If the user selected to open the folder, do so and return
-    if answers["name"] == "> Open folder":
+    if answers["name"] == "Open Folder →":
         open_folder(conversations_dir)
         return
 

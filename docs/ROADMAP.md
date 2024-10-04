@@ -9,7 +9,10 @@
 - [ ] Figure out how to get OI to answer to user input requests like python's `input()`. Do we somehow detect a delay in the output..? Is there some universal flag that TUIs emit when they expect user input? Should we do this semantically with embeddings, then ask OI to review it and respond..?
 - [ ] Placeholder text that gives a compelling example OI request. Probably use `textual`
 - [ ] Everything else `textual` offers, like could we make it easier to select text? Copy paste in and out? Code editing interface?
-- [ ] Let people edit the code OI writes. Could just open it in the user's preferred editor. Simple. [Full description of how to implement this here.](https://github.com/KillianLucas/open-interpreter/pull/830#issuecomment-1854989795)
+- [x] Let people turn off the active line highlighting
+- [ ] Add a --plain flag which doesn't use rich, just prints stuff in plain text
+- [ ] Use iPython stuff to track the active line, instead of inserting print statements, which makes debugging weird (From ChatGPT: For deeper insights into what's happening behind the scenes, including which line of code is being executed, you can increase the logging level of the IPython kernel. You can configure the kernel's logger to a more verbose setting, which logs each execution request. However, this requires modifying the kernel's startup settings, which might involve changing logging configurations in the IPython kernel source or when launching the kernel.)
+- [ ] Let people edit the code OI writes. Could just open it in the user's preferred editor. Simple. [Full description of how to implement this here.](https://github.com/OpenInterpreter/open-interpreter/pull/830#issuecomment-1854989795)
 - [ ] Display images in the terminal interface
 - [ ] There should be a function that just renders messages to the terminal, so we can revive conversation navigator, and let people look at their conversations
 - [ ] ^ This function should also render the last like 5 messages once input() is about to be run, so we don't get those weird stuttering `rich` artifacts
@@ -48,14 +51,14 @@
 
 # What's in our scope?
 
-Open Interpreter contains two projects which support eachother, whose scopes are as follows:
+Open Interpreter contains two projects which support each other, whose scopes are as follows:
 
 1. `core`, which is dedicated to figuring out how to get LLMs to safely control a computer. Right now, this means creating a real-time code execution environment that language models can operate.
 2. `terminal_interface`, a text-only way for users to direct the code-running LLM running inside `core`. This includes functions for connecting the `core` to various local and hosted LLMs (which the `core` itself should not know about).
 
 # What's not in our scope?
 
-Our guiding philosphy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
+Our guiding philosophy is minimalism, so we have also decided to explicitly consider the following as **out of scope**:
 
 1. Additional functions in `core` beyond running code.
 2. More complex interactions with the LLM in `terminal_interface` beyond text (but file paths to more complex inputs, like images or video, can be included in that text).

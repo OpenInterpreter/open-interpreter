@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import sys
 
 from PIL import Image
 
@@ -42,9 +43,11 @@ def convert_to_openai_messages(
                 "role"
             ]  # This should never be `computer`, right?
 
-            if (
-                message["role"] == "user" and message == messages[-1]
-            ):  # Only add the template for the last message?
+            if message["role"] == "user" and (
+                message == [m for m in messages if m["role"] == "user"][-1]
+                or interpreter.always_apply_user_message_template
+            ):
+                # Only add the template for the last message?
                 new_message["content"] = interpreter.user_message_template.replace(
                     "{content}", message["content"]
                 )
@@ -78,6 +81,12 @@ def convert_to_openai_messages(
             if function_calling:
                 new_message["role"] = "function"
                 new_message["name"] = "execute"
+                if "content" not in message:
+                    print("What is this??", content)
+                if type(message["content"]) != str:
+                    if interpreter.debug:
+                        print("\n\n\nStrange chunk found:", message, "\n\n\n")
+                    message["content"] = str(message["content"])
                 if message["content"].strip() == "":
                     new_message[
                         "content"
@@ -98,16 +107,10 @@ def convert_to_openai_messages(
                     new_message["role"] = "user"
                     new_message["content"] = content
                 elif interpreter.code_output_sender == "assistant":
-                    if "@@@SEND_MESSAGE_AS_USER@@@" in message["content"]:
-                        new_message["role"] = "user"
-                        new_message["content"] = message["content"].replace(
-                            "@@@SEND_MESSAGE_AS_USER@@@", ""
-                        )
-                    else:
-                        new_message["role"] = "assistant"
-                        new_message["content"] = (
-                            "\n```output\n" + message["content"] + "\n```"
-                        )
+                    new_message["role"] = "assistant"
+                    new_message["content"] = (
+                        "\n```output\n" + message["content"] + "\n```"
+                    )
 
         elif message["type"] == "image":
             if message.get("format") == "description":
@@ -125,43 +128,18 @@ def convert_to_openai_messages(
                     else:
                         extension = "png"
 
-                    # Construct the content string
-                    content = f"data:image/{extension};base64,{message['content']}"
-
-                    if shrink_images:
-                        try:
-                            # Decode the base64 image
-                            img_data = base64.b64decode(message["content"])
-                            img = Image.open(io.BytesIO(img_data))
-
-                            # Resize the image if it's width is more than 1024
-                            if img.width > 1024:
-                                new_height = int(img.height * 1024 / img.width)
-                                img = img.resize((1024, new_height))
-
-                            # Convert the image back to base64
-                            buffered = io.BytesIO()
-                            img.save(buffered, format=extension)
-                            img_str = base64.b64encode(buffered.getvalue()).decode(
-                                "utf-8"
-                            )
-                            content = f"data:image/{extension};base64,{img_str}"
-                        except:
-                            # This should be non blocking. It's not required
-                            # print("Failed to shrink image. Proceeding with original image size.")
-                            pass
+                    encoded_string = message["content"]
 
                 elif message["format"] == "path":
                     # Convert to base64
                     image_path = message["content"]
-                    file_extension = image_path.split(".")[-1]
+                    extension = image_path.split(".")[-1]
 
                     with open(image_path, "rb") as image_file:
                         encoded_string = base64.b64encode(image_file.read()).decode(
                             "utf-8"
                         )
 
-                    content = f"data:image/{file_extension};base64,{encoded_string}"
                 else:
                     # Probably would be better to move this to a validation pass
                     # Near core, through the whole messages object
@@ -172,17 +150,57 @@ def convert_to_openai_messages(
                             f"Unrecognized image format: {message['format']}"
                         )
 
-                # Calculate the size of the original binary data in bytes
-                content_size_bytes = len(content) * 3 / 4
+                content = f"data:image/{extension};base64,{encoded_string}"
 
-                # Convert the size to MB
-                content_size_mb = content_size_bytes / (1024 * 1024)
+                if shrink_images:
+                    # Shrink to less than 5mb
 
-                # Print the size of the content in MB
-                # print(f"File size: {content_size_mb} MB")
+                    # Calculate size
+                    content_size_bytes = sys.getsizeof(str(content))
 
-                # Assert that the content size is under 20 MB
-                assert content_size_mb < 20, "Content size exceeds 20 MB"
+                    # Convert the size to MB
+                    content_size_mb = content_size_bytes / (1024 * 1024)
+
+                    # If the content size is greater than 5 MB, resize the image
+                    if content_size_mb > 5:
+                        # Decode the base64 image
+                        img_data = base64.b64decode(encoded_string)
+                        img = Image.open(io.BytesIO(img_data))
+
+                        # Run in a loop to make SURE it's less than 5mb
+                        for _ in range(10):
+                            # Calculate the scale factor needed to reduce the image size to 4.9 MB
+                            scale_factor = (4.9 / content_size_mb) ** 0.5
+
+                            # Calculate the new dimensions
+                            new_width = int(img.width * scale_factor)
+                            new_height = int(img.height * scale_factor)
+
+                            # Resize the image
+                            img = img.resize((new_width, new_height))
+
+                            # Convert the image back to base64
+                            buffered = io.BytesIO()
+                            img.save(buffered, format=extension)
+                            encoded_string = base64.b64encode(
+                                buffered.getvalue()
+                            ).decode("utf-8")
+
+                            # Set the content
+                            content = f"data:image/{extension};base64,{encoded_string}"
+
+                            # Recalculate the size of the content in bytes
+                            content_size_bytes = sys.getsizeof(str(content))
+
+                            # Convert the size to MB
+                            content_size_mb = content_size_bytes / (1024 * 1024)
+
+                            if content_size_mb < 5:
+                                break
+                        else:
+                            print(
+                                "Attempted to shrink the image but failed. Sending to the LLM anyway."
+                            )
 
                 new_message = {
                     "role": "user",
@@ -194,9 +212,38 @@ def convert_to_openai_messages(
                     ],
                 }
 
+                if message["role"] == "computer":
+                    new_message["content"].append(
+                        {
+                            "type": "text",
+                            "text": "This image is the result of the last tool output. What does it mean / are we done?",
+                        }
+                    )
+                if message.get("format") == "path":
+                    if any(
+                        content.get("type") == "text"
+                        for content in new_message["content"]
+                    ):
+                        for content in new_message["content"]:
+                            if content.get("type") == "text":
+                                content["text"] += (
+                                    "\nThis image is at this path: "
+                                    + message["content"]
+                                )
+                    else:
+                        new_message["content"].append(
+                            {
+                                "type": "text",
+                                "text": "This image is at this path: "
+                                + message["content"],
+                            }
+                        )
+
         elif message["type"] == "file":
             new_message = {"role": "user", "content": message["content"]}
-
+        elif message["type"] == "error":
+            print("Ignoring 'type' == 'error' messages.")
+            continue
         else:
             raise Exception(f"Unable to convert this message type: {message}")
 

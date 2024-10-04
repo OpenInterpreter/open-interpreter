@@ -30,7 +30,7 @@ def display_output(output):
 
     # Return a message for the LLM.
     # We should make this specific to what happened in the future,
-    # like saying WHAT temporary file we made, ect. Keep the LLM informed.
+    # like saying WHAT temporary file we made, etc. Keep the LLM informed.
     return "Displayed on the user's machine."
 
 

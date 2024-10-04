@@ -21,7 +21,12 @@ def render_message(interpreter, message):
             )
 
             # Extract the output content
-            outputs = (line["content"] for line in output if line.get("format") == "output" and "IGNORE_ALL_ABOVE_THIS_LINE" not in line["content"])
+            outputs = (
+                line["content"]
+                for line in output
+                if line.get("format") == "output"
+                and "IGNORE_ALL_ABOVE_THIS_LINE" not in line["content"]
+            )
 
             # Replace the part with the output
             parts[i] = "\n".join(outputs)
@@ -29,7 +34,9 @@ def render_message(interpreter, message):
     # Join the parts back into the message
     rendered_message = "".join(parts).strip()
 
-    if interpreter.debug:
+    if (
+        interpreter.debug == True and False  # DISABLED
+    ):  # debug will equal "server" if we're debugging the server specifically
         print("\n\n\nSYSTEM MESSAGE\n\n\n")
         print(rendered_message)
         print("\n\n\n")

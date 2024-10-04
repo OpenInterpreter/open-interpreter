@@ -2,9 +2,9 @@ name: Build and Test
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "development"]
   pull_request:
-    branches: ["main"]
+    branches: ["main", "development"]
 
 jobs:
   build:
@@ -25,13 +25,11 @@ jobs:
           curl -sSL https://install.python-poetry.org | python3 -
       - name: Install dependencies
         run: |
-          # Update poetry to the latest version.
-          poetry self update
           # Ensure dependencies are installed without relying on a lock file.
           poetry update
-          poetry install
+          poetry install -E server
       - name: Test with pytest
         run: |
-          poetry run pytest -s -x
+          poetry run pytest -s -x -k test_
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

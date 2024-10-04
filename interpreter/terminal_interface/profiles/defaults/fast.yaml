@@ -3,12 +3,16 @@
 # Remove the "#" before the settings below to use them.
 
 llm:
-  model: "gpt-3.5-turbo"
+  model: "gpt-4o-mini"
   temperature: 0
   # api_key: ...  # Your API key, if the API requires it
   # api_base: ...  # The URL where an OpenAI-compatible server is running to handle LLM API requests
   # api_version: ...  # The version of the API (this is primarily for Azure)
   # max_output: 2500  # The maximum characters of code output visible to the LLM
+
+# Computer Settings
+computer:
+  import_computer_api: True # Gives OI a helpful Computer API designed for code interpreting language models
 
 custom_instructions: "The user has set you to FAST mode. **No talk, just code.** Be as brief as possible. No comments, no unnecessary messages. Assume as much as possible, rarely ask the user for clarification. Once the task has been completed, say 'The task is done.'" # This will be appended to the system message
 # auto_run: False  # If True, code will run without asking for confirmation
@@ -19,4 +23,4 @@ custom_instructions: "The user has set you to FAST mode. **No talk, just code.**
 
 # All options: https://docs.openinterpreter.com/settings
 
-version: 0.2.1 # Configuration file version (do not modify)
+version: 0.2.5 # Configuration file version (do not modify)

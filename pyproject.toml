@@ -2,36 +2,14 @@
 name = "open-interpreter"
 packages = [
     {include = "interpreter"},
+    {include = "scripts"},
 ]
-version = "0.2.5" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.3.13" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<4"
-astor = "^0.8.1"
-git-python = "^1.0.3"
-inquirer = "^3.1.3"
-litellm = "^1.35.32"
-pyyaml = "^6.0.1"
-rich = "^13.4.2"
-six = "^1.16.0"
-tokentrim = "^0.1.13"
-wget = "^3.2"
-psutil = "^5.9.6"
-pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
-html2image = "^2.0.4.3"
-send2trash = "^1.8.2"
-ipykernel = "^6.26.0"
-jupyter-client = "^8.6.0"
-matplotlib = "^3.8.2"
-toml = "^0.10.2"
-posthog = "^3.1.0"
-tiktoken = "^0.6.0"
-aifs = "^0.0.15"
-platformdirs = "^4.2.0"
-pydantic = "^2.6.4"
 
 # Optional [os] dependencies
 opencv-python = { version = "^4.8.1.78", optional = true }
@@ -48,17 +26,56 @@ screeninfo = { version = "^0.8.1", optional = true }
 
 # Optional [safe] dependencies
 semgrep = { version = "^1.52.0", optional = true }
-yaspin = { version = "^3.0.1", optional = true }
 
 # Optional [local] dependencies
-transformers = { version = "^4.40.1", optional = true }
+transformers = { version = "4.41.2", optional = true }
 einops = { version = "^0.8.0", optional = true }
 torchvision = { version = "^0.18.0", optional = true }
+easyocr = { version = "^1.7.1", optional = true }
+
+# Optional [server] dependencies
+fastapi = { version = "^0.111.0", optional = true }
+uvicorn = { version = "^0.30.1", optional = true }
+janus = { version = "^1.0.0", optional = true }
+
+# Required dependencies
+python = ">=3.9,<4"
+setuptools = "*"
+astor = "^0.8.1"
+git-python = "^1.0.3"
+inquirer = "^3.1.3"
+pyyaml = "^6.0.1"
+rich = "^13.4.2"
+six = "^1.16.0"
+tokentrim = "^0.1.13"
+wget = "^3.2"
+psutil = "^5.9.6"
+pyreadline3 = {version = "^3.4.1", markers = "sys_platform == 'win32'"}
+html2image = "^2.0.4.3"
+send2trash = "^1.8.2"
+ipykernel = "^6.26.0"
+jupyter-client = "^8.6.0"
+matplotlib = "^3.8.2"
+toml = "^0.10.2"
+tiktoken = "^0.7.0"
+platformdirs = "^4.2.0"
+pydantic = "^2.6.4"
+google-generativeai = "^0.7.1"
+pyperclip = "^1.9.0"
+yaspin = "^3.0.2"
+shortuuid = "^1.0.13"
+litellm = "^1.41.26"
+starlette = "^0.37.2"
+typer = "^0.12.4"
+html2text = "^2024.2.26"
+selenium = "^4.24.0"
+webdriver-manager = "^4.0.2"
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "torch", "timm", "screeninfo"]
-safe = ["semgrep", "yaspin"]
-local = ["torch", "transformers", "einops", "torchvision"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "timm", "screeninfo"]
+safe = ["semgrep"]
+local = ["opencv-python", "pytesseract", "torch", "transformers", "einops", "torchvision", "easyocr"]
+server = ["fastapi", "janus", "uvicorn"]
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.10.1"
@@ -74,6 +91,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 i = "interpreter.terminal_interface.start_terminal_interface:main"
+wtf = "scripts.wtf:main"
 
 [tool.black]
 target-version = ['py311']
