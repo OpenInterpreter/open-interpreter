@@ -3,6 +3,11 @@ import uvloop
 
 uvloop.install()
 
+import asyncio
+import uvloop
+
+uvloop.install()
+
 """
 This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
@@ -448,6 +453,16 @@ class OpenInterpreter:
     def get_oi_dir(self):
         # Again, just handy for start_script in profiles.
         return oi_dir
+
+async def main():
+    # Replace this function body with relevant asynchronous command handling logic
+    await asyncio.gather(
+        handle_command_1(),
+        handle_command_2(),
+    )
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 async def main():
     # Replace this function body with relevant asynchronous command handling logic
