@@ -385,6 +385,11 @@ Use """ to write multi-line messages.
 
     args, unknown_args = parser.parse_known_args()
 
+    # If --help is present, return early
+    if '--help' or '-h' in sys.argv:
+        parser.print_help()
+        return
+
     # handle unknown arguments
     if unknown_args:
         print(f"\nUnrecognized argument(s): {unknown_args}")
