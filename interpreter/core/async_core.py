@@ -975,8 +975,8 @@ class Server:
                 )
 
         self.app.include_router(router)
-        h = host or os.getenv("HOST", Server.DEFAULT_HOST)
-        p = port or int(os.getenv("PORT", Server.DEFAULT_PORT))
+        h = host or os.getenv("INTERPRETER_HOST", Server.DEFAULT_HOST)
+        p = port or int(os.getenv("INTERPRETER_PORT", Server.DEFAULT_PORT))
         self.config = uvicorn.Config(app=self.app, host=h, port=p)
         self.uvicorn_server = uvicorn.Server(self.config)
 
