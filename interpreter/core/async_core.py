@@ -737,11 +737,11 @@ def create_router(async_interpreter):
                 if chunk["type"] == "message" and "content" in chunk:
                     output_content = chunk["content"]
                 if chunk["type"] == "code" and "start" in chunk:
-                    output_content = " "
+                    output_content = "```" + chunk["format"] + "\n"
                 if chunk["type"] == "code" and "content" in chunk:
-                    output_content = (
-                        f"""<unvoiced code="{chunk["content"]}"></unvoiced>"""
-                    )
+                    output_content = chunk["content"]
+                if chunk["type"] == "code" and "end" in chunk:
+                    output_content = "\n```\n"
 
                 if output_content:
                     await asyncio.sleep(0)
@@ -776,6 +776,16 @@ def create_router(async_interpreter):
                     chunk["type"] == "confirmation"
                     and async_interpreter.auto_run == False
                 ):
+                    await asyncio.sleep(0)
+                    output_content = "Do you want to run this code?"
+                    output_chunk = {
+                        "id": i,
+                        "object": "chat.completion.chunk",
+                        "created": time.time(),
+                        "model": "open-interpreter",
+                        "choices": [{"delta": {"content": output_content}}],
+                    }
+                    yield f"data: {json.dumps(output_chunk)}\n\n"
                     break
 
                 if async_interpreter.stop_event.is_set():
@@ -786,11 +796,11 @@ def create_router(async_interpreter):
                 if chunk["type"] == "message" and "content" in chunk:
                     output_content = chunk["content"]
                 if chunk["type"] == "code" and "start" in chunk:
-                    output_content = " "
+                    output_content = "```" + chunk["format"] + "\n"
                 if chunk["type"] == "code" and "content" in chunk:
-                    output_content = (
-                        f"""<unvoiced code="{chunk["content"]}"></unvoiced>"""
-                    )
+                    output_content = chunk["content"]
+                if chunk["type"] == "code" and "end" in chunk:
+                    output_content = "\n```\n"
 
                 if output_content:
                     await asyncio.sleep(0)
@@ -805,18 +815,6 @@ def create_router(async_interpreter):
 
             if made_chunk:
                 break
-
-            if async_interpreter.messages[-1]["type"] == "code":
-                await asyncio.sleep(0)
-                output_content = "{CODE_FINISHED}"
-                output_chunk = {
-                    "id": i,
-                    "object": "chat.completion.chunk",
-                    "created": time.time(),
-                    "model": "open-interpreter",
-                    "choices": [{"delta": {"content": output_content}}],
-                }
-                yield f"data: {json.dumps(output_chunk)}\n\n"
 
     @router.post("/openai/chat/completions")
     async def chat_completion(request: ChatCompletionRequest):
@@ -851,7 +849,14 @@ def create_router(async_interpreter):
             async_interpreter.auto_run = False
             return
 
-        if type(last_message.content) == str:
+        run_code = False
+        if (
+            async_interpreter.messages
+            and async_interpreter.messages[-1]["type"] == "code"
+            and last_message.content.lower().strip(".!?").strip() == "yes"
+        ):
+            run_code = True
+        elif type(last_message.content) == str:
             async_interpreter.messages.append(
                 {
                     "role": "user",
@@ -890,11 +895,6 @@ def create_router(async_interpreter):
                         }
                     )
 
-        run_code = False
-        if last_message.content == "{RUN}":
-            run_code = True
-            # Remove that {RUN} message that would have just been added
-            async_interpreter.messages = async_interpreter.messages[:-1]
         else:
             if async_interpreter.context_mode:
                 # In context mode, we only respond if we recieved a {START} message
