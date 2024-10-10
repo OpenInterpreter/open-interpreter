@@ -1,6 +1,8 @@
 import json
 import os
 import time
+import subprocess
+import getpass
 
 from ..utils.recipient_utils import parse_for_recipient
 from .languages.applescript import AppleScript
@@ -45,6 +47,29 @@ class Terminal:
         ]
         self._active_languages = {}
 
+    def sudo_install(self, package):
+        try:
+            # First, try to install without sudo
+            subprocess.run(['apt', 'install', '-y', package], check=True)
+        except subprocess.CalledProcessError:
+            # If it fails, try with sudo
+            print(f"Installation of {package} requires sudo privileges.")
+            sudo_password = getpass.getpass("Enter sudo password: ")
+
+            try:
+                # Use sudo with password
+                subprocess.run(
+                    ['sudo', '-S', 'apt', 'install', '-y', package],
+                    input=sudo_password.encode(),
+                    check=True
+                )
+                print(f"Successfully installed {package}")
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to install {package}. Error: {e}")
+                return False
+
+        return True
+
     def get_language(self, language):
         for lang in self.languages:
             if language.lower() == lang.name.lower() or (
@@ -55,6 +80,14 @@ class Terminal:
         return None
 
     def run(self, language, code, stream=False, display=False):
+        # Check if this is an apt install command
+        if language == "shell" and code.strip().startswith("apt install"):
+            package = code.split()[-1]
+            if self.sudo_install(package):
+                return [{"type": "console", "format": "output", "content": f"Package {package} installed successfully."}]
+            else:
+                return [{"type": "console", "format": "output", "content": f"Failed to install package {package}."}]
+
         if language == "python":
             if (
                 self.computer.import_computer_api

@@ -6,6 +6,7 @@ import traceback
 
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
+import openai
 
 from .render_message import render_message
 
@@ -112,6 +113,20 @@ def respond(interpreter):
                     raise Exception(
                         f"{output}\n\nThere might be an issue with your API key(s).\n\nTo reset your API key (we'll use OPENAI_API_KEY for this example, but you may need to reset your ANTHROPIC_API_KEY, HUGGINGFACE_API_KEY, etc):\n        Mac/Linux: 'export OPENAI_API_KEY=your-key-here'. Update your ~/.zshrc on MacOS or ~/.bashrc on Linux with the new key if it has already been persisted there.,\n        Windows: 'setx OPENAI_API_KEY your-key-here' then restart terminal.\n\n"
                     )
+                elif (
+                    type(e) == litellm.exceptions.RateLimitError
+                    and "exceeded" in str(e).lower()
+                    or "insufficient_quota" in str(e).lower()
+                ):
+                    display_markdown_message(
+                        f""" > You ran out of current quota for OpenAI's API, please check your plan and billing details. You can either wait for the quota to reset or upgrade your plan.
+
+                        To check your current usage and billing details, visit the [OpenAI billing page](https://platform.openai.com/settings/organization/billing/overview).
+
+                        You can also use `interpreter --max_budget [higher USD amount]` to set a budget for your sessions.
+                        """
+                    )
+
                 elif (
                     interpreter.offline == False and "not have access" in str(e).lower()
                 ):

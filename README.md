@@ -18,9 +18,6 @@
 <img alt="local_explorer" src="https://github.com/OpenInterpreter/open-interpreter/assets/63927363/d941c3b4-b5ad-4642-992c-40edf31e2e7a">
 
 <br>
-<br>
-<p align="center">
-This week we launched <strong>Local III</strong>, which introduces the Local Explorer via <strong><code>--local</code></strong>. <a href="https://changes.openinterpreter.com/log/local-iii">Read On →</a>
 </p>
 <br>
 
