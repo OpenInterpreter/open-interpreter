@@ -206,7 +206,7 @@ def handle_count_tokens(self, prompt):
         )
 
     outputs.append(
-        f"**Note**: This functionality is currently experimental and may not be accurate. Please report any issues you find to the [Open Interpreter GitHub repository](https://github.com/KillianLucas/open-interpreter)."
+        f"**Note**: This functionality is currently experimental and may not be accurate. Please report any issues you find to the [Open Interpreter GitHub repository](https://github.com/OpenInterpreter/open-interpreter)."
     )
 
     self.display_message("\n".join(outputs))
