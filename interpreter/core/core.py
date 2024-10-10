@@ -269,7 +269,7 @@ class OpenInterpreter:
                         first_few_words = "_".join(first_few_words_list[:-1])
                     else:  # for languages like Chinese without blank between words
                         first_few_words = self.messages[0]["content"][:15]
-                    for char in '<>:"/\\|?*!':  # Invalid characters for filenames
+                    for char in '<>:"/\\|?*!\n':  # Invalid characters for filenames
                         first_few_words = first_few_words.replace(char, "")
 
                     date = datetime.now().strftime("%B_%d_%Y_%H-%M-%S")
