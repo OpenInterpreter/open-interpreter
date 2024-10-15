@@ -1,7 +1,7 @@
 import os
 from unittest import TestCase, mock
 
-from interpreter.core.async_core import Server, AsyncInterpreter
+from interpreter.core.async_core import AsyncInterpreter, Server
 
 
 class TestServerConstruction(TestCase):
@@ -20,7 +20,7 @@ class TestServerConstruction(TestCase):
             s = Server(AsyncInterpreter())
             self.assertEqual(s.host, Server.DEFAULT_HOST)
             self.assertEqual(s.port, Server.DEFAULT_PORT)
-        
+
     def test_host_and_port_passed_in(self):
         """
         Tests that a Server object takes on the passed-in host and port when they are passed-in,
@@ -29,11 +29,14 @@ class TestServerConstruction(TestCase):
         host = "the-really-real-host"
         port = 2222
 
-        with mock.patch.dict(os.environ, {"HOST": "this-is-supes-fake", "PORT": "9876"}):
+        with mock.patch.dict(
+            os.environ,
+            {"INTERPRETER_HOST": "this-is-supes-fake", "INTERPRETER_PORT": "9876"},
+        ):
             sboth = Server(AsyncInterpreter(), host, port)
             self.assertEqual(sboth.host, host)
             self.assertEqual(sboth.port, port)
-        
+
     def test_host_and_port_from_env_1(self):
         """
         Tests that the Server object takes on the HOST and PORT env vars as host and port when
@@ -42,7 +45,10 @@ class TestServerConstruction(TestCase):
         fake_host = "fake_host"
         fake_port = 1234
 
-        with mock.patch.dict(os.environ, {"HOST": fake_host, "PORT": str(fake_port)}):
+        with mock.patch.dict(
+            os.environ,
+            {"INTERPRETER_HOST": fake_host, "INTERPRETER_PORT": str(fake_port)},
+        ):
             s = Server(AsyncInterpreter())
             self.assertEqual(s.host, fake_host)
             self.assertEqual(s.port, fake_port)
