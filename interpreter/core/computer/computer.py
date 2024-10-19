@@ -110,7 +110,8 @@ Do not import the computer module, or any of its sub-modules. They are already i
             "methods": []
         }
         for name, method in inspect.getmembers(tool, predicate=inspect.ismethod):
-            if not name.startswith("_"):
+            # Check if the method should be ignored based on its decorator
+            if not name.startswith("_") and not hasattr(method, '__wrapped__'):
                 # Get the method signature
                 method_signature = inspect.signature(method)
                 # Construct the signature string without *args and **kwargs

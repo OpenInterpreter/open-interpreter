@@ -19,3 +19,8 @@ class TestComputer(unittest.TestCase):
 
         # Assert
         self.assertGreater(len(tools_description), 64)
+
+if __name__ == "__main__":
+    testing = TestComputer()
+    testing.setUp()
+    testing.test_get_all_computer_tools_signature_and_description()
