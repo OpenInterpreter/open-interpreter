@@ -236,3 +236,7 @@ misc/
 # Ignore litellm_uuid.txt
 litellm_uuid.txt
 .aider*
+file.txt
+numbers.txt
+poetry.lock
+poetry.lock
