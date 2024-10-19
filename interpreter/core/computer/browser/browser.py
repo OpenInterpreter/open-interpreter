@@ -16,7 +16,7 @@ class Browser:
         self._driver = None
 
     @property
-    def driver(self, headless=True):
+    def driver(self, headless=False):
         if self._driver is None:
             self.setup(headless)
         return self._driver

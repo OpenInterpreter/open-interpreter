@@ -65,7 +65,7 @@ class Computer:
 A python `computer` module is ALREADY IMPORTED, and can be used for many tasks:
 
 ```python
-{self._get_all_computer_tools_signature_and_description()}
+{"\n".join(self._get_all_computer_tools_signature_and_description())}
 ```
 
 Do not import the computer module, or any of its sub-modules. They are already imported.
@@ -109,6 +109,27 @@ Do not import the computer module, or any of its sub-modules. They are already i
             "signature": tool.__class__.__name__,
             "methods": []
         }
+        if tool.__class__.__name__ == "Browser":
+            methods = []
+            for name in dir(tool):
+                if 'driver' in name:
+                    continue  # Skip methods containing 'driver' in their name
+                attr = getattr(tool, name)
+                if callable(attr) and not name.startswith('_') and not hasattr(attr, '__wrapped__') and not isinstance(attr, property):
+                    # Construct the method signature manually
+                    param_str = ", ".join(
+                        param for param in attr.__code__.co_varnames[:attr.__code__.co_argcount]
+                    )
+                    full_signature = f"computer.{tool.__class__.__name__.lower()}.{name}({param_str})"
+                    # Get the method description
+                    method_description = attr.__doc__ or ""
+                    # Append the method details
+                    tool_info["methods"].append({
+                        "signature": full_signature,
+                        "description": method_description.strip()
+                    })
+            return tool_info            
+
         for name, method in inspect.getmembers(tool, predicate=inspect.ismethod):
             # Check if the method should be ignored based on its decorator
             if not name.startswith("_") and not hasattr(method, '__wrapped__'):
