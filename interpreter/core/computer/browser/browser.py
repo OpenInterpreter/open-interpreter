@@ -16,9 +16,9 @@ class Browser:
         self._driver = None
 
     @property
-    def driver(self):
+    def driver(self, headless=False):
         if self._driver is None:
-            self.setup()
+            self.setup(headless)
         return self._driver
 
     @driver.setter
@@ -62,10 +62,19 @@ class Browser:
 
         return response.json()["result"]
 
-    def setup(self):
-        self.service = Service(ChromeDriverManager().install())
-        self.options = webdriver.ChromeOptions()
-        self._driver = webdriver.Chrome(service=self.service, options=self.options)
+    def setup(self, headless):
+        try:
+            self.service = Service(ChromeDriverManager().install())
+            self.options = webdriver.ChromeOptions()
+            # Run Chrome in headless mode
+            if headless:
+                self.options.add_argument("--headless")
+                self.options.add_argument("--disable-gpu")
+                self.options.add_argument("--no-sandbox")
+            self._driver = webdriver.Chrome(service=self.service, options=self.options)
+        except Exception as e:
+            print(f"An error occurred while setting up the WebDriver: {e}")
+            self._driver = None
 
     def go_to_url(self, url):
         """Navigate to a URL"""
