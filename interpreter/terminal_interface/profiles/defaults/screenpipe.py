@@ -1,18 +1,18 @@
 """
 This is an Open Interpreter profile specialized for searching ScreenPipe history.
-It is configured to run Anthropic's `Claude 3.5 Sonnet`.
+It leverages Llama 3.1 70b served by Groq and requires the environment variable GROQ_API_KEYH to be set.
 """
 
 # Configure Open Interpreter
 from interpreter import interpreter
 from datetime import datetime, timezone
 
-interpreter.llm.model = "claude-3-5-sonnet-20240620"
+interpreter.llm.model = "groq/llama-3.1-70b-versatile"
 interpreter.computer.import_computer_api = False
 interpreter.llm.supports_functions = False
 interpreter.llm.supports_vision = False
 interpreter.llm.context_window = 100000
-interpreter.llm.max_tokens = 8192
+interpreter.llm.max_tokens = 4096
 
 # Add the current date and time in UTC
 current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -89,9 +89,10 @@ results = search_screenpipe("Open Interpreter", limit=3)
 results = search_screenpipe("project meeting", limit=5, start_time="2024-10-16T12:00:00Z", end_time="2024-10-16T19:00:00Z")
 
 for result in results:
-    print(f"Text: {{result['content']['text'][:100]}}...")  # Print first 100 characters
+    print(f"Text: {{result['content']['text'][:300]}}...")  # Print first 100 characters
     print(f"Source: {{result['content']['app_name']}} - {{result['content']['window_name']}}")
     print(f"Timestamp: {{result['content']['timestamp']}}")
 ```
 
+Write valid code. 
 """
