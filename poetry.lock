@@ -160,6 +160,31 @@ files = [
 ]
 
 [[package]]
+name = "anthropic"
+version = "0.37.1"
+description = "The official Python library for the anthropic API"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "anthropic-0.37.1-py3-none-any.whl", hash = "sha256:8f550f88906823752e2abf99fbe491fbc8d40bce4cb26b9663abdf7be990d721"},
+    {file = "anthropic-0.37.1.tar.gz", hash = "sha256:99f688265795daa7ba9256ee68eaf2f05d53cd99d7417f4a0c2dc292c106d00a"},
+]
+
+[package.dependencies]
+anyio = ">=3.5.0,<5"
+distro = ">=1.7.0,<2"
+httpx = ">=0.23.0,<1"
+jiter = ">=0.4.0,<1"
+pydantic = ">=1.9.0,<3"
+sniffio = "*"
+tokenizers = ">=0.13.0"
+typing-extensions = ">=4.7,<5"
+
+[package.extras]
+bedrock = ["boto3 (>=1.28.57)", "botocore (>=1.31.57)"]
+vertex = ["google-auth (>=2,<3)"]
+
+[[package]]
 name = "anyio"
 version = "4.6.0"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
@@ -2598,7 +2623,7 @@ tbb = "==2021.*"
 name = "mouseinfo"
 version = "0.1.3"
 description = "An application to display XY position and RGB color information for the pixel currently under the mouse. Works on Python 2 and 3."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "MouseInfo-0.1.3.tar.gz", hash = "sha256:2c62fb8885062b8e520a3cce0a297c657adcc08c60952eb05bc8256ef6f7f6e7"},
@@ -3617,7 +3642,7 @@ pyasn1 = ">=0.4.6,<0.7.0"
 name = "pyautogui"
 version = "0.9.54"
 description = "PyAutoGUI lets Python control the mouse and keyboard, and other GUI automation tasks. For Windows, macOS, and Linux, on Python 3 and 2."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "PyAutoGUI-0.9.54.tar.gz", hash = "sha256:dd1d29e8fd118941cb193f74df57e5c6ff8e9253b99c7b04f39cfc69f3ae04b2"},
@@ -3825,7 +3850,7 @@ typing-extensions = ">=4.6.0,<4.7.0 || >4.7.0"
 name = "pygetwindow"
 version = "0.0.9"
 description = "A simple, cross-platform module for obtaining GUI information on application's windows."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "PyGetWindow-0.0.9.tar.gz", hash = "sha256:17894355e7d2b305cd832d717708384017c1698a90ce24f6f7fbf0242dd0a688"},
@@ -3872,7 +3897,7 @@ dev = ["mypy (>=0.990)", "pywinctl (>=0.3)", "types-python-xlib (>=0.32)", "type
 name = "pymsgbox"
 version = "1.0.9"
 description = "A simple, cross-platform, pure Python module for JavaScript-like message boxes."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "PyMsgBox-1.0.9.tar.gz", hash = "sha256:2194227de8bff7a3d6da541848705a155dcbb2a06ee120d9f280a1d7f51263ff"},
@@ -4052,7 +4077,7 @@ allbindings = ["pyobjc-core (==10.3.1)", "pyobjc-framework-AVFoundation (==10.3.
 name = "pyobjc-core"
 version = "10.3.1"
 description = "Python<->ObjC Interoperability Module"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_core-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:ea46d2cda17921e417085ac6286d43ae448113158afcf39e0abe484c58fb3d78"},
@@ -4508,7 +4533,7 @@ pyobjc-framework-CoreLocation = ">=10.3.1"
 name = "pyobjc-framework-cocoa"
 version = "10.3.1"
 description = "Wrappers for the Cocoa frameworks on macOS"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_framework_Cocoa-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:4cb4f8491ab4d9b59f5187e42383f819f7a46306a4fa25b84f126776305291d1"},
@@ -6076,7 +6101,7 @@ pyobjc-framework-Cocoa = ">=10.3.1"
 name = "pyobjc-framework-quartz"
 version = "10.3.1"
 description = "Wrappers for the Quartz frameworks on macOS"
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "pyobjc_framework_Quartz-10.3.1-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:5ef4fd315ed2bc42ef77fdeb2bae28a88ec986bd7b8079a87ba3b3475348f96e"},
@@ -6770,7 +6795,7 @@ dev = ["build", "flake8", "mypy", "pytest", "twine"]
 name = "pyrect"
 version = "0.2.0"
 description = "PyRect is a simple module with a Rect class for Pygame-like rectangular areas."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "PyRect-0.2.0.tar.gz", hash = "sha256:f65155f6df9b929b67caffbd57c0947c5ae5449d3b580d178074bffb47a09b78"},
@@ -6780,7 +6805,7 @@ files = [
 name = "pyscreeze"
 version = "1.0.1"
 description = "A simple, cross-platform screenshot module for Python 2 and 3."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "pyscreeze-1.0.1.tar.gz", hash = "sha256:cf1662710f1b46aa5ff229ee23f367da9e20af4a78e6e365bee973cad0ead4be"},
@@ -7027,7 +7052,7 @@ six = ">=1.10.0"
 name = "python3-xlib"
 version = "0.15"
 description = "Python3 X Library"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "python3-xlib-0.15.tar.gz", hash = "sha256:dc4245f3ae4aa5949c1d112ee4723901ade37a96721ba9645f2bfa56e5b383f8"},
@@ -7037,7 +7062,7 @@ files = [
 name = "pytweening"
 version = "1.2.0"
 description = "A collection of tweening (aka easing) functions."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "pytweening-1.2.0.tar.gz", hash = "sha256:243318b7736698066c5f362ec5c2b6434ecf4297c3c8e7caa8abfe6af4cac71b"},
@@ -7665,7 +7690,7 @@ files = [
 name = "rubicon-objc"
 version = "0.4.9"
 description = "A bridge between an Objective C runtime environment and Python."
-optional = true
+optional = false
 python-versions = ">=3.8"
 files = [
     {file = "rubicon_objc-0.4.9-py3-none-any.whl", hash = "sha256:c351b3800cf74c8c23f7d534f008fd5de46c63818de7a44de96daffdb3ed8b8c"},
@@ -9494,4 +9519,4 @@ server = ["fastapi", "janus", "uvicorn"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<4"
-content-hash = "c1e539c550b49f5d9f4f191e09d39544d28a8048cdfc792897cf7eaacc21d9cb"
+content-hash = "27698654f124a7fd983bda2fe95f1d0504d507e7c7205ee6fc336ba18f75a5ed"
