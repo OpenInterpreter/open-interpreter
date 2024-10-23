@@ -94,7 +94,7 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * If the item you are looking at is a pdf, if after taking a single screenshot of the pdf it seems that you want to read the entire document instead of trying to continue to read the pdf from your screenshots + navigation, determine the URL, use curl to download the pdf, install and use pdftotext to convert it to a text file, and then read that text file directly with your StrReplaceEditTool.
 </IMPORTANT>"""
 
-X_SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
+SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You are an AI assistant with access to a virtual machine running on {platform.machine()} architecture.
 * You have the capability to edit and run code.
 * You can use the bash tool to run shell commands, execute scripts, and manage files.
@@ -103,6 +103,18 @@ X_SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * When dealing with large outputs, use redirection to temporary files and tools like `grep` or the str_replace_editor to analyze the content efficiently.
 * The current date is {datetime.today().strftime('%A, %B %-d, %Y')}.
 </SYSTEM_CAPABILITY>"""
+
+SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
+* You are an AI assistant with access to a virtual machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
+* When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
+</SYSTEM_CAPABILITY>"""
+
+# Update the SYSTEM_PROMPT for Mac OS
+if platform.system() == "Darwin":
+    SYSTEM_PROMPT += """
+<IMPORTANT>
+* Open applications using Spotlight by using the computer tool to simulate pressing Command+Space, typing the application name, and pressing Enter.
+</IMPORTANT>"""
 
 
 async def sampling_loop(
@@ -122,8 +134,8 @@ async def sampling_loop(
     """
     tool_collection = ToolCollection(
         ComputerTool(),
-        BashTool(),
-        EditTool(),
+        # BashTool(),
+        # EditTool(),
     )
     system = (
         f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}"
@@ -227,7 +239,7 @@ async def sampling_loop(
 def _maybe_filter_to_n_most_recent_images(
     messages: list[BetaMessageParam],
     images_to_keep: int,
-    min_removal_threshold: int = 10,
+    min_removal_threshold: int = 5,
 ):
     """
     With the assumption that images are screenshots that are of diminishing value as
@@ -351,6 +363,9 @@ async def main():
 We recommend using our desktop app for a better experience. Type `d` for early access.
 
 **Warning:** In this mode, Open Interpreter will not require approval before performing actions. Move your mouse to any corner of the screen to exit.
+"""
+
+    markdown_text = f"""> Model set to `Claude 3.5`    OS control enabled
 """
 
     print_markdown(markdown_text)

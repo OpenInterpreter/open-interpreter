@@ -1,9 +1,12 @@
 import asyncio
 import base64
+import math
 import os
 import platform
 import shlex
 import shutil
+import tempfile
+import time
 from enum import StrEnum
 from pathlib import Path
 from typing import Literal, TypedDict
@@ -62,6 +65,30 @@ class ComputerToolOptions(TypedDict):
 
 def chunks(s: str, chunk_size: int) -> list[str]:
     return [s[i : i + chunk_size] for i in range(0, len(s), chunk_size)]
+
+
+def smooth_move_to(x, y, duration=1.2):
+    start_x, start_y = pyautogui.position()
+    dx = x - start_x
+    dy = y - start_y
+    distance = math.hypot(dx, dy)  # Calculate the distance in pixels
+
+    start_time = time.time()
+
+    while True:
+        elapsed_time = time.time() - start_time
+        if elapsed_time > duration:
+            break
+
+        t = elapsed_time / duration
+        eased_t = (1 - math.cos(t * math.pi)) / 2  # easeInOutSine function
+
+        target_x = start_x + dx * eased_t
+        target_y = start_y + dy * eased_t
+        pyautogui.moveTo(target_x, target_y)
+
+    # Ensure the mouse ends up exactly at the target (x, y)
+    pyautogui.moveTo(x, y)
 
 
 class ComputerTool(BaseAnthropicTool):
@@ -123,8 +150,9 @@ class ComputerTool(BaseAnthropicTool):
             )
 
             if action == "mouse_move":
-                pyautogui.moveTo(x, y)
+                smooth_move_to(x, y)
             elif action == "left_click_drag":
+                smooth_move_to(x, y)
                 pyautogui.dragTo(x, y, button="left")
 
         elif action in ("key", "type"):
@@ -136,20 +164,38 @@ class ComputerTool(BaseAnthropicTool):
                     text = text.replace("super+", "command+")
                 keys = text.split("+")
                 if len(keys) > 1:
-                    pyautogui.hotkey(*keys)
+                    if "darwin" in platform.system().lower():
+                        # Use AppleScript for hotkey on macOS
+                        keystroke, modifier = (keys[-1], "+".join(keys[:-1]))
+                        modifier = modifier.lower() + " down"
+                        if keystroke.lower() == "space":
+                            keystroke = " "
+                        elif keystroke.lower() == "enter":
+                            keystroke = "\n"
+                        script = f"""
+                        tell application "System Events"
+                            keystroke "{keystroke}" using {modifier}
+                        end tell
+                        """
+                        os.system("osascript -e '{}'".format(script))
+                    else:
+                        pyautogui.hotkey(*keys)
                 else:
                     pyautogui.press(text)
             elif action == "type":
                 pyautogui.write(text, interval=TYPING_DELAY_MS / 1000)
 
         elif action in ("left_click", "right_click", "double_click", "middle_click"):
+            time.sleep(0.1)
             button = {
                 "left_click": "left",
                 "right_click": "right",
                 "middle_click": "middle",
             }
             if action == "double_click":
-                pyautogui.doubleClick()
+                pyautogui.click()
+                time.sleep(0.1)
+                pyautogui.click()
             else:
                 pyautogui.click(button=button.get(action, "left"))
 
@@ -170,9 +216,9 @@ class ComputerTool(BaseAnthropicTool):
 
     async def screenshot(self):
         """Take a screenshot of the current screen and return the base64 encoded image."""
-        output_dir = Path(OUTPUT_DIR)
-        output_dir.mkdir(parents=True, exist_ok=True)
-        path = output_dir / f"screenshot_{uuid4().hex}.png"
+        # Use a user-writable directory for temporary files
+        temp_dir = Path(tempfile.gettempdir())
+        path = temp_dir / f"screenshot_{uuid4().hex}.png"
 
         screenshot = pyautogui.screenshot()
         screenshot.save(str(path))
@@ -186,7 +232,9 @@ class ComputerTool(BaseAnthropicTool):
             )
 
         if path.exists():
-            return ToolResult(base64_image=base64.b64encode(path.read_bytes()).decode())
+            base64_image = base64.b64encode(path.read_bytes()).decode()
+            path.unlink()  # Remove the temporary file
+            return ToolResult(base64_image=base64_image)
         raise ToolError(f"Failed to take screenshot")
 
     async def shell(self, command: str, take_screenshot=True) -> ToolResult:
