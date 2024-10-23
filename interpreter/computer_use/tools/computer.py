@@ -162,7 +162,21 @@ class ComputerTool(BaseAnthropicTool):
             if action == "key":
                 if platform.system() == "Darwin":  # Check if we're on macOS
                     text = text.replace("super+", "command+")
-                keys = text.split("+")
+
+                # Normalize key names
+                def normalize_key(key):
+                    key = key.lower().replace("_", "")
+                    key_map = {
+                        "pagedown": "pgdn",
+                        "pageup": "pgup",
+                        "enter": "return",
+                        "return": "enter",
+                        # Add more mappings as needed
+                    }
+                    return key_map.get(key, key)
+
+                keys = [normalize_key(k) for k in text.split("+")]
+
                 if len(keys) > 1:
                     if "darwin" in platform.system().lower():
                         # Use AppleScript for hotkey on macOS
@@ -181,7 +195,7 @@ class ComputerTool(BaseAnthropicTool):
                     else:
                         pyautogui.hotkey(*keys)
                 else:
-                    pyautogui.press(text)
+                    pyautogui.press(keys[0])
             elif action == "type":
                 pyautogui.write(text, interval=TYPING_DELAY_MS / 1000)
 
