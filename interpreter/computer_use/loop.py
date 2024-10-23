@@ -360,12 +360,9 @@ async def main():
 
     markdown_text = f"""> Model set to `Claude 3.5 Sonnet (New)`, OS control enabled
 
-We recommend using our desktop app for a better experience. Type `d` for early access.
+We recommend using our desktop app for the best experience. Type `d` for early access.
 
 **Warning:** In this mode, Open Interpreter will not require approval before performing actions. Move your mouse to any corner of the screen to exit.
-"""
-
-    markdown_text = f"""> Model set to `Claude 3.5`    OS control enabled
 """
 
     print_markdown(markdown_text)
