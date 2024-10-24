@@ -362,7 +362,9 @@ async def main():
 
 We recommend using our desktop app for the best experience. Type `d` for early access.
 
-**Warning:** In this mode, Open Interpreter will not require approval before performing actions. Move your mouse to any corner of the screen to exit.
+**Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
+
+Move your mouse to any corner of the screen to exit.
 """
 
     print_markdown(markdown_text)
