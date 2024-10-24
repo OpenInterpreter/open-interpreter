@@ -101,7 +101,7 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You have access to a code editor tool for viewing and modifying source code files.
 * You can install and use command-line applications and development tools as needed.
 * When dealing with large outputs, use redirection to temporary files and tools like `grep` or the str_replace_editor to analyze the content efficiently.
-* The current date is {datetime.today().strftime('%A, %B %-d, %Y')}.
+* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
 </SYSTEM_CAPABILITY>"""
 
 SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
