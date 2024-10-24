@@ -364,7 +364,7 @@ We recommend using our desktop app for the best experience. Type `d` for early a
 
 **Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
 
-Move your mouse to any corner of the screen to exit.
+Move your mouse to any corner of the screen to exit. Reduce display resolution for better performance.
 """
 
     print_markdown(markdown_text)
