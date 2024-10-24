@@ -7,10 +7,16 @@ import json
 import os
 import platform
 import time
+import traceback
 import uuid
 from collections.abc import Callable
 from datetime import datetime
-from enum import StrEnum
+
+try:
+    from enum import StrEnum
+except ImportError:  # 3.10 compatibility
+    from enum import Enum as StrEnum
+
 from typing import Any, List, cast
 
 import requests
@@ -33,9 +39,18 @@ from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 
 BETA_FLAG = "computer-use-2024-10-22"
 
+from typing import List, Optional
+
+import uvicorn
+from fastapi import FastAPI
+from fastapi.responses import StreamingResponse
+from pydantic import BaseModel
 from rich import print as rich_print
 from rich.markdown import Markdown
 from rich.rule import Rule
+
+# Add this near the top of the file, with other imports and global variables
+messages: List[BetaMessageParam] = []
 
 
 def print_markdown(message):
@@ -87,7 +102,7 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * When using your bash tool with commands that are expected to output very large quantities of text, redirect into a tmp file and use str_replace_editor or `grep -n -B <lines before> -A <lines after> <query> <filename>` to confirm output.
 * When viewing a page it can be helpful to zoom out so that you can see everything on the page.  Either that, or make sure you scroll down to see everything before deciding something isn't available.
 * When using your computer function calls, they take a while to run and send back to you.  Where possible/feasible, try to chain multiple of these calls all into one function calls request.
-* The current date is {datetime.today().strftime('%A, %B %-d, %Y')}.
+* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
 </SYSTEM_CAPABILITY>
 
 <IMPORTANT>
@@ -107,6 +122,7 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You are an AI assistant with access to a virtual machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
 * When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
+* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
 </SYSTEM_CAPABILITY>"""
 
 # Update the SYSTEM_PROMPT for Mac OS
@@ -175,6 +191,8 @@ async def sampling_loop(
             elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
                 if chunk.delta.type == "text_delta":
                     print(f"{chunk.delta.text}", end="", flush=True)
+                    yield {"type": "chunk", "chunk": chunk.delta.text}
+                    await asyncio.sleep(0)
                     if current_block and current_block.type == "text":
                         current_block.text += chunk.delta.text
                 elif chunk.delta.type == "input_json_delta":
@@ -189,10 +207,13 @@ async def sampling_loop(
                         # Finished a tool call
                         # print()
                         current_block.input = json.loads(current_block.partial_json)
+                        # yield {"type": "chunk", "chunk": current_block.input}
                         delattr(current_block, "partial_json")
                     else:
                         # Finished a message
                         print("\n")
+                        yield {"type": "chunk", "chunk": "\n"}
+                        await asyncio.sleep(0)
                     response_content.append(current_block)
                     current_block = None
 
@@ -231,7 +252,9 @@ async def sampling_loop(
                 tool_output_callback(result, content_block.id)
 
         if not tool_result_content:
-            return messages
+            # Done!
+            yield {"type": "messages", "messages": messages}
+            break
 
         messages.append({"content": tool_result_content, "role": "user"})
 
@@ -334,6 +357,95 @@ async def main():
     provider = APIProvider.ANTHROPIC
     system_prompt_suffix = ""
 
+    # Check if running in server mode
+    if "--server" in sys.argv:
+        app = FastAPI()
+
+        # Start the mouse position checking thread when in server mode
+        mouse_thread = threading.Thread(target=check_mouse_position)
+        mouse_thread.daemon = True
+        mouse_thread.start()
+
+        # Get API key from environment variable
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "ANTHROPIC_API_KEY environment variable must be set when running in server mode"
+            )
+
+        @app.post("/openai/chat/completions")
+        async def chat_completion(request: ChatCompletionRequest):
+            print("BRAND NEW REQUEST")
+            # Check exit flag before processing request
+            if exit_flag:
+                return {"error": "Server shutting down due to mouse in corner"}
+
+            async def stream_response():
+                print("is this even happening")
+
+                # Instead of creating converted_messages, append the last message to global messages
+                global messages
+                messages.append(
+                    {
+                        "role": request.messages[-1].role,
+                        "content": [
+                            {"type": "text", "text": request.messages[-1].content}
+                        ],
+                    }
+                )
+
+                response_chunks = []
+
+                async def output_callback(content_block: BetaContentBlock):
+                    chunk = f"data: {json.dumps({'choices': [{'delta': {'content': content_block.text}}]})}\n\n"
+                    response_chunks.append(chunk)
+                    yield chunk
+
+                async def tool_output_callback(result: ToolResult, tool_id: str):
+                    if result.output or result.error:
+                        content = result.output if result.output else result.error
+                        chunk = f"data: {json.dumps({'choices': [{'delta': {'content': content}}]})}\n\n"
+                        response_chunks.append(chunk)
+                        yield chunk
+
+                try:
+                    yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
+
+                    messages = [m for m in messages if m["content"]]
+                    print(str(messages)[-100:])
+                    await asyncio.sleep(4)
+
+                    async for chunk in sampling_loop(
+                        model=model,
+                        provider=provider,
+                        system_prompt_suffix=system_prompt_suffix,
+                        messages=messages,  # Now using global messages
+                        output_callback=output_callback,
+                        tool_output_callback=tool_output_callback,
+                        api_key=api_key,
+                    ):
+                        if chunk["type"] == "chunk":
+                            await asyncio.sleep(0)
+                            yield f"data: {json.dumps({'choices': [{'delta': {'content': chunk['chunk']}}]})}\n\n"
+                        if chunk["type"] == "messages":
+                            messages = chunk["messages"]
+
+                    yield f"data: {json.dumps({'choices': [{'delta': {'content': '', 'finish_reason': 'stop'}}]})}\n\n"
+
+                except Exception as e:
+                    print("Error: An exception occurred.")
+                    print(traceback.format_exc())
+                    pass
+                    # raise
+                    # print(f"Error: {e}")
+                    # yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+            return StreamingResponse(stream_response(), media_type="text/event-stream")
+
+        # Instead of running uvicorn here, we'll return the app
+        return app
+
+    # Original CLI code continues here...
     print()
     print_markdown("Welcome to **Open Interpreter**.\n")
     print_markdown("---")
@@ -351,20 +463,22 @@ async def main():
     import random
 
     tips = [
-        "You can type `i` in your terminal to use Open Interpreter.",
-        "Type `wtf` in your terminal to have Open Interpreter fix the last error.",
-        "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
+        # "You can type `i` in your terminal to use Open Interpreter.",
+        "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
+        # "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
+        "We recommend using our desktop app for the best experience. Type `d` for early access.",
+        "**Tip:** Reduce display resolution for better performance.",
     ]
 
     random_tip = random.choice(tips)
 
     markdown_text = f"""> Model set to `Claude 3.5 Sonnet (New)`, OS control enabled
 
-We recommend using our desktop app for the best experience. Type `d` for early access.
+{random_tip}
 
 **Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
 
-Move your mouse to any corner of the screen to exit. Reduce display resolution for better performance.
+Move your mouse to any corner of the screen to exit.
 """
 
     print_markdown(markdown_text)
@@ -411,7 +525,7 @@ Move your mouse to any corner of the screen to exit. Reduce display resolution f
                 print(f"---\n{result.error}\n---")
 
         try:
-            messages = await sampling_loop(
+            async for chunk in sampling_loop(
                 model=model,
                 provider=provider,
                 system_prompt_suffix=system_prompt_suffix,
@@ -419,15 +533,22 @@ Move your mouse to any corner of the screen to exit. Reduce display resolution f
                 output_callback=output_callback,
                 tool_output_callback=tool_output_callback,
                 api_key=api_key,
-            )
+            ):
+                if chunk["type"] == "messages":
+                    messages = chunk["messages"]
         except Exception as e:
-            print(f"An error occurred: {e}")
+            raise
 
     # The thread will automatically terminate when the main program exits
 
 
 def run_async_main():
-    asyncio.run(main())
+    if "--server" in sys.argv:
+        # Start uvicorn server directly without asyncio.run()
+        app = asyncio.run(main())
+        uvicorn.run(app, host="0.0.0.0", port=8000)
+    else:
+        asyncio.run(main())
 
 
 if __name__ == "__main__":
@@ -463,3 +584,13 @@ def check_mouse_position():
             print("\nMouse moved to corner. Exiting...")
             os._exit(0)
         threading.Event().wait(0.1)  # Check every 100ms
+
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class ChatCompletionRequest(BaseModel):
+    messages: List[ChatMessage]
+    stream: Optional[bool] = False

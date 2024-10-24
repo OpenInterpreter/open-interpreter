@@ -4,7 +4,7 @@ packages = [
     {include = "interpreter"},
     {include = "scripts"},
 ]
-version = "0.4.0" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.4.2" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -33,8 +33,6 @@ torchvision = { version = "^0.18.0", optional = true }
 easyocr = { version = "^1.7.1", optional = true }
 
 # Optional [server] dependencies
-fastapi = { version = "^0.111.0", optional = true }
-uvicorn = { version = "^0.30.1", optional = true }
 janus = { version = "^1.0.0", optional = true }
 
 # Required dependencies
@@ -71,6 +69,8 @@ webdriver-manager = "^4.0.2"
 anthropic = "^0.37.1"
 pyautogui = "^0.9.54"
 typer = "^0.12.5"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "timm", "screeninfo"]
