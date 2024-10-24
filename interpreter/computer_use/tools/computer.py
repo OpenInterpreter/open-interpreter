@@ -93,7 +93,7 @@ def smooth_move_to(x, y, duration=1.2):
 
 class ComputerTool(BaseAnthropicTool):
     """
-    A tool that allows the agent to interact with the screen, keyboard, and mouse of the current computer.
+    A tool that allows the agent to interact with the primary monitor's screen, keyboard, and mouse.
     The tool parameters are defined by Anthropic and are not editable.
     """
 
@@ -101,7 +101,7 @@ class ComputerTool(BaseAnthropicTool):
     api_type: Literal["computer_20241022"] = "computer_20241022"
     width: int
     height: int
-    display_num: int | None
+    display_num: None  # Simplified to always be None since we're only using primary display
 
     _screenshot_delay = 2.0
     _scaling_enabled = True
@@ -122,17 +122,8 @@ class ComputerTool(BaseAnthropicTool):
 
     def __init__(self):
         super().__init__()
-
         self.width, self.height = pyautogui.size()
-
-        if (display_num := os.getenv("DISPLAY_NUM")) is not None:
-            self.display_num = int(display_num)
-            self._display_prefix = f"DISPLAY=:{self.display_num} "
-        else:
-            self.display_num = None
-            self._display_prefix = ""
-
-        self.xdotool = f"{self._display_prefix}xdotool"
+        self.display_num = None
 
     async def __call__(
         self,
@@ -230,7 +221,6 @@ class ComputerTool(BaseAnthropicTool):
 
     async def screenshot(self):
         """Take a screenshot of the current screen and return the base64 encoded image."""
-        # Use a user-writable directory for temporary files
         temp_dir = Path(tempfile.gettempdir())
         path = temp_dir / f"screenshot_{uuid4().hex}.png"
 
@@ -241,9 +231,12 @@ class ComputerTool(BaseAnthropicTool):
             x, y = self.scale_coordinates(
                 ScalingSource.COMPUTER, self.width, self.height
             )
-            await self.shell(
-                f"convert {path} -resize {x}x{y}! {path}", take_screenshot=False
-            )
+            # Use PIL directly instead of shell convert command
+            from PIL import Image
+
+            with Image.open(path) as img:
+                img = img.resize((x, y), Image.Resampling.LANCZOS)
+                img.save(path)
 
         if path.exists():
             base64_image = base64.b64encode(path.read_bytes()).decode()
