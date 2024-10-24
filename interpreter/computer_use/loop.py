@@ -7,10 +7,16 @@ import json
 import os
 import platform
 import time
+import traceback
 import uuid
 from collections.abc import Callable
 from datetime import datetime
-from enum import StrEnum
+
+try:
+    from enum import StrEnum
+except ImportError:  # 3.10 compatibility
+    from enum import Enum as StrEnum
+
 from typing import Any, List, cast
 
 import requests
@@ -185,6 +191,8 @@ async def sampling_loop(
             elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
                 if chunk.delta.type == "text_delta":
                     print(f"{chunk.delta.text}", end="", flush=True)
+                    yield {"type": "chunk", "chunk": chunk.delta.text}
+                    await asyncio.sleep(0)
                     if current_block and current_block.type == "text":
                         current_block.text += chunk.delta.text
                 elif chunk.delta.type == "input_json_delta":
@@ -199,10 +207,13 @@ async def sampling_loop(
                         # Finished a tool call
                         # print()
                         current_block.input = json.loads(current_block.partial_json)
+                        # yield {"type": "chunk", "chunk": current_block.input}
                         delattr(current_block, "partial_json")
                     else:
                         # Finished a message
                         print("\n")
+                        yield {"type": "chunk", "chunk": "\n"}
+                        await asyncio.sleep(0)
                     response_content.append(current_block)
                     current_block = None
 
@@ -241,7 +252,9 @@ async def sampling_loop(
                 tool_output_callback(result, content_block.id)
 
         if not tool_result_content:
-            return messages
+            # Done!
+            yield {"type": "messages", "messages": messages}
+            break
 
         messages.append({"content": tool_result_content, "role": "user"})
 
@@ -362,6 +375,7 @@ async def main():
 
         @app.post("/openai/chat/completions")
         async def chat_completion(request: ChatCompletionRequest):
+            print("BRAND NEW REQUEST")
             # Check exit flag before processing request
             if exit_flag:
                 return {"error": "Server shutting down due to mouse in corner"}
@@ -395,7 +409,13 @@ async def main():
                         yield chunk
 
                 try:
-                    result = await sampling_loop(
+                    yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
+
+                    messages = [m for m in messages if m["content"]]
+                    print(str(messages)[-100:])
+                    await asyncio.sleep(4)
+
+                    async for chunk in sampling_loop(
                         model=model,
                         provider=provider,
                         system_prompt_suffix=system_prompt_suffix,
@@ -403,15 +423,22 @@ async def main():
                         output_callback=output_callback,
                         tool_output_callback=tool_output_callback,
                         api_key=api_key,
-                    )
+                    ):
+                        if chunk["type"] == "chunk":
+                            await asyncio.sleep(0)
+                            yield f"data: {json.dumps({'choices': [{'delta': {'content': chunk['chunk']}}]})}\n\n"
+                        if chunk["type"] == "messages":
+                            messages = chunk["messages"]
 
-                    # # Yield all stored chunks
-                    # for chunk in response_chunks:
-                    #     yield chunk
+                    yield f"data: {json.dumps({'choices': [{'delta': {'content': '', 'finish_reason': 'stop'}}]})}\n\n"
 
                 except Exception as e:
-                    print(f"Error: {e}")
-                    yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                    print("Error: An exception occurred.")
+                    print(traceback.format_exc())
+                    pass
+                    # raise
+                    # print(f"Error: {e}")
+                    # yield f"data: {json.dumps({'error': str(e)})}\n\n"
 
             return StreamingResponse(stream_response(), media_type="text/event-stream")
 
@@ -436,20 +463,22 @@ async def main():
     import random
 
     tips = [
-        "You can type `i` in your terminal to use Open Interpreter.",
-        "Type `wtf` in your terminal to have Open Interpreter fix the last error.",
-        "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
+        # "You can type `i` in your terminal to use Open Interpreter.",
+        "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
+        # "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
+        "We recommend using our desktop app for the best experience. Type `d` for early access.",
+        "**Tip:** Reduce display resolution for better performance.",
     ]
 
     random_tip = random.choice(tips)
 
     markdown_text = f"""> Model set to `Claude 3.5 Sonnet (New)`, OS control enabled
 
-We recommend using our desktop app for the best experience. Type `d` for early access.
+{random_tip}
 
 **Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
 
-Move your mouse to any corner of the screen to exit. Reduce display resolution for better performance.
+Move your mouse to any corner of the screen to exit.
 """
 
     print_markdown(markdown_text)
@@ -496,7 +525,7 @@ Move your mouse to any corner of the screen to exit. Reduce display resolution f
                 print(f"---\n{result.error}\n---")
 
         try:
-            messages = await sampling_loop(
+            async for chunk in sampling_loop(
                 model=model,
                 provider=provider,
                 system_prompt_suffix=system_prompt_suffix,
@@ -504,9 +533,11 @@ Move your mouse to any corner of the screen to exit. Reduce display resolution f
                 output_callback=output_callback,
                 tool_output_callback=tool_output_callback,
                 api_key=api_key,
-            )
+            ):
+                if chunk["type"] == "messages":
+                    messages = chunk["messages"]
         except Exception as e:
-            print(f"An error occurred: {e}")
+            raise
 
     # The thread will automatically terminate when the main program exits
 
