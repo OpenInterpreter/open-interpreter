@@ -26,6 +26,14 @@ except:
     cv2 = None  # Fixes colab error
 
 pyautogui = lazy_import("pyautogui")
+
+# Check if there's a display available
+try:
+    # Attempt to get the screen size
+    pyautogui.size()
+except:
+    pyautogui = None
+
 np = lazy_import("numpy")
 plt = lazy_import("matplotlib.pyplot")
 screeninfo = lazy_import("screeninfo")
