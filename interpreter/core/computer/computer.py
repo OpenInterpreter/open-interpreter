@@ -1,3 +1,4 @@
+import inspect
 import json
 
 from .ai.ai import Ai
@@ -57,24 +58,18 @@ class Computer:
             self.interpreter.max_output
         )  # Should mirror interpreter.max_output
 
-        self.system_message = """
+        computer_tools = "\n".join(
+            self._get_all_computer_tools_signature_and_description()
+        )
+
+        self.system_message = f"""
 
 # THE COMPUTER API
 
 A python `computer` module is ALREADY IMPORTED, and can be used for many tasks:
 
 ```python
-computer.browser.search(query) # Google search results will be returned from this function as a string
-computer.files.edit(path_to_file, original_text, replacement_text) # Edit a file
-computer.calendar.create_event(title="Meeting", start_date=datetime.datetime.now(), end_date=datetime.datetime.now() + datetime.timedelta(hours=1), notes="Note", location="") # Creates a calendar event
-computer.calendar.get_events(start_date=datetime.date.today(), end_date=None) # Get events between dates. If end_date is None, only gets events for start_date
-computer.calendar.delete_event(event_title="Meeting", start_date=datetime.datetime) # Delete a specific event with a matching title and start date, you may need to get use get_events() to find the specific event object first
-computer.contacts.get_phone_number("John Doe")
-computer.contacts.get_email_address("John Doe")
-computer.mail.send("john@email.com", "Meeting Reminder", "Reminder that our meeting is at 3pm today.", ["path/to/attachment.pdf", "path/to/attachment2.pdf"]) # Send an email with a optional attachments
-computer.mail.get(4, unread=True) # Returns the [number] of unread emails, or all emails if False is passed
-computer.mail.unread_count() # Returns the number of unread emails
-computer.sms.send("555-123-4567", "Hello from the computer!") # Send a text message. MUST be a phone number, so use computer.contacts.get_phone_number frequently here
+{computer_tools}
 ```
 
 Do not import the computer module, or any of its sub-modules. They are already imported.
@@ -89,6 +84,105 @@ Do not import the computer module, or any of its sub-modules. They are already i
     @languages.setter
     def languages(self, value):
         self.terminal.languages = value
+
+    def _get_all_computer_tools_list(self):
+        return [
+            self.mouse,
+            self.keyboard,
+            self.display,
+            self.clipboard,
+            self.mail,
+            self.sms,
+            self.calendar,
+            self.contacts,
+            self.browser,
+            self.os,
+            self.vision,
+            self.skills,
+            self.docs,
+            self.ai,
+            self.files,
+        ]
+
+    def _get_all_computer_tools_signature_and_description(self):
+        """
+        This function returns a list of all the computer tools that are available with their signature and description from the function docstrings.
+        for example:
+        computer.browser.search(query) # Searches the web for the specified query and returns the results.
+        computer.calendar.create_event(title: str, start_date: datetime.datetime, end_date: datetime.datetime, location: str = "", notes: str = "", calendar: str = None) -> str # Creates a new calendar event in the default calendar with the given parameters using AppleScript.
+        """
+        tools = self._get_all_computer_tools_list()
+        tools_signature_and_description = []
+        for tool in tools:
+            tool_info = self._extract_tool_info(tool)
+            for method in tool_info["methods"]:
+                # Format as tool_signature # tool_description
+                formatted_info = f"{method['signature']} # {method['description']}"
+                tools_signature_and_description.append(formatted_info)
+        return tools_signature_and_description
+
+    def _extract_tool_info(self, tool):
+        """
+        Helper function to extract the signature and description of a tool's methods.
+        """
+        tool_info = {"signature": tool.__class__.__name__, "methods": []}
+        if tool.__class__.__name__ == "Browser":
+            methods = []
+            for name in dir(tool):
+                if "driver" in name:
+                    continue  # Skip methods containing 'driver' in their name
+                attr = getattr(tool, name)
+                if (
+                    callable(attr)
+                    and not name.startswith("_")
+                    and not hasattr(attr, "__wrapped__")
+                    and not isinstance(attr, property)
+                ):
+                    # Construct the method signature manually
+                    param_str = ", ".join(
+                        param
+                        for param in attr.__code__.co_varnames[
+                            : attr.__code__.co_argcount
+                        ]
+                    )
+                    full_signature = f"computer.{tool.__class__.__name__.lower()}.{name}({param_str})"
+                    # Get the method description
+                    method_description = attr.__doc__ or ""
+                    # Append the method details
+                    tool_info["methods"].append(
+                        {
+                            "signature": full_signature,
+                            "description": method_description.strip(),
+                        }
+                    )
+            return tool_info
+
+        for name, method in inspect.getmembers(tool, predicate=inspect.ismethod):
+            # Check if the method should be ignored based on its decorator
+            if not name.startswith("_") and not hasattr(method, "__wrapped__"):
+                # Get the method signature
+                method_signature = inspect.signature(method)
+                # Construct the signature string without *args and **kwargs
+                param_str = ", ".join(
+                    f"{param.name}"
+                    if param.default == param.empty
+                    else f"{param.name}={param.default!r}"
+                    for param in method_signature.parameters.values()
+                    if param.kind not in (param.VAR_POSITIONAL, param.VAR_KEYWORD)
+                )
+                full_signature = (
+                    f"computer.{tool.__class__.__name__.lower()}.{name}({param_str})"
+                )
+                # Get the method description
+                method_description = method.__doc__ or ""
+                # Append the method details
+                tool_info["methods"].append(
+                    {
+                        "signature": full_signature,
+                        "description": method_description.strip(),
+                    }
+                )
+        return tool_info
 
     def run(self, *args, **kwargs):
         """
