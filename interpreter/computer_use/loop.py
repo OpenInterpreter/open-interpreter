@@ -107,6 +107,7 @@ SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
 * You are an AI assistant with access to a virtual machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
 * When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
+* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
 </SYSTEM_CAPABILITY>"""
 
 # Update the SYSTEM_PROMPT for Mac OS
