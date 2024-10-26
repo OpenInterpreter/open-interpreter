@@ -47,7 +47,10 @@ class Keyboard:
                 self.computer.clipboard.paste()
 
             if ends_in_enter:
-                self.press("enter")
+                if self.shift_pressed:
+                    pyautogui.hotkey('shift', 'enter')  
+                else:
+                    pyautogui.press('enter') 
 
             try:
                 self.computer.clipboard.copy(clipboard_history)
