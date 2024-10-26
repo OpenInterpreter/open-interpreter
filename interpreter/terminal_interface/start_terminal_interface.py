@@ -410,9 +410,7 @@ Use """ to write multi-line messages.
 
     if args.version:
         version = pkg_resources.get_distribution("open-interpreter").version
-        update_name = (
-            "The Beginning (Ty and Victor)"  # Change this with each major update
-        )
+        update_name = "Developer Preview"  # Change this with each major update
         print(f"Open Interpreter {version} {update_name}")
         return
 
@@ -478,7 +476,10 @@ Use """ to write multi-line messages.
     ### Set attributes on interpreter, because the arguments passed in via the CLI should override profile
 
     set_attributes(args, arguments)
-    interpreter.disable_telemetry=os.getenv("DISABLE_TELEMETRY", "false").lower() == "true" or args.disable_telemetry
+    interpreter.disable_telemetry = (
+        os.getenv("DISABLE_TELEMETRY", "false").lower() == "true"
+        or args.disable_telemetry
+    )
 
     ### Set some helpful settings we know are likely to be true
 
