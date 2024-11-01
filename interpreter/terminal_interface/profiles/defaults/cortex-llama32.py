@@ -3,6 +3,10 @@ This is an Open Interpreter profile for using Llama 3.2:3b served locally by Cor
 
 This profile configures Open Interpreter to use a locally hosted Llama 3.2 model through Cortex.
 
+Run `cortex start` before running Open Interpreter.
+
+More information about Cortex: https://cortex.so/docs/
+
 """
 
 from interpreter import interpreter
