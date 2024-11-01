@@ -487,6 +487,8 @@ Move your mouse to any corner of the screen to exit.
 
             print_markdown("\nWe'll email you shortly. ✓\n---\n")
             continue
+        elif user_input=="":
+            continue
 
         messages.append(
             {"role": "user", "content": [{"type": "text", "text": user_input}]}
