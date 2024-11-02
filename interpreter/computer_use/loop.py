@@ -487,7 +487,7 @@ Move your mouse to any corner of the screen to exit.
 
             print_markdown("\nWe'll email you shortly. ✓\n---\n")
             continue
-        elif user_input=="":
+        elif user_input.strip()=="":
             continue
 
         messages.append(
