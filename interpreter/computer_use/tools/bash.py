@@ -1,7 +1,10 @@
 import asyncio
 import os
+import pty
+import sys
 from typing import ClassVar, Literal
 
+import pyte
 from anthropic.types.beta import BetaToolBash20241022Param
 
 from .base import BaseAnthropicTool, CLIResult, ToolError, ToolResult
@@ -21,20 +24,43 @@ class _BashSession:
     def __init__(self):
         self._started = False
         self._timed_out = False
+        # Create a terminal screen and stream
+        self._screen = pyte.Screen(80, 24)  # Standard terminal size
+        self._stream = pyte.Stream(self._screen)
 
     async def start(self):
         if self._started:
             return
 
-        self._process = await asyncio.create_subprocess_shell(
-            self.command,
-            preexec_fn=os.setsid,
-            shell=True,
-            bufsize=0,
-            stdin=asyncio.subprocess.PIPE,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-        )
+        try:
+            # Try to create process with PTY
+            master, slave = pty.openpty()
+            self._process = await asyncio.create_subprocess_shell(
+                self.command,
+                preexec_fn=os.setsid,
+                shell=True,
+                bufsize=0,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=slave,
+                stderr=slave,
+            )
+            # Store master fd for reading
+            self._master_fd = master
+            self._using_pty = True
+            print("using pty")
+        except (ImportError, OSError):
+            print("using pipes")
+            # Fall back to regular pipes if PTY is not available
+            self._process = await asyncio.create_subprocess_shell(
+                self.command,
+                preexec_fn=os.setsid,
+                shell=True,
+                bufsize=0,
+                stdin=asyncio.subprocess.PIPE,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            self._using_pty = False
 
         self._started = True
 
@@ -45,18 +71,11 @@ class _BashSession:
         if self._process.returncode is not None:
             return
         self._process.terminate()
+        if hasattr(self, "_master_fd"):
+            os.close(self._master_fd)
 
     async def run(self, command: str):
         """Execute a command in the bash shell."""
-        # Ask for user permission before executing the command
-        print(f"Do you want to execute the following command?\n{command}")
-        user_input = input("Enter 'yes' to proceed, anything else to cancel: ")
-
-        if user_input.lower() != "yes":
-            return ToolResult(
-                system="Command execution cancelled by user",
-                error="User did not provide permission to execute the command.",
-            )
         if not self._started:
             raise ToolError("Session has not started.")
         if self._process.returncode is not None:
@@ -71,8 +90,6 @@ class _BashSession:
 
         # we know these are not None because we created the process with PIPEs
         assert self._process.stdin
-        assert self._process.stdout
-        assert self._process.stderr
 
         # send command to the process
         self._process.stdin.write(
@@ -80,20 +97,63 @@ class _BashSession:
         )
         await self._process.stdin.drain()
 
-        # read output from the process, until the sentinel is found
         try:
             async with asyncio.timeout(self._timeout):
-                while True:
-                    await asyncio.sleep(self._output_delay)
-                    # if we read directly from stdout/stderr, it will wait forever for
-                    # EOF. use the StreamReader buffer directly instead.
-                    output = (
-                        self._process.stdout._buffer.decode()
-                    )  # pyright: ignore[reportAttributeAccessIssue]
-                    if self._sentinel in output:
-                        # strip the sentinel and break
-                        output = output[: output.index(self._sentinel)]
-                        break
+                if self._using_pty:
+                    # Reset screen state
+                    self._screen.reset()
+                    output = ""
+                    while True:
+                        try:
+                            raw_chunk = os.read(self._master_fd, 1024)
+                            chunk_str = raw_chunk.decode()
+
+                            # Update output before checking sentinel
+                            output += chunk_str
+
+                            # Check for sentinel
+                            if self._sentinel in chunk_str:
+                                # Clean the output for display
+                                clean_chunk = chunk_str[
+                                    : chunk_str.index(self._sentinel)
+                                ].encode()
+                                if clean_chunk:
+                                    os.write(sys.stdout.fileno(), clean_chunk)
+                                # Clean the stored output
+                                if self._sentinel in output:
+                                    output = output[: output.index(self._sentinel)]
+                                break
+
+                            os.write(sys.stdout.fileno(), raw_chunk)
+                        except OSError:
+                            break
+                        await asyncio.sleep(0.01)
+                    error = ""
+                else:
+                    # Real-time output for pipe-based reading
+                    output = ""
+                    while True:
+                        chunk = await self._process.stdout.read(1024)
+                        if not chunk:
+                            break
+                        chunk_str = chunk.decode()
+                        output += chunk_str
+
+                        # Check for sentinel
+                        if self._sentinel in chunk_str:
+                            # Clean the chunk for display
+                            clean_chunk = chunk_str[
+                                : chunk_str.index(self._sentinel)
+                            ].encode()
+                            if clean_chunk:
+                                os.write(sys.stdout.fileno(), clean_chunk)
+                            # Clean the stored output
+                            if self._sentinel in output:
+                                output = output[: output.index(self._sentinel)]
+                            break
+
+                        os.write(sys.stdout.fileno(), chunk)
+                        await asyncio.sleep(0.01)
         except asyncio.TimeoutError:
             self._timed_out = True
             raise ToolError(
@@ -102,18 +162,23 @@ class _BashSession:
 
         if output.endswith("\n"):
             output = output[:-1]
-
-        error = (
-            self._process.stderr._buffer.decode()
-        )  # pyright: ignore[reportAttributeAccessIssue]
-        if error.endswith("\n"):
+        if not self._using_pty and error.endswith("\n"):
             error = error[:-1]
 
-        # clear the buffers so that the next output can be read correctly
-        self._process.stdout._buffer.clear()  # pyright: ignore[reportAttributeAccessIssue]
-        self._process.stderr._buffer.clear()  # pyright: ignore[reportAttributeAccessIssue]
+        # Clear buffers only when using pipes
+        if not self._using_pty:
+            self._process.stdout._buffer.clear()
+            self._process.stderr._buffer.clear()
 
         return CLIResult(output=output, error=error)
+
+    @staticmethod
+    def _strip_ansi(text: str) -> str:
+        """Remove ANSI escape sequences from text."""
+        import re
+
+        ansi_escape = re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
+        return ansi_escape.sub("", text)
 
 
 class BashTool(BaseAnthropicTool):

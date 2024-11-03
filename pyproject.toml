@@ -21,7 +21,6 @@ nltk = { version = "^3.8.1", optional = true }
 ipywidgets = { version = "^8.1.2", optional = true }
 torch = { version = "^2.2.1", optional = true }
 timm = { version = "^0.9.16", optional = true }
-screeninfo = { version = "^0.8.1", optional = true }
 
 # Optional [safe] dependencies
 semgrep = { version = "^1.52.0", optional = true }
@@ -71,9 +70,12 @@ pyautogui = "^0.9.54"
 typer = "^0.12.5"
 fastapi = "^0.111.0"
 uvicorn = "^0.30.1"
+screeninfo = "^0.8.1"
+pyte = "^0.8.2"
+pygments = "^2.18.0"
 
 [tool.poetry.extras]
-os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "timm", "screeninfo"]
+os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "timm"]
 safe = ["semgrep"]
 local = ["opencv-python", "pytesseract", "torch", "transformers", "einops", "torchvision", "easyocr"]
 server = ["fastapi", "janus", "uvicorn"]

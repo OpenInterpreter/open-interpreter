@@ -3,8 +3,6 @@ import base64
 import math
 import os
 import platform
-import shlex
-import shutil
 import tempfile
 import time
 from enum import StrEnum
@@ -12,14 +10,13 @@ from pathlib import Path
 from typing import Literal, TypedDict
 from uuid import uuid4
 
-# Add import for PyAutoGUI
 import pyautogui
 from anthropic.types.beta import BetaToolComputerUse20241022Param
+from PIL import Image
+from screeninfo import get_monitors
 
 from .base import BaseAnthropicTool, ToolError, ToolResult
 from .run import run
-
-OUTPUT_DIR = "/tmp/outputs"
 
 TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
@@ -93,7 +90,7 @@ def smooth_move_to(x, y, duration=1.2):
 
 class ComputerTool(BaseAnthropicTool):
     """
-    A tool that allows the agent to interact with the primary monitor's screen, keyboard, and mouse.
+    A tool that allows the agent to interact with the screen, keyboard, and mouse of the current computer.
     The tool parameters are defined by Anthropic and are not editable.
     """
 
@@ -101,7 +98,7 @@ class ComputerTool(BaseAnthropicTool):
     api_type: Literal["computer_20241022"] = "computer_20241022"
     width: int
     height: int
-    display_num: None  # Simplified to always be None since we're only using primary display
+    display_num: int | None
 
     _screenshot_delay = 2.0
     _scaling_enabled = True
@@ -122,8 +119,25 @@ class ComputerTool(BaseAnthropicTool):
 
     def __init__(self):
         super().__init__()
+
         self.width, self.height = pyautogui.size()
+
+        # Get display number and set up display offset
         self.display_num = None
+        self._display_offset_x = 0
+        if (display_num := os.getenv("DISPLAY_NUM")) is not None:
+            self.display_num = int(display_num)
+            # Get all displays using screeninfo
+            try:
+                monitors = get_monitors()
+                # Calculate x offset based on display number
+                # Assuming displays are arranged horizontally
+                self._display_offset_x = sum(
+                    m.width for m in monitors[: self.display_num]
+                )
+            except ImportError:
+                # Fallback if screeninfo not available
+                self._display_offset_x = 0
 
     async def __call__(
         self,
@@ -136,6 +150,13 @@ class ComputerTool(BaseAnthropicTool):
         if action in ("mouse_move", "left_click_drag"):
             if coordinate is None:
                 raise ToolError(f"coordinate is required for {action}")
+            if text is not None:
+                raise ToolError(f"text is not accepted for {action}")
+            if not isinstance(coordinate, list) or len(coordinate) != 2:
+                raise ToolError(f"{coordinate} must be a tuple of length 2")
+            if not all(isinstance(i, int) and i >= 0 for i in coordinate):
+                raise ToolError(f"{coordinate} must be a tuple of non-negative ints")
+
             x, y = self.scale_coordinates(
                 ScalingSource.API, coordinate[0], coordinate[1]
             )
@@ -143,8 +164,9 @@ class ComputerTool(BaseAnthropicTool):
             if action == "mouse_move":
                 smooth_move_to(x, y)
             elif action == "left_click_drag":
+                pyautogui.mouseDown(button="left")
                 smooth_move_to(x, y)
-                pyautogui.dragTo(x, y, button="left")
+                pyautogui.mouseUp(button="left")
 
         elif action in ("key", "type"):
             if text is None:
@@ -232,7 +254,6 @@ class ComputerTool(BaseAnthropicTool):
                 ScalingSource.COMPUTER, self.width, self.height
             )
             # Use PIL directly instead of shell convert command
-            from PIL import Image
 
             with Image.open(path) as img:
                 img = img.resize((x, y), Image.Resampling.LANCZOS)

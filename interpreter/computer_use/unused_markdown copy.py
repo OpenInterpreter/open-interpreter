@@ -6,6 +6,8 @@ from typing import Dict, Optional, Set
 from pygments import highlight
 from pygments.formatters import Terminal256Formatter
 from pygments.lexers import TextLexer, get_lexer_by_name
+from yaspin import yaspin
+from yaspin.spinners import Spinners
 
 
 class MarkdownElement(Enum):
@@ -22,9 +24,7 @@ class MarkdownStreamer:
         # ANSI escape codes
         self.BOLD = "\033[1m"
         self.CODE = "\033[7m"  # Regular inline code stays inverted
-        self.CODE_BLOCK = (
-            "\033[48;5;234m"  # Very subtle dark gray background for code blocks
-        )
+        self.CODE_BLOCK = "\033[48;5;236m"  # Gray background for code blocks
         self.CODE_BLOCK_LINE = (
             ""  # Removed the separator line since we'll use background
         )
@@ -46,6 +46,9 @@ class MarkdownStreamer:
         self.in_code_block = False
         self.current_code_line = ""
         self.line_number = 1
+
+        # Add spinner (no text, just the spinner)
+        self.spinner = yaspin(Spinners.simpleDots, text="")
 
     def write_styled(self, text: str, element: Optional[MarkdownElement] = None):
         """Write text with appropriate styling."""
@@ -154,18 +157,27 @@ class MarkdownStreamer:
             if self.in_code_block:
                 if char == "\n":
                     if self.collecting_lang:
+                        self.spinner.start()
+                        self.spinner.stop()  # Stop before any output
                         # First newline after ``` - this line contains the language
                         self.code_lang = self.current_code_line
                         self.collecting_lang = False
                         terminal_width = os.get_terminal_size().columns
-                        # Print empty line with background
                         sys.stdout.write(
-                            f"\n\n{self.CODE_BLOCK}"
-                            + " " * terminal_width
-                            + f"{self.RESET}\n"
-                        )
+                            "\033[38;5;240m\n────┬" + "─" * (terminal_width - 5) + "\n"
+                        )  # Top line
+                        sys.stdout.write(
+                            "\033[38;5;240m    │ " + self.code_lang + "\n"
+                        )  # Language line
+                        sys.stdout.write(
+                            "\033[38;5;240m────┼"
+                            + "─" * (terminal_width - 5)
+                            + "\033[0m\n"
+                        )  # Connected line
+                        self.line_number = 1
                         self.current_code_line = ""
                     else:
+                        self.spinner.stop()  # Stop before any output
                         try:
                             lexer = get_lexer_by_name(self.code_lang.strip().lower())
                         except:
@@ -173,44 +185,63 @@ class MarkdownStreamer:
                         formatter = Terminal256Formatter(style="monokai")
 
                         terminal_width = os.get_terminal_size().columns
-                        padding = 2  # Left/right padding
-                        content_width = terminal_width - (padding * 2)
+                        line_prefix = (
+                            f"\033[38;5;240m{str(self.line_number).rjust(3)} │ "
+                        )
+                        content_width = (
+                            terminal_width - len(line_prefix) + len("\033[38;5;240m")
+                        )  # Adjust for ANSI code
 
-                        # Split the original line into words before highlighting
-                        words = self.current_code_line.split(" ")
-                        current_line = ""
+                        if (
+                            not self.current_code_line.strip()
+                        ):  # Empty or whitespace-only line
+                            sys.stdout.write(f"{line_prefix}\n")
+                        else:
+                            # Split the original line into words before highlighting
+                            words = self.current_code_line.split(" ")
+                            current_line = ""
+                            first_line = True
 
-                        for word in words:
-                            test_line = (
-                                current_line + (" " if current_line else "") + word
-                            )
-                            if len(test_line) > content_width:
-                                # Print current line with background and padding
+                            for word in words:
+                                test_line = (
+                                    current_line + (" " if current_line else "") + word
+                                )
+                                if len(test_line) > content_width:
+                                    # Highlight and write current line
+                                    if first_line:
+                                        formatted = highlight(
+                                            current_line, lexer, formatter
+                                        ).rstrip()
+                                        sys.stdout.write(f"{line_prefix}{formatted}\n")
+                                        first_line = False
+                                    else:
+                                        formatted = highlight(
+                                            current_line, lexer, formatter
+                                        ).rstrip()
+                                        sys.stdout.write(
+                                            f"\033[38;5;240m    │ {formatted}\n"
+                                        )
+                                    current_line = word
+                                else:
+                                    current_line = test_line if current_line else word
+
+                            # Write any remaining content
+                            if current_line:
                                 formatted = highlight(
                                     current_line, lexer, formatter
                                 ).rstrip()
-                                sys.stdout.write(
-                                    f"{self.CODE_BLOCK}  {formatted}"
-                                    + " " * (terminal_width - len(current_line) - 2)
-                                    + f"{self.RESET}\n"
-                                )
-                                current_line = word
-                            else:
-                                current_line = test_line if current_line else word
+                                if first_line:
+                                    sys.stdout.write(f"{line_prefix}{formatted}\n")
+                                else:
+                                    sys.stdout.write(
+                                        f"\033[38;5;240m    │ {formatted}\n"
+                                    )
 
-                        # Write any remaining content
-                        if current_line:
-                            formatted = highlight(
-                                current_line, lexer, formatter
-                            ).rstrip()
-                            sys.stdout.write(
-                                f"{self.CODE_BLOCK}  {formatted}"
-                                + " " * (terminal_width - len(current_line) - 2)
-                                + f"{self.RESET}\n"
-                            )
-
+                        self.line_number += 1
                         self.current_code_line = ""
+                        self.spinner.start()  # Start after output
                 elif char == "`" and self.current_code_line.endswith("``"):
+                    self.spinner.stop()  # Stop before final output
                     if self.current_code_line[:-2]:
                         try:
                             lexer = get_lexer_by_name(self.code_lang.strip().lower())
@@ -220,18 +251,12 @@ class MarkdownStreamer:
                         formatted = highlight(
                             self.current_code_line[:-2], lexer, formatter
                         ).rstrip()
-                        terminal_width = os.get_terminal_size().columns
                         sys.stdout.write(
-                            f"{self.CODE_BLOCK}  {formatted}"
-                            + " "
-                            * (terminal_width - len(self.current_code_line[:-2]) - 2)
-                            + f"{self.RESET}\n"
+                            f"{str(self.line_number).rjust(4)} │ {formatted}\n"
                         )
-
                     terminal_width = os.get_terminal_size().columns
-                    # Print empty line with background
                     sys.stdout.write(
-                        f"{self.CODE_BLOCK}" + " " * terminal_width + f"{self.RESET}\n"
+                        "\033[38;5;240m────┴" + "─" * (terminal_width - 5) + "\033[0m\n"
                     )
                     sys.stdout.flush()
                     self.in_code_block = False
@@ -319,10 +344,26 @@ url = (
 response = requests.get(url)
 markdown_text = response.text
 
+# Get everything after </p>
 markdown_text = markdown_text.split("After install")[1]
+
+markdown_text = (
+    """```python
+print("Hello, world!")
+```\n"""
+    + markdown_text
+)
+
 
 # Initialize it once
 md = MarkdownStreamer()
+
+# Then feed it characters one at a time. You can do this:
+md.feed("H")
+md.feed("e")
+md.feed("l")
+md.feed("l")
+md.feed("o")
 
 # Or feed from a string:
 import random

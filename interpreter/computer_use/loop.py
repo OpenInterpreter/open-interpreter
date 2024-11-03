@@ -6,11 +6,17 @@ import asyncio
 import json
 import os
 import platform
+import sys
+import threading
 import time
 import traceback
 import uuid
 from collections.abc import Callable
 from datetime import datetime
+
+import pyautogui
+
+from .ui.markdown import MarkdownStreamer
 
 try:
     from enum import StrEnum
@@ -20,9 +26,18 @@ except ImportError:  # 3.10 compatibility
 from typing import Any, List, cast
 
 import requests
-from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex, APIResponse
+from anthropic import (
+    Anthropic,
+    AnthropicBedrock,
+    AnthropicVertex,
+    APIError,
+    APIResponse,
+    APIResponseValidationError,
+    APIStatusError,
+)
 from anthropic.types import ToolResultBlockParam
 from anthropic.types.beta import (
+    BetaCacheControlEphemeralParam,
     BetaContentBlock,
     BetaContentBlockParam,
     BetaImageBlockParam,
@@ -31,13 +46,18 @@ from anthropic.types.beta import (
     BetaRawContentBlockDeltaEvent,
     BetaRawContentBlockStartEvent,
     BetaRawContentBlockStopEvent,
+    BetaTextBlock,
     BetaTextBlockParam,
     BetaToolResultBlockParam,
+    BetaToolUseBlockParam,
 )
 
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 
-BETA_FLAG = "computer-use-2024-10-22"
+md = MarkdownStreamer()
+
+COMPUTER_USE_BETA_FLAG = "computer-use-2024-10-22"
+PROMPT_CACHING_BETA_FLAG = "prompt-caching-2024-07-31"
 
 from typing import List, Optional
 
@@ -125,25 +145,44 @@ async def sampling_loop(
     """
     Agentic sampling loop for the assistant/tool interaction of computer use.
     """
-    tool_collection = ToolCollection(
-        ComputerTool(),
-        # BashTool(),
-        # EditTool(),
-    )
-    system = (
-        f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}"
+    tools = []
+    if "--os" in sys.argv:
+        tools.append(ComputerTool())
+        if "--cli" in sys.argv:
+            tools = [BashTool(), EditTool()]
+    else:
+        tools = [ComputerTool(), BashTool(), EditTool()]
+    tool_collection = ToolCollection(*tools)
+    system = BetaTextBlockParam(
+        type="text",
+        text=f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}",
     )
 
     while True:
-        if only_n_most_recent_images:
-            _maybe_filter_to_n_most_recent_images(messages, only_n_most_recent_images)
-
+        enable_prompt_caching = False
+        betas = [COMPUTER_USE_BETA_FLAG]
+        image_truncation_threshold = 10
         if provider == APIProvider.ANTHROPIC:
             client = Anthropic(api_key=api_key)
+            enable_prompt_caching = True
         elif provider == APIProvider.VERTEX:
             client = AnthropicVertex()
         elif provider == APIProvider.BEDROCK:
             client = AnthropicBedrock()
+
+        if enable_prompt_caching:
+            betas.append(PROMPT_CACHING_BETA_FLAG)
+            _inject_prompt_caching(messages)
+            # Is it ever worth it to bust the cache with prompt caching?
+            image_truncation_threshold = 50
+            system["cache_control"] = {"type": "ephemeral"}
+
+        if only_n_most_recent_images:
+            _maybe_filter_to_n_most_recent_images(
+                messages,
+                only_n_most_recent_images,
+                min_removal_threshold=image_truncation_threshold,
+            )
 
         # Call the API
         # we use raw_response to provide debug information to streamlit. Your
@@ -153,9 +192,9 @@ async def sampling_loop(
             max_tokens=max_tokens,
             messages=messages,
             model=model,
-            system=system,
+            system=system["text"],
             tools=tool_collection.to_params(),
-            betas=["computer-use-2024-10-22"],
+            betas=betas,
             stream=True,
         )
 
@@ -167,17 +206,102 @@ async def sampling_loop(
                 current_block = chunk.content_block
             elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
                 if chunk.delta.type == "text_delta":
-                    print(f"{chunk.delta.text}", end="", flush=True)
+                    # print(f"{chunk.delta.text}", end="", flush=True)
+                    md.feed(chunk.delta.text)
                     yield {"type": "chunk", "chunk": chunk.delta.text}
                     await asyncio.sleep(0)
                     if current_block and current_block.type == "text":
                         current_block.text += chunk.delta.text
                 elif chunk.delta.type == "input_json_delta":
-                    print(f"{chunk.delta.partial_json}", end="", flush=True)
-                    if current_block and current_block.type == "tool_use":
-                        if not hasattr(current_block, "partial_json"):
-                            current_block.partial_json = ""
-                        current_block.partial_json += chunk.delta.partial_json
+                    # Initialize partial_json if needed
+                    if not hasattr(current_block, "partial_json"):
+                        current_block.partial_json = ""
+                        current_block.parsed_json = {}
+                        current_block.current_key = None
+                        current_block.current_value = ""
+
+                    # Add new JSON delta
+                    current_block.partial_json += chunk.delta.partial_json
+
+                    # Try to parse the string as-is first
+                    try:
+                        new_parsed = json.loads(current_block.partial_json)
+                    except:
+                        # Initialize variables for partial JSON parsing
+                        new_s = ""
+                        stack = []
+                        is_inside_string = False
+                        escaped = False
+                        quote_count = 0
+
+                        # Process each character
+                        for char in current_block.partial_json:
+                            if is_inside_string:
+                                if char == '"' and not escaped:
+                                    quote_count -= 1
+                                    is_inside_string = quote_count > 0
+                                elif char == "\\":
+                                    escaped = not escaped
+                                    new_s += char
+                                    continue
+                                else:
+                                    escaped = False
+                            else:
+                                if char == '"':
+                                    quote_count += 1
+                                    is_inside_string = True
+                                    escaped = False
+                                elif char == "{":
+                                    stack.append("}")
+                                elif char == "[":
+                                    stack.append("]")
+                                elif char == "}" or char == "]":
+                                    if stack and stack[-1] == char:
+                                        stack.pop()
+                                    else:
+                                        # Mismatched closing character
+                                        new_parsed = None
+                                        break
+                            new_s += char
+
+                        # Close any unclosed structures
+                        if is_inside_string:
+                            new_s += '"'
+                            quote_count = 0
+                        for closing_char in reversed(stack):
+                            new_s += closing_char
+
+                        # Try to parse the fixed JSON
+                        try:
+                            new_parsed = json.loads(new_s)
+                        except:
+                            # print("COULD NOT PARSE JSON: ", new_s)
+                            new_parsed = None
+
+                    if new_parsed:
+                        # Find new or changed parameters and stream them
+                        for key, value in new_parsed.items():
+                            if (
+                                key not in current_block.parsed_json
+                                or current_block.parsed_json[key] != value
+                            ):
+                                if current_block.current_key != key:
+                                    if current_block.current_key is not None:
+                                        print()  # New line before new key
+                                    print(f"{key}: ", end="", flush=True)
+                                    current_block.current_key = key
+                                    current_block.current_value = ""
+
+                                # Only print the new part of the value
+                                new_part = str(value)[
+                                    len(current_block.current_value) :
+                                ]
+                                print(new_part, end="", flush=True)
+                                current_block.current_value = str(value)
+
+                        # Store the new parsed state
+                        current_block.parsed_json = new_parsed
+
             elif isinstance(chunk, BetaRawContentBlockStopEvent):
                 if current_block:
                     if hasattr(current_block, "partial_json"):
@@ -188,9 +312,20 @@ async def sampling_loop(
                         delattr(current_block, "partial_json")
                     else:
                         # Finished a message
-                        print("\n")
+                        # print("\n")
+                        md.feed("\n")
                         yield {"type": "chunk", "chunk": "\n"}
                         await asyncio.sleep(0)
+                    # Clean up any remaining attributes from partial processing
+                    if current_block:
+                        for attr in [
+                            "partial_json",
+                            "parsed_json",
+                            "current_key",
+                            "current_value",
+                        ]:
+                            if hasattr(current_block, attr):
+                                delattr(current_block, attr)
                     response_content.append(current_block)
                     current_block = None
 
@@ -215,18 +350,40 @@ async def sampling_loop(
             }
         )
 
+        user_approval = None
         tool_result_content: list[BetaToolResultBlockParam] = []
         for content_block in cast(list[BetaContentBlock], response.content):
             output_callback(content_block)
             if content_block.type == "tool_use":
-                result = await tool_collection.run(
-                    name=content_block.name,
-                    tool_input=cast(dict[str, Any], content_block.input),
-                )
+                # Ask user if they want to create the file
+                # path = "/tmp/test_file.txt"
+                # print(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?")
+                # response = input(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?" + " (y/n): ").lower().strip()
+                # Ask user for confirmation before running tool
+                if "-y" in sys.argv or "--yes" in sys.argv or "--os" in sys.argv:
+                    user_approval = "y"
+                else:
+                    print(
+                        f"\n\033[38;5;240mRun tool \033[0m\033[1m{content_block.name}\033[0m?"
+                    )
+                    user_approval = input("(y/n): ").lower().strip()
+
+                if user_approval == "y":
+                    result = await tool_collection.run(
+                        name=content_block.name,
+                        tool_input=cast(dict[str, Any], content_block.input),
+                    )
+                else:
+                    result = ToolResult(output="Tool execution cancelled by user")
                 tool_result_content.append(
                     _make_api_tool_result(result, content_block.id)
                 )
                 tool_output_callback(result, content_block.id)
+
+        if user_approval == "n":
+            messages.append({"content": tool_result_content, "role": "user"})
+            yield {"type": "messages", "messages": messages}
+            break
 
         if not tool_result_content:
             # Done!
@@ -283,6 +440,42 @@ def _maybe_filter_to_n_most_recent_images(
                         continue
                 new_content.append(content)
             tool_result["content"] = new_content
+
+
+def _response_to_params(
+    response: BetaMessage,
+) -> list[BetaTextBlockParam | BetaToolUseBlockParam]:
+    res: list[BetaTextBlockParam | BetaToolUseBlockParam] = []
+    for block in response.content:
+        if isinstance(block, BetaTextBlock):
+            res.append({"type": "text", "text": block.text})
+        else:
+            res.append(cast(BetaToolUseBlockParam, block.model_dump()))
+    return res
+
+
+def _inject_prompt_caching(
+    messages: list[BetaMessageParam],
+):
+    """
+    Set cache breakpoints for the 3 most recent turns
+    one cache breakpoint is left for tools/system prompt, to be shared across sessions
+    """
+
+    breakpoints_remaining = 3
+    for message in reversed(messages):
+        if message["role"] == "user" and isinstance(
+            content := message["content"], list
+        ):
+            if breakpoints_remaining:
+                breakpoints_remaining -= 1
+                content[-1]["cache_control"] = BetaCacheControlEphemeralParam(
+                    {"type": "ephemeral"}
+                )
+            else:
+                content[-1].pop("cache_control", None)
+                # we'll only every have one extra turn per loop
+                break
 
 
 def _make_api_tool_result(
@@ -358,7 +551,10 @@ async def main():
                 return {"error": "Server shutting down due to mouse in corner"}
 
             async def stream_response():
-                print("is this even happening")
+                # if "claude" not in request.messages[-1].content.lower():
+                #     print("not claude")
+                #     # Return early if not a Claude request
+                #     return
 
                 # Instead of creating converted_messages, append the last message to global messages
                 global messages
@@ -389,8 +585,8 @@ async def main():
                     yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
 
                     messages = [m for m in messages if m["content"]]
-                    print(str(messages)[-100:])
-                    await asyncio.sleep(4)
+                    # print(str(messages)[-100:])
+                    # await asyncio.sleep(4)
 
                     async for chunk in sampling_loop(
                         model=model,
@@ -401,6 +597,7 @@ async def main():
                         tool_output_callback=tool_output_callback,
                         api_key=api_key,
                     ):
+                        print(chunk)
                         if chunk["type"] == "chunk":
                             await asyncio.sleep(0)
                             yield f"data: {json.dumps({'choices': [{'delta': {'content': chunk['chunk']}}]})}\n\n"
@@ -455,8 +652,7 @@ async def main():
 
 **Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
 
-Move your mouse to any corner of the screen to exit.
-"""
+Move your mouse to any corner of the screen to exit."""
 
     print_markdown(markdown_text)
 
@@ -466,7 +662,9 @@ Move your mouse to any corner of the screen to exit.
     mouse_thread.start()
 
     while not exit_flag:
-        user_input = input("> ")
+        user_input = (
+            os.environ.get("TASK") if "--task-env" in sys.argv else input("\n> ")
+        )
         print()
         if user_input.lower() in ["exit", "quit", "q"]:
             break
@@ -516,6 +714,9 @@ Move your mouse to any corner of the screen to exit.
         except Exception as e:
             raise
 
+        if "--stdin" in sys.argv:
+            break
+
     # The thread will automatically terminate when the main program exits
 
 
@@ -530,12 +731,6 @@ def run_async_main():
 
 if __name__ == "__main__":
     run_async_main()
-
-import sys
-import threading
-
-# Replace the pynput and screeninfo imports with pyautogui
-import pyautogui
 
 # Replace the global variables and functions related to mouse tracking
 exit_flag = False
