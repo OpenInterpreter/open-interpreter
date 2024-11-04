@@ -10,7 +10,7 @@ Learn more about Claude 3.5 Haiku: https://www.anthropic.com/claude/haiku
 # Configure Open Interpreter
 from interpreter import interpreter
 
-interpreter.llm.model = "claude-3-5-haiku-20241022"
+interpreter.llm.model = "anthropic/claude-3-5-haiku-20241022"
 interpreter.computer.import_computer_api = True
 interpreter.llm.supports_functions = True
 interpreter.llm.supports_vision = False
