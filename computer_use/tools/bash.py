@@ -47,9 +47,7 @@ class _BashSession:
             # Store master fd for reading
             self._master_fd = master
             self._using_pty = True
-            print("using pty")
         except (ImportError, OSError):
-            print("using pipes")
             # Fall back to regular pipes if PTY is not available
             self._process = await asyncio.create_subprocess_shell(
                 self.command,

@@ -15,6 +15,8 @@ from collections.abc import Callable
 from datetime import datetime
 
 import pyautogui
+from prompt_toolkit import PromptSession
+from prompt_toolkit.formatted_text import HTML
 
 from .ui.markdown import MarkdownStreamer
 
@@ -53,6 +55,13 @@ from anthropic.types.beta import (
 )
 
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
+from .ui.edit import CodeStreamView
+
+model_choice = "claude-3.5-sonnet"
+if "--model" in sys.argv and sys.argv[sys.argv.index("--model") + 1]:
+    model_choice = sys.argv[sys.argv.index("--model") + 1]
+
+print(model_choice)
 
 md = MarkdownStreamer()
 
@@ -145,13 +154,11 @@ async def sampling_loop(
     """
     Agentic sampling loop for the assistant/tool interaction of computer use.
     """
-    tools = []
-    if "--os" in sys.argv:
+    tools = [BashTool(), EditTool()]
+    if "--gui" in sys.argv:
         tools.append(ComputerTool())
-        if "--cli" in sys.argv:
-            tools = [BashTool(), EditTool()]
-    else:
-        tools = [ComputerTool(), BashTool(), EditTool()]
+    if "--gui-only" in sys.argv:
+        tools = [ComputerTool()]
     tool_collection = ToolCollection(*tools)
     system = BetaTextBlockParam(
         type="text",
@@ -184,24 +191,60 @@ async def sampling_loop(
                 min_removal_threshold=image_truncation_threshold,
             )
 
+        edit = CodeStreamView()
+
         # Call the API
         # we use raw_response to provide debug information to streamlit. Your
         # implementation may be able call the SDK directly with:
         # `response = client.messages.create(...)` instead.
-        raw_response = client.beta.messages.create(
-            max_tokens=max_tokens,
-            messages=messages,
-            model=model,
-            system=system["text"],
-            tools=tool_collection.to_params(),
-            betas=betas,
-            stream=True,
-        )
+
+        if model_choice == "gpt-4o":
+            tools = [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "bash",
+                        "description": "Run a bash command",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "command": {
+                                    "type": "string",
+                                    "description": "The bash command to run",
+                                }
+                            },
+                            "required": ["command"],
+                        },
+                    },
+                }
+            ]
+            from openai import OpenAI
+
+            client = OpenAI()
+            raw_response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": system["text"]}] + messages,
+                tools=tools,
+                stream=True,
+                max_tokens=max_tokens,
+            )
+        else:
+            raw_response = client.beta.messages.create(
+                max_tokens=max_tokens,
+                messages=messages,
+                model=model,
+                system=system["text"],
+                tools=tool_collection.to_params(),
+                betas=betas,
+                stream=True,
+            )
 
         response_content = []
         current_block = None
 
         for chunk in raw_response:
+            chunk = chunk.choices[0]
+            # time.sleep(5)
             if isinstance(chunk, BetaRawContentBlockStartEvent):
                 current_block = chunk.content_block
             elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
@@ -223,86 +266,17 @@ async def sampling_loop(
                     # Add new JSON delta
                     current_block.partial_json += chunk.delta.partial_json
 
-                    # Try to parse the string as-is first
-                    try:
-                        new_parsed = json.loads(current_block.partial_json)
-                    except:
-                        # Initialize variables for partial JSON parsing
-                        new_s = ""
-                        stack = []
-                        is_inside_string = False
-                        escaped = False
-                        quote_count = 0
+                    # print(chunk.delta.partial_json)
 
-                        # Process each character
-                        for char in current_block.partial_json:
-                            if is_inside_string:
-                                if char == '"' and not escaped:
-                                    quote_count -= 1
-                                    is_inside_string = quote_count > 0
-                                elif char == "\\":
-                                    escaped = not escaped
-                                    new_s += char
-                                    continue
-                                else:
-                                    escaped = False
-                            else:
-                                if char == '"':
-                                    quote_count += 1
-                                    is_inside_string = True
-                                    escaped = False
-                                elif char == "{":
-                                    stack.append("}")
-                                elif char == "[":
-                                    stack.append("]")
-                                elif char == "}" or char == "]":
-                                    if stack and stack[-1] == char:
-                                        stack.pop()
-                                    else:
-                                        # Mismatched closing character
-                                        new_parsed = None
-                                        break
-                            new_s += char
-
-                        # Close any unclosed structures
-                        if is_inside_string:
-                            new_s += '"'
-                            quote_count = 0
-                        for closing_char in reversed(stack):
-                            new_s += closing_char
-
-                        # Try to parse the fixed JSON
-                        try:
-                            new_parsed = json.loads(new_s)
-                        except:
-                            # print("COULD NOT PARSE JSON: ", new_s)
-                            new_parsed = None
-
-                    if new_parsed:
-                        # Find new or changed parameters and stream them
-                        for key, value in new_parsed.items():
-                            if (
-                                key not in current_block.parsed_json
-                                or current_block.parsed_json[key] != value
-                            ):
-                                if current_block.current_key != key:
-                                    if current_block.current_key is not None:
-                                        print()  # New line before new key
-                                    print(f"{key}: ", end="", flush=True)
-                                    current_block.current_key = key
-                                    current_block.current_value = ""
-
-                                # Only print the new part of the value
-                                new_part = str(value)[
-                                    len(current_block.current_value) :
-                                ]
-                                print(new_part, end="", flush=True)
-                                current_block.current_value = str(value)
-
-                        # Store the new parsed state
-                        current_block.parsed_json = new_parsed
+                    # If name attribute is present on current_block:
+                    if hasattr(current_block, "name"):
+                        if edit.name == None:
+                            edit.name = current_block.name
+                        edit.feed(chunk.delta.partial_json)
 
             elif isinstance(chunk, BetaRawContentBlockStopEvent):
+                edit.close()
+                edit = CodeStreamView()
                 if current_block:
                     if hasattr(current_block, "partial_json"):
                         # Finished a tool call
@@ -351,6 +325,30 @@ async def sampling_loop(
         )
 
         user_approval = None
+
+        if "-y" in sys.argv or "--yes" in sys.argv:  # or "--os" in sys.argv:
+            user_approval = "y"
+        else:
+            # If not in terminal, break
+            if not sys.stdin.isatty():
+                # Error out
+                print(
+                    "Error: You appear to be running in a non-interactive environment, so cannot approve tools. Add the `-y` flag to automatically approve tools in non-interactive environments."
+                )
+                # Exit
+                exit(1)
+
+            content_blocks = cast(list[BetaContentBlock], response.content)
+            tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
+            if len(tool_use_blocks) > 1:
+                print(f"\n\033[38;5;240mRun actions above\033[0m?")
+                user_approval = input("\n(y/n): ").lower().strip()
+            elif len(tool_use_blocks) == 1:
+                print(
+                    f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
+                )
+                user_approval = input("\n(y/n): ").lower().strip()
+
         tool_result_content: list[BetaToolResultBlockParam] = []
         for content_block in cast(list[BetaContentBlock], response.content):
             output_callback(content_block)
@@ -360,13 +358,7 @@ async def sampling_loop(
                 # print(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?")
                 # response = input(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?" + " (y/n): ").lower().strip()
                 # Ask user for confirmation before running tool
-                if "-y" in sys.argv or "--yes" in sys.argv or "--os" in sys.argv:
-                    user_approval = "y"
-                else:
-                    print(
-                        f"\n\033[38;5;240mRun tool \033[0m\033[1m{content_block.name}\033[0m?"
-                    )
-                    user_approval = input("(y/n): ").lower().strip()
+                edit.close()
 
                 if user_approval == "y":
                     result = await tool_collection.run(
@@ -620,33 +612,34 @@ async def main():
         return app
 
     # Original CLI code continues here...
-    print()
-    print_markdown("Welcome to **Open Interpreter**.\n")
-    print_markdown("---")
-    time.sleep(0.5)
-
-    # Check for API key in environment variable
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        api_key = input(
-            "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
-        )
-        print_markdown("\n---")
+    def original_welcome():
+        print()
+        print_markdown("Welcome to **Open Interpreter**.\n")
+        print_markdown("---")
         time.sleep(0.5)
 
-    import random
+        # Check for API key in environment variable
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            api_key = input(
+                "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
+            )
+            print_markdown("\n---")
+            time.sleep(0.5)
 
-    tips = [
-        # "You can type `i` in your terminal to use Open Interpreter.",
-        "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
-        # "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
-        "We recommend using our desktop app for the best experience. Type `d` for early access.",
-        "**Tip:** Reduce display resolution for better performance.",
-    ]
+        import random
 
-    random_tip = random.choice(tips)
+        tips = [
+            # "You can type `i` in your terminal to use Open Interpreter.",
+            "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
+            # "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
+            "We recommend using our desktop app for the best experience. Type `d` for early access.",
+            "**Tip:** Reduce display resolution for better performance.",
+        ]
 
-    markdown_text = f"""> Model set to `Claude 3.5 Sonnet (New)`, OS control enabled
+        random_tip = random.choice(tips)
+
+        markdown_text = f"""> Model set to `Claude 3.5 Sonnet (New)`, OS control enabled
 
 {random_tip}
 
@@ -654,7 +647,15 @@ async def main():
 
 Move your mouse to any corner of the screen to exit."""
 
-    print_markdown(markdown_text)
+        print_markdown(markdown_text)
+
+    def new_welcome():
+        print()
+        print_markdown("Welcome to **Open Interpreter**.\n")
+        print_markdown("---")
+        time.sleep(0.5)
+
+    # new_welcome()
 
     # Start the mouse position checking thread
     mouse_thread = threading.Thread(target=check_mouse_position)
@@ -662,10 +663,34 @@ Move your mouse to any corner of the screen to exit."""
     mouse_thread.start()
 
     while not exit_flag:
-        user_input = (
-            os.environ.get("TASK") if "--task-env" in sys.argv else input("\n> ")
-        )
+        # If is atty, get input from user
+        if sys.stdin.isatty():
+            placeholder = HTML('<ansiblack>Use """ for multi-line prompts</ansiblack>')
+            # placeholder = HTML('<ansiblack>  Send a message (/? for help)</ansiblack>')
+            session = PromptSession()
+            # Initialize empty message for multi-line input
+            user_input = ""
+            if len(messages) < 3:
+                first_line = await session.prompt_async("\n> ", placeholder=placeholder)
+            else:
+                first_line = input("\n> ")
+
+            # Check if starting multi-line input
+            if first_line.strip() == '"""':
+                while True:
+                    placeholder = HTML('<ansiblack>Use """ again to finish</ansiblack>')
+                    line = await session.prompt_async("", placeholder=placeholder)
+                    if line.strip().endswith('"""'):
+                        break
+                    user_input += line + "\n"
+            else:
+                user_input = first_line
+        else:
+            # Read from stdin when not in terminal
+            user_input = sys.stdin.read().strip()
+
         print()
+
         if user_input.lower() in ["exit", "quit", "q"]:
             break
         elif user_input.lower() in ["d"]:
@@ -694,6 +719,7 @@ Move your mouse to any corner of the screen to exit."""
             pass
 
         def tool_output_callback(result: ToolResult, tool_id: str):
+            return
             if result.output:
                 print(f"---\n{result.output}\n---")
             if result.error:
@@ -714,7 +740,8 @@ Move your mouse to any corner of the screen to exit."""
         except Exception as e:
             raise
 
-        if "--stdin" in sys.argv:
+        # If not in terminal, break
+        if not sys.stdin.isatty():
             break
 
     # The thread will automatically terminate when the main program exits

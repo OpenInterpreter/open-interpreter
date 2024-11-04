@@ -1,6 +1,7 @@
 import json
 import os
 import random
+import re
 import sys
 
 from pygments import highlight
@@ -29,7 +30,7 @@ class CodeRenderer(ContentRenderer):
         super().__init__(style)
         SchemaRenderer.print_separator("┼")
         self.line_number = 1
-        self.code_lang = "python"
+        self.code_lang = None
         self.buffer = ""
         self.rendered_content = ""
         self.spinner = yaspin(Spinners.simpleDots, text="  ")
@@ -37,9 +38,36 @@ class CodeRenderer(ContentRenderer):
         self.terminal_width = os.get_terminal_size().columns
         self.prefix_width = 6  # "123 │ " = 6 characters
         self.safety_padding = 4  # Extra padding to prevent edge cases
+        self.json_obj = None
 
     def feed(self, json_obj):
-        content = json_obj.get("content", "")
+        self.json_obj = json_obj
+
+        if json_obj.get("name") == "bash":
+            content = json_obj.get("command", "")
+            self.code_lang = "bash"
+        elif json_obj.get("name") == "str_replace_editor":
+            content = json_obj.get("file_text", "")
+
+        if self.code_lang is None:
+            # Derive it from path extension
+            extension = (
+                json_obj.get("path", "").split(".")[-1]
+                if "." in json_obj.get("path", "")
+                else ""
+            )
+            self.code_lang = {
+                "py": "python",
+                "js": "javascript",
+                "ts": "typescript",
+                "html": "html",
+                "css": "css",
+                "json": "json",
+                "md": "markdown",
+                "sh": "bash",
+                "txt": "text",
+            }.get(extension, "text")
+
         # Start spinner if we have content to process
         if not self.is_spinning and content.strip():
             self.spinner.start()
@@ -76,17 +104,46 @@ class CodeRenderer(ContentRenderer):
         formatter = Terminal256Formatter(style=self.style)
         available_width = self.terminal_width - self.prefix_width - self.safety_padding
 
-        # Split long lines before highlighting
-        if len(line) > available_width:
-            chunks = [
-                line[i : i + available_width]
-                for i in range(0, len(line), available_width)
-            ]
+        # Remove ANSI escape sequences for width calculation
+        line_no_ansi = re.sub(r"\033\[[0-9;]*[a-zA-Z]", "", line)
+
+        # Split long lines before highlighting, accounting for actual visible width
+        if len(line_no_ansi) > available_width:
+            chunks = []
+            pos = 0
+            chunk_start = 0
+            ansi_offset = 0
+
+            while pos < len(line_no_ansi):
+                if pos - chunk_start >= available_width:
+                    # Find actual position in original string including ANSI codes
+                    real_pos = pos + ansi_offset
+                    chunks.append(line[chunk_start:real_pos])
+                    chunk_start = real_pos
+                pos += 1
+
+                # Count ANSI sequences to maintain offset
+                while pos + ansi_offset < len(line):
+                    if line[pos + ansi_offset] == "\033":
+                        match = re.match(
+                            r"\033\[[0-9;]*[a-zA-Z]", line[pos + ansi_offset :]
+                        )
+                        if match:
+                            ansi_offset += len(match.group(0))
+                        else:
+                            break
+                    else:
+                        break
+
+            if chunk_start < len(line):
+                chunks.append(line[chunk_start:])
         else:
             chunks = [line]
 
         # Highlight and print first chunk with line number
         line_prefix = f"{SchemaRenderer.GRAY_COLOR}{str(self.line_number).rjust(3)} │ {SchemaRenderer.RESET_COLOR}"
+        # if self.json_obj and self.json_obj.get("command") == "Open Interpreter":
+        #     line_prefix = f"{SchemaRenderer.GRAY_COLOR}    │ {SchemaRenderer.RESET_COLOR}"
         highlighted = highlight(chunks[0] + "\n", lexer, formatter).rstrip()
         sys.stdout.write(f"{line_prefix}{highlighted}\n")
 
@@ -122,7 +179,17 @@ class PathRenderer(ContentRenderer):
 
     def feed(self, json_obj):
         self.json_obj = json_obj
-        content = json_obj.get("path", "")
+
+        if json_obj.get("name") == "computer":
+            if "coordinate" in json_obj:
+                content = json_obj.get("coordinate", "")
+            elif "text" in json_obj:
+                content = json_obj.get("text", "")
+        else:
+            content = json_obj.get("path", "")
+
+        content = str(content)
+
         # Only render new content
         new_content = content[len(self.rendered_content) :]
         if new_content:
@@ -132,7 +199,10 @@ class PathRenderer(ContentRenderer):
 
     def close(self):
         self.flush()
-        if self.json_obj and self.json_obj.get("command") == "view":
+        if self.json_obj and (
+            self.json_obj.get("command") == "view"
+            or self.json_obj.get("name") == "computer"
+        ):
             SchemaRenderer.print_separator("┴", newline=True)
 
 
@@ -143,6 +213,18 @@ class CommandRenderer(ContentRenderer):
         "str_replace": "↻",
         "insert": "➤",
         "undo_edit": "↫",
+        "bash": "▶",
+        "key": "⌨",
+        "type": "⌨",
+        "mouse_move": "⇢",
+        "left_click": "⊙",
+        "left_click_drag": "⇥",
+        "right_click": "⊚",
+        "middle_click": "⊗",
+        "double_click": "⊛",
+        "screenshot": "⚆",
+        "cursor_position": "⊹",
+        "Open Interpreter": "●",
     }
 
     def __init__(self, style):
@@ -150,9 +232,17 @@ class CommandRenderer(ContentRenderer):
         SchemaRenderer.print_separator("┬")
         self.buffer = ""
         self.rendered_commands = set()  # Track complete commands we've rendered
+        self.json_obj = None
 
     def feed(self, json_obj):
-        content = json_obj.get("command", "")
+        self.json_obj = json_obj
+        if json_obj.get("name") == "bash":
+            content = json_obj.get("name", "")
+        elif json_obj.get("name") == "str_replace_editor":
+            content = json_obj.get("command", "")
+        elif json_obj.get("name") == "computer":
+            content = json_obj.get("action", "")
+
         # If we've already rendered this complete command, skip
         if content in self.rendered_commands:
             return
@@ -174,6 +264,10 @@ class CommandRenderer(ContentRenderer):
     def flush(self):
         pass  # No need to flush since we render when we get a complete command
 
+    def close(self):
+        if self.json_obj and self.json_obj.get("action") == "screenshot":
+            SchemaRenderer.print_separator("┴", newline=True)
+
 
 class InsertRenderer(ContentRenderer):
     def __init__(self, style):
@@ -193,8 +287,8 @@ class InsertRenderer(ContentRenderer):
         self.code_lang = "python"
         self.buffer = ""
         self.terminal_width = os.get_terminal_size().columns
-        self.prefix_width = 6  # "123 │ " = 6 characters
-        self.safety_padding = 4  # Extra padding to prevent edge cases
+        self.prefix_width = 5  # "123 │ " = 6 characters
+        self.safety_padding = 2  # Extra padding to prevent edge cases
         self.show_context = True
         self.leading_space = ""
 
@@ -492,12 +586,23 @@ class SchemaRenderer:
                 f"{SchemaRenderer.GRAY_COLOR}    {char}{SchemaRenderer.RESET_COLOR}\n"
             )
 
-    schemas = {
+    edit_schemas = {
         "command": {"renderer": CommandRenderer},
         "path": {"renderer": PathRenderer},
-        "content": {"renderer": CodeRenderer},
+        "file_text": {"renderer": CodeRenderer},
         "old_str": {"renderer": OldStrRenderer},
         "new_str": {"renderer": InsertRenderer},
+    }
+
+    bash_schemas = {
+        "name": {"renderer": CommandRenderer},
+        "command": {"renderer": CodeRenderer},
+    }
+
+    computer_schemas = {
+        "action": {"renderer": CommandRenderer},
+        "text": {"renderer": PathRenderer},
+        "coordinate": {"renderer": PathRenderer},
     }
 
 
@@ -510,6 +615,7 @@ class CodeStreamView:
         # print("Style:", self.code_style)
         self.current_schema = None
         self.current_json = None  # Store the current parsed JSON state
+        self.name = None
 
     def _parse_json(self, json_chunk):
         # Add new chunk to existing buffer
@@ -588,8 +694,18 @@ class CodeStreamView:
         if not json_obj:
             return
 
+        json_obj["name"] = self.name  # Pass name into renderers
+
         # Process the JSON object
-        for schema_type, schema in SchemaRenderer.schemas.items():
+        schemas = []
+        if self.name == "str_replace_editor":
+            schemas = SchemaRenderer.edit_schemas.items()
+        elif self.name == "bash":
+            schemas = SchemaRenderer.bash_schemas.items()
+        elif self.name == "computer":
+            schemas = SchemaRenderer.computer_schemas.items()
+
+        for schema_type, schema in schemas:
             if schema_type in json_obj:
                 # If this is a new schema type, initialize it
                 if schema_type not in self.current_renderers:

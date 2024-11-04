@@ -26,10 +26,11 @@ def feed_json_in_chunks(
 
 
 # Example JSON to stream
-json_str = """{"command": "create", "path": "temp/test.py", "content": "def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world():\\n    print(\\"Hello world!\\")\\n\\ndef calculate_sum(a, b):\\n    return a + b\\n\\nif __name__ == \\"__main\\":\\n    hello_world()\\n    result = calculate_sum(5, 3)\\n    print(f\\"Sum: {result}\\")\\n"}"""
+json_str = """{"command": "create", "path": "temp/test.py", "file_text": "def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world()def hello_world():\\n    print(\\"Hello world!\\")\\n\\ndef calculate_sum(a, b):\\n    return a + b\\n\\nif __name__ == \\"__main\\":\\n    hello_world()\\n    result = calculate_sum(5, 3)\\n    print(f\\"Sum: {result}\\")\\n"}"""
 
 # Feed the JSON string in chunks
 streamer = CodeStreamView()
+streamer.name = "str_replace_editor"
 feed_json_in_chunks(json_str, streamer)
 
 # Ask user if they want to create the file
@@ -46,6 +47,7 @@ view_json = """{"command": "view", "path": "something/test.py"}"""
 
 # Feed the view JSON string in chunks
 streamer = CodeStreamView()
+streamer.name = "str_replace_editor"
 feed_json_in_chunks(view_json, streamer)
 
 
@@ -58,6 +60,7 @@ insert_json = """{"command": "insert",
 
 # Feed the insert JSON string in chunks
 streamer = CodeStreamView()
+streamer.name = "str_replace_editor"
 feed_json_in_chunks(insert_json, streamer)
 
 
@@ -80,4 +83,5 @@ except json.JSONDecodeError as e:
 
 # Feed the insert JSON string in chunks
 streamer = CodeStreamView()
+streamer.name = "str_replace_editor"
 feed_json_in_chunks(insert_json, streamer)
