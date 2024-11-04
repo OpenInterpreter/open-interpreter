@@ -4,7 +4,7 @@ This is an Open Interpreter profile. It configures Open Interpreter to run Anthr
 Make sure to set ANTHROPIC_API_KEY environment variable to your API key.
 
 This profile is optimized for quick, concise responses while maintaining high accuracy.
-Learn more about Claude 3.5 Haiku: https://www.anthropic.com/news/claude-3-haiku
+Learn more about Claude 3.5 Haiku: https://www.anthropic.com/claude/haiku
 """
 
 # Configure Open Interpreter
