@@ -146,6 +146,7 @@ class CodeRenderer(ContentRenderer):
         #     line_prefix = f"{SchemaRenderer.GRAY_COLOR}    │ {SchemaRenderer.RESET_COLOR}"
         highlighted = highlight(chunks[0] + "\n", lexer, formatter).rstrip()
         sys.stdout.write(f"{line_prefix}{highlighted}\n")
+        # sys.stdout.write(f"{line_prefix}" + " ".join(highlighted) + "\n") # For debugging
 
         # Print remaining chunks with padding and pipe
         continuation_prefix = (
@@ -450,7 +451,7 @@ class OldStrRenderer(ContentRenderer):
     def __init__(self, style):
         super().__init__(style)
         SchemaRenderer.print_separator("┼")
-        self.RED_COLOR = "\033[38;5;197m"  # Monokai red color (more purple)
+        self.RED_COLOR = "\033[39m\033[38;5;204m"  # Monokai red
         self.RESET_COLOR = "\033[0m"
         self.rendered_content = ""
         self.line_number = 1

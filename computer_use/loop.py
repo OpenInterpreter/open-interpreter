@@ -61,8 +61,6 @@ model_choice = "claude-3.5-sonnet"
 if "--model" in sys.argv and sys.argv[sys.argv.index("--model") + 1]:
     model_choice = sys.argv[sys.argv.index("--model") + 1]
 
-print(model_choice)
-
 md = MarkdownStreamer()
 
 COMPUTER_USE_BETA_FLAG = "computer-use-2024-10-22"
@@ -243,8 +241,8 @@ async def sampling_loop(
         current_block = None
 
         for chunk in raw_response:
-            chunk = chunk.choices[0]
-            # time.sleep(5)
+            # chunk = chunk.choices[0]
+            # # time.sleep(5)
             if isinstance(chunk, BetaRawContentBlockStartEvent):
                 current_block = chunk.content_block
             elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
@@ -344,10 +342,12 @@ async def sampling_loop(
                 print(f"\n\033[38;5;240mRun actions above\033[0m?")
                 user_approval = input("\n(y/n): ").lower().strip()
             elif len(tool_use_blocks) == 1:
-                print(
-                    f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
-                )
+                print(f"\n\033[38;5;240mRun tool?\033[0m")
+                # print(
+                #     f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
+                # )
                 user_approval = input("\n(y/n): ").lower().strip()
+                print()
 
         tool_result_content: list[BetaToolResultBlockParam] = []
         for content_block in cast(list[BetaContentBlock], response.content):
@@ -618,15 +618,6 @@ async def main():
         print_markdown("---")
         time.sleep(0.5)
 
-        # Check for API key in environment variable
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
-            api_key = input(
-                "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
-            )
-            print_markdown("\n---")
-            time.sleep(0.5)
-
         import random
 
         tips = [
@@ -653,6 +644,15 @@ Move your mouse to any corner of the screen to exit."""
         print()
         print_markdown("Welcome to **Open Interpreter**.\n")
         print_markdown("---")
+        time.sleep(0.5)
+
+    # Check for API key in environment variable
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        api_key = input(
+            "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
+        )
+        print_markdown("\n---")
         time.sleep(0.5)
 
     # new_welcome()
