@@ -26,14 +26,12 @@ from .utils.convert_to_openai_messages import convert_to_openai_messages
 # Create or get the logger
 logger = logging.getLogger("LiteLLM")
 
-
 class SuppressDebugFilter(logging.Filter):
     def filter(self, record):
         # Suppress only the specific message containing the keywords
-        if "cost map" in record.getMessage():
+        if "cost map" in record.getMessage() or "vision support" in record.getMessage():
             return False  # Suppress this log message
         return True  # Allow all other messages
-
 
 class Llm:
     """
