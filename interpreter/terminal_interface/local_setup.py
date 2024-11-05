@@ -303,6 +303,7 @@ def local_setup(interpreter, provider=None, model=None):
 
             # Set the model to the selected model
             interpreter.llm.model = f"ollama/{model}"
+            interpreter.llm.supports_functions = False
 
             # Send a ping, which will actually load the model
 
@@ -373,6 +374,7 @@ def local_setup(interpreter, provider=None, model=None):
 
         interpreter.llm.model = jan_model_name
         interpreter.llm.api_key = "dummy"
+        interpreter.llm.supports_functions = False
         interpreter.display_message(f"\nUsing Jan model: `{jan_model_name}` \n")
         # time.sleep(1)
 
