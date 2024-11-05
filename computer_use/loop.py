@@ -3,6 +3,7 @@ Based on Anthropic's computer use example at https://github.com/anthropics/anthr
 """
 
 import asyncio
+import dataclasses
 import json
 import os
 import platform
@@ -57,9 +58,11 @@ from anthropic.types.beta import (
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 from .ui.edit import CodeStreamView
 
-model_choice = "claude-3.5-sonnet"
+model_choice = "claude-3-5-sonnet-20241022"
 if "--model" in sys.argv and sys.argv[sys.argv.index("--model") + 1]:
     model_choice = sys.argv[sys.argv.index("--model") + 1]
+
+import litellm
 
 md = MarkdownStreamer()
 
@@ -196,7 +199,172 @@ async def sampling_loop(
         # implementation may be able call the SDK directly with:
         # `response = client.messages.create(...)` instead.
 
-        if model_choice == "gpt-4o":
+        use_anthropic = (
+            litellm.get_model_info(model_choice)["litellm_provider"] == "anthropic"
+        )
+
+        if use_anthropic:
+            # Use Anthropic API which supports betas
+            raw_response = client.beta.messages.create(
+                max_tokens=max_tokens,
+                messages=messages,
+                model=model,
+                system=system["text"],
+                tools=tool_collection.to_params(),
+                betas=betas,
+                stream=True,
+            )
+
+            response_content = []
+            current_block = None
+
+            for chunk in raw_response:
+                if isinstance(chunk, BetaRawContentBlockStartEvent):
+                    current_block = chunk.content_block
+                elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
+                    if chunk.delta.type == "text_delta":
+                        # print(f"{chunk.delta.text}", end="", flush=True)
+                        md.feed(chunk.delta.text)
+                        yield {"type": "chunk", "chunk": chunk.delta.text}
+                        await asyncio.sleep(0)
+                        if current_block and current_block.type == "text":
+                            current_block.text += chunk.delta.text
+                    elif chunk.delta.type == "input_json_delta":
+                        # Initialize partial_json if needed
+                        if not hasattr(current_block, "partial_json"):
+                            current_block.partial_json = ""
+                            current_block.parsed_json = {}
+                            current_block.current_key = None
+                            current_block.current_value = ""
+
+                        # Add new JSON delta
+                        current_block.partial_json += chunk.delta.partial_json
+
+                        # print(chunk.delta.partial_json)
+
+                        # If name attribute is present on current_block:
+                        if hasattr(current_block, "name"):
+                            if edit.name == None:
+                                edit.name = current_block.name
+                            edit.feed(chunk.delta.partial_json)
+
+                elif isinstance(chunk, BetaRawContentBlockStopEvent):
+                    edit.close()
+                    edit = CodeStreamView()
+                    if current_block:
+                        if hasattr(current_block, "partial_json"):
+                            # Finished a tool call
+                            # print()
+                            current_block.input = json.loads(current_block.partial_json)
+                            # yield {"type": "chunk", "chunk": current_block.input}
+                            delattr(current_block, "partial_json")
+                        else:
+                            # Finished a message
+                            # print("\n")
+                            md.feed("\n")
+                            yield {"type": "chunk", "chunk": "\n"}
+                            await asyncio.sleep(0)
+                        # Clean up any remaining attributes from partial processing
+                        if current_block:
+                            for attr in [
+                                "partial_json",
+                                "parsed_json",
+                                "current_key",
+                                "current_value",
+                            ]:
+                                if hasattr(current_block, attr):
+                                    delattr(current_block, attr)
+                        response_content.append(current_block)
+                        current_block = None
+
+            response = BetaMessage(
+                id=str(uuid.uuid4()),
+                content=response_content,
+                role="assistant",
+                model=model,
+                stop_reason=None,
+                stop_sequence=None,
+                type="message",
+                usage={
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                },  # Add a default usage dictionary
+            )
+
+            messages.append(
+                {
+                    "role": "assistant",
+                    "content": cast(list[BetaContentBlockParam], response.content),
+                }
+            )
+
+            user_approval = None
+
+            if "-y" in sys.argv or "--yes" in sys.argv:  # or "--os" in sys.argv:
+                user_approval = "y"
+            else:
+                # If not in terminal, break
+                if not sys.stdin.isatty():
+                    # Error out
+                    print(
+                        "Error: You appear to be running in a non-interactive environment, so cannot approve tools. Add the `-y` flag to automatically approve tools in non-interactive environments."
+                    )
+                    # Exit
+                    exit(1)
+
+                content_blocks = cast(list[BetaContentBlock], response.content)
+                tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
+                if len(tool_use_blocks) > 1:
+                    print(f"\n\033[38;5;240mRun actions above\033[0m?")
+                    user_approval = input("\n(y/n): ").lower().strip()
+                elif len(tool_use_blocks) == 1:
+                    print(f"\n\033[38;5;240mRun tool?\033[0m")
+                    # print(
+                    #     f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
+                    # )
+                    user_approval = input("\n(y/n): ").lower().strip()
+                    print()
+
+            tool_result_content: list[BetaToolResultBlockParam] = []
+            for content_block in cast(list[BetaContentBlock], response.content):
+                output_callback(content_block)
+                if content_block.type == "tool_use":
+                    # Ask user if they want to create the file
+                    # path = "/tmp/test_file.txt"
+                    # print(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?")
+                    # response = input(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?" + " (y/n): ").lower().strip()
+                    # Ask user for confirmation before running tool
+                    edit.close()
+
+                    if user_approval == "y":
+                        result = await tool_collection.run(
+                            name=content_block.name,
+                            tool_input=cast(dict[str, Any], content_block.input),
+                        )
+                    else:
+                        result = ToolResult(output="Tool execution cancelled by user")
+                    tool_result_content.append(
+                        _make_api_tool_result(result, content_block.id)
+                    )
+                    tool_output_callback(result, content_block.id)
+
+            if user_approval == "n":
+                messages.append({"content": tool_result_content, "role": "user"})
+                yield {"type": "messages", "messages": messages}
+                break
+
+            if not tool_result_content:
+                # Done!
+                yield {"type": "messages", "messages": messages}
+                break
+
+            if use_anthropic:
+                messages.append({"content": tool_result_content, "role": "user"})
+            else:
+                messages.append({"content": tool_result_content, "role": "tool"})
+
+        else:
+            # Use Litellm
             tools = [
                 {
                     "type": "function",
@@ -216,173 +384,95 @@ async def sampling_loop(
                     },
                 }
             ]
-            from openai import OpenAI
 
-            client = OpenAI()
-            raw_response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "system", "content": system["text"]}] + messages,
-                tools=tools,
-                stream=True,
-                max_tokens=max_tokens,
-            )
-        else:
-            raw_response = client.beta.messages.create(
-                max_tokens=max_tokens,
-                messages=messages,
-                model=model,
-                system=system["text"],
-                tools=tool_collection.to_params(),
-                betas=betas,
-                stream=True,
-            )
-
-        response_content = []
-        current_block = None
-
-        for chunk in raw_response:
-            # chunk = chunk.choices[0]
-            # # time.sleep(5)
-            if isinstance(chunk, BetaRawContentBlockStartEvent):
-                current_block = chunk.content_block
-            elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
-                if chunk.delta.type == "text_delta":
-                    # print(f"{chunk.delta.text}", end="", flush=True)
-                    md.feed(chunk.delta.text)
-                    yield {"type": "chunk", "chunk": chunk.delta.text}
-                    await asyncio.sleep(0)
-                    if current_block and current_block.type == "text":
-                        current_block.text += chunk.delta.text
-                elif chunk.delta.type == "input_json_delta":
-                    # Initialize partial_json if needed
-                    if not hasattr(current_block, "partial_json"):
-                        current_block.partial_json = ""
-                        current_block.parsed_json = {}
-                        current_block.current_key = None
-                        current_block.current_value = ""
-
-                    # Add new JSON delta
-                    current_block.partial_json += chunk.delta.partial_json
-
-                    # print(chunk.delta.partial_json)
-
-                    # If name attribute is present on current_block:
-                    if hasattr(current_block, "name"):
-                        if edit.name == None:
-                            edit.name = current_block.name
-                        edit.feed(chunk.delta.partial_json)
-
-            elif isinstance(chunk, BetaRawContentBlockStopEvent):
-                edit.close()
-                edit = CodeStreamView()
-                if current_block:
-                    if hasattr(current_block, "partial_json"):
-                        # Finished a tool call
-                        # print()
-                        current_block.input = json.loads(current_block.partial_json)
-                        # yield {"type": "chunk", "chunk": current_block.input}
-                        delattr(current_block, "partial_json")
-                    else:
-                        # Finished a message
-                        # print("\n")
-                        md.feed("\n")
-                        yield {"type": "chunk", "chunk": "\n"}
-                        await asyncio.sleep(0)
-                    # Clean up any remaining attributes from partial processing
-                    if current_block:
-                        for attr in [
-                            "partial_json",
-                            "parsed_json",
-                            "current_key",
-                            "current_value",
-                        ]:
-                            if hasattr(current_block, attr):
-                                delattr(current_block, attr)
-                    response_content.append(current_block)
-                    current_block = None
-
-        response = BetaMessage(
-            id=str(uuid.uuid4()),
-            content=response_content,
-            role="assistant",
-            model=model,
-            stop_reason=None,
-            stop_sequence=None,
-            type="message",
-            usage={
-                "input_tokens": 0,
-                "output_tokens": 0,
-            },  # Add a default usage dictionary
-        )
-
-        messages.append(
-            {
-                "role": "assistant",
-                "content": cast(list[BetaContentBlockParam], response.content),
+            params = {
+                "model": model_choice,
+                "messages": [{"role": "system", "content": system["text"]}] + messages,
+                "tools": tools,
+                "stream": True,
+                "max_tokens": max_tokens,
             }
-        )
 
-        user_approval = None
+            raw_response = litellm.completion(**params)
 
-        if "-y" in sys.argv or "--yes" in sys.argv:  # or "--os" in sys.argv:
-            user_approval = "y"
-        else:
-            # If not in terminal, break
-            if not sys.stdin.isatty():
-                # Error out
-                print(
-                    "Error: You appear to be running in a non-interactive environment, so cannot approve tools. Add the `-y` flag to automatically approve tools in non-interactive environments."
-                )
-                # Exit
-                exit(1)
+            message = None
 
-            content_blocks = cast(list[BetaContentBlock], response.content)
-            tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
-            if len(tool_use_blocks) > 1:
-                print(f"\n\033[38;5;240mRun actions above\033[0m?")
-                user_approval = input("\n(y/n): ").lower().strip()
-            elif len(tool_use_blocks) == 1:
-                print(f"\n\033[38;5;240mRun tool?\033[0m")
-                # print(
-                #     f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
-                # )
-                user_approval = input("\n(y/n): ").lower().strip()
-                print()
+            for chunk in raw_response:
+                if message == None:
+                    message = chunk.choices[0].delta
 
-        tool_result_content: list[BetaToolResultBlockParam] = []
-        for content_block in cast(list[BetaContentBlock], response.content):
-            output_callback(content_block)
-            if content_block.type == "tool_use":
-                # Ask user if they want to create the file
-                # path = "/tmp/test_file.txt"
-                # print(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?")
-                # response = input(f"\n\033[38;5;240m Create \033[0m\033[1m{path}\033[0m?" + " (y/n): ").lower().strip()
-                # Ask user for confirmation before running tool
-                edit.close()
+                if chunk.choices[0].delta.content:
+                    md.feed(chunk.choices[0].delta.content)
+                    yield {"type": "chunk", "chunk": chunk.choices[0].delta.content}
+                    await asyncio.sleep(0)
+
+                    # If the delta == message, we're on the first block, so this content is already in there
+                    if chunk.choices[0].delta != message:
+                        message.content += chunk.choices[0].delta.content
+                if chunk.choices[0].delta.tool_calls:
+                    if chunk.choices[0].delta.tool_calls[0].id:
+                        if message.tool_calls == None or chunk.choices[
+                            0
+                        ].delta.tool_calls[0].id not in [
+                            t.id for t in message.tool_calls
+                        ]:
+                            edit.close()
+                            edit = CodeStreamView()
+                            message.tool_calls.append(
+                                chunk.choices[0].delta.tool_calls[0]
+                            )
+                        current_tool_call = [
+                            t
+                            for t in message.tool_calls
+                            if t.id == chunk.choices[0].delta.tool_calls[0].id
+                        ][0]
+
+                    if chunk.choices[0].delta.tool_calls[0].function.name:
+                        tool_name = chunk.choices[0].delta.tool_calls[0].function.name
+                        if edit.name == None:
+                            edit.name = tool_name
+                        if current_tool_call.function.name == None:
+                            current_tool_call.function.name = tool_name
+                    if chunk.choices[0].delta.tool_calls[0].function.arguments:
+                        arguments_delta = (
+                            chunk.choices[0].delta.tool_calls[0].function.arguments
+                        )
+                        edit.feed(arguments_delta)
+
+                        # If the delta == message, we're on the first block, so this arguments_delta is already in there
+                        if chunk.choices[0].delta != message:
+                            current_tool_call.function.arguments += arguments_delta
+
+                if chunk.choices[0].finish_reason:
+                    edit.close()
+                    edit = CodeStreamView()
+
+            messages.append(message)
+
+            if not message.tool_calls:
+                yield {"type": "messages", "messages": messages}
+                break
+
+            user_approval = input("\nRun tool(s)? (y/n): ").lower().strip()
+
+            for tool_call in message.tool_calls:
+                function_arguments = json.loads(tool_call.function.arguments)
 
                 if user_approval == "y":
                     result = await tool_collection.run(
-                        name=content_block.name,
-                        tool_input=cast(dict[str, Any], content_block.input),
+                        name=tool_call.function.name,
+                        tool_input=cast(dict[str, Any], function_arguments),
                     )
                 else:
                     result = ToolResult(output="Tool execution cancelled by user")
-                tool_result_content.append(
-                    _make_api_tool_result(result, content_block.id)
+
+                messages.append(
+                    {
+                        "role": "tool",
+                        "content": json.dumps(dataclasses.asdict(result)),
+                        "tool_call_id": tool_call.id,
+                    }
                 )
-                tool_output_callback(result, content_block.id)
-
-        if user_approval == "n":
-            messages.append({"content": tool_result_content, "role": "user"})
-            yield {"type": "messages", "messages": messages}
-            break
-
-        if not tool_result_content:
-            # Done!
-            yield {"type": "messages", "messages": messages}
-            break
-
-        messages.append({"content": tool_result_content, "role": "user"})
 
 
 def _maybe_filter_to_n_most_recent_images(
@@ -664,8 +754,13 @@ Move your mouse to any corner of the screen to exit."""
 
     while not exit_flag:
         # If is atty, get input from user
+        placeholder_color = "ansiblack"
+        placeholder_color = "ansigray"
+
         if sys.stdin.isatty():
-            placeholder = HTML('<ansiblack>Use """ for multi-line prompts</ansiblack>')
+            placeholder = HTML(
+                f'<{placeholder_color}>Use """ for multi-line prompts</{placeholder_color}>'
+            )
             # placeholder = HTML('<ansiblack>  Send a message (/? for help)</ansiblack>')
             session = PromptSession()
             # Initialize empty message for multi-line input
@@ -678,7 +773,9 @@ Move your mouse to any corner of the screen to exit."""
             # Check if starting multi-line input
             if first_line.strip() == '"""':
                 while True:
-                    placeholder = HTML('<ansiblack>Use """ again to finish</ansiblack>')
+                    placeholder = HTML(
+                        f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
+                    )
                     line = await session.prompt_async("", placeholder=placeholder)
                     if line.strip().endswith('"""'):
                         break

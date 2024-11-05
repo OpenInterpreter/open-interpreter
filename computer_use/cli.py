@@ -1,7 +1,11 @@
+import importlib.util
 import json
+import os
 import random
 import sys
 import time
+
+import platformdirs
 
 from .loop import run_async_main
 from .ui.edit import CodeStreamView
@@ -34,23 +38,26 @@ def help_message():
         "\033[38;5;240mTip: Type `wtf` in your terminal to fix the last error\033[0m",
         "\033[38;5;240mTip: Your terminal is a chatbox. Type `i want to...`\033[0m",
     ]
+    BLUE_COLOR = "\033[94m"
+    RESET_COLOR = "\033[0m"
+
     content = f"""
 A standard interface for computer-controlling agents.
 
-Run \033[34minterpreter\033[0m or \033[34mi [prompt]\033[0m to begin.
+Run {BLUE_COLOR}interpreter{RESET_COLOR} or {BLUE_COLOR}i [prompt]{RESET_COLOR} to begin.
 
-\033[34m--gui\033[0m Enable display, mouse, and keyboard control
-\033[34m--model\033[0m Specify language model or OpenAI-compatible URL
-\033[34m--serve\033[0m Start an OpenAI-compatible server at \033[34m/\033[0m
+{BLUE_COLOR}--gui{RESET_COLOR} Enable display, mouse, and keyboard control
+{BLUE_COLOR}--model{RESET_COLOR} Specify language model or OpenAI-compatible URL
+{BLUE_COLOR}--serve{RESET_COLOR} Start an OpenAI-compatible server at {BLUE_COLOR}/{RESET_COLOR}
 
-\033[34m-y\033[0m Automatically approve tools
-\033[34m-d\033[0m Run in debug mode
+{BLUE_COLOR}-y{RESET_COLOR} Automatically approve tools
+{BLUE_COLOR}-d{RESET_COLOR} Run in debug mode
 
 Examples:
 
-\033[34mi need help with my code\033[0m
-\033[34mi --model gpt-4o-mini --serve\033[0m
-\033[34mi --model https://localhost:1234/v1\033[0m
+{BLUE_COLOR}i need help with my code{RESET_COLOR}
+{BLUE_COLOR}i --model gpt-4o-mini --serve{RESET_COLOR}
+{BLUE_COLOR}i --model https://localhost:1234/v1{RESET_COLOR}
 
 {random.choice(tips)}
 """.strip()
@@ -68,11 +75,39 @@ Examples:
     time.sleep(0.03)
     print("")
     time.sleep(0.04)
-    print("\033[38;5;238mA.C., 2024. https://openinterpreter.com/\033[0m\n")
+    # print("\033[38;5;238mA.C., 2024. https://openinterpreter.com/\033[0m\n")
+    print("\033[38;5;238mhttps://openinterpreter.com/\033[0m\n")
     time.sleep(0.05)
 
 
 def main():
+    oi_dir = platformdirs.user_config_dir("open-interpreter")
+    profiles_dir = os.path.join(oi_dir, "profiles")
+
+    # Get profile path from command line args
+    profile = None
+    for i, arg in enumerate(sys.argv):
+        if arg == "--profile" and i + 1 < len(sys.argv):
+            profile = sys.argv[i + 1]
+            break
+
+    if profile:
+        if not os.path.isfile(profile):
+            profile = os.path.join(profiles_dir, profile)
+            if not os.path.isfile(profile):
+                profile += ".py"
+                if not os.path.isfile(profile):
+                    print(f"Invalid profile path: {profile}")
+                    exit(1)
+
+        # Load the profile module from the provided path
+        spec = importlib.util.spec_from_file_location("profile", profile)
+        profile_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(profile_module)
+
+        # Get the interpreter from the profile
+        interpreter = profile_module.interpreter
+
     if len(sys.argv) > 1 and sys.argv[1] == "--help":
         help_message()
     else:
