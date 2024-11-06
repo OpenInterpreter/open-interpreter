@@ -607,8 +607,8 @@ class SchemaRenderer:
     }
 
 
-class CodeStreamView:
-    def __init__(self):
+class ToolRenderer:
+    def __init__(self, name=None):
         self.current_renderers = {}
         self.partial_json = ""
         self.code_style = random.choice(list(get_all_styles()))
@@ -616,7 +616,7 @@ class CodeStreamView:
         # print("Style:", self.code_style)
         self.current_schema = None
         self.current_json = None  # Store the current parsed JSON state
-        self.name = None
+        self.name = name
 
     def _parse_json(self, json_chunk):
         # Add new chunk to existing buffer

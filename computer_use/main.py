@@ -19,7 +19,8 @@ import pyautogui
 from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
 
-from .ui.markdown import MarkdownStreamer
+from .misc.desktop import desktop_prompt
+from .ui.markdown import MarkdownRenderer
 
 try:
     from enum import StrEnum
@@ -29,15 +30,7 @@ except ImportError:  # 3.10 compatibility
 from typing import Any, List, cast
 
 import requests
-from anthropic import (
-    Anthropic,
-    AnthropicBedrock,
-    AnthropicVertex,
-    APIError,
-    APIResponse,
-    APIResponseValidationError,
-    APIStatusError,
-)
+from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex
 from anthropic.types import ToolResultBlockParam
 from anthropic.types.beta import (
     BetaCacheControlEphemeralParam,
@@ -56,15 +49,16 @@ from anthropic.types.beta import (
 )
 
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
-from .ui.edit import CodeStreamView
+from .ui.tool import ToolRenderer
 
 model_choice = "claude-3-5-sonnet-20241022"
 if "--model" in sys.argv and sys.argv[sys.argv.index("--model") + 1]:
     model_choice = sys.argv[sys.argv.index("--model") + 1]
 
+os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
-md = MarkdownStreamer()
+md = MarkdownRenderer()
 
 COMPUTER_USE_BETA_FLAG = "computer-use-2024-10-22"
 PROMPT_CACHING_BETA_FLAG = "prompt-caching-2024-07-31"
@@ -79,32 +73,8 @@ from rich import print as rich_print
 from rich.markdown import Markdown
 from rich.rule import Rule
 
-# Add this near the top of the file, with other imports and global variables
+# Add this near the top of the file, with other imports and global variables # <- this is from anthropic but it sounds so cursor lmao
 messages: List[BetaMessageParam] = []
-
-
-def print_markdown(message):
-    """
-    Display markdown message. Works with multiline strings with lots of indentation.
-    Will automatically make single line > tags beautiful.
-    """
-
-    for line in message.split("\n"):
-        line = line.strip()
-        if line == "":
-            print("")
-        elif line == "---":
-            rich_print(Rule(style="white"))
-        else:
-            try:
-                rich_print(Markdown(line))
-            except UnicodeEncodeError as e:
-                # Replace the problematic character or handle the error as needed
-                print("Error displaying line:", line)
-
-    if "\n" not in message and message.startswith(">"):
-        # Aesthetic choice. For these tags, they need a space below them
-        print("")
 
 
 class APIProvider(StrEnum):
@@ -180,7 +150,7 @@ async def sampling_loop(
 
         if enable_prompt_caching:
             betas.append(PROMPT_CACHING_BETA_FLAG)
-            _inject_prompt_caching(messages)
+            # _inject_prompt_caching(messages)
             # Is it ever worth it to bust the cache with prompt caching?
             image_truncation_threshold = 50
             system["cache_control"] = {"type": "ephemeral"}
@@ -192,7 +162,7 @@ async def sampling_loop(
                 min_removal_threshold=image_truncation_threshold,
             )
 
-        edit = CodeStreamView()
+        edit = ToolRenderer()
 
         # Call the API
         # we use raw_response to provide debug information to streamlit. Your
@@ -250,7 +220,7 @@ async def sampling_loop(
 
                 elif isinstance(chunk, BetaRawContentBlockStopEvent):
                     edit.close()
-                    edit = CodeStreamView()
+                    edit = ToolRenderer()
                     if current_block:
                         if hasattr(current_block, "partial_json"):
                             # Finished a tool call
@@ -483,7 +453,7 @@ async def sampling_loop(
                             t.id for t in message.tool_calls
                         ]:
                             edit.close()
-                            edit = CodeStreamView()
+                            edit = ToolRenderer()
                             message.tool_calls.append(
                                 chunk.choices[0].delta.tool_calls[0]
                             )
@@ -511,7 +481,7 @@ async def sampling_loop(
 
                 if chunk.choices[0].finish_reason:
                     edit.close()
-                    edit = CodeStreamView()
+                    edit = ToolRenderer()
 
             messages.append(message)
 
@@ -767,41 +737,6 @@ async def main():
         # Instead of running uvicorn here, we'll return the app
         return app
 
-    # Original CLI code continues here...
-    def original_welcome():
-        print()
-        print_markdown("Welcome to **Open Interpreter**.\n")
-        print_markdown("---")
-        time.sleep(0.5)
-
-        import random
-
-        tips = [
-            # "You can type `i` in your terminal to use Open Interpreter.",
-            "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
-            # "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
-            "We recommend using our desktop app for the best experience. Type `d` for early access.",
-            "**Tip:** Reduce display resolution for better performance.",
-        ]
-
-        random_tip = random.choice(tips)
-
-        markdown_text = f"""> Model set to `Claude 3.5 Sonnet (New)`, OS control enabled
-
-{random_tip}
-
-**Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
-
-Move your mouse to any corner of the screen to exit."""
-
-        print_markdown(markdown_text)
-
-    def new_welcome():
-        print()
-        print_markdown("Welcome to **Open Interpreter**.\n")
-        print_markdown("---")
-        time.sleep(0.5)
-
     # Check for API key in environment variable
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
@@ -857,21 +792,7 @@ Move your mouse to any corner of the screen to exit."""
         if user_input.lower() in ["exit", "quit", "q"]:
             break
         elif user_input.lower() in ["d"]:
-            print_markdown(
-                "---\nTo get early access to the **Open Interpreter Desktop App**, please provide the following information:\n"
-            )
-            first_name = input("What's your first name? ").strip()
-            email = input("What's your email? ").strip()
-
-            url = "https://neyguovvcjxfzhqpkicj.supabase.co/functions/v1/addEmailToWaitlist"
-            data = {"first_name": first_name, "email": email}
-
-            try:
-                response = requests.post(url, json=data)
-            except requests.RequestException as e:
-                pass
-
-            print_markdown("\nWe'll email you shortly. ✓\n---\n")
+            desktop_prompt()
             continue
 
         messages.append(

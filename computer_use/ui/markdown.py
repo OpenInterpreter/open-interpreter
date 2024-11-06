@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from enum import Enum, auto
 from typing import Dict, Optional, Set
 
@@ -19,7 +20,7 @@ class MarkdownElement(Enum):
     HEADER = "#"
 
 
-class MarkdownStreamer:
+class MarkdownRenderer:
     def __init__(self):
         # ANSI escape codes
         self.BOLD = "\033[1m"
@@ -152,6 +153,7 @@ class MarkdownStreamer:
 
     def feed(self, text: str):
         """Process incoming text stream."""
+
         for char in text:
             # Handle code block line-by-line streaming
             if self.in_code_block:
@@ -319,6 +321,9 @@ class MarkdownStreamer:
 
             # Track line starts for headers
             self.line_start = char == "\n"
+
+    def close(self):
+        pass
 
     def reset(self):
         """Reset all state variables to their initial values."""

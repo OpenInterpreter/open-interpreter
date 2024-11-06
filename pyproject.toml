@@ -74,6 +74,7 @@ uvicorn = "^0.30.1"
 screeninfo = "^0.8.1"
 pyte = "^0.8.2"
 pygments = "^2.18.0"
+tabulate = "^0.9.0"
 
 [tool.poetry.extras]
 os = ["opencv-python", "pyautogui", "plyer", "pywinctl", "pytesseract", "sentence-transformers", "ipywidgets", "timm"]
