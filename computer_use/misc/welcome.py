@@ -32,6 +32,11 @@ def welcome_message(args):
     else:
         model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))} # ⎇
 
+    if args["gui"]:
+        gui = "` ✳ GUI CONTROL `"
+    else:
+        gui = " " * len(" ✳ GUI CONTROL ")
+
     second_column_from_left = 20
 
     markdown_text = f"""●
@@ -42,7 +47,7 @@ Welcome to **Open Interpreter**.
 **TOOLS**{" "*(second_column_from_left-len("TOOLS"))}**MODEL**
 ` ❯ INTERPRETER `{" "*(second_column_from_left-len(" ❯ INTERPRETER "))}{model}
 ` ❚ FILE EDITOR `{" "*(second_column_from_left-len(" ❚ FILE EDITOR "))}**MODE**
-` ⎋ GUI CONTROL `{" "*(second_column_from_left-len(" ⎋ GUI CONTROL "))}` ? ASK CONFIRMATION `
+{gui}{" "*(second_column_from_left-len(" ⎋ GUI CONTROL "))}` ? ASK CONFIRMATION `
 
 
 {random_tip}

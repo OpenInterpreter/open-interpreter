@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument("--api-base", "-b", help="Specify the API base URL")
     parser.add_argument("--api-key", "-k", help="Specify the API key")
     parser.add_argument("--debug", "-d", action="store_true", help="Run in debug mode")
+    parser.add_argument("--gui", "-g", action="store_true", help="Enable GUI control")
     parser.add_argument(
         "--yes", "-y", action="store_true", help="Automatically approve tools"
     )
