@@ -53,8 +53,8 @@ from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 from .ui.tool import ToolRenderer
 
 model_choice = "claude-3-5-sonnet-20241022"
-if "--model" in sys.argv and sys.argv[sys.argv.index("--model") + 1]:
-    model_choice = sys.argv[sys.argv.index("--model") + 1]
+
+# model_choice = "gpt-4o"
 
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
@@ -70,6 +70,10 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+
+# Add these near the top with other global variables
+approved_paths = set()  # Store approved file paths
+approved_commands = set()  # Store approved bash commands
 
 # Add this near the top of the file, with other imports and global variables # <- this is from anthropic but it sounds so cursor lmao
 messages: List[BetaMessageParam] = []
@@ -117,6 +121,7 @@ async def sampling_loop(
     api_key: str,
     only_n_most_recent_images: int | None = None,
     max_tokens: int = 4096,
+    auto_approve: bool = False,
 ):
     """
     Agentic sampling loop for the assistant/tool interaction of computer use.
@@ -277,7 +282,7 @@ async def sampling_loop(
 
             user_approval = None
 
-            if "-y" in sys.argv or "--yes" in sys.argv:  # or "--os" in sys.argv:
+            if auto_approve:
                 user_approval = "y"
             else:
                 # If not in terminal, break
@@ -293,42 +298,63 @@ async def sampling_loop(
                 tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
                 if len(tool_use_blocks) > 1:
                     print(f"\n\033[38;5;240mRun all actions above\033[0m?")
-                    user_approval = input("\n(y/n): ").lower().strip()
+                    user_approval = input("\n(y/n/a): ").lower().strip()
                 elif len(tool_use_blocks) == 1:
+                    auto_approved = False
                     if tool_use_blocks[0].name == "str_replace_editor":
-                        if tool_use_blocks[0].input.get("command") == "create":
-                            path = tool_use_blocks[0].input.get("path")
-                            if path.startswith(os.getcwd()):
-                                path = path[len(os.getcwd()) + 1 :]
-                            print(
-                                f"\n\033[38;5;240mCreate \033[0m{path}\033[38;5;240m?\033[0m"
-                            )
-                        elif tool_use_blocks[0].input.get("command") == "view":
-                            path = tool_use_blocks[0].input.get("path")
-                            if path.startswith(os.getcwd()):
-                                path = path[len(os.getcwd()) + 1 :]
-                            print(
-                                f"\n\033[38;5;240mView \033[0m{path}\033[38;5;240m?\033[0m"
-                            )
-                        elif tool_use_blocks[0].input.get("command") in [
-                            "str_replace",
-                            "insert",
-                        ]:
-                            path = tool_use_blocks[0].input.get("path")
-                            if path.startswith(os.getcwd()):
-                                path = path[len(os.getcwd()) + 1 :]
-                            print(
-                                f"\n\033[38;5;240mEdit \033[0m{path}\033[38;5;240m?\033[0m"
-                            )
+                        path = tool_use_blocks[0].input.get("path")
+                        if path.startswith(os.getcwd()):
+                            path = path[len(os.getcwd()) + 1 :]
+                            if path == "":
+                                path = "/"
+
+                        # Check if path is already approved
+                        if path in approved_paths:
+                            user_approval = "y"
+                            auto_approved = True
+                        else:
+                            if tool_use_blocks[0].input.get("command") == "create":
+                                print(
+                                    f"\n\033[38;5;240mCreate \033[0m{path}\033[38;5;240m?\033[0m"
+                                )
+                            elif tool_use_blocks[0].input.get("command") == "view":
+                                print(
+                                    f"\n\033[38;5;240mView \033[0m{path}\033[38;5;240m?\033[0m"
+                                )
+                            elif tool_use_blocks[0].input.get("command") in [
+                                "str_replace",
+                                "insert",
+                            ]:
+                                print(
+                                    f"\n\033[38;5;240mEdit \033[0m{path}\033[38;5;240m?\033[0m"
+                                )
                     elif tool_use_blocks[0].name == "bash":
-                        print(f"\n\033[38;5;240mRun code?\033[0m")
+                        command = tool_use_blocks[0].input.get("command")
+                        # Check if command is already approved
+                        if command in approved_commands:
+                            user_approval = "y"
+                            auto_approved = True
+                        else:
+                            print(f"\n\033[38;5;240mRun code?\033[0m")
                     else:
                         print(f"\n\033[38;5;240mRun tool?\033[0m")
-                    # print(
-                    #     f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
-                    # )
-                    user_approval = input("\n(y/n): ").lower().strip()
-                    print()
+
+                    if not auto_approved:
+                        user_approval = input("\n(y/n/a): ").lower().strip()
+
+                        # Add to approved list if 'a' was pressed
+                        if user_approval == "a":
+                            if tool_use_blocks[0].name == "str_replace_editor":
+                                approved_paths.add(path)
+                                print(
+                                    f"\033[38;5;240mAdded {path} to approved paths\033[0m"
+                                )
+                            elif tool_use_blocks[0].name == "bash":
+                                approved_commands.add(command)
+                                print(
+                                    f"\033[38;5;240mAdded '{command}' to approved commands\033[0m"
+                                )
+                            user_approval = "y"
 
             tool_result_content: list[BetaToolResultBlockParam] = []
             for content_block in cast(list[BetaContentBlock], response.content):
@@ -396,15 +422,11 @@ async def sampling_loop(
                 {
                     "type": "function",
                     "function": {
-                        "name": "bash",
+                        "name": "str_replace_editor",
                         "description": """Custom editing tool for viewing, creating and editing files\n
-                            * State is persistent across command calls and discussions with the user\n
                             * If `path` is a file, `view` displays the result of applying `cat -n`. If `path` is a directory, `view` lists non-hidden files and directories up to 2 levels deep\n
                             * The `create` command cannot be used if the specified `path` already exists as a file\n
                             * If a `command` generates a long output, it will be truncated and marked with `<response clipped>` \n
-                            * The `undo_edit` command will revert the last edit made to the file at `path`\n
-                            \n
-                            Notes for using the `str_replace` command:\n
                             * The `old_str` parameter should match EXACTLY one or more consecutive lines from the original file. Be mindful of whitespaces!\n
                             * If the `old_str` parameter is not unique in the file, the replacement will not be performed. Make sure to include enough context in `old_str` to make it unique\n
                             * The `new_str` parameter should contain the edited lines that should replace the `old_str`""",
@@ -492,6 +514,8 @@ async def sampling_loop(
                         ]:
                             edit.close()
                             edit = ToolRenderer()
+                            if message.tool_calls == None:
+                                message.tool_calls = []
                             message.tool_calls.append(
                                 chunk.choices[0].delta.tool_calls[0]
                             )
@@ -741,6 +765,7 @@ async def async_main(args):
                 provider=provider,
                 messages=messages,
                 api_key=args["api_key"],
+                auto_approve=args["yes"],
             ):
                 if chunk["type"] == "messages":
                     messages = chunk["messages"]

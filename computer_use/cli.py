@@ -9,11 +9,15 @@ from .misc.welcome import welcome_message
 
 def parse_args():
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("--help", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--serve", action="store_true", help="Start the server")
-    parser.add_argument("--model", help="Specify the model name")
-    parser.add_argument("--api-base", help="Specify the API base URL")
-    parser.add_argument("--api-key", help="Specify the API key")
+    parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--serve", "-s", action="store_true", help="Start the server")
+    parser.add_argument("--model", "-m", help="Specify the model name")
+    parser.add_argument("--api-base", "-b", help="Specify the API base URL")
+    parser.add_argument("--api-key", "-k", help="Specify the API key")
+    parser.add_argument("--debug", "-d", action="store_true", help="Run in debug mode")
+    parser.add_argument(
+        "--yes", "-y", action="store_true", help="Automatically approve tools"
+    )
     parser.add_argument("--input-message", help=argparse.SUPPRESS)
 
     # If second argument exists and doesn't start with '-', don't parse args. This is an `i` style input

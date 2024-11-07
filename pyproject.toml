@@ -5,7 +5,7 @@ packages = [
     {include = "scripts"},
     {include = "computer_use"},
 ]
-version = "0.4.3" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "0.4.4" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "Let language models run code"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -96,11 +96,10 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-i = "interpreter.terminal_interface.start_terminal_interface:main"
 interpreter = "interpreter.terminal_interface.start_terminal_interface:main"
 wtf = "scripts.wtf:main"
 interpreter-classic = "interpreter.terminal_interface.start_terminal_interface:main"
-ix = "computer_use.cli:main"
+i = "computer_use.cli:main"
 
 [tool.black]
 target-version = ['py311']
