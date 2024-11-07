@@ -7,7 +7,7 @@ from .stream_text import stream_text
 def desktop_prompt():
     renderer = MarkdownRenderer()
     for chunk in stream_text(
-        "---\nTo get early access to the **Open Interpreter Desktop App**, please provide the following information:\n"
+        "To get early access to the **Open Interpreter Desktop App**, please provide the following information:\n\n"
     ):
         renderer.feed(chunk)
     first_name = input("What's your first name? ").strip()

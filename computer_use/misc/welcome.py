@@ -6,7 +6,7 @@ from ..ui.markdown import MarkdownRenderer
 from .stream_text import stream_text
 
 
-def welcome_message():
+def welcome_message(args):
     terminal_width = os.get_terminal_size().columns
     print()
     renderer = MarkdownRenderer()
@@ -15,15 +15,22 @@ def welcome_message():
 
     tips = [
         # "You can type `i` in your terminal to use Open Interpreter.",
-        "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
-        # "You can type prompts after `i` in your terminal, for example, `i want you to install node`. (Yes, really.)",
-        "We recommend using our desktop app for the best experience. Type `d` for early access.",
-        "**Tip:** Reduce display resolution for better performance.",
+        "**Tip:** Type `wtf` in your terminal to instantly fix the last error.",
+        # "**Tip:** Type `wtf` in your terminal to have Open Interpreter fix the last error.",
+        '**Tip:** You can paste content into Open Interpreter by typing `"""` first.',
+        # "**Tip:** Type prompts after `i` in your terminal, for example, `i want deno`.",
+        "**Tip:** You can type `i [your prompt]` directly into your terminal, e.g. `i want a venv`.",  # \n\nThese are all valid commands: `i want deno`, `i dont understand`, `i want a venv`",
+        # "**Tip:** Type your prompt directly into your CLI by starting with `i `, like `i want node`.", # \n\nThese are all valid commands: `i want deno`, `i dont understand`, `i want a venv`",
+        # "Our desktop app provides the best experience. Type `d` for early access.",
+        # "**Tip:** Reduce display resolution for better performance.",
     ]
 
     random_tip = random.choice(tips)
 
-    model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))} # ⎇
+    if args["model"]:
+        model = f"` ✳ {args['model']} `"  # {"-" * (terminal_width - len(model))} # ⎇
+    else:
+        model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))} # ⎇
 
     second_column_from_left = 20
 

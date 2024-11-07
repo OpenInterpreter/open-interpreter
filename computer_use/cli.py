@@ -1,44 +1,79 @@
-import importlib.util
-import os
+import argparse
+import asyncio
 import sys
+from concurrent.futures import ThreadPoolExecutor
 
-import platformdirs
-
-from .main import run_async_main
 from .misc.help import help_message
 from .misc.welcome import welcome_message
 
 
+def parse_args():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--help", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--serve", action="store_true", help="Start the server")
+    parser.add_argument("--model", help="Specify the model name")
+    parser.add_argument("--api-base", help="Specify the API base URL")
+    parser.add_argument("--api-key", help="Specify the API key")
+    parser.add_argument("--input-message", help=argparse.SUPPRESS)
+
+    # If second argument exists and doesn't start with '-', don't parse args. This is an `i` style input
+    if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
+        return {**vars(parser.parse_args([])), "input_message": " ".join(sys.argv[1:])}
+
+    args = vars(parser.parse_args())
+
+    if args["help"]:
+        arguments_string = ""
+        for action in parser._actions:
+            if action.help != argparse.SUPPRESS:
+                arguments_string += f"\n  {action.option_strings[0]:<12} {action.help}"
+        help_message(arguments_string)
+        sys.exit(0)
+
+    return args
+
+
 def main():
-    oi_dir = platformdirs.user_config_dir("open-interpreter")
-    profiles_dir = os.path.join(oi_dir, "profiles")
+    args = parse_args()
 
-    # Get profile path from command line args
-    profile = None
-    for i, arg in enumerate(sys.argv):
-        if arg == "--profile" and i + 1 < len(sys.argv):
-            profile = sys.argv[i + 1]
-            break
-
-    if profile:
-        if not os.path.isfile(profile):
-            profile = os.path.join(profiles_dir, profile)
-            if not os.path.isfile(profile):
-                profile += ".py"
-                if not os.path.isfile(profile):
-                    print(f"Invalid profile path: {profile}")
-                    exit(1)
-
-        # Load the profile module from the provided path
-        spec = importlib.util.spec_from_file_location("profile", profile)
-        profile_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(profile_module)
-
-        # Get the interpreter from the profile
-        interpreter = profile_module.interpreter
-
-    if len(sys.argv) > 1 and sys.argv[1] == "--help":
-        help_message()
+    if sys.stdin.isatty() and not args["input_message"]:
+        welcome_message(args)
     else:
-        welcome_message()
-        run_async_main()
+        from yaspin import yaspin
+        from yaspin.spinners import Spinners
+
+        spinner = yaspin(Spinners.simpleDots, text="")
+        spinner.start()
+
+    def load_main():
+        global main
+        from .main import main
+
+    async def async_load():
+        # Write initial prompt with placeholder
+        sys.stdout.write(
+            '\n> Use """ for multi-line prompts'
+        )  # Write prompt and placeholder
+        sys.stdout.write("\r> ")  # Move cursor back to after >
+        sys.stdout.flush()
+
+        # Load main in background
+        with ThreadPoolExecutor() as pool:
+            await asyncio.get_event_loop().run_in_executor(pool, load_main)
+
+        # Clear the line when done
+        sys.stdout.write("\r\033[K")  # Clear entire line
+        sys.stdout.flush()
+
+    if sys.stdin.isatty() and not args["input_message"]:
+        asyncio.run(async_load())
+        # print("\r", end="", flush=True)
+    else:
+        load_main()
+        spinner.stop()
+
+    main(args)
+
+
+if __name__ == "__main__":
+    main()

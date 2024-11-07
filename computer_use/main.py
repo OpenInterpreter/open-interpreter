@@ -95,9 +95,10 @@ PROVIDER_TO_DEFAULT_MODEL_NAME: dict[APIProvider, str] = {
 # helpful for the task at hand.
 
 SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
-* You are an AI assistant with access to a virtual machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
+* You are an AI assistant with access to a machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
 * When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
 * The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
+* The user's cwd is {os.getcwd()} and username is {os.getlogin()}.
 </SYSTEM_CAPABILITY>"""
 
 # Update the SYSTEM_PROMPT for Mac OS
@@ -139,7 +140,10 @@ async def sampling_loop(
         betas = [COMPUTER_USE_BETA_FLAG]
         image_truncation_threshold = 10
         if provider == APIProvider.ANTHROPIC:
-            client = Anthropic(api_key=api_key)
+            if api_key:
+                client = Anthropic(api_key=api_key)
+            else:
+                client = Anthropic()
             enable_prompt_caching = True
         elif provider == APIProvider.VERTEX:
             client = AnthropicVertex()
@@ -288,10 +292,38 @@ async def sampling_loop(
                 content_blocks = cast(list[BetaContentBlock], response.content)
                 tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
                 if len(tool_use_blocks) > 1:
-                    print(f"\n\033[38;5;240mRun actions above\033[0m?")
+                    print(f"\n\033[38;5;240mRun all actions above\033[0m?")
                     user_approval = input("\n(y/n): ").lower().strip()
                 elif len(tool_use_blocks) == 1:
-                    print(f"\n\033[38;5;240mRun tool?\033[0m")
+                    if tool_use_blocks[0].name == "str_replace_editor":
+                        if tool_use_blocks[0].input.get("command") == "create":
+                            path = tool_use_blocks[0].input.get("path")
+                            if path.startswith(os.getcwd()):
+                                path = path[len(os.getcwd()) + 1 :]
+                            print(
+                                f"\n\033[38;5;240mCreate \033[0m{path}\033[38;5;240m?\033[0m"
+                            )
+                        elif tool_use_blocks[0].input.get("command") == "view":
+                            path = tool_use_blocks[0].input.get("path")
+                            if path.startswith(os.getcwd()):
+                                path = path[len(os.getcwd()) + 1 :]
+                            print(
+                                f"\n\033[38;5;240mView \033[0m{path}\033[38;5;240m?\033[0m"
+                            )
+                        elif tool_use_blocks[0].input.get("command") in [
+                            "str_replace",
+                            "insert",
+                        ]:
+                            path = tool_use_blocks[0].input.get("path")
+                            if path.startswith(os.getcwd()):
+                                path = path[len(os.getcwd()) + 1 :]
+                            print(
+                                f"\n\033[38;5;240mEdit \033[0m{path}\033[38;5;240m?\033[0m"
+                            )
+                    elif tool_use_blocks[0].name == "bash":
+                        print(f"\n\033[38;5;240mRun code?\033[0m")
+                    else:
+                        print(f"\n\033[38;5;240mRun tool?\033[0m")
                     # print(
                     #     f"\n\033[38;5;240mRun tool \033[0m\033[1m{tool_use_blocks[0].name}\033[0m?"
                     # )
@@ -644,112 +676,11 @@ def _maybe_prepend_system_tool_result(result: ToolResult, result_text: str):
     return result_text
 
 
-async def main():
+async def async_main(args):
+    messages = []
     global exit_flag
-    messages: List[BetaMessageParam] = []
     model = PROVIDER_TO_DEFAULT_MODEL_NAME[APIProvider.ANTHROPIC]
     provider = APIProvider.ANTHROPIC
-
-    # Check if running in server mode
-    if "--server" in sys.argv:
-        app = FastAPI()
-
-        # Start the mouse position checking thread when in server mode
-        mouse_thread = threading.Thread(target=check_mouse_position)
-        mouse_thread.daemon = True
-        mouse_thread.start()
-
-        # Get API key from environment variable
-        api_key = os.environ.get("ANTHROPIC_API_KEY")
-        if not api_key:
-            raise ValueError(
-                "ANTHROPIC_API_KEY environment variable must be set when running in server mode"
-            )
-
-        @app.post("/openai/chat/completions")
-        async def chat_completion(request: ChatCompletionRequest):
-            print("BRAND NEW REQUEST")
-            # Check exit flag before processing request
-            if exit_flag:
-                return {"error": "Server shutting down due to mouse in corner"}
-
-            async def stream_response():
-                # if "claude" not in request.messages[-1].content.lower():
-                #     print("not claude")
-                #     # Return early if not a Claude request
-                #     return
-
-                # Instead of creating converted_messages, append the last message to global messages
-                global messages
-                messages.append(
-                    {
-                        "role": request.messages[-1].role,
-                        "content": [
-                            {"type": "text", "text": request.messages[-1].content}
-                        ],
-                    }
-                )
-
-                response_chunks = []
-
-                async def output_callback(content_block: BetaContentBlock):
-                    chunk = f"data: {json.dumps({'choices': [{'delta': {'content': content_block.text}}]})}\n\n"
-                    response_chunks.append(chunk)
-                    yield chunk
-
-                async def tool_output_callback(result: ToolResult, tool_id: str):
-                    if result.output or result.error:
-                        content = result.output if result.output else result.error
-                        chunk = f"data: {json.dumps({'choices': [{'delta': {'content': content}}]})}\n\n"
-                        response_chunks.append(chunk)
-                        yield chunk
-
-                try:
-                    yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
-
-                    messages = [m for m in messages if m["content"]]
-                    # print(str(messages)[-100:])
-                    # await asyncio.sleep(4)
-
-                    async for chunk in sampling_loop(
-                        model=model,
-                        provider=provider,
-                        messages=messages,  # Now using global messages
-                        output_callback=output_callback,
-                        tool_output_callback=tool_output_callback,
-                        api_key=api_key,
-                    ):
-                        print(chunk)
-                        if chunk["type"] == "chunk":
-                            await asyncio.sleep(0)
-                            yield f"data: {json.dumps({'choices': [{'delta': {'content': chunk['chunk']}}]})}\n\n"
-                        if chunk["type"] == "messages":
-                            messages = chunk["messages"]
-
-                    yield f"data: {json.dumps({'choices': [{'delta': {'content': '', 'finish_reason': 'stop'}}]})}\n\n"
-
-                except Exception as e:
-                    print("Error: An exception occurred.")
-                    print(traceback.format_exc())
-                    pass
-                    # raise
-                    # print(f"Error: {e}")
-                    # yield f"data: {json.dumps({'error': str(e)})}\n\n"
-
-            return StreamingResponse(stream_response(), media_type="text/event-stream")
-
-        # Instead of running uvicorn here, we'll return the app
-        return app
-
-    # Check for API key in environment variable
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        api_key = input(
-            "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
-        )
-        time.sleep(0.5)
-
-    # new_welcome()
 
     # Start the mouse position checking thread
     mouse_thread = threading.Thread(target=check_mouse_position)
@@ -761,7 +692,10 @@ async def main():
         placeholder_color = "ansiblack"
         placeholder_color = "ansigray"
 
-        if sys.stdin.isatty():
+        if args["input_message"]:
+            user_input = args["input_message"]
+            args["input_message"] = None
+        elif sys.stdin.isatty():
             placeholder = HTML(
                 f'<{placeholder_color}>Use """ for multi-line prompts</{placeholder_color}>'
             )
@@ -770,9 +704,9 @@ async def main():
             # Initialize empty message for multi-line input
             user_input = ""
             if len(messages) < 3:
-                first_line = await session.prompt_async("\n> ", placeholder=placeholder)
+                first_line = await session.prompt_async("> ", placeholder=placeholder)
             else:
-                first_line = input("\n> ")
+                first_line = input("> ")
 
             # Check if starting multi-line input
             if first_line.strip() == '"""':
@@ -786,11 +720,10 @@ async def main():
                     user_input += line + "\n"
             else:
                 user_input = first_line
+            print()
         else:
             # Read from stdin when not in terminal
             user_input = sys.stdin.read().strip()
-
-        print()
 
         if user_input.lower() in ["exit", "quit", "q"]:
             break
@@ -807,7 +740,7 @@ async def main():
                 model=model,
                 provider=provider,
                 messages=messages,
-                api_key=api_key,
+                api_key=args["api_key"],
             ):
                 if chunk["type"] == "messages":
                     messages = chunk["messages"]
@@ -820,24 +753,23 @@ async def main():
         if not sys.stdin.isatty():
             break
 
+        print()
+
     # The thread will automatically terminate when the main program exits
 
 
-def run_async_main():
+def main(args):
     if "--server" in sys.argv:
         # Start uvicorn server directly without asyncio.run()
-        app = asyncio.run(main())
+        app = asyncio.run(async_main(args))
         uvicorn.run(app, host="0.0.0.0", port=8000)
     else:
         try:
-            asyncio.run(main())
+            asyncio.run(async_main(args))
         except KeyboardInterrupt:
             print()
             pass
 
-
-if __name__ == "__main__":
-    run_async_main()
 
 # Replace the global variables and functions related to mouse tracking
 exit_flag = False

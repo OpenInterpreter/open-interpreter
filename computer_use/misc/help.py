@@ -6,7 +6,7 @@ from ..ui.tool import ToolRenderer
 from .stream_text import stream_text
 
 
-def help_message():
+def help_message(arguments_string):
     tips = [
         "\033[38;5;240mTip: Pipe in prompts using `$ANYTHING | i`\033[0m",
         "\033[38;5;240mTip: Type `wtf` in your terminal to fix the last error\033[0m",
@@ -32,6 +32,8 @@ Examples:
 {BLUE_COLOR}i need help with my code{RESET_COLOR}
 {BLUE_COLOR}i --model gpt-4o-mini --serve{RESET_COLOR}
 {BLUE_COLOR}i --model https://localhost:1234/v1{RESET_COLOR}
+
+{arguments_string}
 
 {random.choice(tips)}
 """.strip()

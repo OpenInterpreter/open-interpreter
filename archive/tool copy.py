@@ -175,11 +175,8 @@ class CodeRenderer(ContentRenderer):
 class PathRenderer(ContentRenderer):
     def __init__(self, style):
         super().__init__(style)
-        self.cwd = os.getcwd() + "/"
-        self.buffer = ""
+        self.rendered_content = ""
         self.json_obj = None
-        self.last_printed_pos = 0
-        self.diverged = False
 
     def feed(self, json_obj):
         self.json_obj = json_obj
@@ -194,28 +191,12 @@ class PathRenderer(ContentRenderer):
 
         content = str(content)
 
-        # Process each new character
-        while self.last_printed_pos < len(content):
-            curr_char = content[self.last_printed_pos]
-
-            # If we haven't diverged yet, check if we're still matching cwd
-            if not self.diverged:
-                if (
-                    self.last_printed_pos < len(self.cwd)
-                    and curr_char != self.cwd[self.last_printed_pos]
-                ):
-                    # We just diverged - print everything from start
-                    self.diverged = True
-                    sys.stdout.write(content[: self.last_printed_pos + 1])
-                elif self.last_printed_pos >= len(self.cwd):
-                    # We're past cwd - print just this character
-                    sys.stdout.write(curr_char)
-            else:
-                # Already diverged - print each new character
-                sys.stdout.write(curr_char)
-
+        # Only render new content
+        new_content = content[len(self.rendered_content) :]
+        if new_content:
+            sys.stdout.write(f"{new_content}")
             sys.stdout.flush()
-            self.last_printed_pos += 1
+            self.rendered_content += new_content
 
     def close(self):
         self.flush()
