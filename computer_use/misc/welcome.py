@@ -23,7 +23,7 @@ def welcome_message():
 
     random_tip = random.choice(tips)
 
-    model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))}
+    model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))} # ⎇
 
     second_column_from_left = 20
 
@@ -31,29 +31,31 @@ def welcome_message():
         
 Welcome to **Open Interpreter**. 
 
-**MODEL:** {model}
 
 **TOOLS**{" "*(second_column_from_left-len("TOOLS"))}**MODEL**
 ` ❯ INTERPRETER `{" "*(second_column_from_left-len(" ❯ INTERPRETER "))}{model}
-` ❚ FILE EDITOR `{" "*(second_column_from_left-len(" ❚ FILE EDITOR "))}**PROFILE**
-` ⎋ GUI CONTROL `{" "*(second_column_from_left-len(" ⎋ GUI CONTROL "))}` ● i.com/FAST `
+` ❚ FILE EDITOR `{" "*(second_column_from_left-len(" ❚ FILE EDITOR "))}**MODE**
+` ⎋ GUI CONTROL `{" "*(second_column_from_left-len(" ⎋ GUI CONTROL "))}` ? ASK CONFIRMATION `
 
-
-{"-" * terminal_width}
 
 {random_tip}
 
-**Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
 
-Move your mouse to any corner of the screen to exit.
-
-{"-" * terminal_width}
+{"─" * terminal_width}
 """
 
-    for chunk in stream_text(markdown_text, max_chunk=1):
-        renderer.feed(chunk)
+    """
+    **Warning:** This AI has full system access and can modify files, install software, and execute commands. By continuing, you accept all risks and responsibility.
+
+    Move your mouse to any corner of the screen to exit.
+    """
+
+    # for chunk in stream_text(markdown_text, max_chunk=1, min_delay=0.0001, max_delay=0.001):
+    #     renderer.feed(chunk)
+
+    renderer.feed(markdown_text)
 
     renderer.close()
 
 
-# ⧳ ❚ ❯ ✦ ⬤ ● ▶ ⚈ ⌖ ⎋ ⬤ ◉
+# ⧳ ❚ ❯ ✦ ⬤ ● ▶ ⚈ ⌖ ⎋ ⬤ ◉ ⎇

@@ -4,6 +4,8 @@ from yaspin import yaspin
 spinner = yaspin()
 spinner.start()
 
+# This should actually run ix, but convert the tool it uses into a bash script (e.g. sed if it uses the str tool). Just tell it that its only got one shot. Parallel is fine I guess.
+
 import os
 import platform
 import re

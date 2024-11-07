@@ -29,7 +29,6 @@ except ImportError:  # 3.10 compatibility
 
 from typing import Any, List, cast
 
-import requests
 from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex
 from anthropic.types import ToolResultBlockParam
 from anthropic.types.beta import (
@@ -47,6 +46,8 @@ from anthropic.types.beta import (
     BetaToolResultBlockParam,
     BetaToolUseBlockParam,
 )
+from yaspin import yaspin
+from yaspin.spinners import Spinners
 
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 from .ui.tool import ToolRenderer
@@ -69,9 +70,6 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
-from rich import print as rich_print
-from rich.markdown import Markdown
-from rich.rule import Rule
 
 # Add this near the top of the file, with other imports and global variables # <- this is from anthropic but it sounds so cursor lmao
 messages: List[BetaMessageParam] = []
@@ -114,10 +112,7 @@ async def sampling_loop(
     *,
     model: str,
     provider: APIProvider,
-    system_prompt_suffix: str,
     messages: list[BetaMessageParam],
-    output_callback: Callable[[BetaContentBlock], None],
-    tool_output_callback: Callable[[ToolResult, str], None],
     api_key: str,
     only_n_most_recent_images: int | None = None,
     max_tokens: int = 4096,
@@ -133,10 +128,13 @@ async def sampling_loop(
     tool_collection = ToolCollection(*tools)
     system = BetaTextBlockParam(
         type="text",
-        text=f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}",
+        text=SYSTEM_PROMPT,
     )
 
     while True:
+        spinner = yaspin(Spinners.simpleDots, text="")
+        spinner.start()
+
         enable_prompt_caching = False
         betas = [COMPUTER_USE_BETA_FLAG]
         image_truncation_threshold = 10
@@ -187,8 +185,13 @@ async def sampling_loop(
 
             response_content = []
             current_block = None
+            first_token = True
 
             for chunk in raw_response:
+                if first_token:
+                    spinner.stop()
+                    first_token = False
+
                 if isinstance(chunk, BetaRawContentBlockStartEvent):
                     current_block = chunk.content_block
                 elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
@@ -297,7 +300,6 @@ async def sampling_loop(
 
             tool_result_content: list[BetaToolResultBlockParam] = []
             for content_block in cast(list[BetaContentBlock], response.content):
-                output_callback(content_block)
                 if content_block.type == "tool_use":
                     # Ask user if they want to create the file
                     # path = "/tmp/test_file.txt"
@@ -316,7 +318,6 @@ async def sampling_loop(
                     tool_result_content.append(
                         _make_api_tool_result(result, content_block.id)
                     )
-                    tool_output_callback(result, content_block.id)
 
             if user_approval == "n":
                 messages.append({"content": tool_result_content, "role": "user"})
@@ -432,8 +433,13 @@ async def sampling_loop(
             raw_response = litellm.completion(**params)
 
             message = None
+            first_token = True
 
             for chunk in raw_response:
+                if first_token:
+                    spinner.stop()
+                    first_token = False
+
                 if message == None:
                     message = chunk.choices[0].delta
 
@@ -643,7 +649,6 @@ async def main():
     messages: List[BetaMessageParam] = []
     model = PROVIDER_TO_DEFAULT_MODEL_NAME[APIProvider.ANTHROPIC]
     provider = APIProvider.ANTHROPIC
-    system_prompt_suffix = ""
 
     # Check if running in server mode
     if "--server" in sys.argv:
@@ -709,7 +714,6 @@ async def main():
                     async for chunk in sampling_loop(
                         model=model,
                         provider=provider,
-                        system_prompt_suffix=system_prompt_suffix,
                         messages=messages,  # Now using global messages
                         output_callback=output_callback,
                         tool_output_callback=tool_output_callback,
@@ -743,7 +747,6 @@ async def main():
         api_key = input(
             "\nAn Anthropic API is required for OS mode.\n\nEnter your Anthropic API key: "
         )
-        print_markdown("\n---")
         time.sleep(0.5)
 
     # new_welcome()
@@ -799,30 +802,19 @@ async def main():
             {"role": "user", "content": [{"type": "text", "text": user_input}]}
         )
 
-        def output_callback(content_block: BetaContentBlock):
-            pass
-
-        def tool_output_callback(result: ToolResult, tool_id: str):
-            return
-            if result.output:
-                print(f"---\n{result.output}\n---")
-            if result.error:
-                print(f"---\n{result.error}\n---")
-
         try:
             async for chunk in sampling_loop(
                 model=model,
                 provider=provider,
-                system_prompt_suffix=system_prompt_suffix,
                 messages=messages,
-                output_callback=output_callback,
-                tool_output_callback=tool_output_callback,
                 api_key=api_key,
             ):
                 if chunk["type"] == "messages":
                     messages = chunk["messages"]
-        except Exception as e:
-            raise
+        except asyncio.CancelledError:  # So weird but this happens on the first ctrl C
+            continue
+        except KeyboardInterrupt:  # Then this happens on all subsequent ctrl Cs?
+            continue
 
         # If not in terminal, break
         if not sys.stdin.isatty():
@@ -837,7 +829,11 @@ def run_async_main():
         app = asyncio.run(main())
         uvicorn.run(app, host="0.0.0.0", port=8000)
     else:
-        asyncio.run(main())
+        try:
+            asyncio.run(main())
+        except KeyboardInterrupt:
+            print()
+            pass
 
 
 if __name__ == "__main__":

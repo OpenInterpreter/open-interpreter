@@ -1,7 +1,6 @@
 import asyncio
 import os
 import pty
-import select
 import signal
 import sys
 from typing import ClassVar, Literal
@@ -98,72 +97,49 @@ class _BashSession:
 
         # Create an event to signal when Ctrl+C is pressed
         ctrl_c_event = asyncio.Event()
-        accumulated_output = []  # Store all output here
 
         async def watch_for_ctrl_c():
             try:
                 while True:
-                    await asyncio.sleep(0.1)
+                    await asyncio.sleep(0.1)  # Small sleep to prevent CPU hogging
             except KeyboardInterrupt:
                 ctrl_c_event.set()
 
+        # Start the watcher task
         watcher = asyncio.create_task(watch_for_ctrl_c())
 
         try:
-            wrapped_command = f'{command}; echo "{self._sentinel}"'
-            self._process.stdin.write(f"{wrapped_command}\n".encode())
+            self._process.stdin.write(f"{command}\n".encode())
             await self._process.stdin.drain()
 
             if self._using_pty:
                 while True:
-                    r, _, _ = select.select([self._master_fd], [], [], 0.001)
-
                     if ctrl_c_event.is_set():
-                        return CLIResult(
-                            output="".join(accumulated_output)
-                            + "\n\nCommand cancelled by user.",
-                        )
+                        self.stop()
+                        return ToolResult(system="Command cancelled by user")
 
-                    if r:
-                        try:
-                            chunk = os.read(self._master_fd, 1024)
-                            if not chunk:
-                                break
-                            chunk_str = chunk.decode()
-                            accumulated_output.append(chunk_str)
-
-                            # Check if sentinel is in the output
-                            full_output = "".join(accumulated_output)
-                            if self._sentinel in full_output:
-                                # Remove sentinel and everything after it
-                                clean_output = full_output.split(self._sentinel)[0]
-                                print(clean_output, end="", flush=True)
-                                return CLIResult(output=clean_output)
-                            else:
-                                print(chunk_str, end="", flush=True)
-
-                        except (OSError, IOError):
+                    try:
+                        chunk = os.read(self._master_fd, 1024)
+                        if not chunk:
                             break
-
+                        print(chunk.decode(), end="", flush=True)
+                    except (OSError, IOError):
+                        break
+                    # Check for Ctrl+C every iteration
                     await asyncio.sleep(0)
 
             else:
                 output, error = await self._process.communicate()
-                output_str = output.decode()
-                print(output_str, end="", flush=True)
-                return CLIResult(output=output_str + "\n" + error.decode())
+                print(output.decode(), end="", flush=True)
+                return CLIResult(output=output.decode(), error=error.decode())
 
         except (KeyboardInterrupt, asyncio.CancelledError):
             self.stop()
-            print("\n\nExecution stopped.")
-            return CLIResult(
-                output="".join(accumulated_output) + "\n\nCommand cancelled by user."
-            )
+            return ToolResult(system="Command cancelled by user")
         finally:
-            watcher.cancel()
+            watcher.cancel()  # Clean up the watcher task
 
-        # If we somehow get here, return whatever we've accumulated
-        return CLIResult(output="".join(accumulated_output))
+        return CLIResult(output="Command completed", error="")
 
 
 class BashTool(BaseAnthropicTool):
