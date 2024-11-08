@@ -1,0 +1,16 @@
+- server
+- .openinterpreter
+- tools [gui_control, file_editor, interpreter]
+- allowed_commands
+- allowed_paths
+- system_message
+- custom_instructions
+- model
+- api_base
+- api_key
+- api_version
+- provider
+- max_budget
+- max_turns
+- profile
+- auto_run
