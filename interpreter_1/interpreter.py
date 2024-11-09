@@ -621,10 +621,19 @@ class Interpreter:
         try:
             placeholder_color = "ansigray"
 
+            message_count = 0
             while True:
+                # Determine placeholder text based on message count
+                if message_count in [0, 1]:
+                    placeholder_text = 'Use """ for multi-line prompts'
+                elif message_count in []:  # Disabled
+                    placeholder_text = "Type /help for advanced commands"
+                else:
+                    placeholder_text = ""
+
                 # Get first line of input with placeholder
                 placeholder = HTML(
-                    f'<{placeholder_color}>Use """ for multi-line prompts</{placeholder_color}>'
+                    f"<{placeholder_color}>{placeholder_text}</{placeholder_color}>"
                 )
                 user_input = prompt_session.prompt(
                     "> ", placeholder=placeholder
@@ -646,6 +655,8 @@ class Interpreter:
                             break
                         user_input += line + "\n"
                     print()
+
+                message_count += 1  # Increment counter after each message
 
                 if user_input.startswith("/"):
                     parts = user_input.split(maxsplit=2)
