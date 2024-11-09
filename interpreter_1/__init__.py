@@ -28,13 +28,6 @@ interpreter.save_config("~/my_settings.json")
 # Use lazy imports to avoid loading heavy modules immediately
 from importlib import import_module
 
-# Add these for documentation tools
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .interpreter import Interpreter
-    from .profiles import Profile
-
 
 def __getattr__(name):
     """Lazy load attributes only when they're actually requested"""

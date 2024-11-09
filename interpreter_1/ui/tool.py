@@ -331,14 +331,15 @@ class InsertRenderer(ContentRenderer):
 
         if old_str is not None:
             file_text = "".join(self.file_content)
-            if old_str not in file_text:
-                # raise ValueError(f"Could not find '{old_str}' in {path}")
-                pass
-            # Find line number by counting newlines before match
-            prefix = file_text[: file_text.index(old_str)]
-            line_number = prefix.count("\n") + 1
-            self.leading_space = prefix[: prefix.find(old_str.lstrip())]
-            return line_number
+            try:
+                # Find line number by counting newlines before match
+                prefix = file_text[: file_text.index(old_str)]
+                line_number = prefix.count("\n") + 1
+                self.leading_space = prefix[: prefix.find(old_str.lstrip())]
+                return line_number
+            except ValueError:
+                print("\n\nInsertion point not found.\n\n")
+                return None  # Return None to indicate failure
 
         return 1  # Default to first line if neither specified
 
@@ -358,6 +359,10 @@ class InsertRenderer(ContentRenderer):
                 specified_line=json_obj.get("insert_line"),
                 old_str=json_obj.get("old_str"),
             )
+
+            # If insert_line is None, stop rendering
+            if self.insert_line is None:
+                return
 
             # Print separator unless we're doing a string replacement
             if "old_str" not in json_obj:
