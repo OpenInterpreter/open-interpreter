@@ -32,7 +32,7 @@ def welcome_message(args):
     else:
         model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))} # ⎇
 
-    if args["gui"]:
+    if args["tools"] and "gui" in args["tools"]:
         gui = "` ✳ GUI CONTROL `"
     else:
         gui = " " * len(" ✳ GUI CONTROL ")

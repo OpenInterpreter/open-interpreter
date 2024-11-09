@@ -52,10 +52,6 @@ from yaspin.spinners import Spinners
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 from .ui.tool import ToolRenderer
 
-model_choice = "claude-3-5-sonnet-20241022"
-
-# model_choice = "gpt-4o"
-
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 
@@ -115,22 +111,27 @@ if platform.system() == "Darwin":
 
 async def sampling_loop(
     *,
-    model: str,
+    model: str = "claude-3-5-sonnet-20241022",
     provider: APIProvider,
     messages: list[BetaMessageParam],
     api_key: str,
     only_n_most_recent_images: int | None = None,
     max_tokens: int = 4096,
     auto_approve: bool = False,
+    tools: list[str] = [],
 ):
     """
     Agentic sampling loop for the assistant/tool interaction of computer use.
     """
-    tools = [BashTool(), EditTool()]
-    if "--gui" in sys.argv:
+
+    tools = []
+    if "interpreter" in tools:
+        tools.append(BashTool())
+    if "editor" in tools:
+        tools.append(EditTool())
+    if "gui" in tools:
         tools.append(ComputerTool())
-    if "--gui-only" in sys.argv:
-        tools = [ComputerTool()]
+
     tool_collection = ToolCollection(*tools)
     system = BetaTextBlockParam(
         type="text",
@@ -154,6 +155,8 @@ async def sampling_loop(
             client = AnthropicVertex()
         elif provider == APIProvider.BEDROCK:
             client = AnthropicBedrock()
+        else:
+            client = Anthropic()
 
         if enable_prompt_caching:
             betas.append(PROMPT_CACHING_BETA_FLAG)
@@ -176,9 +179,12 @@ async def sampling_loop(
         # implementation may be able call the SDK directly with:
         # `response = client.messages.create(...)` instead.
 
-        use_anthropic = (
-            litellm.get_model_info(model_choice)["litellm_provider"] == "anthropic"
-        )
+        try:
+            use_anthropic = (
+                litellm.get_model_info(model)["litellm_provider"] == "anthropic"
+            )
+        except:
+            use_anthropic = False
 
         if use_anthropic:
             # Use Anthropic API which supports betas
@@ -476,15 +482,37 @@ async def sampling_loop(
                 },
             ]
 
+            tools = tools[:1]
+
+            if model.startswith("ollama/"):
+                stream = False
+                # Ollama doesn't support tool calling + streaming
+                # Also litellm doesnt.. work?
+                actual_model = model.replace("ollama/", "openai/")
+                api_base = "http://localhost:11434/v1/"
+            else:
+                stream = True
+                api_base = None
+                actual_model = model
+
             params = {
-                "model": model_choice,
+                "model": actual_model,
                 "messages": [{"role": "system", "content": system["text"]}] + messages,
-                "tools": tools,
-                "stream": True,
-                "max_tokens": max_tokens,
+                # "tools": tools,
+                "stream": stream,
+                # "max_tokens": max_tokens,
+                "api_base": api_base,
+                # "drop_params": True,
+                "temperature": 0.0,
             }
 
             raw_response = litellm.completion(**params)
+            print(raw_response)
+
+            if not stream:
+                # Simulate streaming
+                raw_response.choices[0].delta = raw_response.choices[0].message
+                raw_response = [raw_response]
 
             message = None
             first_token = True
@@ -546,6 +574,8 @@ async def sampling_loop(
                     edit = ToolRenderer()
 
             messages.append(message)
+
+            print()
 
             if not message.tool_calls:
                 yield {"type": "messages", "messages": messages}
@@ -703,8 +733,6 @@ def _maybe_prepend_system_tool_result(result: ToolResult, result_text: str):
 async def async_main(args):
     messages = []
     global exit_flag
-    model = PROVIDER_TO_DEFAULT_MODEL_NAME[APIProvider.ANTHROPIC]
-    provider = APIProvider.ANTHROPIC
 
     # Start the mouse position checking thread
     mouse_thread = threading.Thread(target=check_mouse_position)
@@ -761,11 +789,11 @@ async def async_main(args):
 
         try:
             async for chunk in sampling_loop(
-                model=model,
-                provider=provider,
+                model=args["model"],
+                provider=args.get("provider"),
                 messages=messages,
                 api_key=args["api_key"],
-                auto_approve=args["yes"],
+                auto_approve=args["auto_run"],
             ):
                 if chunk["type"] == "messages":
                     messages = chunk["messages"]

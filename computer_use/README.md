@@ -1,6 +1,5 @@
 - server
-- .openinterpreter
-- tools [gui_control, file_editor, interpreter]
+- tools [interpreter,editor,gui]
 - allowed_commands
 - allowed_paths
 - system_message
@@ -12,5 +11,9 @@
 - provider
 - max_budget
 - max_turns
-- profile
+- profile ~/.openinterpreter
 - auto_run
+- tool_calling
+
+i --model ollama/llama3.2 --no-tool-calling --custom-instructions "
+You can execute code by enclosing it in markdown code blocks."

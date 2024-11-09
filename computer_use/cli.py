@@ -9,17 +9,57 @@ from .misc.welcome import welcome_message
 
 def parse_args():
     parser = argparse.ArgumentParser(add_help=False)
+    # Hidden arguments
     parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--serve", "-s", action="store_true", help="Start the server")
+    parser.add_argument("--input-message", help=argparse.SUPPRESS)
+
+    # Server configuration
+    parser.add_argument("--server", "-s", action="store_true", help="Start the server")
+
+    # Model and API configuration
     parser.add_argument("--model", "-m", help="Specify the model name")
+    parser.add_argument("--provider", help="Specify the API provider")
     parser.add_argument("--api-base", "-b", help="Specify the API base URL")
     parser.add_argument("--api-key", "-k", help="Specify the API key")
-    parser.add_argument("--debug", "-d", action="store_true", help="Run in debug mode")
-    parser.add_argument("--gui", "-g", action="store_true", help="Enable GUI control")
+    parser.add_argument("--api-version", help="Specify the API version")
+
+    # Tool configuration
+    parser.add_argument("--tools", help="Specify enabled tools (comma-separated)")
+    parser.add_argument("--allowed-commands", help="Specify allowed commands")
+    parser.add_argument("--allowed-paths", help="Specify allowed paths")
     parser.add_argument(
-        "--yes", "-y", action="store_true", help="Automatically approve tools"
+        "--auto-run", "-y", action="store_true", help="Automatically run tools"
     )
-    parser.add_argument("--input-message", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--no-tool-calling",
+        action="store_false",
+        default=True,
+        dest="tool_calling",
+        help="Disable tool calling (enabled by default)",
+    )
+
+    # Behavior configuration
+    parser.add_argument("--system-message", help="Overwrite system message")
+    parser.add_argument(
+        "--custom-instructions", help="Appended to default system message"
+    )
+    parser.add_argument(
+        "--max-budget",
+        type=float,
+        help="Set maximum budget, defaults to -1 (unlimited)",
+    )
+    parser.add_argument(
+        "--max-turns",
+        type=int,
+        help="Set maximum conversation turns, defaults to -1 (unlimited)",
+    )
+    parser.add_argument(
+        "--profile",
+        help="Path to profile configuration, defaults to ~/.openinterpreter",
+    )
+
+    # Debugging
+    parser.add_argument("--debug", "-d", action="store_true", help="Run in debug mode")
 
     # If second argument exists and doesn't start with '-', don't parse args. This is an `i` style input
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
