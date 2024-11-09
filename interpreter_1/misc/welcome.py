@@ -27,15 +27,38 @@ def welcome_message(args):
 
     random_tip = random.choice(tips)
 
-    if args["model"]:
-        model = f"` ✳ {args['model']} `"  # {"-" * (terminal_width - len(model))} # ⎇
-    else:
-        model = "` ✳ CLAUDE-3.5-SONNET `"  # {"-" * (terminal_width - len(model))} # ⎇
+    model = args["model"]
 
-    if args["tools"] and "gui" in args["tools"]:
-        gui = "` ✳ GUI CONTROL `"
-    else:
-        gui = " " * len(" ✳ GUI CONTROL ")
+    if model == "claude-3-5-sonnet-20241022":
+        model = "CLAUDE-3.5-SONNET"
+
+    model = f"` ✳ {model.upper()} `"  # {"-" * (terminal_width - len(model))} # ⎇
+
+    tool_displays = []
+    for tool in ["interpreter", "editor", "gui"]:
+        if args["tools"] and tool in args["tools"]:
+            if tool == "interpreter":
+                tool_displays.append("` ❯ INTERPRETER `")
+            elif tool == "editor":
+                tool_displays.append("` ❚ FILE EDITOR `")
+            elif tool == "gui":
+                tool_displays.append("` ✳ GUI CONTROL `")
+        else:
+            if tool == "interpreter":
+                tool_displays.append(" " * len(" ❯ INTERPRETER "))
+            elif tool == "editor":
+                tool_displays.append(" " * len(" ❚ FILE EDITOR "))
+            elif tool == "gui":
+                tool_displays.append(" " * len(" ✳ GUI CONTROL "))
+
+    # Sort tool_displays so that empty tools are at the end
+    tool_displays = sorted(
+        tool_displays, key=lambda x: x == " " * len(" ❯ INTERPRETER ")
+    )
+
+    auto_run_display = (
+        "` ! AUTOMATIC (UNSAFE) `" if args["auto_run"] else "` ? REQUIRES PERMISSION `"
+    )
 
     second_column_from_left = 20
 
@@ -45,9 +68,9 @@ Welcome to **Open Interpreter**.
 
 
 **TOOLS**{" "*(second_column_from_left-len("TOOLS"))}**MODEL**
-` ❯ INTERPRETER `{" "*(second_column_from_left-len(" ❯ INTERPRETER "))}{model}
-` ❚ FILE EDITOR `{" "*(second_column_from_left-len(" ❚ FILE EDITOR "))}**MODE**
-{gui}{" "*(second_column_from_left-len(" ⎋ GUI CONTROL "))}` ? ASK CONFIRMATION `
+{tool_displays[0]}{" "*(second_column_from_left-len(" ❯ INTERPRETER "))}{model}
+{tool_displays[1]}{" "*(second_column_from_left-len(" ❯ INTERPRETER "))}**TOOL EXECUTION**
+{tool_displays[2]}{" "*(second_column_from_left-len(" ❯ INTERPRETER "))}{auto_run_display}
 
 
 {random_tip}

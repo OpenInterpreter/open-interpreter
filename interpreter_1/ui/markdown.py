@@ -184,7 +184,9 @@ class MarkdownRenderer:
                             lexer = get_lexer_by_name(self.code_lang.strip().lower())
                         except:
                             lexer = TextLexer()
-                        formatter = Terminal256Formatter(style="monokai")
+                        formatter = Terminal256Formatter(
+                            style=os.getenv("INTERPRETER_CODE_STYLE", "monokai")
+                        )
 
                         terminal_width = os.get_terminal_size().columns
                         line_prefix = (

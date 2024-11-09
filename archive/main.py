@@ -109,7 +109,7 @@ if platform.system() == "Darwin":
 </IMPORTANT>"""
 
 
-async def sampling_loop(
+async def respond(
     *,
     model: str = "claude-3-5-sonnet-20241022",
     provider: APIProvider,
@@ -788,7 +788,7 @@ async def async_main(args):
         )
 
         try:
-            async for chunk in sampling_loop(
+            async for chunk in respond(
                 model=args["model"],
                 provider=args.get("provider"),
                 messages=messages,
@@ -811,7 +811,7 @@ async def async_main(args):
     # The thread will automatically terminate when the main program exits
 
 
-def main(args):
+def run(args):
     if "--server" in sys.argv:
         # Start uvicorn server directly without asyncio.run()
         app = asyncio.run(async_main(args))

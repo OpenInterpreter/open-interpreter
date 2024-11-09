@@ -1,6 +1,6 @@
 def export_to_markdown(messages: list[dict], export_path: str):
     markdown = messages_to_markdown(messages)
-    with open(export_path, 'w') as f:
+    with open(export_path, "w") as f:
         f.write(markdown)
     print(f"Exported current conversation to {export_path}")
 

@@ -20,7 +20,6 @@ A standard interface for computer-controlling agents.
 
 Run {BLUE_COLOR}interpreter{RESET_COLOR} or {BLUE_COLOR}i [prompt]{RESET_COLOR} to begin.
 
-{BLUE_COLOR}--gui{RESET_COLOR} Enable display, mouse, and keyboard control
 {BLUE_COLOR}--model{RESET_COLOR} Specify language model or OpenAI-compatible URL
 {BLUE_COLOR}--serve{RESET_COLOR} Start an OpenAI-compatible server at {BLUE_COLOR}/{RESET_COLOR}
 

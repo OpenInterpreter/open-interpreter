@@ -3,9 +3,10 @@ This is an Open Interpreter profile specialized for searching ScreenPipe history
 It leverages Llama 3.1 70b served by Groq and requires the environment variable GROQ_API_KEYH to be set.
 """
 
+from datetime import datetime, timezone
+
 # Configure Open Interpreter
 from interpreter import interpreter
-from datetime import datetime, timezone
 
 interpreter.llm.model = "groq/llama-3.1-70b-versatile"
 interpreter.computer.import_computer_api = False
