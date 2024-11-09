@@ -12,6 +12,11 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any, List, Optional, cast
 
+from prompt_toolkit import PromptSession
+from prompt_toolkit.formatted_text import HTML
+
+prompt_session = PromptSession()
+
 try:
     from enum import StrEnum
 except ImportError:  # Python 3.10 compatibility
@@ -382,7 +387,7 @@ class Interpreter:
                 self.messages.append(
                     {
                         "content": tool_result_content,
-                        "role": "user" if use_anthropic else "tool",
+                        "role": "user" if self.provider == "anthropic" else "tool",
                     }
                 )
 
@@ -472,9 +477,33 @@ class Interpreter:
         Interactive mode
         """
         try:
+            placeholder_color = "ansigray"
+
             while True:
-                user_input = input("> ").strip()
+                # Get first line of input with placeholder
+                placeholder = HTML(
+                    f'<{placeholder_color}>Use """ for multi-line prompts</{placeholder_color}>'
+                )
+                user_input = prompt_session.prompt(
+                    "> ", placeholder=placeholder
+                ).strip()
                 print()
+
+                # Handle multi-line input
+                if user_input == '"""':
+                    user_input = ""
+                    print('> """')
+                    while True:
+                        placeholder = HTML(
+                            f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
+                        )
+                        line = prompt_session.prompt(
+                            "", placeholder=placeholder
+                        ).strip()
+                        if line == '"""':
+                            break
+                        user_input += line + "\n"
+                    print()
 
                 if user_input.startswith("/"):
                     parts = user_input.split(maxsplit=2)
