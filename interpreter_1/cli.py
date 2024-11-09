@@ -119,7 +119,11 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
 
 
 def parse_args():
-    profile = Profile()  # Load from ~/.openinterpreter if it exists
+    # Create profile with defaults
+    profile = Profile()
+    # Load from default location if it exists
+    profile.load(Profile.DEFAULT_PROFILE_PATH)
+
     parser = argparse.ArgumentParser(add_help=False)
 
     # Hidden arguments

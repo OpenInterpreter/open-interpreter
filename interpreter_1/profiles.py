@@ -61,10 +61,8 @@ class Profile:
         # Debug settings
         self.debug = False  # Whether to enable debug mode
 
+        # Set default path but don't load from it
         self.profile_path = self.DEFAULT_PROFILE_PATH
-
-        # Load from default profile if it exists
-        self.load(self.DEFAULT_PROFILE_PATH)
 
     def to_dict(self):
         """Convert settings to dictionary for serialization"""

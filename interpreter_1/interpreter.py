@@ -156,17 +156,18 @@ class Interpreter:
         Initialize interpreter with optional profile.
         If no profile provided, loads from default profile (~/.openinterpreter)
         """
-        self.profile = profile or Profile()
+        self._profile = profile or Profile()
 
         # Initialize all profile-based attributes
-        for key, value in self.profile.to_dict().items():
-            setattr(self, key, value)
+        for key, value in self._profile.to_dict().items():
+            if key != "profile":
+                setattr(self, key, value)
 
         self._client = None
 
     def to_dict(self):
         """Convert current settings to dictionary"""
-        return {key: getattr(self, key) for key in self.profile.to_dict().keys()}
+        return {key: getattr(self, key) for key in self._profile.to_dict().keys()}
 
     def load_profile(self, path):
         """
@@ -175,9 +176,9 @@ class Interpreter:
         Example:
         >>> interpreter.load_profile("~/work_settings.json")
         """
-        self.profile.load(path)
+        self._profile.load(path)
         # Update interpreter attributes from new profile
-        for key, value in self.profile.to_dict().items():
+        for key, value in self._profile.to_dict().items():
             setattr(self, key, value)
 
     def save_profile(self, path=None):
@@ -188,9 +189,9 @@ class Interpreter:
         >>> interpreter.save_profile("~/my_preferred_settings.json")
         """
         # Update profile object with current values
-        self.profile.from_dict(self.to_dict())
+        self._profile.from_dict(self.to_dict())
         # Save to file
-        self.profile.save(path)
+        self._profile.save(path)
 
     @classmethod
     def from_profile(cls, path):
@@ -348,12 +349,67 @@ class Interpreter:
                     ]
 
                     if len(tool_use_blocks) > 1:
-                        print(f"\n\033[38;5;240mRun all actions above\033[0m?")
-                        user_approval = input("\n(y/n/a): ").lower().strip()
+                        # Check if all tools are pre-approved
+                        all_approved = all(
+                            self._is_tool_approved(b) for b in tool_use_blocks
+                        )
+                        if all_approved:
+                            user_approval = "y"
+                        else:
+                            print(f"\n\033[38;5;240mRun all actions above\033[0m?")
+                            user_approval = input("\n(y/n/a): ").lower().strip()
                     elif len(tool_use_blocks) == 1:
-                        # Handle single tool approval logic...
-                        # (keeping this part brief for clarity, but it would mirror the original code)
-                        user_approval = input("\n(y/n/a): ").lower().strip()
+                        tool_block = tool_use_blocks[0]
+                        if self._is_tool_approved(tool_block):
+                            user_approval = "y"
+                        else:
+                            if tool_block.name == "str_replace_editor":
+                                path = tool_block.input.get("path")
+                                if path.startswith(os.getcwd()):
+                                    path = path[len(os.getcwd()) + 1 :]
+                                    if path == "":
+                                        path = "/"
+
+                                if tool_block.input.get("command") == "create":
+                                    print(
+                                        f"\n\033[38;5;240mCreate \033[0m{path}\033[38;5;240m?\033[0m"
+                                    )
+                                elif tool_block.input.get("command") == "view":
+                                    print(
+                                        f"\n\033[38;5;240mView \033[0m{path}\033[38;5;240m?\033[0m"
+                                    )
+                                elif tool_block.input.get("command") in [
+                                    "str_replace",
+                                    "insert",
+                                ]:
+                                    print(
+                                        f"\n\033[38;5;240mEdit \033[0m{path}\033[38;5;240m?\033[0m"
+                                    )
+                            elif tool_block.name == "bash":
+                                command = tool_block.input.get("command")
+                                print(f"\n\033[38;5;240mRun code?\033[0m")
+                            else:
+                                print(f"\n\033[38;5;240mRun tool?\033[0m")
+
+                            user_approval = input("\n(y/n/a): ").lower().strip()
+
+                            # Handle adding to allowed lists
+                            if user_approval == "a":
+                                if tool_block.name == "editor":
+                                    path = tool_block.input.get("path")
+                                    if path:
+                                        self.allowed_paths.add(path)
+                                        print(
+                                            f"\n\033[38;5;240mEdits to {path} will be auto-approved in this session.\033[0m\n"
+                                        )
+                                else:  # bash/computer tools
+                                    command = tool_block.input.get("command", "")
+                                    if command:
+                                        self.allowed_commands.add(command)
+                                        print(
+                                            f"\n\033[38;5;240mThe command '{command}' will be auto-approved in this session.\033[0m\n"
+                                        )
+                                user_approval = "y"
 
                 tool_result_content: list[BetaToolResultBlockParam] = []
                 for content_block in cast(list[BetaContentBlock], response.content):
@@ -398,6 +454,7 @@ class Interpreter:
 
     def _handle_command(self, cmd: str, parts: list[str]) -> bool:
         """Handle / commands for controlling interpreter settings"""
+
         SETTINGS = {
             "model": (str, "Model (e.g. claude-3-5-sonnet-20241022)"),
             "provider": (str, "Provider (e.g. anthropic, openai)"),
@@ -413,16 +470,8 @@ class Interpreter:
             "max_turns": (int, "Maximum conversation turns (-1 for unlimited)"),
         }
 
-        def print_help():
-            print("Available Commands:")
-            print("  /help                Show this help message")
-            print("\nSettings:")
-            for name, (_, help_text) in SETTINGS.items():
-                print(f"  /set {name} <value>    {help_text}")
-            print("  /set no_<setting>    Disable boolean settings")
-            print()
-
         def parse_value(value_str: str, type_hint: type):
+            """Convert string value to appropriate type"""
             if type_hint == bool:
                 return True
             if type_hint == list:
@@ -433,10 +482,102 @@ class Interpreter:
                 return int(value_str)
             return value_str
 
+        def print_help():
+            print("Available Commands:")
+            print("  /help                Show this help message")
+            print("\nProfile Management:")
+            print("  /profile show        Show current profile location")
+            print(
+                "  /profile save [path] Save settings to profile (default: ~/.openinterpreter)"
+            )
+            print("  /profile load <path> Load settings from profile")
+            print("  /profile reset       Reset settings to defaults")
+            print("\nSettings:")
+            for name, (_, help_text) in SETTINGS.items():
+                print(f"  /set {name} <value>    {help_text}")
+            print("  /set no_<setting>    Disable boolean settings")
+            print()
+
+        # Handle /help
         if cmd == "/help":
             print_help()
             return True
 
+        # Handle /profile commands
+        if cmd == "/profile":
+            if len(parts) < 2:
+                print(
+                    "Error: Missing profile command. Use /help to see available commands."
+                )
+                return True
+
+            subcmd = parts[1].lower()
+            path = parts[2] if len(parts) > 2 else None
+
+            if subcmd == "show":
+                path = os.path.expanduser(self._profile.profile_path)
+                if not os.path.exists(path):
+                    print(f"Profile does not exist yet. Current path would be: {path}")
+                    return True
+
+                if platform.system() == "Darwin":  # macOS
+                    os.system(f"open -R '{path}'")
+                elif platform.system() == "Windows":
+                    os.system(f"explorer /select,{path}")
+                else:
+                    print(f"Current profile path: {path}")
+                return True
+
+            elif subcmd == "save":
+                try:
+                    self.save_profile(path)
+                    if path:
+                        print(f"Settings saved to: {path}")
+                    else:
+                        print("Settings saved to default profile (~/.openinterpreter)")
+                except Exception as e:
+                    print(f"Error saving profile: {str(e)}")
+                return True
+
+            elif subcmd == "load":
+                if not path:
+                    print("Error: Missing path for profile load")
+                    return True
+                try:
+                    self.load_profile(path)
+                    print(f"Settings loaded from: {path}")
+                except Exception as e:
+                    print(f"Error loading profile: {str(e)}")
+                return True
+
+            elif subcmd == "reset":
+                path = os.path.expanduser(self._profile.profile_path)
+                if os.path.exists(path):
+                    print(
+                        f"\n\033[38;5;240mThis will reset all settings to defaults and overwrite:\033[0m {path}"
+                    )
+                    confirmation = input("\nAre you sure? (y/n): ").lower().strip()
+                    if confirmation != "y":
+                        print("Reset cancelled")
+                        return True
+
+                # Create new profile with defaults
+                self._profile = Profile()
+                # Update interpreter attributes
+                for key, value in self._profile.to_dict().items():
+                    if key != "profile":
+                        setattr(self, key, value)
+                # Save to file
+                self._profile.save()
+                print("Settings reset to defaults")
+                return True
+
+            else:
+                print(f"Unknown profile command: {subcmd}")
+                print("Use /help to see available commands")
+                return True
+
+        # Handle /set commands
         if cmd == "/set":
             if len(parts) < 2:
                 print("Error: Missing parameter name")
@@ -470,6 +611,7 @@ class Interpreter:
                 print(f"Error setting {param}: {str(e)}")
             return True
 
+        # Not a recognized command
         return False
 
     def chat(self):
@@ -570,3 +712,12 @@ class Interpreter:
             server.run()
         except KeyboardInterrupt:
             print("\nShutting down server...")
+
+    def _is_tool_approved(self, tool_block: BetaContentBlock) -> bool:
+        """Check if a tool use is pre-approved based on stored paths/commands"""
+        if tool_block.name == "editor":
+            path = tool_block.input.get("path")
+            return path in self.allowed_paths
+        else:  # bash/computer tools
+            command = tool_block.input.get("command", "")
+            return command in self.allowed_commands
