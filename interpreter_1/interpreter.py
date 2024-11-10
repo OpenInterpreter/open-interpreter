@@ -167,6 +167,7 @@ class Interpreter:
                 setattr(self, key, value)
 
         self._client = None
+        self._spinner = yaspin(Spinners.simpleDots, text="")
 
     def to_dict(self):
         """Convert current settings to dictionary"""
@@ -230,8 +231,7 @@ class Interpreter:
         max_tokens = model_info["max_tokens"]
 
         while True:
-            spinner = yaspin(Spinners.simpleDots, text="")
-            spinner.start()
+            self._spinner.start()
 
             enable_prompt_caching = False
             betas = [COMPUTER_USE_BETA_FLAG]
@@ -267,7 +267,7 @@ class Interpreter:
 
                 for chunk in raw_response:
                     if first_token:
-                        spinner.stop()
+                        self._spinner.stop()
                         first_token = False
 
                     if isinstance(chunk, BetaRawContentBlockStartEvent):
@@ -674,9 +674,11 @@ class Interpreter:
 
                 print()
         except KeyboardInterrupt:
+            self._spinner.stop()
             print()
             pass
         except Exception as e:
+            self._spinner.stop()
             print(traceback.format_exc())
             print("\n\n\033[91mAn error has occurred.\033[0m")
             if sys.stdin.isatty():  # Only prompt if in interactive mode
