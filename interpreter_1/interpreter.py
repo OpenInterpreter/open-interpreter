@@ -24,6 +24,9 @@ except ImportError:  # Python 3.10 compatibility
 
 # Third-party imports
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
+import webbrowser
+from urllib.parse import quote
+
 import litellm
 import pyautogui
 from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex
@@ -673,6 +676,21 @@ class Interpreter:
         except KeyboardInterrupt:
             print()
             pass
+        except Exception as e:
+            print(traceback.format_exc())
+            print("\n\n\033[91mAn error has occurred.\033[0m")
+            if sys.stdin.isatty():  # Only prompt if in interactive mode
+                print(
+                    "\nOpen Interpreter is self-healing. If you report this error, it will be autonomously repaired."
+                )
+                if (
+                    input(
+                        "\n\033[1mReport error?\033[0m This opens Github. (y/N): "
+                    ).lower()
+                    == "y"
+                ):
+                    self._report_error("".join(traceback.format_exc()))
+            exit(1)
 
     async def _consume_generator(self, generator):
         """Consume the async generator from async_respond"""
@@ -732,3 +750,39 @@ class Interpreter:
         else:  # bash/computer tools
             command = tool_block.input.get("command", "")
             return command in self.allowed_commands
+
+    def _report_error(self, traceback_str) -> None:
+        # Extract key information
+        error_type = traceback_str.splitlines()[-1]
+        system = platform.system()
+        python_version = sys.version
+        conversation = "\n\n".join(
+            msg["role"].upper() + ": " + msg["content"] for msg in self.messages
+        )
+
+        # Build error details sections
+        error_section = "### Error Details\n\n" + traceback_str
+        system_section = (
+            "### System Information\n\nOS: " + system + "\nPython: " + python_version
+        )
+        convo_section = "### Conversation History\n\n" + conversation
+
+        # Combine sections
+        error_details = "\n\n".join([convo_section, error_section, system_section])
+
+        # Create GitHub issue URL components
+        title = quote("Error Report: " + error_type[:100])
+        body = quote(error_details)
+        labels = quote("bug,automated-report")
+
+        # Generate and open GitHub issue URL
+        base_url = "https://github.com/openinterpreter/open-interpreter/issues/new"
+        params = "?title=" + title + "&body=" + body + "&labels=" + labels
+        webbrowser.open(base_url + params)
+
+        print(
+            "\nThank you! A browser window has been opened. Please review the information before submitting.\n"
+        )
+        print(
+            "\nFor more assistance, please join our Discord: https://discord.gg/Hvz9Axh84z\n"
+        )
