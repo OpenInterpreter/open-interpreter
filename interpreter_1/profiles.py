@@ -29,7 +29,9 @@ class Profile:
         # Default values if no profile exists
         # Model configuration
         self.model = "claude-3-5-sonnet-20241022"  # The LLM model to use
-        self.provider = "anthropic"  # The model provider (e.g. anthropic, openai)
+        self.provider = (
+            None  # The model provider (e.g. anthropic, openai) None will auto-detect
+        )
         self.temperature = 0  # Sampling temperature for model outputs (0-1)
 
         # API configuration

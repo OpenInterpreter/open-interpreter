@@ -1,4 +1,5 @@
 import asyncio
+import dataclasses
 import json
 import os
 import platform
@@ -23,10 +24,8 @@ import webbrowser
 from urllib.parse import quote
 
 import litellm
-import pyautogui
 from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex
 from anthropic.types.beta import (
-    BetaCacheControlEphemeralParam,
     BetaContentBlock,
     BetaContentBlockParam,
     BetaImageBlockParam,
@@ -223,7 +222,8 @@ class Interpreter:
         )
 
         model_info = litellm.get_model_info(self.model)
-        provider = model_info["litellm_provider"]
+        if self.provider == None:
+            self.provider = model_info["litellm_provider"]
         max_tokens = model_info["max_tokens"]
 
         while True:
@@ -449,9 +449,152 @@ class Interpreter:
                 )
 
             else:
-                # LiteLLM implementation would go here
-                # (I can add this if you'd like, but focusing on the Anthropic path for now)
-                pass
+                tools = []
+                if "interpreter" in self.tools:
+                    tools.append(
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "bash",
+                                "description": """Run commands in a bash shell\n
+                                * When invoking this tool, the contents of the \"command\" parameter does NOT need to be XML-escaped.\n
+                                * You don't have access to the internet via this tool.\n
+                                * You do have access to a mirror of common linux and python packages via apt and pip.\n
+                                * State is persistent across command calls and discussions with the user.\n
+                                * To inspect a particular line range of a file, e.g. lines 10-25, try 'sed -n 10,25p /path/to/the/file'.\n
+                                * Please avoid commands that may produce a very large amount of output.\n
+                                * Please run long lived commands in the background, e.g. 'sleep 10 &' or start a server in the background.""",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "command": {
+                                            "type": "string",
+                                            "description": "The bash command to run.",
+                                        }
+                                    },
+                                    "required": ["command"],
+                                },
+                            },
+                        }
+                    )
+
+                if self.model.startswith("ollama/"):
+                    # Fix ollama
+                    stream = False
+                    actual_model = self.model.replace("ollama/", "openai/")
+                    if self.api_base == None:
+                        api_base = "http://localhost:11434/v1/"
+                    else:
+                        api_base = self.api_base
+                else:
+                    stream = True
+                    api_base = self.api_base
+                    actual_model = self.model
+
+                params = {
+                    "model": actual_model,
+                    "messages": [{"role": "system", "content": SYSTEM_PROMPT}]
+                    + self.messages,
+                    "stream": stream,
+                    "api_base": api_base,
+                    "temperature": self.temperature,
+                    "tools": tools,
+                }
+
+                raw_response = litellm.completion(**params)
+
+                if not stream:
+                    raw_response.choices[0].delta = raw_response.choices[0].message
+                    raw_response = [raw_response]
+
+                message = None
+                first_token = True
+
+                for chunk in raw_response:
+                    if first_token:
+                        self._spinner.stop()
+                        first_token = False
+
+                    if message == None:
+                        message = chunk.choices[0].delta
+
+                    if chunk.choices[0].delta.content:
+                        yield {"type": "chunk", "chunk": chunk.choices[0].delta.content}
+                        md.feed(chunk.choices[0].delta.content)
+                        await asyncio.sleep(0)
+
+                        if chunk.choices[0].delta != message:
+                            message.content += chunk.choices[0].delta.content
+
+                    if chunk.choices[0].delta.tool_calls:
+                        if chunk.choices[0].delta.tool_calls[0].id:
+                            if message.tool_calls == None or chunk.choices[
+                                0
+                            ].delta.tool_calls[0].id not in [
+                                t.id for t in message.tool_calls
+                            ]:
+                                edit.close()
+                                edit = ToolRenderer()
+                                if message.tool_calls == None:
+                                    message.tool_calls = []
+                                message.tool_calls.append(
+                                    chunk.choices[0].delta.tool_calls[0]
+                                )
+                            current_tool_call = [
+                                t
+                                for t in message.tool_calls
+                                if t.id == chunk.choices[0].delta.tool_calls[0].id
+                            ][0]
+
+                        if chunk.choices[0].delta.tool_calls[0].function.name:
+                            tool_name = (
+                                chunk.choices[0].delta.tool_calls[0].function.name
+                            )
+                            if edit.name == None:
+                                edit.name = tool_name
+                            if current_tool_call.function.name == None:
+                                current_tool_call.function.name = tool_name
+                        if chunk.choices[0].delta.tool_calls[0].function.arguments:
+                            arguments_delta = (
+                                chunk.choices[0].delta.tool_calls[0].function.arguments
+                            )
+                            edit.feed(arguments_delta)
+
+                            if chunk.choices[0].delta != message:
+                                current_tool_call.function.arguments += arguments_delta
+
+                    if chunk.choices[0].finish_reason:
+                        edit.close()
+                        edit = ToolRenderer()
+
+                self.messages.append(message)
+
+                print()
+
+                if not message.tool_calls:
+                    yield {"type": "messages", "messages": self.messages}
+                    break
+
+                user_approval = input("\nRun tool(s)? (y/n): ").lower().strip()
+
+                for tool_call in message.tool_calls:
+                    function_arguments = json.loads(tool_call.function.arguments)
+
+                    if user_approval == "y":
+                        result = await tool_collection.run(
+                            name=tool_call.function.name,
+                            tool_input=cast(dict[str, Any], function_arguments),
+                        )
+                    else:
+                        result = ToolResult(output="Tool execution cancelled by user")
+
+                    self.messages.append(
+                        {
+                            "role": "tool",
+                            "content": json.dumps(dataclasses.asdict(result)),
+                            "tool_call_id": tool_call.id,
+                        }
+                    )
 
     def _ask_user_approval(self) -> str:
         """Ask user for approval to run a tool"""
