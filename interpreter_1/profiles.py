@@ -1,5 +1,22 @@
 import json
 import os
+import platform
+from datetime import datetime
+
+# System prompt with dynamic values
+SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
+* You are an AI assistant with access to a machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
+* When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
+* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
+* The user's cwd is {os.getcwd()} and username is {os.getlogin()}.
+</SYSTEM_CAPABILITY>"""
+
+# Update system prompt for Mac OS
+if platform.system() == "Darwin":
+    SYSTEM_PROMPT += """
+<IMPORTANT>
+* Open applications using Spotlight by using the computer tool to simulate pressing Command+Space, typing the application name, and pressing Enter.
+</IMPORTANT>"""
 
 
 class Profile:
@@ -45,8 +62,8 @@ class Profile:
 
         # Conversation state
         self.messages = []  # List of conversation messages
-        self.system_message = None  # System prompt override
-        self.custom_instructions = None  # Additional model instructions
+        self.system_message = SYSTEM_PROMPT  # System prompt override
+        self.instructions = ""  # Additional model instructions
 
         # Available tools and settings
         self.tools = ["interpreter", "editor"]  # Enabled tool modules

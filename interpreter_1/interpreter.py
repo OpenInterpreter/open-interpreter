@@ -7,7 +7,7 @@ import sys
 import traceback
 import uuid
 from datetime import datetime
-from typing import Any, List, Optional, cast
+from typing import Any, cast
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
@@ -24,20 +24,22 @@ import webbrowser
 from urllib.parse import quote
 
 import litellm
-from anthropic import Anthropic, AnthropicBedrock, AnthropicVertex
+
+litellm.suppress_debug_info = True
+litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
+litellm.modify_params = True
+
+from anthropic import Anthropic
 from anthropic.types.beta import (
     BetaContentBlock,
     BetaContentBlockParam,
     BetaImageBlockParam,
     BetaMessage,
-    BetaMessageParam,
     BetaRawContentBlockDeltaEvent,
     BetaRawContentBlockStartEvent,
     BetaRawContentBlockStopEvent,
-    BetaTextBlock,
     BetaTextBlockParam,
     BetaToolResultBlockParam,
-    BetaToolUseBlockParam,
 )
 
 from .misc.spinner import SimpleSpinner
@@ -53,21 +55,6 @@ PROMPT_CACHING_BETA_FLAG = "prompt-caching-2024-07-31"
 
 # Initialize markdown renderer
 md = MarkdownRenderer()
-
-# System prompt with dynamic values
-SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
-* You are an AI assistant with access to a machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
-* When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
-* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
-* The user's cwd is {os.getcwd()} and username is {os.getlogin()}.
-</SYSTEM_CAPABILITY>"""
-
-# Update system prompt for Mac OS
-if platform.system() == "Darwin":
-    SYSTEM_PROMPT += """
-<IMPORTANT>
-* Open applications using Spotlight by using the computer tool to simulate pressing Command+Space, typing the application name, and pressing Enter.
-</IMPORTANT>"""
 
 
 # Helper function used in async_respond()
@@ -216,15 +203,19 @@ class Interpreter:
             tools.append(ComputerTool())
 
         tool_collection = ToolCollection(*tools)
-        system = BetaTextBlockParam(
-            type="text",
-            text=SYSTEM_PROMPT,
-        )
 
         model_info = litellm.get_model_info(self.model)
         if self.provider == None:
             self.provider = model_info["litellm_provider"]
         max_tokens = model_info["max_tokens"]
+
+        system_message = self.system_message + "\n\n" + self.instructions
+        system_message = system_message.strip()
+
+        system = BetaTextBlockParam(
+            type="text",
+            text=system_message,
+        )
 
         while True:
             self._spinner.start()
@@ -493,7 +484,7 @@ class Interpreter:
 
                 params = {
                     "model": actual_model,
-                    "messages": [{"role": "system", "content": SYSTEM_PROMPT}]
+                    "messages": [{"role": "system", "content": system_message}]
                     + self.messages,
                     "stream": stream,
                     "api_base": api_base,

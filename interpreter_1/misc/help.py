@@ -41,7 +41,7 @@ A standard interface for computer-controlling agents.
 {BLUE_COLOR}--auto-run{RESET_COLOR}, {BLUE_COLOR}-y{RESET_COLOR}       Auto-run suggested commands
 
 {BLUE_COLOR}--system-message{RESET_COLOR}     Override default system message
-{BLUE_COLOR}--instructions{RESET_COLOR}       Additional instructions to append
+{BLUE_COLOR}--instructions{RESET_COLOR}       Additional instructions in system message
 {BLUE_COLOR}--max-budget{RESET_COLOR}         Maximum spend allowed (-1 for unlimited)
 {BLUE_COLOR}--max-turns{RESET_COLOR}          Maximum conversation turns (-1 for unlimited)
 

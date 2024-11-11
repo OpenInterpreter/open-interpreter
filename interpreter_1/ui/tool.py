@@ -34,7 +34,10 @@ class CodeRenderer(ContentRenderer):
         self.rendered_content = ""
         self.spinner = SimpleSpinner("")
         self.is_spinning = False
-        self.terminal_width = os.get_terminal_size().columns
+        try:
+            self.terminal_width = os.get_terminal_size().columns
+        except:
+            self.terminal_width = 50
         self.safety_padding = 4  # Extra padding to prevent edge cases
         self.json_obj = None
 
@@ -328,10 +331,13 @@ class InsertRenderer(ContentRenderer):
         self.line_number = 1
         self.rendered_content = ""
         self.is_spinning = False
-        self.spinner = yaspin(Spinners.simpleDots, text="  ")
+        self.spinner = SimpleSpinner("")
         self.code_lang = "python"
         self.buffer = ""
-        self.terminal_width = os.get_terminal_size().columns
+        try:
+            self.terminal_width = os.get_terminal_size().columns
+        except:
+            self.terminal_width = 50
         self.prefix_width = 5  # "123 │ " = 6 characters
         self.safety_padding = 2  # Extra padding to prevent edge cases
         self.show_context = True
@@ -506,7 +512,10 @@ class OldStrRenderer(ContentRenderer):
         self.rendered_content = ""
         self.line_number = 1
         self.code_lang = "python"
-        self.terminal_width = os.get_terminal_size().columns
+        try:
+            self.terminal_width = os.get_terminal_size().columns
+        except:
+            self.terminal_width = 50
         self.prefix_width = 6
         self.safety_padding = 4
         self.buffer = ""  # Add buffer for line-by-line processing
@@ -623,7 +632,10 @@ class SchemaRenderer:
 
     @staticmethod
     def print_separator(char="─", newline=True, line=True):
-        terminal_width = os.get_terminal_size().columns
+        try:
+            terminal_width = os.get_terminal_size().columns
+        except:
+            terminal_width = 50
         if newline:
             sys.stdout.write("\n")
         if line:

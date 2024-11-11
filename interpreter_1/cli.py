@@ -85,8 +85,8 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "help": "Overwrite system message",
         },
         "custom_instructions": {
-            "flags": ["--custom-instructions"],
-            "default": profile.custom_instructions,
+            "flags": ["--instructions"],
+            "default": profile.instructions,
             "help": "Appended to default system message",
         },
         "max_budget": {
@@ -213,6 +213,9 @@ def main():
             message = args["input_message"]
         else:
             message = sys.stdin.read().strip()
+            # print("---")
+            # print(message)
+            # print("---")
         interpreter.messages = [{"role": "user", "content": message}]
 
         # Run the generator until completion
