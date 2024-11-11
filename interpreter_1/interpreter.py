@@ -1,21 +1,16 @@
 import asyncio
-import dataclasses
 import json
 import os
 import platform
 import sys
-import threading
-import time
 import traceback
 import uuid
-from collections.abc import Callable
 from datetime import datetime
 from typing import Any, List, Optional, cast
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.formatted_text import HTML
-
-prompt_session = PromptSession()
+from readchar import readchar
 
 try:
     from enum import StrEnum
@@ -45,8 +40,8 @@ from anthropic.types.beta import (
     BetaToolResultBlockParam,
     BetaToolUseBlockParam,
 )
-from yaspin import yaspin
-from yaspin.spinners import Spinners
+
+from .misc.spinner import SimpleSpinner
 
 # Local imports
 from .profiles import Profile
@@ -167,7 +162,8 @@ class Interpreter:
                 setattr(self, key, value)
 
         self._client = None
-        self._spinner = yaspin(Spinners.simpleDots, text="")
+        self._spinner = SimpleSpinner("")
+        self._prompt_session = None
 
     def to_dict(self):
         """Convert current settings to dictionary"""
@@ -336,20 +332,22 @@ class Interpreter:
                     }
                 )
 
+                content_blocks = cast(list[BetaContentBlock], response.content)
+                tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
+
+                # If there are no tool use blocks, we're done
+                if not tool_use_blocks:
+                    break
+
                 user_approval = None
                 if getattr(self, "auto_run", False):
                     user_approval = "y"
                 else:
                     if not sys.stdin.isatty():
                         print(
-                            "Error: Non-interactive environment requires auto_run=True"
+                            "Error: Non-interactive environment requires auto_run=True to run tools"
                         )
                         exit(1)
-
-                    content_blocks = cast(list[BetaContentBlock], response.content)
-                    tool_use_blocks = [
-                        b for b in content_blocks if b.type == "tool_use"
-                    ]
 
                     if len(tool_use_blocks) > 1:
                         # Check if all tools are pre-approved
@@ -360,7 +358,7 @@ class Interpreter:
                             user_approval = "y"
                         else:
                             print(f"\n\033[38;5;240mRun all actions above\033[0m?")
-                            user_approval = input("\n(y/n/a): ").lower().strip()
+                            user_approval = self._ask_user_approval()
                     elif len(tool_use_blocks) == 1:
                         tool_block = tool_use_blocks[0]
                         if self._is_tool_approved(tool_block):
@@ -394,21 +392,21 @@ class Interpreter:
                             else:
                                 print(f"\n\033[38;5;240mRun tool?\033[0m")
 
-                            user_approval = input("\n(y/n/a): ").lower().strip()
+                            user_approval = self._ask_user_approval()
 
                             # Handle adding to allowed lists
                             if user_approval == "a":
                                 if tool_block.name == "editor":
                                     path = tool_block.input.get("path")
                                     if path:
-                                        self.allowed_paths.add(path)
+                                        self.allowed_paths.append(path)
                                         print(
                                             f"\n\033[38;5;240mEdits to {path} will be auto-approved in this session.\033[0m\n"
                                         )
                                 else:  # bash/computer tools
                                     command = tool_block.input.get("command", "")
                                     if command:
-                                        self.allowed_commands.add(command)
+                                        self.allowed_commands.append(command)
                                         print(
                                             f"\n\033[38;5;240mThe command '{command}' will be auto-approved in this session.\033[0m\n"
                                         )
@@ -454,6 +452,23 @@ class Interpreter:
                 # LiteLLM implementation would go here
                 # (I can add this if you'd like, but focusing on the Anthropic path for now)
                 pass
+
+    def _ask_user_approval(self) -> str:
+        """Ask user for approval to run a tool"""
+        # print("\n\033[38;5;240m(\033[0my\033[38;5;240m)es (\033[0mn\033[38;5;240m)o (\033[0ma\033[38;5;240m)lways approve this command: \033[0m", end="", flush=True)
+        # Simpler y/n prompt
+        print(
+            "\n\033[38;5;240m(\033[0my\033[38;5;240m/\033[0mn\033[38;5;240m): \033[0m",
+            end="",
+            flush=True,
+        )
+        try:
+            user_approval = readchar().lower()
+            print(user_approval)
+            return user_approval
+        except KeyboardInterrupt:
+            print()
+            return "n"
 
     def _handle_command(self, cmd: str, parts: list[str]) -> bool:
         """Handle / commands for controlling interpreter settings"""
@@ -521,6 +536,7 @@ class Interpreter:
                 path = os.path.expanduser(self._profile.profile_path)
                 if not os.path.exists(path):
                     print(f"Profile does not exist yet. Current path would be: {path}")
+                    print("Use /profile save to create it")
                     return True
 
                 if platform.system() == "Darwin":  # macOS
@@ -638,7 +654,9 @@ class Interpreter:
                 placeholder = HTML(
                     f"<{placeholder_color}>{placeholder_text}</{placeholder_color}>"
                 )
-                user_input = prompt_session.prompt(
+                if self._prompt_session is None:
+                    self._prompt_session = PromptSession()
+                user_input = self._prompt_session.prompt(
                     "> ", placeholder=placeholder
                 ).strip()
                 print()
@@ -651,7 +669,7 @@ class Interpreter:
                         placeholder = HTML(
                             f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
                         )
-                        line = prompt_session.prompt(
+                        line = self._prompt_session.prompt(
                             "", placeholder=placeholder
                         ).strip()
                         if line == '"""':
@@ -666,6 +684,13 @@ class Interpreter:
                     cmd = parts[0].lower()
                     if self._handle_command(cmd, parts):
                         continue
+
+                if user_input == "":
+                    if message_count in range(4, 7):
+                        print("Error: Cat is asleep on Enter key\n")
+                    else:
+                        print("Error: No input provided\n")
+                    continue
 
                 self.messages.append({"role": "user", "content": user_input})
 

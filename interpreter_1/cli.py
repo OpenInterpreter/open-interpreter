@@ -4,9 +4,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
 
-from yaspin import yaspin
-from yaspin.spinners import Spinners
-
+from .misc.spinner import SimpleSpinner
 from .profiles import Profile
 
 
@@ -144,7 +142,7 @@ def parse_args():
 
     # If a different profile is specified, load it
     if args["profile"] != profile.profile_path:
-        profile.load_from_profile(args["profile"])
+        profile.load(args["profile"])
         # Update any values that weren't explicitly set in CLI
         for key, value in vars(profile).items():
             if key in args and args[key] is None:
@@ -199,7 +197,7 @@ def main():
         sys.stdout.write("\r\033[K")  # Clear entire line
         sys.stdout.flush()
 
-    if args["input_message"] is None:
+    if args["input_message"] is None and sys.stdin.isatty():
         from .misc.welcome import welcome_message
 
         welcome_message(args)
@@ -207,7 +205,7 @@ def main():
         interpreter.chat()
     else:
         print()
-        spinner = yaspin(Spinners.simpleDots, text="")
+        spinner = SimpleSpinner("")
         spinner.start()
         load_interpreter()
         spinner.stop()

@@ -7,8 +7,8 @@ from typing import Dict, Optional, Set
 from pygments import highlight
 from pygments.formatters import Terminal256Formatter
 from pygments.lexers import TextLexer, get_lexer_by_name
-from yaspin import yaspin
-from yaspin.spinners import Spinners
+
+from ..misc.spinner import SimpleSpinner
 
 
 class MarkdownElement(Enum):
@@ -49,7 +49,7 @@ class MarkdownRenderer:
         self.line_number = 1
 
         # Add spinner (no text, just the spinner)
-        self.spinner = yaspin(Spinners.simpleDots, text="")
+        self.spinner = SimpleSpinner("")
 
     def write_styled(self, text: str, element: Optional[MarkdownElement] = None):
         """Write text with appropriate styling."""

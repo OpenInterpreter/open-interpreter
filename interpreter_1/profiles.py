@@ -84,6 +84,13 @@ class Profile:
         path = os.path.expanduser(path or self.profile_path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
+        if os.path.exists(path):
+            print(f"\n\033[38;5;240mThis will overwrite:\033[0m {path}")
+            confirmation = input("\nAre you sure? (y/n): ").lower().strip()
+            if confirmation != "y":
+                print("Save cancelled")
+                return
+
         with open(path, "w") as f:
             json.dump(self.to_dict(), f, indent=2)
 
@@ -95,9 +102,19 @@ class Profile:
             with open(path) as f:
                 data = json.load(f)
                 self.from_dict(data)
-        except (FileNotFoundError, json.JSONDecodeError):
-            # If file doesn't exist or is invalid, keep defaults
-            pass
+        except FileNotFoundError:
+            # If file doesn't exist, if it's the default, that's fine
+            if os.path.abspath(os.path.expanduser(path)) == os.path.abspath(
+                os.path.expanduser(self.DEFAULT_PROFILE_PATH)
+            ):
+                pass
+            else:
+                raise FileNotFoundError(f"Profile file not found at {path}")
+        except json.JSONDecodeError as e:
+            # If JSON is invalid, raise descriptive error
+            raise json.JSONDecodeError(
+                f"Failed to parse profile at {path}. Error: {str(e)}", e.doc, e.pos
+            )
 
     @classmethod
     def from_file(cls, path):

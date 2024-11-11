@@ -8,8 +8,8 @@ from pygments import highlight
 from pygments.formatters import Terminal256Formatter
 from pygments.lexers import TextLexer, get_lexer_by_name
 from pygments.styles import get_all_styles
-from yaspin import yaspin
-from yaspin.spinners import Spinners
+
+from ..misc.spinner import SimpleSpinner
 
 
 class ContentRenderer:
@@ -33,7 +33,7 @@ class CodeRenderer(ContentRenderer):
         self.code_lang = None
         self.buffer = ""
         self.rendered_content = ""
-        self.spinner = yaspin(Spinners.simpleDots, text="  ")
+        self.spinner = SimpleSpinner("")
         self.is_spinning = False
         self.terminal_width = os.get_terminal_size().columns
         self.prefix_width = 6  # "123 │ " = 6 characters

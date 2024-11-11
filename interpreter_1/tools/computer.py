@@ -12,7 +12,6 @@ from uuid import uuid4
 
 import pyautogui
 from anthropic.types.beta import BetaToolComputerUse20241022Param
-from PIL import Image
 from screeninfo import get_monitors
 
 from .base import BaseAnthropicTool, ToolError, ToolResult
@@ -246,18 +245,17 @@ class ComputerTool(BaseAnthropicTool):
         temp_dir = Path(tempfile.gettempdir())
         path = temp_dir / f"screenshot_{uuid4().hex}.png"
 
-        screenshot = pyautogui.screenshot()
-        screenshot.save(str(path))
-
         if self._scaling_enabled:
             x, y = self.scale_coordinates(
                 ScalingSource.COMPUTER, self.width, self.height
             )
-            # Use PIL directly instead of shell convert command
+            # Use pyautogui's screenshot with direct scaling
+            screenshot = pyautogui.screenshot()
+            screenshot = screenshot.resize((x, y))
+        else:
+            screenshot = pyautogui.screenshot()
 
-            with Image.open(path) as img:
-                img = img.resize((x, y), Image.Resampling.LANCZOS)
-                img.save(path)
+        screenshot.save(str(path))
 
         if path.exists():
             base64_image = base64.b64encode(path.read_bytes()).decode()
