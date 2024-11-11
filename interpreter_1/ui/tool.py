@@ -28,7 +28,6 @@ class ContentRenderer:
 class CodeRenderer(ContentRenderer):
     def __init__(self, style):
         super().__init__(style)
-        SchemaRenderer.print_separator("┼")
         self.line_number = 1
         self.code_lang = None
         self.buffer = ""
@@ -36,9 +35,23 @@ class CodeRenderer(ContentRenderer):
         self.spinner = SimpleSpinner("")
         self.is_spinning = False
         self.terminal_width = os.get_terminal_size().columns
-        self.prefix_width = 6  # "123 │ " = 6 characters
         self.safety_padding = 4  # Extra padding to prevent edge cases
         self.json_obj = None
+
+        # Set prefix width based on INTERPRETER_LINE_NUMBERS
+        self.show_line_numbers = (
+            os.environ.get("INTERPRETER_LINE_NUMBERS", "true").lower() == "true"
+        )
+        self.prefix_width = (
+            6 if self.show_line_numbers else 0
+        )  # "123 │ " = 6 characters
+
+        # Print appropriate separator
+        if self.show_line_numbers:
+            SchemaRenderer.print_separator("┼")
+        else:
+            SchemaRenderer.print_separator("┴")
+            print()
 
     def feed(self, json_obj):
         self.json_obj = json_obj
@@ -141,25 +154,28 @@ class CodeRenderer(ContentRenderer):
         else:
             chunks = [line]
 
-        # Highlight and print first chunk with line number
-        line_prefix = f"{SchemaRenderer.GRAY_COLOR}{str(self.line_number).rjust(3)} │ {SchemaRenderer.RESET_COLOR}"
-        # if self.json_obj and self.json_obj.get("command") == "Open Interpreter":
-        #     line_prefix = f"{SchemaRenderer.GRAY_COLOR}    │ {SchemaRenderer.RESET_COLOR}"
-        highlighted = highlight(chunks[0] + "\n", lexer, formatter).rstrip()
+        if self.show_line_numbers:
+            # Highlight and print first chunk with line number
+            line_prefix = f"{SchemaRenderer.GRAY_COLOR}{str(self.line_number).rjust(3)} │ {SchemaRenderer.RESET_COLOR}"
+            highlighted = highlight(chunks[0] + "\n", lexer, formatter).rstrip()
 
-        if self.line_number == 0 and highlighted.strip() == "":
-            return
+            if self.line_number == 0 and highlighted.strip() == "":
+                return
 
-        sys.stdout.write(f"{line_prefix}{highlighted}\n")
-        # sys.stdout.write(f"{line_prefix}" + " ".join(highlighted) + "\n") # For debugging
+            sys.stdout.write(f"{line_prefix}{highlighted}\n")
 
-        # Print remaining chunks with padding and pipe
-        continuation_prefix = (
-            f"{SchemaRenderer.GRAY_COLOR}    │ {SchemaRenderer.RESET_COLOR}"
-        )
-        for chunk in chunks[1:]:
-            highlighted = highlight(chunk + "\n", lexer, formatter).rstrip()
-            sys.stdout.write(f"{continuation_prefix}{highlighted}\n")
+            # Print remaining chunks with padding and pipe
+            continuation_prefix = (
+                f"{SchemaRenderer.GRAY_COLOR}    │ {SchemaRenderer.RESET_COLOR}"
+            )
+            for chunk in chunks[1:]:
+                highlighted = highlight(chunk + "\n", lexer, formatter).rstrip()
+                sys.stdout.write(f"{continuation_prefix}{highlighted}\n")
+        else:
+            # Print chunks without line numbers
+            for chunk in chunks:
+                highlighted = highlight(chunk + "\n", lexer, formatter).rstrip()
+                sys.stdout.write(f"{highlighted}\n")
 
         sys.stdout.flush()
         self.line_number += 1
@@ -174,7 +190,11 @@ class CodeRenderer(ContentRenderer):
 
     def close(self):
         self.flush()
-        SchemaRenderer.print_separator("┴", newline=False)
+        if self.show_line_numbers:
+            SchemaRenderer.print_separator("┴", newline=False)
+        else:
+            print()
+            SchemaRenderer.print_separator("─", newline=False)
 
 
 class PathRenderer(ContentRenderer):

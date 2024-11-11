@@ -6,7 +6,7 @@ from ..ui.tool import ToolRenderer
 from .stream_text import stream_text
 
 
-def help_message(arguments_string):
+def help_message(u):
     tips = [
         "\033[38;5;240mTip: Pipe in prompts using `$ANYTHING | i`\033[0m",
         "\033[38;5;240mTip: Type `wtf` in your terminal to fix the last error\033[0m",
@@ -18,24 +18,41 @@ def help_message(arguments_string):
     content = f"""
 A standard interface for computer-controlling agents.
 
-Run {BLUE_COLOR}interpreter{RESET_COLOR} or {BLUE_COLOR}i [prompt]{RESET_COLOR} to begin.
 
-{BLUE_COLOR}--model{RESET_COLOR} Specify language model or OpenAI-compatible URL
-{BLUE_COLOR}--serve{RESET_COLOR} Start an OpenAI-compatible server at {BLUE_COLOR}/{RESET_COLOR}
+\033[1mUSAGE\033[0m 
 
-{BLUE_COLOR}-y{RESET_COLOR} Automatically approve tools
-{BLUE_COLOR}-d{RESET_COLOR} Run in debug mode
+{BLUE_COLOR}interpreter{RESET_COLOR} [flags]  \033[38;5;240m(e.g. interpreter --model gpt-4o)\033[0m
+{BLUE_COLOR}i{RESET_COLOR} [prompt]           \033[38;5;240m(e.g. i want deno)\033[0m
 
-Examples:
 
-{BLUE_COLOR}i need help with my code{RESET_COLOR}
-{BLUE_COLOR}i --model gpt-4o-mini --serve{RESET_COLOR}
-{BLUE_COLOR}i --model https://localhost:1234/v1{RESET_COLOR}
+\033[1mFLAGS\033[0m
 
-{arguments_string}
+{BLUE_COLOR}--model{RESET_COLOR}              Model to use for completion
+{BLUE_COLOR}--provider{RESET_COLOR}           API provider (e.g. OpenAI, Anthropic)
+{BLUE_COLOR}--api-base{RESET_COLOR}           Base URL for API requests
+{BLUE_COLOR}--api-key{RESET_COLOR}            API key for authentication
+{BLUE_COLOR}--api-version{RESET_COLOR}        API version to use
+{BLUE_COLOR}--temperature{RESET_COLOR}        Sampling temperature (default: 0)
 
-{random.choice(tips)}
-""".strip()
+{BLUE_COLOR}--tools{RESET_COLOR}              Comma-separated tools: interpreter,editor,gui
+{BLUE_COLOR}--allowed-commands{RESET_COLOR}   Commands the model can execute
+{BLUE_COLOR}--allowed-paths{RESET_COLOR}      Paths the model can access
+{BLUE_COLOR}--no-tool-calling{RESET_COLOR}    Disable tool usage (enabled by default)
+{BLUE_COLOR}--auto-run{RESET_COLOR}, {BLUE_COLOR}-y{RESET_COLOR}       Auto-run suggested commands
+
+{BLUE_COLOR}--system-message{RESET_COLOR}     Override default system message
+{BLUE_COLOR}--instructions{RESET_COLOR}       Additional instructions to append
+{BLUE_COLOR}--max-budget{RESET_COLOR}         Maximum spend allowed (-1 for unlimited)
+{BLUE_COLOR}--max-turns{RESET_COLOR}          Maximum conversation turns (-1 for unlimited)
+
+{BLUE_COLOR}--profile{RESET_COLOR}            Load settings from config file
+{BLUE_COLOR}--serve{RESET_COLOR}              Start OpenAI-compatible server
+
+
+"""
+
+    # Add an indent to each line
+    # content = "\n".join(f"  {line}" for line in content.split("\n"))
 
     string = json.dumps(
         {"command": "Open Interpreter", "path": "", "file_text": content}
@@ -43,14 +60,16 @@ Examples:
 
     renderer = ToolRenderer(name="str_replace_editor")
 
-    for chunk in stream_text(string):
-        renderer.feed(chunk)
+    # for chunk in stream_text(string, min_delay=0.00001, max_delay=0.0001, max_chunk=50):
+    #     renderer.feed(chunk)
+
+    renderer.feed(string)
 
     renderer.close()
 
-    time.sleep(0.03)
+    # time.sleep(0.03)
     print("")
-    time.sleep(0.04)
+    # time.sleep(0.04)
     # print("\033[38;5;238mA.C., 2024. https://openinterpreter.com/\033[0m\n")
-    print("\033[38;5;238mhttps://openinterpreter.com/\033[0m\n")
-    time.sleep(0.05)
+    print("\033[38;5;238mhttps://docs.openinterpreter.com/\033[0m\n")
+    # time.sleep(0.05)

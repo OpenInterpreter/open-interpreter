@@ -1,3 +1,4 @@
+import asyncio
 import sys
 import threading
 import time
@@ -12,7 +13,7 @@ class SimpleSpinner:
         self.keep_running = False
         self.spinner_thread = None
 
-    def _spin(self):
+    async def _spin(self):
         while self.keep_running:
             for frame in self.spinner_cycle:
                 if not self.keep_running:
@@ -20,13 +21,19 @@ class SimpleSpinner:
                 # Clear the line and write the new frame
                 sys.stdout.write("\r" + self.text + frame)
                 sys.stdout.flush()
-                time.sleep(0.2)  # Control animation speed
+                try:
+                    await asyncio.sleep(0.2)  # Async sleep for better cancellation
+                except asyncio.CancelledError:
+                    break
 
     def start(self):
         """Start the spinner animation in a separate thread."""
         if not self.spinner_thread:
             self.keep_running = True
-            self.spinner_thread = threading.Thread(target=self._spin)
+            loop = asyncio.new_event_loop()
+            self.spinner_thread = threading.Thread(
+                target=lambda: loop.run_until_complete(self._spin())
+            )
             self.spinner_thread.daemon = True
             self.spinner_thread.start()
 
