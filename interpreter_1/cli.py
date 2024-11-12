@@ -89,11 +89,6 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "default": profile.instructions,
             "help": "Appended to default system message",
         },
-        "input": {
-            "flags": ["--input"],
-            "default": profile.input,
-            "help": "Set initial input message",
-        },
         "max_turns": {
             "flags": ["--max-turns"],
             "type": int,
@@ -125,6 +120,8 @@ def parse_args():
 
     # Hidden arguments
     parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--version", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--input", action="store", help=argparse.SUPPRESS)
 
     # Add arguments programmatically from config
     arg_params = _profile_to_arg_params(profile)
@@ -134,7 +131,7 @@ def parse_args():
 
     # If second argument exists and doesn't start with '-', treat as input message
     if len(sys.argv) > 1 and not sys.argv[1].startswith("-"):
-        return {**vars(parser.parse_args([])), "input_message": " ".join(sys.argv[1:])}
+        return {**vars(parser.parse_args([])), "input": "i " + " ".join(sys.argv[1:])}
 
     args = vars(parser.parse_args())
 
@@ -145,16 +142,6 @@ def parse_args():
         for key, value in vars(profile).items():
             if key in args and args[key] is None:
                 args[key] = value
-
-    if args["help"]:
-        from .misc.help import help_message
-
-        arguments_string = ""
-        for action in parser._actions:
-            if action.help != argparse.SUPPRESS:
-                arguments_string += f"\n  {action.option_strings[0]:<12} {action.help}"
-        help_message(arguments_string)
-        sys.exit(0)
 
     return args
 
@@ -171,6 +158,20 @@ def main():
         for key, value in args.items():
             if hasattr(interpreter, key) and value is not None:
                 setattr(interpreter, key, value)
+
+    if args["help"]:
+        from .misc.help import help_message
+
+        help_message()
+        sys.exit(0)
+
+    if args["version"]:
+        # Print version of currently installed interpreter
+        # Get this from the package metadata
+        from importlib.metadata import version
+
+        print("Open Interpreter " + version("open-interpreter"))
+        sys.exit(0)
 
     # Check if we should start the server
     if args["serve"]:
@@ -208,13 +209,11 @@ def main():
         spinner.start()
         load_interpreter()
         spinner.stop()
-        if args["input"]:
+
+        if args["input"] is not None:
             message = args["input"]
         else:
             message = sys.stdin.read().strip()
-            # print("---")
-            # print(message)
-            # print("---")
         interpreter.messages = [{"role": "user", "content": message}]
 
         # Run the generator until completion
@@ -222,7 +221,7 @@ def main():
             pass
         print()
 
-        if sys.stdin.isatty():
+        if interpreter.interactive:
             interpreter.chat()  # Continue in interactive mode
 
 

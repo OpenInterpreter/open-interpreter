@@ -1,6 +1,7 @@
 import json
 import os
 import platform
+import sys
 from datetime import datetime
 
 # System prompt with dynamic values
@@ -63,12 +64,12 @@ class Profile:
         self.messages = []  # List of conversation messages
         self.system_message = SYSTEM_PROMPT  # System prompt override
         self.instructions = ""  # Additional model instructions
-        self.input = None  # Input message override
 
         # Available tools and settings
         self.tools = ["interpreter", "editor"]  # Enabled tool modules
         self.auto_run = False  # Whether to auto-run tools without confirmation
         self.tool_calling = True  # Whether to allow tool/function calling
+        self.interactive = sys.stdin.isatty()  # Whether to prompt for input
 
         # Server settings
         self.serve = False  # Whether to start the server

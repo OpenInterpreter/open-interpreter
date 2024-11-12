@@ -1,12 +1,9 @@
 import json
-import random
-import time
 
 from ..ui.tool import ToolRenderer
-from .stream_text import stream_text
 
 
-def help_message(u):
+def help_message():
     tips = [
         "\033[38;5;240mTip: Pipe in prompts using `$ANYTHING | i`\033[0m",
         "\033[38;5;240mTip: Type `wtf` in your terminal to fix the last error\033[0m",
@@ -39,10 +36,11 @@ A standard interface for computer-controlling agents.
 {BLUE_COLOR}--allowed-paths{RESET_COLOR}      Paths the model can access
 {BLUE_COLOR}--no-tool-calling{RESET_COLOR}    Disable tool usage (enabled by default)
 {BLUE_COLOR}--auto-run{RESET_COLOR}, {BLUE_COLOR}-y{RESET_COLOR}       Auto-run suggested commands
+{BLUE_COLOR}--interactive{RESET_COLOR}        Enable interactive mode (enabled if sys.stdin.isatty())
+{BLUE_COLOR}--no-interactive{RESET_COLOR}     Disable interactive mode
 
 {BLUE_COLOR}--system-message{RESET_COLOR}     Override default system message
 {BLUE_COLOR}--instructions{RESET_COLOR}       Additional instructions in system message
-{BLUE_COLOR}--max-budget{RESET_COLOR}         Maximum spend allowed (-1 for unlimited)
 {BLUE_COLOR}--max-turns{RESET_COLOR}          Maximum conversation turns (-1 for unlimited)
 
 {BLUE_COLOR}--profile{RESET_COLOR}            Load settings from config file

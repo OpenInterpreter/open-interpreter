@@ -140,7 +140,9 @@ class _BashSession:
                             if self._sentinel in full_output:
                                 # Remove sentinel and everything after it
                                 clean_output = full_output.split(self._sentinel)[0]
-                                # print(clean_output, end="", flush=True)
+                                # If output is empty or only whitespace, return a message
+                                if not clean_output.strip():
+                                    return CLIResult(output="<No output>")
                                 return CLIResult(output=clean_output)
                             else:
                                 print(chunk_str, end="", flush=True)
@@ -153,8 +155,11 @@ class _BashSession:
             else:
                 output, error = await self._process.communicate()
                 output_str = output.decode()
-                print(output_str, end="", flush=True)
-                return CLIResult(output=output_str + "\n" + error.decode())
+                error_str = error.decode()
+                combined_output = output_str + "\n" + error_str
+                if not combined_output.strip():
+                    return CLIResult(output="<No output>")
+                return CLIResult(output=combined_output)
 
         except (KeyboardInterrupt, asyncio.CancelledError):
             self.stop()

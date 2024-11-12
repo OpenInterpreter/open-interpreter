@@ -345,7 +345,7 @@ class Interpreter:
                 if getattr(self, "auto_run", False):
                     user_approval = "y"
                 else:
-                    if not sys.stdin.isatty():
+                    if not self.interactive:
                         print(
                             "Error: Non-interactive environment requires auto_run=True to run tools"
                         )
@@ -805,31 +805,28 @@ class Interpreter:
                 placeholder = HTML(
                     f"<{placeholder_color}>{placeholder_text}</{placeholder_color}>"
                 )
-                if self.input:
-                    user_input = self.input
-                else:
-                    if self._prompt_session is None:
-                        self._prompt_session = PromptSession()
-                    user_input = self._prompt_session.prompt(
-                        "> ", placeholder=placeholder
-                    ).strip()
-                    print()
+                if self._prompt_session is None:
+                    self._prompt_session = PromptSession()
+                user_input = self._prompt_session.prompt(
+                    "> ", placeholder=placeholder
+                ).strip()
+                print()
 
-                    # Handle multi-line input
-                    if user_input == '"""':
-                        user_input = ""
-                        print('> """')
-                        while True:
-                            placeholder = HTML(
-                                f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
-                            )
-                            line = self._prompt_session.prompt(
-                                "", placeholder=placeholder
-                            ).strip()
-                            if line == '"""':
-                                break
-                            user_input += line + "\n"
-                        print()
+                # Handle multi-line input
+                if user_input == '"""':
+                    user_input = ""
+                    print('> """')
+                    while True:
+                        placeholder = HTML(
+                            f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
+                        )
+                        line = self._prompt_session.prompt(
+                            "", placeholder=placeholder
+                        ).strip()
+                        if line == '"""':
+                            break
+                        user_input += line + "\n"
+                    print()
 
                 message_count += 1  # Increment counter after each message
 
@@ -860,7 +857,7 @@ class Interpreter:
             self._spinner.stop()
             print(traceback.format_exc())
             print("\n\n\033[91mAn error has occurred.\033[0m")
-            if sys.stdin.isatty():  # Only prompt if in interactive mode
+            if self.interactive:
                 print(
                     "\nOpen Interpreter is self-healing. If you report this error, it will be autonomously repaired."
                 )
