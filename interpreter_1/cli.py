@@ -178,6 +178,7 @@ def main():
     if args["serve"]:
         # Load interpreter immediately for server mode
         load_interpreter()
+        print("Starting server...")
         interpreter.server()
         return
 

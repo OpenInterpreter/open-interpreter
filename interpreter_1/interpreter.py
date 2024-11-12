@@ -253,6 +253,8 @@ class Interpreter:
                 first_token = True
 
                 for chunk in raw_response:
+                    yield chunk
+
                     if first_token:
                         self._spinner.stop()
                         first_token = False
@@ -423,11 +425,9 @@ class Interpreter:
                     self.messages.append(
                         {"content": tool_result_content, "role": "user"}
                     )
-                    yield {"type": "messages", "messages": self.messages}
                     break
 
                 if not tool_result_content:
-                    yield {"type": "messages", "messages": self.messages}
                     break
 
                 self.messages.append(
@@ -500,6 +500,8 @@ class Interpreter:
                 first_token = True
 
                 for chunk in raw_response:
+                    yield chunk
+
                     if first_token:
                         self._spinner.stop()
                         first_token = False
@@ -508,11 +510,12 @@ class Interpreter:
                         message = chunk.choices[0].delta
 
                     if chunk.choices[0].delta.content:
-                        yield {"type": "chunk", "chunk": chunk.choices[0].delta.content}
                         md.feed(chunk.choices[0].delta.content)
                         await asyncio.sleep(0)
 
-                        if chunk.choices[0].delta != message:
+                        if message.content == None:
+                            message.content = chunk.choices[0].delta.content
+                        elif chunk.choices[0].delta.content != None:
                             message.content += chunk.choices[0].delta.content
 
                     if chunk.choices[0].delta.tool_calls:
@@ -561,10 +564,12 @@ class Interpreter:
                 print()
 
                 if not message.tool_calls:
-                    yield {"type": "messages", "messages": self.messages}
                     break
 
-                user_approval = input("\nRun tool(s)? (y/n): ").lower().strip()
+                if self.auto_run:
+                    user_approval = "y"
+                else:
+                    user_approval = input("\nRun tool(s)? (y/n): ").lower().strip()
 
                 for tool_call in message.tool_calls:
                     function_arguments = json.loads(tool_call.function.arguments)
@@ -886,13 +891,6 @@ class Interpreter:
         Start an OpenAI-compatible API server.
         """
         from .server import Server
-
-        # Initialize messages if not already set
-        if not hasattr(self, "messages"):
-            self.messages = []
-
-        # Set auto_run to True for server mode
-        self.auto_run = True
 
         # Create and start server
         server = Server(self)

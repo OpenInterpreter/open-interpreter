@@ -24,6 +24,7 @@ pyte = "^0.8.2"
 screeninfo = "^0.8.1"
 readchar = "^4.2.1"
 pillow = "^11.0.0"
+uvicorn = "^0.32.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

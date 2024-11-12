@@ -2,23 +2,24 @@ import asyncio
 import json
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
+from pydantic import BaseModel
 
 
-class ChatCompletionRequest:
-    def __init__(
-        self,
-        messages: List[Dict[str, str]],
-        stream: bool = False,
-        model: Optional[str] = None,
-    ):
-        self.messages = messages
-        self.stream = stream
-        self.model = model
+class ChatCompletionRequest(BaseModel):
+    messages: List[Dict[str, Union[str, list, None]]]
+    stream: bool = False
+    model: Optional[str] = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+    top_p: Optional[float] = None
+    frequency_penalty: Optional[float] = None
+    presence_penalty: Optional[float] = None
+    tools: Optional[List[Dict[str, Any]]] = None
 
 
 class Server:
@@ -33,30 +34,22 @@ class Server:
 
         # Setup routes
         self.app.post("/v1/chat/completions")(self.chat_completion)
-        self.app.get("/v1/models")(self.list_models)
-
-    async def list_models(self):
-        """List available models endpoint"""
-        return {
-            "data": [
-                {
-                    "id": self.interpreter.model,
-                    "object": "model",
-                    "created": int(time.time()),
-                    "owned_by": "open-interpreter",
-                }
-            ]
-        }
 
     async def chat_completion(self, request: Request):
         """Main chat completion endpoint"""
         body = await request.json()
-        req = ChatCompletionRequest(**body)
+        try:
+            req = ChatCompletionRequest(**body)
+        except Exception as e:
+            print("Validation error:", str(e))  # Debug print
+            print("Request body:", body)  # Print the request body
+            raise
+
+        # Filter out system message
+        req.messages = [msg for msg in req.messages if msg["role"] != "system"]
 
         # Update interpreter messages
-        self.interpreter.messages = [
-            {"role": msg["role"], "content": msg["content"]} for msg in req.messages
-        ]
+        self.interpreter.messages = req.messages
 
         if req.stream:
             return StreamingResponse(
@@ -85,33 +78,54 @@ class Server:
 
     async def _stream_response(self):
         """Stream the response in OpenAI-compatible format"""
-        for chunk in self.interpreter.respond():
-            if chunk.get("type") == "chunk":
-                data = {
-                    "id": "chatcmpl-" + str(time.time()),
-                    "object": "chat.completion.chunk",
-                    "created": int(time.time()),
-                    "model": self.interpreter.model,
-                    "choices": [
-                        {
-                            "index": 0,
-                            "delta": {"content": chunk["chunk"]},
-                            "finish_reason": None,
-                        }
-                    ],
-                }
-                yield f"data: {json.dumps(data)}\n\n"
-                await asyncio.sleep(0)
+        async for chunk in self.interpreter.async_respond():
+            # Convert tool_calls to dict if present
+            choices = []
+            for choice in chunk.choices:
+                delta = {}
+                if choice.delta:
+                    if choice.delta.content is not None:
+                        delta["content"] = choice.delta.content
+                    if choice.delta.role is not None:
+                        delta["role"] = choice.delta.role
+                    if choice.delta.function_call is not None:
+                        delta["function_call"] = choice.delta.function_call
+                    if choice.delta.tool_calls is not None:
+                        pass
+                        # Convert tool_calls to dict representation
+                        # delta["tool_calls"] = [
+                        #     {
+                        #         "index": tool_call.index,
+                        #         "id": tool_call.id,
+                        #         "type": tool_call.type,
+                        #         "function": {
+                        #             "name": tool_call.function.name,
+                        #             "arguments": tool_call.function.arguments
+                        #         }
+                        #     } for tool_call in choice.delta.tool_calls
+                        # ]
 
-        # Send final chunk
-        data = {
-            "id": "chatcmpl-" + str(time.time()),
-            "object": "chat.completion.chunk",
-            "created": int(time.time()),
-            "model": self.interpreter.model,
-            "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}],
-        }
-        yield f"data: {json.dumps(data)}\n\n"
+                choices.append(
+                    {
+                        "index": choice.index,
+                        "delta": delta,
+                        "finish_reason": choice.finish_reason,
+                    }
+                )
+
+            data = {
+                "id": chunk.id,
+                "object": chunk.object,
+                "created": chunk.created,
+                "model": chunk.model,
+                "choices": choices,
+            }
+
+            if hasattr(chunk, "system_fingerprint"):
+                data["system_fingerprint"] = chunk.system_fingerprint
+
+            yield f"data: {json.dumps(data)}\n\n"
+
         yield "data: [DONE]\n\n"
 
     def run(self):
