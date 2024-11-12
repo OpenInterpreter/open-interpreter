@@ -230,7 +230,9 @@ class Interpreter:
 
             edit = ToolRenderer()
 
-            if self.provider == "anthropic":
+            if (
+                self.provider == "anthropic" and not self.serve
+            ):  # Server can't handle Anthropic yet
                 if self._client is None:
                     if self.api_key:
                         self._client = Anthropic(api_key=self.api_key)
@@ -466,6 +468,12 @@ class Interpreter:
                             },
                         }
                     )
+                if "editor" in self.tools:
+                    # print("Editor is not supported for non-Anthropic models.")
+                    pass
+                if "gui" in self.tools:
+                    # print("GUI is not supported for non-Anthropic models.")
+                    pass
 
                 if self.model.startswith("ollama/"):
                     # Fix ollama
