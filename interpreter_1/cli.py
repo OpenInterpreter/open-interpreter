@@ -89,11 +89,10 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "default": profile.instructions,
             "help": "Appended to default system message",
         },
-        "max_budget": {
-            "flags": ["--max-budget"],
-            "type": float,
-            "default": profile.max_budget,
-            "help": f"Set maximum budget, defaults to -1 (unlimited)",
+        "input": {
+            "flags": ["--input"],
+            "default": profile.input,
+            "help": "Set initial input message",
         },
         "max_turns": {
             "flags": ["--max-turns"],
@@ -126,7 +125,6 @@ def parse_args():
 
     # Hidden arguments
     parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--input-message", help=argparse.SUPPRESS)
 
     # Add arguments programmatically from config
     arg_params = _profile_to_arg_params(profile)
@@ -198,7 +196,7 @@ def main():
         sys.stdout.write("\r\033[K")  # Clear entire line
         sys.stdout.flush()
 
-    if args["input_message"] is None and sys.stdin.isatty():
+    if args["input"] is None and sys.stdin.isatty():
         from .misc.welcome import welcome_message
 
         welcome_message(args)
@@ -210,8 +208,8 @@ def main():
         spinner.start()
         load_interpreter()
         spinner.stop()
-        if args["input_message"]:
-            message = args["input_message"]
+        if args["input"]:
+            message = args["input"]
         else:
             message = sys.stdin.read().strip()
             # print("---")

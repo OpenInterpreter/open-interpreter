@@ -57,13 +57,13 @@ class Profile:
         self.api_version = None  # API version to use
 
         # Runtime limits
-        self.max_budget = -1  # Maximum budget in USD (-1 for unlimited)
         self.max_turns = -1  # Maximum conversation turns (-1 for unlimited)
 
         # Conversation state
         self.messages = []  # List of conversation messages
         self.system_message = SYSTEM_PROMPT  # System prompt override
         self.instructions = ""  # Additional model instructions
+        self.input = None  # Input message override
 
         # Available tools and settings
         self.tools = ["interpreter", "editor"]  # Enabled tool modules

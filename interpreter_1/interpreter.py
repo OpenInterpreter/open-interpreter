@@ -129,8 +129,6 @@ class Interpreter:
         API key being used
     api_version : str or None
         API version being used
-    max_budget : float
-        Maximum budget in USD (-1 for unlimited)
     max_turns : int
         Maximum conversation turns (-1 for unlimited)
     """
@@ -207,6 +205,7 @@ class Interpreter:
         model_info = litellm.get_model_info(self.model)
         if self.provider == None:
             self.provider = model_info["litellm_provider"]
+
         max_tokens = model_info["max_tokens"]
 
         system_message = self.system_message + "\n\n" + self.instructions
@@ -217,7 +216,15 @@ class Interpreter:
             text=system_message,
         )
 
+        # Count turns
+        turn_count = 0
+
         while True:
+            turn_count += 1
+            if turn_count > self.max_turns and self.max_turns != -1:
+                print("\nMax turns reached, exiting\n")
+                break
+
             self._spinner.start()
 
             enable_prompt_caching = False
@@ -469,10 +476,10 @@ class Interpreter:
                         }
                     )
                 if "editor" in self.tools:
-                    # print("Editor is not supported for non-Anthropic models.")
+                    print("\nEditor is not supported for non-Anthropic models yet.\n")
                     pass
                 if "gui" in self.tools:
-                    # print("GUI is not supported for non-Anthropic models.")
+                    print("\nGUI is not supported for non-Anthropic models yet.\n")
                     pass
 
                 if self.model.startswith("ollama/"):
@@ -629,7 +636,6 @@ class Interpreter:
             "api_key": (str, "API key"),
             "api_version": (str, "API version"),
             "temperature": (float, "Sampling temperature (0-1)"),
-            "max_budget": (float, "Maximum budget in USD (-1 for unlimited)"),
             "max_turns": (int, "Maximum conversation turns (-1 for unlimited)"),
         }
 
@@ -799,28 +805,31 @@ class Interpreter:
                 placeholder = HTML(
                     f"<{placeholder_color}>{placeholder_text}</{placeholder_color}>"
                 )
-                if self._prompt_session is None:
-                    self._prompt_session = PromptSession()
-                user_input = self._prompt_session.prompt(
-                    "> ", placeholder=placeholder
-                ).strip()
-                print()
-
-                # Handle multi-line input
-                if user_input == '"""':
-                    user_input = ""
-                    print('> """')
-                    while True:
-                        placeholder = HTML(
-                            f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
-                        )
-                        line = self._prompt_session.prompt(
-                            "", placeholder=placeholder
-                        ).strip()
-                        if line == '"""':
-                            break
-                        user_input += line + "\n"
+                if self.input:
+                    user_input = self.input
+                else:
+                    if self._prompt_session is None:
+                        self._prompt_session = PromptSession()
+                    user_input = self._prompt_session.prompt(
+                        "> ", placeholder=placeholder
+                    ).strip()
                     print()
+
+                    # Handle multi-line input
+                    if user_input == '"""':
+                        user_input = ""
+                        print('> """')
+                        while True:
+                            placeholder = HTML(
+                                f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
+                            )
+                            line = self._prompt_session.prompt(
+                                "", placeholder=placeholder
+                            ).strip()
+                            if line == '"""':
+                                break
+                            user_input += line + "\n"
+                        print()
 
                 message_count += 1  # Increment counter after each message
 
