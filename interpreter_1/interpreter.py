@@ -262,7 +262,6 @@ class Interpreter:
                     elif isinstance(chunk, BetaRawContentBlockDeltaEvent):
                         if chunk.delta.type == "text_delta":
                             md.feed(chunk.delta.text)
-                            yield {"type": "chunk", "chunk": chunk.delta.text}
                             await asyncio.sleep(0)
                             if current_block and current_block.type == "text":
                                 current_block.text += chunk.delta.text
@@ -291,7 +290,6 @@ class Interpreter:
                                 delattr(current_block, "partial_json")
                             else:
                                 md.feed("\n")
-                                yield {"type": "chunk", "chunk": "\n"}
                                 await asyncio.sleep(0)
 
                             for attr in [
@@ -304,6 +302,8 @@ class Interpreter:
                                     delattr(current_block, attr)
                             response_content.append(current_block)
                             current_block = None
+
+                edit.close()
 
                 response = BetaMessage(
                     id=str(uuid.uuid4()),
@@ -406,8 +406,6 @@ class Interpreter:
                 tool_result_content: list[BetaToolResultBlockParam] = []
                 for content_block in cast(list[BetaContentBlock], response.content):
                     if content_block.type == "tool_use":
-                        edit.close()
-
                         if user_approval in ["y", "a"]:
                             result = await tool_collection.run(
                                 name=content_block.name,

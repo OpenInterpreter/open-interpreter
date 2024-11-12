@@ -313,8 +313,9 @@ class CommandRenderer(ContentRenderer):
         pass  # No need to flush since we render when we get a complete command
 
     def close(self):
-        if self.json_obj and self.json_obj.get("action") == "screenshot":
-            SchemaRenderer.print_separator("┴", newline=True)
+        if self.json_obj and self.json_obj.get("name") == "computer":
+            if set(self.json_obj.keys()) == {"name", "action"}:
+                SchemaRenderer.print_separator("┴", newline=True)
 
 
 class InsertRenderer(ContentRenderer):

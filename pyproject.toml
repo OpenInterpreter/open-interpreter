@@ -13,7 +13,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 
 # Required dependencies
-python = ">=3.8,<4"
+python = ">=3.9,<4"
 litellm = "^1.52.3"
 anthropic = "^0.39.0"
 pygments = "^2.18.0"
@@ -23,6 +23,7 @@ prompt-toolkit = "^3.0.48"
 pyte = "^0.8.2"
 screeninfo = "^0.8.1"
 readchar = "^4.2.1"
+pillow = "^11.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
