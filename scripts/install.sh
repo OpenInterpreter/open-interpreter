@@ -180,12 +180,12 @@ else
 fi
 
 # Offer shell integration
-info "Would you like to install shell integration? This allows you to use Open Interpreter directly from your shell - if you type an unrecognized command, it will be passed to Open Interpreter with context about your recent shell history. [y/N] "
+info "Would you like to install our experimental shell integration? This allows you to use your shell as a chatbox, with your shell history as context. [y/N] "
 read -r install_shell_integration
 if [[ "$install_shell_integration" =~ ^[Yy]$ ]]; then
     if command_exists interpreter-shell; then
         interpreter-shell
-        info "Shell integration installed successfully! Restart your shell to activate it."
+        info "Shell integration installed successfully! Restart your shell to activate it. Run interpreter-uninstall-shell to remove it."
     else
         error "Could not find interpreter-shell command. Please ensure Open Interpreter was installed correctly."
     fi

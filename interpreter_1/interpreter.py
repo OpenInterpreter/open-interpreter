@@ -702,6 +702,8 @@ class Interpreter:
                         "> ",
                         placeholder=placeholder,
                     ).strip()
+                except KeyboardInterrupt:
+                    raise
                 except:
                     user_input = input("> ").strip()
                 print()
