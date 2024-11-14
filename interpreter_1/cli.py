@@ -252,8 +252,8 @@ def main():
             pass
         print()
 
-        # if interpreter.interactive:
-        #     interpreter.chat()  # Continue in interactive mode
+        if interpreter.interactive:
+            interpreter.chat()  # Continue in interactive mode
 
 
 if __name__ == "__main__":

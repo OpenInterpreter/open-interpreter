@@ -33,6 +33,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 i = "interpreter_1.cli:main"
 interpreter = "interpreter_1.cli:main"
+interpreter-shell = "scripts.shell:main"
 
 wtf = "scripts.wtf:main"
 interpreter-classic = "interpreter.terminal_interface.start_terminal_interface:main"

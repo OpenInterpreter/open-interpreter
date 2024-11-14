@@ -141,12 +141,52 @@ fi
 
 # Platform-specific final instructions
 if [[ "$OSTYPE" == "msys" ]] || [[ "$OSTYPE" == "win32" ]]; then
-    info "Installation complete! You can now use 'open-interpreter' from a new terminal window."
+    info "Installation complete! You can now use 'interpreter' from a new terminal window."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    info "Installation complete! You can now use the 'open-interpreter' command."
-    info "Make sure $BIN_DIR is in your PATH by adding this to your ~/.zshrc or ~/.bash_profile:"
-    info "    export PATH=\"\$PATH:$BIN_DIR\""
+    info "Installation complete! You can now use the 'interpreter' command."
+    info "Would you like to add $BIN_DIR to your PATH? [y/N] "
+    read -r add_to_path
+    if [[ "$add_to_path" =~ ^[Yy]$ ]]; then
+        if [[ -f "$HOME/.zshrc" ]]; then
+            echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.zshrc"
+            info "Added to ~/.zshrc. Please restart your terminal or run: source ~/.zshrc"
+        elif [[ -f "$HOME/.bash_profile" ]]; then
+            echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.bash_profile"
+            info "Added to ~/.bash_profile. Please restart your terminal or run: source ~/.bash_profile"
+        else
+            info "Could not find ~/.zshrc or ~/.bash_profile. Please manually add to your shell's config:"
+            info "    export PATH=\"\$PATH:$BIN_DIR\""
+        fi
+    else
+        info "You can manually add $BIN_DIR to your PATH by adding this to ~/.zshrc or ~/.bash_profile:"
+        info "    export PATH=\"\$PATH:$BIN_DIR\""
+    fi
 else
-    info "Installation complete! You can now use the 'open-interpreter' command."
-    info "Make sure $BIN_DIR is in your PATH."
+    info "Installation complete! You can now use the 'interpreter' command."
+    info "Would you like to add $BIN_DIR to your PATH? [y/N] "
+    read -r add_to_path
+    if [[ "$add_to_path" =~ ^[Yy]$ ]]; then
+        if [[ -f "$HOME/.bashrc" ]]; then
+            echo "export PATH=\"\$PATH:$BIN_DIR\"" >> "$HOME/.bashrc"
+            info "Added to ~/.bashrc. Please restart your terminal or run: source ~/.bashrc"
+        else
+            info "Could not find ~/.bashrc. Please manually add to your shell's config:"
+            info "    export PATH=\"\$PATH:$BIN_DIR\""
+        fi
+    else
+        info "You can manually add $BIN_DIR to your PATH by adding this to ~/.bashrc:"
+        info "    export PATH=\"\$PATH:$BIN_DIR\""
+    fi
+fi
+
+# Offer shell integration
+info "Would you like to install shell integration? This allows you to use Open Interpreter directly from your shell - if you type an unrecognized command, it will be passed to Open Interpreter with context about your recent shell history. [y/N] "
+read -r install_shell_integration
+if [[ "$install_shell_integration" =~ ^[Yy]$ ]]; then
+    if command_exists interpreter-shell; then
+        interpreter-shell
+        info "Shell integration installed successfully! Restart your shell to activate it."
+    else
+        error "Could not find interpreter-shell command. Please ensure Open Interpreter was installed correctly."
+    fi
 fi

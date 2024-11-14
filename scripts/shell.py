@@ -38,7 +38,7 @@ def get_shell_config():
 
 def get_shell_script(shell_type):
     """Return the appropriate shell script based on shell type."""
-    base_script = """# Create log file if it doesn't exist
+    base_script = r"""# Create log file if it doesn't exist
 touch ~/.shell_history_with_output
 
 # Function to capture terminal interaction
@@ -68,11 +68,12 @@ function reset_output() {
 # Command not found handler that pipes context to interpreter
 command_not_found_handler() {
     local cmd=$1
-    # echo "user: $cmd" >> ~/.shell_history_with_output
-    # echo "computer:" >> ~/.shell_history_with_output
     
     # Capture output in temp file, display unstripped version, then process and append stripped version
     output_file=$(mktemp)
+    # Add trap to handle SIGINT (Ctrl+C) gracefully
+    trap "rm -f $output_file; return 0" INT
+    
     interpreter --input "$(cat ~/.shell_history_with_output)" --instructions "You are in FAST mode. Be ultra-concise. Determine what the user is trying to do (most recently) and help them." 2>&1 | \
         tee "$output_file"
     cat "$output_file" | sed -r \
@@ -82,7 +83,10 @@ command_not_found_handler() {
         -e "s/^[[:space:]\.]*//;s/[[:space:]\.]*$//" \
         -e "s/─{3,}//g" \
         >> ~/.shell_history_with_output
-    rm "$output_file"
+    
+    # Clean up and remove the trap
+    trap - INT
+    rm -f "$output_file"
     return 0
 }
 
