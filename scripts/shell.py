@@ -44,9 +44,9 @@ touch ~/.shell_history_with_output
 # Function to capture terminal interaction
 function capture_output() {
     local cmd=$1
-    # Redirect with more thorough ANSI and cursor control stripping
-    exec 1> >(tee >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGKHF]//g; s/\x1B\[[0-9;]*[A-Za-z]//g; s/\r//g" >> ~/.shell_history_with_output))
-    exec 2> >(tee >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGKHF]//g; s/\x1B\[[0-9;]*[A-Za-z]//g; s/\r//g" >> ~/.shell_history_with_output))
+    # Use LC_ALL=C to force ASCII output and handle encoding issues
+    exec 1> >(LC_ALL=C tee >(LC_ALL=C sed -e $'s/\x1B\[[0-9;]*[a-zA-Z]//g' -e $'s/\x1B\[[0-9;]*[mGKHF]//g' -e $'s/[^[:print:]\t\n]//g' >> ~/.shell_history_with_output))
+    exec 2> >(LC_ALL=C tee >(LC_ALL=C sed -e $'s/\x1B\[[0-9;]*[a-zA-Z]//g' -e $'s/\x1B\[[0-9;]*[mGKHF]//g' -e $'s/[^[:print:]\t\n]//g' >> ~/.shell_history_with_output))
     
     echo "user: $cmd" >> ~/.shell_history_with_output
     echo "computer:" >> ~/.shell_history_with_output
@@ -74,14 +74,16 @@ command_not_found_handler() {
     # Add trap to handle SIGINT (Ctrl+C) gracefully
     trap "rm -f $output_file; return 0" INT
     
-    interpreter --input "$(cat ~/.shell_history_with_output)" --instructions "You are in FAST mode. Be ultra-concise. Determine what the user is trying to do (most recently) and help them." 2>&1 | \
+    # Force ASCII output and clean non-printable characters
+    LC_ALL=C interpreter --input "$(cat ~/.shell_history_with_output)" --instructions "You are in FAST mode. Be ultra-concise. Determine what the user is trying to do (most recently) and help them." 2>&1 | \
         tee "$output_file"
-    cat "$output_file" | sed -r \
-        -e "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGKHF]//g" \
-        -e "s/\x1B\[[0-9;]*[A-Za-z]//g" \
-        -e "s/\]633;[^]]*\]//g" \
-        -e "s/^[[:space:]\.]*//;s/[[:space:]\.]*$//" \
-        -e "s/─{3,}//g" \
+    LC_ALL=C cat "$output_file" | LC_ALL=C sed \
+        -e $'s/\x1B\[[0-9;]*[a-zA-Z]//g' \
+        -e $'s/\x1B\[[0-9;]*[mGKHF]//g' \
+        -e $'s/\]633;[^]]*\]//g' \
+        -e 's/^[[:space:]\.]*//;s/[[:space:]\.]*$//' \
+        -e 's/─\{3,\}//g' \
+        -e $'s/[^[:print:]\t\n]//g' \
         >> ~/.shell_history_with_output
     
     # Clean up and remove the trap

@@ -25,6 +25,7 @@ screeninfo = "^0.8.1"
 readchar = "^4.2.1"
 pillow = "^11.0.0"
 uvicorn = "^0.32.0"
+pynput = "^1.7.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -33,7 +34,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 i = "interpreter_1.cli:main"
 interpreter = "interpreter_1.cli:main"
+
 interpreter-shell = "scripts.shell:main"
+interpreter-uninstall-shell = "scripts.uninstall_shell:main"
 
 wtf = "scripts.wtf:main"
 interpreter-classic = "interpreter.terminal_interface.start_terminal_interface:main"
