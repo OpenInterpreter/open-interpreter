@@ -7,7 +7,10 @@ from .stream_text import stream_text
 
 
 def welcome_message(args):
-    terminal_width = os.get_terminal_size().columns
+    try:
+        terminal_width = os.get_terminal_size().columns
+    except:
+        terminal_width = 80
     print()
     renderer = MarkdownRenderer()
 

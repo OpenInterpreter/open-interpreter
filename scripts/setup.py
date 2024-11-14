@@ -44,25 +44,60 @@ touch ~/.shell_history_with_output
 # Function to capture terminal interaction
 function capture_output() {
     local cmd=$1
+    # Redirect with more thorough ANSI and cursor control stripping
+    exec 1> >(tee >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGKHF]//g; s/\x1B\[[0-9;]*[A-Za-z]//g; s/\r//g" >> ~/.shell_history_with_output))
+    exec 2> >(tee >(sed -r "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGKHF]//g; s/\x1B\[[0-9;]*[A-Za-z]//g; s/\r//g" >> ~/.shell_history_with_output))
+    
     echo "user: $cmd" >> ~/.shell_history_with_output
     echo "computer:" >> ~/.shell_history_with_output
-    eval "$cmd" >> ~/.shell_history_with_output 2>&1
+    
+    # Trim history file if it exceeds 20K characters
+    if [ $(wc -c < ~/.shell_history_with_output) -gt 20000 ]; then
+        # Keep only the last 15K characters to prevent frequent trimming
+        tail -c 15000 ~/.shell_history_with_output > ~/.shell_history_with_output.tmp
+        mv ~/.shell_history_with_output.tmp ~/.shell_history_with_output
+    fi
+}
+
+# After the command completes, reset the output redirection
+function reset_output() {
+    exec 1>&1
+    exec 2>&2
 }
 
 # Command not found handler that pipes context to interpreter
 command_not_found_handler() {
-    cat ~/.shell_history_with_output | interpreter
+    local cmd=$1
+    # echo "user: $cmd" >> ~/.shell_history_with_output
+    # echo "computer:" >> ~/.shell_history_with_output
+    
+    # Capture output in temp file, display unstripped version, then process and append stripped version
+    output_file=$(mktemp)
+    interpreter --input "$(cat ~/.shell_history_with_output)" --instructions "You are in FAST mode. Be ultra-concise. Determine what the user is trying to do (most recently) and help them." 2>&1 | \
+        tee "$output_file"
+    cat "$output_file" | sed -r \
+        -e "s/\x1B\[([0-9]{1,3}(;[0-9]{1,3})*)?[mGKHF]//g" \
+        -e "s/\x1B\[[0-9;]*[A-Za-z]//g" \
+        -e "s/\]633;[^]]*\]//g" \
+        -e "s/^[[:space:]\.]*//;s/[[:space:]\.]*$//" \
+        -e "s/─{3,}//g" \
+        >> ~/.shell_history_with_output
+    rm "$output_file"
     return 0
 }
 
 # Hook into preexec"""
 
     if shell_type == "zsh":
-        return base_script + '\npreexec() {\n    capture_output "$1"\n}\n'
+        return (
+            base_script
+            + '\npreexec() {\n    capture_output "$1"\n}\n\npostexec() {\n    reset_output\n}\n'
+        )
     elif shell_type == "bash":
         return (
             base_script
             + '\ntrap \'capture_output "$(HISTTIMEFORMAT= history 1 | sed "s/^[ ]*[0-9]*[ ]*//")" \' DEBUG\n'
+            + "trap 'reset_output' RETURN\n"
         )
     return None
 
@@ -130,7 +165,7 @@ def main():
     except Exception as e:
         print(f"Error writing to {config_path}: {e}")
         print(
-            "Please visit docs.openinterpreter.com/shell for manual installation instructions."
+            "Please visit docs.openinterpreter.com for manual installation instructions."
         )
 
 

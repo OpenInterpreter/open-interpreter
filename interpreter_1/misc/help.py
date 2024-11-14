@@ -35,6 +35,7 @@ A standard interface for computer-controlling agents.
 {BLUE_COLOR}--allowed-commands{RESET_COLOR}   Commands the model can execute
 {BLUE_COLOR}--allowed-paths{RESET_COLOR}      Paths the model can access
 {BLUE_COLOR}--no-tool-calling{RESET_COLOR}    Disable tool usage (enabled by default)
+{BLUE_COLOR}--no-stream{RESET_COLOR}          Disable streaming (enabled by default)
 {BLUE_COLOR}--auto-run{RESET_COLOR}, {BLUE_COLOR}-y{RESET_COLOR}       Auto-run suggested commands
 {BLUE_COLOR}--interactive{RESET_COLOR}        Enable interactive mode (enabled if sys.stdin.isatty())
 {BLUE_COLOR}--no-interactive{RESET_COLOR}     Disable interactive mode

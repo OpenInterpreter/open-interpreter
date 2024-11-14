@@ -693,9 +693,17 @@ class Interpreter:
                 )
                 if self._prompt_session is None:
                     self._prompt_session = PromptSession()
-                user_input = self._prompt_session.prompt(
-                    "> ", placeholder=placeholder
-                ).strip()
+
+                try:
+                    # Prompt toolkit requires terminal size to work properly
+                    # If this fails, prompt toolkit will look weird, so we fall back to standard input
+                    os.get_terminal_size()
+                    user_input = self._prompt_session.prompt(
+                        "> ",
+                        placeholder=placeholder,
+                    ).strip()
+                except:
+                    user_input = input("> ").strip()
                 print()
 
                 # Handle multi-line input

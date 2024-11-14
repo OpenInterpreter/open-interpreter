@@ -79,6 +79,19 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "dest": "tool_calling",
             "help": "Disable tool calling (enabled by default)",
         },
+        "interactive": {
+            "flags": ["--interactive"],
+            "action": "store_true",
+            "default": profile.interactive,
+            "help": "Enable interactive mode (enabled by default)",
+        },
+        "no_interactive": {
+            "flags": ["--no-interactive"],
+            "action": "store_false",
+            "default": profile.interactive,
+            "dest": "interactive",
+            "help": "Disable interactive mode",
+        },
         # Behavior configuration
         "system_message": {
             "flags": ["--system-message"],
@@ -239,8 +252,8 @@ def main():
             pass
         print()
 
-        if interpreter.interactive:
-            interpreter.chat()  # Continue in interactive mode
+        # if interpreter.interactive:
+        #     interpreter.chat()  # Continue in interactive mode
 
 
 if __name__ == "__main__":
