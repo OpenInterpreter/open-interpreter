@@ -42,6 +42,7 @@ from anthropic.types.beta import (
     BetaToolResultBlockParam,
 )
 
+from .commands import CommandHandler
 from .misc.spinner import SimpleSpinner
 
 # Local imports
@@ -148,6 +149,8 @@ class Interpreter:
         self._client = None
         self._spinner = SimpleSpinner("")
         self._prompt_session = None
+        self._command_handler = CommandHandler(self)
+        self._stop_flag = False  # Add stop flag
 
     def to_dict(self):
         """Convert current settings to dictionary"""
@@ -187,6 +190,32 @@ class Interpreter:
         """
         return cls(Profile.from_file(path))
 
+    def default_system_message(self):
+        system_message = f"""<SYSTEM_CAPABILITY>
+        * You are an AI assistant with access to a machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
+        * The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
+        * The user's cwd is {os.getcwd()} and username is {os.getlogin()}.
+        </SYSTEM_CAPABILITY>"""
+
+        # Add web search capability if enabled
+        if (
+            os.environ.get("INTERPRETER_EXPERIMENTAL_WEB_SEARCH", "false").lower()
+            == "true"
+        ):
+            system_message = system_message.replace(
+                "</SYSTEM_CAPABILITY>",
+                "* For fast web searches (like up-to-date docs) curl https://api.openinterpreter.com/v0/browser/search?query=your+search+query\n</SYSTEM_CAPABILITY>",
+            )
+
+        # Update system prompt for Mac OS, if computer tool is enabled
+        if platform.system() == "Darwin" and "gui" in self.tools:
+            system_message += """
+            <IMPORTANT>
+            * Open applications using Spotlight by using the computer tool to simulate pressing Command+Space, typing the application name, and pressing Enter.
+            </IMPORTANT>"""
+
+        return system_message
+
     async def async_respond(self):
         """
         Agentic sampling loop for the assistant/tool interaction.
@@ -203,13 +232,20 @@ class Interpreter:
         tool_collection = ToolCollection(*tools)
 
         model_info = litellm.get_model_info(self.model)
+
         if self.provider == None:
-            self.provider = model_info["litellm_provider"]
+            provider = model_info["litellm_provider"]
+        else:
+            provider = self.provider
 
         max_tokens = model_info["max_tokens"]
 
-        system_message = self.system_message + "\n\n" + self.instructions
-        system_message = system_message.strip()
+        if self.system_message is None:
+            system_message = self.default_system_message()
+        else:
+            system_message = self.system_message
+
+        system_message = (system_message + "\n\n" + self.instructions).strip()
 
         system = BetaTextBlockParam(
             type="text",
@@ -220,6 +256,9 @@ class Interpreter:
         turn_count = 0
 
         while True:
+            if self._stop_flag:
+                break
+
             turn_count += 1
             if turn_count > self.max_turns and self.max_turns != -1:
                 print("\nMax turns reached, exiting\n")
@@ -238,7 +277,7 @@ class Interpreter:
             edit = ToolRenderer()
 
             if (
-                self.provider == "anthropic" and not self.serve
+                provider == "anthropic" and not self.serve
             ):  # Server can't handle Anthropic yet
                 if self._client is None:
                     if self.api_key:
@@ -345,12 +384,6 @@ class Interpreter:
                 if getattr(self, "auto_run", False):
                     user_approval = "y"
                 else:
-                    if not self.interactive:
-                        print(
-                            "Error: Non-interactive environment requires auto_run=True to run tools"
-                        )
-                        exit(1)
-
                     if len(tool_use_blocks) > 1:
                         # Check if all tools are pre-approved
                         all_approved = all(
@@ -361,11 +394,23 @@ class Interpreter:
                         else:
                             print(f"\n\033[38;5;240mRun all actions above\033[0m?")
                             user_approval = self._ask_user_approval()
+
+                        if not self.interactive:
+                            print(
+                                "Error: Non-interactive environment requires auto_run=True to run tools"
+                            )
+                            exit(1)
                     elif len(tool_use_blocks) == 1:
                         tool_block = tool_use_blocks[0]
                         if self._is_tool_approved(tool_block):
                             user_approval = "y"
                         else:
+                            if not self.interactive:
+                                print(
+                                    "Error: Non-interactive environment requires auto_run=True to run tools"
+                                )
+                                exit(1)
+
                             if tool_block.name == "str_replace_editor":
                                 path = tool_block.input.get("path")
                                 if path.startswith(os.getcwd()):
@@ -442,7 +487,7 @@ class Interpreter:
                 self.messages.append(
                     {
                         "content": tool_result_content,
-                        "role": "user" if self.provider == "anthropic" else "tool",
+                        "role": "user" if provider == "anthropic" else "tool",
                     }
                 )
 
@@ -623,166 +668,7 @@ class Interpreter:
             return "n"
 
     def _handle_command(self, cmd: str, parts: list[str]) -> bool:
-        """Handle / commands for controlling interpreter settings"""
-
-        SETTINGS = {
-            "model": (str, "Model (e.g. claude-3-5-sonnet-20241022)"),
-            "provider": (str, "Provider (e.g. anthropic, openai)"),
-            "system_message": (str, "System message"),
-            "tools": (list, "Enabled tools (comma-separated: interpreter,editor,gui)"),
-            "auto_run": (bool, "Auto-run tools without confirmation"),
-            "tool_calling": (bool, "Enable/disable tool calling"),
-            "api_base": (str, "Custom API endpoint"),
-            "api_key": (str, "API key"),
-            "api_version": (str, "API version"),
-            "temperature": (float, "Sampling temperature (0-1)"),
-            "max_turns": (int, "Maximum conversation turns (-1 for unlimited)"),
-        }
-
-        def parse_value(value_str: str, type_hint: type):
-            """Convert string value to appropriate type"""
-            if type_hint == bool:
-                return True
-            if type_hint == list:
-                return value_str.split(",")
-            if type_hint == float:
-                return float(value_str)
-            if type_hint == int:
-                return int(value_str)
-            return value_str
-
-        def print_help():
-            print("Available Commands:")
-            print("  /help                Show this help message")
-            print("\nProfile Management:")
-            print("  /profile show        Show current profile location")
-            print(
-                "  /profile save [path] Save settings to profile (default: ~/.openinterpreter)"
-            )
-            print("  /profile load <path> Load settings from profile")
-            print("  /profile reset       Reset settings to defaults")
-            print("\nSettings:")
-            for name, (_, help_text) in SETTINGS.items():
-                print(f"  /set {name} <value>    {help_text}")
-            print("  /set no_<setting>    Disable boolean settings")
-            print()
-
-        # Handle /help
-        if cmd == "/help":
-            print_help()
-            return True
-
-        # Handle /profile commands
-        if cmd == "/profile":
-            if len(parts) < 2:
-                print(
-                    "Error: Missing profile command. Use /help to see available commands."
-                )
-                return True
-
-            subcmd = parts[1].lower()
-            path = parts[2] if len(parts) > 2 else None
-
-            if subcmd == "show":
-                path = os.path.expanduser(self._profile.profile_path)
-                if not os.path.exists(path):
-                    print(f"Profile does not exist yet. Current path would be: {path}")
-                    print("Use /profile save to create it")
-                    return True
-
-                if platform.system() == "Darwin":  # macOS
-                    os.system(f"open -R '{path}'")
-                elif platform.system() == "Windows":
-                    os.system(f"explorer /select,{path}")
-                else:
-                    print(f"Current profile path: {path}")
-                return True
-
-            elif subcmd == "save":
-                try:
-                    self.save_profile(path)
-                    if path:
-                        print(f"Settings saved to: {path}")
-                    else:
-                        print("Settings saved to default profile (~/.openinterpreter)")
-                except Exception as e:
-                    print(f"Error saving profile: {str(e)}")
-                return True
-
-            elif subcmd == "load":
-                if not path:
-                    print("Error: Missing path for profile load")
-                    return True
-                try:
-                    self.load_profile(path)
-                    print(f"Settings loaded from: {path}")
-                except Exception as e:
-                    print(f"Error loading profile: {str(e)}")
-                return True
-
-            elif subcmd == "reset":
-                path = os.path.expanduser(self._profile.profile_path)
-                if os.path.exists(path):
-                    print(
-                        f"\n\033[38;5;240mThis will reset all settings to defaults and overwrite:\033[0m {path}"
-                    )
-                    confirmation = input("\nAre you sure? (y/n): ").lower().strip()
-                    if confirmation != "y":
-                        print("Reset cancelled")
-                        return True
-
-                # Create new profile with defaults
-                self._profile = Profile()
-                # Update interpreter attributes
-                for key, value in self._profile.to_dict().items():
-                    if key != "profile":
-                        setattr(self, key, value)
-                # Save to file
-                self._profile.save()
-                print("Settings reset to defaults")
-                return True
-
-            else:
-                print(f"Unknown profile command: {subcmd}")
-                print("Use /help to see available commands")
-                return True
-
-        # Handle /set commands
-        if cmd == "/set":
-            if len(parts) < 2:
-                print("Error: Missing parameter name")
-                return True
-
-            param = parts[1].lower()
-            value_str = parts[2] if len(parts) > 2 else ""
-
-            # Provider resets client
-            if param == "provider":
-                self._client = None
-
-            # Handle boolean negation (no_<setting>)
-            if param.startswith("no_"):
-                actual_param = param[3:]
-                if actual_param in SETTINGS and SETTINGS[actual_param][0] == bool:
-                    setattr(self, actual_param, False)
-                    print(f"Set {actual_param} = False")
-                    return True
-
-            if param not in SETTINGS:
-                print(f"Unknown parameter: {param}")
-                return True
-
-            type_hint, _ = SETTINGS[param]
-            try:
-                value = parse_value(value_str, type_hint)
-                setattr(self, param, value)
-                print(f"Set {param} = {value}")
-            except (ValueError, TypeError) as e:
-                print(f"Error setting {param}: {str(e)}")
-            return True
-
-        # Not a recognized command
-        return False
+        return self._command_handler.handle_command(cmd, parts)
 
     def chat(self):
         """
@@ -928,7 +814,8 @@ class Interpreter:
         system = platform.system()
         python_version = sys.version
         conversation = "\n\n".join(
-            msg["role"].upper() + ": " + msg["content"] for msg in self.messages
+            str(msg["role"].upper()) + ": " + str(msg["content"])
+            for msg in self.messages
         )
 
         # Build error details sections

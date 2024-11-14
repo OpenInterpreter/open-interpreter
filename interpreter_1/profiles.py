@@ -4,21 +4,6 @@ import platform
 import sys
 from datetime import datetime
 
-# System prompt with dynamic values
-SYSTEM_PROMPT = f"""<SYSTEM_CAPABILITY>
-* You are an AI assistant with access to a machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
-* When using your computer function calls, they take a while to run and send back to you. Where possible/feasible, try to chain multiple of these calls all into one function calls request.
-* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
-* The user's cwd is {os.getcwd()} and username is {os.getlogin()}.
-</SYSTEM_CAPABILITY>"""
-
-# Update system prompt for Mac OS
-if platform.system() == "Darwin":
-    SYSTEM_PROMPT += """
-<IMPORTANT>
-* Open applications using Spotlight by using the computer tool to simulate pressing Command+Space, typing the application name, and pressing Enter.
-</IMPORTANT>"""
-
 
 class Profile:
     """
@@ -41,7 +26,8 @@ class Profile:
     profile.save("~/my_settings.json")
     """
 
-    DEFAULT_PROFILE_PATH = "~/.openinterpreter"
+    DEFAULT_PROFILE_FOLDER = "~/.openinterpreter"
+    DEFAULT_PROFILE_PATH = os.path.join(DEFAULT_PROFILE_FOLDER, "default_profile.py")
 
     def __init__(self):
         # Default values if no profile exists
@@ -62,7 +48,7 @@ class Profile:
 
         # Conversation state
         self.messages = []  # List of conversation messages
-        self.system_message = SYSTEM_PROMPT  # System prompt override
+        self.system_message = None  # System message override
         self.instructions = ""  # Additional model instructions
 
         # Available tools and settings
@@ -102,6 +88,8 @@ class Profile:
     def save(self, path=None):
         """Save current settings to a profile file"""
         path = os.path.expanduser(path or self.profile_path)
+        if not path.endswith(".py"):
+            path += ".py"
         os.makedirs(os.path.dirname(path), exist_ok=True)
 
         if os.path.exists(path):
@@ -111,30 +99,67 @@ class Profile:
                 print("Save cancelled")
                 return
 
+        # Get default values to compare against
+        default_profile = Profile()
+
         with open(path, "w") as f:
-            json.dump(self.to_dict(), f, indent=2)
+            f.write("from interpreter import interpreter\n\n")
+
+            # Compare each attribute with default and write if different
+            for key, value in self.to_dict().items():
+                if key == "messages":
+                    continue
+
+                if value != getattr(default_profile, key):
+                    if isinstance(value, str):
+                        f.write(f'interpreter.{key} = """{value}"""\n')
+                    elif isinstance(value, list):
+                        f.write(f"interpreter.{key} = {repr(value)}\n")
+                    else:
+                        f.write(f"interpreter.{key} = {repr(value)}\n")
+
+        print(f"Profile saved to {path}")
 
     def load(self, path):
         """Load settings from a profile file if it exists"""
         path = os.path.expanduser(path)
+        if not path.endswith(".py"):
+            path += ".py"
 
-        try:
-            with open(path) as f:
-                data = json.load(f)
-                self.from_dict(data)
-        except FileNotFoundError:
+        if not os.path.exists(path):
             # If file doesn't exist, if it's the default, that's fine
             if os.path.abspath(os.path.expanduser(path)) == os.path.abspath(
                 os.path.expanduser(self.DEFAULT_PROFILE_PATH)
             ):
-                pass
+                return
+            raise FileNotFoundError(f"Profile file not found at {path}")
+
+        # Create a temporary namespace to execute the profile in
+        namespace = {}
+        try:
+            with open(path) as f:
+                # Read the profile content
+                content = f.read()
+
+                # Replace the import with a dummy class definition
+                # This avoids loading the full interpreter module which is resource intensive
+                content = content.replace(
+                    "from interpreter import interpreter",
+                    "class Interpreter:\n    pass\ninterpreter = Interpreter()",
+                )
+
+                # Execute the modified profile content
+                exec(content, namespace)
+
+            # Extract settings from the interpreter object in the namespace
+            if "interpreter" in namespace:
+                for key in self.to_dict().keys():
+                    if hasattr(namespace["interpreter"], key):
+                        setattr(self, key, getattr(namespace["interpreter"], key))
             else:
-                raise FileNotFoundError(f"Profile file not found at {path}")
-        except json.JSONDecodeError as e:
-            # If JSON is invalid, raise descriptive error
-            raise json.JSONDecodeError(
-                f"Failed to parse profile at {path}. Error: {str(e)}", e.doc, e.pos
-            )
+                print("Failed to load profile, no interpreter object found")
+        except Exception as e:
+            raise ValueError(f"Failed to load profile at {path}. Error: {str(e)}")
 
     @classmethod
     def from_file(cls, path):

@@ -365,7 +365,6 @@ class InsertRenderer(ContentRenderer):
                 self.leading_space = prefix[: prefix.find(old_str.lstrip())]
                 return line_number
             except ValueError:
-                print("\n\nInsertion point not found.\n\n")
                 return None  # Return None to indicate failure
 
         return 1  # Default to first line if neither specified

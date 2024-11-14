@@ -78,55 +78,60 @@ class Server:
 
     async def _stream_response(self):
         """Stream the response in OpenAI-compatible format"""
-        async for chunk in self.interpreter.async_respond():
-            # Convert tool_calls to dict if present
-            choices = []
-            for choice in chunk.choices:
-                delta = {}
-                if choice.delta:
-                    if choice.delta.content is not None:
-                        delta["content"] = choice.delta.content
-                    if choice.delta.role is not None:
-                        delta["role"] = choice.delta.role
-                    if choice.delta.function_call is not None:
-                        delta["function_call"] = choice.delta.function_call
-                    if choice.delta.tool_calls is not None:
-                        pass
-                        # Convert tool_calls to dict representation
-                        # delta["tool_calls"] = [
-                        #     {
-                        #         "index": tool_call.index,
-                        #         "id": tool_call.id,
-                        #         "type": tool_call.type,
-                        #         "function": {
-                        #             "name": tool_call.function.name,
-                        #             "arguments": tool_call.function.arguments
-                        #         }
-                        #     } for tool_call in choice.delta.tool_calls
-                        # ]
+        try:
+            async for chunk in self.interpreter.async_respond():
+                # Convert tool_calls to dict if present
+                choices = []
+                for choice in chunk.choices:
+                    delta = {}
+                    if choice.delta:
+                        if choice.delta.content is not None:
+                            delta["content"] = choice.delta.content
+                        if choice.delta.role is not None:
+                            delta["role"] = choice.delta.role
+                        if choice.delta.function_call is not None:
+                            delta["function_call"] = choice.delta.function_call
+                        if choice.delta.tool_calls is not None:
+                            pass
+                            # Convert tool_calls to dict representation
+                            # delta["tool_calls"] = [
+                            #     {
+                            #         "index": tool_call.index,
+                            #         "id": tool_call.id,
+                            #         "type": tool_call.type,
+                            #         "function": {
+                            #             "name": tool_call.function.name,
+                            #             "arguments": tool_call.function.arguments
+                            #         }
+                            #     } for tool_call in choice.delta.tool_calls
+                            # ]
 
-                choices.append(
-                    {
-                        "index": choice.index,
-                        "delta": delta,
-                        "finish_reason": choice.finish_reason,
-                    }
-                )
+                    choices.append(
+                        {
+                            "index": choice.index,
+                            "delta": delta,
+                            "finish_reason": choice.finish_reason,
+                        }
+                    )
 
-            data = {
-                "id": chunk.id,
-                "object": chunk.object,
-                "created": chunk.created,
-                "model": chunk.model,
-                "choices": choices,
-            }
+                data = {
+                    "id": chunk.id,
+                    "object": chunk.object,
+                    "created": chunk.created,
+                    "model": chunk.model,
+                    "choices": choices,
+                }
 
-            if hasattr(chunk, "system_fingerprint"):
-                data["system_fingerprint"] = chunk.system_fingerprint
+                if hasattr(chunk, "system_fingerprint"):
+                    data["system_fingerprint"] = chunk.system_fingerprint
 
-            yield f"data: {json.dumps(data)}\n\n"
-
-        yield "data: [DONE]\n\n"
+                yield f"data: {json.dumps(data)}\n\n"
+        except asyncio.CancelledError:
+            # Set stop flag when stream is cancelled
+            self.interpreter._stop_flag = True
+            raise
+        finally:
+            yield "data: [DONE]\n\n"
 
     def run(self):
         """Start the server"""

@@ -44,6 +44,7 @@ A standard interface for computer-controlling agents.
 {BLUE_COLOR}--max-turns{RESET_COLOR}          Maximum conversation turns (-1 for unlimited)
 
 {BLUE_COLOR}--profile{RESET_COLOR}            Load settings from config file
+{BLUE_COLOR}--profiles{RESET_COLOR}           Open profiles directory
 {BLUE_COLOR}--serve{RESET_COLOR}              Start OpenAI-compatible server
 
 

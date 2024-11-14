@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Dict
@@ -114,7 +115,9 @@ def parse_args():
     # Create profile with defaults
     profile = Profile()
     # Load from default location if it exists
-    profile.load(Profile.DEFAULT_PROFILE_PATH)
+    default_profile_path = os.path.expanduser(Profile.DEFAULT_PROFILE_PATH)
+    if os.path.exists(default_profile_path):
+        profile.load(Profile.DEFAULT_PROFILE_PATH)
 
     parser = argparse.ArgumentParser(add_help=False)
 
@@ -122,6 +125,9 @@ def parse_args():
     parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--version", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--input", action="store", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--profiles", action="store_true", help="Open profiles directory"
+    )
 
     # Add arguments programmatically from config
     arg_params = _profile_to_arg_params(profile)
@@ -134,6 +140,18 @@ def parse_args():
         return {**vars(parser.parse_args([])), "input": "i " + " ".join(sys.argv[1:])}
 
     args = vars(parser.parse_args())
+
+    # Handle profiles flag
+    if args["profiles"]:
+        profile_dir = os.path.expanduser(Profile.DEFAULT_PROFILE_FOLDER)
+        if sys.platform == "win32":
+            os.startfile(profile_dir)
+        else:
+            import subprocess
+
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.run([opener, profile_dir])
+        sys.exit(0)
 
     # If a different profile is specified, load it
     if args["profile"] != profile.profile_path:
