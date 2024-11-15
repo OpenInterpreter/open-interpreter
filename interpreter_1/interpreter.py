@@ -191,11 +191,31 @@ class Interpreter:
         return cls(Profile.from_file(path))
 
     def default_system_message(self):
-        system_message = f"""<SYSTEM_CAPABILITY>
-        * You are an AI assistant with access to a machine running on {"Mac OS" if platform.system() == "Darwin" else platform.system()} with internet access.
-        * The current date is {datetime.today().strftime('%A, %B %d, %Y')}.
-        * The user's cwd is {os.getcwd()} and username is {os.getlogin()}.
-        </SYSTEM_CAPABILITY>"""
+        system_message = "<SYSTEM_CAPABILITY>\n"
+
+        try:
+            system_message += f"* You are an AI assistant with access to a machine running on {'Mac OS' if platform.system() == 'Darwin' else platform.system()} with internet access.\n"
+        except:
+            print("Error adding system capability for platform")
+
+        try:
+            system_message += (
+                f"* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.\n"
+            )
+        except:
+            print("Error adding system capability for date")
+
+        try:
+            cwd_line = f"* The user's cwd is {os.getcwd()}"
+            try:
+                cwd_line += f" and username is {os.getlogin()}"
+            except:
+                print("Error adding system capability for username")
+            system_message += cwd_line + "\n"
+        except:
+            print("Error adding system capability for cwd")
+
+        system_message += "</SYSTEM_CAPABILITY>"
 
         # Add web search capability if enabled
         if (
