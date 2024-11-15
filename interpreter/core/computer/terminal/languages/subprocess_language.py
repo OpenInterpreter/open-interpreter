@@ -138,6 +138,7 @@ class SubprocessLanguage(BaseLanguage):
                     break
 
     def handle_stream_output(self, stream, is_error_stream):
+        self.verbose = True
         try:
             for line in iter(stream.readline, ""):
                 if self.verbose:
@@ -191,3 +192,8 @@ class SubprocessLanguage(BaseLanguage):
                     print("Stream closed while reading.")
             else:
                 raise e
+        finally:
+            # Set self.done when the stream ends
+            if self.verbose:
+                print("Stream ended, setting self.done")
+            self.done.set()
