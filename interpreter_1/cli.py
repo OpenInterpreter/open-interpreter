@@ -68,6 +68,11 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "default": profile.temperature,
             "help": "Specify the temperature",
         },
+        "max_tokens": {
+            "flags": ["--max-tokens"],
+            "default": profile.max_tokens,
+            "help": "Specify the maximum number of tokens",
+        },
         # Tool configuration
         "tools": {
             "flags": ["--tools"],
