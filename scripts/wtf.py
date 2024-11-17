@@ -1,5 +1,20 @@
-import asyncio
 import sys
+
+if len(sys.argv) == 2 and sys.argv[1] == "--help":
+    print(
+        """wtf is a command-line tool that fixes terminal errors.
+
+Usage:
+  wtf                    Fix the last error
+  wtf <question>         Get help with a specific question
+  wtf --help             Show this help message
+
+Set INTERPRETER_WTF_MODEL to change the model (default: gpt-4o-mini)
+Examples: gpt-4o-mini, ollama/qwen2.5-coder, cerebres/llama3.1-70b"""
+    )
+    exit(0)
+
+import asyncio
 import threading
 import time
 
