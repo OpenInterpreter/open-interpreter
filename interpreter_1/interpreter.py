@@ -251,14 +251,24 @@ class Interpreter:
 
         tool_collection = ToolCollection(*tools)
 
-        model_info = litellm.get_model_info(self.model)
+        # Get provider and max_tokens, with fallbacks
+        provider = self.provider  # Keep existing provider if set
+        max_tokens = self.max_tokens  # Keep existing max_tokens if set
 
-        if self.provider == None:
-            provider = model_info["litellm_provider"]
-        else:
-            provider = self.provider
-
-        max_tokens = model_info["max_tokens"]
+        # Only try to get model info if we need either provider or max_tokens
+        if provider is None or max_tokens is None:
+            try:
+                model_info = litellm.get_model_info(self.model)
+                if provider is None:
+                    provider = model_info["litellm_provider"]
+                if max_tokens is None:
+                    max_tokens = model_info["max_tokens"]
+            except:
+                # Fallback values if model info unavailable
+                if provider is None:
+                    provider = "openai"
+                if max_tokens is None:
+                    max_tokens = 4000
 
         if self.system_message is None:
             system_message = self.default_system_message()
@@ -304,6 +314,9 @@ class Interpreter:
                         self._client = Anthropic(api_key=self.api_key)
                     else:
                         self._client = Anthropic()
+
+                if self.debug:
+                    print("\nSending messages:", self.messages, "\n")
 
                 # Use Anthropic API which supports betas
                 raw_response = self._client.beta.messages.create(
@@ -386,12 +399,16 @@ class Interpreter:
                     usage={"input_tokens": 0, "output_tokens": 0},
                 )
 
-                self.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": cast(list[BetaContentBlockParam], response.content),
-                    }
-                )
+                # Only append if response has meaningful content
+                if response.content:
+                    self.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": cast(
+                                list[BetaContentBlockParam], response.content
+                            ),
+                        }
+                    )
 
                 content_blocks = cast(list[BetaContentBlock], response.content)
                 tool_use_blocks = [b for b in content_blocks if b.type == "tool_use"]
@@ -401,7 +418,7 @@ class Interpreter:
                     break
 
                 user_approval = None
-                if getattr(self, "auto_run", False):
+                if self.auto_run:
                     user_approval = "y"
                 else:
                     if len(tool_use_blocks) > 1:
@@ -416,21 +433,14 @@ class Interpreter:
                             user_approval = self._ask_user_approval()
 
                         if not self.interactive:
-                            print(
-                                "Error: Non-interactive environment requires auto_run=True to run tools"
-                            )
-                            exit(1)
+                            user_approval = "n"
                     elif len(tool_use_blocks) == 1:
                         tool_block = tool_use_blocks[0]
                         if self._is_tool_approved(tool_block):
                             user_approval = "y"
+                        elif not self.interactive:
+                            user_approval = "n"
                         else:
-                            if not self.interactive:
-                                print(
-                                    "Error: Non-interactive environment requires auto_run=True to run tools"
-                                )
-                                exit(1)
-
                             if tool_block.name == "str_replace_editor":
                                 path = tool_block.input.get("path")
                                 if path.startswith(os.getcwd()):
@@ -488,18 +498,20 @@ class Interpreter:
                                 tool_input=cast(dict[str, Any], content_block.input),
                             )
                         else:
-                            result = ToolResult(
-                                output="Tool execution cancelled by user"
-                            )
+                            if self.interactive:
+                                result = ToolResult(
+                                    output="Tool execution cancelled by user"
+                                )
+                            else:
+                                result = ToolResult(
+                                    output="You can only run the following commands: "
+                                    + ", ".join(self.allowed_commands)
+                                    + "\nOr edit/view the following paths: "
+                                    + ", ".join(self.allowed_paths)
+                                )
                         tool_result_content.append(
                             _make_api_tool_result(result, content_block.id)
                         )
-
-                if user_approval == "n":
-                    self.messages.append(
-                        {"content": tool_result_content, "role": "user"}
-                    )
-                    break
 
                 if not tool_result_content:
                     break
@@ -507,9 +519,12 @@ class Interpreter:
                 self.messages.append(
                     {
                         "content": tool_result_content,
-                        "role": "user" if provider == "anthropic" else "tool",
+                        "role": "user",
                     }
                 )
+
+                if user_approval == "n" and self.interactive:
+                    break
 
             else:
                 tools = []
@@ -541,8 +556,69 @@ class Interpreter:
                         }
                     )
                 if "editor" in self.tools:
-                    print("\nEditor is not supported for non-Anthropic models yet.\n")
-                    pass
+                    tools.append(
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "str_replace_editor",
+                                "description": """Custom editing tool for viewing, creating and editing files
+* State is persistent across command calls and discussions with the user
+* If `path` is a file, `view` displays the result of applying `cat -n`. If `path` is a directory, `view` lists non-hidden files and directories up to 2 levels deep
+* The `create` command cannot be used if the specified `path` already exists as a file
+* If a `command` generates a long output, it will be truncated and marked with `<response clipped>`
+* The `undo_edit` command will revert the last edit made to the file at `path`
+
+Notes for using the `str_replace` command:
+* The `old_str` parameter should match EXACTLY one or more consecutive lines from the original file. Be mindful of whitespaces!
+* If the `old_str` parameter is not unique in the file, the replacement will not be performed. Make sure to include enough context in `old_str` to make it unique
+* The `new_str` parameter should contain the edited lines that should replace the `old_str`""",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "command": {
+                                            "type": "string",
+                                            "description": "The command to execute: view, create, str_replace, insert, or undo_edit",
+                                            "enum": [
+                                                "view",
+                                                "create",
+                                                "str_replace",
+                                                "insert",
+                                                "undo_edit",
+                                            ],
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "description": "Absolute path to the file or directory",
+                                        },
+                                        "file_text": {
+                                            "type": "string",
+                                            "description": "File content for create command",
+                                        },
+                                        "view_range": {
+                                            "type": "array",
+                                            "description": "Two integers specifying start and end line numbers for view command",
+                                            "items": {"type": "integer"},
+                                            "minItems": 2,
+                                            "maxItems": 2,
+                                        },
+                                        "old_str": {
+                                            "type": "string",
+                                            "description": "Text to replace for str_replace command",
+                                        },
+                                        "new_str": {
+                                            "type": "string",
+                                            "description": "Replacement text for str_replace or insert commands",
+                                        },
+                                        "insert_line": {
+                                            "type": "integer",
+                                            "description": "Line number where to insert text for insert command",
+                                        },
+                                    },
+                                    "required": ["command", "path"],
+                                },
+                            },
+                        }
+                    )
                 if "gui" in self.tools:
                     print("\nGUI is not supported for non-Anthropic models yet.\n")
                     pass
@@ -560,6 +636,9 @@ class Interpreter:
                     api_base = self.api_base
                     actual_model = self.model
 
+                if not self.tool_calling:
+                    system_message += "\n\nPLEASE write code to satisfy the user's request, use ```bash\n...\n``` to run code. You CAN run code."
+
                 params = {
                     "model": actual_model,
                     "messages": [{"role": "system", "content": system_message}]
@@ -567,14 +646,81 @@ class Interpreter:
                     "stream": stream,
                     "api_base": api_base,
                     "temperature": self.temperature,
-                    "tools": tools,
                 }
+
+                if self.tool_calling:
+                    params["tools"] = tools
+                else:
+                    params["stream"] = False
+                    stream = False
+
+                if self.debug:
+                    print(params)
 
                 raw_response = litellm.completion(**params)
 
                 if not stream:
                     raw_response.choices[0].delta = raw_response.choices[0].message
                     raw_response = [raw_response]
+
+                if not self.tool_calling:
+                    # Add the original message to the messages list
+                    self.messages.append(
+                        {
+                            "role": "assistant",
+                            "content": raw_response[0].choices[0].delta.content,
+                        }
+                    )
+
+                    # Extract code blocks from non-tool-calling response
+                    content = raw_response[0].choices[0].delta.content
+                    message = raw_response[0].choices[0].delta
+                    message.tool_calls = []
+                    message.content = ""
+
+                    # Find all code blocks between backticks
+                    while "```" in content:
+                        try:
+                            # Split on first ``` to get everything after it
+                            before, rest = content.split("```", 1)
+                            message.content += before
+
+                            # Handle optional language identifier
+                            if "\n" in rest:
+                                maybe_lang, rest = rest.split("\n", 1)
+                            else:
+                                maybe_lang = ""
+
+                            # Split on closing ``` to get code block
+                            code, content = rest.split("```", 1)
+
+                            # Create tool call for the code block
+                            tool_call = type(
+                                "ToolCall",
+                                (),
+                                {
+                                    "id": f"call_{len(message.tool_calls)}",
+                                    "function": type(
+                                        "Function",
+                                        (),
+                                        {
+                                            "name": "bash",
+                                            "arguments": json.dumps(
+                                                {"command": code.strip()}
+                                            ),
+                                        },
+                                    ),
+                                },
+                            )
+                            message.tool_calls.append(tool_call)
+
+                        except ValueError:
+                            # Handle malformed code blocks by breaking
+                            break
+
+                    # Add any remaining content after the last code block
+                    message.content += content
+                    raw_response = [raw_response[0]]
 
                 message = None
                 first_token = True
@@ -639,7 +785,8 @@ class Interpreter:
                         edit.close()
                         edit = ToolRenderer()
 
-                self.messages.append(message)
+                if self.tool_calling:
+                    self.messages.append(message)
 
                 print()
 
@@ -662,13 +809,22 @@ class Interpreter:
                     else:
                         result = ToolResult(output="Tool execution cancelled by user")
 
-                    self.messages.append(
-                        {
-                            "role": "tool",
-                            "content": json.dumps(dataclasses.asdict(result)),
-                            "tool_call_id": tool_call.id,
-                        }
-                    )
+                    if self.tool_calling:
+                        self.messages.append(
+                            {
+                                "role": "tool",
+                                "content": json.dumps(dataclasses.asdict(result)),
+                                "tool_call_id": tool_call.id,
+                            }
+                        )
+                    else:
+                        self.messages.append(
+                            {
+                                "role": "user",
+                                "content": "This was the output of the tool call. What does it mean/what's next?"
+                                + json.dumps(dataclasses.asdict(result)),
+                            }
+                        )
 
     def _ask_user_approval(self) -> str:
         """Ask user for approval to run a tool"""
@@ -681,7 +837,7 @@ class Interpreter:
         )
         try:
             user_approval = readchar().lower()
-            print(user_approval)
+            print(user_approval, "\n")
             return user_approval
         except KeyboardInterrupt:
             print()

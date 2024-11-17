@@ -1,9 +1,6 @@
 import asyncio
 import os
-import pty
-import select
-import signal
-import sys
+import shutil
 from typing import ClassVar, Literal
 
 import pyte
@@ -15,163 +12,88 @@ from .base import BaseAnthropicTool, CLIResult, ToolError, ToolResult
 class _BashSession:
     """A session of a bash shell."""
 
-    _started: bool
-    _process: asyncio.subprocess.Process
-
-    command: str = "/bin/bash"
-    _output_delay: float = 0.2  # seconds
-    _timeout: float = 120.0  # seconds
-    _sentinel: str = "<<exit>>"
-
     def __init__(self):
         self._started = False
-        self._timed_out = False
-        self._screen = pyte.Screen(80, 24)
+        self._process = None
+        self._sentinel = "<<exit>>"
+        # Get terminal size, fallback to 80x24 if we can't
+        terminal_size = shutil.get_terminal_size((80, 24))
+        self._screen = pyte.Screen(terminal_size.columns, terminal_size.lines)
         self._stream = pyte.Stream(self._screen)
-        self._pgid = None
-        self._cancelled = False
 
     async def start(self):
         if self._started:
             return
 
-        try:
-            master, slave = pty.openpty()
-
-            # Set up bash to immediately exit on Ctrl+C
-            self._process = await asyncio.create_subprocess_shell(
-                f"exec {self.command}",  # exec ensures signals go to bash
-                preexec_fn=os.setsid,
-                shell=True,
-                bufsize=0,
-                stdin=asyncio.subprocess.PIPE,
-                stdout=slave,
-                stderr=slave,
-            )
-
-            self._pgid = os.getpgid(self._process.pid)
-            self._master_fd = master
-            self._using_pty = True
-
-        except (ImportError, OSError):
-            self._process = await asyncio.create_subprocess_shell(
-                self.command,
-                preexec_fn=os.setsid,
-                shell=True,
-                bufsize=0,
-                stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-            self._using_pty = False
-
+        shell = "cmd.exe" if os.name == "nt" else "/bin/bash"
+        self._process = await asyncio.create_subprocess_shell(
+            shell,
+            stdin=asyncio.subprocess.PIPE,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
         self._started = True
 
     def stop(self):
-        """Terminate the bash shell and all child processes."""
         if not self._started:
-            raise ToolError("Session has not started.")
-        if self._process.returncode is not None:
             return
-
-        try:
-            # Kill the entire process group
-            if self._pgid:
-                try:
-                    os.killpg(self._pgid, signal.SIGKILL)
-                except ProcessLookupError:
-                    pass
-        finally:
+        if self._process and self._process.returncode is None:
             self._process.terminate()
-            if hasattr(self, "_master_fd"):
-                os.close(self._master_fd)
+
+    def _get_screen_text(self) -> str:
+        """Get the current screen content as a string."""
+        return "\n".join(line.rstrip() for line in self._screen.display).rstrip()
 
     async def run(self, command: str):
-        """Execute a command in the bash shell."""
+        """Execute a command in the shell."""
         if not self._started:
             raise ToolError("Session has not started.")
         if self._process.returncode is not None:
             return ToolResult(
                 system="tool must be restarted",
-                error=f"bash has exited with returncode {self._process.returncode}",
+                error=f"shell has exited with returncode {self._process.returncode}",
             )
 
-        # Create an event to signal when Ctrl+C is pressed
-        ctrl_c_event = asyncio.Event()
-        accumulated_output = []  # Store all output here
-
-        async def watch_for_ctrl_c():
-            try:
-                while True:
-                    await asyncio.sleep(0.1)
-            except KeyboardInterrupt:
-                ctrl_c_event.set()
-
-        watcher = asyncio.create_task(watch_for_ctrl_c())
-
         try:
-            wrapped_command = f'{command}; echo "{self._sentinel}"'
-            self._process.stdin.write(f"{wrapped_command}\n".encode())
+            self._screen.reset()
+
+            wrapped_command = f'{command}\n echo "{self._sentinel}"\n'
+            self._process.stdin.write(wrapped_command.encode())
             await self._process.stdin.drain()
 
-            if self._using_pty:
-                while True:
-                    r, _, _ = select.select([self._master_fd], [], [], 0.001)
+            while True:
+                chunk = await self._process.stdout.read(1024)
+                if not chunk:
+                    break
 
-                    if ctrl_c_event.is_set():
-                        return CLIResult(
-                            output="".join(accumulated_output)
-                            + "\n\nCommand cancelled by user.",
-                        )
+                # Decode and handle sentinel
+                decoded = chunk.decode(errors="replace")
+                if self._sentinel in decoded:
+                    # Print everything before the sentinel
+                    print(decoded.split(self._sentinel)[0], end="", flush=True)
+                else:
+                    print(decoded, end="", flush=True)
 
-                    if r:
-                        try:
-                            chunk = os.read(self._master_fd, 1024)
-                            if not chunk:
-                                break
-                            try:
-                                chunk_str = chunk.decode("utf-8")
-                            except UnicodeDecodeError:
-                                chunk_str = chunk.decode("utf-8", errors="replace")
-                            accumulated_output.append(chunk_str)
+                # Feed to terminal emulator for final state
+                self._stream.feed(decoded)
 
-                            # Check if sentinel is in the output
-                            full_output = "".join(accumulated_output)
-                            if self._sentinel in full_output:
-                                # Remove sentinel and everything after it
-                                clean_output = full_output.split(self._sentinel)[0]
-                                # If output is empty or only whitespace, return a message
-                                if not clean_output.strip():
-                                    return CLIResult(output="<No output>")
-                                return CLIResult(output=clean_output)
-                            else:
-                                print(chunk_str, end="", flush=True)
+                screen_text = self._get_screen_text()
+                if self._sentinel in screen_text:
+                    final_text = screen_text.split(self._sentinel)[0].rstrip()
+                    return CLIResult(output=final_text if final_text else "<No output>")
 
-                        except (OSError, IOError):
-                            break
+            error = await self._process.stderr.read()
+            if error:
+                error_text = error.decode(errors="replace")
+                print(error_text, end="", flush=True)
+                self._stream.feed(error_text)
 
-                    await asyncio.sleep(0)
-
-            else:
-                output, error = await self._process.communicate()
-                output_str = output.decode()
-                error_str = error.decode()
-                combined_output = output_str + "\n" + error_str
-                if not combined_output.strip():
-                    return CLIResult(output="<No output>")
-                return CLIResult(output=combined_output)
+            final_output = self._get_screen_text()
+            return CLIResult(output=final_output if final_output else "<No output>")
 
         except (KeyboardInterrupt, asyncio.CancelledError):
             self.stop()
-            print("\n\nExecution stopped.")
-            return CLIResult(
-                output="".join(accumulated_output) + "\n\nCommand cancelled by user."
-            )
-        finally:
-            watcher.cancel()
-
-        # If we somehow get here, return whatever we've accumulated
-        return CLIResult(output="".join(accumulated_output))
+            return CLIResult(output="Command cancelled by user.")
 
 
 class BashTool(BaseAnthropicTool):

@@ -37,6 +37,9 @@ def welcome_message(args):
 
     model = f"` ✳ {model.upper()} `"  # {"-" * (terminal_width - len(model))} # ⎇
 
+    if args["tool_calling"] == False:
+        args["tools"] = ["interpreter"]
+
     tool_displays = []
     for tool in ["interpreter", "editor", "gui"]:
         if args["tools"] and tool in args["tools"]:

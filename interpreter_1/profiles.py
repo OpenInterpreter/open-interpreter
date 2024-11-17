@@ -37,6 +37,7 @@ class Profile:
             None  # The model provider (e.g. anthropic, openai) None will auto-detect
         )
         self.temperature = 0  # Sampling temperature for model outputs (0-1)
+        self.max_tokens = None  # Maximum tokens in a message
 
         # API configuration
         self.api_base = None  # Custom API endpoint URL

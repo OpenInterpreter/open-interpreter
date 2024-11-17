@@ -9,6 +9,24 @@ from .misc.spinner import SimpleSpinner
 from .profiles import Profile
 
 
+def _parse_list_arg(value: str) -> list:
+    """Parse a comma-separated or JSON-formatted string into a list"""
+    if not value:
+        return []
+
+    # Try parsing as JSON first
+    if value.startswith("["):
+        try:
+            import json
+
+            return json.loads(value)
+        except json.JSONDecodeError:
+            pass
+
+    # Fall back to comma-separated parsing
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
 def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
     """Convert Profile attributes to argparse parameter definitions"""
     return {
@@ -54,17 +72,20 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
         "tools": {
             "flags": ["--tools"],
             "default": profile.tools,
-            "help": "Specify enabled tools (comma-separated)",
+            "help": "Specify enabled tools (comma-separated or JSON list)",
+            "type": _parse_list_arg,
         },
         "allowed_commands": {
             "flags": ["--allowed-commands"],
             "default": profile.allowed_commands,
-            "help": "Specify allowed commands",
+            "help": "Specify allowed commands (comma-separated or JSON list)",
+            "type": _parse_list_arg,
         },
         "allowed_paths": {
             "flags": ["--allowed-paths"],
             "default": profile.allowed_paths,
-            "help": "Specify allowed paths",
+            "help": "Specify allowed paths (comma-separated or JSON list)",
+            "type": _parse_list_arg,
         },
         "auto_run": {
             "flags": ["--auto-run", "-y"],
