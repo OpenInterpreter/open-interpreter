@@ -80,29 +80,31 @@ usage: interpreter [options]
 A modern command-line assistant.
 
 options:
-        --model              model to use for completion
-        --provider           api provider (e.g. openai, anthropic)
-        --api-base           base url for api requests
-        --api-key            api key for authentication
-        --api-version        api version to use
-        --temperature        sampling temperature (default: 0)
+        --models                   show available models
+        --model <model>            model to use for completion
+        --provider <provider>      api provider (e.g. openai, anthropic)
+        --api-base <url>           base url for api requests
+        --api-key <key>            api key for authentication
+        --api-version <version>    api version to use
+        --temperature <float>      sampling temperature (default: 0)
 
-        --tools              comma-separated tools: interpreter,editor,gui
-        --allowed-commands   commands the model can execute
-        --allowed-paths      paths the model can access
-        --no-tool-calling    disable tool calling (instead parse markdown code)
-        --auto-run, -y       auto-run suggested commands
-        --interactive        force interactive mode (true if sys.stdin.isatty())
-        --no-interactive     disable interactive mode
+        --tools <list>             comma-separated tools: interpreter,editor,gui
+        --allowed-commands <list>  commands the model can execute
+        --allowed-paths <list>     paths the model can access
+        --no-tool-calling          disable tool calling (instead parse markdown code)
+        --auto-run, -y             auto-run suggested commands
+        --interactive              force interactive mode (true if sys.stdin.isatty())
+        --no-interactive           disable interactive mode
 
-        --instructions       additional instructions in system message
-        --input              pre-fill first user message
-        --system-message     override default system message
-        --max-turns          maximum conversation turns (-1 for unlimited)
+        --instructions <text>      additional instructions in system message
+        --input <text>             pre-fill first user message
+        --system-message <text>    override default system message
+        --max-turns <int>          maximum conversation turns (-1 for unlimited)
 
-        --profile            load settings from config file
-        --profiles           open profiles directory
-        --serve              start openai-compatible server
+        --profile <path>           load settings from config file or url
+        --save <path>              save settings to config file
+        --profiles                 open profiles directory
+        --serve                    start openai-compatible server
 
 example:  i want a venv
 example:  interpreter --model ollama/llama3.2 --serve

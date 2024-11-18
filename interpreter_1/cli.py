@@ -158,6 +158,7 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "flags": ["--profile"],
             "default": profile.profile_path,
             "help": "Path to profile configuration",
+            "metavar": "PATH",
         },
         "debug": {
             "flags": ["--debug", "-d"],
@@ -240,10 +241,13 @@ def parse_args():
 
     parser = argparse.ArgumentParser(add_help=False)
 
-    parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--version", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--help", "-h", action="store_true", help="Show help")
+    parser.add_argument("--version", action="store_true", help="Show version")
     parser.add_argument(
         "--profiles", action="store_true", help="Open profiles directory"
+    )
+    parser.add_argument(
+        "--save", action="store", metavar="PATH", help="Save profile to path"
     )
 
     arg_params = _profile_to_arg_params(profile)
@@ -270,6 +274,14 @@ def parse_args():
         for key, value in vars(profile).items():
             if key in args and args[key] is None:
                 args[key] = value
+
+    if args["save"]:
+        # Apply CLI args to profile
+        for key, value in args.items():
+            if key in vars(profile) and value is not None:
+                setattr(profile, key, value)
+        profile.save(args["save"])
+        sys.exit(0)
 
     return args
 
