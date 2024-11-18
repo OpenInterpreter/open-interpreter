@@ -627,9 +627,16 @@ Notes for using the `str_replace` command:
                     else:
                         api_base = self.api_base
                 else:
+                    if (
+                        not self.model.startswith("openai/")
+                        and self.provider == "openai"
+                    ):
+                        actual_model = "openai/" + self.model
+                    else:
+                        actual_model = self.model
+
                     stream = True
                     api_base = self.api_base
-                    actual_model = self.model
 
                 if not self.tool_calling:
                     system_message += "\n\nPLEASE write code to satisfy the user's request, use ```bash\n...\n``` to run code. You CAN run code."
@@ -641,6 +648,8 @@ Notes for using the `str_replace` command:
                     "stream": stream,
                     "api_base": api_base,
                     "temperature": self.temperature,
+                    "api_key": self.api_key,
+                    "api_version": self.api_version,
                 }
 
                 if self.tool_calling:
@@ -651,6 +660,12 @@ Notes for using the `str_replace` command:
 
                 if self.debug:
                     print(params)
+
+                if self.debug:
+                    print("Sending request...", params)
+                    import time
+
+                    time.sleep(3)
 
                 raw_response = litellm.completion(**params)
 

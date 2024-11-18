@@ -51,6 +51,7 @@ class Profile:
         self.messages = []  # List of conversation messages
         self.system_message = None  # System message override
         self.instructions = ""  # Additional model instructions
+        self.input = None  # Pre-filled first user message
 
         # Available tools and settings
         self.tools = ["interpreter", "editor"]  # Enabled tool modules

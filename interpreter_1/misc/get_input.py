@@ -6,7 +6,9 @@ import sys
 import termios
 
 
-async def get_input(placeholder_text=None, placeholder_color: str = "gray") -> str:
+async def get_input(
+    placeholder_text=None, placeholder_color: str = "gray", multiline_support=True
+) -> str:
     if placeholder_text is None:
         common_placeholders = [
             "How can I help you?",
@@ -15,7 +17,7 @@ async def get_input(placeholder_text=None, placeholder_color: str = "gray") -> s
             'Use """ for multi-line input',
             "Psst... try the wtf command",
         ]
-        very_rare_placeholders = ["Let's make history together!"]
+        very_rare_placeholders = [""]
 
         # 69% common, 30% rare, 1% very rare
         rand = random.random()
@@ -56,13 +58,15 @@ async def get_input(placeholder_text=None, placeholder_color: str = "gray") -> s
 
     def redraw():
         sys.stdout.write("\r\033[K")  # Clear line
-        sys.stdout.write("\r> ")
+        if multiline_support:
+            sys.stdout.write("\r> ")
         if current_input:
             sys.stdout.write("".join(current_input))
         elif show_placeholder:
             color_code = COLORS.get(placeholder_color.lower(), COLORS["gray"])
             sys.stdout.write(f"{color_code}{placeholder_text}{RESET}")
-            sys.stdout.write("\r> ")
+            if multiline_support:
+                sys.stdout.write("\r> ")
         sys.stdout.flush()
 
     try:
@@ -74,7 +78,18 @@ async def get_input(placeholder_text=None, placeholder_color: str = "gray") -> s
                 if char == "\n":
                     if current_input:
                         result = "".join(current_input)
-                        return result
+                        # Multiline support
+                        if multiline_support and result.startswith('"""'):
+                            while True:
+                                print()
+                                extra_input = await get_input(multiline_support=False)
+                                if extra_input.endswith('"""'):
+                                    result += extra_input
+                                    return result
+                                else:
+                                    result += extra_input
+                        else:
+                            return result
                     else:
                         redraw()
                 elif char == "\x7f":  # Backspace

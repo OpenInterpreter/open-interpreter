@@ -143,6 +143,11 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
             "default": profile.instructions,
             "help": "Appended to default system message",
         },
+        "input": {
+            "flags": ["--input"],
+            "default": profile.input,
+            "help": "Pre-fill first user message",
+        },
         "max_turns": {
             "flags": ["--max-turns"],
             "type": int,
@@ -237,7 +242,6 @@ def parse_args():
 
     parser.add_argument("--help", "-h", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--version", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--input", action="store", help=argparse.SUPPRESS)
     parser.add_argument(
         "--profiles", action="store_true", help="Open profiles directory"
     )

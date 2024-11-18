@@ -74,12 +74,12 @@ A modern command-line assistant.
 def help_message():
     print(
         """
-usage: interpreter [flags]
+usage: interpreter [options]
        i [prompt]
 
 A modern command-line assistant.
 
-flags:
+options:
         --model              model to use for completion
         --provider           api provider (e.g. openai, anthropic)
         --api-base           base url for api requests
@@ -104,7 +104,7 @@ flags:
         --profiles           open profiles directory
         --serve              start openai-compatible server
 
-example:  i want a venv here
+example:  i want a venv
 example:  interpreter --model ollama/llama3.2 --serve
 example:  i -y --input "run pytest, fix errors"
 example:  cat instructions.txt | i
