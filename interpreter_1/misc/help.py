@@ -1,8 +1,3 @@
-import json
-
-from ..ui.tool import ToolRenderer
-
-
 def help_message():
     tips = [
         "\033[38;5;240mTip: Pipe in prompts using `$ANYTHING | i`\033[0m",
@@ -12,9 +7,11 @@ def help_message():
     BLUE_COLOR = "\033[94m"
     RESET_COLOR = "\033[0m"
 
-    content = f"""
-A standard interface for computer-controlling agents.
+    content = f"""Open Interpreter 1.0.0
+Copyright (C) 2024 Open Interpreter Team
+Licensed under GNU AGPL v3.0
 
+A modern command-line assistant.
 
 \033[1mUSAGE\033[0m 
 
@@ -46,25 +43,25 @@ A standard interface for computer-controlling agents.
 {BLUE_COLOR}--profile{RESET_COLOR}            Load settings from config file
 {BLUE_COLOR}--profiles{RESET_COLOR}           Open profiles directory
 {BLUE_COLOR}--serve{RESET_COLOR}              Start OpenAI-compatible server
-
-
 """
 
     # Add an indent to each line
     # content = "\n".join(f"  {line}" for line in content.split("\n"))
 
-    string = json.dumps(
-        {"command": "Open Interpreter", "path": "", "file_text": content}
-    )
+    # string = json.dumps(
+    #     {"command": "Open Interpreter", "path": "", "file_text": content}
+    # )
 
-    renderer = ToolRenderer(name="str_replace_editor")
+    # renderer = ToolRenderer(name="str_replace_editor")
 
     # for chunk in stream_text(string, min_delay=0.00001, max_delay=0.0001, max_chunk=50):
     #     renderer.feed(chunk)
 
-    renderer.feed(string)
+    # renderer.feed(string)
 
-    renderer.close()
+    # renderer.close()
+
+    print(content)
 
     # time.sleep(0.03)
     print("")
@@ -72,3 +69,45 @@ A standard interface for computer-controlling agents.
     # print("\033[38;5;238mA.C., 2024. https://openinterpreter.com/\033[0m\n")
     print("\033[38;5;238mhttps://docs.openinterpreter.com/\033[0m\n")
     # time.sleep(0.05)
+
+
+def help_message():
+    print(
+        """
+usage: interpreter [flags]
+       i [prompt]
+
+A modern command-line assistant.
+
+flags:
+        --model              model to use for completion
+        --provider           api provider (e.g. openai, anthropic)
+        --api-base           base url for api requests
+        --api-key            api key for authentication
+        --api-version        api version to use
+        --temperature        sampling temperature (default: 0)
+
+        --tools              comma-separated tools: interpreter,editor,gui
+        --allowed-commands   commands the model can execute
+        --allowed-paths      paths the model can access
+        --no-tool-calling    disable tool calling (instead parse markdown code)
+        --auto-run, -y       auto-run suggested commands
+        --interactive        force interactive mode (true if sys.stdin.isatty())
+        --no-interactive     disable interactive mode
+
+        --instructions       additional instructions in system message
+        --input              pre-fill first user message
+        --system-message     override default system message
+        --max-turns          maximum conversation turns (-1 for unlimited)
+
+        --profile            load settings from config file
+        --profiles           open profiles directory
+        --serve              start openai-compatible server
+
+example:  i want a venv here
+example:  interpreter --model ollama/llama3.2 --serve
+example:  i -y --input "run pytest, fix errors"
+example:  cat instructions.txt | i
+example:  i --tools gui "try to earn $1"
+    """
+    )

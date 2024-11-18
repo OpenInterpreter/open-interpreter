@@ -10,13 +10,9 @@ from datetime import datetime
 from typing import Any, cast
 
 from prompt_toolkit import PromptSession
-from prompt_toolkit.formatted_text import HTML
 from readchar import readchar
 
-try:
-    from enum import StrEnum
-except ImportError:  # Python 3.10 compatibility
-    from enum import Enum as StrEnum
+from .misc.get_input import get_input
 
 # Third-party imports
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
@@ -148,7 +144,6 @@ class Interpreter:
 
         self._client = None
         self._spinner = SimpleSpinner("")
-        self._prompt_session = None
         self._command_handler = CommandHandler(self)
         self._stop_flag = False  # Add stop flag
 
@@ -316,7 +311,7 @@ class Interpreter:
                         self._client = Anthropic()
 
                 if self.debug:
-                    print("\nSending messages:", self.messages, "\n")
+                    print("Sending messages:", self.messages, "\n")
 
                 # Use Anthropic API which supports betas
                 raw_response = self._client.beta.messages.create(
@@ -851,54 +846,10 @@ Notes for using the `str_replace` command:
         Interactive mode
         """
         try:
-            placeholder_color = "ansigray"
-
             message_count = 0
             while True:
-                # Determine placeholder text based on message count
-                if message_count in [0, 1]:
-                    placeholder_text = 'Use """ for multi-line prompts'
-                elif message_count in []:  # Disabled
-                    placeholder_text = "Type /help for advanced commands"
-                else:
-                    placeholder_text = ""
-
-                # Get first line of input with placeholder
-                placeholder = HTML(
-                    f"<{placeholder_color}>{placeholder_text}</{placeholder_color}>"
-                )
-                if self._prompt_session is None:
-                    self._prompt_session = PromptSession()
-
-                try:
-                    # Prompt toolkit requires terminal size to work properly
-                    # If this fails, prompt toolkit will look weird, so we fall back to standard input
-                    os.get_terminal_size()
-                    user_input = self._prompt_session.prompt(
-                        "> ",
-                        placeholder=placeholder,
-                    ).strip()
-                except KeyboardInterrupt:
-                    raise
-                except:
-                    user_input = input("> ").strip()
-                print()
-
-                # Handle multi-line input
-                if user_input == '"""':
-                    user_input = ""
-                    print('> """')
-                    while True:
-                        placeholder = HTML(
-                            f'<{placeholder_color}>Use """ again to finish</{placeholder_color}>'
-                        )
-                        line = self._prompt_session.prompt(
-                            "", placeholder=placeholder
-                        ).strip()
-                        if line == '"""':
-                            break
-                        user_input += line + "\n"
-                    print()
+                user_input = input("> ")
+                print("")
 
                 message_count += 1  # Increment counter after each message
 

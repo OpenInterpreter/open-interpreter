@@ -33,7 +33,7 @@ class Server:
         self.app = FastAPI(title="Open Interpreter API")
 
         # Setup routes
-        self.app.post("/v1/chat/completions")(self.chat_completion)
+        self.app.post("/chat/completions")(self.chat_completion)
 
     async def chat_completion(self, request: Request):
         """Main chat completion endpoint"""
