@@ -40,8 +40,6 @@ from anthropic.types.beta import (
 
 from .commands import CommandHandler
 from .misc.spinner import SimpleSpinner
-
-# Local imports
 from .profiles import Profile
 from .tools import BashTool, ComputerTool, EditTool, ToolCollection, ToolResult
 from .ui.markdown import MarkdownRenderer
@@ -90,16 +88,13 @@ class Interpreter:
     """
     Open Interpreter's main interface.
 
-    The Interpreter class provides natural language interaction with your computer,
-    executing commands and engaging in conversation based on user input.
-
     Examples
     --------
     >>> from interpreter import Interpreter
 
     # Basic usage
     interpreter = Interpreter()
-    interpreter.chat("Hello, what can you help me with?")
+    interpreter.chat()
 
     # With custom configuration
     from interpreter import Profile
