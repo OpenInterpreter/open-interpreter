@@ -164,7 +164,10 @@ class MarkdownRenderer:
                         # First newline after ``` - this line contains the language
                         self.code_lang = self.current_code_line
                         self.collecting_lang = False
-                        terminal_width = os.get_terminal_size().columns
+                        try:
+                            terminal_width = os.get_terminal_size().columns
+                        except:
+                            terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
                         sys.stdout.write(
                             "\033[38;5;240m\n────┬" + "─" * (terminal_width - 5) + "\n"
                         )  # Top line
@@ -188,7 +191,10 @@ class MarkdownRenderer:
                             style=os.getenv("INTERPRETER_CODE_STYLE", "monokai")
                         )
 
-                        terminal_width = os.get_terminal_size().columns
+                        try:
+                            terminal_width = os.get_terminal_size().columns
+                        except:
+                            terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
                         line_prefix = (
                             f"\033[38;5;240m{str(self.line_number).rjust(3)} │ "
                         )
@@ -258,7 +264,10 @@ class MarkdownRenderer:
                         sys.stdout.write(
                             f"{str(self.line_number).rjust(4)} │ {formatted}\n"
                         )
-                    terminal_width = os.get_terminal_size().columns
+                    try:
+                        terminal_width = os.get_terminal_size().columns
+                    except:
+                        terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
                     sys.stdout.write(
                         "\033[38;5;240m────┴" + "─" * (terminal_width - 5) + "\033[0m\n"
                     )

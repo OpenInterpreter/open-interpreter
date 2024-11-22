@@ -19,7 +19,7 @@ import subprocess
 import threading
 from typing import Any, Dict
 
-from .misc.get_input import get_input
+from .misc.get_input import async_get_input
 from .misc.spinner import SimpleSpinner
 from .profiles import Profile
 
@@ -214,7 +214,7 @@ async def async_main(args):
         thread.start()
 
         # Get user input
-        message = await get_input()
+        message = await async_get_input()
 
         # Wait for the thread to finish
         thread.join()

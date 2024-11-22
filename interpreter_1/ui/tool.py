@@ -37,7 +37,7 @@ class CodeRenderer(ContentRenderer):
         try:
             self.terminal_width = os.get_terminal_size().columns
         except:
-            self.terminal_width = 50
+            self.terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
         self.safety_padding = 4  # Extra padding to prevent edge cases
         self.json_obj = None
 
@@ -338,7 +338,7 @@ class InsertRenderer(ContentRenderer):
         try:
             self.terminal_width = os.get_terminal_size().columns
         except:
-            self.terminal_width = 50
+            self.terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
         self.prefix_width = 5  # "123 │ " = 6 characters
         self.safety_padding = 2  # Extra padding to prevent edge cases
         self.show_context = True
@@ -515,7 +515,7 @@ class OldStrRenderer(ContentRenderer):
         try:
             self.terminal_width = os.get_terminal_size().columns
         except:
-            self.terminal_width = 50
+            self.terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
         self.prefix_width = 6
         self.safety_padding = 4
         self.buffer = ""  # Add buffer for line-by-line processing
@@ -633,9 +633,9 @@ class SchemaRenderer:
     @staticmethod
     def print_separator(char="─", newline=True, line=True):
         try:
-            terminal_width = os.get_terminal_size().columns
+            self.terminal_width = os.get_terminal_size().columns
         except:
-            terminal_width = 50
+            self.terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
         if newline:
             sys.stdout.write("\n")
         if line:

@@ -858,7 +858,7 @@ Notes for using the `str_replace` command:
         try:
             message_count = 0
             while True:
-                user_input = input("> ")
+                user_input = get_input()
                 print("")
 
                 message_count += 1  # Increment counter after each message
