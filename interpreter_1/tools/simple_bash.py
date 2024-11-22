@@ -22,9 +22,22 @@ class BashTool(BaseAnthropicTool):
             raise ToolError("no command provided")
 
         try:
-            # Create process with shell=True to handle all bash features properly
+            # Set up non-interactive environment
+            env = os.environ.copy()
+            env.update(
+                {
+                    "DEBIAN_FRONTEND": "noninteractive",  # Prevents apt from prompting
+                    "NONINTERACTIVE": "1",  # Generic non-interactive flag
+                }
+            )
+
+            # Create process with shell=True and stdin set to DEVNULL
             process = await asyncio.create_subprocess_shell(
-                command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                command,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+                stdin=asyncio.subprocess.DEVNULL,  # Explicitly disable stdin
+                env=env,
             )
 
             try:
