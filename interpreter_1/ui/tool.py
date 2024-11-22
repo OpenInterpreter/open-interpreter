@@ -633,9 +633,9 @@ class SchemaRenderer:
     @staticmethod
     def print_separator(char="─", newline=True, line=True):
         try:
-            self.terminal_width = os.get_terminal_size().columns
+            terminal_width = os.get_terminal_size().columns
         except:
-            self.terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
+            terminal_width = int(os.environ.get("TERMINAL_WIDTH", "50"))
         if newline:
             sys.stdout.write("\n")
         if line:
