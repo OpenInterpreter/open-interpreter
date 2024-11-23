@@ -10,7 +10,14 @@ from pathlib import Path
 from typing import Literal, TypedDict
 from uuid import uuid4
 
-import pyautogui
+try:
+    import pyautogui
+except:
+    import traceback
+
+    traceback.print_exc()
+    print("Failed to import pyautogui. Computer tool will not work.")
+
 from anthropic.types.beta import BetaToolComputerUse20241022Param
 from screeninfo import get_monitors
 

@@ -5,7 +5,7 @@ from .collection import ToolCollection
 from .computer import ComputerTool
 from .edit import EditTool
 
-if os.environ.get("INTERPRETER_SIMPLE_BASH") == "true":
+if os.environ.get("INTERPRETER_SIMPLE_BASH", "").lower() == "true":
     from .simple_bash import BashTool
 else:
     from .bash import BashTool
