@@ -4,12 +4,12 @@ import json
 import os
 import platform
 import sys
+import time
 import traceback
 import uuid
 from datetime import datetime
 from typing import Any, cast
 
-from prompt_toolkit import PromptSession
 from readchar import readchar
 
 from .misc.get_input import get_input
@@ -24,6 +24,7 @@ import litellm
 litellm.suppress_debug_info = True
 litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
 litellm.modify_params = True
+# litellm.drop_params = True
 
 from anthropic import Anthropic
 from anthropic.types.beta import (
@@ -244,6 +245,10 @@ class Interpreter:
         # Get provider and max_tokens, with fallbacks
         provider = self.provider  # Keep existing provider if set
         max_tokens = self.max_tokens  # Keep existing max_tokens if set
+
+        if self.model == "claude-3-5-sonnet-latest":
+            # For some reason, Litellm can't find the model info for claude-3-5-sonnet-latest
+            provider = "anthropic"
 
         # Only try to get model info if we need either provider or max_tokens
         if provider is None or max_tokens is None:
@@ -610,8 +615,53 @@ Notes for using the `str_replace` command:
                         }
                     )
                 if "gui" in self.tools:
-                    print("\nGUI is not supported for non-Anthropic models yet.\n")
-                    pass
+                    tools.append(
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "computer",
+                                "description": """Control the computer's mouse, keyboard and screen interactions
+                        * Coordinates are scaled to standard resolutions (max 1366x768)
+                        * Screenshots are automatically taken after most actions
+                        * For key commands, use normalized key names (e.g. 'pagedown' -> 'pgdn', 'enter'/'return' are interchangeable)
+                        * On macOS, 'super+' is automatically converted to 'command+'
+                        * Mouse movements use smooth easing for natural motion""",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "action": {
+                                            "type": "string",
+                                            "description": "The action to perform",
+                                            "enum": [
+                                                "key",  # Send keyboard input (hotkeys or single keys)
+                                                "type",  # Type text with a slight delay between characters
+                                                "mouse_move",  # Move mouse cursor to coordinates
+                                                "left_click",  # Perform left mouse click
+                                                "left_click_drag",  # Click and drag from current pos to coordinates
+                                                "right_click",  # Perform right mouse click
+                                                "middle_click",  # Perform middle mouse click
+                                                "double_click",  # Perform double left click
+                                                "screenshot",  # Take a screenshot
+                                                "cursor_position",  # Get current cursor coordinates
+                                            ],
+                                        },
+                                        "text": {
+                                            "type": "string",
+                                            "description": "Text to type or key command to send (required for 'key' and 'type' actions)",
+                                        },
+                                        "coordinate": {
+                                            "type": "array",
+                                            "description": "X,Y coordinates for mouse actions (required for 'mouse_move' and 'left_click_drag')",
+                                            "items": {"type": "integer"},
+                                            "minItems": 2,
+                                            "maxItems": 2,
+                                        },
+                                    },
+                                    "required": ["action"],
+                                },
+                            },
+                        }
+                    )
 
                 if self.model.startswith("ollama/"):
                     # Fix ollama
@@ -645,6 +695,7 @@ Notes for using the `str_replace` command:
                     "temperature": self.temperature,
                     "api_key": self.api_key,
                     "api_version": self.api_version,
+                    "parallel_tool_calls": False,
                 }
 
                 if self.tool_calling:
@@ -658,7 +709,6 @@ Notes for using the `str_replace` command:
 
                 if self.debug:
                     print("Sending request...", params)
-                    import time
 
                     time.sleep(3)
 
@@ -815,13 +865,36 @@ Notes for using the `str_replace` command:
                         result = ToolResult(output="Tool execution cancelled by user")
 
                     if self.tool_calling:
-                        self.messages.append(
-                            {
-                                "role": "tool",
-                                "content": json.dumps(dataclasses.asdict(result)),
-                                "tool_call_id": tool_call.id,
-                            }
-                        )
+                        if result.base64_image:
+                            # Add image to tool result
+                            self.messages.append(
+                                {
+                                    "role": "tool",
+                                    "content": "The user will reply with the image outputted by the tool.",
+                                    "tool_call_id": tool_call.id,
+                                }
+                            )
+                            self.messages.append(
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        {
+                                            "type": "image_url",
+                                            "image_url": {
+                                                "url": f"data:image/png;base64,{result.base64_image}",
+                                            },
+                                        }
+                                    ],
+                                }
+                            )
+                        else:
+                            self.messages.append(
+                                {
+                                    "role": "tool",
+                                    "content": json.dumps(dataclasses.asdict(result)),
+                                    "tool_call_id": tool_call.id,
+                                }
+                            )
                     else:
                         self.messages.append(
                             {
