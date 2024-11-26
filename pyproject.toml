@@ -36,7 +36,7 @@ easyocr = { version = "^1.7.1", optional = true }
 janus = { version = "^1.0.0", optional = true }
 
 # Required dependencies
-python = ">=3.9,<4"
+python = ">=3.9,<3.13"
 setuptools = "*"
 astor = "^0.8.1"
 git-python = "^1.0.3"
