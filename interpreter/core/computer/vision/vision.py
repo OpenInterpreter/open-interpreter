@@ -22,9 +22,10 @@ class Vision:
     def load(self, load_moondream=True, load_easyocr=True):
         # print("Loading vision models (Moondream, EasyOCR)...\n")
 
-        with contextlib.redirect_stdout(
-            open(os.devnull, "w")
-        ), contextlib.redirect_stderr(open(os.devnull, "w")):
+        with (
+            contextlib.redirect_stdout(open(os.devnull, "w")),
+            contextlib.redirect_stderr(open(os.devnull, "w")),
+        ):
             if self.easyocr == None and load_easyocr:
                 import easyocr
 
