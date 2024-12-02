@@ -230,8 +230,8 @@ nix/
 # Ignore the replit.nix configuration file
 replit.nix
 
-# Ignore misc directory
-misc/
+# Ignore top level misc directory
+/misc/
 
 # Ignore litellm_uuid.txt
 litellm_uuid.txt

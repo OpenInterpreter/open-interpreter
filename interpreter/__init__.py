@@ -49,7 +49,7 @@ if "--os" in sys.argv:
 
     if "--voice" in sys.argv:
         print("Coming soon...")
-    from .computer_use.loop import run_async_main
+    from ..computer_use.loop import run_async_main
 
     run_async_main()
     exit()

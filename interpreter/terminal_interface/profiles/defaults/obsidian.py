@@ -2,8 +2,9 @@
 This is an Open Interpreter profile to control an Obsidian vault.
 """
 
-from interpreter import interpreter
 import os
+
+from interpreter import interpreter
 
 # You can hardcode the path to the Obsidian vault or use the environment variable
 obsidian_directory = os.environ.get("OBSIDIAN_VAULT_PATH")

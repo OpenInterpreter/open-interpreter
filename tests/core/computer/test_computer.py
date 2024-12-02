@@ -1,6 +1,8 @@
 import unittest
 from unittest import mock
+
 from interpreter.core.computer.computer import Computer
+
 
 class TestComputer(unittest.TestCase):
     def setUp(self):
@@ -15,10 +17,13 @@ class TestComputer(unittest.TestCase):
 
     def test_get_all_computer_tools_signature_and_description(self):
         # Act
-        tools_description = self.computer._get_all_computer_tools_signature_and_description()
+        tools_description = (
+            self.computer._get_all_computer_tools_signature_and_description()
+        )
 
         # Assert
         self.assertGreater(len(tools_description), 64)
+
 
 if __name__ == "__main__":
     testing = TestComputer()

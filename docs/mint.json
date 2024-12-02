@@ -141,6 +141,12 @@
       "pages": [
         "telemetry/telemetry"
       ]
+    },
+    {
+      "group": "Policies",
+      "pages": [
+        "legal/license"
+      ]
     }
   ],
   "feedback": {

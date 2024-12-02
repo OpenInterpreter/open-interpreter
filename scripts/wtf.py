@@ -1,7 +1,70 @@
-from yaspin import yaspin
+import sys
+
+if len(sys.argv) == 2 and sys.argv[1] == "--help":
+    print(
+        """wtf is a command-line tool that fixes terminal errors.
+
+Usage:
+  wtf                    Fix the last error
+  wtf <question>         Get help with a specific question
+  wtf --help             Show this help message
+
+Set INTERPRETER_WTF_MODEL to change the model (default: gpt-4o-mini)
+Examples: gpt-4o-mini, ollama/qwen2.5-coder, cerebres/llama3.1-70b"""
+    )
+    exit(0)
+
+import asyncio
+import threading
+import time
+
+
+class SimpleSpinner:
+    """A simple text-based spinner for command line interfaces."""
+
+    def __init__(self, text=""):
+        self.spinner_cycle = ["   ", ".  ", ".. ", "..."]
+        self.text = text
+        self.keep_running = False
+        self.spinner_thread = None
+
+    async def _spin(self):
+        while self.keep_running:
+            for frame in self.spinner_cycle:
+                if not self.keep_running:
+                    break
+                # Clear the line and write the new frame
+                sys.stdout.write("\r" + self.text + frame)
+                sys.stdout.flush()
+                try:
+                    await asyncio.sleep(0.2)  # Async sleep for better cancellation
+                except asyncio.CancelledError:
+                    break
+
+    def start(self):
+        """Start the spinner animation in a separate thread."""
+        if not self.spinner_thread:
+            self.keep_running = True
+            loop = asyncio.new_event_loop()
+            self.spinner_thread = threading.Thread(
+                target=lambda: loop.run_until_complete(self._spin())
+            )
+            self.spinner_thread.daemon = True
+            self.spinner_thread.start()
+
+    def stop(self):
+        """Stop the spinner animation and clear the line."""
+        self.keep_running = False
+        if self.spinner_thread:
+            self.spinner_thread.join()
+            self.spinner_thread = None
+        # Clear the spinner from the line
+        sys.stdout.write("\r" + " " * (len(self.text) + 3) + "\r")
+        sys.stdout.flush()
+
 
 # Start spinner
-spinner = yaspin()
+spinner = SimpleSpinner()
 spinner.start()
 
 import os
@@ -11,16 +74,8 @@ import subprocess
 import sys
 import time
 
-import platformdirs
 import pyperclip
-import yaml
-
-try:
-    from pynput.keyboard import Controller, Key
-except ImportError:
-    spinner.stop()
-    print("Please run `pip install pynput` to use the `wtf` command.")
-    exit()
+from pynput.keyboard import Controller, Key
 
 # Don't let litellm go online here, this slows it down
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
@@ -362,21 +417,7 @@ def main():
 
     ### PREPARE FOR LLM
 
-    # Get LLM model from profile
-    default_profile_path = os.path.join(
-        platformdirs.user_config_dir("open-interpreter"), "profiles", "default.yaml"
-    )
-
-    try:
-        with open(default_profile_path, "r") as file:
-            profile = yaml.safe_load(file)
-            wtf_model = profile.get("wtf", {}).get("model")
-            if wtf_model:
-                model = wtf_model
-            else:
-                model = profile.get("llm", {}).get("model", "gpt-4o-mini")
-    except:
-        model = "gpt-4o-mini"
+    model = os.environ.get("INTERPRETER_WTF_MODEL", "gpt-4o-mini")
 
     # If they're using a local model (improve this heuristic) use the LOCAL_SYSTEM_MESSAGE
     if "ollama" in model or "llama" in model:

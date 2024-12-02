@@ -50,40 +50,18 @@ class EditTool(BaseAnthropicTool):
         insert_line: int | None = None,
         **kwargs,
     ):
-        # Ask for user permission before executing the command
-        print(f"Do you want to execute the following command?")
-        print(f"Command: {command}")
-        print(f"Path: {path}")
-        if file_text:
-            print(f"File text: {file_text}")
-        if view_range:
-            print(f"View range: {view_range}")
-        if old_str:
-            print(f"Old string: {old_str}")
-        if new_str:
-            print(f"New string: {new_str}")
-        if insert_line is not None:
-            print(f"Insert line: {insert_line}")
-
-        user_input = input("Enter 'yes' to proceed, anything else to cancel: ")
-
-        if user_input.lower() != "yes":
-            return ToolResult(
-                system="Command execution cancelled by user",
-                error="User did not provide permission to execute the command.",
-            )
         _path = Path(path)
         self.validate_path(command, _path)
         if command == "view":
             return await self.view(_path, view_range)
         elif command == "create":
-            if not file_text:
+            if file_text is None:
                 raise ToolError("Parameter `file_text` is required for command: create")
             self.write_file(_path, file_text)
             self._file_history[_path].append(file_text)
             return ToolResult(output=f"File created successfully at: {_path}")
         elif command == "str_replace":
-            if not old_str:
+            if old_str is None:
                 raise ToolError(
                     "Parameter `old_str` is required for command: str_replace"
                 )
@@ -93,7 +71,7 @@ class EditTool(BaseAnthropicTool):
                 raise ToolError(
                     "Parameter `insert_line` is required for command: insert"
                 )
-            if not new_str:
+            if new_str is None:
                 raise ToolError("Parameter `new_str` is required for command: insert")
             return self.insert(_path, insert_line, new_str)
         elif command == "undo_edit":
@@ -155,15 +133,15 @@ class EditTool(BaseAnthropicTool):
             init_line, final_line = view_range
             if init_line < 1 or init_line > n_lines_file:
                 raise ToolError(
-                    f"Invalid `view_range`: {view_range}. It's first element `{init_line}` should be within the range of lines of the file: {[1, n_lines_file]}"
+                    f"Invalid `view_range`: {view_range}. Its first element `{init_line}` should be within the range of lines of the file: {[1, n_lines_file]}"
                 )
             if final_line > n_lines_file:
                 raise ToolError(
-                    f"Invalid `view_range`: {view_range}. It's second element `{final_line}` should be smaller than the number of lines in the file: `{n_lines_file}`"
+                    f"Invalid `view_range`: {view_range}. Its second element `{final_line}` should be smaller than the number of lines in the file: `{n_lines_file}`"
                 )
             if final_line != -1 and final_line < init_line:
                 raise ToolError(
-                    f"Invalid `view_range`: {view_range}. It's second element `{final_line}` should be larger or equal than its first `{init_line}`"
+                    f"Invalid `view_range`: {view_range}. Its second element `{final_line}` should be larger or equal than its first `{init_line}`"
                 )
 
             if final_line == -1:

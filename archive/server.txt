@@ -1,0 +1,90 @@
+# Check if running in server mode
+    if "--server" in sys.argv:
+        app = FastAPI()
+
+        # Start the mouse position checking thread when in server mode
+        mouse_thread = threading.Thread(target=check_mouse_position)
+        mouse_thread.daemon = True
+        mouse_thread.start()
+
+        # Get API key from environment variable
+        api_key = os.environ.get("ANTHROPIC_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "ANTHROPIC_API_KEY environment variable must be set when running in server mode"
+            )
+
+        @app.post("/openai/chat/completions")
+        async def chat_completion(request: ChatCompletionRequest):
+            print("BRAND NEW REQUEST")
+            # Check exit flag before processing request
+            if exit_flag:
+                return {"error": "Server shutting down due to mouse in corner"}
+
+            async def stream_response():
+                # if "claude" not in request.messages[-1].content.lower():
+                #     print("not claude")
+                #     # Return early if not a Claude request
+                #     return
+
+                # Instead of creating converted_messages, append the last message to global messages
+                global messages
+                messages.append(
+                    {
+                        "role": request.messages[-1].role,
+                        "content": [
+                            {"type": "text", "text": request.messages[-1].content}
+                        ],
+                    }
+                )
+
+                response_chunks = []
+
+                async def output_callback(content_block: BetaContentBlock):
+                    chunk = f"data: {json.dumps({'choices': [{'delta': {'content': content_block.text}}]})}\n\n"
+                    response_chunks.append(chunk)
+                    yield chunk
+
+                async def tool_output_callback(result: ToolResult, tool_id: str):
+                    if result.output or result.error:
+                        content = result.output if result.output else result.error
+                        chunk = f"data: {json.dumps({'choices': [{'delta': {'content': content}}]})}\n\n"
+                        response_chunks.append(chunk)
+                        yield chunk
+
+                try:
+                    yield f"data: {json.dumps({'choices': [{'delta': {'role': 'assistant'}}]})}\n\n"
+
+                    messages = [m for m in messages if m["content"]]
+                    # print(str(messages)[-100:])
+                    # await asyncio.sleep(4)
+
+                    async for chunk in sampling_loop(
+                        model=model,
+                        provider=provider,
+                        messages=messages,  # Now using global messages
+                        output_callback=output_callback,
+                        tool_output_callback=tool_output_callback,
+                        api_key=api_key,
+                    ):
+                        print(chunk)
+                        if chunk["type"] == "chunk":
+                            await asyncio.sleep(0)
+                            yield f"data: {json.dumps({'choices': [{'delta': {'content': chunk['chunk']}}]})}\n\n"
+                        if chunk["type"] == "messages":
+                            messages = chunk["messages"]
+
+                    yield f"data: {json.dumps({'choices': [{'delta': {'content': '', 'finish_reason': 'stop'}}]})}\n\n"
+
+                except Exception as e:
+                    print("Error: An exception occurred.")
+                    print(traceback.format_exc())
+                    pass
+                    # raise
+                    # print(f"Error: {e}")
+                    # yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+            return StreamingResponse(stream_response(), media_type="text/event-stream")
+
+        # Instead of running uvicorn here, we'll return the app
+        return app

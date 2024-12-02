@@ -4,7 +4,9 @@ os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import sys
 
 import litellm
+from openai import OpenAI
 
+ollama_client = OpenAI(base_url="http://localhost:11434/v1", api_key="ollama")
 litellm.suppress_debug_info = True
 litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
 
@@ -126,7 +128,9 @@ class Llm:
         # Detect function support
         if self.supports_functions == None:
             try:
-                if litellm.supports_function_calling(model):
+                if litellm.supports_function_calling(model) and not model.startswith(
+                    "ollama/"
+                ):
                     self.supports_functions = True
                 else:
                     self.supports_functions = False
@@ -419,6 +423,19 @@ def fixed_litellm_completions(**params):
     Hopefully they will fix this!
     """
 
+    if params.get("model").startswith("ollama/"):
+        # Tool calling... kinda working
+        # response = ollama_client.chat.completions.create(
+        #     model=params["model"].replace("ollama/", ""),
+        #     messages=params["messages"],
+        #     tools=params["tools"],
+        # )
+        # new_chunk = {"choices": [{"delta": dict(response.choices[0].message)}]}
+        # yield new_chunk
+        # return
+
+        params["model"] = params["model"].replace("ollama/", "ollama_chat/")
+
     if "local" in params.get("model"):
         # Kinda hacky, but this helps sometimes
         params["stop"] = ["<|assistant|>", "<|end|>", "<|eot_id|>"]
@@ -440,7 +457,8 @@ def fixed_litellm_completions(**params):
 
     for attempt in range(attempts):
         try:
-            yield from litellm.completion(**params)
+            for chunk in litellm.completion(**params):
+                yield chunk
             return  # If the completion is successful, exit the function
         except KeyboardInterrupt:
             print("Exiting...")
