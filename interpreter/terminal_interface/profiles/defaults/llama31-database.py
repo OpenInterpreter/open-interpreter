@@ -2,9 +2,10 @@
 This is an Open Interpreter profile to chat with a database. 
 """
 
-from interpreter import interpreter
-from datetime import date
 import os
+from datetime import date
+
+from interpreter import interpreter
 
 # Use environment variables for database connection or update defaults with your credentials
 db_user = os.environ.get("DB_USER", "user")

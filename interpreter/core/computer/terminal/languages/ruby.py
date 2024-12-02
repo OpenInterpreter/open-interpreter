@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+
 from .subprocess_language import SubprocessLanguage
 
 
@@ -9,12 +10,12 @@ class Ruby(SubprocessLanguage):
 
     def __init__(self):
         super().__init__()
-        self.start_cmd = ["irb"] 
+        self.start_cmd = ["irb"]
 
     def preprocess_code(self, code):
         """
         Add active line markers
-        Wrap in a tryCatch for better error handling 
+        Wrap in a tryCatch for better error handling
         Add end of execution marker
         """
 
@@ -39,7 +40,7 @@ ensure
 end
 """
         self.code_line_count = len(processed_code.split("\n"))
-        #print(processed_code)
+        # print(processed_code)
         return processed_code
 
     def line_postprocessor(self, line):
@@ -48,7 +49,7 @@ end
             self.code_line_count -= 1
             return None
         if "nil" in line:
-           return None
+            return None
         return line
 
     def detect_active_line(self, line):

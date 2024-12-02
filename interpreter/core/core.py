@@ -2,6 +2,7 @@
 This file defines the Interpreter class.
 It's the main file. `from interpreter import interpreter` will import an instance of this class.
 """
+
 import json
 import os
 import threading

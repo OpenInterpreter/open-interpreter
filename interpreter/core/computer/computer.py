@@ -164,9 +164,11 @@ Do not import the computer module, or any of its sub-modules. They are already i
                 method_signature = inspect.signature(method)
                 # Construct the signature string without *args and **kwargs
                 param_str = ", ".join(
-                    f"{param.name}"
-                    if param.default == param.empty
-                    else f"{param.name}={param.default!r}"
+                    (
+                        f"{param.name}"
+                        if param.default == param.empty
+                        else f"{param.name}={param.default!r}"
+                    )
                     for param in method_signature.parameters.values()
                     if param.kind not in (param.VAR_POSITIONAL, param.VAR_KEYWORD)
                 )

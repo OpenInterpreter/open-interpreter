@@ -73,9 +73,9 @@ def convert_to_openai_messages(
                 # especially for the OpenAI service hosted on Azure
                 new_message["content"] = ""
             else:
-                new_message[
-                    "content"
-                ] = f"""```{message["format"]}\n{message["content"]}\n```"""
+                new_message["content"] = (
+                    f"""```{message["format"]}\n{message["content"]}\n```"""
+                )
 
         elif message["type"] == "console" and message["format"] == "output":
             if function_calling:
@@ -88,9 +88,9 @@ def convert_to_openai_messages(
                         print("\n\n\nStrange chunk found:", message, "\n\n\n")
                     message["content"] = str(message["content"])
                 if message["content"].strip() == "":
-                    new_message[
-                        "content"
-                    ] = "No output"  # I think it's best to be explicit, but we should test this.
+                    new_message["content"] = (
+                        "No output"  # I think it's best to be explicit, but we should test this.
+                    )
                 else:
                     new_message["content"] = message["content"]
 

@@ -7,11 +7,11 @@ Learn about all the available settings - https://docs.openinterpreter.com/settin
 
 """
 
-# Import the interpreter
-from interpreter import interpreter
-
 # You can import other libraries too
 from datetime import date
+
+# Import the interpreter
+from interpreter import interpreter
 
 # You can set variables
 today = date.today()

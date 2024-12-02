@@ -234,7 +234,8 @@ interpreter.auto_run = True
 # Set offline for all local models
 interpreter.offline = True
 
-import os, platform
+import os
+import platform
 
 # Get the current user's login name
 username = os.getlogin()
