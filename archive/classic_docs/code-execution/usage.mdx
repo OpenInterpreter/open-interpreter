@@ -1,0 +1,36 @@
+---
+title: Usage
+---
+
+# Running Code
+
+The `computer` itself is separate from Open Interpreter's core, so you can run it independently:
+
+```python
+from interpreter import interpreter
+
+interpreter.computer.run("python", "print('Hello World!')")
+```
+
+This runs in the same Python instance that interpreter uses, so you can define functions, variables, or log in to services before the AI starts running code:
+
+```python
+interpreter.computer.run("python", "import replicate\nreplicate.api_key='...'")
+
+interpreter.custom_instructions = "Replicate has already been imported."
+
+interpreter.chat("Please generate an image on replicate...") # Interpreter will be logged into Replicate
+```
+
+# Custom Languages
+
+You also have control over the `computer`'s languages (like Python, Javascript, and Shell), and can easily append custom languages:
+
+<Card
+  title="Custom Languages"
+  icon="code"
+  iconType="solid"
+  href="/code-execution/custom-languages/"
+>
+  Add or customize the programming languages that Open Interpreter can use.
+</Card>

@@ -1,0 +1,85 @@
+---
+title: Setup
+---
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/5sk3t8ilDR8"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowFullScreen
+></iframe>
+
+## Installation from `pip`
+
+If you are familiar with Python, we recommend installing Open Interpreter via `pip`
+
+```bash
+pip install open-interpreter
+```
+
+<Info>
+  You'll need Python
+  [3.10](https://www.python.org/downloads/release/python-3100/) or
+  [3.11](https://www.python.org/downloads/release/python-3110/). Run `python
+  --version` to check yours.
+
+It is recommended to install Open Interpreter in a [virtual
+environment](https://docs.python.org/3/library/venv.html).
+
+</Info>
+
+## Install optional dependencies from `pip`
+
+Open Interpreter has optional dependencies for different capabilities
+
+[Local Mode](/guides/running-locally) dependencies
+
+```bash
+pip install open-interpreter[local]
+```
+
+[OS Mode](/guides/os-mode) dependencies
+
+```bash
+pip install open-interpreter[os]
+```
+
+[Safe Mode](/safety/safe-mode) dependencies
+
+```bash
+pip install open-interpreter[safe]
+```
+
+Server dependencies
+
+```bash
+pip install open-interpreter[server]
+```
+
+## Experimental one-line installers
+
+To try our experimental installers, open your Terminal with admin privileges [(click here to learn how)](https://chat.openai.com/share/66672c0f-0935-4c16-ac96-75c1afe14fe3), then paste the following commands:
+
+<CodeGroup>
+
+```bash Mac
+curl -sL https://raw.githubusercontent.com/openinterpreter/open-interpreter/main/installers/oi-mac-installer.sh | bash
+```
+
+```powershell Windows
+iex "& {$(irm https://raw.githubusercontent.com/openinterpreter/open-interpreter/main/installers/oi-windows-installer-conda.ps1)}"
+```
+
+```bash Linux
+curl -sL https://raw.githubusercontent.com/openinterpreter/open-interpreter/main/installers/oi-linux-installer.sh | bash
+```
+
+</CodeGroup>
+
+These installers will attempt to download Python, set up an environment, and install Open Interpreter for you.
+
+## No Installation
+
+If configuring your computer environment is challenging, you can press the `,` key on the [GitHub page](https://github.com/OpenInterpreter/open-interpreter) to create a codespace. After a moment, you'll receive a cloud virtual machine environment pre-installed with open-interpreter. You can then start interacting with it directly and freely confirm its execution of system commands without worrying about damaging the system.

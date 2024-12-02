@@ -1,0 +1,26 @@
+---
+title: Settings
+---
+
+Default settings can be edited via a profile. To open the file, run:
+
+```bash
+interpreter --profiles
+```
+
+| Key                      | Value                                                    |
+| ------------------------ | -------------------------------------------------------- |
+| `llm_model`              | String ["openai/gpt-4", "openai/local", "azure/gpt-3.5"] |
+| `llm_temperature`        | Float [0.0 -> 1.0]                                       |
+| `llm_supports_vision`    | Boolean [True/False]                                     |
+| `llm_supports_functions` | Boolean [True/False]                                     |
+| `llm_context_window`     | Integer [3000]                                           |
+| `llm_max_tokens`         | Integer [3000]                                           |
+| `llm_api_base`           | String ["http://ip_address:port", "https://openai.com"]  |
+| `llm_api_key`            | String ["sk-Your-Key"]                                   |
+| `llm_api_version`        | String ["version-number"]                                |
+| `llm_max_budget`         | Float [0.01] #USD $0.01                                  |
+| `offline`                | Boolean [True/False]                                     |
+| `vision`                 | Boolean [True/False]                                     |
+| `auto_run`               | Boolean [True/False]                                     |
+| `verbose`                | Boolean [True/False]                                     |

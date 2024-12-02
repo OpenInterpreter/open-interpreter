@@ -1,0 +1,240 @@
+---
+title: Computer API
+---
+
+The following functions are designed for language models to use in Open Interpreter, currently only supported in [OS Mode](/guides/os-mode/).
+
+### Display - View
+
+Takes a screenshot of the primary display.
+
+
+
+```python
+interpreter.computer.display.view()
+```
+
+
+
+### Display - Center
+
+Gets the x, y value of the center of the screen.
+
+
+
+```python
+x, y = interpreter.computer.display.center()
+```
+
+
+
+### Keyboard - Hotkey
+
+Performs a hotkey on the computer
+
+
+
+```python
+interpreter.computer.keyboard.hotkey(" ", "command")
+```
+
+
+
+### Keyboard - Write
+
+Writes the text into the currently focused window.
+
+
+
+```python
+interpreter.computer.keyboard.write("hello")
+```
+
+
+
+### Mouse - Click
+
+Clicks on the specified coordinates, or an icon, or text. If text is specified, OCR will be run on the screenshot to find the text coordinates and click on it.
+
+
+
+```python
+# Click on coordinates
+interpreter.computer.mouse.click(x=100, y=100)
+
+# Click on text on the screen
+interpreter.computer.mouse.click("Onscreen Text")
+
+# Click on a gear icon
+interpreter.computer.mouse.click(icon="gear icon")
+```
+
+
+
+### Mouse - Move
+
+Moves to the specified coordinates, or an icon, or text. If text is specified, OCR will be run on the screenshot to find the text coordinates and move to it.
+
+
+
+```python
+# Click on coordinates
+interpreter.computer.mouse.move(x=100, y=100)
+
+# Click on text on the screen
+interpreter.computer.mouse.move("Onscreen Text")
+
+# Click on a gear icon
+interpreter.computer.mouse.move(icon="gear icon")
+```
+
+
+
+### Mouse - Scroll
+
+Scrolls the mouse a specified number of pixels.
+
+
+
+```python
+# Scroll Down
+interpreter.computer.mouse.scroll(-10)
+
+# Scroll Up
+interpreter.computer.mouse.scroll(10)
+```
+
+
+
+### Clipboard - View
+
+Returns the contents of the clipboard.
+
+
+
+```python
+interpreter.computer.clipboard.view()
+```
+
+
+
+### OS - Get Selected Text
+
+Get the selected text on the screen.
+
+
+
+```python
+interpreter.computer.os.get_selected_text()
+```
+
+
+
+### Mail - Get
+
+Retrieves the last `number` emails from the inbox, optionally filtering for only unread emails. (Mac only)
+
+
+
+```python
+interpreter.computer.mail.get(number=10, unread=True)
+```
+
+
+
+### Mail - Send
+
+Sends an email with the given parameters using the default mail app. (Mac only)
+
+
+
+```python
+interpreter.computer.mail.send("john@email.com", "Subject", "Body", ["path/to/attachment.pdf", "path/to/attachment2.pdf"])
+```
+
+
+
+### Mail - Unread Count
+
+Retrieves the count of unread emails in the inbox. (Mac only)
+
+
+
+```python
+interpreter.computer.mail.unread_count()
+```
+
+
+
+### SMS - Send
+
+Send a text message using the default SMS app. (Mac only)
+
+
+
+```python
+interpreter.computer.sms.send("2068675309", "Hello from Open Interpreter!")
+```
+
+
+
+### Contacts - Get Phone Number
+
+Returns the phone number of a contact name. (Mac only)
+
+
+
+```python
+interpreter.computer.contacts.get_phone_number("John Doe")
+```
+
+
+
+### Contacts - Get Email Address
+
+Returns the email of a contact name. (Mac only)
+
+
+
+```python
+interpreter.computer.contacts.get_phone_number("John Doe")
+```
+
+
+
+### Calendar - Get Events
+
+Fetches calendar events for the given date or date range from all calendars. (Mac only)
+
+
+
+```python
+interpreter.computer.calendar.get_events(start_date=datetime, end_date=datetime)
+```
+
+
+
+### Calendar - Create Event
+
+Creates a new calendar event. Uses first calendar if none is specified (Mac only)
+
+
+
+```python
+interpreter.computer.calendar.create_event(title="Title", start_date=datetime, end_date=datetime, location="Location", notes="Notes", calendar="Work")
+```
+
+
+
+### Calendar - Delete Event
+
+Delete a specific calendar event. (Mac only)
+
+
+
+```python
+interpreter.computer.calendar.delete_event(event_title="Title", start_date=datetime, calendar="Work")
+```
+
+
+

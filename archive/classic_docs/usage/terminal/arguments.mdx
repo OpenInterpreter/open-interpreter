@@ -1,0 +1,440 @@
+---
+title: Arguments
+---
+
+**[Modes](/docs/usage/terminal/arguments#modes)**
+
+`--vision`, `--os`.
+
+**[Model Settings](/docs/usage/terminal/arguments#model-settings)**
+
+`--model`, `--fast`, `--local`, `--temperature`, `--context_window`, `--max_tokens`, `--max_output`, `--api_base`, `--api_key`, `--api_version`, `--llm_supports_functions`, `--llm_supports_vision`.
+
+**[Configuration](/docs/usage/terminal/arguments#Configuration)**
+
+`--profiles`, `--profile`, `--custom_instructions`, `--system_message`.
+
+**[Options](/docs/usage/terminal/arguments#options)**
+
+`--safe_mode`, `--auto_run`, `--loop`, `--verbose`, `--max_budget`, `--speak_messages`, `--multi_line`.
+
+**[Other](/docs/usage/terminal/arguments#other)**
+
+`--version`, `--help`.
+
+---
+
+## Modes
+
+#### `--vision` or `-vi`
+
+Enables vision mode for multimodal models. Defaults to GPT-4-turbo.
+
+<CodeGroup>
+```bash Terminal
+interpreter --vision
+```
+
+```yaml Config
+vision: true
+```
+
+</CodeGroup>
+
+#### `--os` or `-o`
+
+Enables OS mode for multimodal models. Defaults to GPT-4-turbo.
+
+<CodeGroup>
+    
+    ```bash Terminal
+    interpreter --os
+    ```
+
+    ```yaml Config
+    os: true
+    ```
+
+</CodeGroup>
+
+---
+
+## Model Settings
+
+#### `--model` or `-m`
+
+Specifies which language model to use. Check out the [models](https://docs.openinterpreter.com/language-model-setup/introduction) section for a list of available models.
+
+<CodeGroup>
+    
+```bash Terminal
+interpreter --model "gpt-3.5-turbo"
+```
+
+```yaml Config
+model: gpt-3.5-turbo
+```
+
+</CodeGroup>
+
+#### `--fast` or `-f`
+
+Sets the model to gpt-3.5-turbo.
+
+<CodeGroup>
+```bash Terminal
+interpreter --fast
+```
+
+```yaml Config
+fast: true
+```
+
+</CodeGroup>
+
+#### `--local` or `-l`
+
+Run the model locally. Check the [models page](/language-model-setup/introduction) for more information.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --local
+```
+
+```yaml Config
+local: true
+```
+
+</CodeGroup>
+
+#### `--temperature` or `-t`
+
+Sets the randomness level of the model's output.
+
+<CodeGroup>
+    
+```bash Terminal
+interpreter --temperature 0.7
+```
+
+```yaml Config
+temperature: 0.7
+```
+
+</CodeGroup>
+
+#### `--context_window` or `-c`
+
+Manually set the context window size in tokens for the model.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --context_window 16000
+```
+
+```yaml Config
+context_window: 16000
+```
+
+</CodeGroup>
+
+#### `--max_tokens` or `-x`
+
+Sets the maximum number of tokens that the model can generate in a single response.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_tokens 100
+```
+
+```yaml Config
+max_tokens: 100
+```
+
+</CodeGroup>
+
+#### `--max_output` or `-xo`
+
+Set the maximum number of characters for code outputs.
+
+<CodeGroup>
+```bash Terminal
+interpreter --max_output 1000
+```
+
+```yaml Config
+max_output: 1000
+```
+
+</CodeGroup>
+#### `--api_base` or `-ab`
+
+If you are using a custom API, specify its base URL with this argument.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_base "https://api.example.com"
+```
+
+```yaml Config
+api_base: https://api.example.com
+```
+
+</CodeGroup>
+
+#### `--api_key` or `-ak`
+
+Set your API key for authentication when making API calls.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_key "your_api_key_here"
+```
+
+```yaml Config
+api_key: your_api_key_here
+```
+
+</CodeGroup>
+
+#### `--api_version` or `-av`
+
+Optionally set the API version to use with your selected model. (This will override environment variables)
+
+<CodeGroup>
+```bash Terminal
+interpreter --api_version 2.0.2
+```
+
+```yaml Config
+api_version: 2.0.2
+```
+
+</CodeGroup>
+#### `--llm_supports_functions` or `-lsf`
+
+Inform Open Interpreter that the language model you're using supports function calling.
+
+<CodeGroup>
+```bash Terminal
+interpreter --llm_supports_functions
+```
+
+```yaml Config
+llm_supports_functions: true
+```
+
+</CodeGroup>
+#### `--no-llm_supports_functions`
+
+Inform Open Interpreter that the language model you're using does not support function calling.
+
+<CodeGroup>
+  ```bash Terminal interpreter --no-llm_supports_functions ```
+</CodeGroup>
+
+#### `--llm_supports_vision` or `-lsv`
+
+Inform Open Interpreter that the language model you're using supports vision.
+
+<CodeGroup>
+```bash Terminal
+interpreter --llm_supports_vision
+```
+
+```yaml Config
+llm_supports_vision: true
+```
+
+</CodeGroup>
+
+---
+
+## Configuration
+
+#### `--profiles`
+
+Opens the directory containing all profiles. They can be edited in your default editor.
+
+<CodeGroup>
+```bash Terminal
+interpreter --profilees
+```
+
+</CodeGroup>
+
+#### `--profile` or `-p`
+
+Optionally set a profile to use.
+
+<CodeGroup>
+```bash Terminal
+interpreter --profile "default.yaml"
+```
+
+</CodeGroup>
+
+#### `--custom_instructions` or `-ci`
+
+Appends custom instructions to the system message. This is useful for adding information about the your system, preferred languages, etc.
+
+<CodeGroup>
+```bash Terminal
+interpreter --custom_instructions "This is a custom instruction."
+```
+
+```yaml Config
+custom_instructions: "This is a custom instruction."
+```
+
+</CodeGroup>
+
+#### `--system_message` or `-s`
+
+We don't recommend modifying the system message, as doing so opts you out of future updates to the system message. Use `--custom_instructions` instead, to add relevant information to the system message. If you must modify the system message, you can do so by using this argument, or by opening the profile using `--profiles`.
+
+<CodeGroup>
+```bash Terminal
+interpreter --system_message "You are Open Interpreter..."
+```
+
+```yaml Config
+system_message: "You are Open Interpreter..."
+```
+
+## Options
+
+#### `--safe_mode`
+
+Enable or disable experimental safety mechanisms like code scanning. Valid options are `off`, `ask`, and `auto`.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --safe_mode ask
+```
+
+```yaml Config
+safe_mode: ask
+```
+
+</CodeGroup>
+
+#### `--auto_run` or `-y`
+
+Automatically run the interpreter without requiring user confirmation.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --auto_run
+```
+
+```yaml Config
+auto_run: true
+```
+
+</CodeGroup>
+
+#### `--loop`
+
+Runs Open Interpreter in a loop, requiring it to admit to completing or failing every task.
+
+<CodeGroup>
+```bash Terminal
+interpreter --loop
+```
+
+```yaml Config
+loop: true
+```
+
+</CodeGroup>
+
+#### `--verbose` or `-v`
+
+Run the interpreter in verbose mode. Debug information will be printed at each step to help diagnose issues.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --verbose
+```
+
+```yaml Config
+verbose: true
+```
+
+</CodeGroup>
+
+#### `--max_budget` or `-b`
+
+Sets the maximum budget limit for the session in USD.
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --max_budget 0.01
+```
+
+```yaml Config
+max_budget: 0.01
+```
+
+</CodeGroup>
+
+#### `--speak_messages` or `-sm`
+
+(Mac Only) Speak messages out loud using the system's text-to-speech engine.
+
+<CodeGroup>
+```bash Terminal
+interpreter --speak_messages
+```
+
+```yaml Config
+speak_messages: true
+```
+
+</CodeGroup>
+
+#### `--multi_line` or `-ml`
+
+Enable multi-line inputs starting and ending with ` ``` `
+
+<CodeGroup>
+```bash Terminal
+interpreter --multi_line
+```
+
+```yaml Config
+multi_line: true
+```
+
+</CodeGroup>
+
+---
+
+## Other
+
+#### `--version`
+
+Get the current installed version number of Open Interpreter.
+
+<CodeGroup>```bash Terminal interpreter --version ```</CodeGroup>
+
+#### `--help` or `-h`
+
+Display all available terminal arguments.
+
+<CodeGroup>
+```bash Terminal
+interpreter --help
+```
+
+</CodeGroup>

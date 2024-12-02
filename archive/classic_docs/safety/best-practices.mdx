@@ -1,0 +1,17 @@
+---
+title: Best Practices
+---
+
+LLM's are not perfect. They can make mistakes, they can be tricked into doing things that they shouldn't, and they are capable of writing unsafe code. This page will help you understand how to use these LLM's safely.
+
+## Best Practices
+
+- Avoid asking it to perform potentially risky tasks. This seems obvious, but it's the number one way to prevent safety mishaps.
+
+- Run it in a sandbox. This is the safest way to run it, as it completely isolates the code it runs from the rest of your system.
+
+- Use trusted models. Yes, Open Interpreter can be configured to run pretty much any text-based model on huggingface. But it does not mean it's a good idea to run any random model you find. Make sure you trust the models you're using. If you're not sure, run it in a sandbox. Nefarious LLM's are becoming a real problem, and they are not going away anytime soon.
+
+- Local models are fun! But GPT-4 is probably your safest bet. OpenAI has their models aligned in a major way. It will outperform the local models, and it will generally refuse to run unsafe code, as it truly understands that the code it writes could be run. It has a pretty good idea what unsafe code looks like, and will refuse to run code like `rm -rf /` that would delete your entire disk, for example.
+
+- The [--safe_mode](/safety/safe-mode) argument is your friend. It enables code scanning, and can use [guarddog](https://github.com/DataDog/guarddog) to identify malicious PyPi and npm packages. It's not a perfect solution, but it's a great start.

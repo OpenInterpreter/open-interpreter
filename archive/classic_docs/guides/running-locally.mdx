@@ -1,0 +1,67 @@
+---
+title: Running Locally
+---
+
+Open Interpreter can be run fully locally.
+
+Users need to install software to run local LLMs. Open Interpreter supports multiple local model providers such as [Ollama](https://www.ollama.com/), [Llamafile](https://github.com/Mozilla-Ocho/llamafile), [Jan](https://jan.ai/), and [LM Studio](https://lmstudio.ai/).
+
+<Tip>
+  Local models perform better with extra guidance and direction. You can improve
+  performance for your use-case by creating a new [Profile](/guides/profiles).
+</Tip>
+
+## Terminal Usage
+
+### Local Explorer
+
+A Local Explorer was created to simplify the process of using OI locally. To access this menu, run the command `interpreter --local`.
+
+Select your chosen local model provider from the list of options.
+
+Most providers will require the user to state the model they are using. Provider specific instructions are shown to the user in the menu.
+
+### Custom Local
+
+If you want to use a provider other than the ones listed, you will set the `--api_base` flag to set a [custom endpoint](/language-models/local-models/custom-endpoint).
+
+You will also need to set the model by passing in the `--model` flag to select a [model](/settings/all-settings#model-selection).
+
+```python
+interpreter --api_base "http://localhost:11434" --model ollama/codestral
+```
+
+<Info>
+  Other terminal flags are explained in [Settings](/settings/all-settings).
+</Info>
+
+## Python Usage
+
+In order to have a Python script use Open Interpreter locally, some fields need to be set
+
+```python
+from interpreter import interpreter
+
+interpreter.offline = True
+interpreter.llm.model = "ollama/codestral"
+interpreter.llm.api_base = "http://localhost:11434"
+
+interpreter.chat("how many files are on my desktop?")
+```
+
+## Helpful settings for local models
+
+Local models benefit from more coercion and guidance. This verbosity of adding extra context to messages can impact the conversational experience of Open Interpreter. The following settings allow templates to be applied to messages to improve the steering of the language model while maintaining the natural flow of conversation.
+
+`interpreter.user_message_template` allows users to have their message wrapped in a template. This can be helpful steering a language model to a desired behaviour without needing the user to add extra context to their message.
+
+`interpreter.always_apply_user_message_template` has all user messages to be wrapped in the template. If False, only the last User message will be wrapped.
+
+`interpreter.code_output_template` wraps the output from the computer after code is run. This can help with nudging the language model to continue working or to explain outputs.
+
+`interpreter.empty_code_output_template` is the message that is sent to the language model if code execution results in no output.
+
+<Info>
+  Other configuration settings are explained in
+  [Settings](/settings/all-settings).
+</Info>

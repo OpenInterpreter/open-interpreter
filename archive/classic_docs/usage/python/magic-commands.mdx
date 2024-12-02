@@ -1,0 +1,17 @@
+---
+title: Magic Commands
+---
+
+If you run an interactive chat in python, you can use *magic commands* built for terminal usage:
+
+```python
+interpreter.chat()
+```
+
+The following magic commands will work:
+
+- %verbose [true/false]: Toggle verbose mode. Without arguments or with true it enters verbose mode. With false it exits verbose mode.
+- %reset: Resets the current session's conversation.
+- %undo: Removes the previous user message and the AI's response from the message history.
+- %tokens [prompt]: (Experimental) Calculate the tokens that will be sent with the next prompt as context and estimate their cost. Optionally calculate the tokens and estimated cost of a prompt if one is provided. Relies on LiteLLM's cost_per_token() method for estimated costs.
+- %help: Show the help message.

@@ -1,0 +1,16 @@
+---
+title: Magic Commands
+---
+
+Magic commands can be used to control the interpreter's behavior in interactive mode:
+
+- `%% [commands]`: Run commands in system shell.
+- `%verbose [true/false]`: Toggle verbose mode. Without arguments or with 'true', it enters verbose mode. With 'false', it exits verbose mode.
+- `%reset`: Resets the current session's conversation.
+- `%undo`: Remove previous messages and its response from the message history.
+- `%save_message [path]`: Saves messages to a specified JSON path. If no path is provided, it defaults to 'messages.json'.
+- `%load_message [path]`: Loads messages from a specified JSON path. If no path is provided, it defaults to 'messages.json'.
+- `%tokens [prompt]`: EXPERIMENTAL: Calculate the tokens used by the next request based on the current conversation's messages and estimate the cost of that request; optionally provide a prompt to also calculate the tokens used by that prompt and the total amount of tokens that will be sent with the next request.
+- `%info`: Show system and interpreter information.
+- `%help`: Show this help message.
+- `%markdown [path]`: Export the conversation to a specified Markdown path. If no path is provided, it will be saved to the Downloads folder with a generated conversation name.

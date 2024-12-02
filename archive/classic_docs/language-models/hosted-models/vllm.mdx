@@ -1,0 +1,44 @@
+---
+title: vLLM
+---
+
+To use Open Interpreter with vLLM, you will need to:
+
+1. `pip install vllm`
+2. Set the api_base flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_base <https://your-hosted-vllm-server>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.api_base = "<https://your-hosted-vllm-server>"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+3. Set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model vllm/<perplexity-model>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "vllm/<perplexity-model>"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+All models from VLLM should be supported

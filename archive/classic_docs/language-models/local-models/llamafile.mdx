@@ -1,0 +1,27 @@
+---
+title: LlamaFile
+---
+
+The easiest way to get started with local models in Open Interpreter is to run `interpreter --local` in the terminal, select LlamaFile, then go through the interactive set up process. This will download the model and start the server for you. If you choose to do it manually, you can follow the instructions below.
+
+To use LlamaFile manually with Open Interpreter, you'll need to download the model and start the server by running the file in the terminal. You can do this with the following commands:
+
+```bash
+# Download Mixtral
+
+wget https://huggingface.co/jartine/Mixtral-8x7B-v0.1.llamafile/resolve/main/mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
+
+# Make it an executable
+
+chmod +x mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
+
+# Start the server
+
+./mixtral-8x7b-instruct-v0.1.Q5_K_M-server.llamafile
+
+# In a separate terminal window, run OI and point it at the llamafile server
+
+interpreter --api_base https://localhost:8080/v1
+```
+
+Please note that if you are using a Mac with Apple Silicon, you'll need to have Xcode installed.

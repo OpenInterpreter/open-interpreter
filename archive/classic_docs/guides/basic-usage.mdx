@@ -1,0 +1,163 @@
+---
+title: Basic Usage
+---
+
+<CardGroup>
+
+<Card
+  title="Interactive demo"
+  icon="gamepad-modern"
+  iconType="solid"
+  href="https://colab.research.google.com/drive/1WKmRXZgsErej2xUriKzxrEAXdxMSgWbb?usp=sharing"
+>
+  Try Open Interpreter without installing anything on your computer
+</Card>
+
+<Card
+  title="Example voice interface"
+  icon="circle"
+  iconType="solid"
+  href="https://colab.research.google.com/drive/1NojYGHDgxH6Y1G1oxThEBBb2AtyODBIK"
+>
+  An example implementation of Open Interpreter's streaming capabilities
+</Card>
+
+</CardGroup>
+
+---
+
+### Interactive Chat
+
+To start an interactive chat in your terminal, either run `interpreter` from the command line or `interpreter.chat()` from a .py file.
+
+<CodeGroup>
+
+```shell Terminal
+interpreter
+```
+
+```python Python
+interpreter.chat()
+```
+
+</CodeGroup>
+
+---
+
+### Programmatic Chat
+
+For more precise control, you can pass messages directly to `.chat(message)` in Python:
+
+```python
+interpreter.chat("Add subtitles to all videos in /videos.")
+
+# ... Displays output in your terminal, completes task ...
+
+interpreter.chat("These look great but can you make the subtitles bigger?")
+
+# ...
+```
+
+---
+
+### Start a New Chat
+
+In your terminal, Open Interpreter behaves like ChatGPT and will not remember previous conversations. Simply run `interpreter` to start a new chat.
+
+In Python, Open Interpreter remembers conversation history. If you want to start fresh, you can reset it.
+
+<CodeGroup>
+
+```shell Terminal
+interpreter
+```
+
+```python Python
+interpreter.messages = []
+```
+
+</CodeGroup>
+
+---
+
+### Save and Restore Chats
+
+In your terminal, Open Interpreter will save previous conversations to `<your application directory>/Open Interpreter/conversations/`.
+
+You can resume any of them by running `--conversations`. Use your arrow keys to select one , then press `ENTER` to resume it.
+
+In Python, `interpreter.chat()` returns a List of messages, which can be used to resume a conversation with `interpreter.messages = messages`.
+
+<CodeGroup>
+
+```shell Terminal
+interpreter --conversations
+```
+
+```python Python
+# Save messages to 'messages'
+messages = interpreter.chat("My name is Killian.")
+
+# Reset interpreter ("Killian" will be forgotten)
+interpreter.messages = []
+
+# Resume chat from 'messages' ("Killian" will be remembered)
+interpreter.messages = messages
+```
+
+</CodeGroup>
+
+---
+
+### Configure Default Settings
+
+We save default settings to the `default.yaml` profile which can be opened and edited by running the following command:
+
+```shell
+interpreter --profiles
+```
+
+You can use this to set your default language model, system message (custom instructions), max budget, etc.
+
+<Info>
+  **Note:** The Python library will also inherit settings from the default
+  profile file. You can change it by running `interpreter --profiles` and
+  editing `default.yaml`.
+</Info>
+
+---
+
+### Customize System Message
+
+In your terminal, modify the system message by [editing your configuration file as described here](#configure-default-settings).
+
+In Python, you can inspect and configure Open Interpreter's system message to extend its functionality, modify permissions, or give it more context.
+
+```python
+interpreter.system_message += """
+Run shell commands with -y so the user doesn't have to confirm them.
+"""
+print(interpreter.system_message)
+```
+
+---
+
+### Change your Language Model
+
+Open Interpreter uses [LiteLLM](https://docs.litellm.ai/docs/providers/) to connect to language models.
+
+You can change the model by setting the model parameter:
+
+```shell
+interpreter --model gpt-3.5-turbo
+interpreter --model claude-2
+interpreter --model command-nightly
+```
+
+In Python, set the model on the object:
+
+```python
+interpreter.llm.model = "gpt-3.5-turbo"
+```
+
+[Find the appropriate "model" string for your language model here.](https://docs.litellm.ai/docs/providers/)

@@ -1,0 +1,19 @@
+---
+title: Custom Endpoint
+---
+
+Simply set `api_base` to any OpenAI compatible server:
+
+<CodeGroup>
+```bash Terminal
+interpreter --api_base <custom_endpoint>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.api_base = "<custom_endpoint>"
+interpreter.chat()
+```
+
+</CodeGroup>

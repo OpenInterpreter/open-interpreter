@@ -1,0 +1,44 @@
+---
+title: Ollama
+---
+
+Ollama is an easy way to get local language models running on your computer through a command-line interface.
+
+To run Ollama with Open interpreter:
+
+1. Download Ollama for your platform from [here](https://ollama.ai/download).
+
+2. Open the installed Ollama application, and go through the setup, which will require your password.
+
+3. Now you are ready to download a model. You can view all available models [here](https://ollama.ai/library). To download a model, run:
+
+```bash
+ollama run <model-name>
+```
+
+4. It will likely take a while to download, but once it does, we are ready to use it with Open Interpreter. You can either run `interpreter --local` to set it up interactively in the terminal, or do it manually:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model ollama/<model-name>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.offline = True # Disables online features like Open Procedures
+interpreter.llm.model = "ollama_chat/<model-name>"
+interpreter.llm.api_base = "http://localhost:11434"
+
+interpreter.chat()
+```
+
+</CodeGroup>
+
+For any future runs with Ollama, ensure that the Ollama server is running. If using the desktop application, you can check to see if the Ollama menu bar item is active.
+
+<Warning>
+  If Ollama is producing strange output, make sure to update to the latest
+  version
+</Warning>

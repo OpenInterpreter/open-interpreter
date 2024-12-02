@@ -1,0 +1,56 @@
+---
+title: Jan.ai
+---
+
+Jan.ai is an open-source platform for running local language models on your computer, and is equipped with a built in server.
+
+To run Open Interpreter with Jan.ai, follow these steps:
+
+1. [Install](https://jan.ai/) the Jan.ai Desktop Application on your computer.
+
+2. Once installed, you will need to install a language model. Click the 'Hub' icon on the left sidebar (the four squares icon). Click the 'Download' button next to the model you would like to install, and wait for it to finish installing before continuing.
+
+3. To start your model, click the 'Settings' icon at the bottom of the left sidebar. Then click 'Models' under the CORE EXTENSIONS section. This page displays all of your installed models. Click the options icon next to the model you would like to start (vertical ellipsis icon). Then click 'Start Model', which will take a few seconds to fire up.
+
+4. Click the 'Advanced' button under the GENERAL section, and toggle on the "Enable API Server" option. This will start a local server that you can use to interact with your model.
+
+5. Now we fire up Open Interpreter with this custom model. Either run `interpreter --local` in the terminal to set it up interactively, or run this command, but replace `<model_id>` with the id of the model you downloaded:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_base http://localhost:1337/v1  --model <model_id>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.offline = True # Disables online features like Open Procedures
+interpreter.llm.model = "<model_id>"
+interpreter.llm.api_base = "http://localhost:1337/v1 "
+
+interpreter.chat()
+```
+
+</CodeGroup>
+
+If your model can handle a longer context window than the default 3000, you can set the context window manually by running:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --api_base http://localhost:1337/v1  --model <model_id> --context_window 5000
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.context_window = 5000
+```
+
+</CodeGroup>
+
+<Warning>
+  If Jan is producing strange output, or no output at all, make sure to update
+  to the latest version and clean your cache.
+</Warning>
