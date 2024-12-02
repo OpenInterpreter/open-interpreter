@@ -13,6 +13,15 @@
     <br><a href="https://0ggfznkwh4j.typeform.com/to/G21i9lJ2">Get early access to the desktop app</a>‎ ‎ |‎ ‎ <a href="https://docs.openinterpreter.com/">Documentation</a><br>
 </p>
 
+> [!NOTE]
+> **Open Interpreter 1.0** is almost here.
+>
+> Please help test the [development branch](https://github.com/OpenInterpreter/open-interpreter/tree/development) and share your experience in the [Discord](https://discord.gg/Hvz9Axh84z):
+> ```
+> pip install git+https://github.com/OpenInterpreter/open-interpreter.git@development
+> interpreter --help
+> ```
+
 <br>
 
 <img alt="local_explorer" src="https://github.com/OpenInterpreter/open-interpreter/assets/63927363/d941c3b4-b5ad-4642-992c-40edf31e2e7a">
