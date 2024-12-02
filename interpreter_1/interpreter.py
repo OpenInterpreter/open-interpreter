@@ -12,7 +12,7 @@ from typing import Any, cast
 
 from readchar import readchar
 
-from .misc.get_input import get_input
+from .misc.get_input import async_get_input
 
 # Third-party imports
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
@@ -227,11 +227,14 @@ class Interpreter:
 
         return system_message
 
-    async def async_respond(self):
+    async def async_respond(self, user_input=None):
         """
         Agentic sampling loop for the assistant/tool interaction.
         Yields chunks and maintains message history on the interpreter instance.
         """
+        if user_input:
+            self.messages.append({"role": "user", "content": user_input})
+
         tools = []
         if "interpreter" in self.tools:
             tools.append(BashTool())
@@ -925,14 +928,26 @@ Notes for using the `str_replace` command:
         return self._command_handler.handle_command(cmd, parts)
 
     def chat(self):
-        """
-        Interactive mode
-        """
+        """Chat with the interpreter. Handles both sync and async contexts."""
+        try:
+            loop = asyncio.get_running_loop()
+            # If we get here, there is a running event loop
+            loop.create_task(self.async_chat())
+        except RuntimeError:
+            # No running event loop, create one
+            asyncio.run(self.async_chat())
+
+    async def async_chat(self):
+        original_message_length = len(self.messages)
+
         try:
             message_count = 0
             while True:
-                user_input = get_input()
-                print("")
+                try:
+                    user_input = await async_get_input()
+                except KeyboardInterrupt:
+                    print()
+                    return self.messages[original_message_length:]
 
                 message_count += 1  # Increment counter after each message
 
@@ -943,23 +958,23 @@ Notes for using the `str_replace` command:
                         continue
 
                 if user_input == "":
-                    if message_count in range(4, 7):
+                    if message_count in range(8, 11):
                         print("Error: Cat is asleep on Enter key\n")
                     else:
                         print("Error: No input provided\n")
                     continue
 
-                self.messages.append({"role": "user", "content": user_input})
-
-                for _ in self.respond():
-                    pass
+                try:
+                    print()
+                    async for _ in self.async_respond(user_input):
+                        pass
+                except KeyboardInterrupt:
+                    self._spinner.stop()
+                except asyncio.CancelledError:
+                    self._spinner.stop()
 
                 print()
-        except KeyboardInterrupt:
-            self._spinner.stop()
-            print()
-            pass
-        except Exception as e:
+        except:
             self._spinner.stop()
             print(traceback.format_exc())
             print("\n\n\033[91mAn error has occurred.\033[0m")
@@ -976,35 +991,34 @@ Notes for using the `str_replace` command:
                     self._report_error("".join(traceback.format_exc()))
             exit(1)
 
-    async def _consume_generator(self, generator):
-        """Consume the async generator from async_respond"""
-        async for chunk in generator:
-            yield chunk
+    def respond(self, user_input=None, stream=False):
+        """Sync method to respond to user input if provided, or to the messages in self.messages."""
+        if user_input:
+            self.messages.append({"role": "user", "content": user_input})
 
-    def respond(self):
-        """
-        Synchronous wrapper around async_respond.
-        Yields chunks from the async generator.
-        """
+        if stream:
+            return self._sync_respond_stream()
+        else:
+            original_message_length = len(self.messages)
+            for _ in self._sync_respond_stream():
+                pass
+            return self.messages[original_message_length:]
+
+    def _sync_respond_stream(self):
+        """Synchronous generator that yields responses. Only use in synchronous contexts."""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-
-        async def run():
-            async for chunk in self.async_respond():
-                yield chunk
-
-        agen = run()
-        while True:
-            try:
-                chunk = loop.run_until_complete(anext(agen))
-                yield chunk
-            except StopAsyncIteration:
-                break
-
-        return self.messages
+            # Convert async generator to sync generator
+            async_gen = self.async_respond()
+            while True:
+                try:
+                    chunk = loop.run_until_complete(async_gen.__anext__())
+                    yield chunk
+                except StopAsyncIteration:
+                    break
+        finally:
+            loop.close()
 
     def server(self):
         """

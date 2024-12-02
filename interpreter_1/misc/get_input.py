@@ -51,7 +51,6 @@ async def async_get_input(
         include_default_pygments_style=False,
         input_processors=[],
         enable_system_prompt=False,
-        wrap_lines=False,
     )
     return result
 
@@ -101,6 +100,5 @@ def get_input(
         include_default_pygments_style=False,
         input_processors=[],
         enable_system_prompt=False,
-        wrap_lines=False,
     )
     return result

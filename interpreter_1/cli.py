@@ -226,11 +226,17 @@ async def async_main(args):
         spinner.stop()
     print()
     global_interpreter.messages = [{"role": "user", "content": message}]
-    async for _ in global_interpreter.async_respond():
-        pass
+    try:
+        async for _ in global_interpreter.async_respond():
+            pass
+    except KeyboardInterrupt:
+        global_interpreter._spinner.stop()
+    except asyncio.CancelledError:
+        global_interpreter._spinner.stop()
     print()
 
-    return global_interpreter
+    if global_interpreter.interactive:
+        await global_interpreter.async_chat()
 
 
 def parse_args():
@@ -297,17 +303,10 @@ def main():
             global_interpreter.server()
             return
 
-        # Run async portion
-        interpreter = asyncio.run(async_main(args))
-        # If we got an interpreter back and it's interactive, start chat in sync context
-        if interpreter and interpreter.interactive:
-            interpreter.chat()
-
+        asyncio.run(async_main(args))
     except KeyboardInterrupt:
-        print("KeyboardInterrupt")
         sys.exit(0)
     except asyncio.CancelledError:
-        print("CancelledError")
         sys.exit(0)
 
 

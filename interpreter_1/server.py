@@ -56,25 +56,7 @@ class Server:
                 self._stream_response(), media_type="text/event-stream"
             )
 
-        # For non-streaming, collect all chunks
-        response_text = ""
-        for chunk in self.interpreter.respond():
-            if chunk.get("type") == "chunk":
-                response_text += chunk["chunk"]
-
-        return {
-            "id": "chatcmpl-" + str(time.time()),
-            "object": "chat.completion",
-            "created": int(time.time()),
-            "model": req.model or self.interpreter.model,
-            "choices": [
-                {
-                    "index": 0,
-                    "message": {"role": "assistant", "content": response_text},
-                    "finish_reason": "stop",
-                }
-            ],
-        }
+        raise NotImplementedError("Non-streaming is not supported yet")
 
     async def _stream_response(self):
         """Stream the response in OpenAI-compatible format"""

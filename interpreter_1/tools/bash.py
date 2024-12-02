@@ -1,6 +1,7 @@
 import asyncio
 import os
 import shutil
+import traceback
 from typing import ClassVar, Literal
 
 import pyte
@@ -91,9 +92,17 @@ class _BashSession:
             final_output = self._get_screen_text()
             return CLIResult(output=final_output if final_output else "<No output>")
 
-        except (KeyboardInterrupt, asyncio.CancelledError):
+        except KeyboardInterrupt as e:
             self.stop()
             return CLIResult(output="Command cancelled by user.")
+        except asyncio.CancelledError as e:
+            self.stop()
+            return CLIResult(output="Command cancelled by user.")
+        except Exception as e:
+            print("Unexpected error")
+            traceback.print_exc()
+            self.stop()
+            return CLIResult(output=f"Command failed with error: {e}")
 
 
 class BashTool(BaseAnthropicTool):
