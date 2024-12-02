@@ -7,6 +7,7 @@ import litellm
 
 litellm.suppress_debug_info = True
 litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
+litellm.modify_params=True
 
 import json
 import logging
