@@ -45,7 +45,7 @@ class Vision:
                         "Alternatively, you can use a vision-supporting LLM and set `interpreter.llm.supports_vision = True`."
                     )
                 model_id = "vikhyatk/moondream2"
-                revision = "2024-04-02"
+                revision = "2024-08-26"
                 print("loading model")
 
                 self.model = transformers.AutoModelForCausalLM.from_pretrained(
