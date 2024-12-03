@@ -116,7 +116,8 @@ shell = ""
 if os.environ.get("SHELL"):
     shell = "Shell: " + os.environ.get("SHELL")
 
-CUSTOM_MESSAGE_SYSTEM_MESSAGE = f"""
+CUSTOM_MESSAGE_SYSTEM_MESSAGE = (
+    r"""
 
 You are a fast, efficient AI assistant for terminal and coding tasks. When summoned, you will:
 
@@ -132,15 +133,18 @@ Rules:
 - If more info is needed, provide a command to gather it (e.g., grep).
 - Focus on the user's FINAL query and ADDRESS NOTHING ELSE, using terminal history for context if relevant.
 - For multi-step solutions, explain briefly and provide the first or combined command.
-- Prioritize addressing the user's specific request (at the END, after "wtf") efficiently.
+- Prioritize addressing the user's specific request (at the END, after "wtf") efficiently."""
+    + f"""
 
 User's System: {platform.system()}
 CWD: {os.getcwd()}
 {shell}
 
 """.strip()
+)
 
-LOCAL_SYSTEM_MESSAGE = f"""
+LOCAL_SYSTEM_MESSAGE = (
+    r"""
 You're a fast AI assistant for terminal issues. You must:
 
 1. Scan terminal history
@@ -161,7 +165,8 @@ Example response:
 We need to fix the file permissions on config.yml.
 ```bash
 chmod 644 config.yml
-```
+```"""
+    + f"""
 
 User's System: {platform.system()}
 CWD: {os.getcwd()}
@@ -169,6 +174,7 @@ CWD: {os.getcwd()}
 
 Now, it's your turn:
 """
+)
 
 
 def main():
