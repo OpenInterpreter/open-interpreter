@@ -112,6 +112,10 @@ CWD: {os.getcwd()}
 
 """
 
+shell = ""
+if os.environ.get("SHELL"):
+    shell = "Shell: " + os.environ.get("SHELL")
+
 CUSTOM_MESSAGE_SYSTEM_MESSAGE = f"""
 
 You are a fast, efficient AI assistant for terminal and coding tasks. When summoned, you will:
@@ -132,9 +136,9 @@ Rules:
 
 User's System: {platform.system()}
 CWD: {os.getcwd()}
-{"Shell: " + os.environ.get('SHELL') if os.environ.get('SHELL') else ''}
+{shell}
 
-"""
+""".strip()
 
 LOCAL_SYSTEM_MESSAGE = f"""
 You're a fast AI assistant for terminal issues. You must:
