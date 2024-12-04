@@ -7,7 +7,7 @@ A modern command line assistant.
 ## Install
 
 ```bash
-pip install open-interpreter
+curl https://raw.githubusercontent.com/OpenInterpreter/open-interpreter/refs/heads/development/installers/new-installer.sh | sh
 ```
 
 ## Usage
@@ -53,7 +53,11 @@ interpreter --profile 4o
 interpreter --tools interpreter,editor,gui
 ```
 
-## Python Usage
+## Python
+
+```bash
+pip install open-interpreter
+```
 
 ```python
 from interpreter import Interpreter

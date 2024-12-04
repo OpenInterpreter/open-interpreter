@@ -1,2 +1,2 @@
-curl openinterpreter.com/cli | bash
+curl openinterpreter.com/cli | sh
 interpreter
