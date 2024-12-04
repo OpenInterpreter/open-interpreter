@@ -35,9 +35,11 @@ uv pip install --python "$VENV_DIR/bin/python" "git+$REPO_URL@$BRANCH"
 # Update PATH for current session and future sessions
 export PATH="$VENV_DIR/bin:$PATH"
 SHELL_CONFIG="$HOME/.bashrc"
-if [[ "$SHELL" == *"zsh"* ]]; then
-    SHELL_CONFIG="$HOME/.zshrc"
-fi
+case "$SHELL" in
+    *zsh*)
+        SHELL_CONFIG="$HOME/.zshrc"
+        ;;
+esac
 echo "export PATH=\"$VENV_DIR/bin:\$PATH\"" >> "$SHELL_CONFIG"
 
 echo
