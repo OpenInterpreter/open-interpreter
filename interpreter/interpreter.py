@@ -889,6 +889,17 @@ Notes for using the `str_replace` command:
                         result = ToolResult(output="Tool execution cancelled by user")
 
                     if self.tool_calling:
+                        if result.error:
+                            output = result.error
+                        else:
+                            output = result.output
+                        self.messages.append(
+                            {
+                                "role": "tool",
+                                "content": output,
+                                "tool_call_id": tool_call.id,
+                            }
+                        )
                         if result.base64_image:
                             self.messages.append(
                                 {
