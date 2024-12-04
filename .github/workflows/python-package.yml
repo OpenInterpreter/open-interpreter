@@ -5,66 +5,31 @@ on:
     branches: ["main", "development"]
   pull_request:
     branches: ["main", "development"]
-  workflow_dispatch: # Allow manual triggering
+  workflow_dispatch:
 
 jobs:
   test:
-    name: Test Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    name: Test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false  # Don't cancel other jobs if one fails
+      fail-fast: true
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.10", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for proper versioning
-      
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'  # Cache pip dependencies
-      
-      - name: Install poetry
+          fetch-depth: 0
+
+      - name: Install Open Interpreter
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-      
-      - name: Configure poetry
-        shell: bash
-        run: |
-          poetry config virtualenvs.create true
-          poetry config virtualenvs.in-project true
-      
-      - name: Cache poetry dependencies
-        uses: actions/cache@v3
-        with:
-          path: ./.venv
-          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-      
-      - name: Install dependencies
-        shell: bash
-        run: |
-          poetry install --no-interaction --all-extras
+          curl https://raw.githubusercontent.com/OpenInterpreter/open-interpreter/refs/heads/development/installers/new-installer.sh | sh
 
       - name: Run tests
         shell: bash
         run: |
-          poetry run pytest tests/ -v --color=yes
+          interpreter run tests/ -v --color=yes
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          PYTHONUNBUFFERED: "1"  # For real-time test output
-      
-      - name: Upload test results
-        if: always()  # Run even if tests fail
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-${{ matrix.os }}-${{ matrix.python-version }}
-          path: |
-            .pytest_cache
-            pytest-report.xml
-          if-no-files-found: ignore
+          PYTHONUNBUFFERED: "1"
