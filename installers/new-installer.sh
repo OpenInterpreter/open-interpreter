@@ -18,9 +18,13 @@ if ! command -v uv > /dev/null 2>&1; then
     export PATH="$HOME/.cargo/bin:$PATH"
 fi
 
+# Install Python using uv
+echo "Installing Python $PYTHON_VERSION..."
+uv python install "$PYTHON_VERSION"
+
 # Direct installation using uv with specific Python version
 echo "Installing package..."
-uv pip install --system --python "$PYTHON_VERSION" "git+$REPO_URL@$BRANCH"
+uv pip install --python "$PYTHON_VERSION" "git+$REPO_URL@$BRANCH"
 
 echo
 echo "Installation complete!"
