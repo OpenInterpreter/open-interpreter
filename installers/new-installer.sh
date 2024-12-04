@@ -22,9 +22,14 @@ fi
 echo "Installing Python $PYTHON_VERSION..."
 uv python install "$PYTHON_VERSION"
 
-# Direct installation using uv with specific Python version
+# Create virtual environment
+echo "Creating virtual environment..."
+mkdir -p "$HOME/.openinterpreter"
+uv venv --python "$PYTHON_VERSION" "$HOME/.openinterpreter/venv"
+
+# Install package into the venv
 echo "Installing package..."
-uv pip install --system --python "$PYTHON_VERSION" "git+$REPO_URL@$BRANCH"
+uv pip install --python "$HOME/.openinterpreter/venv/bin/python" "git+$REPO_URL@$BRANCH"
 
 echo
 echo "Installation complete!"
