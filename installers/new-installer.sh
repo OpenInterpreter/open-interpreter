@@ -43,7 +43,7 @@ esac
 echo "export PATH=\"$VENV_DIR/bin:\$PATH\"" >> "$SHELL_CONFIG"
 
 echo "Testing..."
-echo "Say hello world!" | interpreter
+echo "Say hello world!" | interpreter --model gpt-4o-mini
 
 echo
 echo "Installation complete!"
