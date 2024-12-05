@@ -42,5 +42,8 @@ case "$SHELL" in
 esac
 echo "export PATH=\"$VENV_DIR/bin:\$PATH\"" >> "$SHELL_CONFIG"
 
+echo "Testing..."
+echo "Say hello world!" | interpreter
+
 echo
 echo "Installation complete!"
