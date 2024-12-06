@@ -249,7 +249,10 @@ class Interpreter:
         provider = self.provider  # Keep existing provider if set
         max_tokens = self.max_tokens  # Keep existing max_tokens if set
 
-        if self.model in ["claude-3-5-sonnet-latest", "claude-3-5-sonnet-20241022"]:
+        if provider is None and self.model in [
+            "claude-3-5-sonnet-latest",
+            "claude-3-5-sonnet-20241022",
+        ]:
             # For some reason, Litellm can't find the model info for these
             provider = "anthropic"
 
