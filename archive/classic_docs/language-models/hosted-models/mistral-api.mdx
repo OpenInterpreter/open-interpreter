@@ -1,0 +1,53 @@
+---
+title: Mistral AI API
+---
+
+To use Open Interpreter with the Mistral API, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model mistral/<mistral-model>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "mistral/<mistral-model>"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support the following completion models from the Mistral API:
+
+- mistral-tiny
+- mistral-small
+- mistral-medium
+
+<CodeGroup>
+
+```bash Terminal
+
+interpreter --model mistral/mistral-tiny
+interpreter --model mistral/mistral-small
+interpreter --model mistral/mistral-medium
+```
+
+```python Python
+interpreter.llm.model = "mistral/mistral-tiny"
+interpreter.llm.model = "mistral/mistral-small"
+interpreter.llm.model = "mistral/mistral-medium"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable | Description                                  | Where to Find                                      |
+| -------------------- | -------------------------------------------- | -------------------------------------------------- |
+| `MISTRAL_API_KEY`    | The Mistral API key from Mistral API Console | [Mistral API Console](https://console.mistral.ai/user/api-keys/) |

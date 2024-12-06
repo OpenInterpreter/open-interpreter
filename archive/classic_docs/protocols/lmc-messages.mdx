@@ -1,0 +1,68 @@
+---
+title: LMC Messages
+---
+
+To support the incoming `L`anguage `M`odel `C`omputer architecture, we extend OpenAI's messages format to include additional information, and a new role called `computer`:
+
+```python
+# The user sends a message.
+{"role": "user", "type": "message", "content": "What's 2380*3875?"}
+
+# The assistant runs some code.
+{"role": "assistant", "type": "code", "format": "python", "content": "2380*3875"}
+
+# The computer responds with the result of the code.
+{"role": "computer", "type": "console", "format": "output", "content": "9222500"}
+
+# The assistant sends a message.
+{"role": "assistant", "type": "message", "content": "The result of multiplying 2380 by 3875 is 9222500."}
+```
+
+## Anatomy
+
+Each message in the LMC architecture has the following parameters (`format` is only present for some types):
+
+```
+{
+  "role": "<role>",       # Who is sending the message.
+  "type": "<type>",       # What kind of message is being sent.
+  "format": "<format>"    # Some types need to be further specified, so they optionally use this parameter.
+  "content": "<content>", # What the message says.
+}
+```
+
+Parameter|Description|
+---|---|
+`role`|The sender of the message.|
+`type`|The kind of message being sent.|
+`content`|The actual content of the message.|
+`format`|The format of the content (optional).|
+
+## Roles
+
+Role|Description|
+---|---|
+`user`|The individual interacting with the system.|
+`assistant`|The language model.|
+`computer`|The system that executes the language model's commands.|
+
+## Possible Message Types / Formats
+
+Any role can produce any of the following formats, but we've included a `Common Roles` column to give you a sense of the message type's usage.
+
+Type|Format|Content Description|Common Roles
+---|---|---|---|
+message|None|A text-only message.|`user`, `assistant`|
+console|active_line|The active line of code (from the most recent code block) that's executing.|`computer`|
+console|output|Text output resulting from `print()` statements in Python, `console.log()` statements in Javascript, etc. **This includes errors.**|`computer`|
+image|base64|A `base64` image in PNG format (default)|`user`, `computer`|
+image|base64.png|A `base64` image in PNG format|`user`, `computer`|
+image|base64.jpeg|A `base64` image in JPEG format|`user`, `computer`|
+image|path|A path to an image.|`user`, `computer`|
+code|html|HTML code that should be executed.|`assistant`, `computer`|
+code|javascript|JavaScript code that should be executed.|`assistant`, `computer`|
+code|python|Python code that should be executed.|`assistant`|
+code|r|R code that should be executed.|`assistant`|
+code|applescript|AppleScript code that should be executed.|`assistant`|
+code|shell|Shell code that should be executed.|`assistant`|
+audio|wav|audio in wav format for websocket.|`user`|

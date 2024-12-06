@@ -1,0 +1,160 @@
+{
+  "name": "Open Interpreter",
+  "logo": {
+    "dark": "/assets/logo/circle-inverted.png",
+    "light": "/assets/logo/circle.png"
+  },
+  "favicon": "/assets/favicon.png",
+  "colors": {
+    "primary": "#000000",
+    "light": "#FFFFFF",
+    "dark": "#000000",
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#000000"
+    },
+    "anchors": {
+      "from": "#000000",
+      "to": "#000000"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "50K ★ GitHub",
+      "url": "https://github.com/OpenInterpreter/open-interpreter"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Join Discord",
+    "url": "https://discord.gg/Hvz9Axh84z"
+  },
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": [
+        "getting-started/introduction",
+        "getting-started/setup"
+      ]
+    },
+    {
+      "group": "Guides",
+      "pages": [
+        "guides/basic-usage",
+        "guides/running-locally",
+        "guides/profiles",
+        "guides/streaming-response",
+        "guides/advanced-terminal-usage",
+        "guides/multiple-instances",
+        "guides/os-mode"
+      ]
+    },
+    {
+      "group": "Settings",
+      "pages": [
+        "settings/all-settings"
+      ]
+    },
+    {
+      "group": "Language Models",
+      "pages": [
+        "language-models/introduction",
+        {
+          "group": "Hosted Providers",
+          "pages": [
+            "language-models/hosted-models/openai",
+            "language-models/hosted-models/azure",
+            "language-models/hosted-models/vertex-ai",
+            "language-models/hosted-models/replicate",
+            "language-models/hosted-models/togetherai",
+            "language-models/hosted-models/mistral-api",
+            "language-models/hosted-models/anthropic",
+            "language-models/hosted-models/anyscale",
+            "language-models/hosted-models/aws-sagemaker",
+            "language-models/hosted-models/baseten",
+            "language-models/hosted-models/cloudflare",
+            "language-models/hosted-models/cohere",
+            "language-models/hosted-models/ai21",
+            "language-models/hosted-models/deepinfra",
+            "language-models/hosted-models/huggingface",
+            "language-models/hosted-models/nlp-cloud",
+            "language-models/hosted-models/openrouter",
+            "language-models/hosted-models/palm",
+            "language-models/hosted-models/perplexity",
+            "language-models/hosted-models/petals",
+            "language-models/hosted-models/vllm"
+          ]
+        },
+        {
+          "group": "Local Providers",
+          "pages": [
+            "language-models/local-models/ollama",
+            "language-models/local-models/llamafile",
+            "language-models/local-models/janai",
+            "language-models/local-models/lm-studio",
+            "language-models/local-models/custom-endpoint",
+            "language-models/local-models/best-practices"
+          ]
+        },
+        "language-models/custom-models",
+        "language-models/settings"
+      ]
+    },
+    {
+      "group": "Code Execution",
+      "pages": [
+        "code-execution/usage",
+        "code-execution/computer-api",
+        "code-execution/custom-languages",
+        "code-execution/settings"
+      ]
+    },
+    {
+      "group": "Protocols",
+      "pages": [
+        "protocols/lmc-messages"
+      ]
+    },
+    {
+      "group": "Integrations",
+      "pages": [
+        "integrations/e2b",
+        "integrations/docker"
+      ]
+    },
+    {
+      "group": "Safety",
+      "pages": [
+        "safety/introduction",
+        "safety/isolation",
+        "safety/safe-mode",
+        "safety/best-practices"
+      ]
+    },
+    {
+      "group": "Troubleshooting",
+      "pages": [
+        "troubleshooting/faq"
+      ]
+    },
+    {
+      "group": "Telemetry",
+      "pages": [
+        "telemetry/telemetry"
+      ]
+    },
+    {
+      "group": "Policies",
+      "pages": [
+        "legal/license"
+      ]
+    }
+  ],
+  "feedback": {
+    "suggestEdit": true
+  },
+  "footerSocials": {
+    "twitter": "https://x.com/OpenInterpreter",
+    "youtube": "https://www.youtube.com/@OpenInterpreter",
+    "linkedin": "https://www.linkedin.com/company/openinterpreter"
+  }
+}

@@ -1,0 +1,59 @@
+---
+title: Cloudflare Workers AI
+---
+
+To use Open Interpreter with the Cloudflare Workers AI API, set the `model` flag:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model cloudflare/<cloudflare-model>
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "cloudflare/<cloudflare-model>"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support the following completion models from Cloudflare Workers AI:
+
+- Llama-2 7b chat fp16
+- Llama-2 7b chat int8
+- Mistral 7b instruct v0.1
+- CodeLlama 7b instruct awq
+
+<CodeGroup>
+
+```bash Terminal
+
+interpreter --model cloudflare/@cf/meta/llama-2-7b-chat-fp16
+interpreter --model cloudflare/@cf/meta/llama-2-7b-chat-int8
+interpreter --model @cf/mistral/mistral-7b-instruct-v0.1
+interpreter --model @hf/thebloke/codellama-7b-instruct-awq
+
+```
+
+```python Python
+interpreter.llm.model = "cloudflare/@cf/meta/llama-2-7b-chat-fp16"
+interpreter.llm.model = "cloudflare/@cf/meta/llama-2-7b-chat-int8"
+interpreter.llm.model = "@cf/mistral/mistral-7b-instruct-v0.1"
+interpreter.llm.model = "@hf/thebloke/codellama-7b-instruct-awq"
+
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable    | Description                | Where to Find                                                                                  |
+| ----------------------- | -------------------------- | ---------------------------------------------------------------------------------------------- |
+| `CLOUDFLARE_API_KEY'`   | Cloudflare API key         | [Cloudflare Profile Page -> API Tokens](https://dash.cloudflare.com/profile/api-tokens)        |
+| `CLOUDFLARE_ACCOUNT_ID` | Your Cloudflare account ID | [Cloudflare Dashboard -> Grab the Account ID from the url like: https://dash.cloudflare.com/{CLOUDFLARE_ACCOUNT_ID}?account= ](https://dash.cloudflare.com/) |

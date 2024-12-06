@@ -1,0 +1,64 @@
+---
+title: OpenRouter
+---
+
+To use Open Interpreter with a model from OpenRouter, set the `model` flag to begin with `openrouter/`:
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model openrouter/openai/gpt-3.5-turbo
+```
+
+```python Python
+from interpreter import interpreter
+
+interpreter.llm.model = "openrouter/openai/gpt-3.5-turbo"
+interpreter.chat()
+```
+
+</CodeGroup>
+
+# Supported Models
+
+We support any model on [OpenRouter's models page:](https://openrouter.ai/models)
+
+<CodeGroup>
+
+```bash Terminal
+interpreter --model openrouter/openai/gpt-3.5-turbo
+interpreter --model openrouter/openai/gpt-3.5-turbo-16k
+interpreter --model openrouter/openai/gpt-4
+interpreter --model openrouter/openai/gpt-4-32k
+interpreter --model openrouter/anthropic/claude-2
+interpreter --model openrouter/anthropic/claude-instant-v1
+interpreter --model openrouter/google/palm-2-chat-bison
+interpreter --model openrouter/google/palm-2-codechat-bison
+interpreter --model openrouter/meta-llama/llama-2-13b-chat
+interpreter --model openrouter/meta-llama/llama-2-70b-chat
+```
+
+```python Python
+interpreter.llm.model = "openrouter/openai/gpt-3.5-turbo"
+interpreter.llm.model = "openrouter/openai/gpt-3.5-turbo-16k"
+interpreter.llm.model = "openrouter/openai/gpt-4"
+interpreter.llm.model = "openrouter/openai/gpt-4-32k"
+interpreter.llm.model = "openrouter/anthropic/claude-2"
+interpreter.llm.model = "openrouter/anthropic/claude-instant-v1"
+interpreter.llm.model = "openrouter/google/palm-2-chat-bison"
+interpreter.llm.model = "openrouter/google/palm-2-codechat-bison"
+interpreter.llm.model = "openrouter/meta-llama/llama-2-13b-chat"
+interpreter.llm.model = "openrouter/meta-llama/llama-2-70b-chat"
+```
+
+</CodeGroup>
+
+# Required Environment Variables
+
+Set the following environment variables [(click here to learn how)](https://chat.openai.com/share/1062cdd8-62a1-4aa8-8ec9-eca45645971a) to use these models.
+
+| Environment Variable  | Description  | Where to Find  |
+| --------------------- | ------------ | -------------- |
+| `OPENROUTER_API_KEY`       | The API key for authenticating to OpenRouter's services. | [OpenRouter Account Page](https://openrouter.ai/keys) |
+| `OR_SITE_URL`      | The site URL for OpenRouter's services. | [OpenRouter Account Page](https://openrouter.ai/keys) |
+| `OR_APP_NAME`   | The app name for OpenRouter's services. | [OpenRouter Account Page](https://openrouter.ai/keys) |

@@ -1,0 +1,41 @@
+---
+title: Custom Models
+---
+
+In addition to hosted and local language models, Open Interpreter also supports custom models.
+
+As long as your system can accept an input and stream an output (and can be interacted with via a Python generator) it can be used as a language model in Open Interpreter.
+
+Simply replace the OpenAI-compatible `completions` function in your language model with one of your own:
+
+```python
+def custom_language_model(messages, model, stream, max_tokens):
+    """
+    OpenAI-compatible completions function (this one just echoes what the user said back).
+    To make it OpenAI-compatible and parsable, `choices` has to be the root property.
+    The property `delta` is used to signify streaming.
+    """
+    users_content = messages[-1].get("content") # Get last message's content
+
+    for character in users_content:
+        yield {"choices": [{"delta": {"content": character}}]}
+
+# Tell Open Interpreter to power the language model with this function
+
+interpreter.llm.completions = custom_language_model
+```
+
+Then, set the following settings:
+
+```
+interpreter.llm.context_window = 2000 # In tokens
+interpreter.llm.max_tokens = 1000 # In tokens
+interpreter.llm.supports_vision = False # Does this completions endpoint accept images?
+interpreter.llm.supports_functions = False # Does this completions endpoint accept/return function calls?
+```
+
+And start using it:
+
+```
+interpreter.chat("Hi!") # Returns/displays "Hi!" character by character
+```

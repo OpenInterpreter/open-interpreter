@@ -5,31 +5,31 @@ on:
     branches: ["main", "development"]
   pull_request:
     branches: ["main", "development"]
+  workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        os: [ubuntu-latest, macos-latest] # figure out windows-latest later
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+      - uses: actions/checkout@v4
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install poetry
+          fetch-depth: 0
+
+      - name: Install Open Interpreter
+        shell: bash
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-      - name: Install dependencies
+          curl https://raw.githubusercontent.com/OpenInterpreter/open-interpreter/refs/heads/development/installers/new-installer.sh | sh
+
+      - name: Run tests
+        shell: bash
         run: |
-          # Ensure dependencies are installed without relying on a lock file.
-          poetry update
-          poetry install -E server
-      - name: Test with pytest
-        run: |
-          poetry run pytest -s -x -k test_
+          interpreter run tests/ -v --color=yes
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          PYTHONUNBUFFERED: "1"

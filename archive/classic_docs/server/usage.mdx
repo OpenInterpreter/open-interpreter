@@ -1,0 +1,338 @@
+# Server Usage Guide
+
+## Starting the Server
+
+### From Command Line
+To start the server from the command line, use:
+
+```bash
+interpreter --server
+```
+
+### From Python
+To start the server from within a Python script:
+
+```python
+from interpreter import AsyncInterpreter
+
+async_interpreter = AsyncInterpreter()
+async_interpreter.server.run(port=8000)  # Default port is 8000, but you can customize it
+```
+
+## WebSocket API
+
+### Establishing a Connection
+Connect to the WebSocket server at `ws://localhost:8000/`.
+
+### Message Format
+Open Interpreter uses an extended version of OpenAI's message format called [LMC messages](https://docs.openinterpreter.com/protocols/lmc-messages) that allow for rich, multi-part messages. **Messages must be sent between start and end flags.** Here's the basic structure:
+
+```json
+{"role": "user", "start": true}
+{"role": "user", "type": "message", "content": "Your message here"}
+{"role": "user", "end": true}
+```
+
+### Multi-part Messages
+You can send complex messages with multiple components:
+
+1. Start with `{"role": "user", "start": true}`
+2. Add various types of content (message, file, image, etc.)
+3. End with `{"role": "user", "end": true}`
+
+### Content Types
+You can include various types of content in your messages:
+
+- Text messages: `{"role": "user", "type": "message", "content": "Your text here"}`
+- File paths: `{"role": "user", "type": "file", "content": "path/to/file"}`
+- Images: `{"role": "user", "type": "image", "format": "path", "content": "path/to/photo"}`
+- Audio: `{"role": "user", "type": "audio", "format": "wav", "content": "path/to/audio.wav"}`
+
+### Control Commands
+To control the server's behavior, send the following commands:
+
+1. Stop execution:
+   ```json
+   {"role": "user", "type": "command", "content": "stop"}
+   ```
+   This stops all execution and message processing.
+
+2. Execute code block:
+   ```json
+   {"role": "user", "type": "command", "content": "go"}
+   ```
+   This executes a generated code block and allows the agent to proceed.
+
+   **Note**: If `auto_run` is set to `False`, the agent will pause after generating code blocks. You must send the "go" command to continue execution.
+
+### Completion Status
+The server indicates completion with the following message:
+```json
+{"role": "server", "type": "status", "content": "complete"}
+```
+Ensure your client watches for this message to determine when the interaction is finished.
+
+### Error Handling
+If an error occurs, the server will send an error message in the following format:
+```json
+{"role": "server", "type": "error", "content": "Error traceback information"}
+```
+Your client should be prepared to handle these error messages appropriately.
+
+## Code Execution Review
+
+After code blocks are executed, you'll receive a review message:
+
+```json
+{
+  "role": "assistant",
+  "type": "review",
+  "content": "Review of the executed code, including safety assessment and potential irreversible actions."
+}
+```
+
+This review provides important information about the safety and potential impact of the executed code. Pay close attention to these messages, especially when dealing with operations that might have significant effects on your system.
+
+The `content` field of the review message may have two possible formats:
+
+1. If the code is deemed completely safe, the content will be exactly `"<SAFE>"`.
+2. Otherwise, it will contain an explanation of why the code might be unsafe or have irreversible effects.
+
+Example of a safe code review:
+```json
+{
+  "role": "assistant",
+  "type": "review",
+  "content": "<SAFE>"
+}
+```
+
+Example of a potentially unsafe code review:
+```json
+{
+  "role": "assistant",
+  "type": "review",
+  "content": "This code performs file deletion operations which are irreversible. Please review carefully before proceeding."
+}
+```
+
+## Example WebSocket Interaction
+
+Here's an example demonstrating the WebSocket interaction:
+
+```python
+import websockets
+import json
+import asyncio
+
+async def websocket_interaction():
+    async with websockets.connect("ws://localhost:8000/") as websocket:
+        # Send a multi-part user message
+        await websocket.send(json.dumps({"role": "user", "start": True}))
+        await websocket.send(json.dumps({"role": "user", "type": "message", "content": "Analyze this image:"}))
+        await websocket.send(json.dumps({"role": "user", "type": "image", "format": "path", "content": "path/to/image.jpg"}))
+        await websocket.send(json.dumps({"role": "user", "end": True}))
+
+        # Receive and process messages
+        while True:
+            message = await websocket.recv()
+            data = json.loads(message)
+            
+            if data.get("type") == "message":
+                print(f"Assistant: {data.get('content', '')}")
+            elif data.get("type") == "review":
+                print(f"Code Review: {data.get('content')}")
+            elif data.get("type") == "error":
+                print(f"Error: {data.get('content')}")
+            elif data == {"role": "assistant", "type": "status", "content": "complete"}:
+                print("Interaction complete")
+                break
+
+asyncio.run(websocket_interaction())
+```
+
+## HTTP API
+
+### Modifying Settings
+To change server settings, send a POST request to `http://localhost:8000/settings`. The payload should conform to [the interpreter object's settings](https://docs.openinterpreter.com/settings/all-settings).
+
+Example:
+```python
+import requests
+
+settings = {
+    "llm": {"model": "gpt-4"},
+    "custom_instructions": "You only write Python code.",
+    "auto_run": True,
+}
+response = requests.post("http://localhost:8000/settings", json=settings)
+print(response.status_code)
+```
+
+### Retrieving Settings
+To get current settings, send a GET request to `http://localhost:8000/settings/{property}`.
+
+Example:
+```python
+response = requests.get("http://localhost:8000/settings/custom_instructions")
+print(response.json())
+# Output: {"custom_instructions": "You only write Python code."}
+```
+
+## OpenAI-Compatible Endpoint
+
+The server provides an OpenAI-compatible endpoint at `/openai`. This allows you to use the server with any tool or library that's designed to work with the OpenAI API.
+
+### Chat Completions Endpoint
+
+The chat completions endpoint is available at:
+
+```
+[server_url]/openai/chat/completions
+```
+
+To use this endpoint, set the `api_base` in your OpenAI client or configuration to `[server_url]/openai`. For example:
+
+```python
+import openai
+
+openai.api_base = "http://localhost:8000/openai"  # Replace with your server URL if different
+openai.api_key = "dummy"  # The key is not used but required by the OpenAI library
+
+response = openai.ChatCompletion.create(
+    model="gpt-3.5-turbo",  # This model name is ignored, but required
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "What's the capital of France?"}
+    ]
+)
+
+print(response.choices[0].message['content'])
+```
+
+Note that only the chat completions endpoint (`/chat/completions`) is implemented. Other OpenAI API endpoints are not available.
+
+When using this endpoint:
+- The `model` parameter is required but ignored.
+- The `api_key` is required by the OpenAI library but not used by the server.
+
+## Using Docker
+
+You can also run the server using Docker. First, build the Docker image from the root of the repository:
+
+```bash
+docker build -t open-interpreter .
+```
+
+Then, run the container:
+
+```bash
+docker run -p 8000:8000 open-interpreter
+```
+
+This will expose the server on port 8000 of your host machine.
+
+## Acknowledgment Feature
+
+When the `INTERPRETER_REQUIRE_ACKNOWLEDGE` environment variable is set to `"True"`, the server requires clients to acknowledge each message received. This feature ensures reliable message delivery in environments where network stability might be a concern.
+
+### How it works
+
+1. When this feature is enabled, each message sent by the server will include an `id` field.
+2. The client must send an acknowledgment message back to the server for each received message.
+3. The server will wait for this acknowledgment before sending the next message.
+
+### Client Implementation
+
+To implement this on the client side:
+
+1. Check if each received message contains an `id` field.
+2. If an `id` is present, send an acknowledgment message back to the server.
+
+Here's an example of how to handle this in your WebSocket client:
+
+```python
+import json
+import websockets
+
+async def handle_messages(websocket):
+    async for message in websocket:
+        data = json.loads(message)
+        
+        # Process the message as usual
+        print(f"Received: {data}")
+
+        # Check if the message has an ID that needs to be acknowledged
+        if "id" in data:
+            ack_message = {
+                "ack": data["id"]
+            }
+            await websocket.send(json.dumps(ack_message))
+            print(f"Sent acknowledgment for message {data['id']}")
+
+async def main():
+    uri = "ws://localhost:8000"
+    async with websockets.connect(uri) as websocket:
+        await handle_messages(websocket)
+
+# Run the async function
+import asyncio
+asyncio.run(main())
+```
+
+### Server Behavior
+
+- If the server doesn't receive an acknowledgment within a certain timeframe, it will attempt to resend the message.
+- The server will make multiple attempts to send a message before considering it failed.
+
+### Enabling the Feature
+
+To enable this feature, set the `INTERPRETER_REQUIRE_ACKNOWLEDGE` environment variable to `"True"` before starting the server:
+
+```bash
+export INTERPRETER_REQUIRE_ACKNOWLEDGE="True"
+interpreter --server
+```
+
+Or in Python:
+
+```python
+import os
+os.environ["INTERPRETER_REQUIRE_ACKNOWLEDGE"] = "True"
+
+from interpreter import AsyncInterpreter
+async_interpreter = AsyncInterpreter()
+async_interpreter.server.run()
+```
+
+## Advanced Usage: Accessing the FastAPI App Directly
+
+The FastAPI app is exposed at `async_interpreter.server.app`. This allows you to add custom routes or host the app using Uvicorn directly.
+
+Example of adding a custom route and hosting with Uvicorn:
+
+```python
+from interpreter import AsyncInterpreter
+from fastapi import FastAPI
+import uvicorn
+
+async_interpreter = AsyncInterpreter()
+app = async_interpreter.server.app
+
+@app.get("/custom")
+async def custom_route():
+    return {"message": "This is a custom route"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+```
+
+## Best Practices
+
+1. Always handle the "complete" status message to ensure your client knows when the server has finished processing.
+2. If `auto_run` is set to `False`, remember to send the "go" command to execute code blocks and continue the interaction.
+3. Implement proper error handling in your client to manage potential connection issues, unexpected server responses, or server-sent error messages.
+4. Use the AsyncInterpreter class when working with the server in Python to ensure compatibility with asynchronous operations.
+5. Pay attention to the code execution review messages for important safety and operational information.
+6. Utilize the multi-part user message structure for complex inputs, including file paths and images.
+7. When sending file paths or image paths, ensure they are accessible to the server.

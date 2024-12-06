@@ -3,9 +3,8 @@ name = "open-interpreter"
 packages = [
     {include = "interpreter"},
     {include = "scripts"},
-    {include = "interpreter_1"},
 ]
-version = "0.4.4" # Use "-rc1", "-rc2", etc. for pre-release versions
+version = "1.0.0" # Use "-rc1", "-rc2", etc. for pre-release versions
 description = "A natural language interface for computers"
 authors = ["Killian Lucas <killian@openinterpreter.com>"]
 readme = "README.md"
@@ -23,23 +22,21 @@ prompt-toolkit = "^3.0.48"
 pyte = "^0.8.2"
 screeninfo = "^0.8.1"
 readchar = "^4.2.1"
-pillow = "^11.0.0"
+pillow = ">=10.3.0"
 uvicorn = "^0.32.0"
 pynput = "^1.7.7"
+httpx = "0.27.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-i = "interpreter_1.cli:main"
-interpreter = "interpreter_1.cli:main"
-
+i = "interpreter.cli:main"
+interpreter = "interpreter.cli:main"
 interpreter-shell = "scripts.shell:main"
 interpreter-uninstall-shell = "scripts.uninstall_shell:main"
-
 wtf = "scripts.wtf:main"
-interpreter-classic = "interpreter.terminal_interface.start_terminal_interface:main"
 
 [tool.black]
 target-version = ['py311']

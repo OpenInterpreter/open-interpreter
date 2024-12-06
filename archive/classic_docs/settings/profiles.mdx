@@ -1,0 +1,32 @@
+---
+title: Profiles
+---
+
+Profiles are preconfigured settings for Open Interpreter that make it easy to get going quickly with a specific set of settings. Any [setting](/settings/all-settings) can be configured in a profile. Custom instructions are helpful to have in each profile, to customize the behavior of Open Interpreter for the specific use case that the profile is designed for.
+
+To load a profile, run:
+
+```bash
+interpreter --profile <profile_name>.yaml
+
+```
+
+All profiles are stored in their own folder, which can be accessed by running:
+
+```bash
+interpreter --profile
+
+```
+
+To create your own profile, you can add a `.yaml` file to this folder and add whatever [settings](/settings/all-settings) you'd like:
+
+```yaml
+custom_instructions: "Always use python, and be as concise as possible"
+llm.model: gpt-4
+llm.temperature: 0.5
+# Any other settings you'd like to add
+```
+
+Any profile named 'default.yaml' will be loaded by default.
+
+Profiles can be shared with others by sending them the profile yaml file!
