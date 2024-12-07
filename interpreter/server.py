@@ -8,6 +8,7 @@ import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
+from asyncio import CancelledError, Task
 
 
 class ChatCompletionRequest(BaseModel):
@@ -35,14 +36,27 @@ class Server:
         # Setup routes
         self.app.post("/chat/completions")(self.chat_completion)
 
+        # Add a field to track the current request task
+        self._current_request: Optional[Task] = None
+
     async def chat_completion(self, request: Request):
         """Main chat completion endpoint"""
+        # Cancel any existing request
+        if self._current_request and not self._current_request.done():
+            self._current_request.cancel()
+            try:
+                await self._current_request
+            except CancelledError:
+                pass
+
         body = await request.json()
+        if self.interpreter.debug:
+            print("Request body:", body)
         try:
             req = ChatCompletionRequest(**body)
         except Exception as e:
-            print("Validation error:", str(e))  # Debug print
-            print("Request body:", body)  # Print the request body
+            print("Validation error:", str(e))
+            print("Request body:", body)
             raise
 
         # Filter out system message
@@ -75,18 +89,6 @@ class Server:
                             delta["function_call"] = choice.delta.function_call
                         if choice.delta.tool_calls is not None:
                             pass
-                            # Convert tool_calls to dict representation
-                            # delta["tool_calls"] = [
-                            #     {
-                            #         "index": tool_call.index,
-                            #         "id": tool_call.id,
-                            #         "type": tool_call.type,
-                            #         "function": {
-                            #             "name": tool_call.function.name,
-                            #             "arguments": tool_call.function.arguments
-                            #         }
-                            #     } for tool_call in choice.delta.tool_calls
-                            # ]
 
                     choices.append(
                         {
@@ -108,11 +110,16 @@ class Server:
                     data["system_fingerprint"] = chunk.system_fingerprint
 
                 yield f"data: {json.dumps(data)}\n\n"
-        except asyncio.CancelledError:
-            # Set stop flag when stream is cancelled
-            self.interpreter._stop_flag = True
+
+        except CancelledError:
+            # Handle cancellation gracefully
+            print("Request cancelled - cleaning up...")
+
             raise
+        except Exception as e:
+            print(f"Error in stream: {str(e)}")
         finally:
+            # Always send DONE message and cleanup
             yield "data: [DONE]\n\n"
 
     def run(self):

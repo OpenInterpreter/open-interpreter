@@ -207,7 +207,7 @@ class Interpreter:
             print("Error adding system capability for cwd")
 
         system_message += "</SYSTEM_CAPABILITY>"
-
+        
         # Add web search capability if enabled
         if (
             os.environ.get("INTERPRETER_EXPERIMENTAL_WEB_SEARCH", "false").lower()
@@ -215,7 +215,7 @@ class Interpreter:
         ):
             system_message = system_message.replace(
                 "</SYSTEM_CAPABILITY>",
-                "* For fast web searches (like up-to-date docs) curl https://api.openinterpreter.com/v0/browser/search?query=your+search+query\n</SYSTEM_CAPABILITY>",
+                "* For any web search requests, curl https://api.openinterpreter.com/v0/browser/search?query=your+search+query\n</SYSTEM_CAPABILITY>",
             )
 
         # Update system prompt for Mac OS, if computer tool is enabled
@@ -1009,6 +1009,12 @@ Notes for using the `str_replace` command:
                 except KeyboardInterrupt:
                     self._spinner.stop()
                 except asyncio.CancelledError:
+                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
+                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
+                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
+                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
+                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
+                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
                     self._spinner.stop()
 
                 print()
