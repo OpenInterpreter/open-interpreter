@@ -36,19 +36,9 @@ class Server:
         # Setup routes
         self.app.post("/chat/completions")(self.chat_completion)
 
-        # Add a field to track the current request task
-        self._current_request: Optional[Task] = None
 
     async def chat_completion(self, request: Request):
         """Main chat completion endpoint"""
-        # Cancel any existing request
-        if self._current_request and not self._current_request.done():
-            self._current_request.cancel()
-            try:
-                await self._current_request
-            except CancelledError:
-                pass
-
         body = await request.json()
         if self.interpreter.debug:
             print("Request body:", body)
