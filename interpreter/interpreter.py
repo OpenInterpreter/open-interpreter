@@ -249,8 +249,11 @@ class Interpreter:
         provider = self.provider  # Keep existing provider if set
         max_tokens = self.max_tokens  # Keep existing max_tokens if set
 
-        if self.model == "claude-3-5-sonnet":
-            # For some reason, Litellm can't find the model info for claude-3-5-sonnet-latest
+        if provider is None and self.model in [
+            "claude-3-5-sonnet-latest",
+            "claude-3-5-sonnet-20241022",
+        ]:
+            # For some reason, Litellm can't find the model info for these
             provider = "anthropic"
 
         # Only try to get model info if we need either provider or max_tokens
@@ -294,13 +297,7 @@ class Interpreter:
 
             self._spinner.start()
 
-            enable_prompt_caching = False
             betas = [COMPUTER_USE_BETA_FLAG]
-
-            if enable_prompt_caching:
-                betas.append(PROMPT_CACHING_BETA_FLAG)
-                image_truncation_threshold = 50
-                system["cache_control"] = {"type": "ephemeral"}
 
             edit = ToolRenderer()
 
@@ -308,19 +305,25 @@ class Interpreter:
                 provider == "anthropic" and not self.serve
             ):  # Server can't handle Anthropic yet
                 if self._client is None:
-                    if self.api_key:
-                        self._client = Anthropic(api_key=self.api_key)
-                    else:
-                        self._client = Anthropic()
+                    anthropic_params = {}
+                    if self.api_key is not None:
+                        anthropic_params["api_key"] = self.api_key
+                    if self.api_base is not None:
+                        anthropic_params["base_url"] = self.api_base
+                    self._client = Anthropic(**anthropic_params)
 
                 if self.debug:
                     print("Sending messages:", self.messages, "\n")
+
+                model = self.model
+                if model.startswith("anthropic/"):
+                    model = model[len("anthropic/") :]
 
                 # Use Anthropic API which supports betas
                 raw_response = self._client.beta.messages.create(
                     max_tokens=max_tokens,
                     messages=self.messages,
-                    model=self.model,
+                    model=model,
                     system=system["text"],
                     tools=tool_collection.to_params(),
                     betas=betas,
@@ -698,7 +701,7 @@ Notes for using the `str_replace` command:
                     "temperature": self.temperature,
                     "api_key": self.api_key,
                     "api_version": self.api_version,
-                    "parallel_tool_calls": False,
+                    # "parallel_tool_calls": True,
                 }
 
                 if self.tool_calling:
@@ -707,13 +710,32 @@ Notes for using the `str_replace` command:
                     params["stream"] = False
                     stream = False
 
-                if self.debug:
-                    print(params)
+                if provider == "anthropic" and self.tool_calling:
+                    params["tools"] = tool_collection.to_params()
+                    for t in params["tools"]:
+                        t["function"] = {"name": t["name"]}
+                        if t["name"] == "computer":
+                            t["function"]["parameters"] = {
+                                "display_height_px": t["display_height_px"],
+                                "display_width_px": t["display_width_px"],
+                                "display_number": t["display_number"],
+                            }
+                    params["extra_headers"] = {
+                        "anthropic-beta": "computer-use-2024-10-22"
+                    }
+
+                # if self.debug:
+                #     print("Sending request...", params)
+                #     time.sleep(3)
 
                 if self.debug:
-                    print("Sending request...", params)
-
-                    time.sleep(3)
+                    print("Messages:")
+                    for m in self.messages:
+                        if len(str(m)) > 1000:
+                            print(str(m)[:1000] + "...")
+                        else:
+                            print(str(m))
+                    print()
 
                 raw_response = litellm.completion(**params)
 
@@ -856,6 +878,8 @@ Notes for using the `str_replace` command:
                 else:
                     user_approval = input("\nRun tool(s)? (y/n): ").lower().strip()
 
+                user_content_to_add = []
+
                 for tool_call in message.tool_calls:
                     function_arguments = json.loads(tool_call.function.arguments)
 
@@ -868,44 +892,58 @@ Notes for using the `str_replace` command:
                         result = ToolResult(output="Tool execution cancelled by user")
 
                     if self.tool_calling:
-                        if result.base64_image:
-                            # Add image to tool result
-                            self.messages.append(
-                                {
-                                    "role": "tool",
-                                    "content": "The user will reply with the image outputted by the tool.",
-                                    "tool_call_id": tool_call.id,
-                                }
-                            )
-                            self.messages.append(
-                                {
-                                    "role": "user",
-                                    "content": [
-                                        {
-                                            "type": "image_url",
-                                            "image_url": {
-                                                "url": f"data:image/png;base64,{result.base64_image}",
-                                            },
-                                        }
-                                    ],
-                                }
-                            )
+                        if result.error:
+                            output = result.error
                         else:
+                            output = result.output
+                        self.messages.append(
+                            {
+                                "role": "tool",
+                                "content": output,
+                                "tool_call_id": tool_call.id,
+                            }
+                        )
+                        if result.base64_image:
                             self.messages.append(
                                 {
                                     "role": "tool",
-                                    "content": json.dumps(dataclasses.asdict(result)),
+                                    "content": "The user will reply with the tool's image output.",
                                     "tool_call_id": tool_call.id,
+                                }
+                            )
+                            user_content_to_add.append(
+                                {
+                                    "type": "image_url",
+                                    "image_url": {
+                                        "url": f"data:image/png;base64,{result.base64_image}",
+                                    },
                                 }
                             )
                     else:
-                        self.messages.append(
-                            {
-                                "role": "user",
-                                "content": "This was the output of the tool call. What does it mean/what's next?"
-                                + json.dumps(dataclasses.asdict(result)),
-                            }
+                        text_content = (
+                            "This was the output of the tool call. What does it mean/what's next?\n"
+                            + (result.output or "")
                         )
+                        if result.base64_image:
+                            content = [
+                                {"type": "text", "text": text_content},
+                                {
+                                    "type": "image",
+                                    "image_url": {
+                                        "url": "data:image/png;base64,"
+                                        + result.base64_image
+                                    },
+                                },
+                            ]
+                        else:
+                            content = text_content
+
+                        self.messages.append({"role": "user", "content": content})
+
+                if user_content_to_add:
+                    self.messages.append(
+                        {"role": "user", "content": user_content_to_add}
+                    )
 
     def _ask_user_approval(self) -> str:
         """Ask user for approval to run a tool"""

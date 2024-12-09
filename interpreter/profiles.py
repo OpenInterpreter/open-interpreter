@@ -32,7 +32,7 @@ class Profile:
     def __init__(self):
         # Default values if no profile exists
         # Model configuration
-        self.model = "claude-3-5-sonnet"  # The LLM model to use
+        self.model = "claude-3-5-sonnet-20241022"  # The LLM model to use
         self.provider = (
             None  # The model provider (e.g. anthropic, openai) None will auto-detect
         )

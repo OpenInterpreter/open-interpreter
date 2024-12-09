@@ -160,6 +160,9 @@ class CommandHandler:
         value_str = parts[2]
         type_hint, _ = SETTINGS[param]
         try:
+            self.interpreter._client = (
+                None  # Reset client, in case they changed API key or API base
+            )
             value = parse_value(value_str, type_hint)
             setattr(self.interpreter, param, value)
             print(f"Set {param} = {value}")
