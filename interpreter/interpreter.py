@@ -207,7 +207,7 @@ class Interpreter:
             print("Error adding system capability for cwd")
 
         system_message += "</SYSTEM_CAPABILITY>"
-        
+
         # Add web search capability if enabled
         if (
             os.environ.get("INTERPRETER_EXPERIMENTAL_WEB_SEARCH", "false").lower()
@@ -971,12 +971,6 @@ Notes for using the `str_replace` command:
                 except KeyboardInterrupt:
                     self._spinner.stop()
                 except asyncio.CancelledError:
-                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
-                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
-                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
-                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
-                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
-                    print("ASYNC CHAT INSIDE INTERPRETER CANCELLED ERROR HERE")
                     self._spinner.stop()
 
                 print()
