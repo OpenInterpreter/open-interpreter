@@ -896,20 +896,15 @@ Notes for using the `str_replace` command:
                             output = result.error
                         else:
                             output = result.output
-                        self.messages.append(
-                            {
-                                "role": "tool",
-                                "content": output,
-                                "tool_call_id": tool_call.id,
-                            }
-                        )
+
+                        tool_output = ""
+
+                        if output:
+                            tool_output += output
+
                         if result.base64_image:
-                            self.messages.append(
-                                {
-                                    "role": "tool",
-                                    "content": "The user will reply with the tool's image output.",
-                                    "tool_call_id": tool_call.id,
-                                }
+                            tool_output += (
+                                "\nThe user will reply with the tool's image output."
                             )
                             user_content_to_add.append(
                                 {
@@ -919,6 +914,17 @@ Notes for using the `str_replace` command:
                                     },
                                 }
                             )
+
+                        if tool_output == "":
+                            tool_output = "No output from tool."
+
+                        self.messages.append(
+                            {
+                                "role": "tool",
+                                "content": tool_output.strip(),
+                                "tool_call_id": tool_call.id,
+                            }
+                        )
                     else:
                         text_content = (
                             "This was the output of the tool call. What does it mean/what's next?\n"
