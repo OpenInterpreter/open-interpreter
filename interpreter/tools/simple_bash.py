@@ -6,7 +6,7 @@ from anthropic.types.beta import BetaToolBash20241022Param
 
 from .base import BaseAnthropicTool, CLIResult, ToolError, ToolResult
 
-print("Using simple bash tool")
+# print("Using simple bash tool")
 
 
 class BashTool(BaseAnthropicTool):
