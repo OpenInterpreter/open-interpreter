@@ -215,7 +215,7 @@ class Interpreter:
         ):
             system_message = system_message.replace(
                 "</SYSTEM_CAPABILITY>",
-                "* For fast web searches (like up-to-date docs) curl https://api.openinterpreter.com/v0/browser/search?query=your+search+query\n</SYSTEM_CAPABILITY>",
+                "* For any web search requests, curl https://api.openinterpreter.com/v0/browser/search?query=your+search+query\n</SYSTEM_CAPABILITY>",
             )
 
         # Update system prompt for Mac OS, if computer tool is enabled
