@@ -109,8 +109,9 @@ def query_reduce_chunks(responses, llm, chunk_size, query):
             summaries = list(
                 executor.map(lambda chunk: fast_llm(llm, query, chunk), chunks)
             )
+        responses = summaries
 
-    return summaries[0]
+    return responses[0]
 
 
 class Ai:
