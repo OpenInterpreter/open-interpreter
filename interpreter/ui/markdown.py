@@ -22,6 +22,9 @@ class MarkdownElement(Enum):
 
 class MarkdownRenderer:
     def __init__(self):
+        if os.name == "nt":
+            import colorama
+            colorama.init()
         # ANSI escape codes
         self.BOLD = "\033[1m"
         self.CODE = "\033[7m"  # Regular inline code stays inverted
