@@ -9,6 +9,7 @@ from .languages.applescript import AppleScript
 from .languages.html import HTML
 from .languages.java import Java
 from .languages.javascript import JavaScript
+from .languages.php import Php
 from .languages.powershell import PowerShell
 from .languages.python import Python
 from .languages.r import R
@@ -44,6 +45,7 @@ class Terminal:
             PowerShell,
             React,
             Java,
+            Php,
         ]
         self._active_languages = {}
 
