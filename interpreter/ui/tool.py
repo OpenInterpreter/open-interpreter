@@ -14,6 +14,9 @@ from ..misc.spinner import SimpleSpinner
 
 class ContentRenderer:
     def __init__(self, style):
+        if os.name == "nt":
+            import colorama
+            colorama.init()
         self.buffer = ""
         self.started = False
         self.style = style
