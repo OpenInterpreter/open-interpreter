@@ -9,8 +9,11 @@ def truncate_output(data, max_output_chars=2800, add_scrollbars=False):
 
     message = ("Output truncated. "
                f"Showing {chars_per_end} characters from start/end. "
-               "You should try again and use computer.ai.summarize(output) "
-               "over the output, or break it down into smaller steps.\n\n")
+               "To handle large outputs, store result in python var first "
+               "`result = command()` then `computer.ai.summarize(result)` for "
+               "a summary, search with `result.find('text')`, "
+               "repeat shell commands with wc/grep/sed, etc. or break it down "
+               "into smaller steps.\n\n")
 
     # This won't work because truncated code is stored in interpreter.messages :/
     # If the full code was stored, we could do this:
