@@ -40,6 +40,7 @@ class SubprocessLanguage(BaseLanguage):
             self.process.terminate()
             self.process.stdin.close()
             self.process.stdout.close()
+            self.process.stderr.close()
 
     def start_process(self):
         if self.process:
@@ -83,6 +84,7 @@ class SubprocessLanguage(BaseLanguage):
             yield {
                 "type": "console",
                 "format": "output",
+                "error": True,
                 "content": traceback.format_exc(),
             }
             return
@@ -95,7 +97,8 @@ class SubprocessLanguage(BaseLanguage):
 
             try:
                 self.process.stdin.write(code + "\n")
-                self.process.stdin.flush()
+                # if execute PHP code with "flush()" it just hangs
+                self.process.stdin.close()
                 break
             except:
                 if retry_count != 0:
@@ -105,6 +108,7 @@ class SubprocessLanguage(BaseLanguage):
                     yield {
                         "type": "console",
                         "format": "output",
+                        "error": True,
                         "content": f"{traceback.format_exc()}\nRetrying... ({retry_count}/{max_retries})\nRestarting process.",
                     }
 
@@ -115,10 +119,12 @@ class SubprocessLanguage(BaseLanguage):
                     yield {
                         "type": "console",
                         "format": "output",
+                        "error": True,
                         "content": "Maximum retries reached. Could not execute code.",
                     }
                     return
 
+        retry_count = 0
         while True:
             if not self.output_queue.empty():
                 yield self.output_queue.get()
@@ -136,6 +142,15 @@ class SubprocessLanguage(BaseLanguage):
                             yield self.output_queue.get()
                         time.sleep(0.2)
                     break
+                retry_count += 1
+                if retry_count > max_retries:
+                    yield {
+                        "type": "console",
+                        "format": "output",
+                        "error": True,
+                        "content": "Maximum retries reached. Code is hang.",
+                    }
+                    return
 
     def handle_stream_output(self, stream, is_error_stream):
         try:
