@@ -1,17 +1,21 @@
+import shutil
 import unittest
 
-from interpreter.core.computer.terminal.languages.shell import Shell
+from archive.classic_interpreter.core.computer.terminal.languages.php import Php
 
 
-class TestShell(unittest.TestCase):
+class TestPhp(unittest.TestCase):
     def setUp(self):
-        self.shell = Shell()
+        if shutil.which("php") is None:
+            raise unittest.SkipTest("php not installed")
+
+        self.php = Php()
 
     def tearDown(self):
-        self.shell.terminate()
+        self.php.terminate()
 
     def test_run(self):
-        for chunk in self.shell.run("echo 'Hello World'"):
+        for chunk in self.php.run("\n<?\necho 'Hello World';\n?>\n"):
             if chunk["format"] == "active_line" or chunk["content"] == "\n":
                 pass
             elif chunk["format"] == "output":
@@ -20,7 +24,7 @@ class TestShell(unittest.TestCase):
                 self.fail("Wrong chunk format")
 
     def test_run_hang(self):
-        for chunk in self.shell.run("echo World'"):
+        for chunk in self.php.run("\n<?\necho World';\n?>\n"):
             if chunk["format"] == "active_line" or chunk["content"] == "\n":
                 pass
             elif "error" in chunk:
@@ -28,13 +32,17 @@ class TestShell(unittest.TestCase):
                     "Maximum retries reached. Code is hang.", chunk["content"]
                 )
             elif chunk["format"] == "output":
-                self.assertIn("unmatched", chunk["content"])
+                self.assertEqual(
+                    'Parse error: syntax error, unexpected string content ";", '
+                    'expecting "," or ";" in Standard input code on line 3\n',
+                    chunk["content"],
+                )
             else:
                 self.fail("Wrong chunk format")
 
 
 if __name__ == "__main__":
-    testing = TestShell()
+    testing = TestPhp()
     testing.setUp()
     testing.test_run()
     testing.tearDown()
