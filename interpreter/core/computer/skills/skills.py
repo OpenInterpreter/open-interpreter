@@ -24,6 +24,9 @@ class Skills:
     """
     Manages access to pre-imported automation skills.
 
+    Note: Skills system must be enabled via profile (like 'the01') or by creating
+    OpenInterpreter with import_skills=True.
+
     Available methods:
     - list(): Returns names of available skills
     - search(query): Lists available skills (currently same as list())
@@ -47,6 +50,15 @@ class Skills:
         Returns:
             list[str]: Names of available skills with () to indicate they're callable
         """
+        if not self.computer.import_skills:
+            print("Skills are disabled. To enable skills, either use a profile like 'the01' that supports skills, "
+                  "or create an instance of OpenInterpreter with import_skills=True")
+            return []
+
+        if not self.computer._has_imported_skills:
+            print("Skills have not been imported yet.")
+            return []
+
         return [
             file.replace(".py", "()")
             for file in os.listdir(self.path)
@@ -70,6 +82,15 @@ class Skills:
         Returns:
             list[str]: Names of available skills with () to indicate they're callable
         """
+        if not self.computer.import_skills:
+            print("Skills are disabled. To enable skills, either use a profile like 'the01' that supports skills, "
+                  "or create an instance of OpenInterpreter with import_skills=True")
+            return []
+
+        if not self.computer._has_imported_skills:
+            print("Skills have not been imported yet.")
+            return []
+
         return [
             file.replace(".py", "()")
             for file in os.listdir(self.path)
@@ -84,6 +105,9 @@ class Skills:
         This method is called automatically during system setup to load available skills.
         Assistant should use list(), search(), or call skills directly instead of this method.
         """
+        if not self.computer.import_skills:
+            return
+
         previous_save_skills_setting = self.computer.save_skills
 
         self.computer.save_skills = False
