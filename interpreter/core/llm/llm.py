@@ -4,6 +4,7 @@ os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import sys
 
 import litellm
+from . import __version__
 
 litellm.suppress_debug_info = True
 litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
@@ -437,6 +438,7 @@ def fixed_litellm_completions(**params):
     first_error = None
 
     params["num_retries"] = 0
+    params["headers"] = {"x-coding-assistant": f"open-interpreter/{__version__}"}
 
     for attempt in range(attempts):
         try:
