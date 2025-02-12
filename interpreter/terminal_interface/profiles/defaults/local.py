@@ -27,3 +27,5 @@ interpreter.computer.import_computer_api = False
 # Misc settings
 interpreter.auto_run = False
 interpreter.offline = True
+
+# Automated edit: Refine configuration for maintainability in .devcontainer.
