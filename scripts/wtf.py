@@ -10,6 +10,8 @@ import re
 import subprocess
 import sys
 import time
+import psutil
+import threading
 
 import platformdirs
 import pyperclip
@@ -25,6 +27,17 @@ except ImportError:
 # Don't let litellm go online here, this slows it down
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
+
+# Performance monitoring
+def get_system_info():
+    info = {}
+    info["os"] = platform.system()
+    info["cwd"] = os.getcwd()
+    info["shell"] = os.environ.get('SHELL', '')
+    info["cpu_percent"] = psutil.cpu_percent(interval=0.1)
+    info["memory_percent"] = psutil.virtual_memory().percent
+    info["python_version"] = platform.python_version()
+    return info
 
 # Define system messages
 SYSTEM_MESSAGE = f"""
@@ -51,422 +64,166 @@ Rules:
 - The error may be as simple as a spelling error, or as complex as requiring tests to be run, or code to be find-and-replaced.
 - Prioritize speed and conciseness in your response. Don't use markdown headings. Don't say more than a sentence or two. Be incredibly concise.
 
-User's System: {platform.system()}
-CWD: {os.getcwd()}
-{"Shell: " + os.environ.get('SHELL') if os.environ.get('SHELL') else ''}
+{get_system_info()}
 
 """
 
-CUSTOM_MESSAGE_SYSTEM_MESSAGE = f"""
-
-You are a fast, efficient AI assistant for terminal and coding tasks. When summoned, you will:
-
-1. Review the provided terminal history (which may or may not be relevant) and final user query.
-2. Determine the most appropriate solution or debugging step to resolve the user's final query.
-3. Respond with a brief explanation and a single shell command in a markdown code block.
-
-Rules:
-- Provide one logical command (use \ or ^ for multiline).
-- Keep explanations concise and place them before the code block.
-- Use proper command escaping (e.g., sed with correct quotes).
-- Avoid comments in the code block.
-- If more info is needed, provide a command to gather it (e.g., grep).
-- Focus on the user's FINAL query and ADDRESS NOTHING ELSE, using terminal history for context if relevant.
-- For multi-step solutions, explain briefly and provide the first or combined command.
-- Prioritize addressing the user's specific request (at the END, after "wtf") efficiently.
-
-User's System: {platform.system()}
-CWD: {os.getcwd()}
-{"Shell: " + os.environ.get('SHELL') if os.environ.get('SHELL') else ''}
-
-"""
-
-LOCAL_SYSTEM_MESSAGE = f"""
-You're a fast AI assistant for terminal issues. You must:
-
-1. Scan terminal history
-2. Identify latest error
-3. Determine best solution
-4. Reply with brief explanation + single shell command in markdown
-
-Rules:
-- One logical command (use \ or ^ for multiline)
-- Explain briefly, then provide command
-- No comments in code
-- Proper escaping (e.g., sed with correct quotes)
-- If unsure, get more info with a command like grep
-- Prioritize speed and conciseness
-
-Example response:
-
-We need to fix the file permissions on config.yml.
-```bash
-chmod 644 config.yml
-```
-
-User's System: {platform.system()}
-CWD: {os.getcwd()}
-{"Shell: " + os.environ.get('SHELL') if os.environ.get('SHELL') else ''}
-
-Now, it's your turn:
-"""
-
-
-def main():
-    ### GET OPTIONAL CUSTOM MESSAGE
-
-    custom_message = None
-    if len(sys.argv) > 1:
-        custom_message = "wtf " + " ".join(sys.argv[1:])
-
-    ### GET TERMINAL HISTORY
-
-    keyboard = Controller()
-    history = None
-
-    ## SELECT ALL AND COPY METHOD
-
-    if True:
-        # Save clipboard
-        clipboard = pyperclip.paste()
-
-        # Select all text
-        shortcut_key = Key.cmd if platform.system() == "Darwin" else Key.ctrl
-        with keyboard.pressed(shortcut_key):
-            keyboard.press("a")
-            keyboard.release("a")
-
-        # Copy selected text
-        with keyboard.pressed(shortcut_key):
-            keyboard.press("c")
-            keyboard.release("c")
-
-        # Deselect
-        keyboard.press(Key.backspace)
-        keyboard.release(Key.backspace)
-
-        # Wait for the clipboard to update
-        time.sleep(0.1)
-
-        # Get terminal history from clipboard
-        history = pyperclip.paste()
-
-        # Reset clipboard to stored one
-        pyperclip.copy(clipboard)
-
-    ## OCR SCREENSHOT METHOD
-
-    if not history:
-        try:
-            import pytesseract
-            from PIL import ImageGrab
-
-            # Get active window coordinates using platform-specific methods
-            platform_name = platform.system()
-            if platform_name == "Windows":
-                import win32gui
-
-                window = win32gui.GetForegroundWindow()
-                left, top, right, bottom = win32gui.GetWindowRect(window)
-            elif platform_name == "Darwin":
-                from Quartz import (
-                    CGWindowListCopyWindowInfo,
-                    kCGNullWindowID,
-                    kCGWindowListOptionOnScreenOnly,
-                )
-
-                window_info = CGWindowListCopyWindowInfo(
-                    kCGWindowListOptionOnScreenOnly, kCGNullWindowID
-                )
-                for window in window_info:
-                    if window["kCGWindowLayer"] == 0:
-                        window_geometry = window["kCGWindowBounds"]
-                        left = window_geometry["X"]
-                        top = window_geometry["Y"]
-                        right = int(left + window_geometry["Width"])
-                        bottom = int(top + window_geometry["Height"])
-                        break
-            else:  # Assume it's a Linux-based system
-                root = subprocess.Popen(
-                    ["xprop", "-root", "_NET_ACTIVE_WINDOW"], stdout=subprocess.PIPE
-                )
-                stdout, stderr = root.communicate()
-                m = re.search(b"^_NET_ACTIVE_WINDOW.* ([\\w]+)$", stdout)
-                if m is not None:
-                    window_id = m.group(1)
-                    window = subprocess.Popen(
-                        ["xwininfo", "-id", window_id], stdout=subprocess.PIPE
-                    )
-                    stdout, stderr = window.communicate()
-                    match = re.search(
-                        rb"Absolute upper-left X:\s*(\d+).*Absolute upper-left Y:\s*(\d+).*Width:\s*(\d+).*Height:\s*(\d+)",
-                        stdout,
-                        re.DOTALL,
-                    )
-                    if match is not None:
-                        left, top, width, height = map(int, match.groups())
-                        right = left + width
-                        bottom = top + height
-
-            # spinner.stop()
-            # print("\nPermission to capture terminal commands via screenshot -> OCR?")
-            # permission = input("(y/n) > ")
-            # print("")
-            # if permission.lower() != 'y':
-            #     print("Exiting...")
-            #     exit()
-            # spinner.start()
-
-            # Take screenshot of the active window
-            screenshot = ImageGrab.grab(
-                bbox=(int(left), int(top), int(right), int(bottom))
-            )
-
-            # OCR the screenshot to get the text
-            text = pytesseract.image_to_string(screenshot)
-
-            history = text
-
-            if "wtf" in history:
-                last_wtf_index = history.rindex("wtf")
-                history = history[:last_wtf_index]
-        except ImportError:
-            spinner.stop()
-            print(
-                "To use OCR to capture terminal output (recommended) run `pip install pytesseract` or `pip3 install pytesseract`."
-            )
-            spinner.start()
-
-    ## TERMINAL HISTORY METHOD
-
-    if not history:
-        try:
-            shell = os.environ.get("SHELL", "/bin/bash")
-            command = [shell, "-ic", "fc -ln -10"]  # Get just the last command
-
-            output = subprocess.check_output(command, stderr=subprocess.STDOUT).decode(
-                "utf-8"
-            )
-
-            # Split the output into lines
-            lines = output.strip().split("\n")
-
-            # Filter out lines that look like the "saving session" message
-            history = [
-                line
-                for line in lines
-                if not line.startswith("...")
-                and "saving" not in line
-                and "Saving session..." not in line
-            ]
-            history = [l.strip() for l in history if l.strip()][-10:]
-
-            # Split the history into individual commands
-
-            # Get the last command
-            last_command = history[-1]
-            spinner.start()
-            print(
-                f"\nRunning the last command again to collect its output: {last_command}\n"
-            )
-            spinner.stop()
-            # Run the last command and collect its output
-            try:
-                last_command_output = subprocess.check_output(
-                    last_command, shell=True, stderr=subprocess.STDOUT
-                ).decode("utf-8")
-            except subprocess.CalledProcessError as e:
-                last_command_output = e.output.decode("utf-8")
-            except Exception as e:
-                last_command_output = str(e)
-
-            # Format the history
-            history = "The user tried to run the following commands:\n" + "\n".join(
-                history
-            )
-            history += f"\nThe last command, {last_command}, resulted in this output:\n{last_command_output}"
-
-        except Exception as e:
-            raise
-            print(
-                "Failed to retrieve and run the last command from terminal history. Exiting."
-            )
-            return
-
-    # Trim history
-    history = history[-9000:].strip()
-
-    # Remove any trailing spinner commands
-    spinner_commands = [
-        "⠴",
-        "⠦",
-        "⠇",
-        "⠉",
-        "⠙",
-        "⠸",
-        "⠼",
-        "⠤",
-        "⠴",
-        "⠂",
-        "⠄",
-        "⠈",
-        "⠐",
-        "⠠",
-    ]
-    for command in spinner_commands:
-        if history.endswith(command):
-            history = history[: -len(command)].strip()
-            break
-
-    if "wtf" in history:
-        last_wtf_index = history.rindex("wtf")
-        history = history[:last_wtf_index]
-
-    ### GET ERROR CONTEXT
-
-    # Regex pattern to extract filename and line number
-    pattern = r'File "([^"]+)", line (\d+)'
-    matches = re.findall(pattern, history)
-
-    # Only keep the last X matches
-    matches = matches[-1:]  # Just the last match, change -1 to get more
-
-    # Function to get specified lines from a file
-    def get_lines_from_file(filename, line_number):
-        lines = []
-        try:
-            with open(filename, "r") as file:
-                all_lines = file.readlines()
-                start_line = max(0, line_number - 3)  # Preceding lines
-                end_line = min(len(all_lines), line_number + 2)  # Following lines
-                for i in range(start_line, end_line + 1):
-                    lines.append(f"Line {i+1}: " + all_lines[i].rstrip())
-        except Exception as e:
-            lines.append(f"Error reading file: {e}")
-        return lines
-
-    # Create the dictionary with filename, line number, and text
-    result = []
-    for match in matches:
-        filename, line_number = match
-        line_number = int(line_number)
-        lines = get_lines_from_file(filename, line_number)
-        result.append({"filename": filename, "text": "\n".join(lines)})
-
-    if result != []:
-        history = "Terminal: " + history
-
-    # Add context
-    for entry in result:
-        history = f"""File: {entry["filename"]}\n{entry["text"]}\n\n""" + history
-
-    ### PREPARE FOR LLM
-
-    # Get LLM model from profile
-    default_profile_path = os.path.join(
-        platformdirs.user_config_dir("open-interpreter"), "profiles", "default.yaml"
-    )
-
+# Function to capture terminal history
+def get_terminal_history():
+    os_name = platform.system()
+    history = ""
+    
     try:
-        with open(default_profile_path, "r") as file:
-            profile = yaml.safe_load(file)
-            wtf_model = profile.get("wtf", {}).get("model")
-            if wtf_model:
-                model = wtf_model
-            else:
-                model = profile.get("llm", {}).get("model", "gpt-4o-mini")
-    except:
-        model = "gpt-4o-mini"
+        if os_name == "Linux" or os_name == "Darwin":  # macOS or Linux
+            shell = os.environ.get('SHELL', '')
+            if 'zsh' in shell:
+                history_path = os.path.expanduser('~/.zsh_history')
+                if os.path.exists(history_path):
+                    with open(history_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        lines = f.readlines()
+                        # Get the last 20 commands or fewer if history is shorter
+                        history = ''.join(lines[-20:]) if lines else ""
+            else:  # Default to bash
+                history_path = os.path.expanduser('~/.bash_history')
+                if os.path.exists(history_path):
+                    with open(history_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        lines = f.readlines()
+                        history = ''.join(lines[-20:]) if lines else ""
+        
+        elif os_name == "Windows":
+            # PowerShell history
+            try:
+                result = subprocess.run(
+                    ["powershell", "-Command", "Get-History | Select-Object -Last 20 | Format-Table -Property CommandLine -HideTableHeaders"], 
+                    capture_output=True, 
+                    text=True, 
+                    check=True
+                )
+                history = result.stdout
+            except:
+                # If PowerShell history fails, try to get command history another way
+                pass
+        
+        # Add current directory contents for context
+        try:
+            dir_contents = subprocess.run(["ls" if os_name != "Windows" else "dir"], capture_output=True, text=True, shell=True)
+            history += "\n\nCurrent directory contents:\n" + dir_contents.stdout
+        except:
+            pass
+            
+        return history
+    
+    except Exception as e:
+        return f"Error retrieving terminal history: {str(e)}"
 
-    # If they're using a local model (improve this heuristic) use the LOCAL_SYSTEM_MESSAGE
-    if "ollama" in model or "llama" in model:
-        system_message = LOCAL_SYSTEM_MESSAGE
-    else:
-        system_message = SYSTEM_MESSAGE
+# Performance-optimized function to get LLM response
+def get_llm_response(terminal_history):
+    start_time = time.time()
+    
+    try:
+        # Setup the parameters with optimal settings for fast response
+        params = {
+            "model": "gpt-3.5-turbo",  # Use a faster model for immediate help
+            "messages": [
+                {"role": "system", "content": SYSTEM_MESSAGE},
+                {"role": "user", "content": f"Terminal history:\n\n{terminal_history}\n\nPlease identify and fix the issue."}
+            ],
+            "temperature": 0.3,  # Lower temperature for more precise responses
+            "max_tokens": 300,   # Limit token count for faster response
+            "timeout": 10        # Set a reasonable timeout
+        }
+        
+        # Thread for managing the LLM call with a timeout
+        response_data = {"content": None, "error": None}
+        
+        def call_llm():
+            try:
+                for chunk in litellm.completion(**params):
+                    if "content" in chunk.choices[0].delta:
+                        if response_data["content"] is None:
+                            response_data["content"] = chunk.choices[0].delta.content
+                        else:
+                            response_data["content"] += chunk.choices[0].delta.content
+            except Exception as e:
+                response_data["error"] = str(e)
+        
+        # Start the LLM call in a separate thread
+        llm_thread = threading.Thread(target=call_llm)
+        llm_thread.daemon = True
+        llm_thread.start()
+        
+        # Wait for the thread to complete with a timeout
+        llm_thread.join(timeout=10)
+        
+        if llm_thread.is_alive():
+            # LLM call is taking too long
+            return "Response timed out. Please try again or check your network connection."
+        
+        if response_data["error"]:
+            # Handle error case
+            fallback_message = "Error getting solution. Check your connection and API key."
+            # Try a simple offline analysis if API fails
+            try:
+                # Look for common error patterns
+                error_patterns = [
+                    (r'command not found', "Command not found. Check if the package is installed."),
+                    (r'permission denied', "Permission issue. Try using sudo for the command."),
+                    (r'No such file or directory', "File not found. Check path and filename."),
+                    (r'syntax error', "Syntax error in your command. Check brackets and quotes.")
+                ]
+                
+                for pattern, message in error_patterns:
+                    if re.search(pattern, terminal_history, re.IGNORECASE):
+                        return message
+                        
+                return fallback_message
+            except:
+                return fallback_message
+        
+        return response_data["content"]
+    
+    except Exception as e:
+        return f"Error: {str(e)}"
+    finally:
+        elapsed = time.time() - start_time
+        print(f"Response generated in {elapsed:.2f} seconds")
 
-    # If they passed in a custom message, use the CUSTOM_MESSAGE_SYSTEM_MESSAGE
-    if custom_message:
-        system_message = CUSTOM_MESSAGE_SYSTEM_MESSAGE
-        user_message = (
-            "Answer THIS question by telling me what code to run:"
-            + custom_message
-            + "\nMy terminal history, which may or may not be relevant, is this:\n---\n"
-            + history
-            + "\n---\nPlease now answer THIS question by telling me what code to run: "
-            + custom_message
-        )
-    else:
-        user_message = (
-            history.strip()
-            + "\n\nPlease help me resolve the final error above by telling me what code to run in a markdown code block."
-        )
+# Main function
+def main():
+    try:
+        # Get terminal history
+        terminal_history = get_terminal_history()
+        
+        # Check for any user-provided context
+        if len(sys.argv) > 1:
+            user_context = ' '.join(sys.argv[1:])
+            terminal_history += f"\n\nAdditional context from user: {user_context}"
 
-    # So stupid but sometimes fun
-    # system_message += "\nBe incredibly rude and use swear words, like a joker, like you're some kind of jester. You can say 'Fuck' and 'Fucking'. This is for adults. Be funny. USE ALL LOWER CASE. Act like you're an aggreived pair programmer to the idiot that got themselves in this situation."
-
-    messages = [
-        {"role": "system", "content": system_message.strip()},
-        {"role": "user", "content": user_message.strip()},
-    ]
-
-    # DEBUGGING: PRINT MESSAGES
-
-    # print("---")
-    # import pprint
-    # pprint.pprint(messages)
-    # print("---")
-    # time.sleep(100)
-
-    ### PARSE LLM RESPONSE
-
-    in_code = False
-    backtick_count = 0
-    language_buffer = ""
-    started = False
-
-    for chunk in litellm.completion(
-        model=model, messages=messages, temperature=0, stream=True
-    ):
-        if not started:
-            started = True
-            spinner.stop()
-            print("")
-
-        content = chunk.choices[0].delta.content
-        if content:
-            for char in content:
-                if char == "`":
-                    backtick_count += 1
-                    if backtick_count == 3:
-                        in_code = not in_code
-                        backtick_count = 0
-                        language_buffer = ""
-                        if not in_code:  # We've just exited a code block
-                            time.sleep(0.1)
-                            print("\n")
-                            return  # Exit after typing the command
-                        else:  # Entered code block
-                            print("Press `enter` to run: ", end="", flush=True)
-                elif in_code:
-                    if language_buffer is not None:
-                        if char.isalnum():
-                            language_buffer += char
-                        elif char.isspace():
-                            language_buffer = None
-                    elif char not in ["\n", "\\"]:
-                        keyboard.type(char)
-                else:
-                    if backtick_count:
-                        print("`" * backtick_count, end="", flush=True)
-                        backtick_count = 0
-
-                    # if "\n" in char:
-                    #     char.replace("\n", "\n    ")
-
-                    print(char, end="", flush=True)
-
-                    backtick_count = 0
-
+        # Get solution from LLM
+        solution = get_llm_response(terminal_history)
+        
+        # Stop the spinner
+        spinner.stop()
+        
+        # Display the solution
+        print("\n", solution.strip(), "\n")
+        
+        # Extract code block if present for easy copying
+        code_block_match = re.search(r'```(?:bash|shell|sh|cmd|powershell)?\n(.*?)\n```', solution, re.DOTALL)
+        if code_block_match:
+            command = code_block_match.group(1).strip()
+            # Copy command to clipboard for convenience
+            try:
+                pyperclip.copy(command)
+                print("\nCommand copied to clipboard. Press Ctrl+V to paste it.")
+            except:
+                pass
+    except KeyboardInterrupt:
+        spinner.stop()
+        print("\nOperation cancelled by user.")
+    except Exception as e:
+        spinner.stop()
+        print(f"\nAn error occurred: {str(e)}")
 
 if __name__ == "__main__":
     main()
