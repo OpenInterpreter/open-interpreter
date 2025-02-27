@@ -4,6 +4,9 @@ import re
 import time
 import traceback
 
+# Import performance logging utilities
+from .utils.performance_logger import PerformanceTimer, log_performance_metric, log_message_stats
+
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import litellm
 import openai
@@ -19,6 +22,9 @@ def respond(interpreter):
 
     last_unsupported_code = ""
     insert_loop_message = False
+
+    # Log message statistics at the start
+    log_message_stats(interpreter.messages)
 
     while True:
         ## RENDER SYSTEM MESSAGE ##
@@ -48,9 +54,11 @@ def respond(interpreter):
         #         "python", f"messages={interpreter.messages}"
         #     )
 
-        ## Rendering ↓
-        rendered_system_message = render_message(interpreter, system_message)
-        ## Rendering ↑
+        ## Rendering with performance tracking
+        with PerformanceTimer("message_processing", "render_system_message"):
+            rendered_system_message = render_message(interpreter, system_message)
+        
+        # Create message object
 
         rendered_system_message = {
             "role": "system",
@@ -84,8 +92,10 @@ def respond(interpreter):
             interpreter.messages[-1]["type"] != "code"
         ):  # If it is, we should run the code (we do below)
             try:
-                for chunk in interpreter.llm.run(messages_for_llm):
-                    yield {"role": "assistant", **chunk}
+                # Track LLM API call performance
+                with PerformanceTimer("llm", "api_call", {"model": interpreter.llm.model}):
+                    for chunk in interpreter.llm.run(messages_for_llm):
+                        yield {"role": "assistant", **chunk}
 
             except litellm.exceptions.BudgetExceededError:
                 interpreter.display_message(
@@ -169,6 +179,8 @@ def respond(interpreter):
                 print("Running code:", interpreter.messages[-1])
 
             try:
+                code_execution_start = time.time()
+                
                 # What language/code do you want to run?
                 language = interpreter.messages[-1]["format"].lower().strip()
                 code = interpreter.messages[-1]["content"]
@@ -364,6 +376,9 @@ def respond(interpreter):
                     yield {"role": "computer", **line}
 
                 ## ↑ CODE IS RUN HERE
+                
+                # Log code execution performance
+                log_performance_metric("code_execution", language, time.time() - code_execution_start, {"code_length": len(code)})
 
                 # sync up your computer with the interpreter's computer
                 try:

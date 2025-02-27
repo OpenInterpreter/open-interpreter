@@ -17,6 +17,8 @@ import uuid
 import requests
 import tokentrim as tt
 
+from ..utils.performance_logger import PerformanceTimer, log_performance_metric
+
 from .run_text_llm import run_text_llm
 
 # from .run_function_calling_llm import run_function_calling_llm
@@ -82,6 +84,9 @@ class Llm:
         And then processing its output, whether it's a function or non function calling model, into LMC format.
         """
 
+        
+        # Overall performance tracking for the entire run method
+        with PerformanceTimer("llm", "run", {"model": self.model}):
         if not self._is_loaded:
             self.load()
 
@@ -143,6 +148,8 @@ class Llm:
             except:
                 self.supports_vision = False
 
+        
+        # Track performance of image processing
         # Trim image messages if they're there
         image_messages = [msg for msg in messages if msg["type"] == "image"]
         if self.supports_vision:
@@ -200,7 +207,10 @@ class Llm:
                         img_msg["content"] = ""
 
         # Convert to OpenAI messages format
-        messages = convert_to_openai_messages(
+ with performance tracking
+        with PerformanceTimer("message_processing", "convert_to_openai_format"):
+            messages = convert_to_openai_messages(
+                messages,
             messages,
             function_calling=self.supports_functions,
             vision=self.supports_vision,
@@ -212,43 +222,52 @@ class Llm:
         messages = messages[1:]
 
         # Trim messages
-        try:
-            if self.context_window and self.max_tokens:
-                trim_to_be_this_many_tokens = (
-                    self.context_window - self.max_tokens - 25
-                )  # arbitrary buffer
-                messages = tt.trim(
-                    messages,
-                    system_message=system_message,
-                    max_tokens=trim_to_be_this_many_tokens,
-                )
-            elif self.context_window and not self.max_tokens:
-                # Just trim to the context window if max_tokens not set
-                messages = tt.trim(
-                    messages,
-                    system_message=system_message,
-                    max_tokens=self.context_window,
-                )
-            else:
+ with performance tracking
+        with PerformanceTimer("message_processing", "token_trimming"):
                 try:
-                    messages = tt.trim(
-                        messages, system_message=system_message, model=model
-                    )
-                except:
-                    if len(messages) == 1:
-                        if self.interpreter.in_terminal_interface:
-                            self.interpreter.display_message(
-                                """
+                    if self.context_window and self.max_tokens:
+                        trim_to_be_this_many_tokens = (
+                            self.context_window - self.max_tokens - 25
+                        )  # arbitrary buffer
+                        tokens_before = sum(len(m.get("content", "")) for m in messages)
+                        messages = tt.trim(
+                            messages,
+                            system_message=system_message,
+                            max_tokens=trim_to_be_this_many_tokens,
+                        )
+                        tokens_after = sum(len(m.get("content", "")) for m in messages)
+                        log_performance_metric("message_processing", "token_reduction", 0, {
+                            "tokens_before": tokens_before,
+                            "tokens_after": tokens_after,
+                            "reduction_percentage": round((tokens_before - tokens_after) / max(tokens_before, 1) * 100, 2)
+                        })
+                    elif self.context_window and not self.max_tokens:
+                        # Just trim to the context window if max_tokens not set
+                        messages = tt.trim(
+                            messages,
+                            system_message=system_message,
+                            max_tokens=self.context_window,
+                        )
+                    else:
+                        try:
+                            messages = tt.trim(
+                                messages, system_message=system_message, model=model
+                            )
+                        except:
+                            if len(messages) == 1:
+                                if self.interpreter.in_terminal_interface:
+                                    self.interpreter.display_message(
+                                        """
 **We were unable to determine the context window of this model.** Defaulting to 8000.
 
 If your model can handle more, run `interpreter --context_window {token limit} --max_tokens {max tokens per response}`.
 
 Continuing...
-                            """
-                            )
-                        else:
-                            self.interpreter.display_message(
-                                """
+                                    """
+                                    )
+                                else:
+                                    self.interpreter.display_message(
+                                        """
 **We were unable to determine the context window of this model.** Defaulting to 8000.
 
 If your model can handle more, run `self.context_window = {token limit}`.
@@ -256,18 +275,18 @@ If your model can handle more, run `self.context_window = {token limit}`.
 Also please set `self.max_tokens = {max tokens per response}`.
 
 Continuing...
-                            """
-                            )
-                    messages = tt.trim(
-                        messages, system_message=system_message, max_tokens=8000
-                    )
-        except:
-            # If we're trimming messages, this won't work.
-            # If we're trimming from a model we don't know, this won't work.
-            # Better not to fail until `messages` is too big, just for frustrations sake, I suppose.
+                                "    ""
+                                    )
+                            messages = tt.trim(
+                                messages, system_message=system_message, max_tokens=8000
+                       )     )
+                except:
+                    # If we're trimming messages, this won't work.
+                    # If we're trimming from a model we don't know, this won't work.
+                    # Better not to fail until `messages` is too big, just for frustrations sake, I suppose.
 
-            # Reunite system message with messages
-            messages = [{"role": "system", "content": system_message}] + messages
+                    # Reunite system message with messages
+                            messages = [{"role": "system", "content": system_message}] + messages
 
             pass
 
@@ -319,9 +338,12 @@ Continuing...
 
         if self.supports_functions:
             # yield from run_function_calling_llm(self, params)
-            yield from run_tool_calling_llm(self, params)
+            with PerformanceTimer("llm", "tool_calling", {"model": self.model}):
+                yield from run_tool_calling_llm(self, params)
         else:
-            yield from run_text_llm(self, params)
+            with PerformanceTimer("llm", "text_generation", {"model": self.model}):
+                yield from run_text_llm(self, params)
+
 
     # If you change model, set _is_loaded to false
     @property
