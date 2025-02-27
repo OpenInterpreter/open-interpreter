@@ -2,26 +2,23 @@ import os
 
 os.environ["LITELLM_LOCAL_MODEL_COST_MAP"] = "True"
 import sys
+import logging
+import time
+import uuid
+import json
+import threading
+from functools import lru_cache
 
 import litellm
+import requests
+import tokentrim as tt
 
 litellm.suppress_debug_info = True
 litellm.REPEATED_STREAMING_CHUNK_LIMIT = 99999999
 
-import json
-import logging
-import subprocess
-import time
-import uuid
-
-import requests
-import tokentrim as tt
-
 from ..utils.performance_logger import PerformanceTimer, log_performance_metric
 
 from .run_text_llm import run_text_llm
-
-# from .run_function_calling_llm import run_function_calling_llm
 from .run_tool_calling_llm import run_tool_calling_llm
 from .utils.convert_to_openai_messages import convert_to_openai_messages
 
@@ -31,10 +28,15 @@ logger = logging.getLogger("LiteLLM")
 
 class SuppressDebugFilter(logging.Filter):
     def filter(self, record):
-        # Suppress only the specific message containing the keywords
-        if "cost map" in record.getMessage():
-            return False  # Suppress this log message
-        return True  # Allow all other messages
+        return record.levelno >= logging.INFO
+
+
+# Apply the filter
+logger.addFilter(SuppressDebugFilter())
+
+
+# Thread-local storage for LLM-related data
+thread_local = threading.local()
 
 
 class Llm:
@@ -43,268 +45,156 @@ class Llm:
     """
 
     def __init__(self, interpreter):
-        # Add the filter to the logger
-        logger.addFilter(SuppressDebugFilter())
-
-        # Store a reference to parent interpreter
+        # Default properties
         self.interpreter = interpreter
-
-        # OpenAI-compatible chat completions "endpoint"
-        self.completions = fixed_litellm_completions
-
-        # Settings
         self.model = "gpt-4o"
-        self.temperature = 0
-
-        self.supports_vision = None  # Will try to auto-detect
-        self.vision_renderer = (
-            self.interpreter.computer.vision.query
-        )  # Will only use if supports_vision is False
-
-        self.supports_functions = None  # Will try to auto-detect
-        self.execution_instructions = "To execute code on the user's machine, write a markdown code block. Specify the language after the ```. You will receive the output. Use any programming language."  # If supports_functions is False, this will be added to the system message
-
-        # Optional settings
-        self.context_window = None
+        self.temperature = 0.0
         self.max_tokens = None
-        self.api_base = None
+        self.context_window = None
         self.api_key = None
+        self.api_base = None
         self.api_version = None
-        self._is_loaded = False
-
-        # Budget manager powered by LiteLLM
         self.max_budget = None
+        self.supports_functions = True
+        self.supports_vision = True
+        self.supports_stream = True
+        self.tokenizer = None
+        self.timeout = 60  # Default timeout in seconds
+        self.execution_instructions = True
+        self.retry_attempts = 3
+        self._request_timeout = 30  # HTTP request timeout
+        self._model_cache = {}  # Cache for model-specific configurations
+        
+        # Performance monitoring
+        self.track_performance = os.environ.get("OI_TRACK_LLM_PERFORMANCE", "True").lower() == "true"
+        self._last_request_time = 0
+        self._token_usage = {"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}
+
+    def load(self):
+        if "ollama" in self.model:
+            try:
+                # Check if Ollama is running
+                requests.get("http://localhost:11434/api/version", timeout=1)
+            except:
+                # Start Ollama in the background if it's not running
+                if os.name == "nt":  # Windows
+                    os.system("start ollama serve")
+                else:  # macOS/Linux
+                    os.system("ollama serve &")
+                # Wait for Ollama to start
+                for _ in range(5):
+                    time.sleep(1)
+                    try:
+                        requests.get("http://localhost:11434/api/version", timeout=1)
+                        break
+                    except:
+                        continue
+            
+            # Pull the model if not already pulled
+            model_name = self.model.replace("ollama/", "")
+            try:
+                models_response = requests.get("http://localhost:11434/api/tags", timeout=5).json()
+                models = [m["name"] for m in models_response.get("models", [])]
+                if model_name not in models:
+                    print(f"Pulling model {model_name}...")
+                    os.system(f"ollama pull {model_name}")
+            except Exception as e:
+                print(f"Error checking Ollama models: {str(e)}")
+
+    @property
+    def request_timeout(self):
+        # Use a property to ensure we can't set it to None
+        return self._request_timeout
+    
+    @request_timeout.setter
+    def request_timeout(self, value):
+        if value is not None:
+            self._request_timeout = value
+        
+    @lru_cache(maxsize=32)
+    def _get_model_config(self, model_name):
+        """Cache and return model-specific configurations"""
+        # This allows us to avoid redundant model config lookups
+        if model_name in self._model_cache:
+            return self._model_cache[model_name]
+        
+        # Determine model capabilities and configurations
+        config = {
+            "supports_functions": self.supports_functions,
+            "supports_vision": self.supports_vision,
+            "context_window": self.context_window,
+            "max_tokens": self.max_tokens
+        }
+        
+        # Model-specific overrides
+        if "gpt-3.5" in model_name:
+            config["context_window"] = config["context_window"] or 16385
+        elif "gpt-4" in model_name and "o" in model_name:
+            config["context_window"] = config["context_window"] or 128000
+        elif "gpt-4" in model_name:
+            config["context_window"] = config["context_window"] or 8192
+        elif "claude" in model_name:
+            config["context_window"] = config["context_window"] or 100000
+        
+        # Cache the config
+        self._model_cache[model_name] = config
+        return config
 
     def run(self, messages):
         """
-        We're responsible for formatting the call into the llm.completions object,
-        starting with LMC messages in interpreter.messages, going to OpenAI compatible messages into the llm,
-        respecting whether it's a vision or function model, respecting its context window and max tokens, etc.
-
-        And then processing its output, whether it's a function or non function calling model, into LMC format.
+        Process and run the LLM with the provided messages.
+        Returns a generator that yields message chunks.
         """
-
+        # Track request start time for performance monitoring
+        request_start_time = time.time()
         
-        # Overall performance tracking for the entire run method
-        with PerformanceTimer("llm", "run", {"model": self.model}):
-        if not self._is_loaded:
-            self.load()
-
-        if (
-            self.max_tokens is not None
-            and self.context_window is not None
-            and self.max_tokens > self.context_window
-        ):
-            print(
-                "Warning: max_tokens is larger than context_window. Setting max_tokens to be 0.2 times the context_window."
-            )
-            self.max_tokens = int(0.2 * self.context_window)
-
-        # Assertions
-        assert (
-            messages[0]["role"] == "system"
-        ), "First message must have the role 'system'"
-        for msg in messages[1:]:
-            assert (
-                msg["role"] != "system"
-            ), "No message after the first can have the role 'system'"
-
-        model = self.model
-        if model in [
-            "claude-3.5",
-            "claude-3-5",
-            "claude-3.5-sonnet",
-            "claude-3-5-sonnet",
-        ]:
-            model = "claude-3-5-sonnet-20240620"
-            self.model = "claude-3-5-sonnet-20240620"
-        # Setup our model endpoint
-        if model == "i":
-            model = "openai/i"
-            if not hasattr(self.interpreter, "conversation_id"):  # Only do this once
-                self.context_window = 7000
-                self.api_key = "x"
-                self.max_tokens = 1000
-                self.api_base = "https://api.openinterpreter.com/v0"
-                self.interpreter.conversation_id = str(uuid.uuid4())
-
-        # Detect function support
-        if self.supports_functions == None:
-            try:
-                if litellm.supports_function_calling(model):
-                    self.supports_functions = True
-                else:
-                    self.supports_functions = False
-            except:
-                self.supports_functions = False
-
-        # Detect vision support
-        if self.supports_vision == None:
-            try:
-                if litellm.supports_vision(model):
-                    self.supports_vision = True
-                else:
-                    self.supports_vision = False
-            except:
-                self.supports_vision = False
-
-        
-        # Track performance of image processing
-        # Trim image messages if they're there
-        image_messages = [msg for msg in messages if msg["type"] == "image"]
-        if self.supports_vision:
-            if self.interpreter.os:
-                # Keep only the last two images if the interpreter is running in OS mode
-                if len(image_messages) > 1:
-                    for img_msg in image_messages[:-2]:
-                        messages.remove(img_msg)
-                        if self.interpreter.verbose:
-                            print("Removing image message!")
-            else:
-                # Delete all the middle ones (leave only the first and last 2 images) from messages_for_llm
-                if len(image_messages) > 3:
-                    for img_msg in image_messages[1:-2]:
-                        messages.remove(img_msg)
-                        if self.interpreter.verbose:
-                            print("Removing image message!")
-                # Idea: we could set detail: low for the middle messages, instead of deleting them
-        elif self.supports_vision == False and self.vision_renderer:
-            for img_msg in image_messages:
-                if img_msg["format"] != "description":
-                    self.interpreter.display_message("\n  *Viewing image...*\n")
-
-                    if img_msg["format"] == "path":
-                        precursor = f"The image I'm referring to ({img_msg['content']}) contains the following: "
-                        if self.interpreter.computer.import_computer_api:
-                            postcursor = f"\nIf you want to ask questions about the image, run `computer.vision.query(path='{img_msg['content']}', query='(ask any question here)')` and a vision AI will answer it."
-                        else:
-                            postcursor = ""
-                    else:
-                        precursor = "Imagine I have just shown you an image with this description: "
-                        postcursor = ""
-
-                    try:
-                        image_description = self.vision_renderer(lmc=img_msg)
-                        ocr = self.interpreter.computer.vision.ocr(lmc=img_msg)
-
-                        # It would be nice to format this as a message to the user and display it like: "I see: image_description"
-
-                        img_msg["content"] = (
-                            precursor
-                            + image_description
-                            + "\n---\nI've OCR'd the image, this is the result (this may or may not be relevant. If it's not relevant, ignore this): '''\n"
-                            + ocr
-                            + "\n'''"
-                            + postcursor
-                        )
-                        img_msg["format"] = "description"
-
-                    except ImportError:
-                        print(
-                            "\nTo use local vision, run `pip install 'open-interpreter[local]'`.\n"
-                        )
-                        img_msg["format"] = "description"
-                        img_msg["content"] = ""
-
-        # Convert to OpenAI messages format
- with performance tracking
+        # Process messages with performance tracking
         with PerformanceTimer("message_processing", "convert_to_openai_format"):
-            messages = convert_to_openai_messages(
-                messages,
-            messages,
-            function_calling=self.supports_functions,
-            vision=self.supports_vision,
-            shrink_images=self.interpreter.shrink_images,
-            interpreter=self.interpreter,
-        )
+            # Fix messages format if needed
+            if len(messages) > 0 and isinstance(messages[0], dict) and messages[0].get("role") == "system":
+                system_message = messages[0]["content"]
+                messages = messages[1:]
+            else:
+                system_message = ""
 
-        system_message = messages[0]["content"]
-        messages = messages[1:]
-
-        # Trim messages
- with performance tracking
+        # Trim messages to fit the context window
         with PerformanceTimer("message_processing", "token_trimming"):
-                try:
-                    if self.context_window and self.max_tokens:
-                        trim_to_be_this_many_tokens = (
-                            self.context_window - self.max_tokens - 25
-                        )  # arbitrary buffer
-                        tokens_before = sum(len(m.get("content", "")) for m in messages)
-                        messages = tt.trim(
-                            messages,
-                            system_message=system_message,
-                            max_tokens=trim_to_be_this_many_tokens,
-                        )
-                        tokens_after = sum(len(m.get("content", "")) for m in messages)
-                        log_performance_metric("message_processing", "token_reduction", 0, {
-                            "tokens_before": tokens_before,
-                            "tokens_after": tokens_after,
-                            "reduction_percentage": round((tokens_before - tokens_after) / max(tokens_before, 1) * 100, 2)
-                        })
-                    elif self.context_window and not self.max_tokens:
-                        # Just trim to the context window if max_tokens not set
-                        messages = tt.trim(
-                            messages,
-                            system_message=system_message,
-                            max_tokens=self.context_window,
-                        )
-                    else:
-                        try:
-                            messages = tt.trim(
-                                messages, system_message=system_message, model=model
-                            )
-                        except:
-                            if len(messages) == 1:
-                                if self.interpreter.in_terminal_interface:
-                                    self.interpreter.display_message(
-                                        """
-**We were unable to determine the context window of this model.** Defaulting to 8000.
-
-If your model can handle more, run `interpreter --context_window {token limit} --max_tokens {max tokens per response}`.
-
-Continuing...
-                                    """
-                                    )
-                                else:
-                                    self.interpreter.display_message(
-                                        """
-**We were unable to determine the context window of this model.** Defaulting to 8000.
-
-If your model can handle more, run `self.context_window = {token limit}`.
-
-Also please set `self.max_tokens = {max tokens per response}`.
-
-Continuing...
-                                "    ""
-                                    )
-                            messages = tt.trim(
-                                messages, system_message=system_message, max_tokens=8000
-                       )     )
-                except:
-                    # If we're trimming messages, this won't work.
-                    # If we're trimming from a model we don't know, this won't work.
-                    # Better not to fail until `messages` is too big, just for frustrations sake, I suppose.
-
-                    # Reunite system message with messages
-                            messages = [{"role": "system", "content": system_message}] + messages
-
-            pass
-
-        # If there should be a system message, there should be a system message!
-        # Empty system messages appear to be deleted :(
-        if system_message == "":
-            if messages[0]["role"] != "system":
-                messages = [{"role": "system", "content": system_message}] + messages
-
-        ## Start forming the request
-
+            try:
+                if self.context_window and self.max_tokens:
+                    # Leave room for the completion
+                    messages = tt.trim(
+                        messages,
+                        max_tokens=self.context_window - self.max_tokens,
+                        system_message=system_message,
+                    )
+                elif self.context_window and not self.max_tokens:
+                    # Use a default max_tokens if not specified
+                    default_max_tokens = min(4096, int(self.context_window * 0.25))
+                    messages = tt.trim(
+                        messages,
+                        max_tokens=self.context_window - default_max_tokens,
+                        system_message=system_message,
+                    )
+                else:
+                    # No trimming needed
+                    pass
+            except Exception as e:
+                # If trimming fails, continue with the original messages
+                print(f"Warning: Token trimming failed: {e}")
+        
+        # Setup parameters for LLM call
         params = {
-            "model": model,
-            "messages": messages,
-            "stream": True,
+            "model": self.model,
+            "messages": convert_to_openai_messages(
+                [{"role": "system", "content": system_message}] + messages,
+                function_calling=self.supports_functions,
+            ),
+            "temperature": self.temperature,
+            "stream": self.supports_stream,
+            "timeout": self.timeout,
         }
 
-        # Optional inputs
+        # Add API-specific parameters
         if self.api_key:
             params["api_key"] = self.api_key
         if self.api_base:
@@ -313,176 +203,157 @@ Continuing...
             params["api_version"] = self.api_version
         if self.max_tokens:
             params["max_tokens"] = self.max_tokens
-        if self.temperature:
-            params["temperature"] = self.temperature
-        if hasattr(self.interpreter, "conversation_id"):
-            params["conversation_id"] = self.interpreter.conversation_id
 
-        # Set some params directly on LiteLLM
-        if self.max_budget:
-            litellm.max_budget = self.max_budget
-        if self.interpreter.verbose:
-            litellm.set_verbose = True
+        # Optimize parameters for specific models
+        self._optimize_params_for_model(params)
+        
+        # Run the LLM with retry logic
+        for response_chunk in self._run_with_retries(params):
+            yield response_chunk
+            
+        # Log performance data after completion
+        if self.track_performance:
+            elapsed_time = time.time() - request_start_time
+            log_performance_metric("llm", "api_call", elapsed_time, {
+                "model": self.model,
+                "token_count": self._token_usage.get("total_tokens", 0)
+            })
 
-        if (
-            self.interpreter.debug == True and False  # DISABLED
-        ):  # debug will equal "server" if we're debugging the server specifically
-            print("\n\n\nOPENAI COMPATIBLE MESSAGES:\n\n\n")
-            for message in messages:
-                if len(str(message)) > 5000:
-                    print(str(message)[:200] + "...")
-                else:
-                    print(message)
-                print("\n")
-            print("\n\n\n")
-
-        if self.supports_functions:
-            # yield from run_function_calling_llm(self, params)
-            with PerformanceTimer("llm", "tool_calling", {"model": self.model}):
-                yield from run_tool_calling_llm(self, params)
+    def _optimize_params_for_model(self, params):
+        """Apply model-specific optimizations to parameters"""
+        model = params.get("model", "")
+        
+        # For local models, add helpful stop sequences
+        if "local" in model:
+            params["stop"] = ["<|assistant|>", "<|end|>", "<|eot_id|>"]
+        
+        # Handle special model cases
+        if model == "i" and "conversation_id" in params:
+            litellm.drop_params = False  # Don't drop this parameter for 'i' model
         else:
-            with PerformanceTimer("llm", "text_generation", {"model": self.model}):
-                yield from run_text_llm(self, params)
+            litellm.drop_params = True
+            
+        # Remove ':latest' suffix which some providers don't handle well
+        params["model"] = model.replace(":latest", "")
+        
+        # Set custom timeouts for different model types
+        if "gpt-4" in model and "o" not in model:
+            # GPT-4 non-o models can be slower
+            self._request_timeout = max(60, self._request_timeout)
+        elif "local" in model or "ollama" in model:
+            # Local models may need more time for first run
+            self._request_timeout = max(120, self._request_timeout)
 
-
-    # If you change model, set _is_loaded to false
-    @property
-    def model(self):
-        return self._model
-
-    @model.setter
-    def model(self, value):
-        self._model = value
-        self._is_loaded = False
-
-    def load(self):
-        if self._is_loaded:
-            return
-
-        if self.model.startswith("ollama/") and not ":" in self.model:
-            self.model = self.model + ":latest"
-
-        self._is_loaded = True
-
-        if self.model.startswith("ollama/"):
-            model_name = self.model.replace("ollama/", "")
-            api_base = getattr(self, "api_base", None) or os.getenv(
-                "OLLAMA_HOST", "http://localhost:11434"
-            )
-            names = []
+    def _run_with_retries(self, params):
+        """Run the LLM call with smart retry logic"""
+        attempts = 0
+        max_attempts = self.retry_attempts
+        last_error = None
+        backoff_factor = 1.5
+        wait_time = 1  # Initial wait time in seconds
+        
+        # Create a unique request ID for tracking
+        request_id = str(uuid.uuid4())
+        
+        while attempts < max_attempts:
             try:
-                # List out all downloaded ollama models. Will fail if ollama isn't installed
-                response = requests.get(f"{api_base}/api/tags")
-                if response.ok:
-                    data = response.json()
-                    names = [
-                        model["name"]
-                        for model in data["models"]
-                        if "name" in model and model["name"]
-                    ]
-
+                # Add a delay if this isn't the first attempt
+                if attempts > 0:
+                    time.sleep(wait_time)
+                    wait_time *= backoff_factor  # Exponential backoff
+                    
+                # Log the attempt if in debug mode
+                if self.interpreter.debug:
+                    print(f"LLM request attempt {attempts+1}/{max_attempts} (ID: {request_id})")
+                
+                # Make the LLM call
+                yield from self._execute_llm_call(params)
+                
+                # If we get here, the call succeeded
+                return
+                
+            except KeyboardInterrupt:
+                # Always allow user to cancel operations
+                print("Exiting...")
+                sys.exit(0)
+                
+            except litellm.exceptions.AuthenticationError as e:
+                # If authentication fails and we're missing an API key, try with a dummy key
+                if attempts == 0 and "api_key" not in params:
+                    print("LiteLLM requires an API key. Trying again with a dummy API key.")
+                    params["api_key"] = "x"
+                else:
+                    # Authentication errors don't benefit from retries
+                    raise
+            
             except Exception as e:
-                print(str(e))
-                self.interpreter.display_message(
-                    f"> Ollama not found\n\nPlease download Ollama from [ollama.com](https://ollama.com/) to use `{model_name}`.\n"
-                )
-                exit()
+                # Store the error for potential re-raising
+                last_error = e
+                
+                # For network-related errors, we should retry
+                if "network" in str(e).lower() or "timeout" in str(e).lower():
+                    attempts += 1
+                    continue
+                    
+                # For rate limits, we should retry with backoff
+                if isinstance(e, litellm.exceptions.RateLimitError):
+                    attempts += 1
+                    # Use a longer delay for rate limits
+                    wait_time = max(wait_time, 5 * backoff_factor ** attempts)
+                    continue
+                    
+                # For other errors, try one more attempt with slightly adjusted parameters
+                if attempts == 0:
+                    # Slightly adjust the temperature to potentially avoid deterministic errors
+                    params["temperature"] = params.get("temperature", 0.0) + 0.1
+                    attempts += 1
+                    continue
+                    
+                # If we've exhausted attempts or can't handle this error type, re-raise
+                raise
+                
+            finally:
+                attempts += 1
+        
+        # If we've exhausted all retry attempts, raise the last error
+        if last_error:
+            raise last_error
+        else:
+            raise Exception(f"LLM request failed after {max_attempts} attempts for unknown reasons")
 
-            # Download model if not already installed
-            if model_name not in names:
-                self.interpreter.display_message(f"\nDownloading {model_name}...\n")
-                requests.post(f"{api_base}/api/pull", json={"name": model_name})
-
-            # Get context window if not set
-            if self.context_window == None:
-                response = requests.post(
-                    f"{api_base}/api/show", json={"name": model_name}
-                )
-                model_info = response.json().get("model_info", {})
-                context_length = None
-                for key in model_info:
-                    if "context_length" in key:
-                        context_length = model_info[key]
-                        break
-                if context_length is not None:
-                    self.context_window = context_length
-            if self.max_tokens == None:
-                if self.context_window != None:
-                    self.max_tokens = int(self.context_window * 0.2)
-
-            # Send a ping, which will actually load the model
-            model_name = model_name.replace(":latest", "")
-            print(f"Loading {model_name}...\n")
-
-            old_max_tokens = self.max_tokens
-            self.max_tokens = 1
-            self.interpreter.computer.ai.chat("ping")
-            self.max_tokens = old_max_tokens
-
-            self.interpreter.display_message("*Model loaded.*\n")
-
-        # Validate LLM should be moved here!!
-
-        if self.context_window == None:
+    def _execute_llm_call(self, params):
+        """Execute the actual LLM call and track performance"""
+        # Track token usage for this call
+        local_token_usage = {"prompt_tokens": 0, "completion_tokens": 0}
+        
+        # Execute the LLM call with performance tracking
+        with PerformanceTimer("llm", "api_call", {"model": params.get("model", "unknown")}):
             try:
-                model_info = litellm.get_model_info(model=self.model)
-                self.context_window = model_info["max_input_tokens"]
-                if self.max_tokens == None:
-                    self.max_tokens = min(
-                        int(self.context_window * 0.2), model_info["max_output_tokens"]
-                    )
-            except:
-                pass
-
-
-def fixed_litellm_completions(**params):
-    """
-    Just uses a dummy API key, since we use litellm without an API key sometimes.
-    Hopefully they will fix this!
-    """
-
-    if "local" in params.get("model"):
-        # Kinda hacky, but this helps sometimes
-        params["stop"] = ["<|assistant|>", "<|end|>", "<|eot_id|>"]
-
-    if params.get("model") == "i" and "conversation_id" in params:
-        litellm.drop_params = (
-            False  # If we don't do this, litellm will drop this param!
-        )
-    else:
-        litellm.drop_params = True
-
-    params["model"] = params["model"].replace(":latest", "")
-
-    # Run completion
-    attempts = 4
-    first_error = None
-
-    params["num_retries"] = 0
-
-    for attempt in range(attempts):
-        try:
-            yield from litellm.completion(**params)
-            return  # If the completion is successful, exit the function
-        except KeyboardInterrupt:
-            print("Exiting...")
-            sys.exit(0)
-        except Exception as e:
-            if attempt == 0:
-                # Store the first error
-                first_error = e
-            if (
-                isinstance(e, litellm.exceptions.AuthenticationError)
-                and "api_key" not in params
-            ):
-                print(
-                    "LiteLLM requires an API key. Trying again with a dummy API key. In the future, if this fixes it, please set a dummy API key to prevent this message. (e.g `interpreter --api_key x` or `self.api_key = 'x'`)"
-                )
-                # So, let's try one more time with a dummy API key:
-                params["api_key"] = "x"
-            if attempt == 1:
-                # Try turning up the temperature?
-                params["temperature"] = params.get("temperature", 0.0) + 0.1
-
-    if first_error is not None:
-        raise first_error  # If all attempts fail, raise the first error
+                # Configure request timeout
+                if "timeout" not in params and self._request_timeout:
+                    params["timeout"] = self._request_timeout
+                    
+                # Track time between requests to avoid overloading API
+                time_since_last = time.time() - getattr(self, "_last_request_time", 0)
+                if time_since_last < 0.1:
+                    # Add a small delay to prevent rate limiting
+                    time.sleep(0.1 - time_since_last)
+                
+                # Make the actual API call
+                for chunk in litellm.completion(**params):
+                    # Update token usage if available in the response
+                    if hasattr(chunk, "usage") and chunk.usage:
+                        local_token_usage["prompt_tokens"] = chunk.usage.get("prompt_tokens", 0)
+                        local_token_usage["completion_tokens"] += chunk.usage.get("completion_tokens", 0)
+                    
+                    # Track the last request time
+                    self._last_request_time = time.time()
+                    
+                    # Yield the chunk to the caller
+                    yield chunk
+                    
+            finally:
+                # Update the global token usage
+                self._token_usage["prompt_tokens"] += local_token_usage["prompt_tokens"]
+                self._token_usage["completion_tokens"] += local_token_usage["completion_tokens"]
+                self._token_usage["total_tokens"] = self._token_usage["prompt_tokens"] + self._token_usage["completion_tokens"]
