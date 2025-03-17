@@ -461,8 +461,8 @@ def fixed_litellm_completions(**params):
             if isinstance(e, litellm.exceptions.RateLimitError):
                 # On the second attempt, raise the error
                 if attempt == 1:
-                    # RateLimitError can be caused if you have no credit left
-                    print("You still exceeded the rate limit. Try again later and check if you have credit left.")
+                    # RateLimitError can be caused if you have no tokens left
+                    print("You still exceeded the rate limit. Try again later. If you use an API, ensure you have tokens left.")
                     raise first_error
                 # Wait and try again
                 print("You exceeded the rate limit. Trying again in 15 seconds...")
