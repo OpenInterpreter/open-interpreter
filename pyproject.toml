@@ -6,7 +6,7 @@ authors = [
     {name = "Killian Lucas", email = "killian@openinterpreter.com"},
 ]
 readme = "README.md"
-requires-python = ">=3.9,<4"
+requires-python = ">=3.9,<3.13"
 dependencies = [
     "litellm>=1.52.3",
     "anthropic>=0.39.0",

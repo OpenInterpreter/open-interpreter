@@ -241,3 +241,4 @@ litellm_uuid.txt
 file.txt
 numbers.txt
 poetry.lock
+uv.lock
