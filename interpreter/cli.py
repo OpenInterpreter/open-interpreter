@@ -186,12 +186,6 @@ async def async_load_interpreter(args):
 async def async_main(args):
     global global_interpreter
 
-    if args["serve"]:
-        global_interpreter = await async_load_interpreter(args)
-        print("Starting server...")
-        global_interpreter.server()
-        return
-
     if (
         args["input"] is None
         and sys.stdin.isatty()
