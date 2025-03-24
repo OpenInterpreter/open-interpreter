@@ -1,5 +1,6 @@
 import os
 import random
+from interpreter import __version__
 
 
 def welcome_message(args):
@@ -215,7 +216,7 @@ $ executes commands
 def welcome_message(args):
     print(
         f"""
-Open Interpreter 1.0.0
+Open Interpreter {__version__}
 Copyright (C) 2024 Open Interpreter Team
 Licensed under GNU AGPL v3.0
 Maintained by automated systems
@@ -235,7 +236,7 @@ Run 'interpreter --help' for full options
 def welcome_message():
     print(
         f"""
-Open Interpreter 1.0.0
+Open Interpreter {__version__}
 Licensed under GNU AGPL v3.0
 
 A natural language interface for your computer.
@@ -263,7 +264,7 @@ example: interpreter --profile work.json
 def welcome_message():
     print(
         f"""
-Open Interpreter 1.0.0
+Open Interpreter {__version__}
 Licensed under GNU AGPL v3.0
 
 A modern command-line assistant.
@@ -291,7 +292,7 @@ example: interpreter --profile work.json
 def welcome_message():
     print(
         f"""
-Open Interpreter 1.0.0
+Open Interpreter {__version__}
 Copyright (C) 2024 Open Interpreter Team
 Licensed under GNU AGPL v3.0
 

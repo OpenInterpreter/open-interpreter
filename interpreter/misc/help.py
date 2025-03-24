@@ -1,3 +1,5 @@
+from interpreter import __version__
+
 def help_message():
     tips = [
         "\033[38;5;240mTip: Pipe in prompts using `$ANYTHING | i`\033[0m",
@@ -7,7 +9,7 @@ def help_message():
     BLUE_COLOR = "\033[94m"
     RESET_COLOR = "\033[0m"
 
-    content = f"""Open Interpreter 1.0.0
+    content = f"""Open Interpreter {__version__}
 Copyright (C) 2024 Open Interpreter Team
 Licensed under GNU AGPL v3.0
 
