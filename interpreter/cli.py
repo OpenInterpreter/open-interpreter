@@ -9,8 +9,7 @@ if "--help" in sys.argv:
 
 # Version message
 if "--version" in sys.argv:
-    from interpreter import __version__
-    print(f"Open Interpreter {__version__}")
+    print("Open Interpreter 1.0.0")
     sys.exit(0)
 
 import argparse
