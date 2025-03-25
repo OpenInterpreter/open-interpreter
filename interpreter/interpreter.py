@@ -201,9 +201,9 @@ class Interpreter:
             print("Error adding system capability for date")
 
         try:
-            # This is not updated as the chat progresses
+            # Currently the bash environment is non-interactive, so CWD cannot be changed
             system_message += (
-                f"* The chat was started in {os.getcwd()} (but may have changed since).\n"
+                f"* The user's cwd is {os.getcwd()}"
             )
         except:
             print("Error adding system capability for cwd")
