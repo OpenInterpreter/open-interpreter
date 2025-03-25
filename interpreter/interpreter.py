@@ -185,26 +185,33 @@ class Interpreter:
         system_message = "<SYSTEM_CAPABILITY>\n"
 
         try:
-            system_message += f"* You are an AI assistant with access to a machine running on {'Mac OS' if platform.system() == 'Darwin' else platform.system()} with internet access.\n"
+            system_message += (
+                "* You are an AI assistant with access to a machine running on "
+                f"{'Mac OS' if platform.system() == 'Darwin' else platform.system()} with internet access.\n"
+            )
         except:
             print("Error adding system capability for platform")
 
         try:
+            # This is updated for each message
             system_message += (
-                f"* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.\n"
+                f"* The current time is {datetime.today().strftime('%A, %B %d, %Y at %I:%M:%S %p')}.\n"
             )
         except:
             print("Error adding system capability for date")
 
         try:
-            cwd_line = f"* The user's cwd is {os.getcwd()}"
-            try:
-                cwd_line += f" and username is {os.getlogin()}"
-            except:
-                print("Error adding system capability for username")
-            system_message += cwd_line + "\n"
+            # This is not updated as the chat progresses
+            system_message += (
+                f"* The chat was started in {os.getcwd()} (but may have changed since).\n"
+            )
         except:
             print("Error adding system capability for cwd")
+
+        try:
+            system_message += f"* The username is {os.getlogin()}.\n"
+        except:
+            print("Error adding system capability for username")
 
         system_message += "</SYSTEM_CAPABILITY>"
 
