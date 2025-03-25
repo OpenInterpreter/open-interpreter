@@ -366,7 +366,7 @@ class Interpreter:
                             current_block.partial_json += chunk.delta.partial_json
 
                             if hasattr(current_block, "name"):
-                                if edit.name is None:
+                                if edit.name == None:
                                     edit.name = current_block.name
                                 edit.feed(chunk.delta.partial_json)
 
@@ -680,7 +680,7 @@ Notes for using the `str_replace` command:
                     # Fix ollama
                     stream = False
                     actual_model = self.model.replace("ollama/", "openai/")
-                    if self.api_base is None:
+                    if self.api_base == None:
                         api_base = "http://localhost:11434/v1/"
                     else:
                         api_base = self.api_base
@@ -819,28 +819,28 @@ Notes for using the `str_replace` command:
                         self._spinner.stop()
                         first_token = False
 
-                    if message is None:
+                    if message == None:
                         message = chunk.choices[0].delta
 
                     if chunk.choices[0].delta.content:
                         md.feed(chunk.choices[0].delta.content)
                         await asyncio.sleep(0)
 
-                        if message.content is None:
+                        if message.content == None:
                             message.content = chunk.choices[0].delta.content
-                        elif chunk.choices[0].delta.content is not None:
+                        elif chunk.choices[0].delta.content != None:
                             message.content += chunk.choices[0].delta.content
 
                     if chunk.choices[0].delta.tool_calls:
                         if chunk.choices[0].delta.tool_calls[0].id:
-                            if message.tool_calls is None or chunk.choices[
+                            if message.tool_calls == None or chunk.choices[
                                 0
                             ].delta.tool_calls[0].id not in [
                                 t.id for t in message.tool_calls
                             ]:
                                 edit.close()
                                 edit = ToolRenderer()
-                                if message.tool_calls is None:
+                                if message.tool_calls == None:
                                     message.tool_calls = []
                                 message.tool_calls.append(
                                     chunk.choices[0].delta.tool_calls[0]
@@ -855,9 +855,9 @@ Notes for using the `str_replace` command:
                             tool_name = (
                                 chunk.choices[0].delta.tool_calls[0].function.name
                             )
-                            if edit.name is None:
+                            if edit.name == None:
                                 edit.name = tool_name
-                            if current_tool_call.function.name is None:
+                            if current_tool_call.function.name == None:
                                 current_tool_call.function.name = tool_name
                         if chunk.choices[0].delta.tool_calls[0].function.arguments:
                             arguments_delta = (
