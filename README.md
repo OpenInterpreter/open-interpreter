@@ -13,6 +13,7 @@ curl https://raw.githubusercontent.com/OpenInterpreter/open-interpreter/refs/hea
 ## Usage
 
 Start a conversation:
+
 ```bash
 $ interpreter
 > help me set up a new fastapi project
@@ -23,13 +24,15 @@ Adding routes/users.py...
 ```
 
 Instant chats with `i [prompt]`:
+
 ```bash
-$ i want a venv here
-$ i want to undo the last commit
-$ i need deno
+i want a venv here
+i want to undo the last commit
+i need deno
 ```
 
 Fix errors with `wtf`:
+
 ```bash
 $ python test.py
 ImportError: No module named 'requests'
