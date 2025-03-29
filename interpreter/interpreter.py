@@ -185,7 +185,10 @@ class Interpreter:
         system_message = "<SYSTEM_CAPABILITY>\n"
 
         try:
-            system_message += f"* You are an AI assistant with access to a machine running on {'Mac OS' if platform.system() == 'Darwin' else platform.system()} with internet access.\n"
+            system_message += (
+                "* You are an AI assistant with access to a machine running on "
+                f"{'Mac OS' if platform.system() == 'Darwin' else platform.system()} with internet access.\n"
+            )
         except:
             print("Error adding system capability for platform")
 
