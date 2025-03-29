@@ -201,7 +201,10 @@ class Interpreter:
             print("Error adding system capability for date")
 
         try:
-            system_message += f"* The user's cwd is {os.getcwd()}.\n"
+            # This is not updated as the chat progresses, and does not necessarily match CWD within tools.
+            system_message += (
+                f'* Launched from "{os.getcwd()}" (but tool environments may have their own cwd).\n'
+            )
         except:
             print("Error adding system capability for cwd")
 
