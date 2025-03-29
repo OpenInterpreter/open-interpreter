@@ -193,8 +193,9 @@ class Interpreter:
             print("Error adding system capability for platform")
 
         try:
+            # This is updated for each message
             system_message += (
-                f"* The current date is {datetime.today().strftime('%A, %B %d, %Y')}.\n"
+                f"* The current time is {datetime.today().strftime('%A, %B %d, %Y at %I:%M:%S %p')}.\n"
             )
         except:
             print("Error adding system capability for date")
