@@ -18,11 +18,11 @@ Configuration
 interpreter = Interpreter()
 
 # Load from custom profile
-config = Config.from_file("~/custom_profile.json")
+config = Config.from_file("~/custom_profile.py")
 interpreter = Interpreter(config)
 
 # Save current settings
-interpreter.save_config("~/my_settings.json")
+interpreter.save_config("~/my_settings.py")
 """
 
 # Use lazy imports to avoid loading heavy modules immediately

@@ -20,10 +20,10 @@ class Profile:
     profile = Profile()
 
     # Load from specific profile
-    profile = Profile.from_file("~/custom_profile.json")
+    profile = Profile.from_file("~/custom_profile.py")
 
     # Save current settings
-    profile.save("~/my_settings.json")
+    profile.save("~/my_settings.py")
     """
 
     DEFAULT_PROFILE_FOLDER = "~/.openinterpreter"

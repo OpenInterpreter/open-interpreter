@@ -99,11 +99,11 @@ class Interpreter:
 
     # With custom configuration
     from interpreter import Profile
-    profile = Profile.from_file("~/custom_profile.json")
+    profile = Profile.from_file("~/custom_profile.py")
     interpreter = Interpreter(profile)
 
     # Save settings for later
-    interpreter.save_profile("~/my_settings.json")
+    interpreter.save_profile("~/my_settings.py")
 
     Parameters
     ----------
@@ -152,7 +152,7 @@ class Interpreter:
         Load settings from a profile file
 
         Example:
-        >>> interpreter.load_profile("~/work_settings.json")
+        >>> interpreter.load_profile("~/work_settings.py")
         """
         self._profile.load(path)
         # Update interpreter attributes from new profile
@@ -164,7 +164,7 @@ class Interpreter:
         Save current settings as a profile
 
         Example:
-        >>> interpreter.save_profile("~/my_preferred_settings.json")
+        >>> interpreter.save_profile("~/my_preferred_settings.py")
         """
         # Update profile object with current values
         self._profile.from_dict(self.to_dict())
@@ -177,7 +177,7 @@ class Interpreter:
         Create new interpreter instance from a profile file
 
         Example:
-        >>> interpreter = Interpreter.from_profile("~/work_settings.json")
+        >>> interpreter = Interpreter.from_profile("~/work_settings.py")
         """
         return cls(Profile.from_file(path))
 
