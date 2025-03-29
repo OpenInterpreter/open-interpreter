@@ -200,14 +200,14 @@ class Interpreter:
             print("Error adding system capability for date")
 
         try:
-            cwd_line = f"* The user's cwd is {os.getcwd()}"
-            try:
-                cwd_line += f" and username is {os.getlogin()}"
-            except:
-                print("Error adding system capability for username")
-            system_message += cwd_line + "\n"
+            system_message += f"* The user's cwd is {os.getcwd()}.\n"
         except:
             print("Error adding system capability for cwd")
+
+        try:
+            system_message += f'* The username is "{os.getlogin()}".\n'
+        except:
+            print("Error adding system capability for username")
 
         system_message += "</SYSTEM_CAPABILITY>"
 
