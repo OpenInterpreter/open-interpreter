@@ -93,17 +93,20 @@ class Interpreter:
     --------
     >>> from interpreter import Interpreter
 
-    # Basic usage
-    interpreter = Interpreter()
-    interpreter.chat()
+    Basic usage:
 
-    # With custom configuration
-    from interpreter import Profile
-    profile = Profile.from_file("~/custom_profile.py")
-    interpreter = Interpreter(profile)
+    >>> interpreter = Interpreter()
+    >>> interpreter.chat()
 
-    # Save settings for later
-    interpreter.save_profile("~/my_settings.py")
+    With custom configuration:
+
+    >>> from interpreter import Profile
+    >>> profile = Profile.from_file("~/custom_profile.py")
+    >>> interpreter = Interpreter(profile)
+
+    Save settings for later:
+
+    >>> interpreter.save_profile("~/my_settings.py")
 
     Parameters
     ----------

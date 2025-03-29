@@ -14,15 +14,18 @@ Configuration
 ------------
 >>> from interpreter import Interpreter, Config
 
-# Use defaults
-interpreter = Interpreter()
+Use defaults:
 
-# Load from custom profile
-config = Config.from_file("~/custom_profile.py")
-interpreter = Interpreter(config)
+>>> interpreter = Interpreter()
 
-# Save current settings
-interpreter.save_config("~/my_settings.py")
+Load from custom profile:
+
+>>> config = Config.from_file("~/custom_profile.py")
+>>> interpreter = Interpreter(config)
+
+Save current settings:
+
+>>> interpreter.save_config("~/my_settings.py")
 """
 
 # Use lazy imports to avoid loading heavy modules immediately

@@ -16,14 +16,17 @@ class Profile:
     --------
     >>> from interpreter import Profile
 
-    # Load defaults (and ~/.openinterpreter if it exists)
-    profile = Profile()
+    Load defaults (and ~/.openinterpreter if it exists):
 
-    # Load from specific profile
-    profile = Profile.from_file("~/custom_profile.py")
+    >>> profile = Profile()
 
-    # Save current settings
-    profile.save("~/my_settings.py")
+    Load from specific profile:
+
+    >>> profile = Profile.from_file("~/custom_profile.py")
+
+    Save current settings:
+
+    >>> profile.save("~/my_settings.py")
     """
 
     DEFAULT_PROFILE_FOLDER = "~/.openinterpreter"
