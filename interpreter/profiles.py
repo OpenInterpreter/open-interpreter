@@ -132,7 +132,8 @@ class Profile:
             path += ".py"
 
         if not os.path.exists(path):
-            # If file doesn't exist, if it's the default, that's fine
+            # If the missing file is the default profile path, that's fine -
+            # we'll use the defaults from __init__
             if os.path.abspath(os.path.expanduser(path)) == os.path.abspath(
                 os.path.expanduser(self.DEFAULT_PROFILE_PATH)
             ):
