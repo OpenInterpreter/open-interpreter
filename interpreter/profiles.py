@@ -147,7 +147,9 @@ class Profile:
                 # This avoids loading the full interpreter module which is resource intensive
                 content = content.replace(
                     "from interpreter import interpreter",
-                    "class Interpreter:\n    pass\ninterpreter = Interpreter()",
+                    "class Interpreter:\n"
+                    "    pass\n"
+                    "interpreter = Interpreter()",
                 )
 
                 # Execute the modified profile content
