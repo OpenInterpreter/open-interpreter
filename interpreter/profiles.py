@@ -69,7 +69,7 @@ class Profile:
         # Debug settings
         self.debug = False  # Whether to enable debug mode
 
-        # Set default path but don't load from it
+        # Initialize with default path (which may be overridden in from_file)
         self.profile_path = self.DEFAULT_PROFILE_PATH
 
     def to_dict(self):
@@ -136,6 +136,9 @@ class Profile:
             ):
                 return
             raise FileNotFoundError(f"Profile file not found at {path}")
+        else:
+            # Update profile_path when loading succeeds
+            self.profile_path = os.path.abspath(path)
 
         # Create a temporary namespace to execute the profile in
         namespace = {}
@@ -171,4 +174,6 @@ class Profile:
         """Create a new profile instance from a file"""
         profile = cls()
         profile.load(path)
+        # Update profile_path after successful load
+        profile.profile_path = os.path.abspath(os.path.expanduser(path))
         return profile
