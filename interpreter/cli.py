@@ -270,10 +270,16 @@ def parse_args():
             subprocess.run([opener, profile_dir])
         sys.exit(0)
 
+    # If custom profile specified, load it and update args
     if args["profile"] != profile.profile_path:
-        profile.load(args["profile"])
+        # Load the specified profile, ignoring any defaults
+        profile = Profile.from_file(args["profile"])
+        # Find which settings were explicitly set via command line flags
+        cli_provided = {k for k,v in parser._option_string_actions.items()
+                       if v.dest in args and sys.argv.__contains__(k)}
+        # Update args with profile values, preserving any CLI overrides
         for key, value in vars(profile).items():
-            if key in args and args[key] is None:
+            if key in args and key not in cli_provided:
                 args[key] = value
 
     if args["save"]:
