@@ -1073,6 +1073,21 @@ Notes for using the `str_replace` command:
         # Create and start server
         server = Server(self)
         try:
+            host = server.host
+            port = server.port
+
+            print("\n" + "=" * 60)
+            print(f"Open Interpreter API Server")
+            print("=" * 60)
+            print("\nTo use with an OpenAI-compatible client, configure:")
+            print(f"  - API Base:     http://{host}:{port}")
+            print(f"  - API Path:     /chat/completions")
+            print(f"  - API Key:      (any value, authentication not required)")
+            print(f"  - Model name:   (any value, ignored)")
+            print("\nNOTE: The server will use the model configured in --model")
+            print(f"      Currently using: {self.model}")
+            print("=" * 60 + "\n")
+
             server.run()
         except KeyboardInterrupt:
             print("\nShutting down server...")
