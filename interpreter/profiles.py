@@ -1,8 +1,5 @@
-import json
 import os
-import platform
 import sys
-from datetime import datetime
 
 
 class Profile:
@@ -16,14 +13,17 @@ class Profile:
     --------
     >>> from interpreter import Profile
 
-    # Load defaults (and ~/.openinterpreter if it exists)
-    profile = Profile()
+    Load defaults (and ~/.openinterpreter if it exists):
 
-    # Load from specific profile
-    profile = Profile.from_file("~/custom_profile.json")
+    >>> profile = Profile()
 
-    # Save current settings
-    profile.save("~/my_settings.json")
+    Load from specific profile:
+
+    >>> profile = Profile.from_file("~/custom_profile.py")
+
+    Save current settings:
+
+    >>> profile.save("~/my_settings.py")
     """
 
     DEFAULT_PROFILE_FOLDER = "~/.openinterpreter"
@@ -129,7 +129,8 @@ class Profile:
             path += ".py"
 
         if not os.path.exists(path):
-            # If file doesn't exist, if it's the default, that's fine
+            # If the missing file is the default profile path, that's fine -
+            # we'll use the defaults from __init__
             if os.path.abspath(os.path.expanduser(path)) == os.path.abspath(
                 os.path.expanduser(self.DEFAULT_PROFILE_PATH)
             ):
@@ -147,7 +148,9 @@ class Profile:
                 # This avoids loading the full interpreter module which is resource intensive
                 content = content.replace(
                     "from interpreter import interpreter",
-                    "class Interpreter:\n    pass\ninterpreter = Interpreter()",
+                    "class Interpreter:\n"
+                    "    pass\n"
+                    "interpreter = Interpreter()",
                 )
 
                 # Execute the modified profile content
