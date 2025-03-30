@@ -3,6 +3,14 @@
 A modern command line assistant.
 
 [Documentation](https://docs.openinterpreter.com/) | [Discord](https://discord.gg/Hvz9Axh84z)
+NOTICE!
+THIS IS A FORK MAINTAINED BY ME, Anton.
+
+Contibuting:
+install UV
+git clone 
+cd open-interpreter
+uv sync
 
 ## Install
 

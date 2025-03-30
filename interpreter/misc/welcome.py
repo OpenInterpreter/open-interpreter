@@ -302,6 +302,6 @@ Usage: i [prompt]
    or: interpreter [options]
 
 Documentation: docs.openinterpreter.com
-Run 'interpreter --help' for all options
+Run 'interpreter --help' for all options or type /help
 """
     )

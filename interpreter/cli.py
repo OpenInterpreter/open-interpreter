@@ -187,18 +187,13 @@ async def async_load_interpreter(args):
 async def async_main(args):
     global global_interpreter
 
-    if (
-        args["input"] is None
-        and sys.stdin.isatty()
-        and sys.argv[0].endswith("interpreter")
-    ):
+    # Display welcome message if appropriate
+    if (args["input"] is None and sys.stdin.isatty() and sys.argv[0].endswith("interpreter")):
         from .misc.welcome import welcome_message
-
         welcome_message()
 
-    if args["input"] is None and (
-        sys.stdin.isatty() and args.get("no_interactive") is not True
-    ):
+    # Handle interactive terminal mode with concurrent loading
+    if args["input"] is None and (sys.stdin.isatty() and args.get("no_interactive") is not True):
         # Load the interpreter in a separate thread
         def load_interpreter_thread(args):
             loop = asyncio.new_event_loop()
@@ -208,17 +203,30 @@ async def async_main(args):
         thread = threading.Thread(target=load_interpreter_thread, args=(args,))
         thread.start()
 
-        # Get user input
+        # Get user input while the interpreter is loading
         message = await async_get_input()
 
         # Wait for the thread to finish
         thread.join()
+        
+        # Check if message is a command before processing it
+        if message.startswith("/"):
+            print()
+            parts = message.split(maxsplit=2)
+            cmd = parts[0].lower()
+            global_interpreter._handle_command(cmd, parts)
+            if global_interpreter.interactive:
+                await global_interpreter.async_chat()
+            return
     else:
+        # Load interpreter synchronously
         spinner = SimpleSpinner()
         spinner.start()
         global_interpreter = await async_load_interpreter(args)
         message = args["input"] if args["input"] is not None else sys.stdin.read()
         spinner.stop()
+
+    # Process the message
     print()
     global_interpreter.messages = [{"role": "user", "content": message}]
     try:
