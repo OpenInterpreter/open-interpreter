@@ -12,17 +12,20 @@ Basic Usage
 
 Configuration
 ------------
->>> from interpreter import Interpreter, Config
+>>> from interpreter import Interpreter, Profile
 
-# Use defaults
-interpreter = Interpreter()
+Use defaults:
 
-# Load from custom profile
-config = Config.from_file("~/custom_profile.json")
-interpreter = Interpreter(config)
+>>> interpreter = Interpreter()
 
-# Save current settings
-interpreter.save_config("~/my_settings.json")
+Load from custom profile:
+
+>>> profile = Profile.from_file("~/custom_profile.py")
+>>> interpreter = Interpreter(profile)
+
+Save current settings:
+
+>>> interpreter.save_profile("~/my_settings.py")
 """
 
 # Use lazy imports to avoid loading heavy modules immediately

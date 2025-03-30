@@ -1,8 +1,5 @@
-import json
 import os
-import platform
 import sys
-from datetime import datetime
 
 
 class Profile:
@@ -16,14 +13,17 @@ class Profile:
     --------
     >>> from interpreter import Profile
 
-    # Load defaults (and ~/.openinterpreter if it exists)
-    profile = Profile()
+    Load defaults (and ~/.openinterpreter if it exists):
 
-    # Load from specific profile
-    profile = Profile.from_file("~/custom_profile.json")
+    >>> profile = Profile()
 
-    # Save current settings
-    profile.save("~/my_settings.json")
+    Load from specific profile:
+
+    >>> profile = Profile.from_file("~/custom_profile.py")
+
+    Save current settings:
+
+    >>> profile.save("~/my_settings.py")
     """
 
     DEFAULT_PROFILE_FOLDER = "~/.openinterpreter"
@@ -69,7 +69,7 @@ class Profile:
         # Debug settings
         self.debug = False  # Whether to enable debug mode
 
-        # Set default path but don't load from it
+        # Initialize with default path (which may be overridden in from_file)
         self.profile_path = self.DEFAULT_PROFILE_PATH
 
     def to_dict(self):
@@ -129,12 +129,16 @@ class Profile:
             path += ".py"
 
         if not os.path.exists(path):
-            # If file doesn't exist, if it's the default, that's fine
+            # If the missing file is the default profile path, that's fine -
+            # we'll use the defaults from __init__
             if os.path.abspath(os.path.expanduser(path)) == os.path.abspath(
                 os.path.expanduser(self.DEFAULT_PROFILE_PATH)
             ):
                 return
             raise FileNotFoundError(f"Profile file not found at {path}")
+        else:
+            # Update profile_path when loading succeeds
+            self.profile_path = os.path.abspath(path)
 
         # Create a temporary namespace to execute the profile in
         namespace = {}
@@ -147,7 +151,9 @@ class Profile:
                 # This avoids loading the full interpreter module which is resource intensive
                 content = content.replace(
                     "from interpreter import interpreter",
-                    "class Interpreter:\n    pass\ninterpreter = Interpreter()",
+                    "class Interpreter:\n"
+                    "    pass\n"
+                    "interpreter = Interpreter()",
                 )
 
                 # Execute the modified profile content
@@ -168,4 +174,6 @@ class Profile:
         """Create a new profile instance from a file"""
         profile = cls()
         profile.load(path)
+        # Update profile_path after successful load
+        profile.profile_path = os.path.abspath(os.path.expanduser(path))
         return profile

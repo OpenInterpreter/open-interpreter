@@ -254,9 +254,9 @@ Execute natural language commands on your computer
     --serve               Start in server mode
 
 example: interpreter "create a python script"
-example: interpreter -m gpt-4 "analyze data.csv" 
+example: interpreter -m gpt-4 "analyze data.csv"
 example: interpreter --auto-run "install nodejs"
-example: interpreter --profile work.json
+example: interpreter --profile work.py
 """
     )
 
@@ -282,9 +282,9 @@ Execute natural language commands on your computer
     --serve               Start in server mode
 
 example: interpreter "create a python script"
-example: interpreter -m gpt-4 "analyze data.csv" 
+example: interpreter -m gpt-4 "analyze data.csv"
 example: interpreter --auto-run "install nodejs"
-example: interpreter --profile work.json
+example: interpreter --profile work.py
 """
     )
 
