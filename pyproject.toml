@@ -12,7 +12,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 
 # Required dependencies
-python = ">=3.9,<4"
+python = ">=3.9,<3.13"
 litellm = "^1.52.3"
 anthropic = "^0.39.0"
 pygments = "^2.18.0"
