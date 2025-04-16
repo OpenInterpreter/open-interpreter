@@ -10,6 +10,7 @@ if "--help" in sys.argv:
 # Version message
 if "--version" in sys.argv:
     from interpreter import __version__
+
     print(f"Open Interpreter {__version__}")
     sys.exit(0)
 
@@ -82,6 +83,7 @@ def _profile_to_arg_params(profile: Profile) -> Dict[str, Dict[str, Any]]:
         },
         "temperature": {
             "flags": ["--temperature"],
+            "type": float,
             "default": profile.temperature,
             "help": "Specify the temperature",
         },
