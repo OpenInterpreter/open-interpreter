@@ -52,7 +52,7 @@ class Llm:
 
         # Settings
         self.model = "gpt-4o"
-        self.temperature = 0
+        self.temperature = 0.0
 
         self.supports_vision = None  # Will try to auto-detect
         self.vision_renderer = (
