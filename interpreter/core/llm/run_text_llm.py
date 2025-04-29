@@ -4,9 +4,7 @@ def run_text_llm(llm, params):
     if llm.execution_instructions:
         try:
             # Add the system message
-            params["messages"][0][
-                "content"
-            ] += "\n" + llm.execution_instructions
+            params["messages"][0]["content"] += "\n" + llm.execution_instructions
         except:
             print('params["messages"][0]', params["messages"][0])
             raise

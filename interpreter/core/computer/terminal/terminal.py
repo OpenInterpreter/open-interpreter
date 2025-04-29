@@ -1,8 +1,8 @@
+import getpass
 import json
 import os
-import time
 import subprocess
-import getpass
+import time
 
 from ..utils.recipient_utils import parse_for_recipient
 from .languages.applescript import AppleScript
@@ -50,7 +50,7 @@ class Terminal:
     def sudo_install(self, package):
         try:
             # First, try to install without sudo
-            subprocess.run(['apt', 'install', '-y', package], check=True)
+            subprocess.run(["apt", "install", "-y", package], check=True)
         except subprocess.CalledProcessError:
             # If it fails, try with sudo
             print(f"Installation of {package} requires sudo privileges.")
@@ -59,9 +59,9 @@ class Terminal:
             try:
                 # Use sudo with password
                 subprocess.run(
-                    ['sudo', '-S', 'apt', 'install', '-y', package],
+                    ["sudo", "-S", "apt", "install", "-y", package],
                     input=sudo_password.encode(),
-                    check=True
+                    check=True,
                 )
                 print(f"Successfully installed {package}")
             except subprocess.CalledProcessError as e:
@@ -84,9 +84,21 @@ class Terminal:
         if language == "shell" and code.strip().startswith("apt install"):
             package = code.split()[-1]
             if self.sudo_install(package):
-                return [{"type": "console", "format": "output", "content": f"Package {package} installed successfully."}]
+                return [
+                    {
+                        "type": "console",
+                        "format": "output",
+                        "content": f"Package {package} installed successfully.",
+                    }
+                ]
             else:
-                return [{"type": "console", "format": "output", "content": f"Failed to install package {package}."}]
+                return [
+                    {
+                        "type": "console",
+                        "format": "output",
+                        "content": f"Failed to install package {package}.",
+                    }
+                ]
 
         if language == "python":
             if (

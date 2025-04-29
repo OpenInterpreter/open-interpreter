@@ -101,7 +101,9 @@ class ComputerTool(BaseAnthropicTool):
     api_type: Literal["computer_20241022"] = "computer_20241022"
     width: int
     height: int
-    display_num: None  # Simplified to always be None since we're only using primary display
+    display_num: (
+        None  # Simplified to always be None since we're only using primary display
+    )
 
     _screenshot_delay = 2.0
     _scaling_enabled = True
