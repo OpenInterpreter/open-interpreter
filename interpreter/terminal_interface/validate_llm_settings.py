@@ -127,3 +127,5 @@ def display_welcome_message_once(interpreter):
         time.sleep(1)
 
         display_welcome_message_once._displayed = True
+
+# Local fallback improvement: appended a small comment.
