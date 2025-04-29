@@ -21,12 +21,44 @@ icon_dimensions = None
 
 
 class Skills:
+    """
+    Manages access to pre-imported automation skills.
+
+    Note: Skills system must be enabled via profile (like 'the01') or by creating
+    OpenInterpreter with import_skills=True.
+
+    Available methods:
+    - list(): Returns names of available skills
+    - search(query): Lists available skills (currently same as list())
+
+    Usage:
+    To use a skill, call it directly as a function:
+        example_skill()
+
+    To create a new skill:
+        computer.skills.new_skill.create()
+    """
     def __init__(self, computer):
         self.computer = computer
         self.path = str(Path(oi_dir) / "skills")
         self.new_skill = NewSkill(self)
 
     def list(self):
+        """
+        Lists all available skills. Skills are already imported and can be called directly.
+
+        Returns:
+            list[str]: Names of available skills with () to indicate they're callable
+        """
+        if not self.computer.import_skills:
+            print("Skills are disabled. To enable skills, either use a profile like 'the01' that supports skills, "
+                  "or create an instance of OpenInterpreter with import_skills=True")
+            return []
+
+        if not self.computer._has_imported_skills:
+            print("Skills have not been imported yet.")
+            return []
+
         return [
             file.replace(".py", "()")
             for file in os.listdir(self.path)
@@ -34,14 +66,31 @@ class Skills:
         ]
 
     def run(self, skill):
+        """
+        DEPRECATED: Do not use this method.
+        Skills are already imported - call them directly as functions instead.
+        """
         print(
             "To run a skill, run its name as a function name (it is already imported)."
         )
 
     def search(self, query):
         """
-        This just lists all for now.
+        Lists available skills (currently same as list()).
+        Skills are already imported and can be called directly.
+
+        Returns:
+            list[str]: Names of available skills with () to indicate they're callable
         """
+        if not self.computer.import_skills:
+            print("Skills are disabled. To enable skills, either use a profile like 'the01' that supports skills, "
+                  "or create an instance of OpenInterpreter with import_skills=True")
+            return []
+
+        if not self.computer._has_imported_skills:
+            print("Skills have not been imported yet.")
+            return []
+
         return [
             file.replace(".py", "()")
             for file in os.listdir(self.path)
@@ -49,6 +98,16 @@ class Skills:
         ]
 
     def import_skills(self):
+        """
+        [INTERNAL METHOD - NOT FOR Assistant USE]
+        System initialization method that imports all Python files from the skills directory.
+
+        This method is called automatically during system setup to load available skills.
+        Assistant should use list(), search(), or call skills directly instead of this method.
+        """
+        if not self.computer.import_skills:
+            return
+
         previous_save_skills_setting = self.computer.save_skills
 
         self.computer.save_skills = False
