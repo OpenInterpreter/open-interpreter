@@ -3,7 +3,8 @@ import difflib
 from ...utils.lazy_import import lazy_import
 
 # Lazy import of aifs, imported when needed
-aifs = lazy_import('aifs')
+aifs = lazy_import("aifs")
+
 
 class Files:
     def __init__(self, computer):
